@@ -15,4 +15,7 @@ controller_msgs/KinematicsToolboxOutputStatus[] robot_configurations
 # Field default value -1.0
 float64 solution_quality
 
+# Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+controller_msgs/WholeBodyTrajectoryMessage suggested_controller_message
+
 

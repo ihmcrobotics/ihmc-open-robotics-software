@@ -28,12 +28,17 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
             * The total summation of the all solution quality for each key frames.
             */
    public double solution_quality_ = -1.0;
+   /**
+            * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+            */
+   public controller_msgs.msg.dds.WholeBodyTrajectoryMessage suggested_controller_message_;
 
    public KinematicsPlanningToolboxOutputStatus()
    {
       key_frame_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> (100, new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
+      suggested_controller_message_ = new controller_msgs.msg.dds.WholeBodyTrajectoryMessage();
 
    }
 
@@ -51,6 +56,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       robot_configurations_.set(other.robot_configurations_);
       solution_quality_ = other.solution_quality_;
 
+      controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType.staticCopy(other.suggested_controller_message_, suggested_controller_message_);
    }
 
    /**
@@ -109,6 +115,15 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    }
 
 
+   /**
+            * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+            */
+   public controller_msgs.msg.dds.WholeBodyTrajectoryMessage getSuggestedControllerMessage()
+   {
+      return suggested_controller_message_;
+   }
+
+
    public static Supplier<KinematicsPlanningToolboxOutputStatusPubSubType> getPubSubType()
    {
       return KinematicsPlanningToolboxOutputStatusPubSubType::new;
@@ -139,6 +154,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
+      if (!this.suggested_controller_message_.epsilonEquals(other.suggested_controller_message_, epsilon)) return false;
 
       return true;
    }
@@ -158,6 +174,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
+      if (!this.suggested_controller_message_.equals(otherMyClass.suggested_controller_message_)) return false;
 
       return true;
    }
@@ -175,7 +192,9 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       builder.append("robot_configurations=");
       builder.append(this.robot_configurations_);      builder.append(", ");
       builder.append("solution_quality=");
-      builder.append(this.solution_quality_);
+      builder.append(this.solution_quality_);      builder.append(", ");
+      builder.append("suggested_controller_message=");
+      builder.append(this.suggested_controller_message_);
       builder.append("}");
       return builder.toString();
    }
