@@ -13,4 +13,9 @@ public abstract class FXUIGraphic
    {
       return root;
    }
+
+   public void setMouseTransparent(boolean transparent)
+   {
+      rootChildren.forEach(node -> node.setMouseTransparent(transparent));
+   }
 }

@@ -5,11 +5,10 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 
-public class OrientationGraphic extends FXUIGraphic
+public class OrientationGraphic
 {
    private final SnappedPositionGraphic positionGraphic;
 
@@ -38,7 +37,6 @@ public class OrientationGraphic extends FXUIGraphic
       arrow = new MeshView(meshBuilder.generateMesh());
       arrow.setMaterial(meshBuilder.generateMaterial());
       arrow.setVisible(false);
-      rootChildren.add(arrow);
    }
 
    public MeshView getArrow()
