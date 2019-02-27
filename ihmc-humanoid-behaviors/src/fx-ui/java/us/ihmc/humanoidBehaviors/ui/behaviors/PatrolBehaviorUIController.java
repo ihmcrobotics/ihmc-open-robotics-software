@@ -60,14 +60,14 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                PatrolWaypoint waypointGraphic = createWaypointGraphic(messager);
                LogTools.debug("Placing waypoint {}", waypoints.size());
                messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic.getSnappedPositionGraphic().getSphere());
+               messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
             }
             else if (transition == FXUIStateTransition.POSITION_LEFT_CLICK)
             {
                PatrolWaypoint latestWaypoint = waypoints.get(waypoints.size() - 1);
                latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
                messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint.getOrientationGraphic().getArrow());
+               messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
             }
             else if (transition == FXUIStateTransition.RIGHT_CLICK)
             {
@@ -105,13 +105,13 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                   if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint position: {}", i);
-                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, intersectedNode);
+                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.SNAPPED_POSITION_EDITOR.activate();
                   }
                   else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint orientation: {}", i);
-                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, intersectedNode);
+                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.ORIENTATION_EDITOR.activate();
                   }
                }
@@ -122,7 +122,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private PatrolWaypoint createWaypointGraphic(JavaFXMessager messager)
    {
-      PatrolWaypoint waypoint = new PatrolWaypoint(messager);
+      PatrolWaypoint waypoint = new PatrolWaypoint();
       registerGraphic(waypoint.getSnappedPositionGraphic());
       registerGraphic(waypoint.getOrientationGraphic());
       waypoints.add(waypoint);

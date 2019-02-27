@@ -9,12 +9,13 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.*;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.references.NotificationReference;
+import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class SnappedPositionEditor extends FXUIEditor
 {
@@ -23,6 +24,7 @@ public class SnappedPositionEditor extends FXUIEditor
    private final NotificationReference mouseRightClicked = new NotificationReference();
 
    private final FXUIStateMachine positionEditorStateMachine;
+   private final OverTypedReference<PositionEditable> selectedGraphicReference;
 
    public SnappedPositionEditor(Messager messager, SubScene subScene)
    {
@@ -46,6 +48,8 @@ public class SnappedPositionEditor extends FXUIEditor
             }
          }
       };
+
+      selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
    }
 
    public void activate()
@@ -64,6 +68,7 @@ public class SnappedPositionEditor extends FXUIEditor
             LogTools.debug("Snapped position editor activated");
             subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
             subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+            selectedGraphicReference.get().setMouseTransparent(true);
          }
 
          mouseMovedMeshIntersection.poll();
@@ -71,30 +76,34 @@ public class SnappedPositionEditor extends FXUIEditor
 
          if (mouseClickedMeshIntersection.hasNext())  // use the clicked position if clicked
          {
-            messager.submitMessage(SnappedPositionEditor.API.SelectedPosition, mouseClickedMeshIntersection.read());
+            selectedGraphicReference.get().setPosition(mouseClickedMeshIntersection.read());
          }
          else if (mouseMovedMeshIntersection.hasNext())  // just for selection preview
          {
-            messager.submitMessage(SnappedPositionEditor.API.SelectedPosition, mouseMovedMeshIntersection.read());
+            selectedGraphicReference.get().setPosition(mouseMovedMeshIntersection.read());
          }
 
          if (mouseClickedMeshIntersection.hasNext())
          {
             LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
+            deactivate();
             activeStateMachine.get().transition(now, FXUIStateTransition.POSITION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
+            deactivate();
             activeStateMachine.get().transition(now, FXUIStateTransition.RIGHT_CLICK);
          }
       }
-      else if (activeEditor.activationChanged())
-      {
-         LogTools.debug("Snapped position editor deactivated.");
-         subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-         subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-      }
+   }
+
+   private void deactivate()
+   {
+      LogTools.debug("Snapped position editor deactivated.");
+      subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      selectedGraphicReference.get().setMouseTransparent(false);
    }
 
    @Override
@@ -162,7 +171,7 @@ public class SnappedPositionEditor extends FXUIEditor
    {
       private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(SnappedPositionEditor.class);
 
-      public static final Topic<Point3D> SelectedPosition = apiFactory.createTopic("SelectedPosition", Point3D.class);
+//      public static final Topic<Point3D> SelectedPosition = apiFactory.createTopic("SelectedPosition", Point3D.class);
 
       public static final MessagerAPI create()
       {

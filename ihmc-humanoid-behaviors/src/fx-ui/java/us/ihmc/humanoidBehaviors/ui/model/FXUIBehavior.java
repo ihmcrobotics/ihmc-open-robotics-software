@@ -17,7 +17,6 @@ public class FXUIBehavior
    {
       graphics.add(graphic);
       rootChildren.add(graphic.getRoot());
-      graphic.start();
    }
 
    protected void removeGraphic(FXUIGraphic graphic)
@@ -29,15 +28,5 @@ public class FXUIBehavior
    public Group getRoot()
    {
       return root;
-   }
-
-   public void start()
-   {
-      graphics.forEach(FXUIGraphic::start);
-   }
-
-   public void stop()
-   {
-      graphics.forEach(FXUIGraphic::stop);
    }
 }
