@@ -21,12 +21,11 @@ public class PlanarRegionsGraphic extends FXUIGraphic
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
-   private JavaFXMessager messager;
    private final PlanarRegionsList planarRegionsList;
 
    public PlanarRegionsGraphic(JavaFXMessager messager)
    {
-      this.messager = messager;
+      super(messager);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(10.0, 10.0);
