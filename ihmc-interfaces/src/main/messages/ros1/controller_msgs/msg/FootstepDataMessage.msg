@@ -42,6 +42,11 @@ int8 trajectory_type
 # If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
 float64 swing_height
 
+# In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
+# can be requested. These proportions encode the xy positions of the swing trajectory's two waypoints. A proportion of 0.0 and 1.0 will
+# place a waypoint's xy-position at the start and end of the trajectory, respectively. If this value is empty, the default proportions are used.
+float64[] custom_waypoint_proportions
+
 # In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be specified here.
 # The waypoints define sole positions.
 # The controller will compute times and velocities at the waypoints.
