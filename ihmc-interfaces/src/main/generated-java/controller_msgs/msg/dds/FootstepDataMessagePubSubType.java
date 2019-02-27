@@ -55,6 +55,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -106,6 +108,10 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getCustomWaypointProportions().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getCustomPositionWaypoints().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCustomPositionWaypoints().get(i0), current_alignment);}
@@ -150,6 +156,10 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_6(data.getSwingHeight());
 
+      if(data.getCustomWaypointProportions().size() <= 2)
+      cdr.write_type_e(data.getCustomWaypointProportions());else
+          throw new RuntimeException("custom_waypoint_proportions field exceeds the maximum length");
+
       if(data.getCustomPositionWaypoints().size() <= 10)
       cdr.write_type_e(data.getCustomPositionWaypoints());else
           throw new RuntimeException("custom_position_waypoints field exceeds the maximum length");
@@ -183,6 +193,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       	
       data.setSwingHeight(cdr.read_type_6());
       	
+      cdr.read_type_e(data.getCustomWaypointProportions());	
       cdr.read_type_e(data.getCustomPositionWaypoints());	
       cdr.read_type_e(data.getSwingTrajectory());	
       data.setSwingTrajectoryBlendDuration(cdr.read_type_6());
@@ -210,6 +221,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
       ser.write_type_9("trajectory_type", data.getTrajectoryType());
       ser.write_type_6("swing_height", data.getSwingHeight());
+      ser.write_type_e("custom_waypoint_proportions", data.getCustomWaypointProportions());
       ser.write_type_e("custom_position_waypoints", data.getCustomPositionWaypoints());
       ser.write_type_e("swing_trajectory", data.getSwingTrajectory());
       ser.write_type_6("swing_trajectory_blend_duration", data.getSwingTrajectoryBlendDuration());
@@ -231,6 +243,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.read_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
       data.setTrajectoryType(ser.read_type_9("trajectory_type"));
       data.setSwingHeight(ser.read_type_6("swing_height"));
+      ser.read_type_e("custom_waypoint_proportions", data.getCustomWaypointProportions());
       ser.read_type_e("custom_position_waypoints", data.getCustomPositionWaypoints());
       ser.read_type_e("swing_trajectory", data.getSwingTrajectory());
       data.setSwingTrajectoryBlendDuration(ser.read_type_6("swing_trajectory_blend_duration"));
