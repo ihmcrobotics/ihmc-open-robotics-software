@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 /**
  * A command that can be used to configure the optimization settings inside the controller core. By
@@ -27,11 +29,115 @@ public class OptimizationSettingsCommand implements InverseDynamicsCommand<Optim
     * 
     * @see ControllerCoreOptimizationSettings#getRhoMin()
     */
-   private double rhoMin = 0.0;
+   private double rhoMin = Double.NaN;
+   private double jointAccelerationMax = Double.NaN;
+   private double rhoWeight = Double.NaN;
+   private double rhoRateWeight = Double.NaN;
+   private final Vector2D centerOfPressureWeight = new Vector2D(Double.NaN, Double.NaN);
+   private final Vector2D centerOfPressureRateWeight = new Vector2D(Double.NaN, Double.NaN);
+   private double jointVelocityWeight = Double.NaN;
+   private double jointAccelerationWeight = Double.NaN;
+   private double jointJerkWeight = Double.NaN;
+   private double jointTorqueWeight = Double.NaN;
 
    public void setRhoMin(double rhoMin)
    {
       this.rhoMin = rhoMin;
+   }
+
+   public void setJointAccelerationMax(double jointAccelerationMax)
+   {
+      this.jointAccelerationMax = jointAccelerationMax;
+   }
+
+   public void setRhoWeight(double rhoWeight)
+   {
+      this.rhoWeight = rhoWeight;
+   }
+
+   public void setRhoRateWeight(double rhoRateWeight)
+   {
+      this.rhoRateWeight = rhoRateWeight;
+   }
+
+   public void setCenterOfPressureWeight(Tuple2DReadOnly centerOfPressureWeight)
+   {
+      this.centerOfPressureWeight.set(centerOfPressureWeight);
+   }
+
+   public void setCenterOfPressureRateWeight(Tuple2DReadOnly centerOfPressureRateWeight)
+   {
+      this.centerOfPressureRateWeight.set(centerOfPressureRateWeight);
+   }
+
+   public void setJointVelocityWeight(double jointVelocityWeight)
+   {
+      this.jointVelocityWeight = jointVelocityWeight;
+   }
+
+   public void setJointAccelerationWeight(double jointAccelerationWeight)
+   {
+      this.jointAccelerationWeight = jointAccelerationWeight;
+   }
+
+   public void setJointJerkWeight(double jointJerkWeight)
+   {
+      this.jointJerkWeight = jointJerkWeight;
+   }
+
+   public void setJointTorqueWeight(double jointTorqueWeight)
+   {
+      this.jointTorqueWeight = jointTorqueWeight;
+   }
+
+   public boolean hasRhoMin()
+   {
+      return !Double.isNaN(rhoMin);
+   }
+
+   public boolean hasJointAccelerationMax()
+   {
+      return !Double.isNaN(jointAccelerationMax);
+   }
+
+   public boolean hasRhoWeight()
+   {
+      return !Double.isNaN(rhoWeight);
+   }
+
+   public boolean hasRhoRateWeight()
+   {
+      return !Double.isNaN(rhoRateWeight);
+   }
+
+   public boolean hasCenterOfPressureWeight()
+   {
+      return !centerOfPressureWeight.containsNaN();
+   }
+
+   public boolean hasCenterOfPressureRateWeight()
+   {
+      return !centerOfPressureRateWeight.containsNaN();
+   }
+
+   public boolean hasJointVelocityWeight()
+   {
+      return !Double.isNaN(jointVelocityWeight);
+   }
+
+   public boolean hasJointAccelerationWeight()
+   {
+      return !Double.isNaN(jointAccelerationWeight);
+   }
+
+   public boolean hasJointJerkWeight()
+   {
+      return !Double.isNaN(jointJerkWeight);
+   }
+
+   public boolean hasJointTorqueWeight()
+   {
+      return !Double.isNaN(jointTorqueWeight);
    }
 
    public double getRhoMin()
@@ -39,10 +145,64 @@ public class OptimizationSettingsCommand implements InverseDynamicsCommand<Optim
       return rhoMin;
    }
 
+   public double getJointAccelerationMax()
+   {
+      return jointAccelerationMax;
+   }
+
+   public double getRhoWeight()
+   {
+      return rhoWeight;
+   }
+
+   public double getRhoRateWeight()
+   {
+      return rhoRateWeight;
+   }
+
+   public Vector2D getCenterOfPressureWeight()
+   {
+      return centerOfPressureWeight;
+   }
+
+   public Vector2D getCenterOfPressureRateWeight()
+   {
+      return centerOfPressureRateWeight;
+   }
+
+   public double getJointVelocityWeight()
+   {
+      return jointVelocityWeight;
+   }
+
+   public double getJointAccelerationWeight()
+   {
+      return jointAccelerationWeight;
+   }
+
+   public double getJointJerkWeight()
+   {
+      return jointJerkWeight;
+   }
+
+   public double getJointTorqueWeight()
+   {
+      return jointTorqueWeight;
+   }
+
    @Override
    public void set(OptimizationSettingsCommand other)
    {
       rhoMin = other.rhoMin;
+      jointAccelerationMax = other.jointAccelerationMax;
+      rhoWeight = other.rhoWeight;
+      rhoRateWeight = other.rhoRateWeight;
+      centerOfPressureWeight.set(other.centerOfPressureWeight);
+      centerOfPressureRateWeight.set(other.centerOfPressureRateWeight);
+      jointVelocityWeight = other.jointVelocityWeight;
+      jointAccelerationWeight = other.jointAccelerationWeight;
+      jointJerkWeight = other.jointJerkWeight;
+      jointTorqueWeight = other.jointTorqueWeight;
    }
 
    @Override
@@ -50,5 +210,4 @@ public class OptimizationSettingsCommand implements InverseDynamicsCommand<Optim
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
    }
-
 }
