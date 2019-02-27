@@ -368,6 +368,23 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
    {
-      rhoMin.set(command.getRhoMin());
+      if (command.hasRhoMin())
+         rhoMin.set(command.getRhoMin());
+      if (command.hasJointAccelerationMax())
+         absoluteMaximumJointAcceleration.set(command.getJointAccelerationMax());
+      if (command.hasRhoWeight())
+         wrenchMatrixCalculator.setRhoWeight(command.getRhoWeight());
+      if (command.hasRhoRateWeight())
+         wrenchMatrixCalculator.setRhoRateWeight(command.getRhoRateWeight());
+      if (command.hasCenterOfPressureWeight())
+         wrenchMatrixCalculator.setDesiredCoPWeight(command.getCenterOfPressureWeight());
+      if (command.hasCenterOfPressureRateWeight())
+         wrenchMatrixCalculator.setCoPRateWeight(command.getCenterOfPressureRateWeight());
+      if (command.hasJointAccelerationWeight())
+         qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
+      if (command.hasJointJerkWeight())
+         qpSolver.setJerkRegularizationWeight(command.getJointJerkWeight());
+      if (command.hasJointTorqueWeight())
+         qpSolver.setJointTorqueWeight(command.getJointTorqueWeight());
    }
 }

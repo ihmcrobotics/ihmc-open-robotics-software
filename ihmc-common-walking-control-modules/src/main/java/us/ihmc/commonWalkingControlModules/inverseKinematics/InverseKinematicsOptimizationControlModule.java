@@ -198,5 +198,9 @@ public class InverseKinematicsOptimizationControlModule
 
    public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
    {
+      if (command.hasJointVelocityWeight())
+         qpSolver.setVelocityRegularizationWeight(command.getJointVelocityWeight());
+      if (command.hasJointAccelerationWeight())
+         qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
    }
 }
