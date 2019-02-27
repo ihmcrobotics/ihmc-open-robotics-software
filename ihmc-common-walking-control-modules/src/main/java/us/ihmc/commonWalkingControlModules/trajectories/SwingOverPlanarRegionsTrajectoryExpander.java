@@ -37,7 +37,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
    private static final double ignoreDistanceFromFloor = 0.02;
-   private static final double[] swingWaypointProportions = new double[]{0.15, 0.85};
+   private static final double[] swingWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
@@ -102,8 +102,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    {
       String namePrefix = "trajectoryExpander";
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
-      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, swingTrajectoryParameters.getSwingWaypointProportions(),
-            swingTrajectoryParameters.getObstacleClearanceProportions(), walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
+      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
             walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
