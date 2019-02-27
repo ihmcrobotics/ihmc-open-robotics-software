@@ -102,6 +102,7 @@ public class SwingState extends AbstractFootControlState
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
    private final FrameVector3D tmpVector = new FrameVector3D();
 
+   private final double[] waypointProportions = new double[2];
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
    private final List<FixedFramePoint3DBasics> swingWaypointsForViz = new ArrayList<>();
@@ -783,7 +784,7 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType.getEnumValue(), positionWaypointsForSole);
       swingTrajectoryOptimizer.setSwingHeight(swingHeight.getDoubleValue());
       swingTrajectoryOptimizer.setStanceFootPosition(stanceFootPosition);
-      swingTrajectoryOptimizer.setWaypointProportionsToDefaults(activeTrajectoryType.getEnumValue());
+      swingTrajectoryOptimizer.setWaypointProportions(waypointProportions);
       swingTrajectoryOptimizer.initialize();
    }
 
@@ -869,6 +870,16 @@ public class SwingState extends AbstractFootControlState
 
          if (checkStepUpOrDown(footstepPose))
             activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
+
+         if(footstep.getCustomWaypointProportions().isEmpty())
+         {
+            swingTrajectoryOptimizer.getDefaultWaypointProportions(activeTrajectoryType.getEnumValue(), waypointProportions);
+         }
+         else
+         {
+            waypointProportions[0] = footstep.getCustomWaypointProportions().get(0).getValue();
+            waypointProportions[1] = footstep.getCustomWaypointProportions().get(1).getValue();
+         }
       }
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)

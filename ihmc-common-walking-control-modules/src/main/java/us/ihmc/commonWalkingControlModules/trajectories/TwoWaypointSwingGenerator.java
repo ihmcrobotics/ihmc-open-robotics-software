@@ -185,13 +185,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       trajectory.informDone();
    }
 
-   public void setWaypointProportions(double firstWaypointProportion, double secondWaypointProportion)
+   public void setWaypointProportions(double... waypointProportions)
    {
-      waypointProportions[0] = firstWaypointProportion;
-      waypointProportions[1] = secondWaypointProportion;
+      this.waypointProportions[0] = waypointProportions[0];
+      this.waypointProportions[1] = waypointProportions[1];
    }
 
-   public void setWaypointProportionsToDefaults(TrajectoryType trajectoryType)
+   public void getDefaultWaypointProportions(TrajectoryType trajectoryType, double[] waypointProportions)
    {
       if(trajectoryType == TrajectoryType.DEFAULT)
       {
