@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
+package us.ihmc.quadrupedCommunication.teleop;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
@@ -31,6 +31,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;

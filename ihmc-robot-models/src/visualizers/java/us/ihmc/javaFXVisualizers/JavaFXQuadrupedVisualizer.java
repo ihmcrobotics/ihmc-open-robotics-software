@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedUI;
+package us.ihmc.javaFXVisualizers;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
@@ -11,7 +11,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -29,7 +29,6 @@ public class JavaFXQuadrupedVisualizer
    private JavaFXGraphics3DNode robotRootNode;
 
    private final FullQuadrupedRobotModel fullRobotModel;
-   private final QuadrupedReferenceFrames referenceFrames;
 
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
@@ -43,14 +42,14 @@ public class JavaFXQuadrupedVisualizer
 
    public JavaFXQuadrupedVisualizer(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
-      this(null, fullRobotModelFactory);
+      this(null, fullRobotModelFactory, null);
    }
 
-   public JavaFXQuadrupedVisualizer(Messager messager, FullQuadrupedRobotModelFactory fullRobotModelFactory)
+   public JavaFXQuadrupedVisualizer(Messager messager, FullQuadrupedRobotModelFactory fullRobotModelFactory,
+                                    MessagerAPIFactory.Topic<FullQuadrupedRobotModel> robotModelTopic)
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       allJoints = fullRobotModel.getOneDoFJoints();
-      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
 
       jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
@@ -84,12 +83,10 @@ public class JavaFXQuadrupedVisualizer
             fullRobotModel.getElevator().updateFramesRecursively();
             graphicsRobot.update();
             robotRootNode.update();
-            referenceFrames.updateFrames();
 
             if (messager != null)
             {
-               messager.submitMessage(QuadrupedUIMessagerAPI.RobotModelTopic, fullRobotModel);
-               messager.submitMessage(QuadrupedUIMessagerAPI.ReferenceFramesTopic, referenceFrames);
+               messager.submitMessage(robotModelTopic, fullRobotModel);
             }
          }
       };
