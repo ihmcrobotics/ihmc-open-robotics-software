@@ -13,3 +13,6 @@ controller_msgs/KinematicsToolboxOutputStatus[] robot_configurations
 # Solution quality.
 # The total summation of the all solution quality for each key frames. 
 float64 solution_quality -1
+
+# Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+WholeBodyTrajectoryMessage suggested_controller_message

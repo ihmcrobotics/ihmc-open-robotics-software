@@ -37,10 +37,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPlannerProcessViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -60,7 +60,7 @@ import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.F
 
 public class MainTabController
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    // control
    @FXML
@@ -129,7 +129,9 @@ public class MainTabController
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
-      setStartFromRobot();
+      if (quadrupedReferenceFrames != null)
+         setStartFromRobot();
+
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);

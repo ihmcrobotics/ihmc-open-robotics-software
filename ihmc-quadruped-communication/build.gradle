@@ -6,7 +6,7 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
    configurePublications()
 }
@@ -26,4 +26,5 @@ mainDependencies {
 }
 
 testDependencies {
+   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning-visualizers", version: "source"
 }

@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator;
+package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.graphicsDescription.Graphics3DObject;
