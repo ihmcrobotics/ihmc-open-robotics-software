@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -39,20 +41,22 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 
+import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+
 public class BipedalSupportPlanarRegionPublisher
 {
-   /**
-    * If true, the support polygon's convex hull is published as a single planar region if the robot is in double support and the feet planes are close.
-    * Otherwise, the polygons are published separately
-    */
-   private static final boolean useConvexHullIfPossible = true;
-   private static final double supportRegionScaleFactor = 2.0;
+   private static final double defaultScaleFactor = 2.0;
+
+   private static final int LEFT_FOOT_INDEX = 0;
+   private static final int RIGHT_FOOT_INDEX = 1;
+   private static final int CONVEX_HULL_INDEX = 2;
 
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "supporting_planar_region_publisher");
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusMessage = new AtomicReference<>(null);
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
+   private final AtomicReference<BipedalSupportPlanarRegionParametersMessage> latestParametersMessage = new AtomicReference<>(null);
 
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private ScheduledFuture<?> task;
@@ -61,6 +65,7 @@ public class BipedalSupportPlanarRegionPublisher
    private final OneDoFJointBasics[] allJointsExcludingHands;
    private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
+   private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel)
@@ -75,17 +80,19 @@ public class BipedalSupportPlanarRegionPublisher
       contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         contactableFeet.get(robotSide).getContactPoints2d().forEach(point -> point.scale(supportRegionScaleFactor));
-      }
-
       ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            (NewMessageListener<CapturabilityBasedStatus>) subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
+      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
+
+      BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
+      defaultParameters.setEnable(true);
+      defaultParameters.setSupportRegionScaleFactor(defaultScaleFactor);
+      latestParametersMessage.set(defaultParameters);
 
       for (int i = 0; i < 3; i++)
       {
@@ -101,9 +108,31 @@ public class BipedalSupportPlanarRegionPublisher
 
    private void run()
    {
+      BipedalSupportPlanarRegionParametersMessage parameters = latestParametersMessage.get();
+      if (!parameters.getEnable() || parameters.getSupportRegionScaleFactor() <= 0.0)
+      {
+         supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
+
+         publishRegions();
+         return;
+      }
+
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusMessage.get();
       if (capturabilityBasedStatus == null)
          return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         scaledContactPointList.get(robotSide).clear();
+         for (FramePoint2D contactPoint : contactableFeet.get(robotSide).getContactPoints2d())
+         {
+            FramePoint2D scaledContactPoint = new FramePoint2D(contactPoint);
+            scaledContactPoint.scale(parameters.getSupportRegionScaleFactor());
+            scaledContactPointList.get(robotSide).add(scaledContactPoint);
+         }
+      }
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationData.get();
       if (robotConfigurationData == null)
@@ -115,20 +144,18 @@ public class BipedalSupportPlanarRegionPublisher
 
       SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon2d().isEmpty(),
                                                                               !capturabilityBasedStatus.getRightFootSupportPolygon2d().isEmpty());
-      if (useConvexHullIfPossible && feetAreInSamePlane(isInSupport))
+      if (feetAreInSamePlane(isInSupport))
       {
-         ContactablePlaneBody leftContactableFoot = contactableFeet.get(RobotSide.LEFT);
-         ContactablePlaneBody rightContactableFoot = contactableFeet.get(RobotSide.RIGHT);
-         ReferenceFrame leftSoleFrame = leftContactableFoot.getSoleFrame();
+         ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
 
          List<FramePoint2D> allContactPoints = new ArrayList<>();
-         leftContactableFoot.getContactPoints2d().stream().map(FramePoint2D::new).forEach(allContactPoints::add);
-         rightContactableFoot.getContactPoints2d().stream().map(FramePoint2D::new).forEach(allContactPoints::add);
+         allContactPoints.addAll(scaledContactPointList.get(RobotSide.LEFT));
+         allContactPoints.addAll(scaledContactPointList.get(RobotSide.RIGHT));
          allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
 
-         supportRegions.set(0, new PlanarRegion());
-         supportRegions.set(1, new PlanarRegion());
-         supportRegions.set(2, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
+         supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
                                                 new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
       }
       else
@@ -138,7 +165,7 @@ public class BipedalSupportPlanarRegionPublisher
             if (isInSupport.get(robotSide))
             {
                ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-               List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
+               List<FramePoint2D> contactPoints = scaledContactPointList.get(robotSide);
                RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
                supportRegions.set(robotSide.ordinal(),
                                   new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
@@ -149,9 +176,14 @@ public class BipedalSupportPlanarRegionPublisher
             }
          }
 
-         supportRegions.set(2, new PlanarRegion());
+         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
       }
 
+      publishRegions();
+   }
+
+   private void publishRegions()
+   {
       for (int i = 0; i < 3; i++)
       {
          supportRegions.get(i).setRegionId(i);
