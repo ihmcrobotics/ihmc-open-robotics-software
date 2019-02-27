@@ -4,9 +4,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 
-public class SnappedPositionGraphic extends FXUIGraphic
+public class SnappedPositionGraphic
 {
    private final Sphere sphere;
    private final PhongMaterial material;
@@ -16,8 +15,6 @@ public class SnappedPositionGraphic extends FXUIGraphic
       sphere = new Sphere(0.05);
       material = new PhongMaterial(color);
       sphere.setMaterial(material);
-
-      rootChildren.add(sphere);
    }
 
    public void setPosition(Point3D position)

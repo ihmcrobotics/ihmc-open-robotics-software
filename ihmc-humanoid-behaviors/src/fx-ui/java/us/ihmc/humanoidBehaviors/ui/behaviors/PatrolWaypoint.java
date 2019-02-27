@@ -4,10 +4,11 @@ import javafx.scene.paint.Color;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 
-public class PatrolWaypoint implements PositionEditable, OrientationEditable
+public class PatrolWaypoint extends FXUIGraphic implements PositionEditable, OrientationEditable
 {
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
@@ -16,13 +17,9 @@ public class PatrolWaypoint implements PositionEditable, OrientationEditable
    {
       snappedPositionGraphic = new SnappedPositionGraphic(Color.YELLOW);
       orientationGraphic = new OrientationGraphic(snappedPositionGraphic);
-   }
 
-   @Override
-   public void setMouseTransparent(boolean transparent)
-   {
-      snappedPositionGraphic.getSphere().setMouseTransparent(transparent);
-      orientationGraphic.getArrow().setMouseTransparent(transparent);
+      rootChildren.add(snappedPositionGraphic.getSphere());
+      rootChildren.add(orientationGraphic.getArrow());
    }
 
    @Override

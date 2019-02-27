@@ -123,8 +123,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    private PatrolWaypoint createWaypointGraphic(JavaFXMessager messager)
    {
       PatrolWaypoint waypoint = new PatrolWaypoint();
-      registerGraphic(waypoint.getSnappedPositionGraphic());
-      registerGraphic(waypoint.getOrientationGraphic());
+      registerGraphic(waypoint);
       waypoints.add(waypoint);
       return waypoint;
    }
@@ -133,16 +132,14 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    {
       LogTools.debug("Removing all waypoint graphics.");
       waypoints.forEach(waypoint -> {
-         removeGraphic(waypoint.getOrientationGraphic());
-         removeGraphic(waypoint.getSnappedPositionGraphic());
+         removeGraphic(waypoint);
       });
       waypoints.clear();
    }
 
    private void removeWaypoint(PatrolWaypoint waypoint)
    {
-      removeGraphic(waypoint.getOrientationGraphic());
-      removeGraphic(waypoint.getSnappedPositionGraphic());
+      removeGraphic(waypoint);
       waypoints.remove(waypoint);
    }
 
