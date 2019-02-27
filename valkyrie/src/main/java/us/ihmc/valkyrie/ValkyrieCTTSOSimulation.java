@@ -41,6 +41,7 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
       networkProcessorParameters.enableWalkingPreviewToolbox(true);
+      networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
 
       networkProcessorParameters.enablePerceptionModule(true);
 

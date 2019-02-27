@@ -26,5 +26,5 @@ visualizersDependencies {
 
     compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
     compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
-    compile group: "us.ihmc", name: "ihmc-quadruped-ui", version: "source"
+    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
 }
