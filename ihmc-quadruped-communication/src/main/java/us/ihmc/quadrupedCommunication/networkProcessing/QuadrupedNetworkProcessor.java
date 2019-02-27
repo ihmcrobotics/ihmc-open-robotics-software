@@ -4,6 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -27,16 +28,17 @@ public class QuadrupedNetworkProcessor
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                    QuadrupedXGaitSettings xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters)
+                                    FootstepPlannerParameters footstepPlannerParameters, QuadrupedXGaitSettings xGaitSettings,
+                                    PointFootSnapperParameters pointFootSnapperParameters)
    {
-      this(robotModel, params, nominalHeight, xGaitSettings, pointFootSnapperParameters, DomainFactory.PubSubImplementation.FAST_RTPS);
+      this(robotModel, params, nominalHeight, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, DomainFactory.PubSubImplementation.FAST_RTPS);
    }
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
-                                    QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                    DomainFactory.PubSubImplementation pubSubImplementation)
+                                    FootstepPlannerParameters footstepPlannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                    PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
+      tryToStartModule(() -> setupFootstepPlanningModule(robotModel, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyHeightTeleopModule(robotModel, params, nominalHeight, pubSubImplementation));
       tryToStartModule(() -> setupBodyTeleopModule(robotModel, params, pubSubImplementation));
@@ -69,13 +71,13 @@ public class QuadrupedNetworkProcessor
       modules.add(stepTeleopModule);
    }
 
-   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                      PointFootSnapperParameters pointFootSnapperParameters, QuadrupedNetworkModuleParameters params,
-                                      DomainFactory.PubSubImplementation pubSubImplementation)
+   private void setupFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, FootstepPlannerParameters footstepPlannerParameters,
+                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                            QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (!params.isFootstepPlanningModuleEnabled())
          return;
-      modules.add(new QuadrupedFootstepPlanningModule(modelFactory, xGaitSettings, pointFootSnapperParameters, null, params.visualizeStepTeleopModuleEnabled(),
+      modules.add(new QuadrupedFootstepPlanningModule(modelFactory, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, null, params.visualizeStepTeleopModuleEnabled(),
                                                              pubSubImplementation));
    }
 

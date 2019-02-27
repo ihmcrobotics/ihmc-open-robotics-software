@@ -1,12 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -76,6 +80,15 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       stepTeleopManager.setEndPhaseShift(180);
+
+      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
+                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
+                                                                           ROS2TopicQualifier.OUTPUT),
+                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
+      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
+                                                                           ROS2TopicQualifier.OUTPUT),
+                                           s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
       planningRequestPacket.getBodyPositionInWorld().set(variables.getRobotBodyX().getDoubleValue(), variables.getRobotBodyY().getDoubleValue(),

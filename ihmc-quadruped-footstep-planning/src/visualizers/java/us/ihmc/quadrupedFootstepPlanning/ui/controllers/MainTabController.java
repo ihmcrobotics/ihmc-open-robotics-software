@@ -60,7 +60,7 @@ import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.F
 
 public class MainTabController
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    // control
    @FXML
@@ -129,7 +129,9 @@ public class MainTabController
       if (verbose)
          PrintTools.info(this, "Clicked compute path...");
 
-      setStartFromRobot();
+      if (quadrupedReferenceFrames != null)
+         setStartFromRobot();
+
       int newRequestID = currentPlannerRequestId.get() + 1;
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, newRequestID);
       messager.submitMessage(ComputePathTopic, true);

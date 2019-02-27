@@ -10,10 +10,12 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -31,15 +33,24 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
 
    private final QuadrupedFootstepPlanningController footstepPlanningController;
 
-   public QuadrupedFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                          PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
+   public QuadrupedFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, FootstepPlannerParameters defaultFootstepPlannerParameters,
+                                          QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                          LogModelProvider modelProvider, boolean startYoVariableServer,
                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
-            pubSubImplementation);
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), defaultFootstepPlannerParameters, defaultXGaitSettings,
+           pointFootSnapperParameters, modelProvider, startYoVariableServer, pubSubImplementation);
+   }
+
+   public QuadrupedFootstepPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, FootstepPlannerParameters defaultFootstepPlannerParameters,
+                                          QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                          LogModelProvider modelProvider, boolean startYoVariableServer,
+                                          DomainFactory.PubSubImplementation pubSubImplementation)
+   {
+      super(name, fulRobotModel, modelProvider, startYoVariableServer, updatePeriodMilliseconds, pubSubImplementation);
 
 
-      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(), new DefaultFootstepPlannerParameters(),
+      footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(), defaultFootstepPlannerParameters,
                                                                            pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                            yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -86,9 +97,11 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-      messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
+      messages.put(QuadrupedFootstepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
+      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
+      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
+      messages.put(QuadrupedFootstepPlannerParametersPacket.class, getPublisherTopicNameGenerator());
+      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicNameGenerator());
 
       return messages;
    }
