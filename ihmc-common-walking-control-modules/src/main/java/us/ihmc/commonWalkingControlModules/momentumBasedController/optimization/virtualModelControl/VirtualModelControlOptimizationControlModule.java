@@ -197,7 +197,16 @@ public class VirtualModelControlOptimizationControlModule
 
    public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
    {
-      rhoMin.set(command.getRhoMin());
+      if (command.hasRhoMin())
+         rhoMin.set(command.getRhoMin());
+      if (command.hasRhoWeight())
+         wrenchMatrixCalculator.setRhoWeight(command.getRhoWeight());
+      if (command.hasRhoRateWeight())
+         wrenchMatrixCalculator.setRhoRateWeight(command.getRhoRateWeight());
+      if (command.hasCenterOfPressureWeight())
+         wrenchMatrixCalculator.setDesiredCoPWeight(command.getCenterOfPressureWeight());
+      if (command.hasCenterOfPressureRateWeight())
+         wrenchMatrixCalculator.setCoPRateWeight(command.getCenterOfPressureRateWeight());
    }
 
    /**
