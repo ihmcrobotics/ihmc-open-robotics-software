@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
@@ -166,6 +167,9 @@ public class WholeBodyInverseKinematicsSolver
             break;
          case COMMAND_LIST:
             submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
+            break;
+         case OPTIMIZATION_SETTINGS:
+            optimizationControlModule.submitOptimizationSettingsCommand((OptimizationSettingsCommand) command);
             break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");

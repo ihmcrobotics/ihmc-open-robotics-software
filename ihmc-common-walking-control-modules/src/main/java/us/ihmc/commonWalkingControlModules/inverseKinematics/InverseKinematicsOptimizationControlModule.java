@@ -6,6 +6,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -193,5 +194,9 @@ public class InverseKinematicsOptimizationControlModule
    public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
       boundCalculator.submitJointLimitReductionCommand(command);
+   }
+
+   public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
+   {
    }
 }

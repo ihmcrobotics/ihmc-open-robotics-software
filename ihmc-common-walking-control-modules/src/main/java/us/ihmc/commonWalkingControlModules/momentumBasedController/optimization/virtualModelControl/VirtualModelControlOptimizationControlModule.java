@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -192,6 +193,11 @@ public class VirtualModelControlOptimizationControlModule
    public void submitExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
+   {
+      rhoMin.set(command.getRhoMin());
    }
 
    /**
