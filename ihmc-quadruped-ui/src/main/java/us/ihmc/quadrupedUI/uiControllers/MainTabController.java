@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 
@@ -43,7 +44,7 @@ public class MainTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-      currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, HighLevelControllerName.WALKING);
+      currentControllerState = messager.createInput(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, null);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, this::validateBodyTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::validateWalkingTopic);
@@ -54,7 +55,7 @@ public class MainTabController
       if (request)
       {
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
-         if (currentControllerState.get() != HighLevelControllerName.WALKING)
+         if (currentControllerState.get() != null && currentControllerState.get() != HighLevelControllerName.WALKING)
             messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
       }
    }
@@ -64,8 +65,12 @@ public class MainTabController
       if (request)
       {
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
-         if (currentControllerState.get() != HighLevelControllerName.WALKING)
+         if (currentControllerState.get() != null && currentControllerState.get() != HighLevelControllerName.WALKING)
             messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
+      }
+      else
+      {
+         requestStanding();
       }
    }
 
@@ -80,6 +85,11 @@ public class MainTabController
    public void requestStandUp()
    {
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, HighLevelControllerName.STAND_PREP_STATE);
+   }
+
+   public void requestStanding()
+   {
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingNameTopic, QuadrupedSteppingStateEnum.STAND);
    }
 
    public void bindControls()

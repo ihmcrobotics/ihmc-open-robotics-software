@@ -1,10 +1,8 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.pathPlanning.visibilityGraphs;
 
 import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -13,11 +11,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphRandomTools;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphTestTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilityMap;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;

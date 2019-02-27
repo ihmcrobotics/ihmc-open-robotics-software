@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
+import controller_msgs.msg.dds.QuadrupedFootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -10,46 +13,47 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-public abstract class FootstepPlannerDataSetTest
+public abstract class FootstepPlannerToolboxDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
 
-   private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
-                                                                                                                   YoAppearance.DarkRed(),
-                                                                                                                   YoAppearance.DarkGreen());
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
@@ -61,13 +65,26 @@ public abstract class FootstepPlannerDataSetTest
    protected Messager messager = null;
 
    private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
-   private QuadrupedBodyPathAndFootstepPlanner planner = null;
+   private QuadrupedFootstepPlanningModule footstepPlanningModule = null;
+
+   private RealtimeRos2Node ros2Node;
+   private RemoteUIMessageConverter converter;
+
+   private final AtomicReference<FootstepPlan> plannerPlanReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningResult> plannerResultReference = new AtomicReference<>(null);
+   private final AtomicReference<Boolean> plannerReceivedPlan = new AtomicReference<>(false);
+   private final AtomicReference<Boolean> plannerReceivedResult = new AtomicReference<>(false);
+
+   private final AtomicReference<FootstepPlan> planReference = new AtomicReference<>(null);
+   private final AtomicReference<FootstepPlanningResult> resultReference = new AtomicReference<>(null);
+
+   private static final String robotName = "testBot";
+   public static final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+
 
    protected abstract FootstepPlannerType getPlannerType();
 
    protected abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
-
-   protected abstract QuadrupedBodyPathAndFootstepPlanner createPlanner();
 
    @BeforeEach
    public void setup()
@@ -79,9 +96,22 @@ public abstract class FootstepPlannerDataSetTest
       else
          messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
 
-      planner = createPlanner();
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
+
+      footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, new DefaultFootstepPlannerParameters(), xGaitSettings,
+                                                                   new DefaultPointFootSnapperParameters(), null, false, pubSubImplementation);
+
+
+      ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
+
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepPlanningToolboxOutputStatus.class,
+                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
+                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+
+      converter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);
+
+      ros2Node.spin();
 
       try
       {
@@ -106,12 +136,27 @@ public abstract class FootstepPlannerDataSetTest
    public void tearDown() throws Exception
    {
       messager.closeMessager();
+      footstepPlanningModule.destroy();
+      converter.destroy();
       if (ui != null)
          ui.stop();
 
+      converter = null;
+      footstepPlanningModule = null;
       ui = null;
       messager = null;
-      planner = null;
+   }
+
+   private void resetAllAtomics()
+   {
+      plannerPlanReference.set(null);
+      plannerResultReference.set(null);
+      plannerReceivedPlan.set(false);
+      plannerReceivedResult.set(false);
+
+
+      planReference.set(null);
+      resultReference.set(null);
    }
 
    private void createUI(Messager messager)
@@ -173,8 +218,8 @@ public abstract class FootstepPlannerDataSetTest
 
    protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
    {
-      DataSet dataSet = DataSetIOTools.loadDataSet(datasetName);
-      String errorMessages = dataSetTester.apply(dataSet);
+      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
+      String errorMessages = dataSetTester.apply(dataset);
       Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
    }
 
@@ -196,6 +241,7 @@ public abstract class FootstepPlannerDataSetTest
             LogTools.info("Testing file: " + dataset.getName());
 
          numbberOfTestedSets++;
+         resetAllAtomics();
          String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
@@ -231,42 +277,35 @@ public abstract class FootstepPlannerDataSetTest
 
    protected String runAssertions(DataSet dataset)
    {
+      resetAllAtomics();
       ThreadTools.sleep(1000);
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
-
-      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
-                    dataset.getPlannerInput().getQuadrupedGoalPosition());
 
       return errorMessage;
    }
 
    protected void packPlanningRequest(DataSet dataset)
    {
-      PlannerInput plannerInput = dataset.getPlannerInput();
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
-
-      startPose.setPosition(plannerInput.getStartPosition());
-      goalPose.setPosition(plannerInput.getGoalPosition());
-
-      if(plannerInput.getHasQuadrupedStartYaw())
-         startPose.setOrientation(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
-      if(plannerInput.getHasQuadrupedGoalYaw())
-         goalPose.setOrientation(new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
+      startPose.setPosition(dataset.getPlannerInput().getQuadrupedStartPosition());
+      goalPose.setPosition(dataset.getPlannerInput().getQuadrupedGoalPosition());
+      if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
+         startPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
+      if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
+         goalPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
+      double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       start.setStartPose(startPose);
       goal.setGoalPose(goalPose);
 
-      planner.setPlanarRegionsList(dataset.getPlanarRegionsList());
-      planner.setStart(start);
-      planner.setGoal(goal);
-      planner.setTimeout(timeout);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
@@ -274,36 +313,183 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
+
       //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
 
       if (DEBUG)
-         LogTools.info("Set planner parameters.");
+         LogTools.info("Sending out planning request.");
+   }
+
+   private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
+   {
+      if (DEBUG)
+         PrintTools.info("Processed an output from a remote planner.");
+
+      plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
+      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
+      plannerReceivedPlan.set(true);
+      plannerReceivedResult.set(true);
+   }
+
+   private static FootstepPlan convertToFootstepPlan(QuadrupedTimedStepListMessage footstepDataListMessage)
+   {
+      FootstepPlan footstepPlan = new FootstepPlan();
+
+      for (QuadrupedTimedStepMessage footstepMessage : footstepDataListMessage.getQuadrupedStepList())
+      {
+         QuadrupedTimedOrientedStep step = new QuadrupedTimedOrientedStep();
+         step.setGoalPosition(footstepMessage.getQuadrupedStepMessage().getGoalPosition());
+         step.getTimeInterval().setInterval(footstepMessage.getTimeInterval().getStartTime(), footstepMessage.getTimeInterval().getEndTime());
+         step.setGroundClearance(footstepMessage.getQuadrupedStepMessage().getGroundClearance());
+         step.setRobotQuadrant(RobotQuadrant.fromByte(footstepMessage.getQuadrupedStepMessage().getRobotQuadrant()));
+
+         footstepPlan.addFootstep(step);
+      }
+
+      return footstepPlan;
+   }
+
+   private String getTimeoutFlag()
+   {
+//      return getPlannerType().toString().toLowerCase() + "_timeout";
+      return "quadruped_timeout";
    }
 
    private String findPlanAndAssertGoodResult(DataSet dataset)
    {
-      String datasetName = dataset.getName();
+      totalTimeTaken = 0.0;
+      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double maxTimeToWait = 2.0 * timeoutMultiplier * 60.0;
+      String datasetName = "";
 
-      FootstepPlanningResult pathResult = planner.planPath();
-      if (!pathResult.validForExecution())
-         return "Path plan for " + datasetName + " is invalid.";
+      queryPlannerResults();
 
-      FootstepPlanningResult planResult = planner.plan();
-      if (!planResult.validForExecution())
-         return "Footstep plan for " + datasetName + " is invalid.";
+      String errorMessage = "";
+      if (DEBUG)
+         PrintTools.info("Waiting for result.");
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
+      errorMessage += waitForResult(() -> resultReference.get() == null, maxTimeToWait, datasetName);
 
-      PlannerInput plannerInput = dataset.getPlannerInput();
-      String errorMessage = assertPlanIsValid(datasetName, planner.getPlan(), plannerInput.getQuadrupedGoalPosition(), plannerInput.getQuadrupedGoalYaw());
+      if (DEBUG)
+         PrintTools.info("Received a result (actual = " + resultReference.get() + ", checking it's validity.");
 
-      ThreadTools.sleep(1000);
+      errorMessage += validateResult(() -> resultReference.get().validForExecution() , resultReference.get(), datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
+
+      if (DEBUG)
+         PrintTools.info("Results are valid, waiting for plan.");
+
+      errorMessage += waitForPlan(() -> planReference.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
+
+      if (DEBUG)
+         PrintTools.info("Received a plan, checking it's validity.");
+
+      FootstepPlanningResult result = this.resultReference.getAndSet(null);
+      FootstepPlan plan = this.planReference.getAndSet(null);
+
+      plannerReceivedPlan.set(false);
+      plannerReceivedResult.set(false);
+
+      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getPlannerInput().getQuadrupedGoalPosition(), dataset.getPlannerInput().getQuadrupedGoalYaw());
+
+      for (int i = 0; i < 100; i++)
+         ThreadTools.sleep(10);
+
       return errorMessage;
    }
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlan plannedSteps, Point3DReadOnly goalPosition, double goalYaw)
+
+   private double totalTimeTaken;
+
+   private String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   {
+      String errorMessage = "";
+      long waitTime = 10;
+      while (conditionChecker.checkCondition())
+      {
+         if (totalTimeTaken > maxTimeToWait)
+         {
+            errorMessage += prefix + " timed out waiting for a result.\n";
+            return errorMessage;
+         }
+
+         ThreadTools.sleep(waitTime);
+         totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+         queryPlannerResults();
+      }
+
+      return errorMessage;
+   }
+
+   private String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
+   {
+      String errorMessage = "";
+
+      if (!conditionChecker.checkCondition())
+      {
+         errorMessage += prefix + " failed to find a valid result. Result : " + result + "\n";
+      }
+
+      return errorMessage;
+   }
+
+   private String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   {
+      String errorMessage = "";
+
+      while (conditionChecker.checkCondition())
+      {
+         long waitTime = 10;
+
+         if (totalTimeTaken > maxTimeToWait)
+         {
+            errorMessage += prefix + " timed out waiting on plan.\n";
+            return errorMessage;
+         }
+
+         ThreadTools.sleep(waitTime);
+         totalTimeTaken += Conversions.millisecondsToSeconds(waitTime);
+         queryPlannerResults();
+      }
+
+      return errorMessage;
+   }
+
+
+   private void queryPlannerResults()
+   {
+      if (plannerReceivedPlan.get() && plannerPlanReference.get() != null && planReference.get() == null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a plan from the planner.");
+         planReference.set(plannerPlanReference.getAndSet(null));
+         plannerReceivedPlan.set(false);
+      }
+
+      if (plannerReceivedResult.get() && plannerResultReference.get() != null)
+      {
+         if (DEBUG)
+            PrintTools.info("Received a result " + plannerResultReference.get() + " from the planner.");
+         resultReference.set(plannerResultReference.getAndSet(null));
+         plannerReceivedResult.set(false);
+      }
+   }
+
+
+   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps, Point3DReadOnly goalPosition,
+                                           double goalYaw)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
+
+      String errorMessage = "";
+      if (!result.validForExecution())
+         errorMessage = datasetName + " was not valid for execution " + result + ".\n";
+
 
       Point3D centerPoint = new Point3D();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -318,13 +504,12 @@ public abstract class FootstepPlannerDataSetTest
 
       centerPoint.scale(0.25);
 
-      String errorMessage = "";
       if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
-         errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
-      if (!Double.isNaN(goalYaw))
+         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
+      if (Double.isFinite(goalYaw))
       {
          if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
-            errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
+            errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
@@ -348,48 +533,8 @@ public abstract class FootstepPlannerDataSetTest
       return finalSteps;
    }
 
-   private void visualizePlan(FootstepPlan plan, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
+   private static interface ConditionChecker
    {
-      if (!VISUALIZE || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-         return;
-
-      SimulationConstructionSet scs = new SimulationConstructionSet();
-
-      Graphics3DObject graphics3DObject = new Graphics3DObject();
-      if (planarRegionsList != null)
-         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, planarRegionsList, YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray());
-      scs.setGroundVisible(false);
-
-      graphics3DObject.identity();
-      graphics3DObject.translate(start);
-      graphics3DObject.translate(0.0, 0.0, 0.05);
-      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Blue());
-
-      graphics3DObject.identity();
-      graphics3DObject.translate(goal);
-      graphics3DObject.translate(0.0, 0.0, 0.05);
-      graphics3DObject.addCone(0.3, 0.05, YoAppearance.Black());
-
-      if (plan != null)
-      {
-         for (int i = 0; i < plan.getNumberOfSteps(); i++)
-         {
-            Point3DReadOnly point = plan.getFootstep(i).getGoalPosition();
-            AppearanceDefinition appearanceDefinition = colorDefinitions.get(plan.getFootstep(i).getRobotQuadrant());
-
-            graphics3DObject.identity();
-            graphics3DObject.translate(point);
-            graphics3DObject.addSphere(0.1, appearanceDefinition);
-
-         }
-      }
-
-      scs.addStaticLinkGraphics(graphics3DObject);
-
-      scs.setCameraFix(0.0, 0.0, 0.0);
-      scs.setCameraPosition(-0.001, 0.0, 15.0);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      boolean checkCondition();
    }
 }

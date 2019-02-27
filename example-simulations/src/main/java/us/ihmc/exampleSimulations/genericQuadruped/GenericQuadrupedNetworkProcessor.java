@@ -5,6 +5,8 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysica
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
@@ -25,15 +27,16 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 
    public GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this(new GenericQuadrupedModelFactory(),
-           new GenericQuadrupedPhysicalProperties().getNominalBodyHeight(), new GenericQuadrupedXGaitSettings(),
+      this(new GenericQuadrupedModelFactory(), new GenericQuadrupedPhysicalProperties().getNominalBodyHeight(), new DefaultFootstepPlannerParameters(),
+           new GenericQuadrupedXGaitSettings(),
            new GenericQuadrupedPointFootSnapperParameters(), pubSubImplementation);
    }
 
-   public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, double nominalHeight, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                           PointFootSnapperParameters pointFootSnapperParameters, DomainFactory.PubSubImplementation pubSubImplementation)
+   public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, double nominalHeight, FootstepPlannerParameters footstepPlannerParameters,
+                                           QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
+                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(robotModel, networkModuleParameters, nominalHeight, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
+      super(robotModel, networkModuleParameters, nominalHeight, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
    }
 
    public static void main(String[] args)
