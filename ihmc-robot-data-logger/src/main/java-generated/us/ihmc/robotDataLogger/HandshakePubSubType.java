@@ -60,6 +60,8 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1024; ++i0)
       {
           current_alignment += us.ihmc.robotDataLogger.EnumTypePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += us.ihmc.robotDataLogger.SummaryPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -108,6 +110,8 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       {
           current_alignment += us.ihmc.robotDataLogger.EnumTypePubSubType.getCdrSerializedSize(data.getEnumTypes().get(i0), current_alignment);}
 
+      current_alignment += us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType.getCdrSerializedSize(data.getReferenceFrameInformation(), current_alignment);
+
       current_alignment += us.ihmc.robotDataLogger.SummaryPubSubType.getCdrSerializedSize(data.getSummary(), current_alignment);
 
 
@@ -142,6 +146,7 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       cdr.write_type_e(data.getEnumTypes());else
           throw new RuntimeException("enumTypes field exceeds the maximum length");
 
+      us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType.write(data.getReferenceFrameInformation(), cdr);
       us.ihmc.robotDataLogger.SummaryPubSubType.write(data.getSummary(), cdr);
    }
 
@@ -155,6 +160,7 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       cdr.read_type_e(data.getGraphicObjects());	
       cdr.read_type_e(data.getArtifacts());	
       cdr.read_type_e(data.getEnumTypes());	
+      us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType.read(data.getReferenceFrameInformation(), cdr);	
       us.ihmc.robotDataLogger.SummaryPubSubType.read(data.getSummary(), cdr);	
 
    }
@@ -169,6 +175,8 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       ser.write_type_e("graphicObjects", data.getGraphicObjects());
       ser.write_type_e("artifacts", data.getArtifacts());
       ser.write_type_e("enumTypes", data.getEnumTypes());
+      ser.write_type_a("referenceFrameInformation", new us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType(), data.getReferenceFrameInformation());
+
       ser.write_type_a("summary", new us.ihmc.robotDataLogger.SummaryPubSubType(), data.getSummary());
 
    }
@@ -183,6 +191,8 @@ public class HandshakePubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc
       ser.read_type_e("graphicObjects", data.getGraphicObjects());
       ser.read_type_e("artifacts", data.getArtifacts());
       ser.read_type_e("enumTypes", data.getEnumTypes());
+      ser.read_type_a("referenceFrameInformation", new us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType(), data.getReferenceFrameInformation());
+
       ser.read_type_a("summary", new us.ihmc.robotDataLogger.SummaryPubSubType(), data.getSummary());
 
    }
