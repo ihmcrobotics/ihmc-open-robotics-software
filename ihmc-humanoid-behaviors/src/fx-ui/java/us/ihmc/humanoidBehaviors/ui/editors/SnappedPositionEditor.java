@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
-import us.ihmc.humanoidBehaviors.ui.references.NotificationReference;
+import us.ihmc.humanoidBehaviors.ui.references.Notification;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
 import us.ihmc.log.LogTools;
@@ -21,7 +21,7 @@ public class SnappedPositionEditor extends FXUIEditor
 {
    private final QueueReference<Point3D> mouseMovedMeshIntersection = new QueueReference<>();
    private final QueueReference<Point3D> mouseClickedMeshIntersection = new QueueReference<>();
-   private final NotificationReference mouseRightClicked = new NotificationReference();
+   private final Notification mouseRightClicked = new Notification();
 
    private final FXUIStateMachine positionEditorStateMachine;
    private final OverTypedReference<PositionEditable> selectedGraphicReference;
