@@ -28,10 +28,16 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double nominalHeight = 0.75;
 
    private static final double initialTransferDuration = 1.0;
+   private static final double finalTransferDuration = 1.0;
+   private static final double settlingTime = 1.0;
    private static final double stepDuration = 0.4;
    private static final double flightDuration = 0.1;
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 5;
+
+   private static final double initialVerticalOffsetBound = 0.05;
+   private static final double finalVerticalOffsetBound = 0.15;
+   private static final double verticalOffset = 0.25;
 
    private static final boolean includeFlight = true;
 
@@ -134,24 +140,33 @@ public class CoMTrajectoryPlannerVisualizer
       double contactPosition = 0.0;
 
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
-      initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
+      initialContactStateProvider.getTimeInterval().setInterval(0.0, 0.5 * initialTransferDuration);
       initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
-      contacts.add(initialContactStateProvider);
+      double currentTime = 0.5 * initialTransferDuration;
 
-      double currentTime = initialTransferDuration;
+      SettableContactStateProvider initialContactStateProvider2 = new SettableContactStateProvider();
+      initialContactStateProvider2.getTimeInterval().setInterval(currentTime, currentTime + 0.5 * initialTransferDuration);
+      initialContactStateProvider2.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -initialVerticalOffsetBound));
+      initialContactStateProvider2.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -initialVerticalOffsetBound));
+      initialContactStateProvider2.setContactState(ContactState.IN_CONTACT);
+
+      contacts.add(initialContactStateProvider);
+      contacts.add(initialContactStateProvider2);
+
+      currentTime += 0.5 * initialTransferDuration;
 
       for (int i = 0; i < numberOfSteps; i++)
       {
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
          if (includeFlight)
             contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
          else
-            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, 0.0));
+            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -174,14 +189,32 @@ public class CoMTrajectoryPlannerVisualizer
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + 5.0);
+      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + 0.5 * finalTransferDuration);
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
-      simDuration = currentTime + 5;
+      currentTime += 0.5 * finalTransferDuration;
+
+      SettableContactStateProvider finalStateProvider2 = new SettableContactStateProvider();
+      finalStateProvider2.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider2.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider2.getTimeInterval().setInterval(currentTime, currentTime + 5.0);
+      finalStateProvider2.setContactState(ContactState.IN_CONTACT);
+
+      currentTime += 0.5 * finalTransferDuration;
+
+      SettableContactStateProvider finalStateProvider3 = new SettableContactStateProvider();
+      finalStateProvider3.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider3.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider3.getTimeInterval().setInterval(currentTime, currentTime + settlingTime);
+      finalStateProvider3.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);
+      contacts.add(finalStateProvider2);
+
+      simDuration = currentTime + settlingTime;
+
 
       return contacts;
    }
