@@ -30,8 +30,6 @@ public class ValkyrieBehaviorUI extends Application
       MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       apiFactory.createRootCategory(getClass().getSimpleName());
       apiFactory.includeMessagerAPIs(BehaviorUI.API.create());
-      apiFactory.includeMessagerAPIs(SnappedPositionEditor.API.create());
-      apiFactory.includeMessagerAPIs(OrientationYawEditor.API.create());
       messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_behavior_ui");
