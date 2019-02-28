@@ -6,7 +6,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -196,7 +196,7 @@ public class InverseKinematicsOptimizationControlModule
       boundCalculator.submitJointLimitReductionCommand(command);
    }
 
-   public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
+   public void submitOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand command)
    {
       if (command.hasJointVelocityWeight())
          qpSolver.setVelocityRegularizationWeight(command.getJointVelocityWeight());
