@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 import java.util.ArrayList;
@@ -168,16 +167,5 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    @FXML public void destroyPatrol()
    {
 
-   }
-
-   public static class API
-   {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(BehaviorUI.class);
-
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }

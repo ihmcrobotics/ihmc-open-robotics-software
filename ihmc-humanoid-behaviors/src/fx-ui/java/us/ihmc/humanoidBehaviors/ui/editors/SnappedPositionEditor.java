@@ -8,14 +8,16 @@ import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.*;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIState;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransition;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.references.Notification;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 public class SnappedPositionEditor extends FXUIEditor
 {
@@ -164,18 +166,6 @@ public class SnappedPositionEditor extends FXUIEditor
       else
       {
          return null;
-      }
-   }
-
-   public static class API
-   {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(SnappedPositionEditor.class);
-
-//      public static final Topic<Point3D> SelectedPosition = apiFactory.createTopic("SelectedPosition", Point3D.class);
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
       }
    }
 }

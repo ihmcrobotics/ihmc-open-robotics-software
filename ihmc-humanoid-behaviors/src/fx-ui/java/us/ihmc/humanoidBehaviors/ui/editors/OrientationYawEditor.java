@@ -10,15 +10,16 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.*;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIState;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransition;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.references.Notification;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class OrientationYawEditor extends FXUIEditor
 {
@@ -159,17 +160,5 @@ public class OrientationYawEditor extends FXUIEditor
       point2.setZ(pointOnProjectionPlane.getZ());
 
       return new Line3D(point1, point2);
-   }
-
-   public static class API
-   {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(OrientationYawEditor.class);
-
-      public static final Topic<Point3D> SelectedOrientation = apiFactory.createTopic("SelectedOrientation", Point3D.class);
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
    }
 }
