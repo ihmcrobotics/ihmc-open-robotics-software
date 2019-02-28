@@ -1098,7 +1098,7 @@ public class CoMTrajectoryPlannerTest
 
       assertEquals(0.0, acceleration.getX(), epsilon);
       assertEquals(0.0, acceleration.getY(), epsilon);
-      assertEquals(gravityZ, acceleration.getZ(), epsilon);
+      assertEquals(-gravityZ, acceleration.getZ(), epsilon);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 

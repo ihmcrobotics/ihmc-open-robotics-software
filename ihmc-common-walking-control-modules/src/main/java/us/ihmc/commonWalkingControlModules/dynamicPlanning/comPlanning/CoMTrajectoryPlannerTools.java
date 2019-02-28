@@ -74,6 +74,7 @@ public class CoMTrajectoryPlannerTools
       desiredCoMAccelerationToPack.scaleAdd(firstCoefficientAccelerationMultiplier, firstCoefficient, desiredCoMAccelerationToPack);
       desiredCoMAccelerationToPack.scaleAdd(secondCoefficientAccelerationMultiplier, secondCoefficient, desiredCoMAccelerationToPack);
       desiredCoMAccelerationToPack.addZ(gravityAccelerationEffect);
+
       if (contactState.isLoadBearing())
       {
          double thirdCoefficientVelocityMultiplier = getThirdCoefficientCoMAccelerationMultiplier(contactState);
@@ -254,7 +255,7 @@ public class CoMTrajectoryPlannerTools
       }
       else
       {
-         return 1.0;
+         return 0.0;
       }
    }
 
