@@ -177,7 +177,7 @@ public class Footstep implements Settable<Footstep>
 
       this.customWaypointProportions.clear();
       RecyclingArrayList<MutableDouble> commandWaypointProportions = command.getCustomWaypointProportions();
-      if(commandWaypointProportions != null)
+      if(commandWaypointProportions != null && commandWaypointProportions.size() == 2)
       {
          for (int i = 0; i < commandWaypointProportions.size(); i++)
          {

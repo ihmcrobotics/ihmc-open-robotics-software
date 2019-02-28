@@ -173,6 +173,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    public void setWaypointProportions(double... waypointProportions)
    {
+      if(waypointProportions.length != numberWaypoints)
+         return;
+
       this.waypointProportions[0] = waypointProportions[0];
       this.waypointProportions[1] = waypointProportions[1];
    }
