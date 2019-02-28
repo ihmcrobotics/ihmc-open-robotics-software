@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.references.Notification;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
-import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
+import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
@@ -22,8 +22,8 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class OrientationYawEditor extends FXUIEditor
 {
-   private final QueueReference<Point3D> mouseMovedOrientation = new QueueReference<>();
-   private final QueueReference<Point3D> mouseClickedOrientation = new QueueReference<>();
+   private final TypedNotification<Point3D> mouseMovedOrientation = new TypedNotification<>();
+   private final TypedNotification<Point3D> mouseClickedOrientation = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
 
    private final FXUIStateMachine orientationEditorStateMachine;
