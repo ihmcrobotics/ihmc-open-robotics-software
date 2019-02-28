@@ -1,20 +1,9 @@
 package us.ihmc.humanoidBehaviors.ui.references;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-public class QueueReference<T>
+public class TypedNotification<T>
 {
-   private final AtomicReference<T> atomicReference;
-   private T polledValue;
-
-   /**
-    * Initialize with a new AtomicReference set to null.
-    */
-   public QueueReference()
-   {
-      this.atomicReference = new AtomicReference<>(null);
-      polledValue = null;
-   }
+   private T notification = null;
+   private T previousValue = null;
 
    /**
     * Get the atomic value, store it for a later call to read, and return if it was null.
@@ -23,9 +12,9 @@ public class QueueReference<T>
     */
    public boolean poll()
    {
-      polledValue = atomicReference.getAndSet(null);
-
-      return polledValue != null;
+      previousValue = notification;
+      notification = null;
+      return previousValue != null;
    }
 
    /**
@@ -35,7 +24,7 @@ public class QueueReference<T>
     */
    public boolean hasNext()
    {
-      return polledValue != null;
+      return previousValue != null;
    }
 
    /**
@@ -45,7 +34,7 @@ public class QueueReference<T>
     */
    public T read()
    {
-      return polledValue;
+      return previousValue;
    }
 
    /**
@@ -55,6 +44,6 @@ public class QueueReference<T>
     */
    public void add(T value)
    {
-      atomicReference.set(value);
+      notification = value;
    }
 }
