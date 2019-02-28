@@ -84,37 +84,44 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
 
    private void processRobotTimestamp(long timestamp)
    {
-      footstepPlanningController.processRobotTimestamp(timestamp);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processRobotTimestamp(timestamp);
    }
 
    private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
    {
-      footstepPlanningController.processHighLevelStateChangeMessage(message);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processHighLevelStateChangeMessage(message);
    }
 
    private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
    {
-      footstepPlanningController.processSteppingStateChangeMessage(message);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processSteppingStateChangeMessage(message);
    }
 
    private void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
-      footstepPlanningController.processGroundPlaneMessage(message);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processGroundPlaneMessage(message);
    }
 
    private void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
    {
-      footstepPlanningController.processFootstepPlanningRequest(packet);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processFootstepPlanningRequest(packet);
    }
 
    private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
    {
-      footstepPlanningController.processXGaitSettingsPacket(packet);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processXGaitSettingsPacket(packet);
    }
 
    private void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
    {
-      footstepPlanningController.processPlanarRegionsListMessage(message);
+      if (footstepPlanningController != null)
+         footstepPlanningController.processPlanarRegionsListMessage(message);
    }
 
    @Override
