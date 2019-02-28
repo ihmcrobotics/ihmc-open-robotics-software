@@ -83,7 +83,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       us.ihmc.idl.IDLSequence.Double messageWaypointProportions = message.getCustomWaypointProportions();
       customWaypointProportions.clear();
-      if (messageWaypointProportions != null)
+      if (messageWaypointProportions != null && messageWaypointProportions.size() == 2)
       {
          for (int i = 0; i < messageWaypointProportions.size(); i++)
          {
