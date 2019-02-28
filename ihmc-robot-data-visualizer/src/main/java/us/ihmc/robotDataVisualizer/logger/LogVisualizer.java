@@ -29,6 +29,7 @@ import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataVisualizer.logger.util.FileSelectionDialog;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -39,6 +40,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -211,6 +213,8 @@ public class LogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
+
+      AdditionalPanelTools.setupFrameView(scs, parser.getFrameIndexMap()::getReferenceFrame, SCSVisualizer.createFrameFilter());
 
 //      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
 //      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
