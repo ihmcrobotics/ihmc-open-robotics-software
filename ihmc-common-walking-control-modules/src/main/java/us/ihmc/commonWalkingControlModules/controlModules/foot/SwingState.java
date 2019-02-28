@@ -887,8 +887,14 @@ public class SwingState extends AbstractFootControlState
          if (checkStepUpOrDown(footstepPose))
             activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
 
-         if(footstep.getCustomWaypointProportions().size() != 2)
+         RecyclingArrayList<MutableDouble> customWaypointProportions = footstep.getCustomWaypointProportions();
+         if(customWaypointProportions.size() != 2)
          {
+            if(!customWaypointProportions.isEmpty())
+            {
+               LogTools.warn("Ignoring custom waypoint proportions. Expected 2, got: " + customWaypointProportions.size());
+            }
+
             List<DoubleProvider> waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ?
                   defaultObstacleClearanceWaypointProportions :
                   defaultWaypointProportions;
@@ -897,13 +903,8 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            if(!footstep.getCustomWaypointProportions().isEmpty())
-            {
-               LogTools.warn("Ignoring custom waypoint proportions. Expected 2, got: " + footstep.getCustomWaypointProportions().size());
-            }
-
-            waypointProportions[0] = footstep.getCustomWaypointProportions().get(0).getValue();
-            waypointProportions[1] = footstep.getCustomWaypointProportions().get(1).getValue();
+            waypointProportions[0] = customWaypointProportions.get(0).getValue();
+            waypointProportions[1] = customWaypointProportions.get(1).getValue();
          }
       }
 
