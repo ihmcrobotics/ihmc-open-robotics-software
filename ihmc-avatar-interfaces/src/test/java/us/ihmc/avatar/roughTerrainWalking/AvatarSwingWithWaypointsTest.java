@@ -65,6 +65,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       ThreadTools.sleep(1000);
       Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
 
+      drcSimulationTestHelper.getYoVariable("MaxStepDistance").setValueFromDouble(1.0);
+      drcSimulationTestHelper.getYoVariable("MaxSwingDistance").setValueFromDouble(0.5);
+
       RobotSide robotSide = RobotSide.LEFT;
       MovingReferenceFrame soleFrame = drcSimulationTestHelper.getReferenceFrames().getSoleFrame(robotSide);
       FramePose3D initialPose = new FramePose3D(soleFrame);

@@ -123,8 +123,8 @@ public class WalkingMessageHandler
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
-   private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, 1.0);
-   private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, 0.5);
+   private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
+   private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
                                 double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
