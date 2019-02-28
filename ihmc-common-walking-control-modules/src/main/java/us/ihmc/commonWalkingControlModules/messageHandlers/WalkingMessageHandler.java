@@ -18,11 +18,15 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -39,10 +43,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -115,6 +122,9 @@ public class WalkingMessageHandler
 
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
+
+   private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
+   private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
                                 double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -254,8 +264,16 @@ public class WalkingMessageHandler
          currentNumberOfFootsteps.increment();
       }
 
-      if (!checkTimings(upcomingFootstepTimings))
+      if (!checkTimings(upcomingFootstepTimings, yoTime))
+      {
          clearFootsteps();
+      }
+
+      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
+      {
+         clearFootsteps();
+      }
+
       checkForPause();
 
       updateVisualization();
@@ -903,7 +921,7 @@ public class WalkingMessageHandler
       }
    }
 
-   private boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings)
+   private static boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings, YoDouble yoTime)
    {
       // TODO: This is somewhat duplicated in the PacketValidityChecker.
       // The reason it has to be here is that this also checks that the timings are monotonically increasing if messages
@@ -932,13 +950,123 @@ public class WalkingMessageHandler
 
       if (atLeastOneFootstepHadTiming && !timingsValid)
       {
-         PrintTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
+         LogTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
          return false;
       }
 
       if (atLeastOneFootstepHadTiming && yoTime == null)
       {
-         PrintTools.warn("Recieved absolute footstep timings but " + getClass().getSimpleName() + " was created with no yoTime.");
+         LogTools.warn("Recieved absolute footstep timings but " + WalkingMessageHandler.class.getSimpleName() + " was created with no yoTime.");
+         return false;
+      }
+
+      return true;
+   }
+
+   private final FramePoint3DBasics tempStanceLocation = new FramePoint3D();
+   private final FramePoint3DBasics tempStepOrigin = new FramePoint3D();
+
+   /**
+    * Does sanity checks on the provided footsteps:
+    * <p>
+    * Will return false if this method finds</br>
+    *  - a step that is too far from the stance foot in XY</br>
+    *  - a step that has a swing trajectory that is too far from a straight line swing in XY</br>
+    *  - a step that has a swing trajectory that is too far from the step origin or destination in Z</br>
+    *
+    * @return if the footsteps were found to be safe
+    */
+   private static boolean checkFootsteps(List<Footstep> footsteps, SideDependentList<ReferenceFrame> soleFrames, double maxStepDistance,
+                                         double maxSwingDistance, FramePoint3DBasics tempStanceLocation, FramePoint3DBasics tempStepOrigin)
+   {
+      if (footsteps.isEmpty())
+      {
+         return true;
+      }
+
+      tempStanceLocation.setToZero(soleFrames.get(footsteps.get(0).getRobotSide().getOppositeSide()));
+      tempStepOrigin.setToZero(soleFrames.get(footsteps.get(0).getRobotSide()));
+      tempStanceLocation.changeFrame(worldFrame);
+      tempStepOrigin.changeFrame(worldFrame);
+
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         Footstep footstep = footsteps.get(i);
+         FixedFramePoint3DBasics stepPosition = footstep.getFootstepPose().getPosition();
+         double distance = stepPosition.distanceXY(tempStanceLocation);
+         if (distance > maxStepDistance)
+         {
+            LogTools.warn("Received step that was too far to be executed safely. Distance from previous step was " + distance
+                  + ". If that is acceptable increase the MaxStepDistance parameter.");
+            return false;
+         }
+
+         // Check the swing trajectory
+         if (footstep.getTrajectoryType() == TrajectoryType.WAYPOINTS)
+         {
+            List<FrameSE3TrajectoryPoint> swingTrajectory = footstep.getSwingTrajectory();
+            for (int j = 0; j < swingTrajectory.size(); j++)
+            {
+               FramePoint3DReadOnly position = swingTrajectory.get(j).getPosition();
+               if (!checkPositionIsValid(position, tempStepOrigin, stepPosition, maxSwingDistance))
+               {
+                  return false;
+               }
+            }
+         }
+
+         // Check position waypoints
+         if (footstep.getTrajectoryType() == TrajectoryType.CUSTOM)
+         {
+            List<FramePoint3D> positionWaypoints = footstep.getCustomPositionWaypoints();
+            for (int j = 0; j < positionWaypoints.size(); j++)
+            {
+               FramePoint3DReadOnly position = positionWaypoints.get(j);
+               if (!checkPositionIsValid(position, tempStepOrigin, stepPosition, maxSwingDistance))
+               {
+                  return false;
+               }
+            }
+         }
+
+         if (i < footsteps.size() - 1)
+         {
+            if (footsteps.get(i + 1).getRobotSide() != footstep.getRobotSide())
+            {
+               // If the next step is with the other foot the step origin is the previous stance location.
+               tempStepOrigin.set(tempStanceLocation);
+               tempStanceLocation.set(stepPosition);
+            }
+            else
+            {
+               // If the next step is with the same foot the step origin is the previous step location.
+               tempStepOrigin.set(stepPosition);
+            }
+         }
+      }
+
+      return true;
+   }
+
+   private static boolean checkPositionIsValid(FramePoint3DReadOnly positionToCheck, FramePoint3DReadOnly location1, FramePoint3DReadOnly location2,
+                                               double maxDistance)
+   {
+      // Check the distance to a straight line on the ground from location1 to location 2
+      double distanceXY = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(positionToCheck.getX(), positionToCheck.getY(), location1.getX(),
+                                                                                 location1.getY(), location2.getX(), location2.getY());
+      if (distanceXY > maxDistance)
+      {
+         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
+               + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         return false;
+      }
+
+      // Check the smaller distance in z from the locations
+      double distanceZ = Math.min(Math.abs(location1.getZ() - positionToCheck.getZ()), Math.abs(location2.getZ() - positionToCheck.getZ()));
+      if (distanceZ > maxDistance)
+      {
+         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was "
+               + distanceZ + ". If that is acceptable increase the MaxSwingDistance parameter.");
          return false;
       }
 
