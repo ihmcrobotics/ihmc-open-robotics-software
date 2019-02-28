@@ -23,6 +23,7 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -158,11 +159,10 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final int maxNumberOfPathPlanners;
    private final int maxNumberOfStepPlanners;
 
-   public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+   public MultiStageFootstepPlanningManager(DRCRobotModel drcRobotModel, StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry, long tickDurationMs)
    {
-      this.contactPointParameters = contactPointParameters;
+      this.contactPointParameters = drcRobotModel.getContactPointParameters();
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allStepPlanningStages, stepPlanningStagesInProgress);
@@ -173,8 +173,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
-      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
+      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
+      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(drcRobotModel.getVisibilityGraphsParameters(), registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
       isDone.set(false);
@@ -216,14 +216,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       });
 
-      AdaptiveSwingParameters adaptiveSwingParameters = footstepPlannerParameters.getAdaptiveSwingParameters();
+      AdaptiveSwingParameters adaptiveSwingParameters = drcRobotModel.getFootstepPlannerParameters().getAdaptiveSwingParameters();
       if(adaptiveSwingParameters == null)
       {
          adaptiveSwingTrajectoryCalculator = null;
       }
       else
       {
-         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters, null);
       }
 
       parentRegistry.addChild(registry);
