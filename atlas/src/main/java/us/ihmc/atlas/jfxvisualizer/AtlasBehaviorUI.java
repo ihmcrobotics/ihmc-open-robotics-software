@@ -28,8 +28,6 @@ public class AtlasBehaviorUI extends Application
       MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       apiFactory.createRootCategory(getClass().getSimpleName());
       apiFactory.includeMessagerAPIs(BehaviorUI.API.create());
-      apiFactory.includeMessagerAPIs(SnappedPositionEditor.API.create());
-      apiFactory.includeMessagerAPIs(OrientationYawEditor.API.create());
       messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
 
       messager.startMessager();
