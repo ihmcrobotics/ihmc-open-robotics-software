@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +106,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
 
+   private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+
    private final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
+   private final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
    private final YoFramePoint3D yoFirstCoefficient = new YoFramePoint3D("comFirstCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoSecondCoefficient = new YoFramePoint3D("comSecondCoefficient", worldFrame, registry);
    private final YoFramePoint3D yoThirdCoefficient = new YoFramePoint3D("comThirdCoefficient", worldFrame, registry);
@@ -207,6 +214,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       ContactState currentContactState = contactSequence.get(0).getContactState();
 
+      computeVRPWaypointsFromContactSequence();
+
       numberOfConstraints = 0;
 
       // set initial constraint
@@ -277,6 +286,62 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
       updateCornerPoints(numberOfPhases);
    }
+
+   private void computeVRPWaypointsFromContactSequence()
+   {
+      startVRPPositions.clear();
+      endVRPPositions.clear();
+
+      double initialHeightVelocity = currentCoMVelocity.getZ();
+      double initialHeight = currentCoMPosition.getZ();
+      double finalHeightVelocity;
+
+      for (int i = 0; i < contactSequence.size(); i++)
+      {
+         ContactStateProvider contactStateProvider = contactSequence.get(i);
+         ContactStateProvider nextContactStateProvider = contactSequence.get(i + 1);
+
+         double duration = contactStateProvider.getTimeInterval().getDuration();
+         if (!contactStateProvider.getContactState().isLoadBearing())
+         {
+            finalHeightVelocity = initialHeightVelocity - gravityZ * duration;
+         }
+         else
+         {
+            if (!nextContactStateProvider.getContactState().isLoadBearing())
+            { // next is a jump
+               double finalHeight;
+               if (i < contactSequence.size() - 2)
+                  finalHeight = contactSequence.get(i + 2).getCopStartPosition().getZ();
+               else
+                  finalHeight = nextContactStateProvider.getCopEndPosition().getZ();
+               double heightChangeWhenJumping = finalHeight - nextContactStateProvider.getCopEndPosition().getZ();
+               double durationOfJump = nextContactStateProvider.getTimeInterval().getDuration();
+
+               finalHeightVelocity = heightChangeWhenJumping / durationOfJump + 0.5 * gravityZ * duration;
+            }
+            else
+            {
+               throw new RuntimeException("Haven't set this up yet.");
+            }
+         }
+
+         FramePoint3D start = startVRPPositions.add();
+         FramePoint3D end = endVRPPositions.add();
+
+         start.set(contactStateProvider.getCopStartPosition());
+         start.addZ(nominalCoMHeight);
+         end.set(contactStateProvider.getCopEndPosition());
+         end.addZ(nominalCoMHeight);
+
+         double offset = (finalHeightVelocity - initialHeightVelocity) / duration;
+         start.subZ(offset);
+         end.subZ(offset);
+      }
+   }
+
+
+
 
    private final FramePoint3D firstCoefficient = new FramePoint3D();
    private final FramePoint3D secondCoefficient = new FramePoint3D();
@@ -375,6 +440,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
    {
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
+      this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);
    }
 
    /** {@inheritDoc} */
@@ -700,17 +766,18 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       {
          ContactMotion contactMotion = contactStateProvider.getContactMotion();
          int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
-         FramePoint3DReadOnly copPosition = contactStateProvider.getCopStartPosition();
-         copPosition.checkReferenceFrameMatch(worldFrame);
+
+         FramePoint3DReadOnly vrpPosition = startVRPPositions.get(sequenceId);
+         vrpPosition.checkReferenceFrameMatch(worldFrame);
 
          coefficientMultipliers.set(numberOfConstraints, startIndex + 0, getFirstCoefficientVRPPositionMultiplier(contactState));
          coefficientMultipliers.set(numberOfConstraints, startIndex + 1, getSecondCoefficientVRPPositionMultiplier(contactState));
          coefficientMultipliers.set(numberOfConstraints, startIndex + 2, getThirdCoefficientVRPPositionMultiplier(contactState, contactMotion, 0.0));
          if (contactMotion.getNumberOfCoefficients() > 3)
             coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState, contactMotion));
-         xCoefficientConstants.set(numberOfConstraints, 0, copPosition.getX());
-         yCoefficientConstants.set(numberOfConstraints, 0, copPosition.getY());
-         zCoefficientConstants.set(numberOfConstraints, 0, copPosition.getZ() + nominalCoMHeight);
+         xCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getX());
+         yCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getY());
+         zCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getZ());
 
          numberOfConstraints++;
       }
@@ -725,8 +792,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       {
          ContactMotion contactMotion = contactStateProvider.getContactMotion();
          int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
-         FramePoint3DReadOnly copPosition = contactStateProvider.getCopEndPosition();
-         copPosition.checkReferenceFrameMatch(worldFrame);
+
+         FramePoint3DReadOnly vrpPosition = endVRPPositions.get(sequenceId);
+         vrpPosition.checkReferenceFrameMatch(worldFrame);
 
          coefficientMultipliers.set(numberOfConstraints, startIndex + 0, getFirstCoefficientVRPPositionMultiplier(contactState));
          coefficientMultipliers.set(numberOfConstraints, startIndex + 1, getSecondCoefficientVRPPositionMultiplier(contactState));
@@ -735,9 +803,9 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
                                                                                                                                       .getDuration()));
          if (contactMotion.getNumberOfCoefficients() > 3)
             coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getFourthCoefficientVRPPositionMultiplier(contactState, contactMotion));
-         xCoefficientConstants.set(numberOfConstraints, 0, copPosition.getX());
-         yCoefficientConstants.set(numberOfConstraints, 0, copPosition.getY());
-         zCoefficientConstants.set(numberOfConstraints, 0, copPosition.getZ() + nominalCoMHeight);
+         xCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getX());
+         yCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getY());
+         zCoefficientConstants.set(numberOfConstraints, 0, vrpPosition.getZ());
 
          numberOfConstraints++;
       }
