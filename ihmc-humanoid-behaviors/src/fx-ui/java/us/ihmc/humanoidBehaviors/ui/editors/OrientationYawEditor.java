@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
-import us.ihmc.humanoidBehaviors.ui.references.NotificationReference;
+import us.ihmc.humanoidBehaviors.ui.references.Notification;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.QueueReference;
 import us.ihmc.log.LogTools;
@@ -24,7 +24,7 @@ public class OrientationYawEditor extends FXUIEditor
 {
    private final QueueReference<Point3D> mouseMovedOrientation = new QueueReference<>();
    private final QueueReference<Point3D> mouseClickedOrientation = new QueueReference<>();
-   private final NotificationReference mouseRightClicked = new NotificationReference();
+   private final Notification mouseRightClicked = new Notification();
 
    private final FXUIStateMachine orientationEditorStateMachine;
    private final OverTypedReference<OrientationEditable> selectedGraphicReference;
