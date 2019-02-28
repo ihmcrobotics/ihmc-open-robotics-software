@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 
-public class ValkyrieFootstepProcessingParameters implements FootstepProcessingParameters
+public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
 {
    /**
     * Parameters for setting swing height as a function of vertical step displacement

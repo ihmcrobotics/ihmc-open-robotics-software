@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 /**
  * Parameters for setting swing times and trajectories from a footstep poses
  */
-public interface FootstepProcessingParameters
+public interface AdaptiveSwingParameters
 {
    /**
     * Parameters for setting swing waypoint height as a function of vertical step displacement
