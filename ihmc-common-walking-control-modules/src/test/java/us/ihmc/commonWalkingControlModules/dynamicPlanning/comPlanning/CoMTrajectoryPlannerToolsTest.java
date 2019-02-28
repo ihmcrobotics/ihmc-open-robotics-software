@@ -196,7 +196,7 @@ public class CoMTrajectoryPlannerToolsTest
                         sufficientlyLarge), multiplier, epsilon);
 
          multiplier = CoMTrajectoryPlannerTools.getFirstCoefficientCoMAccelerationMultiplier(ContactState.FLIGHT, timeInPhase, omega);
-         expectedMultiplier = 1.0;
+         expectedMultiplier = 0.0;
 
          assertTrue(Double.isFinite(multiplier));
          assertEquals(expectedMultiplier, multiplier);
