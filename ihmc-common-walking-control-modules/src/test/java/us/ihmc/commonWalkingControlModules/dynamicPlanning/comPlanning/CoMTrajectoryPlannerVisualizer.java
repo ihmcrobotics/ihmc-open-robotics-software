@@ -8,6 +8,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -56,10 +57,14 @@ public class CoMTrajectoryPlannerVisualizer
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
+   private final YoFrameVector3D desiredGroundReactionForce;
+   private final YoFramePoint3D desiredECMPPosition;
 
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
+
+   private final YoDouble omega;
 
    public CoMTrajectoryPlannerVisualizer()
    {
@@ -72,7 +77,10 @@ public class CoMTrajectoryPlannerVisualizer
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
-      YoDouble omega = new YoDouble("omega", registry);
+      desiredGroundReactionForce = new YoFrameVector3D("desiredGroundReactionForce", worldFrame, registry);
+      desiredECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
+
+      omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
       dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, graphicsListRegistry);
@@ -89,6 +97,9 @@ public class CoMTrajectoryPlannerVisualizer
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
       YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
+      YoGraphicVector forceViz = new YoGraphicVector("desiredGRF", desiredECMPPosition, desiredGroundReactionForce, 0.05, YoAppearance.Red());
+
+      graphicsListRegistry.registerYoGraphic("dcmPlanner", forceViz);
       graphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
@@ -197,6 +208,12 @@ public class CoMTrajectoryPlannerVisualizer
          desiredDCMPosition.set(planner.getDesiredDCMPosition());
          desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
          desiredVRPPosition.set(planner.getDesiredVRPPosition());
+
+         desiredGroundReactionForce.set(desiredCoMAcceleration);
+         desiredGroundReactionForce.addZ(gravity);
+
+         desiredECMPPosition.set(desiredVRPPosition);
+         desiredECMPPosition.subZ(gravity / (omega.getDoubleValue() * omega.getDoubleValue()));
 
          dcmTrajectory.setBallLoop(desiredDCMPosition);
          comTrajectory.setBallLoop(desiredCoMPosition);
