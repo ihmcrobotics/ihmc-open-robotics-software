@@ -1043,9 +1043,9 @@ public class CoMTrajectoryPlannerTest
       planner.compute(0.0);
       FrameVector3DReadOnly acceleration = planner.getDesiredCoMAcceleration();
 
-      assertEquals(gravityZ, acceleration.getZ(), 1e-3);
-      assertEquals(0.0, acceleration.getX(), 1e-3);
-      assertEquals(0.0, acceleration.getY(), 1e-3);
+      assertEquals(0.0, acceleration.getX(), epsilon);
+      assertEquals(0.0, acceleration.getY(), epsilon);
+      assertEquals(-gravityZ, acceleration.getZ(), epsilon);
       checkPlannerDynamics(planner, -omega.getDoubleValue());
 
 
@@ -1064,9 +1064,9 @@ public class CoMTrajectoryPlannerTest
          planner.compute(time);
          checkPlannerDynamics(planner, omega.getDoubleValue());
          acceleration = planner.getDesiredCoMAcceleration();
-         assertEquals(gravityZ, acceleration.getZ(), 1e-3);
-         assertEquals(0.0, acceleration.getX(), 1e-3);
-         assertEquals(0.0, acceleration.getY(), 1e-3);
+         assertEquals(-gravityZ, acceleration.getZ(), epsilon);
+         assertEquals(0.0, acceleration.getX(), epsilon);
+         assertEquals(0.0, acceleration.getY(), epsilon);
       }
    }
 
