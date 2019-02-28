@@ -32,4 +32,10 @@ public interface AdaptiveSwingParameters
    double getMaximumStepHeightForMinimumSwingTime();
    
    double getMinimumStepHeightForMaximumSwingTime();
+
+   /**
+    * Parameters for calculating custom waypoint proportions
+    */
+
+   double getMinimumXYWaypointToRegionDistance();
 }
