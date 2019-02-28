@@ -88,6 +88,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = t </p>
+    * <p> CONTACT: coeff = e<sup>&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getFirstCoefficientCoMPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -100,6 +108,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = 1 </p>
+    * <p> CONTACT: coeff = e<sup>-&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getSecondCoefficientCoMPositionMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -112,6 +128,15 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> Constant CONTACT: 1.0</p>
+    * <p> Linear CONTACT: t </p>
+    * @param contactState indicates if it's flight or contact
+    * @param contactMotion whether or not the VRP is a constant value or a linear trajectory
+    * @param timeInPhase t in the above equation
+    * @return coeff in the above equation
+    */
    static double getThirdCoefficientCoMPositionMultiplier(ContactState contactState, ContactMotion contactMotion, double timeInPhase)
    {
       if (contactState.isLoadBearing())
@@ -127,12 +152,20 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> Constant CONTACT: n/a - constant contact only has three coefficients </p>
+    * <p> Linear CONTACT: 1.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param contactMotion whether or not the VRP is a constant value or a linear trajectory
+    * @return coeff in the above equation
+    */
    static double getFourthCoefficientCoMPositionMultiplier(ContactState contactState, ContactMotion contactMotion)
    {
       if (contactState.isLoadBearing())
       {
          if (contactMotion == ContactMotion.CONSTANT)
-            throw new IllegalArgumentException("Constant only has three coefficients.");
+            throw new IllegalArgumentException("Constant contact only has three coefficients.");
          return 1.0;
       }
       else
@@ -194,6 +227,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = 1.0 </p>
+    * <p> CONTACT: coeff = &omega; e<sup>&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getFirstCoefficientCoMVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -206,6 +247,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = 0.0 </p>
+    * <p> CONTACT: coeff = -&omega; e<sup>-&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getSecondCoefficientCoMVelocityMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -218,6 +267,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> Constant CONTACT: 0.0</p>
+    * <p> Linear CONTACT: 1.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param contactMotion whether or not the VRP is a constant value or a linear trajectory
+    * @return coeff in the above equation
+    */
    static double getThirdCoefficientCoMVelocityMultiplier(ContactState contactState, ContactMotion contactMotion)
    {
       if (contactState.isLoadBearing())
@@ -233,6 +290,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> Constant CONTACT: n/a - constant contact only has three coefficients </p>
+    * <p> Linear CONTACT: 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param contactMotion whether or not the VRP is a constant value or a linear trajectory
+    * @return coeff in the above equation
+    */
    static double getFourthCoefficientCoMVelocityMultiplier(ContactState contactState, ContactMotion contactMotion)
    {
       if (contactState.isLoadBearing())
@@ -247,6 +312,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = 0.0 </p>
+    * <p> CONTACT: coeff = &omega;<sup>2</sup> e<sup>&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getFirstCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -259,6 +332,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = 0.0 </p>
+    * <p> CONTACT: coeff = &omega;<sup>2</sup> e<sup>-&omega; t</sup></p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param omega &omega; in the above equation
+    * @return coeff in the above equation
+    */
    static double getSecondCoefficientCoMAccelerationMultiplier(ContactState contactState, double timeInPhase, double omega)
    {
       if (contactState.isLoadBearing())
@@ -271,6 +352,12 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> CONTACT: 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @return coeff in the above equation
+    */
    static double getThirdCoefficientCoMAccelerationMultiplier(ContactState contactState)
    {
       if (contactState.isLoadBearing())
@@ -283,12 +370,20 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : n/a - flight is only described by a linear function </p>
+    * <p> Constant CONTACT: n/a - constant contact only has three coefficients </p>
+    * <p> Linear CONTACT: 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param contactMotion whether or not the VRP is a constant value or a linear trajectory
+    * @return coeff in the above equation
+    */
    static double getFourthCoefficientCoMAccelerationMultiplier(ContactState contactState, ContactMotion contactMotion)
    {
       if (contactState.isLoadBearing())
       {
          if (contactMotion == ContactMotion.CONSTANT)
-            throw new IllegalArgumentException("Constant only has three coefficients.");
+            throw new IllegalArgumentException("Constant contact only has three coefficients.");
          return 0.0;
       }
       else
@@ -297,6 +392,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = -0.5 g t<sup>2</sup></p>
+    * <p> CONTACT: coeff = 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param gravityZ absolute value of gravity, g in the above equation
+    * @return coeff in the above equation
+    */
    static double getGravityPositionEffect(ContactState contactState, double timeInPhase, double gravityZ)
    {
       if (contactState.isLoadBearing())
@@ -309,6 +412,14 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = -g t </p>
+    * <p> CONTACT: coeff = 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param timeInPhase t in the above equation
+    * @param gravityZ absolute value of gravity, g in the above equation
+    * @return coeff in the above equation
+    */
    static double getGravityVelocityEffect(ContactState contactState, double timeInPhase, double gravityZ)
    {
       if (contactState.isLoadBearing())
@@ -321,6 +432,13 @@ public class CoMTrajectoryPlannerTools
       }
    }
 
+   /**
+    * <p> FLIGHT : coeff = -g </p>
+    * <p> CONTACT: coeff = 0.0 </p>
+    * @param contactState indicates if it's flight or contact
+    * @param gravityZ absolute value of gravity, g in the above equation
+    * @return coeff in the above equation
+    */
    static double getGravityAccelerationEffect(ContactState contactState, double gravityZ)
    {
       if (contactState.isLoadBearing())

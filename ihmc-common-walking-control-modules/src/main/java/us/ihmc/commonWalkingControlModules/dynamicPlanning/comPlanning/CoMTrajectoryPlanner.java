@@ -26,8 +26,44 @@ import java.util.List;
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.*;
 
-// This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
-// This means that the final CoP is the terminal ICP location
+/**
+ * <p>
+ *    This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
+ *    This means that the final CoP is the terminal ICP location
+ *  </p>
+ *    <p>
+ *       If the VRP during contact is a linear function, the CoM follows the following trajectory definitions:
+ *    </p>
+ *    <p>
+ *       IN_CONTACT:
+ *       <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t + c<sub>3</sub></li>
+ *       <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub></li>
+ *       <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup></li>
+ *    </p>
+ *    <p>
+ *       FLIGHT:
+ *       <li>      x(t) = -0.5 g t<sup>2</sup> + c<sub>0</sub> t + c<sub>1</sub></li>
+ *       <li> d/dt x(t) = - g t + c<sub>0</sub> </li>
+ *       <li> d<sup>2</sup> / dt<sup>2</sup> = -g </li>
+ *    </p>
+ *    <p>
+ *        If the VRP during contact is a constant function, the CoM follows the following trajectory definitions:
+ *    </p>
+ *    <p>
+ *        IN_CONTACT:
+ *        <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> </li>
+ *        <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> </li>
+ *        <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup></li>
+ *    </p>
+ *    <p>
+ *        FLIGHT:
+ *        <li>      x(t) = -0.5 g t<sup>2</sup> + c<sub>0</sub> t + c<sub>1</sub></li>
+ *        <li> d/dt x(t) = - g t + c<sub>0</sub> </li>
+ *        <li> d<sup>2</sup> / dt<sup>2</sup> = -g </li>
+ *    </p>
+ *
+ *    <p> Because of this, the V</p>
+ */
 public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private static final int maxCapacity = 10;
