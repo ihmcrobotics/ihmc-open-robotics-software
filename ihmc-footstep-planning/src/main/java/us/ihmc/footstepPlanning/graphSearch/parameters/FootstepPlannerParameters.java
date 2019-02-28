@@ -505,9 +505,9 @@ public interface FootstepPlannerParameters
    }
 
    /**
-    * Parameters for setting swing times and trajectories after planning. Will use default values if this returns null
+    * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
     */
-   default FootstepProcessingParameters getFootstepProcessingParameters()
+   default AdaptiveSwingParameters getAdaptiveSwingParameters()
    {
       return null;
    }

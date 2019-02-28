@@ -45,7 +45,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
@@ -153,7 +153,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoBoolean waitingForPlanningRequest = new YoBoolean("waitingForPlanningRequest", registry);
 
    private final MultiStagePlannerListener plannerListener;
-   private final DistanceBasedSwingParameterCalculator swingParametersCalculator;
+   private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
 
    private final int maxNumberOfPathPlanners;
    private final int maxNumberOfStepPlanners;
@@ -216,14 +216,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       });
 
-      FootstepProcessingParameters footstepProcessingParameters = footstepPlannerParameters.getFootstepProcessingParameters();
-      if(footstepProcessingParameters == null)
+      AdaptiveSwingParameters adaptiveSwingParameters = footstepPlannerParameters.getAdaptiveSwingParameters();
+      if(adaptiveSwingParameters == null)
       {
-         swingParametersCalculator = null;
+         adaptiveSwingTrajectoryCalculator = null;
       }
       else
       {
-         swingParametersCalculator = new DistanceBasedSwingParameterCalculator(footstepProcessingParameters);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters);
       }
 
       parentRegistry.addChild(registry);
@@ -720,8 +720,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
                                                                                         plannerTime.getDoubleValue());
 
-               if(swingParametersCalculator != null)
-                  processSwingParameters(footstepPlanMessage.getFootstepDataList());
+               if(adaptiveSwingTrajectoryCalculator != null)
+                  setSwingTrajectories(footstepPlanMessage.getFootstepDataList());
 
                statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
@@ -750,7 +750,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.isDone.set(isDone);
    }
 
-   private void processSwingParameters(FootstepDataListMessage footstepDataListMessage)
+   private void setSwingTrajectories(FootstepDataListMessage footstepDataListMessage)
    {
       FramePose3D firstStepStancePose = new FramePose3D();
       FramePose3D secondStepStancePose = new FramePose3D();
@@ -785,8 +785,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             endPoint.set(footstepDataList.get(i - 2).getLocation());
          }
 
-         footstepDataMessage.setSwingHeight(swingParametersCalculator.calculateSwingHeight(startPoint, endPoint));
-         footstepDataMessage.setSwingDuration(swingParametersCalculator.calculateSwingTime(startPoint, endPoint));
+         footstepDataMessage.setSwingHeight(adaptiveSwingTrajectoryCalculator.calculateSwingHeight(startPoint, endPoint));
+         footstepDataMessage.setSwingDuration(adaptiveSwingTrajectoryCalculator.calculateSwingTime(startPoint, endPoint));
       }
    }
 
