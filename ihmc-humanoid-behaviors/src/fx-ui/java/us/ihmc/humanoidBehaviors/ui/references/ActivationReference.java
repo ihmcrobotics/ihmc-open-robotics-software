@@ -29,43 +29,17 @@ public class ActivationReference<T>
    public boolean pollActivated()
    {
       T newValue = atomicReference.get();
-
-      boolean newValueActivated;
-      if (newValue == activatedValue)
-         newValueActivated = true;
-      else if (newValue == null)
-         newValueActivated = false;
-      else
-         newValueActivated = newValue.equals(activatedValue);
-
-      boolean lastValueActivated;
-      if (lastValue == activatedValue)
-         lastValueActivated = true;
-      else if (lastValue == null)
-         lastValueActivated = false;
-      else
-         lastValueActivated = lastValue.equals(activatedValue);
-
+      boolean newValueActivated = isValueActivated(newValue);
+      boolean lastValueActivated = isValueActivated(lastValue);
       activationChanged = newValueActivated != lastValueActivated;
-
       lastValue = newValue;
-
       return newValueActivated;
    }
 
    public boolean peekActivated()
    {
       T newValue = atomicReference.get();
-
-      boolean newValueActivated;
-      if (newValue == activatedValue)
-         newValueActivated = true;
-      else if (newValue == null)
-         newValueActivated = false;
-      else
-         newValueActivated = newValue.equals(activatedValue);
-
-      return newValueActivated;
+      return isValueActivated(newValue);
    }
 
    /**
@@ -74,5 +48,20 @@ public class ActivationReference<T>
    public boolean activationChanged()
    {
       return activationChanged;
+   }
+
+   /**
+    * This thing provides null safety.
+    */
+   private boolean isValueActivated(T value)
+   {
+      boolean activated;
+      if (value == activatedValue) // check reference equal or both null
+         activated = true;
+      else if (value == null)   // check value is null, knowing they aren't both null
+         activated = false;
+      else
+         activated = value.equals(activatedValue);  // check the equals method, knowing neither is null
+      return activated;
    }
 }
