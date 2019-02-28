@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -18,6 +19,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertEquals;
 
 public class CoMTrajectoryPlannerTest
 {
@@ -1090,6 +1093,12 @@ public class CoMTrajectoryPlannerTest
       planner.solveForTrajectory();
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
+
+      FrameVector3DReadOnly acceleration = planner.getDesiredCoMAcceleration();
+
+      assertEquals(0.0, acceleration.getX(), epsilon);
+      assertEquals(0.0, acceleration.getY(), epsilon);
+      assertEquals(gravityZ, acceleration.getZ(), epsilon);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 
