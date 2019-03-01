@@ -36,6 +36,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.Footstep
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
@@ -100,7 +101,39 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (xGaitSettings == null)
          xGaitSettings = getXGaitSettings();
 
-      footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, new DefaultFootstepPlannerParameters(), xGaitSettings,
+      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
+      {
+         @Override
+         public double getMaximumStepReach()
+         {
+            return 0.7;
+         }
+
+         @Override
+         public double getMaximumStepCycleDistance()
+         {
+            return 0.65;
+         }
+
+         @Override
+         public double getMinimumStepLength()
+         {
+            return -0.3;
+         }
+
+         @Override
+         public double getMinimumStepWidth()
+         {
+            return -0.3;
+         }
+
+         @Override
+         public double getMaximumStepWidth()
+         {
+            return 0.35;
+         }
+      };
+      footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, parameters, xGaitSettings,
                                                                    new DefaultPointFootSnapperParameters(), null, false, pubSubImplementation);
 
 
