@@ -299,7 +299,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       for (int i = 0; i < contactSequence.size(); i++)
       {
          ContactStateProvider contactStateProvider = contactSequence.get(i);
-         ContactStateProvider nextContactStateProvider = contactSequence.get(i + 1);
+         boolean finalContact = i == contactSequence.size() - 1;
+         ContactStateProvider nextContactStateProvider = null;
+         if (!finalContact)
+            nextContactStateProvider = contactSequence.get(i + 1);
+
 
          double duration = contactStateProvider.getTimeInterval().getDuration();
          if (!contactStateProvider.getContactState().isLoadBearing())
@@ -308,21 +312,22 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          }
          else
          {
-            if (!nextContactStateProvider.getContactState().isLoadBearing())
-            { // next is a jump
-               double finalHeight;
-               if (i < contactSequence.size() - 2)
-                  finalHeight = contactSequence.get(i + 2).getCopStartPosition().getZ();
-               else
-                  finalHeight = nextContactStateProvider.getCopEndPosition().getZ();
-               double heightChangeWhenJumping = finalHeight - nextContactStateProvider.getCopEndPosition().getZ();
+            if (!finalContact && !nextContactStateProvider.getContactState().isLoadBearing())
+            { // next is a jump, current one is load bearing
+               ContactStateProvider nextNextContactStateProvider = contactSequence.get(i + 2);
+               double heightBeforeJump = contactStateProvider.getCopEndPosition().getZ();
+               double finalHeightAfterJump = nextNextContactStateProvider.getCopStartPosition().getZ();
+
+               double heightChangeWhenJumping = finalHeightAfterJump - heightBeforeJump;
                double durationOfJump = nextContactStateProvider.getTimeInterval().getDuration();
 
-               finalHeightVelocity = heightChangeWhenJumping / durationOfJump + 0.5 * gravityZ * duration;
+               /* delta z = v0 T - 0.5 g T^2
+                * v0 =  delta z / T + 0.5 g T**/
+               finalHeightVelocity = heightChangeWhenJumping / durationOfJump + 0.5 * gravityZ * durationOfJump;
             }
             else
-            {
-               throw new RuntimeException("Haven't set this up yet.");
+            { // next is is load bearing, current is load bearing.
+               finalHeightVelocity = 0.0;
             }
          }
 
@@ -334,9 +339,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          end.set(contactStateProvider.getCopEndPosition());
          end.addZ(nominalCoMHeight);
 
-         double offset = (finalHeightVelocity - initialHeightVelocity) / duration;
-         start.subZ(offset);
-         end.subZ(offset);
+         // offset the height VRP waypoint based on the desired velocity change
+         double heightVelocityChange = finalHeightVelocity - initialHeightVelocity;
+         double offset = heightVelocityChange / (MathTools.square(omega.getValue()) * duration);
+         start.subZ(offset);end.subZ(offset);
+
+         initialHeightVelocity = finalHeightVelocity;
       }
    }
 
