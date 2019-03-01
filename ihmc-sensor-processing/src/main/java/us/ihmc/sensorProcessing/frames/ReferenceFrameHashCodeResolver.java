@@ -119,7 +119,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
          if (referenceFrame != existingFrame)
          {
             throw new IllegalArgumentException(getClass().getSimpleName()
-                  + ": The reference frame has the same hash-code as another distint reference frame previously registered.");
+                  + ": The reference frame has the same hash-code as another distinct reference frame previously registered.");
          }
       }
       else
