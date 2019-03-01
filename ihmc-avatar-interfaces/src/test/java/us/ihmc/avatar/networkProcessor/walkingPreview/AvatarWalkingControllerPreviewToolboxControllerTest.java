@@ -1,26 +1,10 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Stream;
-
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.junit.After;
-import org.junit.Test;
-
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -73,6 +57,15 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implements MultiRobotTestInterface
 {
@@ -128,7 +121,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       ghost.setGravity(0);
    }
 
-   @After
+   @AfterEach
    public void teardown()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -152,7 +145,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout = 300000)
+   @Test
    public void testWalkingPreviewAlone() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       double dt = 0.02;
@@ -233,7 +226,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    }
 
    @SuppressWarnings("unchecked")
-   @Test(timeout = 300000)
+   @Test
    public void testStepsInPlacePreviewAtControllerDT() throws SimulationExceededMaximumTimeException
    {
       setup(getRobotModel().getControllerDT());
@@ -330,7 +323,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
    }
 
    @SuppressWarnings("unchecked")
-   @Test(timeout = 300000)
+   @Test
    public void testResetFeature() throws SimulationExceededMaximumTimeException
    { // We check that the preview properly snaps to the current robot configuration before starting the preview.
       Random random = new Random(4720615);
