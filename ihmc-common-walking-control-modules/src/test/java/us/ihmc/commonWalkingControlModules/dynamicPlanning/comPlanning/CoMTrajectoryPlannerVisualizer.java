@@ -35,9 +35,12 @@ public class CoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.5;
    private static final int numberOfSteps = 5;
 
-   private static final double initialVerticalOffsetBound = 0.05;
-   private static final double finalVerticalOffsetBound = 0.15;
-   private static final double verticalOffset = 0.25;
+//   private static final double initialVerticalOffsetBound = 0.05;
+//   private static final double finalVerticalOffsetBound = 0.15;
+//private static final double verticalOffset = 0.25;
+   private static final double initialVerticalOffsetBound = 0.0;
+   private static final double finalVerticalOffsetBound = 0.0;
+   private static final double verticalOffset = 0.0;
 
    private static final boolean includeFlight = true;
 
