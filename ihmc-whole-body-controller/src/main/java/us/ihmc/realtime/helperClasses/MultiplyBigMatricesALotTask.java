@@ -23,13 +23,15 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
    private final DenseMatrix64F matrixB;
    private final DenseMatrix64F matrixC;
 
-   private boolean firstTick = true;
+   private final boolean useNativeCommonOps;
 
    private final ExecutionTimer executionTimer;
 
-   public MultiplyBigMatricesALotTask(YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor)
+   public MultiplyBigMatricesALotTask(YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
    {
       super(divisor);
+
+      this.useNativeCommonOps = useNativeCommonOps;
 
       timingInformation = new TimingInformation("MultiplySmallMatricesALotTask", schedulerPeriodNanoseconds * divisor);
       matrixA = new DenseMatrix64F(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
@@ -48,11 +50,8 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    public void doTimingReporting()
    {
-      System.out.format("MultiplyBigMatricesALotTask Jitter: avg = %.4f us, max = %.4f us%n", timingInformation.getFinalAvgJitterMicroseconds(),
-                        timingInformation.getFinalMaxJitterMicroseconds());
-
-      System.out.format("MultiplyBigMatricesALotTask Execution Time: avg = %.4f s, max = %.4f s%n", executionTimer.getAverageTime().getDoubleValue(),
-                        executionTimer.getMaxTime().getDoubleValue());
+      BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV(getClass().getSimpleName(), executionTimer);
+      BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV(getClass().getSimpleName(), timingInformation);
    }
 
    /**
@@ -66,6 +65,7 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
    {
       RandomMatrices.setRandom(matrixA, random);
       RandomMatrices.setRandom(matrixB, random);
+      timingInformation.initialize(System.nanoTime());
       return true;
    }
 
@@ -77,7 +77,8 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    protected void execute()
    {
-      BarrierSchedulerLoadTestHelper.doTimingStatistics(timingInformation);
+      RandomMatrices.setRandom(matrixA, random);
+      RandomMatrices.setRandom(matrixB, random);
 
       executionTimer.startMeasurement();
 
@@ -95,7 +96,14 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
          numberOfMultiplications = loadTestData.getSlowTaskNumberOfOperations();
       }
 
-      BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperations(matrixA, matrixB, matrixC, numberOfMultiplications);
+      if (this.useNativeCommonOps)
+      {
+         BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperationsNativeCommonOps(matrixA, matrixB, matrixC, numberOfMultiplications);
+      }
+      else
+      {
+         BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperationsEJMLCommonOps(matrixA, matrixB, matrixC, numberOfMultiplications);
+      }
 
       double elementSum = CommonOps.elementSum(matrixC);
       double determinant = CommonOps.det(matrixC);
@@ -105,5 +113,6 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
       loadTestData.setFastTaskNumberOfOperations(BarrierSchedulerLoadTestHelper.generateFastTaskNumberOfOperations(random));
 
       executionTimer.stopMeasurement();
+      BarrierSchedulerLoadTestHelper.doTimingStatistics(timingInformation);
    }
 }

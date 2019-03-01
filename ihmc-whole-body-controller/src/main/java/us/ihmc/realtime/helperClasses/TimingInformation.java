@@ -42,14 +42,14 @@ public class TimingInformation
       iterations++;
    }
 
-   public double getFinalMaxJitterMicroseconds()
+   public double getFinalMaxJitterSeconds()
    {
-      return (double) maxJitter / 1e3;
+      return (double) maxJitter / 1e9;
    }
 
-   public double getFinalAvgJitterMicroseconds()
+   public double getFinalAvgJitterSeconds()
    {
-      return (double) avgJitter / (double) iterations / 1e3;
+      return (double) avgJitter / (double) iterations / 1e9;
    }
 
    public boolean isInitialized()
