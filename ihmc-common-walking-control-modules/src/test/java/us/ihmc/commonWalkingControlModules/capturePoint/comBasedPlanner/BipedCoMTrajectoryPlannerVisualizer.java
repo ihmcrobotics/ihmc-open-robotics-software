@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -11,10 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -75,9 +73,13 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
    private final YoFrameVector3D desiredCoMAcceleration;
+   private final YoFrameVector3D desiredForce;
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
+   private final YoFramePoint3D desiredCoPPosition;
+
+   private final YoDouble omega;
 
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
@@ -86,7 +88,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final double simDuration;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("test");
-
 
    private final YoFramePoseUsingYawPitchRoll leftFootPose = new YoFramePoseUsingYawPitchRoll("leftFootPose", worldFrame, registry);
    private final YoFramePoseUsingYawPitchRoll rightFootPose = new YoFramePoseUsingYawPitchRoll("rightFootPose", worldFrame, registry);
@@ -112,11 +113,13 @@ public class BipedCoMTrajectoryPlannerVisualizer
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
       desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
+      desiredForce = new YoFrameVector3D("desiredForce", worldFrame, registry);
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
+      desiredCoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
 
-      YoDouble omega = new YoDouble("omega", registry);
+      omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
       dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
@@ -130,7 +133,9 @@ public class BipedCoMTrajectoryPlannerVisualizer
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
       YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", desiredCoPPosition, desiredForce, 0.1, YoAppearance.Red());
 
+      yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", forceVector);
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
@@ -285,6 +290,13 @@ public class BipedCoMTrajectoryPlannerVisualizer
          desiredDCMPosition.set(planner.getDesiredDCMPosition());
          desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
          desiredVRPPosition.set(planner.getDesiredVRPPosition());
+
+         desiredCoPPosition.set(desiredVRPPosition);
+         desiredCoPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
+
+         desiredForce.set(desiredCoMAcceleration);
+         desiredForce.addZ(gravity);
+
 
          dcmTrajectory.setBallLoop(desiredDCMPosition);
          comTrajectory.setBallLoop(desiredCoMPosition);
