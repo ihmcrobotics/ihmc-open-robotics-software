@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Color;
 import java.util.Arrays;
@@ -517,10 +517,10 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       String errorMessage = "Poor tracking of the " + watcher.controllerBody.getName()
             + EuclidCoreIOTools.getStringOf("(", ")", ",", EuclidCoreIOTools.DEFAULT_FORMAT, positionMean, orientationMean, linearVelocityMean,
                                             angularVelocityMean);
-      assertTrue(errorMessage, positionMean < positionTreshold);
-      assertTrue(errorMessage, orientationMean < orientationTreshold);
-      assertTrue(errorMessage, linearVelocityMean < linearVelocityTreshold);
-      assertTrue(errorMessage, angularVelocityMean < angularVelocityTreshold);
+      assertTrue(positionMean < positionTreshold, errorMessage);
+      assertTrue(orientationMean < orientationTreshold, errorMessage);
+      assertTrue(linearVelocityMean < linearVelocityTreshold, errorMessage);
+      assertTrue(angularVelocityMean < angularVelocityTreshold, errorMessage);
    }
 
    private void runToolboxController(int maxNumberOfIterations) throws SimulationExceededMaximumTimeException
