@@ -3,6 +3,7 @@ package us.ihmc.quadrupedUI;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import javafx.geometry.Pos;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -15,6 +16,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -39,9 +41,13 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme Edit = apiFactory.createCategoryTheme("Edit");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
+   private static final CategoryTheme Position = apiFactory.createCategoryTheme("Position");
+   private static final CategoryTheme Orientation = apiFactory.createCategoryTheme("Orientation");
 
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
+   private static final CategoryTheme LowLevelGoal = apiFactory.createCategoryTheme("LowLevelGoal");
    private static final CategoryTheme Goal = apiFactory.createCategoryTheme("Goal");
+
 
    private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
@@ -60,12 +66,13 @@ public class QuadrupedUIMessagerAPI
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Integer> Id = apiFactory.createTypedTopicTheme("Id");
+   private static final TypedTopicTheme<PlanarRegion> PlanarRegion = apiFactory.createTypedTopicTheme("PlanarRegion");
    private static final TypedTopicTheme<PlanarRegionsList> PlanarRegionsList = apiFactory.createTypedTopicTheme("PlanarRegionsList");
    private static final TypedTopicTheme<FootstepPlanningResult> PlanningResult = apiFactory.createTypedTopicTheme("PlanningResult");
    private static final TypedTopicTheme<FootstepPlannerStatus> PlannerStatus = apiFactory.createTypedTopicTheme("PlannerStatus");
    private static final TypedTopicTheme<Number> Fraction = apiFactory.createTypedTopicTheme("Fraction");
-   private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
-   private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
+   private static final TypedTopicTheme<Point3D> Point = apiFactory.createTypedTopicTheme("Point");
+   private static final TypedTopicTheme<Quaternion> Quaternion = apiFactory.createTypedTopicTheme("Quaternion");
    private static final TypedTopicTheme<RobotQuadrant> RobotQuadrant = apiFactory.createTypedTopicTheme("RobotQuadrant");
    private static final TypedTopicTheme<FootstepPlan> FootstepPlan = apiFactory.createTypedTopicTheme("FootstepPlan");
    private static final TypedTopicTheme<Double> Time = apiFactory.createTypedTopicTheme("Time");
@@ -84,6 +91,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(Environment).child(PlanarRegions).topic(PlanarRegionsList);
    public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(Environment).child(PlanarRegions).child(FlatGround).topic(Enable);
+   public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Show);
 
 
    /* Status */
@@ -107,6 +115,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Integer> PlannerRequestIdTopic = Root.child(FootstepPlanning).child(Command).topic(Id);
    public static final Topic<Integer> ReceivedPlanIdTopic = Root.child(FootstepPlanning).child(Result).topic(Id);
    public static final Topic<Boolean> ShowFootstepPlanTopic = Root.child(FootstepPlanning).child(Result).topic(Show);
+   public static final Topic<PlanarRegion> SelectedRegionTopic = Root.child(FootstepPlanning).child(Edit).topic(PlanarRegion);
 
    public static final Topic<FootstepPlanningResult> PlanningResultTopic = Root.child(FootstepPlanning).child(Result).topic(PlanningResult);
    public static final Topic<FootstepPlannerStatus> PlannerStatusTopic = Root.child(FootstepPlanning).child(Status).topic(PlannerStatus);
@@ -114,16 +123,20 @@ public class QuadrupedUIMessagerAPI
 
    public static final Topic<Boolean> ShowFootstepPreviewTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Show);
    public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Fraction);
-   public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).topic(Position);
-   public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Start).topic(Orientation);
+   public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(Point);
+   public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Orientation).topic(Quaternion);
+   public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Position).topic(Point);
+   public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Orientation).topic(Quaternion);
    public static final Topic<RobotQuadrant> InitialSupportQuadrantTopic = Root.child(FootstepPlanning).child(Command).child(Start).topic(RobotQuadrant);
-   public static final Topic<Point3D> GoalPositionTopic = Root.child(FootstepPlanning).child(Command).child(Goal).topic(Position);
-   public static final Topic<Quaternion> GoalOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Goal).topic(Orientation);
+   public static final Topic<Point3D> GoalPositionTopic = Root.child(FootstepPlanning).child(Command).child(Goal).child(Position).topic(Point);
+   public static final Topic<Quaternion> GoalOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Goal).child(Orientation).topic(Quaternion);
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlanning).child(Command).topic(Begin);
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlanning).child(Command).topic(Stop);
    public static final Topic<Boolean> EditModeEnabledTopic = Root.child(FootstepPlanning).child(Edit).topic(Enable);
-   public static final Topic<Boolean> StartPositionEditModeEnabledTopic = Root.child(FootstepPlanning).child(Start).child(Edit).topic(Enable);
-   public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = Root.child(FootstepPlanning).child(Goal).child(Edit).topic(Enable);
+   public static final Topic<Boolean> StartPositionEditModeEnabledTopic = Root.child(FootstepPlanning).child(Start).child(Position).child(Edit).topic(Enable);
+   public static final Topic<Boolean> StartOrientationEditModeEnabledTopic = Root.child(FootstepPlanning).child(Start).child(Orientation).child(Edit).topic(Enable);
+   public static final Topic<Boolean> GoalPositionEditModeEnabledTopic = Root.child(FootstepPlanning).child(Goal).child(Position).child(Edit).topic(Enable);
+   public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = Root.child(FootstepPlanning).child(Goal).child(Orientation).child(Edit).topic(Enable);
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlanning).child(Command).topic(Time);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlanning).child(Command).topic(Length);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlanning).child(Result).topic(Time);
