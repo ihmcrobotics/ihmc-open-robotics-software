@@ -17,8 +17,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   private QuadrupedFootstepPlannerListener visualizer;
-
    public FootstepPlannerType getPlannerType()
    {
       return FootstepPlannerType.A_STAR;
@@ -72,9 +70,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
          }
       };
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      visualizer = new AStarMessagerListener(messager);
 
-      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
    }
 
    @Override
@@ -89,7 +86,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171115_171243_SimplePlaneAndWall");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_220208_SimpleStairs");
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
