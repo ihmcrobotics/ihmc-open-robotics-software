@@ -23,11 +23,15 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    private final DenseMatrix64F matrixB;
    private final DenseMatrix64F matrixC;
 
+   boolean useNativeCommonOps;
+
    private final ExecutionTimer executionTimer;
 
-   public MultiplySmallMatricesALotTask(YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor)
+   public MultiplySmallMatricesALotTask(YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
    {
       super(divisor);
+
+      this.useNativeCommonOps = useNativeCommonOps;
 
       timingInformation = new TimingInformation("MultiplySmallMatricesALotTask", schedulerPeriodNanoseconds * divisor);
       matrixA = new DenseMatrix64F(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
@@ -46,11 +50,8 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    public void doTimingReporting()
    {
-      System.out.format("MultiplySmallMatricesALotTask Jitter: avg = %.4f us, max = %.4f us%n", timingInformation.getFinalAvgJitterMicroseconds(),
-                        timingInformation.getFinalMaxJitterMicroseconds());
-
-      System.out.format("MultiplySmallMatricesALotTask Execution Time: avg = %.4f s, max = %.4f s%n", executionTimer.getAverageTime().getDoubleValue(),
-                        executionTimer.getMaxTime().getDoubleValue());
+      BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV(getClass().getSimpleName(), executionTimer);
+      BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV(getClass().getSimpleName(), timingInformation);
    }
 
    /**
@@ -64,6 +65,7 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    {
       RandomMatrices.setRandom(matrixA, random);
       RandomMatrices.setRandom(matrixB, random);
+      timingInformation.initialize(System.nanoTime());
       return true;
    }
 
@@ -75,7 +77,8 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    protected void execute()
    {
-      BarrierSchedulerLoadTestHelper.doTimingStatistics(timingInformation);
+      RandomMatrices.setRandom(matrixA, random);
+      RandomMatrices.setRandom(matrixB, random);
 
       executionTimer.startMeasurement();
 
@@ -93,7 +96,14 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
          numberOfMultiplications = loadTestData.getFastTaskNumberOfOperations();
       }
 
-      BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperations(matrixA, matrixB, matrixC, numberOfMultiplications);
+      if (this.useNativeCommonOps)
+      {
+         BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperationsNativeCommonOps(matrixA, matrixB, matrixC, numberOfMultiplications);
+      }
+      else
+      {
+         BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperationsEJMLCommonOps(matrixA, matrixB, matrixC, numberOfMultiplications);
+      }
 
       double elementSum = CommonOps.elementSum(matrixC);
       double determinant = CommonOps.det(matrixC);
@@ -103,5 +113,6 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
       loadTestData.setSlowTaskNumberOfOperations(BarrierSchedulerLoadTestHelper.generateSlowTaskNumberOfOperations(random));
 
       executionTimer.stopMeasurement();
+      BarrierSchedulerLoadTestHelper.doTimingStatistics(timingInformation);
    }
 }

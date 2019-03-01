@@ -20,8 +20,10 @@ public class BarrierSchedulerLoadTest
    private static final int NUM_ITERATIONS_OF_SCHEDULER = 60000; // 60 seconds @ 1KHz
    private static final double ESTIMATED_DURATION = (double) SCHEDULER_PERIOD_NANOSECONDS * (double) NUM_ITERATIONS_OF_SCHEDULER / 1e9;
 
-   public void testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply()
+   public void testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(boolean useNativeCommonOps)
    {
+      System.out.println("Performing Benchmark; Using Native Commons Ops: " + useNativeCommonOps);
+
       final YoVariableRegistry registry = new YoVariableRegistry("BarrierSchedulerLoadTestRegistry");
       CPUDMALatency.setLatency(0);
 
@@ -39,8 +41,8 @@ public class BarrierSchedulerLoadTest
          System.err.println("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
       }
 
-      MultiplySmallMatricesALotTask fastTask = new MultiplySmallMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 1); // 1KHz
-      MultiplyBigMatricesALotTask slowTask = new MultiplyBigMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 4); // 250Hz
+      MultiplySmallMatricesALotTask fastTask = new MultiplySmallMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 1, useNativeCommonOps); // 1KHz
+      MultiplyBigMatricesALotTask slowTask = new MultiplyBigMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 4, useNativeCommonOps); // 250Hz
 
       List<BarrierSchedulerLoadTestTask> tasks = Arrays.asList(fastTask, slowTask);
       BarrierSchedulerLoadTestContext context = new BarrierSchedulerLoadTestContext(new Pair<>(fastTask, slowTask));
@@ -78,10 +80,11 @@ public class BarrierSchedulerLoadTest
             }
 
             fastTask.doTimingReporting();
+            System.out.println();
             slowTask.doTimingReporting();
+            System.out.println();
 
-            System.out.format("Scheduler Jitter: avg = %.4f us, max = %.4f us%n", schedulerTimingInformation.getFinalAvgJitterMicroseconds(),
-                              schedulerTimingInformation.getFinalMaxJitterMicroseconds());
+            BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV("Scheduler", schedulerTimingInformation);
          }
       };
 
@@ -95,16 +98,22 @@ public class BarrierSchedulerLoadTest
       fastTaskThread.start();
       slowTaskThread.start();
 
+      schedulerThread.start();
+
       System.out.println("Starting cyclic test [Iterations: " + NUM_ITERATIONS_OF_SCHEDULER + "; Estimated Duration: " + ESTIMATED_DURATION + "s]");
 
-      schedulerThread.start();
       schedulerThread.join();
    }
 
    public static void main(String[] args)
    {
+      int numberOfIterations = Integer.parseInt(args[0]);
+      boolean useNativeCommonOps = Boolean.parseBoolean(args[1]);
+
+      BarrierSchedulerLoadTestHelper.setNumberOfOperations(numberOfIterations);
       BarrierSchedulerLoadTest barrierSchedulerLoadTest = new BarrierSchedulerLoadTest();
 
-      barrierSchedulerLoadTest.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply();
+      //      barrierSchedulerLoadTest.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiplyNativeCommonOps();
+      barrierSchedulerLoadTest.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(useNativeCommonOps);
    }
 }
