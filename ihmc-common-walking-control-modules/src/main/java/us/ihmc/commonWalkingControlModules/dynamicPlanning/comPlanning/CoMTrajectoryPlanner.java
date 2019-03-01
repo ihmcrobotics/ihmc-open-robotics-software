@@ -293,7 +293,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       endVRPPositions.clear();
 
       double initialHeightVelocity = currentCoMVelocity.getZ();
-      double initialHeight = currentCoMPosition.getZ();
       double finalHeightVelocity;
 
       for (int i = 0; i < contactSequence.size(); i++)
