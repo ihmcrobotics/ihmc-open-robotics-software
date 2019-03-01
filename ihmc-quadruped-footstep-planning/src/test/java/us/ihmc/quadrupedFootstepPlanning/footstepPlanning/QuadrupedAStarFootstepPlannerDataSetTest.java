@@ -39,7 +39,38 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       QuadrupedXGaitSettingsReadOnly xGaitSettings = getXGaitSettings();
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
+      {
+         @Override
+         public double getMaximumStepReach()
+         {
+            return 0.7;
+         }
+
+         @Override
+         public double getMaximumStepCycleDistance()
+         {
+            return 0.65;
+         }
+
+         @Override
+         public double getMinimumStepLength()
+         {
+            return -0.3;
+         }
+
+         @Override
+         public double getMinimumStepWidth()
+         {
+            return -0.3;
+         }
+
+         @Override
+         public double getMaximumStepWidth()
+         {
+            return 0.35;
+         }
+      };
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       visualizer = new AStarMessagerListener(messager);
 
