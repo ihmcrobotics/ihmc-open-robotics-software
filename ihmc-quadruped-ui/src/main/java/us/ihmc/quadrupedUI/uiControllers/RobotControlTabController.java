@@ -13,7 +13,7 @@ import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MainTabController
+public class RobotControlTabController
 {
    @FXML
    private TextField currentStateViewer;
