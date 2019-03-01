@@ -2,19 +2,16 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class FootstepNodeTest
 {
@@ -66,8 +63,17 @@ public class FootstepNodeTest
 
          expandedNodes.add(nodeA.hashCode());
 
-         assertEquals("number : " + i, nodeA.hashCode(), nodeB.hashCode());
-         assertTrue("number : " + i, expandedNodes.contains(nodeB.hashCode()));
+         if (nodeA.getYawIndex() == nodeB.getYawIndex())
+         {
+            assertEquals("number : " + i, nodeA.hashCode(), nodeB.hashCode());
+            assertTrue("number : " + i, expandedNodes.contains(nodeB.hashCode()));
+         }
+         else
+         {
+            assertFalse("number : " + i, nodeA.hashCode() == nodeB.hashCode());
+            assertFalse("number : " + i, expandedNodes.contains(nodeB.hashCode()));
+
+         }
       }
    }
 }
