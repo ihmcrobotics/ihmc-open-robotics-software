@@ -15,6 +15,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -35,26 +36,27 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
 
    public QuadrupedFootstepPlanningModule(FullQuadrupedRobotModelFactory modelFactory, FootstepPlannerParameters defaultFootstepPlannerParameters,
                                           QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                          LogModelProvider modelProvider, boolean startYoVariableServer,
+                                          LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), defaultFootstepPlannerParameters, defaultXGaitSettings,
-           pointFootSnapperParameters, modelProvider, startYoVariableServer, pubSubImplementation);
+           pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
    public QuadrupedFootstepPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, FootstepPlannerParameters defaultFootstepPlannerParameters,
                                           QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                          LogModelProvider modelProvider, boolean startYoVariableServer,
+                                          LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(name, fulRobotModel, modelProvider, startYoVariableServer, updatePeriodMilliseconds, pubSubImplementation);
+      super(name, fulRobotModel, modelProvider, startYoVariableServer, new DataServerSettings(logYoVariables, true, 8007, "FootstepPlanningModule"), updatePeriodMilliseconds,
+            pubSubImplementation);
 
 
       footstepPlanningController = new QuadrupedFootstepPlanningController(defaultXGaitSettings, new DefaultVisibilityGraphParameters(), defaultFootstepPlannerParameters,
                                                                            pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                            yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
-      startYoVariableServer();
+      startYoVariableServer(getClass());
    }
 
    @Override

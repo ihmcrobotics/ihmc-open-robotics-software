@@ -9,6 +9,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -27,14 +28,14 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
    private final QuadrupedBodyHeightTeleopController heightTeleopController;
 
    public QuadrupedBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, double nominalHeight, LogModelProvider modelProvider,
-                                          boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
+                                          boolean startYoVariableServer, boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
+            new DataServerSettings(logYoVariables, true, 8006, "BodyHeightTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
       heightTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, outputManager, robotDataReceiver, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-      startYoVariableServer();
+      startYoVariableServer(getClass());
    }
 
    @Override
