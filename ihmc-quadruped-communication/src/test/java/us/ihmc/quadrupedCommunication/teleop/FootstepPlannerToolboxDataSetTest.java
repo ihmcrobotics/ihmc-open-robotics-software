@@ -134,7 +134,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          }
       };
       footstepPlanningModule = new QuadrupedFootstepPlanningModule(robotName, null, parameters, xGaitSettings,
-                                                                   new DefaultPointFootSnapperParameters(), null, false, pubSubImplementation);
+                                                                   new DefaultPointFootSnapperParameters(), null, false, false, pubSubImplementation);
 
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
