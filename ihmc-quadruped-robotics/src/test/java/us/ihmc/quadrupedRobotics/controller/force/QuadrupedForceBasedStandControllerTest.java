@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
@@ -228,10 +229,14 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
+      stepTeleopManager.requestBodyTeleop();
+
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
       conductor.simulate();
+
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
       runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
@@ -258,6 +263,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
@@ -279,7 +285,6 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 5.0 * bodyShiftDuration));
-      conductor.addTimeLimit(variables.getYoTime(), 10.0 * bodyShiftDuration);
       conductor.simulate();
 
       assertTrue("Height did not meet goal : Math.abs(" + variables.getCurrentHeightInWorld().getDoubleValue() + " - " + variables.getHeightInWorldSetpoint()
