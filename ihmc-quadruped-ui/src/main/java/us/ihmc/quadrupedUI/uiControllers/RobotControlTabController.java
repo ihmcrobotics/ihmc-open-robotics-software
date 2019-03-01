@@ -89,7 +89,7 @@ public class RobotControlTabController
 
    public void requestStanding()
    {
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingNameTopic, QuadrupedSteppingStateEnum.STAND);
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
    }
 
    public void bindControls()
