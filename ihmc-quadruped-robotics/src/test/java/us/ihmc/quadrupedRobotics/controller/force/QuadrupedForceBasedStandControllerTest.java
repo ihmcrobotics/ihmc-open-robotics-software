@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
@@ -18,7 +17,6 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.io.IOException;
 

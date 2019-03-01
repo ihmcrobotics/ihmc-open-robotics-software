@@ -36,7 +36,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_220523_SteppingStones");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
       ThreadTools.sleepForever();
       test.tearDown();
 
