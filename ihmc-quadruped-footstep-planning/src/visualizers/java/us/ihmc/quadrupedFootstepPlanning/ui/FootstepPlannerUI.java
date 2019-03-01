@@ -20,7 +20,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
@@ -114,6 +113,8 @@ public class FootstepPlannerUI
       dataExporterAnchorPaneController.attachMessager(messager);
       footstepPlannerVizController.attachMessager(messager);
       visibilityGraphsVizController.attachMessager(messager);
+
+      setMainTabTopics();
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -211,6 +212,8 @@ public class FootstepPlannerUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
+
+
    public JavaFXMessager getMessager()
    {
       return messager;
@@ -237,6 +240,32 @@ public class FootstepPlannerUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
+   }
+
+   private void setMainTabTopics()
+   {
+      mainTabController.setPlannerTypeTopic(FootstepPlannerMessagerAPI.PlannerTypeTopic);
+      mainTabController.setPlannerRequestIdTopic(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      mainTabController.setReceivedPlanIdTopic(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
+      mainTabController.setFootstepPlanTopic(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, FootstepPlannerMessagerAPI.FootstepPlanTopic);
+      mainTabController.setPlanarRegionDataTopic(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+      mainTabController.setPlannerTimeTakenTopic(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
+      mainTabController.setPlannerTimeoutTopic(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
+      mainTabController.setComputePathTopic(FootstepPlannerMessagerAPI.ComputePathTopic);
+      mainTabController.setAbortPlanningTopic(FootstepPlannerMessagerAPI.AbortPlanningTopic);
+      mainTabController.setAcceptNewPlanarRegionsTopic(FootstepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
+      mainTabController.setPlanningResultTopic(FootstepPlannerMessagerAPI.PlanningResultTopic);
+      mainTabController.setPlannerStatusTopic(FootstepPlannerMessagerAPI.PlannerStatusTopic);
+      mainTabController.setPlannerHorizonLengthTopic(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
+                                           FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
+                                           FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
+                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic);
+      mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
+      mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
+      mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
+      mainTabController.setXGaitSettingsTopic(FootstepPlannerMessagerAPI.XGaitSettingsTopic);
+      mainTabController.setShowFootstepPreviewTopic(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
