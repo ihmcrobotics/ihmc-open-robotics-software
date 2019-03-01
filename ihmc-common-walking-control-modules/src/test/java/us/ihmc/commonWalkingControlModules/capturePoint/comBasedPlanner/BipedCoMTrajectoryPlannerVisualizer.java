@@ -2,15 +2,23 @@ package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
@@ -18,10 +26,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +51,10 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private static final boolean includeFlight = true;
 
+
+   private static final double footLengthForControl = 0.2;
+   private static final double toeWidthForControl = 0.15;
+   private static final double footWidthForControl = 0.15;
 
    private static final double simDt = 1e-3;
 
@@ -74,9 +85,25 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private final double simDuration;
 
+   private final YoVariableRegistry registry = new YoVariableRegistry("test");
+
+
+   private final YoFramePoseUsingYawPitchRoll leftFootPose = new YoFramePoseUsingYawPitchRoll("leftFootPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll rightFootPose = new YoFramePoseUsingYawPitchRoll("rightFootPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextFootstepPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll yoNextNextNextFootstepPose = new YoFramePoseUsingYawPitchRoll("nextNextNextFootstepPose", worldFrame, registry);
+   private final YoFrameConvexPolygon2D yoNextFootstepPolygon = new YoFrameConvexPolygon2D("nextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
+   private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
+
+   private final List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses = new ArrayList<>();
+   private final List<YoFrameConvexPolygon2D> nextFootstepPolygons = new ArrayList<>();
+
+   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+
    public BipedCoMTrajectoryPlannerVisualizer()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
@@ -107,6 +134,39 @@ public class BipedCoMTrajectoryPlannerVisualizer
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
+
+      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false));
+      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false));
+      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextNextFootstep", yoNextNextNextFootstepPolygon, Color.blue, false));
+
+      List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
+      contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
+      contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
+      contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
+      contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
+
+      contactPointsInSoleFrame.forEach(footPolygon::addVertex);
+      footPolygon.update();
+
+      Graphics3DObject footstepGraphics = new Graphics3DObject();
+      Graphics3DObject stanceFootGraphics = new Graphics3DObject();
+      footstepGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.blue));
+      stanceFootGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.green));
+
+
+      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("leftFootPose", stanceFootGraphics, leftFootPose, 1.0));
+      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("rightFootPose", stanceFootGraphics, rightFootPose, 1.0));
+      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0));
+      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextFootstep", footstepGraphics, yoNextNextFootstepPose, 1.0));
+      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextNextFootstep", footstepGraphics, yoNextNextNextFootstepPose, 1.0));
+
+      nextFootstepPoses.add(yoNextFootstepPose);
+      nextFootstepPoses.add(yoNextNextFootstepPose);
+      nextFootstepPoses.add(yoNextNextNextFootstepPose);
+
+      nextFootstepPolygons.add(yoNextFootstepPolygon);
+      nextFootstepPolygons.add(yoNextNextFootstepPolygon);
+      nextFootstepPolygons.add(yoNextNextNextFootstepPolygon);
 
       planner = new BipedCoMTrajectoryPlanner(soleFrames, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = createSteps(soleFrames);
@@ -237,11 +297,15 @@ public class BipedCoMTrajectoryPlannerVisualizer
       }
    }
 
+   private final PoseReferenceFrame stepPoseFrame = new PoseReferenceFrame("stepPoseFrame", worldFrame);
+
+
    private void updateFeetStates(double currentTime)
    {
       feetInContact.clear();
       for (RobotSide robotSide : RobotSide.values)
          feetInContact.add(robotSide);
+
 
       int stepNumber = 0;
       while (stepNumber < steps.size())
@@ -275,6 +339,43 @@ public class BipedCoMTrajectoryPlannerVisualizer
             soleFramesForModifying.get(step.getRobotSide()).updateTranslation(step.getGoalPose().getPosition());
             feetInContact.remove(step.getRobotSide());
          }
+      }
+
+      int nextStepIndex = 0;
+      int stepIndex = 0;
+      while (stepIndex < steps.size() && nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
+      {
+         BipedTimedStep step = steps.get(stepIndex);
+         nextFootstepPoses.get(nextStepIndex).set(step.getGoalPose());
+
+         stepPoseFrame.setPoseAndUpdate(step.getGoalPose());
+         FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+         tempPolygon.setReferenceFrame(stepPoseFrame);
+         tempPolygon.set(footPolygon);
+         tempPolygon.changeFrame(worldFrame);
+         nextFootstepPolygons.get(nextStepIndex).set(tempPolygon);
+
+         stepIndex++;
+         nextStepIndex++;
+      }
+      while (nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
+      {
+         nextFootstepPoses.get(nextStepIndex).setToNaN();
+         nextFootstepPolygons.get(nextStepIndex).setToNaN();
+         nextStepIndex++;
+      }
+
+      leftFootPose.setToNaN();
+      rightFootPose.setToNaN();
+      if (feetInContact.contains(RobotSide.LEFT))
+      {
+         FramePose3D pose = new FramePose3D(soleFramesForModifying.get(RobotSide.LEFT));
+         leftFootPose.setMatchingFrame(pose);
+      }
+      if (feetInContact.contains(RobotSide.RIGHT))
+      {
+         FramePose3D pose = new FramePose3D(soleFramesForModifying.get(RobotSide.RIGHT));
+         rightFootPose.setMatchingFrame(pose);
       }
    }
 
