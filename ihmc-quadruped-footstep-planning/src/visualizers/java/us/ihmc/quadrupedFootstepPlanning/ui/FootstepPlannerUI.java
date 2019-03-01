@@ -136,13 +136,17 @@ public class FootstepPlannerUI
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
                                                                  GoalOrientationTopic, XGaitSettingsTopic);
-      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
+                                                                       StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
+                                                                       LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                          StartPositionTopic, GoalPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
                                                          StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic);
+      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene(), EditModeEnabledTopic, StartOrientationEditModeEnabledTopic,
+                                                              GoalOrientationEditModeEnabledTopic, StartPositionTopic, StartOrientationTopic,
+                                                              GoalPositionTopic, GoalOrientationTopic, SelectedRegionTopic);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
-      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
-      this.pathViewer = new FootstepPathMeshViewer(messager);
+      this.pathViewer = new FootstepPathMeshViewer(messager, FootstepPlanTopic, ComputePathTopic, ShowFootstepPlanTopic, ShowFootstepPreviewTopic);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
