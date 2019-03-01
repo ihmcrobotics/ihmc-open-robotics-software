@@ -54,6 +54,7 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                                                            pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                            yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer();
    }
 
    @Override

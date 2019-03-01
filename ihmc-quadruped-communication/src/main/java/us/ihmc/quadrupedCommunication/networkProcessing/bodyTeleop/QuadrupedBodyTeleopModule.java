@@ -26,15 +26,16 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
-   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider,
+   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
                                     DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
             pubSubImplementation);
 
       bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotDataReceiver, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer();
    }
 
    @Override

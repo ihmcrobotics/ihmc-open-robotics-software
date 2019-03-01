@@ -27,13 +27,14 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
    private final QuadrupedBodyHeightTeleopController heightTeleopController;
 
    public QuadrupedBodyHeightTeleopModule(FullQuadrupedRobotModelFactory modelFactory, double nominalHeight, LogModelProvider modelProvider,
-                                          DomainFactory.PubSubImplementation pubSubImplementation)
+                                          boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
             pubSubImplementation);
 
       heightTeleopController = new QuadrupedBodyHeightTeleopController(nominalHeight, outputManager, robotDataReceiver, registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer();
    }
 
    @Override

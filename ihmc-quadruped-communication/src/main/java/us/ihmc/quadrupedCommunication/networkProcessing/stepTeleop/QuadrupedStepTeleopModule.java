@@ -40,6 +40,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer();
    }
 
    @Override
