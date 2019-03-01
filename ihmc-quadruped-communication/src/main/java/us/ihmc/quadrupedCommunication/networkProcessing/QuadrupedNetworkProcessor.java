@@ -76,7 +76,7 @@ public class QuadrupedNetworkProcessor
       if (!params.isStepTeleopModuleEnabled())
          return;
       stepTeleopModule = new QuadrupedStepTeleopModule(modelFactory, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                                       params.visualizeStepTeleopModuleEnabled(), pubSubImplementation);
+                                                       params.visualizeStepTeleopModuleEnabled(), params.logStepTeleopModuleEnabled(), pubSubImplementation);
       modules.add(stepTeleopModule);
    }
 
@@ -88,7 +88,8 @@ public class QuadrupedNetworkProcessor
       if (!params.isFootstepPlanningModuleEnabled())
          return;
       modules.add(new QuadrupedFootstepPlanningModule(modelFactory, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                                      params.visualizeFootstepPlanningModuleEnabled(), pubSubImplementation));
+                                                      params.visualizeFootstepPlanningModuleEnabled(), params.logFootstepPlanningModuleEnabled(),
+                                                      pubSubImplementation));
    }
 
 
@@ -97,7 +98,8 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyHeightTeleopModuleEnabled())
          return;
-      modules.add(new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, logModelProvider, params.visualizeBodyHeightTeleopModuleEnabled(), pubSubImplementation));
+      modules.add(new QuadrupedBodyHeightTeleopModule(modelFactory, nominalHeight, logModelProvider, params.visualizeBodyHeightTeleopModuleEnabled(),
+                                                      params.logBodyHeightTeleopModuleEnabled(), pubSubImplementation));
    }
 
    private void setupBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
@@ -105,7 +107,8 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isBodyTeleopModuleEnabled())
          return;
-      modules.add(new QuadrupedBodyTeleopModule(modelFactory, logModelProvider, params.visualizeBodyTeleopModuleEnabled(), pubSubImplementation));
+      modules.add(new QuadrupedBodyTeleopModule(modelFactory, logModelProvider, params.visualizeBodyTeleopModuleEnabled(),
+                                                params.logBodyTeleopModuleEnabled(), pubSubImplementation));
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,

@@ -33,7 +33,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
                               LogModelProvider modelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, null, updatePeriodMilliseconds,
             pubSubImplementation);
 
       xBoxController = new QuadrupedXBoxController(robotDataReceiver, defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);

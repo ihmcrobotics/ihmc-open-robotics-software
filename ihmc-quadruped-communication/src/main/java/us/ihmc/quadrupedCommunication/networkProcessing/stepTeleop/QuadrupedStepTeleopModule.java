@@ -12,6 +12,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -31,16 +32,16 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 
    public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                    DomainFactory.PubSubImplementation pubSubImplementation)
+                                    boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
+            new DataServerSettings(logYoVariables, "StepTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
 
       stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
-      startYoVariableServer();
+      startYoVariableServer(getClass());
    }
 
    @Override
