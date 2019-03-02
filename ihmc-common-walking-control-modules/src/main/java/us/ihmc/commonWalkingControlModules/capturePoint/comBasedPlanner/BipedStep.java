@@ -5,6 +5,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -79,6 +81,11 @@ public class BipedStep
    public void setGoalPose(FramePose3DReadOnly goalPose)
    {
       this.goalPose.setMatchingFrame(goalPose);
+   }
+
+   public void setGoalPose(FramePoint3DReadOnly goalPosition, FrameOrientation3DReadOnly goalOrientation)
+   {
+      this.goalPose.set(goalPosition, goalOrientation);
    }
 
    public void setSwingHeight(double swingHeight)

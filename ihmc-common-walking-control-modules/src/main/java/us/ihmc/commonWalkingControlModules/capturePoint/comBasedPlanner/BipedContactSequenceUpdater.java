@@ -54,8 +54,11 @@ public class BipedContactSequenceUpdater
          YoGraphicPosition startCoP = new YoGraphicPosition("start cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
          YoGraphicPosition endCoP = new YoGraphicPosition("end cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
 
-         graphicsListRegistry.registerArtifact("Contact Sequence", startCoP.createArtifact());
-         graphicsListRegistry.registerArtifact("Contact Sequence", endCoP.createArtifact());
+         if (graphicsListRegistry != null)
+         {
+            graphicsListRegistry.registerArtifact("Contact Sequence", startCoP.createArtifact());
+            graphicsListRegistry.registerArtifact("Contact Sequence", endCoP.createArtifact());
+         }
       }
    }
 
