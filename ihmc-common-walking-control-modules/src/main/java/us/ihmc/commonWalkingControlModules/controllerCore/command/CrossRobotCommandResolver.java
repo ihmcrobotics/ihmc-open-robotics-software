@@ -5,6 +5,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -97,6 +101,20 @@ public class CrossRobotCommandResolver
          out.addJointToComputeDesiredPositionFor(jointHashCodeResolver.castAndGetJoint(jointHashCode));
          // There is no thread sensitive information in this command, so the output can directly be set to the input.
          out.setJointParameters(jointIndex, in.getJointParameters(jointIndex));
+      }
+   }
+
+   public void resolveJointLimitEnforcementMethodCommand(JointLimitEnforcementMethodCommand in, JointLimitEnforcementMethodCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         int jointHashCode = in.getJoint(jointIndex).hashCode();
+         OneDoFJointBasics joint = jointHashCodeResolver.castAndGetJoint(jointHashCode);
+         JointLimitParameters parameters = in.getJointLimitParameters(jointIndex);
+         JointLimitEnforcement method = in.getJointLimitReductionFactor(jointIndex);
+         out.addLimitEnforcementMethod(joint, method, parameters);
       }
    }
 }
