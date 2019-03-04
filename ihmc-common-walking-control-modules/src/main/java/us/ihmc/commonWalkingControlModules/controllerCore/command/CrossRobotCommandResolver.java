@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -42,5 +43,27 @@ public class CrossRobotCommandResolver
       out.getWeight().setIncludingFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightFrameHashCode), in.getWeight());
       int desiredCoPFrameHashCode = in.getDesiredCoP().getReferenceFrame().hashCode();
       out.getDesiredCoP().setIncludingFrame(referenceFrameHashCodeResolver.getReferenceFrame(desiredCoPFrameHashCode), in.getDesiredCoP());
+   }
+
+   public void resolveContactWrenchCommand(ContactWrenchCommand in, ContactWrenchCommand out)
+   {
+      out.setConstraintType(in.getConstraintType());
+      int contactingRigidBodyHashCode = in.getRigidBody().hashCode();
+      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(contactingRigidBodyHashCode));
+      int wrenchFrameHashCode = in.getWrench().getReferenceFrame().hashCode();
+      int wrenchBodyFrameHashCode = in.getWrench().getBodyFrame().hashCode();
+      out.getWrench().setIncludingFrame(in.getWrench());
+      out.getWrench().setReferenceFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchFrameHashCode));
+      out.getWrench().setBodyFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchBodyFrameHashCode));
+      int weightAngularFrameHashCode = in.getWeightMatrix().getAngularWeightFrame().hashCode();
+      int weightLinearFrameHashCode = in.getWeightMatrix().getLinearWeightFrame().hashCode();
+      out.getWeightMatrix().set(in.getWeightMatrix());
+      out.getWeightMatrix().getAngularPart().setWeightFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightAngularFrameHashCode));
+      out.getWeightMatrix().getLinearPart().setWeightFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightLinearFrameHashCode));
+      int selectionAngularFrameHashCode = in.getSelectionMatrix().getAngularSelectionFrame().hashCode();
+      int selectionLinearFrameHashCode = in.getSelectionMatrix().getLinearSelectionFrame().hashCode();
+      out.getSelectionMatrix().set(in.getSelectionMatrix());
+      out.getSelectionMatrix().getAngularPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionAngularFrameHashCode));
+      out.getSelectionMatrix().getLinearPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionLinearFrameHashCode));
    }
 }
