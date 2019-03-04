@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -16,8 +17,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -28,6 +31,8 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
@@ -235,10 +240,34 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseDynamicsOptimizationSettingsCommand in = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         InverseDynamicsOptimizationSettingsCommand expectedOut = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         InverseDynamicsOptimizationSettingsCommand in = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
+                                                                                                        testData.frameTreeA);
+         InverseDynamicsOptimizationSettingsCommand expectedOut = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                 testData.frameTreeB);
          InverseDynamicsOptimizationSettingsCommand actualOut = new InverseDynamicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseDynamicsOptimizationSettingsCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
+   @Test
+   void testResolveJointAccelerationIntegrationCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointAccelerationIntegrationCommand in = nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointAccelerationIntegrationCommand expectedOut = nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointAccelerationIntegrationCommand actualOut = new JointAccelerationIntegrationCommand();
+         crossRobotCommandResolver.resolveJointAccelerationIntegrationCommand(in, actualOut);
          assertEquals(expectedOut, actualOut);
       }
    }
@@ -272,7 +301,8 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBody rootBody,
+                                                                                                           ReferenceFrame... possibleFrames)
    {
       InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
       next.setRhoMin(random.nextDouble());
@@ -284,6 +314,23 @@ class CrossRobotCommandResolverTest
       next.setJointAccelerationWeight(random.nextDouble());
       next.setJointJerkWeight(random.nextDouble());
       next.setJointTorqueWeight(random.nextDouble());
+      return next;
+   }
+
+   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, RigidBody rootBody,
+                                                                                             ReferenceFrame... possibleFrames)
+   {
+      JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         next.addJointToComputeDesiredPositionFor(allJoints.remove(random.nextInt(allJoints.size())));
+         next.setJointParameters(jointIndex, nextJointAccelerationIntegrationParameters(random));
+      }
+
       return next;
    }
 
@@ -355,6 +402,16 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static JointAccelerationIntegrationParameters nextJointAccelerationIntegrationParameters(Random random)
+   {
+      JointAccelerationIntegrationParameters next = new JointAccelerationIntegrationParameters();
+      next.setPositionBreakFrequency(random.nextDouble());
+      next.setVelocityBreakFrequency(random.nextDouble());
+      next.setMaxPositionError(random.nextDouble());
+      next.setMaxVelocity(random.nextDouble());
+      return next;
+   }
+
    private static class TestData
    {
       private final ReferenceFrame rootFrameA = ReferenceFrameTools.constructARootFrame("rootFrameA");
@@ -381,8 +438,8 @@ class CrossRobotCommandResolverTest
             frameResolverForB.put(frameTreeB[i], frameTreeA[i].hashCode());
          }
 
-         chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainA", numberOfJoints);
-         chainB = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainB", numberOfJoints);
+         chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainA", rootBodyA, numberOfJoints);
+         chainB = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainB", rootBodyB, numberOfJoints);
 
          bodyResolverForB.put(rootBodyB, rootBodyA.hashCode());
 
