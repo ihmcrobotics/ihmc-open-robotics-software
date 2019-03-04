@@ -1,14 +1,11 @@
 package us.ihmc.atlas;
 
-import org.junit.Assume;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.jupiter.api.*;
 
+import org.opentest4j.TestAbortedException;
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
@@ -46,14 +43,14 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    {
       try
       {
-         Assume.assumeTrue(BambooTools.isNightlyBuild());
+         Assumptions.assumeTrue(BambooTools.isNightlyBuild());
          BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
          robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }
-      catch (AssumptionViolatedException e)
+      catch (TestAbortedException e)
       {
          System.out.println("Not Nightly Build, skipping AtlasFlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
       }

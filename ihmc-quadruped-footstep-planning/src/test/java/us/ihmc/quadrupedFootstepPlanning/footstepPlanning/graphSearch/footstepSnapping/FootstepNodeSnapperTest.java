@@ -195,8 +195,8 @@ public class FootstepNodeSnapperTest
          // test for exact same transform
          RobotQuadrant robotQuadrant = RobotQuadrant.FRONT_LEFT;
          Point2DReadOnly frontLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-         Point2DReadOnly frontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
-         Point2DReadOnly otherFrontRight= EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly frontRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
+         Point2DReadOnly otherFrontRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
          Point2DReadOnly hindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
          Point2DReadOnly otherHindLeft = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
          Point2DReadOnly hindRight = EuclidCoreRandomTools.nextPoint2D(random, 1.0);
@@ -205,16 +205,19 @@ public class FootstepNodeSnapperTest
          nodeA = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, 1.5, 0.5);
          nodeB = new FootstepNode(robotQuadrant, frontLeft, otherFrontRight, otherHindLeft, otherHindRight, 1.5, 0.5);
 
-
          TIntObjectHashMap<FootstepNodeSnapData> snapDataHolder = new TIntObjectHashMap<>();
 
          assertFalse("number : " + i, snapDataHolder.containsKey(nodeB.hashCode()));
 
          snapDataHolder.put(nodeA.hashCode(), FootstepNodeSnapData.emptyData());
 
-         assertEquals("number : " + i, nodeA.hashCode(), nodeB.hashCode());
          assertTrue("number : " + i, snapDataHolder.containsKey(nodeA.hashCode()));
-         assertTrue("number : " + i, snapDataHolder.containsKey(nodeB.hashCode()));
+
+         if (nodeA.getYawIndex() == nodeB.getYawIndex())
+         {
+            assertEquals("number : " + i, nodeA.hashCode(), nodeB.hashCode());
+            assertTrue("number : " + i, snapDataHolder.containsKey(nodeB.hashCode()));
+         }
       }
    }
 

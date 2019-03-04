@@ -235,9 +235,9 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
-                    dataset.getPlannerInput().getQuadrupedGoalPosition());
-
+//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
+//                    dataset.getPlannerInput().getQuadrupedGoalPosition());
+//
       return errorMessage;
    }
 
@@ -247,8 +247,8 @@ public abstract class FootstepPlannerDataSetTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
 
-      startPose.setPosition(plannerInput.getStartPosition());
-      goalPose.setPosition(plannerInput.getGoalPosition());
+      startPose.setPosition(plannerInput.getQuadrupedStartPosition());
+      goalPose.setPosition(plannerInput.getQuadrupedGoalPosition());
 
       if(plannerInput.getHasQuadrupedStartYaw())
          startPose.setOrientation(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));

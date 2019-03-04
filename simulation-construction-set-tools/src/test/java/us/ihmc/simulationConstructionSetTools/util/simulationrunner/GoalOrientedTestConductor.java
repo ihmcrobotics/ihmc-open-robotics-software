@@ -182,7 +182,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       scs.stop();
    }
    
-   public void simulate() throws AssertionFailedError
+   public void simulate()
    {
       assertionFailedMessage = null;
       yoTimeChangedListenerActive = true;
