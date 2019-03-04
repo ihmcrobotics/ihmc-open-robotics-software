@@ -60,7 +60,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> ignorePartialFootholds;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
-   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(true);
+   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
