@@ -15,9 +15,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -241,8 +241,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       setVRPEndPosition(numberOfPhases - 1);
 
       // solve for coefficients
-      solver.setA(coefficientMultipliers);
-      solver.invert(coefficientMultipliersInv);
+      NativeCommonOps.invert(coefficientMultipliers, coefficientMultipliersInv);
       CommonOps.mult(coefficientMultipliersInv, xCoefficientConstants, xCoefficientVector);
       CommonOps.mult(coefficientMultipliersInv, yCoefficientConstants, yCoefficientVector);
       CommonOps.mult(coefficientMultipliersInv, zCoefficientConstants, zCoefficientVector);
