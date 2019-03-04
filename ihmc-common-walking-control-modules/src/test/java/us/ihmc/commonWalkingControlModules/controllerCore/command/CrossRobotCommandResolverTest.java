@@ -18,9 +18,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -272,6 +275,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveJointLimitEnforcementMethodCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointLimitEnforcementMethodCommand in = nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointLimitEnforcementMethodCommand expectedOut = nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitEnforcementMethodCommand actualOut = new JointLimitEnforcementMethodCommand();
+         crossRobotCommandResolver.resolveJointLimitEnforcementMethodCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -329,6 +354,23 @@ class CrossRobotCommandResolverTest
       {
          next.addJointToComputeDesiredPositionFor(allJoints.remove(random.nextInt(allJoints.size())));
          next.setJointParameters(jointIndex, nextJointAccelerationIntegrationParameters(random));
+      }
+
+      return next;
+   }
+
+   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   {
+      JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         next.addLimitEnforcementMethod(allJoints.remove(random.nextInt(allJoints.size())), nextElementIn(random, JointLimitEnforcement.values()),
+                                        nextJointLimitParameters(random));
       }
 
       return next;
@@ -409,6 +451,16 @@ class CrossRobotCommandResolverTest
       next.setVelocityBreakFrequency(random.nextDouble());
       next.setMaxPositionError(random.nextDouble());
       next.setMaxVelocity(random.nextDouble());
+      return next;
+   }
+
+   public static JointLimitParameters nextJointLimitParameters(Random random)
+   {
+      JointLimitParameters next = new JointLimitParameters();
+      next.setMaxAbsJointVelocity(random.nextDouble());
+      next.setJointLimitDistanceForMaxVelocity(random.nextDouble());
+      next.setJointLimitFilterBreakFrequency(random.nextDouble());
+      next.setVelocityControlGain(random.nextDouble());
       return next;
    }
 
