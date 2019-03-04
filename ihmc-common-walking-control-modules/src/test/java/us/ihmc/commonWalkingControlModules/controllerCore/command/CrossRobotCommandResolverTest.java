@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -24,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.spatial.Wrench;
@@ -219,6 +221,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveInverseDynamicsOptimizationSettingsCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         InverseDynamicsOptimizationSettingsCommand in = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed));
+         InverseDynamicsOptimizationSettingsCommand expectedOut = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed));
+         InverseDynamicsOptimizationSettingsCommand actualOut = new InverseDynamicsOptimizationSettingsCommand();
+         crossRobotCommandResolver.resolveInverseDynamicsOptimizationSettingsCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -245,6 +269,21 @@ class CrossRobotCommandResolverTest
       ExternalWrenchCommand next = new ExternalWrenchCommand();
       next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.getExternalWrench().setIncludingFrame(nextWrench(random, possibleFrames));
+      return next;
+   }
+
+   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random)
+   {
+      InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
+      next.setRhoMin(random.nextDouble());
+      next.setJointAccelerationMax(random.nextDouble());
+      next.setRhoWeight(random.nextDouble());
+      next.setRhoRateWeight(random.nextDouble());
+      next.setCenterOfPressureWeight(EuclidCoreRandomTools.nextPoint2D(random));
+      next.setCenterOfPressureRateWeight(EuclidCoreRandomTools.nextPoint2D(random));
+      next.setJointAccelerationWeight(random.nextDouble());
+      next.setJointJerkWeight(random.nextDouble());
+      next.setJointTorqueWeight(random.nextDouble());
       return next;
    }
 
