@@ -446,7 +446,7 @@ public class MainTabController
    private void setStartFromRobot()
    {
       quadrupedReferenceFrames.updateFrames();
-      FramePose3D startPose = new FramePose3D(quadrupedReferenceFrames.getSoleFrame(initialSupportQuadrant.getValue()));
+      FramePose3D startPose = new FramePose3D(quadrupedReferenceFrames.getBodyZUpFrame());
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       startPositionProperty.set(new Point3D(startPose.getPosition()));
       startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
