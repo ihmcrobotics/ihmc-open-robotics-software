@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.tools.factories.FactoryTools;
@@ -13,6 +14,8 @@ public class FootstepCostBuilder
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
    private final OptionalFactoryField<Boolean> includePitchAndRollCost = new OptionalFactoryField<>("includePitchAndRollCost");
+   private final OptionalFactoryField<Boolean> includeBoundingBoxCost = new OptionalFactoryField<>("includeBoundingBoxCost");
+   private final OptionalFactoryField<FootstepNodeBodyCollisionDetector> collisionDetector = new OptionalFactoryField<>("collisionDetector");
 
    public void setFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -34,10 +37,21 @@ public class FootstepCostBuilder
       this.includePitchAndRollCost.set(includePitchAndRollCost);
    }
 
+   public void setCollisionDetector(FootstepNodeBodyCollisionDetector collisionDetector)
+   {
+      this.collisionDetector.set(collisionDetector);
+   }
+
+   public void setIncludeBoundingBoxCost(boolean includeBoundingBoxCost)
+   {
+      this.includeBoundingBoxCost.set(includeBoundingBoxCost);
+   }
+
    public FootstepCost buildCost()
    {
       includeHeightCost.setDefaultValue(false);
       includePitchAndRollCost.setDefaultValue(false);
+      includeBoundingBoxCost.setDefaultValue(false);
 
       CompositeFootstepCost compositeFootstepCost = new CompositeFootstepCost();
 
@@ -46,6 +60,9 @@ public class FootstepCostBuilder
 
       if (includePitchAndRollCost.get())
          compositeFootstepCost.addFootstepCost(new PitchAndRollBasedCost(footstepPlannerParameters.get().getCostParameters(), snapper.get()));
+
+      if(includeBoundingBoxCost.get() && collisionDetector.hasValue())
+         compositeFootstepCost.addFootstepCost(new BodyCollisionNodeCost(collisionDetector.get(), footstepPlannerParameters.get().getCostParameters(), snapper.get()));
 
       compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
 

@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__KinematicsPlanningToolboxOutputStatus__idl__
 
 #include "controller_msgs/msg/./KinematicsToolboxOutputStatus_.idl"
+#include "controller_msgs/msg/./WholeBodyTrajectoryMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -33,6 +34,10 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double solution_quality;
+        /**
+         * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+         */
+        controller_msgs::msg::dds::WholeBodyTrajectoryMessage suggested_controller_message;
       };
     };
   };

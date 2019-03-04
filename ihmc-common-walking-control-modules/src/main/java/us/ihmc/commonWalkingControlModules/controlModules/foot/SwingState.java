@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -51,6 +52,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -102,6 +104,10 @@ public class SwingState extends AbstractFootControlState
 
    private final FrameQuaternion tmpOrientation = new FrameQuaternion();
    private final FrameVector3D tmpVector = new FrameVector3D();
+
+   private final double[] waypointProportions = new double[2];
+   private final List<DoubleProvider> defaultWaypointProportions = new ArrayList<>();
+   private final List<DoubleProvider> defaultObstacleClearanceWaypointProportions = new ArrayList<>();
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints;
@@ -274,6 +280,19 @@ public class SwingState extends AbstractFootControlState
       midpointOrientationInterpolationForClearance = new DoubleParameter(namePrefix + "MidpointOrientationInterpolationForClearance", registry,
                                                                          swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
 
+      int numberWaypoints = 2;
+      double[] defaultWaypointProportions = swingTrajectoryParameters.getSwingWaypointProportions();
+      double[] defaultObstacleClearanceWaypointProportions = swingTrajectoryParameters.getObstacleClearanceProportions();
+
+      for (int i = 0; i < numberWaypoints; i++)
+      {
+         DoubleParameter waypointProportion = new DoubleParameter(namePrefix + "WaypointProportion" + i, registry, defaultWaypointProportions[i]);
+         DoubleParameter obstacleClearanceWaypointProportion = new DoubleParameter(namePrefix + "ObstacleClearanceWaypointProportion" + i, registry,
+                                                                                   defaultObstacleClearanceWaypointProportions[i]);
+         this.defaultWaypointProportions.add(waypointProportion);
+         this.defaultObstacleClearanceWaypointProportions.add(obstacleClearanceWaypointProportion);
+      }
+
       ignoreInitialAngularVelocityZ = new YoBoolean(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
       maxInitialLinearVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialLinearVelocityMagnitude", registry);
       maxInitialAngularVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialAngularVelocityMagnitude", registry);
@@ -294,13 +313,11 @@ public class SwingState extends AbstractFootControlState
 
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
-      double[] waypointProportions = swingTrajectoryParameters.getSwingWaypointProportions();
-      double[] obstacleClearanceProportions = swingTrajectoryParameters.getObstacleClearanceProportions();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, waypointProportions, obstacleClearanceProportions, minSwingHeightFromStanceFoot,
-                                                               maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+      swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry,
+                                                               yoGraphicsListRegistry);
 
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
@@ -786,6 +803,7 @@ public class SwingState extends AbstractFootControlState
       swingTrajectoryOptimizer.setTrajectoryType(activeTrajectoryType.getEnumValue(), positionWaypointsForSole);
       swingTrajectoryOptimizer.setSwingHeight(swingHeight.getDoubleValue());
       swingTrajectoryOptimizer.setStanceFootPosition(stanceFootPosition);
+      swingTrajectoryOptimizer.setWaypointProportions(waypointProportions);
       swingTrajectoryOptimizer.initialize();
    }
 
@@ -871,6 +889,25 @@ public class SwingState extends AbstractFootControlState
 
          if (checkStepUpOrDown(footstepPose))
             activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
+
+         if(footstep.getCustomWaypointProportions().size() != 2)
+         {
+            List<DoubleProvider> waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ?
+                  defaultObstacleClearanceWaypointProportions :
+                  defaultWaypointProportions;
+            this.waypointProportions[0] = waypointProportions.get(0).getValue();
+            this.waypointProportions[1] = waypointProportions.get(1).getValue();
+         }
+         else
+         {
+            if(!footstep.getCustomWaypointProportions().isEmpty())
+            {
+               LogTools.warn("Ignoring custom waypoint proportions. Expected 2, got: " + footstep.getCustomWaypointProportions().size());
+            }
+
+            waypointProportions[0] = footstep.getCustomWaypointProportions().get(0).getValue();
+            waypointProportions[1] = footstep.getCustomWaypointProportions().get(1).getValue();
+         }
       }
 
       if (activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)

@@ -35,7 +35,7 @@ public class ManualStepTabController
 
    private JavaFXMessager messager;
    private AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
-   private AtomicReference<QuadrupedReferenceFrames> referenceFramesReference;
+   private AtomicReference<QuadrupedReferenceFrames> referenceFramesReference = new AtomicReference<>(null);
 
 
    @FXML
@@ -72,7 +72,8 @@ public class ManualStepTabController
       this.messager = messager;
 
       xGaitSettingsReference = messager.createInput(QuadrupedUIMessagerAPI.XGaitSettingsTopic);
-      referenceFramesReference = messager.createInput(QuadrupedUIMessagerAPI.ReferenceFramesTopic);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotModelTopic, fullRobotModel ->
+                                           referenceFramesReference.set(new QuadrupedReferenceFrames(fullRobotModel)));
 
       xGaitSettingsReference.set(defaultXGaitSettings);
    }

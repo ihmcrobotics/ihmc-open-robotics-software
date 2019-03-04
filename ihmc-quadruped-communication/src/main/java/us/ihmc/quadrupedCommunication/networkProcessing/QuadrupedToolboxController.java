@@ -44,10 +44,13 @@ public abstract class QuadrupedToolboxController
     */
    public boolean initialize() throws InterruptedException
    {
-      while (!robotDataReceiver.framesHaveBeenSetUp())
+      if (robotDataReceiver != null)
       {
-         robotDataReceiver.updateRobotModel();
-         Thread.sleep(10);
+         while (!robotDataReceiver.framesHaveBeenSetUp())
+         {
+            robotDataReceiver.updateRobotModel();
+            Thread.sleep(10);
+         }
       }
 
       return initializeInternal();

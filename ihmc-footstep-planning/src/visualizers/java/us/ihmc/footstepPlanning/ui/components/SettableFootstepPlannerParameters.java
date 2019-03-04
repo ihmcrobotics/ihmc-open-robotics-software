@@ -45,7 +45,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double bodyBoxBaseX;
    private double bodyBoxBaseY;
    private double bodyBoxBaseZ;
-   private double stepTranslationBoundingBoxScaleFactor;
 
    private final SettableFootstepPlannerCostParameters costParameters;
 
@@ -99,7 +98,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxBaseX = footstepPlannerParameters.getBodyBoxBaseX();
       this.bodyBoxBaseY = footstepPlannerParameters.getBodyBoxBaseY();
       this.bodyBoxBaseZ = footstepPlannerParameters.getBodyBoxBaseZ();
-      this.stepTranslationBoundingBoxScaleFactor = footstepPlannerParameters.getStepTranslationBoundingBoxScaleFactor();
 
       this.costParameters.set(footstepPlannerParameters.getCostParameters());
    }
@@ -354,9 +352,14 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
-   public void setStepTranslationBoundingBoxScaleFactor(double stepTranslationBoundingBoxScaleFactor)
+   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
    {
-      this.stepTranslationBoundingBoxScaleFactor = stepTranslationBoundingBoxScaleFactor;
+      this.costParameters.setMaximum2dDistanceFromBoundingBoxToPenalize(maximum2dDistanceFromBoundingBoxToPenalize);
+   }
+
+   public void setBoundingBoxCost(double boundingBoxCost)
+   {
+      this.costParameters.setBoundingBoxCost(boundingBoxCost);
    }
 
    @Override
@@ -575,12 +578,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return bodyBoxBaseZ;
    }
 
-   @Override
-   public double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return stepTranslationBoundingBoxScaleFactor;
-   }
-
    public boolean useQuadraticDistanceCost()
    {
       return costParameters.useQuadraticDistanceCost();
@@ -629,6 +626,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getCostPerStep()
    {
       return costParameters.getCostPerStep();
+   }
+
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return costParameters.getMaximum2dDistanceFromBoundingBoxToPenalize();
+   }
+
+   public double getBoundingBoxCost()
+   {
+      return costParameters.getBoundingBoxCost();
    }
 
    public double getAStarHeuristicsWeight()

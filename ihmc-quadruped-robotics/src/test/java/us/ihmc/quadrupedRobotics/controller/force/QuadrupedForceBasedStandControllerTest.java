@@ -1,10 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
 import junit.framework.AssertionFailedError;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -230,9 +227,14 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
+      stepTeleopManager.requestBodyTeleop();
+
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.addTimeLimit(variables.getYoTime(), 2.0);
       conductor.simulate();
+
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
       runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
@@ -243,6 +245,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    }
 
 
+   @Disabled
    @Test
    public void testStandingUpAndShiftingCoM() throws IOException
    {
@@ -258,8 +261,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 1.0));
+      conductor.addTimeLimit(variables.getYoTime(), 2.0);
       conductor.simulate();
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
@@ -284,14 +289,15 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
                                                                                                                                   .getDoubleValue() + " < "
                        + heightDelta,
                  Math.abs(variables.getCurrentHeightInWorld().getDoubleValue() - variables.getHeightInWorldSetpoint().getDoubleValue()) < heightDelta);
+
       assertTrue("Yaw did not meet goal : Math.abs(" + variables.getBodyEstimateYaw() + " - " + bodyOrientationYaw + " < "
-                       + orientationDelta, Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateYaw(), bodyOrientationYaw)) < orientationDelta);
+                          + orientationDelta, Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateYaw(), bodyOrientationYaw)) < orientationDelta);
       assertTrue("Pitch did not meet goal : Math.abs(" + variables.getBodyEstimatePitch() + " - " + bodyOrientationPitch + " < "
-                       + orientationDelta,
-                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimatePitch(), bodyOrientationPitch)) < orientationDelta);
+                          + orientationDelta,
+                    Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimatePitch(), bodyOrientationPitch)) < orientationDelta);
       assertTrue("Roll did not meet goal : Math.abs(" + variables.getBodyEstimateRoll() + " - " + bodyOrientationRoll + " < "
-                       + orientationDelta,
-                 Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateRoll(), bodyOrientationRoll)) < orientationDelta);
+                          + orientationDelta,
+                    Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(variables.getBodyEstimateRoll(), bodyOrientationRoll)) < orientationDelta);
    }
 
    private void runMovingCoM(double bodyHeight, double bodyX, double bodyY, double heightDelta, double translationDelta)
@@ -308,6 +314,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 2.0 * comShiftDuration));
+      conductor.addTimeLimit(variables.getYoTime(), 4.0 * comShiftDuration);
       conductor.simulate();
 
       double currentHeightInWorld = variables.getCurrentHeightInWorld().getDoubleValue();
