@@ -168,8 +168,8 @@ public class BipedContactSequenceUpdaterTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(2).getCopEndPosition(), epsilon);
       assertEquals(1.0 - timeInPhase, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
-
    }
+
 
    @Test
    public void testTwoSimpleSteps()
