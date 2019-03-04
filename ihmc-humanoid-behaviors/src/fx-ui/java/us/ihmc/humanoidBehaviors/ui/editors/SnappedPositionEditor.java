@@ -89,13 +89,13 @@ public class SnappedPositionEditor extends FXUIEditor
          {
             LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
             deactivate();
-            activeStateMachine.get().transition(now, FXUIStateTransition.POSITION_LEFT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransition.POSITION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
             deactivate();
-            activeStateMachine.get().transition(now, FXUIStateTransition.RIGHT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransition.RIGHT_CLICK);
          }
       }
    }

@@ -9,8 +9,6 @@ public abstract class FXUIStateMachine
 {
    private final Messager messager;
    private final FXUIStateTransition exitTransition;
-   private long lastStateTime = 0L;
-   private FXUIState currentState = FXUIState.INACTIVE;
    private HashMap<FXUIStateTransition, FXUIState> stateMap = new HashMap<>();
 
    public FXUIStateMachine(Messager messager, FXUIState startState, FXUIStateTransition exitTransition)
@@ -22,26 +20,9 @@ public abstract class FXUIStateMachine
       mapTransitionToState(exitTransition, FXUIState.INACTIVE);
    }
 
-   /**
-    * Make sure changes don't activate until next tick.
-    * @param now
-    * @return current or INACTIVE if same tick as previous transition
-    */
-   public FXUIState currentState(long now)
-   {
-      if (now > lastStateTime)
-      {
-         return currentState;
-      }
-      else
-      {
-         return FXUIState.INACTIVE;
-      }
-   }
-
    public final void start()
    {
-      transition(0L, FXUIStateTransition.START);
+      transition(FXUIStateTransition.START);
    }
 
    private final void exit()
@@ -49,13 +30,9 @@ public abstract class FXUIStateMachine
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, null);
    }
 
-   public final void transition(long now, FXUIStateTransition transition)
+   public final void transition(FXUIStateTransition transition)
    {
-      lastStateTime = now;
-
       handleTransition(transition);
-
-      currentState = stateMap.get(transition);
 
       if (transition.equals(exitTransition))
       {

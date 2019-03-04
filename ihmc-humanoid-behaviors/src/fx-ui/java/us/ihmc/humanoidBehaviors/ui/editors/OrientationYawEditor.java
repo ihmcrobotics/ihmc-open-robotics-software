@@ -89,13 +89,13 @@ public class OrientationYawEditor extends FXUIEditor
          {
             LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
             deactivate();
-            activeStateMachine.get().transition(now, FXUIStateTransition.ORIENTATION_LEFT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransition.ORIENTATION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
             deactivate();
-            activeStateMachine.get().transition(now, FXUIStateTransition.RIGHT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransition.RIGHT_CLICK);
          }
       }
    }
