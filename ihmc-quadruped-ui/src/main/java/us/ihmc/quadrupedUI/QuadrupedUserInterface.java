@@ -29,11 +29,9 @@ import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedUserInterface
 {
@@ -173,7 +171,6 @@ public class QuadrupedUserInterface
       pawPathViewer.start();
       bodyPathMeshViewer.start();
 
-
       robotVisualizer.start();
       cameraTracking.start();
 
@@ -205,6 +202,7 @@ public class QuadrupedUserInterface
       startGoalOrientationEditor.stop();
       pawPathViewer.stop();
       bodyPathMeshViewer.stop();
+      cameraTracking.stop();
 
       try
       {
