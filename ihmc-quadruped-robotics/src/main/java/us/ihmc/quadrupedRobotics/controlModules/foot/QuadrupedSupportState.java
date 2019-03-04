@@ -22,6 +22,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportState extends QuadrupedFootState
@@ -49,6 +50,9 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final Vector3DReadOnly linearWeight;
 
+   private final YoBoolean footBarelyLoaded;
+   private final DoubleParameter footLoadThreshold;
+
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
@@ -67,6 +71,9 @@ public class QuadrupedSupportState extends QuadrupedFootState
       minimumTimeInSupportState = new DoubleParameter(robotQuadrant.getShortName() + "TimeInSupportState", registry, 0.05);
       linearWeight = new ParameterVector3D(robotQuadrant.getShortName() + "_supportFootWeight", new Vector3D(10.0, 10.0, 10.0), registry);
 
+      footBarelyLoaded = new YoBoolean(robotQuadrant.getShortName() + "_BarelyLoaded", registry);
+      footLoadThreshold = new DoubleParameter(robotQuadrant.getShortName() + "_FootLoadThreshold", registry, 0.15);
+
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
    }
 
@@ -81,6 +88,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       footIsVerifiedAsLoaded = false;
 
+
+      footBarelyLoaded.set(false);
    }
 
 
@@ -105,6 +114,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
             upcomingGroundPlanePosition.setMatchingFrame(tempPoint);
          }
       }
+
+      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getValue());
    }
 
    @Override
@@ -117,6 +128,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    public void onExit()
    {
       footIsVerifiedAsLoaded = false;
+      footBarelyLoaded.set(false);
    }
 
    @Override
