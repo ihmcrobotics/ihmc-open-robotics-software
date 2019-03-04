@@ -76,8 +76,13 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
     * Parameter for calculating custom waypoint proportions
     */
 
-   @Override public double getMinimumXYWaypointToRegionDistance()
+   @Override public double getFootStubClearance()
    {
       return 0.05;
+   }
+
+   @Override public double getWaypointProportionShiftForStubAvoidance()
+   {
+      return 0.1;
    }
 }
