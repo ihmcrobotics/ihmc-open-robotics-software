@@ -149,7 +149,7 @@ public class FootstepPlannerUI
       this.pathViewer = new FootstepPathMeshViewer(messager, FootstepPlanTopic, ComputePathTopic, ShowFootstepPlanTopic, ShowFootstepPreviewTopic);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
-      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
+      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, ShowBodyPathTopic, ComputePathTopic, BodyPathDataTopic);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
 //      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
       this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);

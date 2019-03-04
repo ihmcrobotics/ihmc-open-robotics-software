@@ -3,12 +3,13 @@ package us.ihmc.quadrupedUI;
 import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import javafx.geometry.Pos;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
@@ -19,6 +20,8 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.List;
 
 public class QuadrupedUIMessagerAPI
 {
@@ -33,6 +36,7 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme HeightTeleop = apiFactory.createCategoryTheme("HeightTeleop");
    private static final CategoryTheme Joystick = apiFactory.createCategoryTheme("Joystick");
    private static final CategoryTheme Parameters = apiFactory.createCategoryTheme("Parameters");
+   private static final CategoryTheme BodyPathPlanning = apiFactory.createCategoryTheme("BodyPathPlanning");
    private static final CategoryTheme FootstepPlanning = apiFactory.createCategoryTheme("FootstepPlanning");
    private static final CategoryTheme XGait = apiFactory.createCategoryTheme("XGait");
    private static final CategoryTheme Environment = apiFactory.createCategoryTheme("Environment");
@@ -75,6 +79,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Quaternion> Quaternion = apiFactory.createTypedTopicTheme("Quaternion");
    private static final TypedTopicTheme<RobotQuadrant> RobotQuadrant = apiFactory.createTypedTopicTheme("RobotQuadrant");
    private static final TypedTopicTheme<FootstepPlan> FootstepPlan = apiFactory.createTypedTopicTheme("FootstepPlan");
+   private static final TypedTopicTheme<List<? extends Point3DReadOnly>> BodyPathPlan = apiFactory.createTypedTopicTheme("BodyPathPlan");
    private static final TypedTopicTheme<Double> Time = apiFactory.createTypedTopicTheme("Time");
    private static final TypedTopicTheme<Double> Length = apiFactory.createTypedTopicTheme("Length");
 
@@ -140,6 +145,11 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlanning).child(Command).topic(Time);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlanning).child(Command).topic(Length);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlanning).child(Result).topic(Time);
+
+
+   /* Body Path Planning */
+   public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPathPlanning).child(Result).topic(Show);
+   public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPathPlanning).child(Result).topic(BodyPathPlan);
 
 
 

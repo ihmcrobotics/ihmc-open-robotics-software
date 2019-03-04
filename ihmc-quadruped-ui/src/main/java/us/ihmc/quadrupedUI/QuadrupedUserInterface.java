@@ -21,6 +21,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
@@ -43,8 +44,7 @@ public class QuadrupedUserInterface
    private final StartGoalPositionEditor startGoalPositionEditor;
    private final StartGoalOrientationEditor startGoalOrientationEditor;
    private final FootstepPathMeshViewer pawPathViewer;
-
-
+   private final BodyPathMeshViewer bodyPathMeshViewer;
 
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
@@ -116,6 +116,8 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.SelectedRegionTopic);
       this.pawPathViewer = new FootstepPathMeshViewer(messager, QuadrupedUIMessagerAPI.FootstepPlanTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                       QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
+      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
+                                                       QuadrupedUIMessagerAPI.BodyPathDataTopic);
 
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
@@ -126,6 +128,8 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
+      view3dFactory.addNodeToView(pawPathViewer.getRoot());
+      view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();
@@ -151,6 +155,7 @@ public class QuadrupedUserInterface
       startGoalPositionEditor.start();
       startGoalOrientationEditor.start();
       pawPathViewer.start();
+      bodyPathMeshViewer.start();
 
 
       robotVisualizer.start();
@@ -183,6 +188,7 @@ public class QuadrupedUserInterface
       startGoalPositionEditor.stop();
       startGoalOrientationEditor.stop();
       pawPathViewer.stop();
+      bodyPathMeshViewer.stop();
 
       try
       {
