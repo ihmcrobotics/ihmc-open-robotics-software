@@ -1,4 +1,4 @@
-package us.ihmc.atlas.behaviorTests;
+package us.ihmc.atlas.behaviors;
 
 import us.ihmc.avatar.AvatarTestYoVariables;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
