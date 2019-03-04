@@ -166,6 +166,11 @@ public class RemoteQuadrupedTeleopManager
       steppingStatePublisher.publish(steppingMessage);
    }
 
+   public void requestBodyTeleop()
+   {
+      bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
+   }
+
    public void requestXGait()
    {
       stepTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));

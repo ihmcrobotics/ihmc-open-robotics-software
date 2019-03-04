@@ -209,8 +209,8 @@ public class QuadrupedAStarFootstepPlannerTest
 
       centerPoint.scale(0.25);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goalPosition, centerPoint, epsilon);
-      assertEquals(goalYaw, nominalYaw, 0.02);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goalPosition, centerPoint, FootstepNode.gridSizeXY);
+      assertEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw);
    }
 
    private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)

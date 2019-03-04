@@ -14,6 +14,7 @@ import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
 
 public abstract class YoVariableHandshakeParser
 {
@@ -55,6 +56,7 @@ public abstract class YoVariableHandshakeParser
    protected int numberOfJointStateVariables;
    protected List<YoVariableRegistry> registries = new ArrayList<>();
    protected List<YoVariable<?>> variables = new ArrayList<>();
+   protected FrameIndexMap frameIndexMap;
 
    public abstract void parseFrom(Handshake handshake) throws IOException;
    public abstract void parseFrom(byte[] handShake) throws IOException;
@@ -67,7 +69,12 @@ public abstract class YoVariableHandshakeParser
    {
       return registries.get(0);
    }
-   
+
+   public FrameIndexMap getFrameIndexMap()
+   {
+      return frameIndexMap;
+   }
+
    public List<YoVariableRegistry> getRegistries()
    {
       return Collections.unmodifiableList(registries);

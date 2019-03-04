@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 
@@ -10,7 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LatticeNodeTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {
       Random random = new Random(3823L);

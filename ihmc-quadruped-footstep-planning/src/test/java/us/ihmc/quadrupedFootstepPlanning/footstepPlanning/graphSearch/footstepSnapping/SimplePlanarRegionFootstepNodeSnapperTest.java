@@ -242,7 +242,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
 
       Point3D snappedPointExpected = new Point3D(snappedX, snappedY, frontLeftRegion.getPlaneZGivenXY(snappedX, snappedY));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(snappedPointExpected, snappedPoint, 1e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(snappedPointExpected, snappedPoint, FootstepNode.gridSizeXY);
    }
 
    @Test

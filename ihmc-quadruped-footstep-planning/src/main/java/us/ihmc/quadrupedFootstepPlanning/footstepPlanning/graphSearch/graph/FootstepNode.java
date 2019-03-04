@@ -157,7 +157,7 @@ public class FootstepNode
       return yIndices.get(robotQuadrant);
    }
 
-   private int getYawIndex()
+   public int getYawIndex()
    {
       return yawIndex;
    }
