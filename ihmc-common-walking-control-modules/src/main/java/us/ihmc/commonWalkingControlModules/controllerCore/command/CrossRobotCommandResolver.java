@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -77,5 +78,11 @@ public class CrossRobotCommandResolver
       out.getExternalWrench().setIncludingFrame(in.getExternalWrench());
       out.getExternalWrench().setReferenceFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchFrameHashCode));
       out.getExternalWrench().setBodyFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchBodyFrameHashCode));
+   }
+
+   public void resolveInverseDynamicsOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand in, InverseDynamicsOptimizationSettingsCommand out)
+   {
+      // There is no thread sensitive information in this command, so the output can directly be set to the input.
+      out.set(in);
    }
 }
