@@ -9,7 +9,7 @@ import javafx.scene.shape.Mesh;
 import javafx.util.Pair;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
@@ -20,11 +20,10 @@ import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
  */
 public class BufferOctreeMeshBuilder implements Runnable
 {
-   private static final Color DEFAULT_BUFFER_COLOR = Color.DARKRED;
    private static final double NODE_SCALE = 0.5;
 
    private final JavaFXMeshBuilder bufferMeshBuilder = new JavaFXMeshBuilder();
-   private final Material bufferMaterial = new PhongMaterial(DEFAULT_BUFFER_COLOR);
+   private final Material bufferMaterial;
 
    private final AtomicReference<Boolean> showBuffer;
    private final AtomicReference<NormalOcTreeMessage> bufferState;
@@ -34,11 +33,16 @@ public class BufferOctreeMeshBuilder implements Runnable
    private boolean hasClearedBufferGraphics = false;
    private final REAUIMessager uiMessager;
 
-   public BufferOctreeMeshBuilder(REAUIMessager uiMessager)
+   private final Topic<Boolean> requestBufferTopic;
+
+   public BufferOctreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> uiShowBufferTopic, Topic<Boolean> requestBufferTopic,
+                                  Topic<NormalOcTreeMessage> bufferStateTopic, Color color)
    {
       this.uiMessager = uiMessager;
-      showBuffer = uiMessager.createInput(REAModuleAPI.UIOcTreeShowBuffer, false);
-      bufferState = uiMessager.createInput(REAModuleAPI.OcTreeBufferState);
+      this.requestBufferTopic = requestBufferTopic;
+      bufferMaterial = new PhongMaterial(color);
+      showBuffer = uiMessager.createInput(uiShowBufferTopic, false);
+      bufferState = uiMessager.createInput(bufferStateTopic);
    }
 
    @Override
@@ -56,7 +60,7 @@ public class BufferOctreeMeshBuilder implements Runnable
          return;
       }
 
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestBuffer);
+      uiMessager.submitStateRequestToModule(requestBufferTopic);
 
       bufferMeshBuilder.clear();
 

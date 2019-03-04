@@ -1,0 +1,75 @@
+#ifndef __controller_msgs__msg__QuadrupedFootstepPlannerParametersPacket__idl__
+#define __controller_msgs__msg__QuadrupedFootstepPlannerParametersPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const double NO_VALUE_DOUBLE =
+      -11.1;
+
+
+      /**
+       * This message is part of the IHMC quadruped footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedFootstepPlannerParametersPacket_")
+      struct QuadrupedFootstepPlannerParametersPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=-11.1)
+        double maximum_step_reach;
+        @defaultValue(value=-11.1)
+        double maximum_step_width;
+        @defaultValue(value=-11.1)
+        double maximum_step_cycle_distance;
+        @defaultValue(value=-11.1)
+        double minimum_step_length;
+        @defaultValue(value=-11.1)
+        double minimum_step_width;
+        @defaultValue(value=-11.1)
+        double minimum_step_yaw;
+        @defaultValue(value=-11.1)
+        double maximum_step_yaw;
+        @defaultValue(value=-11.1)
+        double maximum_step_change_z;
+        @defaultValue(value=-11.1)
+        double maximum_step_cycle_change_z;
+        @defaultValue(value=-11.1)
+        double body_ground_clearance;
+        @defaultValue(value=-11.1)
+        double forward_weight;
+        @defaultValue(value=-11.1)
+        double lateral_weight;
+        @defaultValue(value=-11.1)
+        double yaw_weight;
+        @defaultValue(value=-11.1)
+        double cost_per_step;
+        @defaultValue(value=-11.1)
+        double step_up_weight;
+        @defaultValue(value=-11.1)
+        double step_down_weight;
+        @defaultValue(value=-11.1)
+        double heuristics_weight;
+        @defaultValue(value=-11.1)
+        double min_x_clearance_from_foot;
+        @defaultValue(value=-11.1)
+        double min_y_clearance_from_foot;
+        @defaultValue(value=-11.1)
+        double minimum_surface_incline_radians;
+        @defaultValue(value=-11.1)
+        double cliff_height_to_avoid;
+        @defaultValue(value=-11.1)
+        double minimum_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double minimum_distance_from_cliff_tops;
+      };
+    };
+  };
+};
+
+#endif

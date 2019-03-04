@@ -6,6 +6,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedFootstepPlannerStart extends QuadrupedFootstepPlannerTarget
 {
+   private RobotQuadrant initialQuadrant = null;
+
    public void setStartPose(FramePose3DReadOnly startPose)
    {
       setStartType(FootstepPlannerTargetType.POSE_BETWEEN_FEET);
@@ -21,5 +23,15 @@ public class QuadrupedFootstepPlannerStart extends QuadrupedFootstepPlannerTarge
    public void setStartType(FootstepPlannerTargetType startType)
    {
       this.targetType = startType;
+   }
+
+   public void setInitialQuadrant(RobotQuadrant initialQuadrant)
+   {
+      this.initialQuadrant = initialQuadrant;
+   }
+
+   public RobotQuadrant getInitialQuadrant()
+   {
+      return initialQuadrant;
    }
 }

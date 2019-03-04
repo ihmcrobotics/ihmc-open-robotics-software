@@ -96,6 +96,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
+      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public abstract double getPelvisOffsetHeight();

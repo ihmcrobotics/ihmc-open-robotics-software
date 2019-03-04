@@ -149,4 +149,9 @@ public class FootstepGraph
       if (!nodeCostMap.containsKey(node))
          throw new RuntimeException("Node has not been added to graph yet.");
    }
+
+   public FootstepNode getParentNode(FootstepNode node)
+   {
+      return incomingBestEdge.get(node).getStartNode();
+   }
 }

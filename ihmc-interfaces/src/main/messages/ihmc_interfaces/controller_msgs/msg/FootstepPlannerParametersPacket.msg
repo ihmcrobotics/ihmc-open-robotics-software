@@ -236,10 +236,5 @@ float64 min_x_clearance_from_stance -1.0
 # this parameter.
 float64 min_y_clearance_from_stance -1.0
 
-# The bounding box for body collision checking places the box at the mid-foot frame between consecutive steps.
-# If t if the xy-translation between these two steps in mid-foot frame, the box's depth and with are expanded
-# by (alpha * t.x) and (alpha * t.y) respectively.
-float64 step_translation_bounding_box_scale_factor -1.0
-
 # When using a cost based planning approach this value defines the weighting parameters to be used
 FootstepPlannerCostParametersPacket cost_parameters

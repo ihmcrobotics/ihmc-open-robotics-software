@@ -4,10 +4,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.jOctoMap.pointCloud.PointCloud;
+import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 public class REAOcTreeBuffer
@@ -15,37 +23,57 @@ public class REAOcTreeBuffer
    private static final int NUMBER_OF_SAMPLES = 100000;
 
    private final AtomicReference<LidarScanMessage> latestLidarScanMessage = new AtomicReference<>(null);
+   private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<ScanCollection> newFullScanReference = new AtomicReference<>(null);
 
    private final AtomicReference<Boolean> enable;
-   private final AtomicReference<Integer> bufferSize;
+   private final AtomicReference<Boolean> enableBuffer;
+   private final AtomicReference<Integer> ocTreeCapacity;
+   private final AtomicReference<Integer> messageCapacity;
 
    private final AtomicBoolean clearBuffer = new AtomicBoolean(false);
    private final AtomicBoolean isBufferFull = new AtomicBoolean(false);
    private final AtomicBoolean isBufferRequested = new AtomicBoolean(false);
    private final AtomicReference<NormalOcTree> newBuffer = new AtomicReference<>(null);
 
-   private final double octreeResolution;
+   private final AtomicReference<Boolean> isBufferStateRequested;
 
-   private final REAModuleStateReporter moduleStateReporter;
+   private final double octreeResolution;
+   private int messageCounter = 0;
 
    private final Messager reaMessager;
 
-   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, REAModuleStateReporter moduleStateReporter)
+   private final Topic<Boolean> enableBufferTopic;
+   private final Topic<Integer> ocTreeCapacityTopic;
+   private final Topic<Integer> messageCapacityTopic;
+   private final Topic<NormalOcTreeMessage> stateTopic;
+
+   public REAOcTreeBuffer(double octreeResolution, Messager reaMessager, Topic<Boolean> enableBufferTopic, boolean enableBufferInitialValue,
+                          Topic<Integer> ocTreeCapacityTopic, int ocTreeCapacityValue, Topic<Integer> messageCapacityTopic, int messageCapacityInitialValue,
+                          Topic<Boolean> requestStateTopic, Topic<NormalOcTreeMessage> stateTopic)
    {
       this.octreeResolution = octreeResolution;
       this.reaMessager = reaMessager;
-      this.moduleStateReporter = moduleStateReporter;
+      this.enableBufferTopic = enableBufferTopic;
+      this.ocTreeCapacityTopic = ocTreeCapacityTopic;
+      this.messageCapacityTopic = messageCapacityTopic;
+      this.stateTopic = stateTopic;
 
       enable = reaMessager.createInput(REAModuleAPI.OcTreeEnable, true);
-      bufferSize = reaMessager.createInput(REAModuleAPI.OcTreeBufferSize, 10000);
+      enableBuffer = reaMessager.createInput(enableBufferTopic, enableBufferInitialValue);
+      ocTreeCapacity = reaMessager.createInput(ocTreeCapacityTopic, ocTreeCapacityValue);
+      messageCapacity = reaMessager.createInput(messageCapacityTopic, messageCapacityInitialValue);
+
+      isBufferStateRequested = reaMessager.createInput(requestStateTopic, false);
 
       reaMessager.registerTopicListener(REAModuleAPI.RequestEntireModuleState, (messageContent) -> sendCurrentState());
    }
 
    private void sendCurrentState()
    {
-      reaMessager.submitMessage(REAModuleAPI.OcTreeBufferSize, bufferSize.get());
+      reaMessager.submitMessage(enableBufferTopic, enableBuffer.get());
+      reaMessager.submitMessage(ocTreeCapacityTopic, ocTreeCapacity.get());
+      reaMessager.submitMessage(messageCapacityTopic, messageCapacity.get());
    }
 
    public void loadConfiguration(FilePropertyHelper filePropertyHelper)
@@ -53,14 +81,22 @@ public class REAOcTreeBuffer
       Boolean enableFile = filePropertyHelper.loadBooleanProperty(REAModuleAPI.OcTreeEnable.getName());
       if (enableFile != null)
          enable.set(enableFile);
-      Integer bufferSizeFile = filePropertyHelper.loadIntegerProperty(REAModuleAPI.OcTreeBufferSize.getName());
-      if (bufferSizeFile != null)
-         bufferSize.set(bufferSizeFile);
+      Boolean enableBufferFile = filePropertyHelper.loadBooleanProperty(enableBufferTopic.getName());
+      if (enableBufferFile != null)
+         enableBuffer.set(enableBufferFile);
+      Integer ocTreeCapacityFile = filePropertyHelper.loadIntegerProperty(ocTreeCapacityTopic.getName());
+      if (ocTreeCapacityFile != null)
+         ocTreeCapacity.set(ocTreeCapacityFile);
+      Integer messageCapacityFile = filePropertyHelper.loadIntegerProperty(messageCapacityTopic.getName());
+      if (messageCapacityFile != null)
+         messageCapacity.set(messageCapacityFile);
    }
 
    public void saveConfiguration(FilePropertyHelper filePropertyHelper)
    {
-      filePropertyHelper.saveProperty(REAModuleAPI.OcTreeBufferSize.getName(), bufferSize.get());
+      filePropertyHelper.saveProperty(enableBufferTopic.getName(), enableBuffer.get());
+      filePropertyHelper.saveProperty(ocTreeCapacityTopic.getName(), ocTreeCapacity.get());
+      filePropertyHelper.saveProperty(messageCapacityTopic.getName(), messageCapacity.get());
    }
 
    public Runnable createBufferThread()
@@ -75,9 +111,10 @@ public class REAOcTreeBuffer
             updateScanCollection();
             ScanCollection newScan = newFullScanReference.getAndSet(null);
 
-            if (clearBuffer.getAndSet(false))
+            if (!enable.get() || !enableBuffer.get() || clearBuffer.getAndSet(false))
             {
                bufferOctree.clear();
+               messageCounter = 0;
                isBufferFull.set(false);
                isBufferRequested.set(false);
                return;
@@ -87,18 +124,31 @@ public class REAOcTreeBuffer
                return;
 
             bufferOctree.insertScanCollection(newScan, false);
+            messageCounter++;
 
-            int numberOfLeafNodesInBuffer = bufferOctree.getNumberOfLeafNodes();
-            isBufferFull.set(numberOfLeafNodesInBuffer >= bufferSize.get().intValue());
+            if (messageCounter >= messageCapacity.get().intValue())
+            {
+               isBufferFull.set(true);
+            }
+            else
+            {
+               int numberOfLeafNodesInBuffer = bufferOctree.getNumberOfLeafNodes();
+               if (numberOfLeafNodesInBuffer >= ocTreeCapacity.get().intValue())
+                  isBufferFull.set(true);
+               else
+                  isBufferFull.set(false);
+            }
 
             if (isBufferRequested.get())
             {
                newBuffer.set(bufferOctree);
                bufferOctree = new NormalOcTree(octreeResolution);
                isBufferRequested.set(false);
+               messageCounter = 0;
             }
 
-            moduleStateReporter.reportBufferOcTreeState(bufferOctree);
+            if (isBufferStateRequested.getAndSet(false))
+               reaMessager.submitMessage(stateTopic, OcTreeMessageConverter.convertToMessage(bufferOctree));
          }
       };
    }
@@ -123,21 +173,56 @@ public class REAOcTreeBuffer
       return newBuffer.getAndSet(null);
    }
 
-   private void updateScanCollection()
+   public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
    {
-      LidarScanMessage lidarScanMessage = latestLidarScanMessage.getAndSet(null);
-
-      if (!enable.get() || lidarScanMessage == null)
-         return;
-
-      ScanCollection scanCollection = new ScanCollection();
-      newFullScanReference.set(scanCollection);
-      scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
-      scanCollection.addScan(lidarScanMessage.getScan().toArray(), lidarScanMessage.getLidarPosition());
+      latestStereoVisionPointCloudMessage.set(message);
    }
 
    public void handleLidarScanMessage(LidarScanMessage message)
    {
       latestLidarScanMessage.set(message);
+   }
+
+   private void updateScanCollection()
+   {
+      LidarScanMessage lidarMessage = latestLidarScanMessage.getAndSet(null);
+      StereoVisionPointCloudMessage stereoMessage = latestStereoVisionPointCloudMessage.getAndSet(null);
+
+      if (!enable.get() || !enableBuffer.get())
+         return;
+
+      if (lidarMessage != null)
+      {
+         ScanCollection scanCollection = new ScanCollection();
+         newFullScanReference.set(scanCollection);
+         scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
+         // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
+         scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
+      }
+
+      if (stereoMessage != null)
+      {
+         ScanCollection scanCollection = new ScanCollection();
+         newFullScanReference.set(scanCollection);
+         scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
+         // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
+         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+      }
+   }
+
+   private static Scan toScan(Float data, Point3DReadOnly sensorPosition)
+   {
+      PointCloud pointCloud = new PointCloud();
+
+      int bufferIndex = 0;
+
+      while (bufferIndex < data.size())
+      {
+         float x = data.getQuick(bufferIndex++);
+         float y = data.getQuick(bufferIndex++);
+         float z = data.getQuick(bufferIndex++);
+         pointCloud.add(x, y, z);
+      }
+      return new Scan(sensorPosition, pointCloud);
    }
 }

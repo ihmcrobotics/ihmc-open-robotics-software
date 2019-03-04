@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-flat-ground-3")
 public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

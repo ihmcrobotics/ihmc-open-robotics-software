@@ -1,6 +1,6 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci") version "4.7"
+   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
@@ -18,13 +18,13 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.5"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
 }
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

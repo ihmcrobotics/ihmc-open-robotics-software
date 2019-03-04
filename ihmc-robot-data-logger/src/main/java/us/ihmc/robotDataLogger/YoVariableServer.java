@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -183,6 +184,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
       }
 
       handshakeBuilder = new YoVariableHandShakeBuilder(rootRegistryName, dt);
+      handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
       int maxVariables = 0;
       int maxStates = 0;
       for (int i = 0; i < registeredBuffers.size(); i++)
@@ -244,6 +246,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
       started = true;
    }
 
+   @Override
    public synchronized void close()
    {
       if (started && !stopped)
@@ -268,6 +271,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
     * 
     * @param timestamp timestamp to send to logger
     */
+   @Override
    public void update(long timestamp)
    {
       update(timestamp, mainRegistry);
@@ -281,6 +285,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
     * @param timestamp timestamp to send to the logger
     * @param registry Top level registry to update
     */
+   @Override
    public void update(long timestamp, YoVariableRegistry registry)
    {
       if (!started && !stopped)
@@ -311,6 +316,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
       buffer.flush();
    }
 
+   @Override
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registeredBuffers.add(new RegistrySendBufferBuilder(registry, null, yoGraphicsListRegistry));

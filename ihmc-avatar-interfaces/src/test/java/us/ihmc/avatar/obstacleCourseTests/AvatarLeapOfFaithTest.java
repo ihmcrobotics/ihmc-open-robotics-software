@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@Tag("humanoid-obstacle")
+@Tag("humanoid-obstacle-2")
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 {
    private static final Random random = new Random(100L);

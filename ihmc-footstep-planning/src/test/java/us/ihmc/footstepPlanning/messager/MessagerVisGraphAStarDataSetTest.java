@@ -33,12 +33,10 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
    public static void main(String[] args) throws Exception
    {
       MessagerVisGraphAStarDataSetTest test = new MessagerVisGraphAStarDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(test::runAssertions, "20171215_214730_CinderBlockField");
       ThreadTools.sleepForever();
       test.tearDown();
-
    }
 }

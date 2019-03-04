@@ -7,10 +7,10 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
@@ -23,10 +23,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -201,7 +201,7 @@ public class InverseDynamicsOptimizationControlModule
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            PrintTools.warn(this, "The QP has not converged. Only showing this once if it happens repeatedly.");
+            LogTools.warn("The QP has not converged. Only showing this once if it happens repeatedly.");
          }
 
          hasNotConvergedInPast.set(true);
@@ -366,8 +366,25 @@ public class InverseDynamicsOptimizationControlModule
       wrenchMatrixCalculator.submitContactWrenchCommand(command);
    }
 
-   public void submitOptimizationSettingsCommand(OptimizationSettingsCommand command)
+   public void submitOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand command)
    {
-      rhoMin.set(command.getRhoMin());
+      if (command.hasRhoMin())
+         rhoMin.set(command.getRhoMin());
+      if (command.hasJointAccelerationMax())
+         absoluteMaximumJointAcceleration.set(command.getJointAccelerationMax());
+      if (command.hasRhoWeight())
+         wrenchMatrixCalculator.setRhoWeight(command.getRhoWeight());
+      if (command.hasRhoRateWeight())
+         wrenchMatrixCalculator.setRhoRateWeight(command.getRhoRateWeight());
+      if (command.hasCenterOfPressureWeight())
+         wrenchMatrixCalculator.setDesiredCoPWeight(command.getCenterOfPressureWeight());
+      if (command.hasCenterOfPressureRateWeight())
+         wrenchMatrixCalculator.setCoPRateWeight(command.getCenterOfPressureRateWeight());
+      if (command.hasJointAccelerationWeight())
+         qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
+      if (command.hasJointJerkWeight())
+         qpSolver.setJerkRegularizationWeight(command.getJointJerkWeight());
+      if (command.hasJointTorqueWeight())
+         qpSolver.setJointTorqueWeight(command.getJointTorqueWeight());
    }
 }

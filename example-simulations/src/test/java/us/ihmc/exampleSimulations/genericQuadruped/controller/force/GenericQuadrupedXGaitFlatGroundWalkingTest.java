@@ -19,6 +19,18 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    }
 
    @Override
+   public double getPacingStepDuration()
+   {
+      return 0.3;
+   }
+
+   @Override
+   public double getPacingEndDoubleSupportDuration()
+   {
+      return 0.05;
+   }
+
+   @Override
    public double getFastWalkingSpeed()
    {
       return 0.8;

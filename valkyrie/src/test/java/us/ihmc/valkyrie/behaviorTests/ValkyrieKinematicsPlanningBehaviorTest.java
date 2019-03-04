@@ -35,4 +35,11 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
    {
       super.testReachToDoorKnob();
    }
+   
+   @Override
+   @Test
+   public void testSingleKeyFrameInput() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testSingleKeyFrameInput();
+   }
 }

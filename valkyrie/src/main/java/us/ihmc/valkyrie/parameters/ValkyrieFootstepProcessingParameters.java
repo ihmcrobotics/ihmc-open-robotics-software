@@ -4,6 +4,38 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParamet
 
 public class ValkyrieFootstepProcessingParameters implements FootstepProcessingParameters
 {
+   /**
+    * Parameters for setting swing height as a function of vertical step displacement
+    */
+
+   @Override
+   public double getMinimumSwingHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumSwingHeight()
+   {
+      return 0.08;
+   }
+
+   @Override
+   public double getMaximumStepHeightForMinimumSwingHeight()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinimumStepHeightForMaximumSwingHeight()
+   {
+      return 0.1;
+   }
+   
+   /**
+    * Parameters for setting swing time as a function of horizontal and vertical step displacement
+    */
+   
    @Override
    public double getMinimumSwingTime()
    {
@@ -26,5 +58,17 @@ public class ValkyrieFootstepProcessingParameters implements FootstepProcessingP
    public double getMinimumStepTranslationForMaximumSwingTime()
    {
       return 0.6;
+   }
+
+   @Override
+   public double getMaximumStepHeightForMinimumSwingTime()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinimumStepHeightForMaximumSwingTime()
+   {
+      return 0.1;
    }
 }

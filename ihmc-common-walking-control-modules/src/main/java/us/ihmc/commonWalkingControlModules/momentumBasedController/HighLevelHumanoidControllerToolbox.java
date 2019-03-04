@@ -385,24 +385,7 @@ public class HighLevelHumanoidControllerToolbox
                                                                                               yoAngularMomentum);
       momentumGain.set(0.0);
 
-      attachControllerFailureListener(new ControllerFailureListener()
-      {
-         @Override
-         public void controllerFailed(FrameVector2D fallingDirection)
-         {
-            reportControllerFailed();
-         }
-      });
-   }
-
-   public void reportControllerFailed()
-   {
-      controllerFailed.set(true);
-   }
-
-   public YoBoolean getControllerFailedBoolean()
-   {
-      return controllerFailed;
+      attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
@@ -938,6 +921,11 @@ public class HighLevelHumanoidControllerToolbox
    public OneDoFJointBasics[] getControlledOneDoFJoints()
    {
       return controlledOneDoFJoints;
+   }
+
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerFailed;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

@@ -79,6 +79,17 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
             * Gets the weight for the heuristics in the Body path based planner.
             */
    public double body_path_based_heuristics_weight_ = -1.0;
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public double maximum_2d_distance_from_bounding_box_to_penalize_ = -1.0;
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public double bounding_box_cost_ = -1.0;
 
    public FootstepPlannerCostParametersPacket()
    {
@@ -121,6 +132,10 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
 
       body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
+
+      maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
+
+      bounding_box_cost_ = other.bounding_box_cost_;
 
    }
 
@@ -365,6 +380,42 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       return body_path_based_heuristics_weight_;
    }
 
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum_2d_distance_from_bounding_box_to_penalize)
+   {
+      maximum_2d_distance_from_bounding_box_to_penalize_ = maximum_2d_distance_from_bounding_box_to_penalize;
+   }
+   /**
+            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+            * @see FootstepPlannerCostParameters#getBoundingBoxCost
+            */
+   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
+   {
+      return maximum_2d_distance_from_bounding_box_to_penalize_;
+   }
+
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public void setBoundingBoxCost(double bounding_box_cost)
+   {
+      bounding_box_cost_ = bounding_box_cost;
+   }
+   /**
+            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+            * {@code c * (1 - d / d_max)}, where d_max is this value.
+            */
+   public double getBoundingBoxCost()
+   {
+      return bounding_box_cost_;
+   }
+
 
    public static Supplier<FootstepPlannerCostParametersPacketPubSubType> getPubSubType()
    {
@@ -413,6 +464,10 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
+
 
       return true;
    }
@@ -456,6 +511,10 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
 
       if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
 
+      if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
+
+      if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
+
 
       return true;
    }
@@ -495,7 +554,11 @@ public class FootstepPlannerCostParametersPacket extends Packet<FootstepPlannerC
       builder.append("depth_first_heuristics_weight=");
       builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
       builder.append("body_path_based_heuristics_weight=");
-      builder.append(this.body_path_based_heuristics_weight_);
+      builder.append(this.body_path_based_heuristics_weight_);      builder.append(", ");
+      builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
+      builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
+      builder.append("bounding_box_cost=");
+      builder.append(this.bounding_box_cost_);
       builder.append("}");
       return builder.toString();
    }

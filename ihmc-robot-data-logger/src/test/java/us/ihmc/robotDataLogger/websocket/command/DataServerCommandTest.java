@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.websocket.command;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
