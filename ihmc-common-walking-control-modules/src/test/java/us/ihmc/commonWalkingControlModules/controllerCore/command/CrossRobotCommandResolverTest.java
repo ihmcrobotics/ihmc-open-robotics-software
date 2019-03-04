@@ -12,6 +12,7 @@ import org.reflections.Reflections;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -24,9 +25,15 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 class CrossRobotCommandResolverTest
@@ -163,7 +170,25 @@ class CrossRobotCommandResolverTest
       assertEquals(expectedOut, actualOut);
    }
 
-   private CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   @Test
+   void testResolveContactWrenchCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      long seed = random.nextLong();
+      // By using the same seed on a fresh random, the two commands will be built the same way.
+      ContactWrenchCommand in = nextContactWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+      ContactWrenchCommand expectedOut = nextContactWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+      ContactWrenchCommand actualOut = new ContactWrenchCommand();
+      crossRobotCommandResolver.resolveContactWrenchCommand(in, actualOut);
+      assertEquals(expectedOut, actualOut);
+   }
+
+   public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
       next.setConstraintType(nextElementIn(random, ConstraintType.values()));
@@ -173,9 +198,21 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static <E> E nextElementIn(Random random, E[] array)
+   public static ContactWrenchCommand nextContactWrenchCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
-      return array[random.nextInt(array.length)];
+      ContactWrenchCommand next = new ContactWrenchCommand();
+      next.setConstraintType(nextElementIn(random, ConstraintType.values()));
+      next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
+      next.getWrench().setIncludingFrame(nextWrench(random, possibleFrames));
+      next.getWeightMatrix().set(nextWeightMatrix6D(random, possibleFrames));
+      next.getSelectionMatrix().set(nextSelectionMatrix6D(random, possibleFrames));
+      return next;
+   }
+
+   @SafeVarargs
+   public static <E> E nextElementIn(Random random, E... elements)
+   {
+      return elements[random.nextInt(elements.length)];
    }
 
    public static <E> E nextElementIn(Random random, List<E> list)
@@ -201,6 +238,43 @@ class CrossRobotCommandResolverTest
    public static FrameVector3D nextFrameVector3D(Random random, ReferenceFrame... possibleFrames)
    {
       return EuclidFrameRandomTools.nextFrameVector3D(random, nextElementIn(random, possibleFrames));
+   }
+
+   public static Wrench nextWrench(Random random, ReferenceFrame... possibleFrames)
+   {
+      return MecanoRandomTools.nextWrench(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
+   }
+
+   public static WeightMatrix3D nextWeightMatrix3D(Random random, ReferenceFrame... possibleFrames)
+   {
+      WeightMatrix3D next = new WeightMatrix3D();
+      next.setWeights(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setWeightFrame(nextElementIn(random, possibleFrames));
+      return next;
+   }
+
+   public static WeightMatrix6D nextWeightMatrix6D(Random random, ReferenceFrame... possibleFrames)
+   {
+      WeightMatrix6D next = new WeightMatrix6D();
+      next.setAngularPart(nextWeightMatrix3D(random, possibleFrames));
+      next.setLinearPart(nextWeightMatrix3D(random, possibleFrames));
+      return next;
+   }
+
+   public static SelectionMatrix3D nextSelectionMatrix3D(Random random, ReferenceFrame... possibleFrames)
+   {
+      SelectionMatrix3D next = new SelectionMatrix3D();
+      next.setAxisSelection(random.nextBoolean(), random.nextBoolean(), random.nextBoolean());
+      next.setSelectionFrame(nextElementIn(random, possibleFrames));
+      return next;
+   }
+
+   public static SelectionMatrix6D nextSelectionMatrix6D(Random random, ReferenceFrame... possibleFrames)
+   {
+      SelectionMatrix6D next = new SelectionMatrix6D();
+      next.setAngularPart(nextSelectionMatrix3D(random, possibleFrames));
+      next.setLinearPart(nextSelectionMatrix3D(random, possibleFrames));
+      return next;
    }
 
    private static class TestData
