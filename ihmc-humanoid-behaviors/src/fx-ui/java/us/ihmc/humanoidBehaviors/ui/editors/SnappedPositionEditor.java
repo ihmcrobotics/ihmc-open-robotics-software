@@ -10,9 +10,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIState;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransition;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
@@ -32,24 +31,15 @@ public class SnappedPositionEditor extends FXUIEditor
    {
       super(messager, subScene);
 
-      positionEditorStateMachine = new FXUIStateMachine(messager,
-                                                        FXUIState.SNAPPED_POSITION_EDITOR,
-                                                        FXUIStateTransition.POSITION_LEFT_CLICK)
+      positionEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
-         @Override
-         protected void handleTransition(FXUIStateTransition transition)
-         {
-            if (transition.isStart())
-            {
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-            }
-            else if (transition == FXUIStateTransition.POSITION_LEFT_CLICK)
-            {
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
-            }
-         }
-      };
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+      });
+      positionEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
+      {
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
+      });
 
       selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
    }
@@ -89,13 +79,13 @@ public class SnappedPositionEditor extends FXUIEditor
          {
             LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
             deactivate();
-            activeStateMachine.get().transition(FXUIStateTransition.POSITION_LEFT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
             deactivate();
-            activeStateMachine.get().transition(FXUIStateTransition.RIGHT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
          }
       }
    }

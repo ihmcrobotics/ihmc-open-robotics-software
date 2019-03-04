@@ -25,7 +25,6 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    @FXML private Button placeWaypoints;
 
    private JavaFXMessager messager;
-   private Node sceneNode;
    private AtomicReference<FXUIEditor> activeEditor;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
@@ -42,48 +41,41 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
       activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
 
-      waypointPlacementStateMachine = new FXUIStateMachine(messager,
-                                                           FXUIState.SNAPPED_POSITION_EDITOR,
-                                                           FXUIStateTransition.RIGHT_CLICK)
+      waypointPlacementStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
       {
-         @Override
-         protected void handleTransition(FXUIStateTransition transition)
-         {
-            if (transition.isStart() || transition == FXUIStateTransition.ORIENTATION_LEFT_CLICK)
-            {
-               if (transition.isStart())
-               {
-                  removeAllWaypointGraphics();
-               }
+         removeAllWaypointGraphics();
+         goToNextWaypointPositionEdit();
+      });
+      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
+      {
+         PatrolWaypoint latestWaypoint = waypoints.get(waypoints.size() - 1);
+         latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
+         messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
+      });
+      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
+      {
+         goToNextWaypointPositionEdit();
+      });
+      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      {
+         LogTools.debug("Completed waypoint placement.");
 
-               PatrolWaypoint waypointGraphic = createWaypointGraphic(messager);
-               LogTools.debug("Placing waypoint {}", waypoints.size());
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
-            }
-            else if (transition == FXUIStateTransition.POSITION_LEFT_CLICK)
-            {
-               PatrolWaypoint latestWaypoint = waypoints.get(waypoints.size() - 1);
-               latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
-            }
-            else if (transition == FXUIStateTransition.RIGHT_CLICK)
-            {
-               LogTools.debug("Completed waypoint placement.");
+         removeWaypoint(waypoints.get(waypoints.size() - 1));
 
-               removeWaypoint(waypoints.get(waypoints.size() - 1));
-
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
-            }
-         }
-      };
-      this.sceneNode = sceneNode;
-      waypointPlacementStateMachine.mapTransitionToState(FXUIStateTransition.POSITION_LEFT_CLICK, FXUIState.ORIENTATION_EDITOR);
-      waypointPlacementStateMachine.mapTransitionToState(FXUIStateTransition.ORIENTATION_LEFT_CLICK, FXUIState.SNAPPED_POSITION_EDITOR);
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
+      });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
+   }
+
+   private void goToNextWaypointPositionEdit()
+   {
+      PatrolWaypoint waypointGraphic = createWaypointGraphic(messager);
+      LogTools.debug("Placing waypoint {}", waypoints.size());
+      messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+      messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
    }
 
    private final void mouseClicked(MouseEvent event)

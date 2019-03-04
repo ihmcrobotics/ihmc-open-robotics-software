@@ -12,9 +12,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIState;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransition;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
 import us.ihmc.humanoidBehaviors.ui.references.TypedNotification;
@@ -34,22 +33,15 @@ public class OrientationYawEditor extends FXUIEditor
    {
       super(messager, sceneNode);
 
-      orientationEditorStateMachine = new FXUIStateMachine(messager, FXUIState.ORIENTATION_EDITOR, FXUIStateTransition.POSITION_LEFT_CLICK)
+      orientationEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
-         @Override
-         protected void handleTransition(FXUIStateTransition transition)
-         {
-            if (transition.isStart())
-            {
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-            }
-            else if (transition == FXUIStateTransition.ORIENTATION_LEFT_CLICK)
-            {
-               messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-               messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
-            }
-         }
-      };
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
+      });
+      orientationEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
+      {
+         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
+      });
 
       selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
    }
@@ -89,13 +81,13 @@ public class OrientationYawEditor extends FXUIEditor
          {
             LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
             deactivate();
-            activeStateMachine.get().transition(FXUIStateTransition.ORIENTATION_LEFT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK);
          }
 
          if (mouseRightClicked.poll())
          {
             deactivate();
-            activeStateMachine.get().transition(FXUIStateTransition.RIGHT_CLICK);
+            activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
          }
       }
    }
