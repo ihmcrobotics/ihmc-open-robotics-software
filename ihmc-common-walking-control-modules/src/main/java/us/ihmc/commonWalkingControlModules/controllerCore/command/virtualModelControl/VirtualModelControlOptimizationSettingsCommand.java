@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
-public class VirtualModelControlOptimizationSettingsCommand implements InverseDynamicsCommand<VirtualModelControlOptimizationSettingsCommand>,
-      InverseKinematicsCommand<VirtualModelControlOptimizationSettingsCommand>, VirtualModelControlCommand<VirtualModelControlOptimizationSettingsCommand>
+public class VirtualModelControlOptimizationSettingsCommand implements VirtualModelControlCommand<VirtualModelControlOptimizationSettingsCommand>
 {
    private double rhoMin = Double.NaN;
    private double rhoWeight = Double.NaN;
