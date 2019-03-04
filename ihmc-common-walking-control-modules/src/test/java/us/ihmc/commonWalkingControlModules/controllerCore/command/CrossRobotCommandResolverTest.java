@@ -235,8 +235,8 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseDynamicsOptimizationSettingsCommand in = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed));
-         InverseDynamicsOptimizationSettingsCommand expectedOut = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed));
+         InverseDynamicsOptimizationSettingsCommand in = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         InverseDynamicsOptimizationSettingsCommand expectedOut = nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          InverseDynamicsOptimizationSettingsCommand actualOut = new InverseDynamicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseDynamicsOptimizationSettingsCommand(in, actualOut);
          assertEquals(expectedOut, actualOut);
@@ -272,7 +272,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random)
+   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
       next.setRhoMin(random.nextDouble());
