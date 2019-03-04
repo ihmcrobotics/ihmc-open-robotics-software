@@ -60,14 +60,12 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> ignorePartialFootholds;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
-   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
+   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(true);
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
-
-   private static final Color intermediateFootstepColor = Color.rgb(160, 160, 160);
 
    public FootstepPathMeshViewer(Messager messager)
    {
@@ -176,15 +174,33 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       if(renderShiftedFootsteps.get())
       {
-         return hasDefaultWaypointProportions(footstepDataMessage) ? Color.GREEN : Color.RED;
+         if(hasDefaultWaypointProportions(footstepDataMessage))
+         {
+            // default waypoints
+            return Color.GRAY;
+         }
+         else
+         {
+            double epsilon = 1e-5;
+            if(EuclidCoreTools.epsilonEquals(defaultWaypointProportions[0], footstepDataMessage.getCustomWaypointProportions().get(0), epsilon))
+            {
+               // second waypoint shifted forward
+               return Color.GREEN;
+            }
+            else
+            {
+               // first waypoint shifted back
+               return Color.RED;
+            }
+         }
       }
-      else if (showIntermediatePlan.get())
+      else if (solutionWasReceived.get())
       {
-         return intermediateFootstepColor;
+         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
       }
       else
       {
-         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
+         return Color.GRAY;
       }
    }
 
