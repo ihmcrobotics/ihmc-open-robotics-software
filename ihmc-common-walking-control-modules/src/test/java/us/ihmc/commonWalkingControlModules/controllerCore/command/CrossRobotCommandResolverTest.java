@@ -13,6 +13,7 @@ import org.reflections.Reflections;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -39,6 +40,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 class CrossRobotCommandResolverTest
 {
    private static final String CONTROLLER_CORE_COMMANDS_PACKAGE = "us.ihmc.commonWalkingControlModules.controllerCore.command";
+   private static final int ITERATIONS = 20;
 
    @SuppressWarnings("rawtypes")
    @Test
@@ -161,13 +163,16 @@ class CrossRobotCommandResolverTest
 
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
-      long seed = random.nextLong();
-      // By using the same seed on a fresh random, the two commands will be built the same way.
-      CenterOfPressureCommand in = nextCenterOfPressureCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-      CenterOfPressureCommand expectedOut = nextCenterOfPressureCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
-      CenterOfPressureCommand actualOut = new CenterOfPressureCommand();
-      crossRobotCommandResolver.resolveCenterOfPressureCommand(in, actualOut);
-      assertEquals(expectedOut, actualOut);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         CenterOfPressureCommand in = nextCenterOfPressureCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         CenterOfPressureCommand expectedOut = nextCenterOfPressureCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         CenterOfPressureCommand actualOut = new CenterOfPressureCommand();
+         crossRobotCommandResolver.resolveCenterOfPressureCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
    }
 
    @Test
@@ -179,13 +184,39 @@ class CrossRobotCommandResolverTest
 
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
-      long seed = random.nextLong();
-      // By using the same seed on a fresh random, the two commands will be built the same way.
-      ContactWrenchCommand in = nextContactWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-      ContactWrenchCommand expectedOut = nextContactWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
-      ContactWrenchCommand actualOut = new ContactWrenchCommand();
-      crossRobotCommandResolver.resolveContactWrenchCommand(in, actualOut);
-      assertEquals(expectedOut, actualOut);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         ContactWrenchCommand in = nextContactWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         ContactWrenchCommand expectedOut = nextContactWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         ContactWrenchCommand actualOut = new ContactWrenchCommand();
+         crossRobotCommandResolver.resolveContactWrenchCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
+   @Test
+   void testResolveExternalWrenchCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         ExternalWrenchCommand in = nextExternalWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         ExternalWrenchCommand expectedOut = nextExternalWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         ExternalWrenchCommand actualOut = new ExternalWrenchCommand();
+         crossRobotCommandResolver.resolveExternalWrenchCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
    }
 
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
@@ -206,6 +237,14 @@ class CrossRobotCommandResolverTest
       next.getWrench().setIncludingFrame(nextWrench(random, possibleFrames));
       next.getWeightMatrix().set(nextWeightMatrix6D(random, possibleFrames));
       next.getSelectionMatrix().set(nextSelectionMatrix6D(random, possibleFrames));
+      return next;
+   }
+
+   public static ExternalWrenchCommand nextExternalWrenchCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   {
+      ExternalWrenchCommand next = new ExternalWrenchCommand();
+      next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
+      next.getExternalWrench().setIncludingFrame(nextWrench(random, possibleFrames));
       return next;
    }
 

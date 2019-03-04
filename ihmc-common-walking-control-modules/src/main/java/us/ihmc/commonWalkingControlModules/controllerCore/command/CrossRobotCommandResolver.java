@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -48,8 +49,8 @@ public class CrossRobotCommandResolver
    public void resolveContactWrenchCommand(ContactWrenchCommand in, ContactWrenchCommand out)
    {
       out.setConstraintType(in.getConstraintType());
-      int contactingRigidBodyHashCode = in.getRigidBody().hashCode();
-      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(contactingRigidBodyHashCode));
+      int rigidBodyHashCode = in.getRigidBody().hashCode();
+      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(rigidBodyHashCode));
       int wrenchFrameHashCode = in.getWrench().getReferenceFrame().hashCode();
       int wrenchBodyFrameHashCode = in.getWrench().getBodyFrame().hashCode();
       out.getWrench().setIncludingFrame(in.getWrench());
@@ -65,5 +66,16 @@ public class CrossRobotCommandResolver
       out.getSelectionMatrix().set(in.getSelectionMatrix());
       out.getSelectionMatrix().getAngularPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionAngularFrameHashCode));
       out.getSelectionMatrix().getLinearPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionLinearFrameHashCode));
+   }
+
+   public void resolveExternalWrenchCommand(ExternalWrenchCommand in, ExternalWrenchCommand out)
+   {
+      int rigidBodyHashCode = in.getRigidBody().hashCode();
+      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(rigidBodyHashCode));
+      int wrenchFrameHashCode = in.getExternalWrench().getReferenceFrame().hashCode();
+      int wrenchBodyFrameHashCode = in.getExternalWrench().getBodyFrame().hashCode();
+      out.getExternalWrench().setIncludingFrame(in.getExternalWrench());
+      out.getExternalWrench().setReferenceFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchFrameHashCode));
+      out.getExternalWrench().setBodyFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchBodyFrameHashCode));
    }
 }
