@@ -160,7 +160,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
-   public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
+   public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPath).topic(Show);
 
    public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
 
