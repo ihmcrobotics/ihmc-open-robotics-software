@@ -5,45 +5,42 @@ import us.ihmc.messager.Messager;
 
 import java.util.HashMap;
 
-public abstract class FXUIStateMachine
+public class FXUIStateMachine
 {
    private final Messager messager;
-   private final FXUIStateTransition exitTransition;
-   private HashMap<FXUIStateTransition, FXUIState> stateMap = new HashMap<>();
+   private final FXUIStateTransitionTrigger exitTransition;
+   private HashMap<FXUIStateTransitionTrigger, FXUIStateTransition> transitions = new HashMap<>();
 
-   public FXUIStateMachine(Messager messager, FXUIState startState, FXUIStateTransition exitTransition)
+   public FXUIStateMachine(Messager messager, FXUIStateTransitionTrigger exitTrigger, FXUIStateTransition startTransition)
    {
       this.messager = messager;
-      this.exitTransition = exitTransition;
+      this.exitTransition = exitTrigger;
 
-      mapTransitionToState(FXUIStateTransition.START, startState);
-      mapTransitionToState(exitTransition, FXUIState.INACTIVE);
+      mapTransition(FXUIStateTransitionTrigger.START, startTransition);
+   }
+
+   public void mapTransition(FXUIStateTransitionTrigger trigger, FXUIStateTransition transition)
+   {
+      transitions.put(trigger, transition);
+   }
+
+   public final void transition(FXUIStateTransitionTrigger trigger)
+   {
+      transitions.get(trigger).transition(trigger);
+
+      if (trigger.equals(exitTransition))
+      {
+         deactivate();
+      }
    }
 
    public final void start()
    {
-      transition(FXUIStateTransition.START);
+      transition(FXUIStateTransitionTrigger.START);
    }
 
-   private final void exit()
+   private final void deactivate()
    {
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, null);
-   }
-
-   public final void transition(FXUIStateTransition transition)
-   {
-      handleTransition(transition);
-
-      if (transition.equals(exitTransition))
-      {
-         exit();
-      }
-   }
-
-   protected abstract void handleTransition(FXUIStateTransition transition);
-
-   public void mapTransitionToState(FXUIStateTransition transition, FXUIState state)
-   {
-      stateMap.put(transition, state);
    }
 }
