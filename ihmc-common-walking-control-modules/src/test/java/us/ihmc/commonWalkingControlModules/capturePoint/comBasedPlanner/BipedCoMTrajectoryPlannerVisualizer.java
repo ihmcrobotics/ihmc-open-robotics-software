@@ -42,10 +42,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private static final double flightDuration = 0.1;
 
    private static final double startLength = 0.3;
-   private static final double stepLength = 0.4;
-   private static final double runLength = 0.5;
+   private static final double stepLength = 0.8;
+   private static final double runLength = 1.5;
    private static final int numberOfWalkingSteps = 0;
    private static final int numberOfRunningSteps = 5;
+
+   private static final double extraSimDuration = 0.5;
 
    private static final boolean includeFlight = true;
 
@@ -182,7 +184,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
       planner = new BipedCoMTrajectoryPlanner(soleFrames, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = createSteps(soleFrames);
 
-      simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + 5.0;
+      simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + extraSimDuration;
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
