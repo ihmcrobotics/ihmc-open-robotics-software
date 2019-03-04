@@ -145,7 +145,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Double> PlannerTimeoutTopic = Root.child(FootstepPlanning).child(Command).topic(Time);
    public static final Topic<Double> PlannerHorizonLengthTopic = Root.child(FootstepPlanning).child(Command).topic(Length);
    public static final Topic<Double> PlannerTimeTakenTopic = Root.child(FootstepPlanning).child(Result).topic(Time);
-
+   public static final Topic<QuadrupedTimedStepListMessage> FootstepPlannerTimedStepsTopic = Root.child(FootstepPlanning).child(Command).topic(StepsListMessage);
 
    /* Body Path Planning */
    public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPathPlanning).child(Result).topic(Show);

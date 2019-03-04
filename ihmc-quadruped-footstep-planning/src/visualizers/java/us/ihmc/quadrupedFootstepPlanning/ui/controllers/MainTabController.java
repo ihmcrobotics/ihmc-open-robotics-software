@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -138,12 +140,21 @@ public class MainTabController
       FootstepPlan footstepPlan = footstepPlanReference.get();
       if (footstepPlan == null)
          return;
-      double swingTime = 1.2;
-      double transferTime = 0.8;
-      throw new RuntimeException("This feature has not yet been implemented.");
-//      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, swingTime, transferTime,
-//                                                                                                                    ExecutionMode.OVERRIDE);
-//      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepDataListTopic, footstepDataListMessage);
+
+      QuadrupedTimedStepListMessage stepMessages = new QuadrupedTimedStepListMessage();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         QuadrupedTimedStepMessage stepMessage = stepMessages.getQuadrupedStepList().add();
+         QuadrupedTimedStep step = footstepPlan.getFootstep(i);
+
+         stepMessage.getQuadrupedStepMessage().setRobotQuadrant(step.getRobotQuadrant().toByte());
+         stepMessage.getQuadrupedStepMessage().getGoalPosition().set(step.getGoalPosition());
+         stepMessage.getQuadrupedStepMessage().setGroundClearance(step.getGroundClearance());
+         stepMessage.getTimeInterval().setStartTime(step.getTimeInterval().getStartTime());
+         stepMessage.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
+      }
+
+      messager.submitMessage(stepListMessageTopic, stepMessages);
    }
 
    @FXML
@@ -217,6 +228,7 @@ public class MainTabController
    private Topic<Number> plannerPlaybackFractionTopic;
    private Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic;
    private Topic<Boolean> showFootstepPreviewTopic;
+   private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -327,6 +339,11 @@ public class MainTabController
    public void setShowFootstepPreviewTopic(Topic<Boolean> showFootstepPreviewTopic)
    {
       this.showFootstepPreviewTopic = showFootstepPreviewTopic;
+   }
+
+   public void setStepListMessageTopic(Topic<QuadrupedTimedStepListMessage> stepListMessageTopic)
+   {
+      this.stepListMessageTopic = stepListMessageTopic;
    }
 
    public void bindControls()

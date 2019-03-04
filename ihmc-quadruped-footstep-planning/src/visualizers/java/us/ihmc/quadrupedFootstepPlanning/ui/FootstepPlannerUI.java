@@ -270,6 +270,7 @@ public class FootstepPlannerUI
       mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
       mainTabController.setXGaitSettingsTopic(FootstepPlannerMessagerAPI.XGaitSettingsTopic);
       mainTabController.setShowFootstepPreviewTopic(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic);
+      mainTabController.setStepListMessageTopic(FootstepPlannerMessagerAPI.FootstepDataListTopic);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
