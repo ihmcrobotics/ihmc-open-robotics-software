@@ -1,13 +1,20 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.reflections.Reflections;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -24,6 +31,120 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 class CrossRobotCommandResolverTest
 {
+   private static final String CONTROLLER_CORE_COMMANDS_PACKAGE = "us.ihmc.commonWalkingControlModules.controllerCore.command";
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testInverseDynamicsCommandCoverage() throws Exception
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseDynamicsCommand>> commandTypes = reflections.getSubTypesOf(InverseDynamicsCommand.class);
+
+      String errorMessage = "";
+
+      for (Class<? extends InverseDynamicsCommand> commandType : commandTypes)
+      {
+         if (commandType.isInterface())
+            continue;
+         if (!isResolveMethodAvailableFor(commandType, verbose))
+            errorMessage += "Missing resolve method for: " + commandType.getSimpleName() + "\n";
+      }
+
+      if (!errorMessage.isEmpty())
+         fail("Missing at least one InverseDynamicsCommand:\n" + errorMessage);
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testInverseKinematicsCommandCoverage() throws Exception
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseKinematicsCommand>> commandTypes = reflections.getSubTypesOf(InverseKinematicsCommand.class);
+
+      String errorMessage = "";
+
+      for (Class<? extends InverseKinematicsCommand> commandType : commandTypes)
+      {
+         if (commandType.isInterface())
+            continue;
+         if (!isResolveMethodAvailableFor(commandType, verbose))
+            errorMessage += "Missing resolve method for: " + commandType.getSimpleName() + "\n";
+      }
+
+      if (!errorMessage.isEmpty())
+         fail("Missing at least one InverseKinematicsCommand:\n" + errorMessage);
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testVirtualModelControlCommandCoverage() throws Exception
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends VirtualModelControlCommand>> commandTypes = reflections.getSubTypesOf(VirtualModelControlCommand.class);
+
+      String errorMessage = "";
+
+      for (Class<? extends VirtualModelControlCommand> commandType : commandTypes)
+      {
+         if (commandType.isInterface())
+            continue;
+         if (!isResolveMethodAvailableFor(commandType, verbose))
+            errorMessage += "Missing resolve method for: " + commandType.getSimpleName() + "\n";
+      }
+
+      if (!errorMessage.isEmpty())
+         fail("Missing at least one VirtualModelControlCommand:\n" + errorMessage);
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testFeedbackControlCommandCoverage() throws Exception
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends FeedbackControlCommand>> commandTypes = reflections.getSubTypesOf(FeedbackControlCommand.class);
+
+      String errorMessage = "";
+
+      for (Class<? extends FeedbackControlCommand> commandType : commandTypes)
+      {
+         if (commandType.isInterface())
+            continue;
+         if (!isResolveMethodAvailableFor(commandType, verbose))
+            errorMessage += "Missing resolve method for: " + commandType.getSimpleName() + "\n";
+      }
+
+      if (!errorMessage.isEmpty())
+         fail("Missing at least one FeedbackControlCommand:\n" + errorMessage);
+   }
+
+   private static boolean isResolveMethodAvailableFor(Class<?> commandType, boolean verbose)
+   {
+      String methodName = "resolve" + commandType.getSimpleName();
+      try
+      {
+         CrossRobotCommandResolver.class.getMethod(methodName, commandType, commandType);
+         return true;
+      }
+      catch (NoSuchMethodException e)
+      {
+         return false;
+      }
+      catch (SecurityException e)
+      {
+         if (verbose)
+            System.err.println("Encountered following error for method " + methodName + ", error: " + e.getMessage());
+         return false;
+      }
+   }
+
    @Test
    void testResolveCenterOfPressureCommand() throws Exception
    {
