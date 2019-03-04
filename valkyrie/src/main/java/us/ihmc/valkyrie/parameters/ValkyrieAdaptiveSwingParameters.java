@@ -78,7 +78,7 @@ public class ValkyrieAdaptiveSwingParameters implements AdaptiveSwingParameters
 
    @Override public double getFootStubClearance()
    {
-      return 0.05;
+      return 0.06;
    }
 
    @Override public double getWaypointProportionShiftForStubAvoidance()
