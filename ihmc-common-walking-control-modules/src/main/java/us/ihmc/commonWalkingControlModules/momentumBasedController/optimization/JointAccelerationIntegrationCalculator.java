@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -136,14 +135,5 @@ public class JointAccelerationIntegrationCalculator
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
       }
-   }
-
-   public static void main(String[] args)
-   {
-      double controlDT = 1.0 / 250.0;
-      double alpha_pos = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(DEFAULT_POSITION_BREAK_FREQUENCY, controlDT);
-      double alpha_vel = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(DEFAULT_VELOCITY_BREAK_FREQUENCY, controlDT);
-      PrintTools.info("Alpha Position: " + alpha_pos);
-      PrintTools.info("Alpha Velocity: " + alpha_vel);
    }
 }

@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
@@ -56,7 +56,7 @@ public class VirtualModelControlDataHandler
       }
       else
       {
-         PrintTools.warn(this, "Class has already registered " + bodyForControl.getName() + ".");
+         LogTools.warn("Class has already registered " + bodyForControl.getName() + ".");
       }
    }
 
@@ -103,7 +103,7 @@ public class VirtualModelControlDataHandler
       if (hasBody(controlledBody))
       {
          if (desiredSelectionMatrices.get(controlledBody) != null)
-            PrintTools.warn(this, "Class already contains selection matrix for body " + controlledBody.getName() + ". It is being overwritten.");
+            LogTools.warn("Class already contains selection matrix for body " + controlledBody.getName() + ". It is being overwritten.");
          desiredSelectionMatrices.put(controlledBody, selectionMatrix);
       }
    }

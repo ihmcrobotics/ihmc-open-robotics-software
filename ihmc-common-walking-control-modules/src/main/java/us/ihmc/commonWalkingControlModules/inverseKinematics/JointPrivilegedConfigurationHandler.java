@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -248,7 +248,7 @@ public class JointPrivilegedConfigurationHandler
             if (!jointsWithConfiguration.contains(configuredJoint))
                jointsWithConfiguration.add(configuredJoint);
             else
-               PrintTools.warn(this, "Overwriting privileged acceleration for joint " + configuredJoint.getName() + ".");
+               LogTools.warn("Overwriting privileged acceleration for joint " + configuredJoint.getName() + ".");
          }
       }
 
@@ -286,7 +286,7 @@ public class JointPrivilegedConfigurationHandler
             if (!jointsWithConfiguration.contains(configuredJoint))
                jointsWithConfiguration.add(configuredJoint);
             else
-               PrintTools.warn(this, "Overwriting privileged velocity for joint " + configuredJoint.getName() + ".");
+               LogTools.warn("Overwriting privileged velocity for joint " + configuredJoint.getName() + ".");
          }
       }
 
@@ -380,7 +380,7 @@ public class JointPrivilegedConfigurationHandler
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
                else
-                  PrintTools.warn(this, "Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
+                  LogTools.warn("Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
             }
 
             if (command.hasNewPrivilegedConfigurationOption(jointNumber))
@@ -392,7 +392,7 @@ public class JointPrivilegedConfigurationHandler
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
                else
-                  PrintTools.warn(this, "Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
+                  LogTools.warn("Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
 
             processConfigurationWeightsAndGains(command, jointIndex, jointNumber);
