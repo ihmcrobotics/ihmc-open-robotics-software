@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -19,6 +18,7 @@ import java.util.List;
 
 public class BipedContactSequenceUpdater
 {
+   private static final boolean debug = true;
    private static final int maxCapacity = 7;
    private final RecyclingArrayList<BipedStepTransition> stepTransitionsInAbsoluteTime = new RecyclingArrayList<>(BipedStepTransition::new);
 
@@ -95,7 +95,7 @@ public class BipedContactSequenceUpdater
       BipedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitionsInAbsoluteTime, currentTime, stepSequence);
       BipedContactSequenceTools.trimPastContactSequences(contactSequenceInAbsoluteTime, currentTime, currentFeetInContact, solePoses);
 
-      computeContactPhasesFromStepTransitions();
+      computeContactPhasesFromStepTransitionsOther();
 
       contactSequenceInRelativeTime.clear();
       for (int i = 0; i < contactSequenceInAbsoluteTime.size(); i++)
@@ -168,8 +168,16 @@ public class BipedContactSequenceUpdater
 
             if (transitionType == BipedStepTransitionType.LIFT_OFF)
             { // this is the end of transfer, with a foot lifting off the ground, meaning this phase is the start of swing
-               startSide = transitionSide.getOppositeSide();
-               previousEndSide = transitionSide.getOppositeSide();
+               if (feetInContact.isEmpty())
+               {
+                  startSide = transitionSide;
+                  previousEndSide = transitionSide;
+               }
+               else
+               {
+                  startSide = transitionSide.getOppositeSide();
+                  previousEndSide = transitionSide.getOppositeSide();
+               }
             }
             else
             {
@@ -203,4 +211,131 @@ public class BipedContactSequenceUpdater
       previousContactPhase.update();
    }
 
+
+
+   private void computeContactPhasesFromStepTransitionsOther()
+   {
+      int numberOfTransitions = stepTransitionsInAbsoluteTime.size();
+
+      // compute transition time and center of pressure for each time interval
+      for (int transitionNumber = 0; transitionNumber < numberOfTransitions; transitionNumber++)
+      {
+         BipedStepTransition stepTransition = stepTransitionsInAbsoluteTime.get(transitionNumber);
+
+         if (!isValidTransition(stepTransition))
+            throw new RuntimeException("Not a valid transition.");
+
+         for (int transitioningFootNumber = 0; transitioningFootNumber < stepTransition.getNumberOfFeetInTransition(); transitioningFootNumber++)
+         {
+            RobotSide transitionSide = stepTransition.getTransitionSide(transitioningFootNumber);
+            switch (stepTransition.getTransitionType(transitioningFootNumber))
+            {
+            case LIFT_OFF:
+               feetInContact.remove(transitionSide);
+               break;
+            case TOUCH_DOWN:
+               feetInContact.add(transitionSide);
+               solePoses.get(transitionSide).setMatchingFrame(stepTransition.transitionPose(transitionSide));
+               break;
+            }
+         }
+
+         SimpleBipedContactPhase endingContactSequence = contactSequenceInAbsoluteTime.getLast();
+         SimpleBipedContactPhase newContactSequence = contactSequenceInAbsoluteTime.add();
+
+         newContactSequence.reset();
+
+         endingContactSequence.getTimeInterval().setEndTime(stepTransition.getTransitionTime());
+         newContactSequence.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
+
+         newContactSequence.setFeetInContact(feetInContact);
+
+         if (feetInContact.isEmpty())
+         { // in flight, so the end of the previous contact phase is the foot that lifted off
+            for (int i = 0; i < stepTransition.getNumberOfFeetInTransition(); i++)
+            {
+               if (debug)
+                  assert (stepTransition.getTransitionType(i) == BipedStepTransitionType.LIFT_OFF);
+
+               RobotSide liftOffSide = stepTransition.getTransitionSide(i);
+               endingContactSequence.addEndFoot(liftOffSide, solePoses.get(liftOffSide));
+            }
+         }
+         else if (feetInContact.size() == 1)
+         { // feet in contact shouldn't be moving, one foot is in stance
+
+            if (stepTransition.getNumberOfFeetInTransition() > 1)
+               throw new RuntimeException("Currently can't handle an instant switch in support.");
+
+            if (stepTransition.getTransitionType(0) == BipedStepTransitionType.LIFT_OFF)
+            { // starting the swing phase, like in normal walking
+               RobotSide transitionSide = stepTransition.getTransitionSide(0);
+               RobotSide supportSide = transitionSide.getOppositeSide();
+               endingContactSequence.addEndFoot(supportSide, solePoses.get(supportSide));
+               newContactSequence.addStartFoot(supportSide, solePoses.get(supportSide));
+
+               if (debug)
+                  assert (supportSide == feetInContact.get(0));
+            }
+            else
+            { // just ending a flight phase
+               RobotSide transitionSide = stepTransition.getTransitionSide(0);
+               newContactSequence.addStartFoot(transitionSide, solePoses.get(transitionSide));
+
+               if (debug)
+                  assert (transitionSide == feetInContact.get(0));
+            }
+         }
+         else
+         {
+            if (debug)
+            {
+               assert (feetInContact.size() == 2);
+
+               for (int i = 0; i < stepTransition.getNumberOfFeetInTransition(); i++)
+                  assert (stepTransition.getTransitionType(i) == BipedStepTransitionType.TOUCH_DOWN);
+            }
+
+            if (stepTransition.getNumberOfFeetInTransition() == 2)
+            { // just landing from a jump
+               for (int i = 0; i < stepTransition.getNumberOfFeetInTransition(); i++)
+               {
+                  RobotSide transitionSide = stepTransition.getTransitionSide(i);
+                  newContactSequence.addStartFoot(transitionSide, solePoses.get(transitionSide));
+               }
+            }
+            else
+            {
+               if (debug)
+                  assert (stepTransition.getNumberOfFeetInTransition() == 1);
+
+               RobotSide transitionSide = stepTransition.getTransitionSide(0);
+               RobotSide oppositeSide = transitionSide.getOppositeSide();
+               endingContactSequence.addEndFoot(oppositeSide, solePoses.get(oppositeSide));
+               newContactSequence.addStartFoot(oppositeSide, solePoses.get(oppositeSide));
+            }
+         }
+
+         boolean isLastContact =
+               (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() >= maxCapacity && feetInContact.size() > 0);
+         if (isLastContact)
+            break;
+      }
+
+      SimpleBipedContactPhase contactPhase = contactSequenceInAbsoluteTime.getLast();
+      contactPhase.getTimeInterval().setEndTime(Double.POSITIVE_INFINITY);
+      for (int i = 0; i < feetInContact.size(); i++)
+         contactPhase.addEndFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
+      contactPhase.update();
+   }
+
+   private static boolean isValidTransition(BipedStepTransition stepTransition)
+   {
+      if (stepTransition.getNumberOfFeetInTransition() > 1 && stepTransition.getTransitionType(0) == stepTransition.getTransitionType(1))
+      { // just started or landed from a jump
+         return false;
+      }
+
+      return true;
+   }
 }
