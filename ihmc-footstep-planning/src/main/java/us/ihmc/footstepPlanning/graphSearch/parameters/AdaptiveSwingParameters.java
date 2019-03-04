@@ -37,5 +37,7 @@ public interface AdaptiveSwingParameters
     * Parameters for calculating custom waypoint proportions
     */
 
-   double getMinimumXYWaypointToRegionDistance();
+   double getFootStubClearance();
+
+   double getWaypointProportionShiftForStubAvoidance();
 }

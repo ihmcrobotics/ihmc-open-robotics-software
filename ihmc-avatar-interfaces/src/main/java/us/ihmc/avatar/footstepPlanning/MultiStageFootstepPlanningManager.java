@@ -203,7 +203,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       }
       else
       {
-         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters, null);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters, drcRobotModel.getWalkingControllerParameters());
       }
 
       parentRegistry.addChild(registry);
@@ -753,16 +753,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          Pose3D startPose = new Pose3D();
          Pose3D endPose = new Pose3D();
 
-         startPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+         endPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
 
          if(i < 2)
          {
-            endPose.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ? firstStepStancePose : secondStepStancePose);
+            startPose.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ? firstStepStancePose : secondStepStancePose);
          }
          else
          {
             FootstepDataMessage previousStep = footstepDataList.get(i - 2);
-            endPose.set(previousStep.getLocation(), previousStep.getOrientation());
+            startPose.set(previousStep.getLocation(), previousStep.getOrientation());
          }
 
          footstepDataMessage.setSwingHeight(adaptiveSwingTrajectoryCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
