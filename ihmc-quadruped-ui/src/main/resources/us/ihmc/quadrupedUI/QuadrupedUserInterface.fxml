@@ -10,7 +10,7 @@
     <bottom>
         <TabPane prefHeight="300.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
-                <Tab text="Main ">
+                <Tab text="Planner">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
                         <fx:include fx:id="plannerTab" source="Planner.fxml"/>
