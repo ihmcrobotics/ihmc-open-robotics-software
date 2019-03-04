@@ -8,5 +8,6 @@ a_star_timeout 45.0
 
 quadruped_goal_yaw 3.141
 quadruped_start_yaw 3.141
+quadruped_goal_position -1.170 -0.063 0.000
 quadruped_planner_status test
 quadruped_timeout 45.0
