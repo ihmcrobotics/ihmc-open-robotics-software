@@ -1,4 +1,4 @@
-package us.ihmc.atlas.behaviorTests;
+package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.*;
@@ -6,7 +6,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
-import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
@@ -66,7 +65,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 @Tag("humanoid-behaviors")
-public class AtlasWalkToLocationBehaviorTest2
+public class AtlasPatrolBehaviorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private SimulationConstructionSet scs;
@@ -99,7 +98,7 @@ public class AtlasWalkToLocationBehaviorTest2
    @AfterAll
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasWalkToLocationBehaviorTest2.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasPatrolBehaviorTest.class + " after class.");
    }
 
    private static final boolean DEBUG = false;
