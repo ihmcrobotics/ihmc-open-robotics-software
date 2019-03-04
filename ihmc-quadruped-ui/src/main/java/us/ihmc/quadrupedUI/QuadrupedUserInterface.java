@@ -15,10 +15,14 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
@@ -52,15 +56,18 @@ public class QuadrupedUserInterface
    private MainTabController plannerTabController;
    @FXML
    private RobotControlTabController robotControlTabController;
-
    @FXML
    private XGaitSettingsController xGaitSettingsController;
-
+   @FXML
+   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
+   @FXML
+   private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
    private ManualStepTabController manualStepTabController;
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                 QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings, YoVariableRegistry registry)
+                                 FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
+                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -71,17 +78,28 @@ public class QuadrupedUserInterface
 
       mainPane = loader.load();
 
+      footstepPlannerParametersUIController.setPlannerParameters(footstepPlannerParameters);
+      visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
+
       plannerTabController.attachMessager(messager);
       robotControlTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
+      footstepPlannerParametersUIController.attachMessager(messager);
+      visibilityGraphsParametersUIController.attachMessager(messager);
       manualStepTabController.attachMessager(messager, xGaitSettings);
 
       setPlannerTabTopics();
+      footstepPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
+      visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(QuadrupedUIMessagerAPI.VisibilityGraphsParametersTopic);
 
       plannerTabController.bindControls();
       robotControlTabController.bindControls();
+      footstepPlannerParametersUIController.bindControls();
+      visibilityGraphsParametersUIController.bindControls();
       xGaitSettingsController.bindControls();
       manualStepTabController.bindControls();
+
+      footstepPlannerParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -227,9 +245,10 @@ public class QuadrupedUserInterface
 
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
-                                                            QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
-                                                            YoVariableRegistry registry) throws Exception
+                                                            FootstepPlannerParameters footstepPlannerParameters,
+                                                            VisibilityGraphsParameters visibilityGraphsParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+         throws Exception
    {
-      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, physicalProperties, xGaitSettings, registry);
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, footstepPlannerParameters, visibilityGraphsParameters, xGaitSettings);
    }
 }
