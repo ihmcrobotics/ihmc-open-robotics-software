@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -84,5 +85,18 @@ public class CrossRobotCommandResolver
    {
       // There is no thread sensitive information in this command, so the output can directly be set to the input.
       out.set(in);
+   }
+
+   public void resolveJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand in, JointAccelerationIntegrationCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
+      {
+         int jointHashCode = in.getJointToComputeDesiredPositionFor(jointIndex).hashCode();
+         out.addJointToComputeDesiredPositionFor(jointHashCodeResolver.castAndGetJoint(jointHashCode));
+         // There is no thread sensitive information in this command, so the output can directly be set to the input.
+         out.setJointParameters(jointIndex, in.getJointParameters(jointIndex));
+      }
    }
 }

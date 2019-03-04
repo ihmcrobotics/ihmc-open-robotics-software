@@ -173,4 +173,49 @@ public class JointAccelerationIntegrationCommand
    {
       return ControllerCoreCommandType.JOINT_ACCELERATION_INTEGRATION;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == null)
+      {
+         return false;
+      }
+      else if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointAccelerationIntegrationCommand)
+      {
+         JointAccelerationIntegrationCommand other = (JointAccelerationIntegrationCommand) object;
+
+         if (getNumberOfJointsToComputeDesiredPositionFor() != other.getNumberOfJointsToComputeDesiredPositionFor())
+            return false;
+
+         for (int jointIndex = 0; jointIndex < getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
+         {
+            if (getJointToComputeDesiredPositionFor(jointIndex) != other.getJointToComputeDesiredPositionFor(jointIndex))
+               return false;
+            if (!getJointParameters(jointIndex).equals(other.getJointParameters(jointIndex)))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ":";
+      for (int jointIndex = 0; jointIndex < getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
+      {
+         ret += "\nJoint: " + getJointToComputeDesiredPositionFor(jointIndex).getName() + ", " + getJointParameters(jointIndex).toString();
+      }
+      return ret;
+   }
 }
