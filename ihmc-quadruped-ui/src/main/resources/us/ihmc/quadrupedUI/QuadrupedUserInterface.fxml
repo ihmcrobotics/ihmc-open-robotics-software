@@ -28,6 +28,19 @@
                         <fx:include source="XGaitSettingsTab.fxml" fx:id="xGaitSettings"/>
                     </content>
                 </Tab>
+                <Tab text="Footstep Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
+                    </content>
+                </Tab>
+
+                <Tab text="Visibility Graph Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
+                    </content>
+                </Tab>
                 <Tab text="ManualSteps">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>

@@ -115,6 +115,8 @@ public class FootstepPlannerUI
       visibilityGraphsVizController.attachMessager(messager);
 
       setMainTabTopics();
+      footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
