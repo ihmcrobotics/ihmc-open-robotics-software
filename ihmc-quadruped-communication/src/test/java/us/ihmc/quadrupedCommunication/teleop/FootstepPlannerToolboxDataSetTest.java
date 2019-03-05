@@ -267,6 +267,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
+      List<String> failingMessages = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -281,6 +282,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+            failingMessages.add(errorMessagesForCurrentFile);
          }
 
          if (DEBUG || VERBOSE)
@@ -296,7 +298,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
-         message += "\n" + failingDatasets.get(i);
+         message += "\n" + failingDatasets.get(i) + " : " + failingMessages.get(i);
       }
       if (VISUALIZE)
       {
