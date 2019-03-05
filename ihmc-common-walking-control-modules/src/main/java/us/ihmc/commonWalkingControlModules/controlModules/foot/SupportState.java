@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -123,14 +120,10 @@ public class SupportState extends AbstractFootControlState
 
    private final BooleanProvider avoidFootRotations;
    private final BooleanProvider dampFootRotations;
-   private final BooleanProvider replanIcpForFootRotations;
-   private final BooleanProvider cropFootholdForFootRotations;
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
    private final FootRotationDetector footRotationDetector;
-   private final FootRotationHelper footRotationHelper;
-   private final FramePoint2D capturePoint = new FramePoint2D();
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -210,15 +203,9 @@ public class SupportState extends AbstractFootControlState
       double dt = controllerToolbox.getControlDT();
       footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
 
-      FootRotationInformation rotationInformation = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootRotationInformation();
-      PlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
-      footRotationHelper = new FootRotationHelper(robotSide, soleFrame, contactState, rotationInformation, registry, graphicsListRegistry);
-
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
       avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
-      replanIcpForFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "replanIcpForFootRotations", registry, false);
-      cropFootholdForFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "cropFootholdForFootRotations", registry, false);
       dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
       footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
    }
@@ -248,7 +235,6 @@ public class SupportState extends AbstractFootControlState
          frameViz.hide();
       explorationHelper.stopExploring();
       footRotationDetector.reset();
-      footRotationHelper.reset();
    }
 
    @Override
@@ -326,16 +312,12 @@ public class SupportState extends AbstractFootControlState
          footBarelyLoaded.set(false);
 
       updateHoldPositionSetpoints();
+
       localGains.set(gains);
       boolean dampingRotations = false;
 
       if (footRotationDetector.compute() && avoidFootRotations.getValue())
       {
-         controllerToolbox.getCapturePoint(tempPoint);
-         tempPoint.changeFrame(footPolygon.getReferenceFrame());
-         capturePoint.setIncludingFrame(tempPoint);
-         footRotationHelper.compute(footRotationDetector.getLineOfRotation(), footPolygon, capturePoint);
-
          if (dampFootRotations.getValue())
          {
             PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
@@ -343,16 +325,6 @@ public class SupportState extends AbstractFootControlState
             localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
             localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
             dampingRotations = true;
-         }
-
-         if (replanIcpForFootRotations.getValue())
-         {
-            footRotationHelper.adjustICPPlan();
-         }
-
-         if (cropFootholdForFootRotations.getValue())
-         {
-            footRotationHelper.reduceFoothold();
          }
       }
 

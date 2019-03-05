@@ -8,7 +8,8 @@
 						<registry name="FeetManager">
 							<registry name="SupportStateParameters">
 								<parameter name="avoidFootRotations" type="BooleanParameter" value="true" />
-								<parameter name="replanIcpForFootRotations" type="BooleanParameter" value="true" />
+								<parameter name="dampFootRotations" type="BooleanParameter" value="true" />
+								<parameter name="footDamping" type="DoubleParameter" value="40.0" />
 							</registry>
 						</registry>
 					</registry>

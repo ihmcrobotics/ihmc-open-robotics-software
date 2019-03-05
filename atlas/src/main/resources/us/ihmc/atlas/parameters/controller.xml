@@ -182,8 +182,6 @@
                             <registry name="SupportStateParameters">
 <parameter name="avoidFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="dampFootRotations" type="BooleanParameter" value="false"/>
-<parameter name="replanIcpForFootRotations" type="BooleanParameter" value="false"/>
-<parameter name="cropFootholdForFootRotations" type="BooleanParameter" value="false"/>
 <parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
                             </registry>
                             <registry name="leftFootControlModule">
@@ -199,21 +197,10 @@
 <parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
 <parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                             </registry>
-                            <registry name="FootRotationHelperParameters">
-<parameter name="AreaPecentToSelect" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
-                            </registry>
                         </registry>
                         <registry name="BalanceManager">
                             <registry name="PelvisICPBasedTranslationManager">
 <parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                            </registry>
-                            <registry name="ICPOptimizationLinearMomentumRateOfChangeControlModule">
-<registry name="ICPOptimizationController">
-    <parameter name="controllerForwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-    <parameter name="controllerBackwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-    <parameter name="controllerInwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-    <parameter name="controllerOutwardAdjustmentLimit" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-</registry>
                             </registry>
                         </registry>
                     </registry>

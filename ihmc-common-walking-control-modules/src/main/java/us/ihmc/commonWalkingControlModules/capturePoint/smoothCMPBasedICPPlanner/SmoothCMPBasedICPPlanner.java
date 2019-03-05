@@ -838,7 +838,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       return angularMomentumTrajectoryGenerator;
    }
 
-   private static final boolean printTracesIfComputedSeveralTimes = true;
+   private static final boolean printTracesIfComputedSeveralTimes = false;
    private int icpComputeCount = 0;
    private final YoInteger icpPlannerComputeCount = new YoInteger("ICPPlannnerComputeCount", registry);
    private final List<Throwable> traces = printTracesIfComputedSeveralTimes ? new ArrayList<>() : null;

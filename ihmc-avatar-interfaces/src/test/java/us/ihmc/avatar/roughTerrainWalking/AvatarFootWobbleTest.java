@@ -3,9 +3,8 @@ package us.ihmc.avatar.roughTerrainWalking;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -13,6 +12,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.SupportState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
@@ -22,6 +22,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -39,7 +40,7 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
 
    private static final Random random = new Random(203L);
 
-   public void testICPReplanningInSwing() throws SimulationExceededMaximumTimeException
+   public void testDampingIsActivated() throws SimulationExceededMaximumTimeException
    {
       testHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       testHelper.createSimulation(getSimpleRobotName() + "FootWobbleTest");
@@ -61,11 +62,8 @@ public abstract class AvatarFootWobbleTest implements MultiRobotTestInterface
       setLineOfRotation(testHelper, stepSide, lineOfRotation);
 
       // Simulate some more and then observe the CoP waypoints in the ICP planner. They should have shifted away from the line of rotation.
-      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(swingTime / 2.0 + finalTransferTime + 0.25));
-      // TODO: add checks.
-
-      // Assert that the line of rotation has not changed. This would happen if the foot was actually rotating or the rotation detector changes such
-      // that the above method for changing the line of rotation does not persist anymore.
+      Assert.assertTrue(testHelper.simulateAndBlockAndCatchExceptions(0.25));
+      Assert.assertEquals(40.0, testHelper.getYoVariable(SupportState.class.getSimpleName() + "Parameters", "footDamping").getValueAsDouble(), Double.MIN_VALUE);
       assertLineOfRotation(testHelper, stepSide, lineOfRotation, Double.MIN_VALUE);
    }
 
