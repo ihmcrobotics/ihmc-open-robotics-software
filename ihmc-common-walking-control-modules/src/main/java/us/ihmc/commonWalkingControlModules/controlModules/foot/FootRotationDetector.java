@@ -31,23 +31,11 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
  * If that is the case provides an estimate of the line of rotation. This class does not rely on a center of pressure
  * estimate and can be used with robots that do not have force-torque sensing in the feet.
  * <p>
- * Two strategies can be used to detect the rotation:
- * <ul>
- * <li>Assuming flat ground and a ground height of 0.0 the foot can be intersected with this plane to accurately find
- * the line of rotation.<br>
- * <li>The twist of the foot can be used to detect an instantaneous line of rotation if the angular velocity of the foot
- * is sufficient.
- * </ul>
- * <p>
- * Both methods require some form of thresholding as to whether foot rotation is occurring. For the twist based
- * detection the angular foot velocity (only in sole plane) is integrated with a leak rate. This integrated velocity is
- * then thresholded to determine if foot the foot is unstable.
- * <p>
- * ------------</br>
- * Currently this class implements only the second one since the assumptions are less restrictive. Depending on the
- * performance the first method should be implemented as an alternative.</br>
- * ------------
- *
+ * The strategy employed is to use the measured twist of the foot to compute the current line of rotation. This requires
+ * the angular velocity of the foot to be sufficiently large. A threshold determines if that is the case. The speed of
+ * rotation is the integrated using a leak rate. If the integral which is a measure of absolute foot rotation exceeds
+ * a second threshold the foot is assumed to rotate.]
+ * 
  * @author Georg Wiedebach
  */
 public class FootRotationDetector
@@ -116,7 +104,7 @@ public class FootRotationDetector
 
    public boolean compute()
    {
-      // 1. Using the twist of the foot
+      // Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
       double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
       absoluteFootOmega.set(Math.sqrt(omegaSquared));
