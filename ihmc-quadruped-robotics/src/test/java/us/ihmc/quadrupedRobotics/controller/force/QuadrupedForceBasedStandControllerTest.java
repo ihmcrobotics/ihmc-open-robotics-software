@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
