@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
-import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
