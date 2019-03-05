@@ -43,6 +43,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -544,7 +545,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (Double.isFinite(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > FootstepNode.gridSizeYaw)
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
