@@ -60,7 +60,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
-   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
+   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException
    {
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -112,7 +112,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkSlope(-0.1, getWalkingUpSlopePosition());
    }
 
-   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
+   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       quadrupedTestFactory.setInitialPosition(initialPosition);
