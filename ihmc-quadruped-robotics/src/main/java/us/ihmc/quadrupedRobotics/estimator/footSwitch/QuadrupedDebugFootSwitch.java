@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator;
+package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -38,7 +38,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
       measurementFrame = contactablePlaneBody.getSoleFrame();
       forceThreshold = new YoDouble(contactablePlaneBody.getName() + "ForceThreshold", registry);
       forceThreshold.set(0.04 * totalRobotWeight);
-      
+
       yoMeasuredForceWorld = new YoFrameVector3D(contactablePlaneBody.getName() + "MeasuredForceWorld", worldFrame, registry);
       hasFootHitGround = new YoBoolean(contactablePlaneBody.getName() + "HasFootHitGround", registry);
    }

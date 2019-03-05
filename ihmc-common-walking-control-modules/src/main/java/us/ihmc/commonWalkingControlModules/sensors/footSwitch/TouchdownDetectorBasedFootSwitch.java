@@ -7,14 +7,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
-public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInterface
+public abstract class TouchdownDetectorBasedFootSwitch implements FootSwitchInterface
 {
    protected final YoVariableRegistry registry;
    protected final ArrayList<TouchdownDetector> touchdownDetectors = new ArrayList<>();
 
    protected final YoBoolean controllerThinksHasTouchedDown;
 
-   public TouchdownDetectorBasedFootswitch(String name, YoVariableRegistry parentRegistry)
+   public TouchdownDetectorBasedFootSwitch(String name, YoVariableRegistry parentRegistry)
    {
       this.registry = parentRegistry;
       controllerThinksHasTouchedDown = new YoBoolean(name + "_controllerThinksHasTouchedDown", parentRegistry);
