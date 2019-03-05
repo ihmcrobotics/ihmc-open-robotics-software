@@ -86,7 +86,7 @@ public class FootControlModule
 
    private final YoBoolean requestExploration;
    private final YoBoolean resetFootPolygon;
-
+   
    private final FramePose3D desiredPose = new FramePose3D();
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
@@ -125,7 +125,7 @@ public class FootControlModule
 
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
-
+      
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
@@ -220,13 +220,13 @@ public class FootControlModule
       factory.addState(ConstraintType.SWING, swingState);
       factory.addState(ConstraintType.TOUCHDOWN, touchdownState);
       factory.addState(ConstraintType.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
-
+      
       for (ConstraintType from : ConstraintType.values())
       {
          factory.addRequestedTransition(from, requestedState);
          factory.addRequestedTransition(from, from, requestedState);
       }
-
+      
       return factory.build(ConstraintType.FULL);
    }
 
@@ -250,7 +250,7 @@ public class FootControlModule
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery(stateMachine.getTimeInCurrentState());
    }
-
+   
    public void requestTouchdown()
    {
     if(stateMachine.getCurrentStateKey() == ConstraintType.SWING)
@@ -316,12 +316,12 @@ public class FootControlModule
       {
          requestExploration();
       }
-
+      
       stateMachine.doTransitions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
-
+      
 
       stateMachine.doAction();
 
@@ -336,7 +336,7 @@ public class FootControlModule
    {
       stateMachine.resetCurrentState();
    }
-
+   
    public boolean isInFlatSupportState()
    {
       ConstraintType currentConstraintType = getCurrentConstraintType();
@@ -478,7 +478,7 @@ public class FootControlModule
       }
       return ret;
    }
-
+   
    public boolean isInTouchdown()
    {
       return getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
