@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -92,7 +91,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    }
 
 
-   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
+   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());

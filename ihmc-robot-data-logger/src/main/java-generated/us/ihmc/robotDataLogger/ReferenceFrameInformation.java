@@ -13,9 +13,9 @@ public class ReferenceFrameInformation extends Packet<ReferenceFrameInformation>
 
    public ReferenceFrameInformation()
    {
-      frameIndices_ = new us.ihmc.idl.IDLSequence.Long (1024, "type_4");
+      frameIndices_ = new us.ihmc.idl.IDLSequence.Long (2048, "type_4");
 
-      frameNames_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1024, "type_d");
+      frameNames_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (2048, "type_d");
    }
 
    public ReferenceFrameInformation(ReferenceFrameInformation other)

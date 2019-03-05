@@ -240,6 +240,7 @@ public class FootstepPlannerUI
       if(walkingControllerParameters != null)
       {
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
+         pathViewer.setDefaultWaypointProportions(walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions());
       }
 
       if(contactPointParameters != null)

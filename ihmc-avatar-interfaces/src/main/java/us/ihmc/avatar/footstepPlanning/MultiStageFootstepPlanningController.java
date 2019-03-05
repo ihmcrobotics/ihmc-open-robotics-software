@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -43,16 +44,13 @@ public class MultiStageFootstepPlanningController
    private final ScheduledExecutorService executorService;
    private final YoBoolean initialize = new YoBoolean("initialize" + registry.getName(), registry);
 
-   public MultiStageFootstepPlanningController(RobotContactPointParameters<RobotSide> contactPointParameters,
-                                               FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
-                                               CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                               ScheduledExecutorService executorService, YoVariableRegistry parentRegistry, long tickTimeMs)
+   public MultiStageFootstepPlanningController(DRCRobotModel drcRobotModel, CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager, ScheduledExecutorService executorService,
+                                               YoVariableRegistry parentRegistry, long tickTimeMs)
    {
       this.tickTimeMs = tickTimeMs;
       this.executorService = executorService;
-      stageManager = new MultiStageFootstepPlanningManager(contactPointParameters, footstepPlannerParameters, visibilityGraphsParameters, statusOutputManager,
-                                                           parentRegistry, tickTimeMs);
-
+      stageManager = new MultiStageFootstepPlanningManager(drcRobotModel, statusOutputManager, parentRegistry, tickTimeMs);
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
       timeWithoutInputsBeforeGoingToSleep.set(Double.POSITIVE_INFINITY);

@@ -90,6 +90,8 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    private final BooleanProvider trustFootSwitches;
 
+   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber;
+
    public QuadrupedControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      HighLevelControllerName initialControllerState, HighLevelControllerState calibrationState)
    {
@@ -187,13 +189,18 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.FRONT_RIGHT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_LEFT).setFootContactState(false);
          runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+         if (stateEstimatorModeSubscriber != null)
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
+
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).trustFootSwitch(trustFootSwitches.getValue());
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(true);
          }
+         if (stateEstimatorModeSubscriber != null)
+            stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.NORMAL);
          break;
       case STAND_TRANSITION_STATE:
       case WALKING:
@@ -411,5 +418,10 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    public void closeAndDispose()
    {
       closeableAndDisposableRegistry.closeAndDispose();
+   }
+
+   public void setStateEstimatorModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
+   {
+      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
    }
 }
