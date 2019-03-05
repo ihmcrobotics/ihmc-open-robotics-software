@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
+package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;

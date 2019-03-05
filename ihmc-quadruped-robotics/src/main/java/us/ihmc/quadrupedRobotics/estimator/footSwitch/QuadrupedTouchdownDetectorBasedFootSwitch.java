@@ -1,6 +1,6 @@
-package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
+package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
-public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootswitch
+public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
 {
    private static final int defaultGlitchWindow = 10;
 
