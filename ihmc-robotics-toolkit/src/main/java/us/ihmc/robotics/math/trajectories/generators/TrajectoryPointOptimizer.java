@@ -234,6 +234,45 @@ public class TrajectoryPointOptimizer
    }
 
    /**
+    * If the user would like to provide waypoint times and only solve for the waypoint velocities this method can be used.
+    *
+    * @param waypointTimes the times at waypoints. Times must be between 0.0 and 1.0.
+    */
+   public void computeForFixedTime(TDoubleArrayList waypointTimes)
+   {
+      computeTimer.startMeasurement();
+      timeGain.set(initialTimeGain);
+
+      int intervals = nWaypoints.getIntegerValue() + 1;
+      this.intervals.set(intervals);
+      intervalTimes.reshape(intervals, 1);
+
+      if (waypointTimes.size() != nWaypoints.getValue())
+      {
+         throw new RuntimeException("Unexpected number of waypoint times. Need " + nWaypoints.getValue() + ", got " + waypointTimes.size() + ".");
+      }
+
+      for (int i = 0; i < intervals; i++)
+      {
+         double previousWaypointTime = i == 0 ? 0.0 : waypointTimes.get(i - 1);
+         double waypointTime = i == nWaypoints.getValue() ? 1.0 : waypointTimes.get(i);
+         double intervalTime = waypointTime - previousWaypointTime;
+         if (intervalTime < 0.0 || intervalTime > 1.0)
+         {
+            throw new RuntimeException("Time in this trajectory is from 0.0 to 1.0. Got invalid waypoint times:\n" + waypointTimes.toString());
+         }
+         intervalTimes.set(i, intervalTime);
+      }
+
+      problemSize.set(dimensions.getIntegerValue() * coefficients * intervals);
+      costs.reset();
+      costs.add(solveMinAcceleration());
+      iteration.set(0);
+
+      computeTimer.stopMeasurement();
+   }
+
+   /**
     * Provides an alternative API to the optimizer. This method allows the user to run a single gradient descent step
     * at a time. Will return true if the optimization has converged.
     *
