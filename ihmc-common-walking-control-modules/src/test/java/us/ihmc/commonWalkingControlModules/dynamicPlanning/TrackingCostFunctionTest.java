@@ -93,8 +93,8 @@ public abstract class TrackingCostFunctionTest<E extends Enum>
             expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / (modifiedEpsilon));
          }
 
-         double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
-         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
+         double value = Math.max(1.0e-10, 1e-3 * Math.abs(CommonOps.elementSum(expectedCostGradient)));
+         JUnitTools.assertMatrixEquals(expectedCostGradient, costGradient, value);
       }
    }
 

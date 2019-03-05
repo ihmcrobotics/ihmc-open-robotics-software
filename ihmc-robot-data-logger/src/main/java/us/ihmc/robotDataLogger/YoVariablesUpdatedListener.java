@@ -2,10 +2,10 @@ package us.ihmc.robotDataLogger;
 
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.listeners.ClearLogListener;
+import us.ihmc.robotDataLogger.interfaces.CommandListener;
 import us.ihmc.robotDataLogger.listeners.TimestampListener;
 
-public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogListener
+public interface YoVariablesUpdatedListener extends TimestampListener, CommandListener
 {
    /**
     * 
@@ -26,16 +26,6 @@ public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogL
     * 
     */
    void disconnected();
-
-   /**
-    * On connect, the return value of this function is send to the server. The server will only send
-    * one in n packets to this client
-    *  
-    * @return Rate of packets to send
-    */
-   int getDisplayOneInNPackets();
-
-
 
    /**
     * Data and timestamp is received over the TCP channel. Significant delay can occur depending on the

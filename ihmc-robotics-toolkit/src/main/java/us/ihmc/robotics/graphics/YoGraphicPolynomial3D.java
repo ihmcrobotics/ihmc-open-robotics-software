@@ -429,7 +429,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     *           YoGraphic expected to be in the same order as packed in {@link #getConstants()}.
     * @return a YoGraphic setup for remote visualization.
     */
-   static YoGraphicPolynomial3D createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
+   public static YoGraphicPolynomial3D createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       return new YoGraphicPolynomial3D(name, yoVariables, constants);
    }

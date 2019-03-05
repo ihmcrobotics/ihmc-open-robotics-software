@@ -1,28 +1,9 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -30,6 +11,7 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -37,17 +19,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerObjective;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.VisibilityGraphMessagesConverter;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
@@ -56,8 +30,8 @@ import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
 import us.ihmc.pathPlanning.statistics.StatisticsType;
 import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -69,6 +43,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
@@ -156,16 +137,15 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private final YoBoolean waitingForPlanningRequest = new YoBoolean("waitingForPlanningRequest", registry);
 
    private final MultiStagePlannerListener plannerListener;
-   private final DistanceBasedSwingParameterCalculator swingParametersCalculator;
+   private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
 
    private final int maxNumberOfPathPlanners;
    private final int maxNumberOfStepPlanners;
 
-   public MultiStageFootstepPlanningManager(RobotContactPointParameters<RobotSide> contactPointParameters, FootstepPlannerParameters footstepPlannerParameters,
-                                            VisibilityGraphsParameters visibilityGraphsParameters, StatusMessageOutputManager statusOutputManager,
+   public MultiStageFootstepPlanningManager(DRCRobotModel drcRobotModel, StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry, long tickDurationMs)
    {
-      this.contactPointParameters = contactPointParameters;
+      this.contactPointParameters = drcRobotModel.getContactPointParameters();
       this.statusOutputManager = statusOutputManager;
       this.tickDurationMs = tickDurationMs;
       goalRecommendationHandler = new PlannerGoalRecommendationHandler(allStepPlanningStages, stepPlanningStagesInProgress);
@@ -176,8 +156,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(getClass().getSimpleName());
       executorService = Executors.newScheduledThreadPool(numberOfCores, threadFactory);
 
-      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, footstepPlannerParameters);
-      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(visibilityGraphsParameters, registry);
+      this.footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
+      this.visibilityGraphsParameters = new YoVisibilityGraphParameters(drcRobotModel.getVisibilityGraphsParameters(), registry);
 
       activePlanner.set(FootstepPlannerType.PLANAR_REGION_BIPEDAL);
       isDone.set(false);
@@ -219,14 +199,14 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             statusOutputManager.reportStatusMessage(FootstepPlanningMessageReporter.packStatus(FootstepPlannerStatus.IDLE));
       });
 
-      FootstepProcessingParameters footstepProcessingParameters = footstepPlannerParameters.getFootstepProcessingParameters();
-      if(footstepProcessingParameters == null)
+      AdaptiveSwingParameters adaptiveSwingParameters = drcRobotModel.getFootstepPlannerParameters().getAdaptiveSwingParameters();
+      if(adaptiveSwingParameters == null)
       {
-         swingParametersCalculator = null;
+         adaptiveSwingTrajectoryCalculator = null;
       }
       else
       {
-         swingParametersCalculator = new DistanceBasedSwingParameterCalculator(footstepProcessingParameters);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(adaptiveSwingParameters, drcRobotModel.getWalkingControllerParameters());
       }
 
       parentRegistry.addChild(registry);
@@ -723,8 +703,8 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                FootstepPlanningToolboxOutputStatus footstepPlanMessage = packStepResult(footstepPlan, bodyPathPlan.getAndSet(null), stepStatus,
                                                                                         plannerTime.getDoubleValue());
 
-               if(swingParametersCalculator != null)
-                  processSwingParameters(footstepPlanMessage.getFootstepDataList());
+               if(adaptiveSwingTrajectoryCalculator != null)
+                  setSwingTrajectories(footstepPlanMessage.getFootstepDataList());
 
                statusOutputManager.reportStatusMessage(footstepPlanMessage);
 
@@ -753,7 +733,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       this.isDone.set(isDone);
    }
 
-   private void processSwingParameters(FootstepDataListMessage footstepDataListMessage)
+   private void setSwingTrajectories(FootstepDataListMessage footstepDataListMessage)
    {
       FramePose3D firstStepStancePose = new FramePose3D();
       FramePose3D secondStepStancePose = new FramePose3D();
@@ -773,23 +753,27 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       for (int i = 0; i < footstepDataList.size(); i++)
       {
          FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
-         Point3D startPoint = new Point3D();
-         Point3D endPoint = new Point3D();
+         Pose3D startPose = new Pose3D();
+         Pose3D endPose = new Pose3D();
 
-         startPoint.set(footstepDataMessage.getLocation());
+         endPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+
          if(i < 2)
          {
-            endPoint.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ?
-                               firstStepStancePose.getPosition() :
-                               secondStepStancePose.getPosition());
+            startPose.set(footstepDataMessage.getRobotSide() == initialStanceSide.toByte() ? firstStepStancePose : secondStepStancePose);
          }
          else
          {
-            endPoint.set(footstepDataList.get(i - 2).getLocation());
+            FootstepDataMessage previousStep = footstepDataList.get(i - 2);
+            startPose.set(previousStep.getLocation(), previousStep.getOrientation());
          }
 
-         footstepDataMessage.setSwingHeight(swingParametersCalculator.calculateSwingHeight(startPoint, endPoint));
-         footstepDataMessage.setSwingDuration(swingParametersCalculator.calculateSwingTime(startPoint, endPoint));
+         footstepDataMessage.setSwingHeight(adaptiveSwingTrajectoryCalculator.calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
+         footstepDataMessage.setSwingDuration(adaptiveSwingTrajectoryCalculator.calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
+
+         double[] waypointProportions = new double[2];
+         adaptiveSwingTrajectoryCalculator.getWaypointProportions(startPose, endPose, planarRegionsList.get(), waypointProportions);
+         footstepDataMessage.getCustomWaypointProportions().add(waypointProportions);
       }
    }
 

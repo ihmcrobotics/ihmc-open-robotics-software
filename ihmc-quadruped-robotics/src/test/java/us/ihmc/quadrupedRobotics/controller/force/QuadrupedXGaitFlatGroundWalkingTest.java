@@ -16,7 +16,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
-@Tag("quadruped-xgait")
+@Tag("quadruped-xgait-2")
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
@@ -25,6 +25,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private QuadrupedTestFactory quadrupedTestFactory;
 
    public abstract double getPacingWidth();
+   public abstract double getPacingStepDuration();
+   public abstract double getPacingEndDoubleSupportDuration();
 
    public abstract double getFastWalkingSpeed();
    public abstract double getSlowWalkingSpeed();
@@ -283,6 +285,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private void testFlatGroundPacing(double walkingSpeed)
    {
       stepTeleopManager.setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStepDuration(getPacingStepDuration());
+      stepTeleopManager.setEndDoubleSupportDuration(getPacingEndDoubleSupportDuration());
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -310,6 +314,8 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    private void testPacingInASemiCircle(double walkingSpeed, double angularVelocity)
    {
       stepTeleopManager.setStanceWidth(getPacingWidth());
+      stepTeleopManager.setStepDuration(getPacingStepDuration());
+      stepTeleopManager.setEndDoubleSupportDuration(getPacingEndDoubleSupportDuration());
 
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

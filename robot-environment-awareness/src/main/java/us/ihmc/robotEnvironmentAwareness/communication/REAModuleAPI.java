@@ -33,7 +33,7 @@ public class REAModuleAPI
 
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
    private static final CategoryTheme Lidar = apiFactory.createCategoryTheme("Lidar");
-   private static final CategoryTheme StereoVisionPointCloud = apiFactory.createCategoryTheme("StereoVisionPointCloud");
+   private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("StereoVision");
    private static final CategoryTheme BoundingBox = apiFactory.createCategoryTheme("BoundingBox");
    private static final CategoryTheme NormalEstimation = apiFactory.createCategoryTheme("NormalEstimation");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
@@ -47,6 +47,7 @@ public class REAModuleAPI
    private static final CategoryTheme Node = apiFactory.createCategoryTheme("Node");
    private static final CategoryTheme Request = apiFactory.createCategoryTheme("Request");
    private static final CategoryTheme DataExporter = apiFactory.createCategoryTheme("DataExporter");
+   private static final CategoryTheme Message = apiFactory.createCategoryTheme("Message");
 
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -57,6 +58,7 @@ public class REAModuleAPI
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<Integer> Depth = apiFactory.createTypedTopicTheme("Depth");
    private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
+   private static final TypedTopicTheme<Integer> Capacity = apiFactory.createTypedTopicTheme("Capacity");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Min = apiFactory.createTopicTheme("Min");
@@ -73,7 +75,12 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> OcTreeEnable = OcTreeCategory.topic(Enable);
    public static final Topic<Boolean> OcTreeClear = OcTreeCategory.topic(Clear);
-   public static final Topic<Integer> OcTreeBufferSize = OcTreeCategory.child(Buffer).topic(Size);
+   public static final Topic<Boolean> LidarBufferEnable = OcTreeCategory.child(Lidar).child(Buffer).topic(Enable);
+   public static final Topic<Integer> LidarBufferOcTreeCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(OcTree).topic(Capacity);
+   public static final Topic<Integer> LidarBufferMessageCapacity = OcTreeCategory.child(Lidar).child(Buffer).child(Message).topic(Capacity);
+   public static final Topic<Boolean> StereoVisionBufferEnable = OcTreeCategory.child(StereoVision).child(Buffer).topic(Enable);
+   public static final Topic<Integer> StereoVisionBufferOcTreeCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(OcTree).topic(Capacity);
+   public static final Topic<Integer> StereoVisionBufferMessageCapacity = OcTreeCategory.child(StereoVision).child(Buffer).child(Message).topic(Capacity);
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = OcTreeCategory.child(BoundingBox).topic(Enable);
    public static final Topic<BoundingBoxParametersMessage> OcTreeBoundingBoxParameters = OcTreeCategory.child(BoundingBox).topic(Parameters);
 
@@ -96,20 +103,22 @@ public class REAModuleAPI
    public static final Topic<ConcaveHullFactoryParameters> PlanarRegionsConcaveHullParameters = PlanarRegionsCategory.child(ConcaveHull).topic(Parameters);
    public static final Topic<PolygonizerParameters> PlanarRegionsPolygonizerParameters = PlanarRegionsCategory.child(Polygonizer).topic(Parameters);
    public static final Topic<Boolean> PlanarRegionsIntersectionEnable = PlanarRegionsCategory.child(Intersection).topic(Enable);
-   public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = PlanarRegionsCategory.child(Intersection).topic(Parameters);
+   public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = PlanarRegionsCategory.child(Intersection)
+                                                                                                                          .topic(Parameters);
 
    public static final Topic<Integer> UIOcTreeDepth = Root.child(UI).child(OcTree).topic(Depth);
    public static final Topic<ColoringType> UIOcTreeColoringMode = Root.child(UI).child(OcTree).topic(Color);
    public static final Topic<DisplayType> UIOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
    public static final Topic<Boolean> UIPlanarRegionHideNodes = Root.child(UI).child(PlanarRegions).child(Node).topic(Hide);
    public static final Topic<Boolean> UIOcTreeBoundingBoxShow = Root.child(UI).child(OcTree).child(BoundingBox).topic(Show);
-   public static final Topic<Boolean> UIOcTreeShowBuffer = Root.child(UI).child(OcTree).child(Buffer).topic(Show);
+   public static final Topic<Boolean> UIOcTreeShowLidarBuffer = Root.child(UI).child(OcTree).child(Lidar).child(Buffer).topic(Show);
+   public static final Topic<Boolean> UIOcTreeShowStereoVisionBuffer = Root.child(UI).child(OcTree).child(StereoVision).child(Buffer).topic(Show);
    public static final Topic<Boolean> UILidarScanShow = Root.child(UI).child(Lidar).topic(Show);
    public static final Topic<Boolean> UILidarScanClear = Root.child(UI).child(Lidar).topic(Clear);
    public static final Topic<Integer> UILidarScanSize = Root.child(UI).child(Lidar).topic(Size);
-   public static final Topic<Boolean> UIStereoVisionPointCloudShow = Root.child(UI).child(StereoVisionPointCloud).topic(Show);
-   public static final Topic<Boolean> UIStereoVisionPointCloudClear = Root.child(UI).child(StereoVisionPointCloud).topic(Clear);
-   public static final Topic<Integer> UIStereoVisionPointCloudSize = Root.child(UI).child(StereoVisionPointCloud).topic(Size);
+   public static final Topic<Boolean> UIStereoVisionShow = Root.child(UI).child(StereoVision).topic(Show);
+   public static final Topic<Boolean> UIStereoVisionClear = Root.child(UI).child(StereoVision).topic(Clear);
+   public static final Topic<Integer> UIStereoVisionSize = Root.child(UI).child(StereoVision).topic(Size);
 
    public static final Topic<Boolean> UISegmentationDataExportRequest = Root.child(UI).child(DataExporter).child(Segmentation).topic(Export);
    public static final Topic<String> UISegmentationDataExporterDirectory = Root.child(UI).child(DataExporter).child(Segmentation).topic(Path);
@@ -117,9 +126,10 @@ public class REAModuleAPI
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = Root.child(UI).child(DataExporter).child(PlanarRegions).topic(Path);
 
    public static final Topic<LidarScanMessage> LidarScanState = ModuleCategory.child(Lidar).topic(Data);
-   public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVisionPointCloud).topic(Data);
+   public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = ModuleCategory.child(StereoVision).topic(Data);
    public static final Topic<NormalOcTreeMessage> OcTreeState = OcTreeCategory.topic(Data);
-   public static final Topic<NormalOcTreeMessage> OcTreeBufferState = OcTreeCategory.child(Buffer).topic(Data);
+   public static final Topic<NormalOcTreeMessage> LidarBufferState = OcTreeCategory.child(Lidar).child(Buffer).topic(Data);
+   public static final Topic<NormalOcTreeMessage> StereoVisionBufferState = OcTreeCategory.child(StereoVision).child(Buffer).topic(Data);
    public static final Topic<PlanarRegionsListMessage> PlanarRegionsState = PlanarRegionsCategory.topic(Data);
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = PlanarRegionsCategory.child(Segmentation).topic(Data);
    public static final Topic<LineSegment3DMessage[]> PlanarRegionsIntersectionState = PlanarRegionsCategory.child(Intersection).topic(Data);
@@ -127,7 +137,8 @@ public class REAModuleAPI
 
    public static final Topic<Boolean> RequestEntireModuleState = ModuleCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestOctree = OcTreeCategory.child(Request).topic(Data);
-   public static final Topic<Boolean> RequestBuffer = OcTreeCategory.child(Buffer).child(Request).topic(Data);
+   public static final Topic<Boolean> RequestLidarBuffer = OcTreeCategory.child(Lidar).child(Buffer).child(Request).topic(Data);
+   public static final Topic<Boolean> RequestStereoVisionBuffer = OcTreeCategory.child(StereoVision).child(Buffer).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegions = PlanarRegionsCategory.child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegionsIntersections = PlanarRegionsCategory.child(Intersection).child(Request).topic(Data);
    public static final Topic<Boolean> RequestPlanarRegionSegmentation = PlanarRegionsCategory.child(Request).child(Segmentation).topic(Data);

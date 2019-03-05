@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -34,6 +35,8 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> stepTeleopXGaitSettingsPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> xboxXGaitSettingsPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
+   private IHMCRealtimeROS2Publisher<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
+
 
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
@@ -63,6 +66,7 @@ public class QuadrupedUIMessageConverter
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
+      desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
 
       enableBodyTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, getTopicNameGenerator(robotName, ROS2Tools.BODY_TELEOP_TOOLBOX,
@@ -81,6 +85,7 @@ public class QuadrupedUIMessageConverter
       stepListMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingNameTopic, this::publishDesiredQuadrupedSteppigState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, this::publishEnableStepTeleop);
@@ -105,6 +110,13 @@ public class QuadrupedUIMessageConverter
    private void publishDesiredHighLevelControllerState(HighLevelControllerName controllerName)
    {
       desiredHighLevelStatePublisher.publish(HumanoidMessageTools.createHighLevelStateMessage(controllerName));
+   }
+
+   private void publishDesiredQuadrupedSteppigState(QuadrupedSteppingStateEnum steppingStateName)
+   {
+      QuadrupedRequestedSteppingStateMessage message = new QuadrupedRequestedSteppingStateMessage();
+      message.setQuadrupedSteppingRequestedEvent(steppingStateName.toByte());
+      desiredSteppingStatePublisher.publish(message);
    }
 
    public void publishDesiredBodyHeight(double desiredBodyHeight)

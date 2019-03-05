@@ -6,12 +6,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedBodyPathAndFootstepPlanner;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerStart;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
@@ -138,12 +136,14 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    }
 
    @Override
-   public List<? extends QuadrupedTimedStep> getSteps()
+   public FootstepPlan getPlan()
    {
-      List<? extends QuadrupedTimedStep> steps = stepCalculator.getSteps();
+      FootstepPlan plan = new FootstepPlan();
+      List<QuadrupedTimedOrientedStep> steps = stepCalculator.getSteps();
       TimeIntervalTools.sortByStartTime(steps);
       double startTime = steps.get(0).getTimeInterval().getStartTime();
       steps.forEach(step -> step.getTimeInterval().shiftInterval(-startTime));
-      return steps;
+      steps.forEach(plan::addFootstep);
+      return plan;
    }
 }

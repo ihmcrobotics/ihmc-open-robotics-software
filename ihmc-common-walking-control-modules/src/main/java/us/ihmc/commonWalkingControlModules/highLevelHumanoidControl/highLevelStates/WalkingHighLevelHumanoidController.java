@@ -579,6 +579,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
+
+      balanceManager.endTick();
    }
 
    private void handleChangeInContactState()

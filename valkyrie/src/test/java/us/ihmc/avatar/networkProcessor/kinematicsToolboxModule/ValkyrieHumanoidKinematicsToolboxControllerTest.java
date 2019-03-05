@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -10,21 +12,31 @@ public class ValkyrieHumanoidKinematicsToolboxControllerTest extends AvatarHuman
    private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
+   @Test // (timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       super.testHoldBodyPose();
    }
 
    @Override
+   @Test // (timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       super.testRandomHandPoses();
    }
 
    @Override
+   @Test // (timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       super.testRandomHandPositions();
+   }
+
+   @Override
+   @Test // (timeout = 30000)
+   public void testSingleSupport() throws Exception
+   {
+      super.testSingleSupport();
    }
 
    @Override

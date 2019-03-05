@@ -1,10 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.NodeDataTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlanTopic;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowNodeDataTopic;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,13 +18,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
+import jdk.nashorn.internal.ir.annotations.Ignore;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
@@ -35,34 +35,43 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.idl.IDLSequence.Double;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static final ConvexPolygon2D defaultFootPolygon = PlannerTools.createDefaultFootPolygon();
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
+   private final double[] defaultWaypointProportions = new double[]{0.15, 0.85};
    private final AtomicReference<Boolean> showSolution;
    private final AtomicReference<Boolean> showIntermediatePlan;
+   private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
+   private final AtomicReference<Boolean> ignorePartialFootholds;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
+   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
 
    private final MeshView footstepPathMeshView = new MeshView();
    private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
-   private static final SideDependentList<Color> solutionFootstepColors = new SideDependentList<>(Color.GREEN, Color.RED);
-   private static final SideDependentList<Color> intermediateFootstepColors = new SideDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
-
    public FootstepPathMeshViewer(Messager messager)
    {
+      ignorePartialFootholds = messager.createInput(IgnorePartialFootholdsTopic, false);
+      footstepDataListMessage = messager.createInput(FootstepPlanResponseTopic, null);
+
       messager.registerTopicListener(FootstepPlanResponseTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
@@ -73,6 +82,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
          processLowestCostNodeList(nodeData);
       }));
 
+      messager.registerTopicListener(RenderShiftedWaypointsTopic, value ->
+      {
+         renderShiftedFootsteps.set(value);
+         processFootstepPath(footstepDataListMessage.get());
+      });
+
+      messager.registerTopicListener(IgnorePartialFootholdsTopic, b -> processFootstepPath(footstepDataListMessage.get()));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlanTopic, true);
@@ -113,17 +129,24 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
    {
       meshBuilder.clear();
-      SideDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
 
       FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
       FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
 
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      if(ignorePartialFootholds.get())
+      {
+         for (int i = 0; i < plan.getNumberOfSteps(); i++)
+         {
+            plan.getFootstep(i).setFoothold(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+         }
+      }
+
+     for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
          SimpleFootstep footstep = plan.getFootstep(i);
-         Color regionColor = colors.get(footstep.getRobotSide());
+         Color regionColor = getFootstepColor(footstepDataListMessage.getFootstepDataList().get(i));
 
          footstep.getSoleFramePose(footPose);
          footPose.get(transformToWorld);
@@ -132,7 +155,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          if (footstep.hasFoothold())
             footstep.getFoothold(foothold);
          else
-            foothold.set(defaultFootPolygon);
+            foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
@@ -145,6 +168,51 @@ public class FootstepPathMeshViewer extends AnimationTimer
       }
 
       meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+   }
+
+   private Color getFootstepColor(FootstepDataMessage footstepDataMessage)
+   {
+      if(renderShiftedFootsteps.get())
+      {
+         if(hasDefaultWaypointProportions(footstepDataMessage))
+         {
+            // default waypoints
+            return Color.GRAY;
+         }
+         else
+         {
+            double epsilon = 1e-5;
+            if(EuclidCoreTools.epsilonEquals(defaultWaypointProportions[0], footstepDataMessage.getCustomWaypointProportions().get(0), epsilon))
+            {
+               // second waypoint shifted forward
+               return Color.GREEN;
+            }
+            else
+            {
+               // first waypoint shifted back
+               return Color.RED;
+            }
+         }
+      }
+      else if (solutionWasReceived.get())
+      {
+         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
+      }
+      else
+      {
+         return Color.GRAY;
+      }
+   }
+
+   private boolean hasDefaultWaypointProportions(FootstepDataMessage footstepDataMessage)
+   {
+      double epsilon = 1e-5;
+      Double customWaypointProportions = footstepDataMessage.getCustomWaypointProportions();
+      if(customWaypointProportions.isEmpty())
+         return true;
+      else
+         return EuclidCoreTools.epsilonEquals(customWaypointProportions.get(0), defaultWaypointProportions[0], epsilon) && EuclidCoreTools
+               .epsilonEquals(customWaypointProportions.get(1), defaultWaypointProportions[1], epsilon);
    }
 
    @Override
@@ -174,6 +242,29 @@ public class FootstepPathMeshViewer extends AnimationTimer
          footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
          footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
       }
+   }
+
+   public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
+   {
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = defaultContactPointParameters.getControllerFootGroundContactPoints();
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         ArrayList<Point2D> defaultContactPoints = controllerFootGroundContactPoints.get(robotSide);
+         for (int i = 0; i < defaultContactPoints.size(); i++)
+         {
+            defaultFoothold.addVertex(defaultContactPoints.get(i));
+         }
+
+         defaultFoothold.update();
+         this.defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+   }
+
+   public void setDefaultWaypointProportions(double[] defaultWaypointProportions)
+   {
+      this.defaultWaypointProportions[0] = defaultWaypointProportions[0];
+      this.defaultWaypointProportions[1] = defaultWaypointProportions[1];
    }
 
    @Override

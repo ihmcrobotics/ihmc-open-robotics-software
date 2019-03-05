@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.*;
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTraject
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,8 +52,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
 
    private static final boolean DEBUG = false;
-
-   private static final boolean PROCESS_GO_HOME_COMMANDS = false;
 
    private boolean visualize = true;
 
@@ -115,6 +115,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final YoBoolean isReadyToHandleQueuedCommands;
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class, PelvisHeightTrajectoryCommand::set);
+
+   private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, false);
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
@@ -964,7 +966,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void goHome(double trajectoryTime)
    {
-      if (!PROCESS_GO_HOME_COMMANDS)
+      if (!processGoHome.getValue())
          return;
 
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());

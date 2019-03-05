@@ -34,6 +34,10 @@ public class TabSaver
    public TuningTab loadTab(TabPane tabPane, Map<String, Tuner> tunerMap)
    {
       ImmutablePair<TuningTab, File> filePair = TabSavingTools.loadTab(tabPane, tunerMap, getWindow());
+      if (filePair == null)
+      {
+         return null;
+      }
       activeTabs.add(filePair);
       saveDefaultTabs();
       return filePair.getLeft();

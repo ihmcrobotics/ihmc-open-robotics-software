@@ -38,6 +38,7 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
+@Tag("humanoid-behaviors")
 public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTestInterface
 {
    private DRCSimulationTestHelper simulationTestHelper;

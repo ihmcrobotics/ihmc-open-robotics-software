@@ -27,7 +27,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@Tag("gui")
+	@Tag("gui-slow")
 	@Test
    public void testLogMessagesToFile() throws IOException
    {
