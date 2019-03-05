@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedUI;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -67,7 +68,7 @@ public class QuadrupedUserInterface
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
-      messager.registerTopicListener(RobotConfigurationDataTopic, robotVisualizer::submitNewConfiguration);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
 
 
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
@@ -100,6 +101,11 @@ public class QuadrupedUserInterface
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
+   }
+
+   private void submitNewConfiguration(RobotConfigurationData configuration)
+   {
+      robotVisualizer.submitNewConfiguration(configuration);
    }
 
    public void show()

@@ -9,7 +9,6 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -65,22 +64,64 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
       // status messages from the controller
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> footstepPlanningController.processRobotTimestamp(s.takeNextData().getTimestamp()));
+                                           s -> processRobotTimestamp(s.takeNextData().getTimestamp()));
 //      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> footstepPlanningController.setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> footstepPlanningController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> footstepPlanningController.processSteppingStateChangeMessage(s.takeNextData()));
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
-                                           s -> footstepPlanningController.processGroundPlaneMessage(s.takeNextData()));
+                                           s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> footstepPlanningController.processFootstepPlanningRequest(s.takeNextData()));
+                                           s -> processFootstepPlanningRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> footstepPlanningController.processXGaitSettingsPacket(s.takeNextData()));
+                                           s -> processXGaitSettingsPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
-                                           s -> footstepPlanningController.processPlanarRegionsListMessage(s.takeNextData()));
+                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
+   }
+
+   private void processRobotTimestamp(long timestamp)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processRobotTimestamp(timestamp);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processGroundPlaneMessage(message);
+   }
+
+   private void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processFootstepPlanningRequest(packet);
+   }
+
+   private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processXGaitSettingsPacket(packet);
+   }
+
+   private void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processPlanarRegionsListMessage(message);
    }
 
    @Override

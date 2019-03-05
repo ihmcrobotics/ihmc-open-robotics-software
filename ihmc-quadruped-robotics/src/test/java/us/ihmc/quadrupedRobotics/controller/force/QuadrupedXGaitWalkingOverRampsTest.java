@@ -1,13 +1,18 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import junit.framework.AssertionFailedError;
+import java.io.IOException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -15,8 +20,6 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
 import us.ihmc.tools.MemoryTools;
-
-import java.io.IOException;
 
 @Tag("quadruped-xgait-3")
 public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMultiRobotTestInterface
@@ -60,7 +63,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkOverRamps(groundProfile, getComHeightForRoughTerrain());
    }
 
-   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
+   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException
    {
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -112,7 +115,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkSlope(-0.1, getWalkingUpSlopePosition());
    }
 
-   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException, AssertionFailedError
+   private void walkSlope(double slope, QuadrupedInitialPositionParameters initialPosition) throws IOException
    {
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       quadrupedTestFactory.setInitialPosition(initialPosition);
