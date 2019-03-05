@@ -1,19 +1,18 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
-
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class VisibilityGraphsDataExporter
 {
@@ -34,12 +33,6 @@ public class VisibilityGraphsDataExporter
       messager.registerTopicListener(UIVisibilityGraphsTopics.exportUnitTestDataFile, this::exportVisibilityGraphsData);
    }
 
-   public VisibilityGraphsDataExporter(File dataDirectoryPath)
-   {
-      planarRegionsState = new AtomicReference<>(null);
-      this.dataDirectoryPath = new AtomicReference<>(dataDirectoryPath.getAbsolutePath());
-   }
-
    private void exportVisibilityGraphsData(boolean export)
    {
       PlanarRegionsList planarRegionData = planarRegionsState.get();
@@ -48,33 +41,13 @@ public class VisibilityGraphsDataExporter
 
    private void executeOnThread(PlanarRegionsList planarRegionData, Point3D start, Point3D goal)
    {
-      if (dataDirectoryPath.get() == null)
-      {
-         LogTools.error("The path to the data directory is null.");
-         return;
-      }
+      DataSet dataSet = new DataSet(PlanarRegionFileTools.getDate() + "_DataSet", planarRegionData);
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.setStartPosition(start);
+      plannerInput.setGoalPosition(goal);
+      dataSet.setPlannerInput(plannerInput);
 
-      if (planarRegionData == null)
-      {
-         LogTools.error("No planar regions, not exporting the data.");
-         return;
-      }
-
-      if (start == null)
-      {
-         LogTools.error("No start position, not exporting the data.");
-         return;
-      }
-
-      if (goal == null)
-      {
-         LogTools.error("No goal position, not exporting the data.");
-         return;
-      }
-
-      Path folderPath = Paths.get(dataDirectoryPath.get());
-      String datasetName = VisibilityGraphsIOTools.createDefaultTimeStampedDatasetFolderName();
-      VisibilityGraphsIOTools.exportDataset(folderPath, datasetName, planarRegionData, start, goal);
+      DataSetIOTools.exportDataSet(dataDirectoryPath.get(), dataSet);
    }
 
    public void stop()

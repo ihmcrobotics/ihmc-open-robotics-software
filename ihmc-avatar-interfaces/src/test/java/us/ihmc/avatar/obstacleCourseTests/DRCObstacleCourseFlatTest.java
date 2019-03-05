@@ -62,7 +62,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-@Tag("humanoid-flat-ground")
+@Tag("humanoid-flat-ground-4")
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();

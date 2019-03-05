@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDat
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
+import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
@@ -49,6 +50,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> setupRobotEnvironmentAwerenessModule(params));
       tryToStartModule(() -> setupBipedalSupportPlanarRegionPublisherModule(robotModel, params));
       tryToStartModule(() -> setupWalkingPreviewModule(robotModel, params));
+      tryToStartModule(() -> setupHumanoidAvatarREAStateUpdater(robotModel, params));
    }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
@@ -204,6 +206,12 @@ public class DRCNetworkProcessor
       {
          new WalkingControllerPreviewToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       }
+   }
+
+   private void setupHumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      if (params.isAutoREAStateUpdaterEnabled())
+         new HumanoidAvatarREAStateUpdater(robotModel, PubSubImplementation.FAST_RTPS);
    }
 
    protected void connect(PacketCommunicator communicator)

@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends VirtualModelControlCommand<T>
+public interface VirtualEffortCommand<T extends VirtualEffortCommand<T>> extends VirtualModelControlCommand<T>
 {
    /**
     * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this

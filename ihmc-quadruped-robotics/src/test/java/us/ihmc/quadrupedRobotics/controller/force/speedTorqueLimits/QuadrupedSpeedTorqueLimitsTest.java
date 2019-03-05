@@ -133,7 +133,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   private void standupPrecisely(double desiredCoMHeight) throws AssertionFailedError
+   private void standupPrecisely(double desiredCoMHeight)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -143,7 +143,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.simulate();
    }
 
-   private void lowerHeightUntilFailure(double originalHeight) throws AssertionFailedError
+   private void lowerHeightUntilFailure(double originalHeight)
    {
       for (double heightDelta = 0.0; (originalHeight + heightDelta) > 0.38; heightDelta -= 0.01)
       {
@@ -171,7 +171,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       }
    }
 
-   private void raiseHeightUntilFailure(double originalHeight) throws AssertionFailedError
+   private void raiseHeightUntilFailure(double originalHeight)
    {
       for (double heightDelta = 0.38 - originalHeight; (originalHeight + heightDelta) < originalHeight; heightDelta += 0.01)
       {

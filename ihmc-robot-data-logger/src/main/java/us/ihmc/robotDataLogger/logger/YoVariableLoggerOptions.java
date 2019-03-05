@@ -17,6 +17,7 @@ public class YoVariableLoggerOptions
    public final static CodecID defaultCodec = CodecID.AV_CODEC_ID_MJPEG;
    public final static double defaultVideoQuality = 0.85;
    public final static int defaultCRF = 23;
+   
 
    private String logDirectory = defaultLogDirectory;
    
@@ -28,6 +29,8 @@ public class YoVariableLoggerOptions
    
    private boolean flushAggressivelyToDisk = false;
 
+   private boolean disableAutoDiscovery = false;
+   
    public static YoVariableLoggerOptions parse(String[] args) throws JSAPException
    {
       SimpleJSAP jsap = new SimpleJSAP("YoVariabeLogger", "Logs YoVariables and video from a robot", new Parameter[] {
@@ -38,7 +41,8 @@ public class YoVariableLoggerOptions
                   "quality", "Video quality for MJPEG"),
             new FlaggedOption("videoCodec", JSAP.STRING_PARSER, String.valueOf(defaultCodec), JSAP.NOT_REQUIRED, 'c', "codec", "Desired video codec. AV_CODEC_ID_H264 or AV_CODEC_ID_MJPEG"),
             new FlaggedOption("crf", JSAP.INTEGER_PARSER, String.valueOf(defaultCRF), JSAP.NOT_REQUIRED, 'r', "crf", "CRF (Constant rate factor) for H264. 0-51, 0 is lossless. Sane values are 18 to 28."),
-            new Switch("flushAggressivelyToDisk", 's', "sync", "Aggressively flush data to disk. Reduces change of data loss but doesn't work on slow platters.") });
+            new Switch("flushAggressivelyToDisk", 's', "sync", "Aggressively flush data to disk. Reduces change of data loss but doesn't work on slow platters."),
+            new Switch("disableAutoDiscovery", 'a', "noDiscovery", "Disable autodiscovery of clients.") });
       JSAPResult config = jsap.parse(args);
       if (jsap.messagePrinted())
       {
@@ -55,6 +59,7 @@ public class YoVariableLoggerOptions
       options.setCrf(config.getInt("crf"));
       
       options.setFlushAggressivelyToDisk(config.getBoolean("flushAggressivelyToDisk"));
+      options.setDisableAutoDiscovery(config.getBoolean("disableAutoDiscovery"));
 
       return options;
    }
@@ -117,6 +122,16 @@ public class YoVariableLoggerOptions
    public void setCrf(int crf)
    {
       this.crf = crf;
+   }
+
+   public boolean isDisableAutoDiscovery()
+   {
+      return disableAutoDiscovery;
+   }
+
+   public void setDisableAutoDiscovery(boolean disableAutoDiscovery)
+   {
+      this.disableAutoDiscovery = disableAutoDiscovery;
    }
    
    

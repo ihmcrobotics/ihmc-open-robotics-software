@@ -9,6 +9,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -22,19 +23,20 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 10;
+   private static final int updatePeriodMilliseconds = 75;
 
    private final QuadrupedBodyTeleopController bodyTeleopController;
 
-   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider,
-                                    DomainFactory.PubSubImplementation pubSubImplementation)
+   public QuadrupedBodyTeleopModule(FullQuadrupedRobotModelFactory modelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                    boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider,startYoVariableServer,
+            new DataServerSettings(logYoVariables, true, 8009, "BodyTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
       bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotDataReceiver, registry);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer(getClass());
    }
 
    @Override
@@ -43,16 +45,46 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> bodyTeleopController.processTimestamp(s.takeNextData().getTimestamp()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> bodyTeleopController.setPaused(true));
+                                           s -> processTimestamp(s.takeNextData().getTimestamp()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> bodyTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> bodyTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
 
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredPose.class, getSubscriberTopicNameGenerator(),
-                                           s -> bodyTeleopController.processTeleopDesiredPoseMessage(s.takeNextData()));
+                                           s -> processTeleopDesiredPoseMessage(s.takeNextData()));
+   }
+
+   private void processTimestamp(long timestamp)
+   {
+      if (bodyTeleopController != null)
+         bodyTeleopController.processTimestamp(timestamp);
+   }
+
+   private void setPaused(boolean paused)
+   {
+      if (bodyTeleopController != null)
+         bodyTeleopController.setPaused(paused);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (bodyTeleopController != null)
+         bodyTeleopController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (bodyTeleopController != null)
+         bodyTeleopController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processTeleopDesiredPoseMessage(QuadrupedTeleopDesiredPose message)
+   {
+      if (bodyTeleopController != null)
+         bodyTeleopController.processTeleopDesiredPoseMessage(message);
    }
 
    @Override

@@ -1,14 +1,10 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -24,15 +20,9 @@ public class PlanarRegionsListHandler
 
    private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
 
-   private final StatusMessageOutputManager statusOutputManager;
-   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
-
    public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
    {
-      this.statusOutputManager = requestOutputManager;
-
       planarRegions.clear();
-      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
 
       parentRegistry.addChild(registry);
    }
@@ -53,7 +43,6 @@ public class PlanarRegionsListHandler
 
    public void requestPlanarRegions()
    {
-      statusOutputManager.reportStatusMessage(planarRegionsRequestMessage);
       waitingOnNewPlanarRegions.set(true);
    }
 
@@ -68,7 +57,7 @@ public class PlanarRegionsListHandler
          return false;
 
       planarRegionsListToPack.clear();
-      for (int i = 0; i <planarRegions.size(); i++)
+      for (int i = 0; i < planarRegions.size(); i++)
          planarRegionsListToPack.addPlanarRegion(planarRegions.get(i));
 
       hasNewPlanarRegionsList.set(false);

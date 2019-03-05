@@ -11,20 +11,17 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.idl.IDLSequence.Double;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -45,7 +42,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    private final TDoubleArrayList keyFrameTimes;
    private final List<KinematicsPlanningToolboxRigidBodyMessage> rigidBodyMessages;
 
-   private final KinematicsPlanningToolboxOutputConverter outputConverter;
    private final ConcurrentListeningQueue<KinematicsPlanningToolboxOutputStatus> toolboxOutputQueue = new ConcurrentListeningQueue<>(40);
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -64,8 +60,6 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
 
       keyFrameTimes = new TDoubleArrayList();
       rigidBodyMessages = new ArrayList<KinematicsPlanningToolboxRigidBodyMessage>();
-
-      outputConverter = new KinematicsPlanningToolboxOutputConverter(fullRobotModelFactory);
 
       createSubscriber(KinematicsPlanningToolboxOutputStatus.class, kinematicsPlanningToolboxPubGenerator, toolboxOutputQueue::put);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsPlanningToolboxSubGenerator);
@@ -176,11 +170,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
 
          trajectoryTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
 
-         WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
-         message.setDestination(PacketDestination.CONTROLLER.ordinal());
-         outputConverter.setMessageToCreate(message);
-         outputConverter.computeWholeBodyTrajectoryMessage(solution);
-         wholeBodyTrajectoryPublisher.publish(message);
+         wholeBodyTrajectoryPublisher.publish(solution.getSuggestedControllerMessage());
          deactivateKinematicsToolboxModule();
       }
    }
@@ -206,11 +196,12 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          rigidBodyMessagePublisher.publish(message);
       }
 
-      Vector3DReadOnly translationVector = fullRobotModel.getRootBody().getBodyFixedFrame().getTransformToWorldFrame().getTranslationVector();
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullRobotModel.getRootBody(), worldFrame);
+      calculator.reset();
 
       List<Point3DReadOnly> desiredCOMPoints = new ArrayList<Point3DReadOnly>();
       for (int i = 0; i < keyFrameTimes.size(); i++)
-         desiredCOMPoints.add(new Point3D(translationVector));
+         desiredCOMPoints.add(calculator.getCenterOfMass());
 
       KinematicsPlanningToolboxCenterOfMassMessage comMessage = HumanoidMessageTools.createKinematicsPlanningToolboxCenterOfMassMessage(keyFrameTimes,
                                                                                                                                         desiredCOMPoints);
@@ -218,6 +209,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       selectionMatrix.selectZAxis(false);
       comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
       comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(defaultCOMWeight));
+
       comMessagePublisher.publish(comMessage);
 
       System.out.println("published");

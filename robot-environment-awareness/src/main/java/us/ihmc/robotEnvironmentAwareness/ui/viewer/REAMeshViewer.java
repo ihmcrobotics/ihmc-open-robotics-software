@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
@@ -34,7 +35,8 @@ public class REAMeshViewer
    private final Group root = new Group();
 
    private final List<ScheduledFuture<?>> meshBuilderScheduledFutures = new ArrayList<>();
-   private final MeshView bufferOcTreeMeshView = new MeshView();
+   private final MeshView lidarBufferOcTreeMeshView = new MeshView();
+   private final MeshView stereoVisionBufferOcTreeMeshView = new MeshView();
    private final MeshView planarRegionMeshView = new MeshView();
    private final MeshView intersectionsMeshView = new MeshView();
 
@@ -44,7 +46,7 @@ public class REAMeshViewer
 
    private final LidarScanViewer lidarScanViewer;
    private final StereoVisionPointCloudViewer stereoVisionPointCloudViewer;
-   private final BufferOctreeMeshBuilder bufferOctreeMeshBuilder;
+   private final BufferOctreeMeshBuilder lidarBufferOctreeMeshBuilder, stereoVisionBufferOctreeMeshBuilder;
    private final OcTreeMeshBuilder ocTreeViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final PlanarRegionsIntersectionsMeshBuilder intersectionsMeshBuilder;
@@ -55,7 +57,11 @@ public class REAMeshViewer
       // TEST Communication over network
       lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, uiMessager);
       stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, uiMessager);
-      bufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager);
+      lidarBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowLidarBuffer, REAModuleAPI.RequestLidarBuffer,
+                                                                 REAModuleAPI.LidarBufferState, Color.DARKRED);
+      stereoVisionBufferOctreeMeshBuilder = new BufferOctreeMeshBuilder(uiMessager, REAModuleAPI.UIOcTreeShowStereoVisionBuffer,
+                                                                        REAModuleAPI.RequestStereoVisionBuffer, REAModuleAPI.StereoVisionBufferState,
+                                                                        Color.DARKORANGE);
       ocTreeViewer = new OcTreeMeshBuilder(uiMessager);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager);
       intersectionsMeshBuilder = new PlanarRegionsIntersectionsMeshBuilder(uiMessager);
@@ -65,11 +71,12 @@ public class REAMeshViewer
       lidarScanRootNode.setMouseTransparent(true);
       Node stereoVisionPointCloudRootNode = stereoVisionPointCloudViewer.getRoot();
       stereoVisionPointCloudRootNode.setMouseTransparent(true);
-      bufferOcTreeMeshView.setMouseTransparent(true);
+      lidarBufferOcTreeMeshView.setMouseTransparent(true);
+      stereoVisionBufferOcTreeMeshView.setMouseTransparent(true);
       ocTreeViewer.getRoot().setMouseTransparent(true);
       boundingBoxMeshView.setMouseTransparent(true);
-      root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, bufferOcTreeMeshView, ocTreeViewer.getRoot(), planarRegionMeshView,
-                                intersectionsMeshView, boundingBoxMeshView);
+      root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, lidarBufferOcTreeMeshView, stereoVisionBufferOcTreeMeshView,
+                                ocTreeViewer.getRoot(), planarRegionMeshView, intersectionsMeshView, boundingBoxMeshView);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -80,8 +87,11 @@ public class REAMeshViewer
             stereoVisionPointCloudViewer.render();
             ocTreeViewer.render();
 
-            if (bufferOctreeMeshBuilder.hasNewMeshAndMaterial())
-               updateMeshView(bufferOcTreeMeshView, bufferOctreeMeshBuilder.pollMeshAndMaterial());
+            if (lidarBufferOctreeMeshBuilder.hasNewMeshAndMaterial())
+               updateMeshView(lidarBufferOcTreeMeshView, lidarBufferOctreeMeshBuilder.pollMeshAndMaterial());
+
+            if (stereoVisionBufferOctreeMeshBuilder.hasNewMeshAndMaterial())
+               updateMeshView(stereoVisionBufferOcTreeMeshView, stereoVisionBufferOctreeMeshBuilder.pollMeshAndMaterial());
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
@@ -106,7 +116,9 @@ public class REAMeshViewer
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarScanViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionPointCloudViewer, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(bufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(lidarBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(stereoVisionBufferOctreeMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD,
+                                                                          TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(intersectionsMeshBuilder, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));

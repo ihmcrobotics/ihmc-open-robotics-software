@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 
-@Tag("gui")
+@Tag("gui-slow")
 public class SpringFlamingoSimulationTest
 {
    private SimulationGUITestFixture testFixture;
