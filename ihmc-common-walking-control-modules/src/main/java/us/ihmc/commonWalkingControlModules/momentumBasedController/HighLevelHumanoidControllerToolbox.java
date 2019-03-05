@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -145,8 +144,6 @@ public class HighLevelHumanoidControllerToolbox
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
    private final ICPControlPlane icpControlPlane;
-
-   private final FootRotationInformation footRotationInformation = new FootRotationInformation();
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
@@ -901,11 +898,6 @@ public class HighLevelHumanoidControllerToolbox
    public ICPControlPolygons getICPControlPolygons()
    {
       return icpControlPolygons;
-   }
-
-   public FootRotationInformation getFootRotationInformation()
-   {
-      return footRotationInformation;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()

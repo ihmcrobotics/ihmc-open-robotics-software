@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.wobble.FootRotationInformation;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -160,10 +159,6 @@ public class BalanceManager
    private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
 
-   private final DoubleProvider maxAdjustmentForRotation = new DoubleParameter("MaxAdjustmentForRotation", registry, 0.2);
-   private final FootRotationInformation footRotationInformation;
-   private final FrameVector2D stepAdjustment = new FrameVector2D();
-
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
                          YoVariableRegistry parentRegistry)
@@ -192,8 +187,6 @@ public class BalanceManager
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
-
-      footRotationInformation = controllerToolbox.getFootRotationInformation();
 
       ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
@@ -424,43 +417,6 @@ public class BalanceManager
    {
       icpPlanner.setTransferFromSide(robotSide);
       linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
-   }
-
-   public boolean computeRotationAdjustment(RobotSide supportSide, Footstep footstep)
-   {
-      if (footRotationInformation.hasAdjusted(supportSide))
-      {
-         return false;
-      }
-      else if (footRotationInformation.isRotating(supportSide))
-      {
-         icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
-         controllerToolbox.getCapturePoint(capturePoint2d);
-         stepAdjustment.setIncludingFrame(capturePoint2d);
-         stepAdjustment.sub(desiredCapturePoint2d);
-         double remainingSwingTime = icpPlanner.getTimeInCurrentStateRemaining();
-         stepAdjustment.scale(Math.exp(controllerToolbox.getOmega0() * remainingSwingTime));
-
-         finalDesiredCapturePoint2d.setIncludingFrame(yoFinalDesiredICP);
-         desiredCoP.setIncludingFrame(footRotationInformation.getDesiredCoP(supportSide));
-         desiredCoP.changeFrameAndProjectToXYPlane(worldFrame);
-         double d1 = desiredCoP.distanceXY(footstep.getFootstepPose().getPosition());
-         double d2 = desiredCoP.distance(finalDesiredCapturePoint2d);
-         stepAdjustment.scale(d1 / d2);
-
-         double adjustmentLength = stepAdjustment.length();
-         if (adjustmentLength > maxAdjustmentForRotation.getValue())
-         {
-            stepAdjustment.scale(maxAdjustmentForRotation.getValue() / adjustmentLength);
-         }
-
-         footstep.setX(footstep.getX() + stepAdjustment.getX());
-         footstep.setY(footstep.getY() + stepAdjustment.getY());
-
-         footRotationInformation.setAdjusted(supportSide);
-         return true;
-      }
-      return false;
    }
 
    public void endTick()

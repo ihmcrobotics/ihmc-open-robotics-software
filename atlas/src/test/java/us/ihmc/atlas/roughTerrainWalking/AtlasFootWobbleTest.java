@@ -34,9 +34,9 @@ public class AtlasFootWobbleTest extends AvatarFootWobbleTest
 
    @Override
    @Test
-   public void testICPReplanningInSwing() throws SimulationExceededMaximumTimeException
+   public void testDampingIsActivated() throws SimulationExceededMaximumTimeException
    {
-      super.testICPReplanningInSwing();
+      super.testDampingIsActivated();
    }
 
    @Override

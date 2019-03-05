@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -68,7 +67,6 @@ public class SwingState extends AbstractFootControlState
 
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
-   private final YoBoolean useVelocityCorrection;
 
    private static final double maxScalingFactor = 1.5;
    private static final double minScalingFactor = 0.1;
@@ -250,7 +248,6 @@ public class SwingState extends AbstractFootControlState
       //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
-      useVelocityCorrection = new YoBoolean(namePrefix + "UseVelocityCorrection", registry);
 
       minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry,
                                                                     swingTrajectoryParameters.getMinHeightDifferenceForStepUpOrDown());
@@ -564,7 +561,7 @@ public class SwingState extends AbstractFootControlState
 
       leapOfFaithModule.compute(time);
 
-      if (footstepWasAdjusted && useVelocityCorrection.getValue())
+      if (footstepWasAdjusted)
       {
          adjustmentVelocityCorrection.set(desiredPosition);
          adjustmentVelocityCorrection.sub(unadjustedPosition);
@@ -632,11 +629,10 @@ public class SwingState extends AbstractFootControlState
       return computeSwingTimeRemaining(currentTime.getDoubleValue());
    }
 
-   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime, boolean useVelocityCorrection)
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
-      this.useVelocityCorrection.set(useVelocityCorrection);
 
       adjustedFootstep.getPose(adjustedFootstepPose);
 
