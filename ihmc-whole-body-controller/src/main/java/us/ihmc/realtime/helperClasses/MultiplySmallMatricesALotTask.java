@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
 
@@ -23,13 +24,15 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    private final DenseMatrix64F matrixB;
    private final DenseMatrix64F matrixC;
 
+   private final YoDouble actualDTMillis;
    boolean useNativeCommonOps;
 
    private final ExecutionTimer executionTimer;
 
-   public MultiplySmallMatricesALotTask(YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
+   public MultiplySmallMatricesALotTask(YoDouble actualDTMillis, YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
    {
       super(divisor);
+      this.actualDTMillis = actualDTMillis;
 
       this.useNativeCommonOps = useNativeCommonOps;
 
@@ -65,7 +68,7 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    {
       RandomMatrices.setRandom(matrixA, random);
       RandomMatrices.setRandom(matrixB, random);
-      timingInformation.initialize(System.nanoTime());
+      timingInformation.initialize(System.nanoTime(), actualDTMillis);
       return true;
    }
 

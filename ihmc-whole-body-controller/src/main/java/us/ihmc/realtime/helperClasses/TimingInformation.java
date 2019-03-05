@@ -1,11 +1,15 @@
 package us.ihmc.realtime.helperClasses;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 public class TimingInformation
 {
    private long previousTime = 0;
+   private YoDouble actualDTYoDouble;
    private long avgJitter = 0;
    private long maxJitter = 0;
 
@@ -21,15 +25,21 @@ public class TimingInformation
       System.out.println(name + " Period, Hz: " + 1 / (periodInNS / 1e9));
    }
 
-   public void initialize(long currentTime)
+   public void initialize(long currentTime, YoDouble actualDTYoDouble)
    {
       previousTime = currentTime;
+      this.actualDTYoDouble = actualDTYoDouble;
       isInitialized = true;
    }
 
    public void updateTimingInformation(long newTime)
    {
       long jitter = Math.abs(newTime - previousTime - periodInNS);
+
+      if (actualDTYoDouble != null)
+      {
+         actualDTYoDouble.set(Conversions.nanosecondsToMilliseconds((double) newTime - (double) previousTime));
+      }
 
       if (jitter > maxJitter)
       {

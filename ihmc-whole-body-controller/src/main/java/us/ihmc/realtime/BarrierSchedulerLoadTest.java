@@ -3,10 +3,14 @@ package us.ihmc.realtime;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.affinity.Package;
+import us.ihmc.commons.Conversions;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.BindingContext;
 import us.ihmc.realtime.helperClasses.*;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,11 +24,15 @@ public class BarrierSchedulerLoadTest
    private static final int NUM_ITERATIONS_OF_SCHEDULER = 60000; // 60 seconds @ 1KHz
    private static final double ESTIMATED_DURATION = (double) SCHEDULER_PERIOD_NANOSECONDS * (double) NUM_ITERATIONS_OF_SCHEDULER / 1e9;
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoDouble actualSchedulerDTMillis = new YoDouble("actualSchedulerDTMillis", registry);
+   private final YoDouble actualFastTaskDTMillis = new YoDouble("actualFastTaskDTMillis", registry);
+   private final YoDouble actualSlowTaskDTMillis = new YoDouble("actualSlowTaskDTMillis", registry);
+
    public void testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(boolean useNativeCommonOps)
    {
       System.out.println("Performing Benchmark; Using Native Commons Ops: " + useNativeCommonOps);
 
-      final YoVariableRegistry registry = new YoVariableRegistry("BarrierSchedulerLoadTestRegistry");
       CPUDMALatency.setLatency(0);
 
       PriorityParameters schedulerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
@@ -41,8 +49,15 @@ public class BarrierSchedulerLoadTest
          System.err.println("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
       }
 
-      MultiplySmallMatricesALotTask fastTask = new MultiplySmallMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 1, useNativeCommonOps); // 1KHz
-      MultiplyBigMatricesALotTask slowTask = new MultiplyBigMatricesALotTask(registry, SCHEDULER_PERIOD_NANOSECONDS, 4, useNativeCommonOps); // 250Hz
+      final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), null, new DataServerSettings(false),
+                                                                     Conversions.nanosecondsToSeconds(SCHEDULER_PERIOD_NANOSECONDS));
+
+      yoVariableServer.setMainRegistry(registry, null, null);
+
+      MultiplySmallMatricesALotTask fastTask = new MultiplySmallMatricesALotTask(actualFastTaskDTMillis, registry, SCHEDULER_PERIOD_NANOSECONDS, 1,
+                                                                                 useNativeCommonOps); // 1KHz
+      MultiplyBigMatricesALotTask slowTask = new MultiplyBigMatricesALotTask(actualSlowTaskDTMillis, registry, SCHEDULER_PERIOD_NANOSECONDS, 4,
+                                                                             useNativeCommonOps); // 250Hz
 
       List<BarrierSchedulerLoadTestTask> tasks = Arrays.asList(fastTask, slowTask);
       BarrierSchedulerLoadTestContext context = new BarrierSchedulerLoadTestContext(new Pair<>(fastTask, slowTask));
@@ -54,39 +69,48 @@ public class BarrierSchedulerLoadTest
       RealtimeThread fastTaskThread = new RealtimeThread(fastTaskPriority, fastTask, "fastTask");
       RealtimeThread slowTaskThread = new RealtimeThread(slowTaskPriority, slowTask, "slowTask");
 
-      RealtimeThread schedulerThread = new RealtimeThread(schedulerPriority, schedulerPeriodicParameters, "barrierSchedulerThread")
+      final Runnable schedulerRunnable = new Runnable()
       {
+         boolean isFinished = false;
          boolean firstTick = true;
          int iterations = -1;
 
          @Override
          public void run()
          {
-            while (iterations < NUM_ITERATIONS_OF_SCHEDULER)
+            long nanoTime = System.nanoTime();
+            if (firstTick)
             {
-               super.waitForNextPeriod();
-               if (firstTick)
-               {
-                  schedulerTimingInformation.initialize(System.nanoTime());
-                  firstTick = false;
-               }
-               else
-               {
-                  schedulerTimingInformation.updateTimingInformation(System.nanoTime());
-               }
-
-               barrierScheduler.run();
-               iterations++;
+               schedulerTimingInformation.initialize(nanoTime, actualSchedulerDTMillis);
+               firstTick = false;
+            }
+            else
+            {
+               schedulerTimingInformation.updateTimingInformation(nanoTime);
             }
 
-            fastTask.doTimingReporting();
-            System.out.println();
-            slowTask.doTimingReporting();
-            System.out.println();
+            barrierScheduler.run();
+            iterations++;
 
-            BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV("Scheduler", schedulerTimingInformation);
+            yoVariableServer.update(nanoTime);
+
+            if (iterations > NUM_ITERATIONS_OF_SCHEDULER && !isFinished)
+            {
+               fastTask.doTimingReporting();
+               System.out.println();
+               slowTask.doTimingReporting();
+               System.out.println();
+
+               BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV("Scheduler", schedulerTimingInformation);
+
+               isFinished = true;
+            }
+
          }
       };
+
+      PeriodicRealtimeThread schedulerThread = new PeriodicRealtimeThread(schedulerPriority, schedulerPeriodicParameters, schedulerRunnable,
+                                                                          "barrierSchedulerThread");
 
       System.out.println("Pinning scheduler thread to core 1");
       schedulerThread.setAffinity(cpuPackage.getCore(1).getDefaultProcessor());
@@ -94,6 +118,8 @@ public class BarrierSchedulerLoadTest
       System.out.println("Pinning fast task to core 2 and slow task to core 3.");
       fastTaskThread.setAffinity(cpuPackage.getCore(2).getDefaultProcessor());
       slowTaskThread.setAffinity(cpuPackage.getCore(3).getDefaultProcessor());
+
+      yoVariableServer.start();
 
       fastTaskThread.start();
       slowTaskThread.start();
