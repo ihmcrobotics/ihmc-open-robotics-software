@@ -27,6 +27,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -324,32 +325,22 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    protected void packPlanningRequest(DataSet dataset)
    {
-      FramePose3D startPose = new FramePose3D();
-      FramePose3D goalPose = new FramePose3D();
-      startPose.setPosition(dataset.getPlannerInput().getQuadrupedStartPosition());
-      goalPose.setPosition(dataset.getPlannerInput().getQuadrupedGoalPosition());
-      if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
-         startPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
-      if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
-         goalPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
-
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
 
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
-
+      PlannerInput plannerInput = dataset.getPlannerInput();
+      
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, plannerInput.getQuadrupedStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
+
+      ThreadTools.sleep(1000);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
