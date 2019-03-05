@@ -4,7 +4,14 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -17,22 +24,25 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
+import java.util.List;
+
 public class QuadrupedFootSwitchFactory
 {
-   // Factory fields
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
-   protected final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>(
+   private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>(
          "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
    private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
    private final OptionalFactoryField<Boolean> useKneeTorqueTouchdown = new OptionalFactoryField<>("useKneeTorqueTouchdown");
 
-   // Private fields
+   // Used to create the ground contact point based foot switches.
+   private final OptionalFactoryField<FloatingRootJointRobot> simulatedRobot = new OptionalFactoryField<>("simulatedRobot");
+
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
-   protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   private void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -64,8 +74,28 @@ public class QuadrupedFootSwitchFactory
 
    protected void setupGroundContactPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
-      PrintTools.warn(this, "simulatedRobot is not set, creating touchdown based foot switches.");
-      setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
+      if (!simulatedRobot.hasValue())
+      {
+         PrintTools.warn(this, "simulatedRobot is null, creating touchdown based foot switches.");
+         setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
+         return;
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         ContactablePlaneBody contactablePlaneBody = footContactableBodies.get().get(robotQuadrant);
+         JointBasics parentJoint = contactablePlaneBody.getRigidBody().getParentJoint();
+         String jointName = parentJoint.getName();
+         String forceSensorName = contactablePlaneBody.getName() + "ForceSensor";
+         FloatingRootJointRobot robot = simulatedRobot.get();
+         OneDegreeOfFreedomJoint forceTorqueSensorJoint = robot.getOneDegreeOfFreedomJoint(jointName);
+         List<GroundContactPoint> contactPoints = forceTorqueSensorJoint.getGroundContactPointGroup().getGroundContactPoints();
+         RigidBodyTransform transformToParentJoint = contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
+         WrenchCalculatorInterface wrenchCaluclator = new GroundContactPointBasedWrenchCalculator(forceSensorName, contactPoints, forceTorqueSensorJoint,
+                                                                                                  transformToParentJoint, robot.getRobotsYoVariableRegistry());
+         FootSwitchInterface footSwitch = new QuadrupedDebugFootSwitch(wrenchCaluclator, contactablePlaneBody, totalRobotWeight, registry);
+         footSwitches.set(robotQuadrant, footSwitch);
+      }
    }
 
    private void setupSettableFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
@@ -107,7 +137,6 @@ public class QuadrupedFootSwitchFactory
    }
 
    // Factory setters
-
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
@@ -141,5 +170,10 @@ public class QuadrupedFootSwitchFactory
    public void setKneeTouchdownThresholds(QuadrantDependentList<Double> kneeTouchdownThresholds)
    {
       this.kneeTorqueTouchdownThreshold.set(kneeTouchdownThresholds);
+   }
+
+   public void setSimulatedRobot(FloatingRootJointRobot simulatedRobot)
+   {
+      this.simulatedRobot.set(simulatedRobot);
    }
 }
