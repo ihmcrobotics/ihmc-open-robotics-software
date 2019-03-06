@@ -50,3 +50,32 @@ dataSetsDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
 }
+
+task updateDataSetList {
+   def resourcesDir = "src/data-sets/resources/us/ihmc/pathPlanning/dataSets"
+   def srcDir = "src/data-sets/java/us/ihmc/pathPlanning"
+   def className = "DataSetList"
+
+   def dataSetDir = new File(resourcesDir)
+   def dataSetList = files { dataSetDir.listFiles() }
+
+   File classFile = new File(srcDir + "/" + className + ".java")
+   println classFile.getAbsolutePath()
+
+   if(classFile.exists())
+      classFile.delete()
+   classFile.createNewFile()
+
+   FileWriter fileWriter = new FileWriter(classFile, true)
+   fileWriter.write("package us.ihmc.pathPlanning;\n\n")
+   fileWriter.write("public enum " + className + "\n")
+   fileWriter.write("{\n")
+
+   dataSetList.each {
+      fileWriter.write(it.name + ",\n")
+   }
+
+   fileWriter.write("}")
+   fileWriter.flush()
+   fileWriter.close()
+}
