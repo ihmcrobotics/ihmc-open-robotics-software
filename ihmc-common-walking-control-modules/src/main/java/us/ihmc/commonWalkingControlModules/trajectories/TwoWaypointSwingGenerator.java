@@ -5,6 +5,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -34,8 +35,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoDouble timeIntoStep;
    private final YoBoolean isDone;
    private final YoDouble swingHeight;
-   private final YoDouble maxSwingHeight;
    private final YoDouble minSwingHeight;
+   private final YoDouble maxSwingHeight;
+   private final YoDouble defaultSwingHeight;
 
    private final double[] waypointProportions = new double[2];
 
@@ -62,7 +64,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -79,6 +81,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
       this.minSwingHeight = new YoDouble(namePrefix + "MinSwingHeight", registry);
       this.minSwingHeight.set(minSwingHeight);
+
+      this.defaultSwingHeight = new YoDouble(namePrefix + "DefaultSwingHeight", registry);
+      this.defaultSwingHeight.set(defaultSwingHeight);
 
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
@@ -151,12 +156,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    public void setSwingHeight(double swingHeight)
    {
-      if (Double.isNaN(swingHeight))
-         this.swingHeight.set(minSwingHeight.getDoubleValue());
-      else if (swingHeight < minSwingHeight.getDoubleValue())
-         this.swingHeight.set(minSwingHeight.getDoubleValue());
-      else if (swingHeight > maxSwingHeight.getDoubleValue())
-         this.swingHeight.set(maxSwingHeight.getDoubleValue());
+      double epsilon = 1e-4;
+      boolean useDefaultSwing =
+            Double.isNaN(swingHeight) || !MathTools.intervalContains(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue(), epsilon);
+
+      if(useDefaultSwing)
+         this.swingHeight.set(defaultSwingHeight.getDoubleValue());
       else
          this.swingHeight.set(swingHeight);
    }
