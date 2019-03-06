@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator.footSwitch;
+package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 

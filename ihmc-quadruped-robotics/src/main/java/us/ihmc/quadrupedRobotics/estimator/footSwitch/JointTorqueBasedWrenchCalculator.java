@@ -3,11 +3,8 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
@@ -16,15 +13,8 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 {
@@ -47,7 +37,6 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 
    public JointTorqueBasedWrenchCalculator(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame)
    {
-
       RigidBodyBasics body = robotModel.getRootBody();
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
@@ -56,6 +45,7 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       MatrixTools.removeRow(angularSelectionMatrix, 3);
       MatrixTools.removeRow(angularSelectionMatrix, 3);
       MatrixTools.removeRow(angularSelectionMatrix, 3);
+
       // remove angular part
       MatrixTools.removeRow(linearSelectionMatrix, 0);
       MatrixTools.removeRow(linearSelectionMatrix, 0);
