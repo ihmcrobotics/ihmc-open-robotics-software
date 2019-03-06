@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -115,6 +116,17 @@ public class CrossRobotCommandResolver
          JointLimitParameters parameters = in.getJointLimitParameters(jointIndex);
          JointLimitEnforcement method = in.getJointLimitReductionFactor(jointIndex);
          out.addLimitEnforcementMethod(joint, method, parameters);
+      }
+   }
+
+   public void resolveJointspaceAccelerationCommand(JointspaceAccelerationCommand in, JointspaceAccelerationCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         int jointHashCode = in.getJoint(jointIndex).hashCode();
+         out.addJoint(jointHashCodeResolver.castAndGetJoint(jointHashCode), in.getDesiredAcceleration(jointIndex), in.getWeight(jointIndex));
       }
    }
 }
