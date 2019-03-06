@@ -72,62 +72,53 @@ public class AtlasPatrolBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      SimulationConstructionSet scs = createAtlasSimulation();
+      variables = new AtlasTestYoVariables(scs);
+      conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private SimulationConstructionSet createAtlasSimulation()
+   {
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
+
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
+
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(testEnvironment, robotModel.getSimulateDT());
-
       scsInitialSetup.setInitializeEstimatorToActual(true);
-
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-
       int recordFrequency = (int) Math.round(robotModel.getControllerDT() / scsInitialSetup.getDT());
       if (recordFrequency < 1) recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
-      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
-      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
-      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
-
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
                                                        contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
       {
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
-                                                            additionalContactNames.get(i),
-                                                            additionalContactTransforms.get(i));
+         contactableBodiesFactory.addAdditionalContactPoint(contactPointParameters.getAdditionalContactRigidBodyNames().get(i),
+                                                            contactPointParameters.getAdditionalContactNames().get(i),
+                                                            contactPointParameters.getAdditionalContactTransforms().get(i));
       }
 
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
-                                                                                                    feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
-                                                                                                    wristForceSensorNames,
-                                                                                                    highLevelControllerParameters,
-                                                                                                    walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters);
+      HighLevelHumanoidControllerFactory controllerFactory =
+            new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                   robotModel.getSensorInformation().getFeetForceSensorNames(),
+                                                   robotModel.getSensorInformation().getFeetContactSensorNames(),
+                                                   robotModel.getSensorInformation().getWristForceSensorNames(),
+                                                   robotModel.getHighLevelControllerParameters(),
+                                                   robotModel.getWalkingControllerParameters(),
+                                                   robotModel.getCapturePointPlannerParameters());
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
-
-      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
-      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
-      controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
-
+      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, DO_NOTHING_BEHAVIOR);
+      controllerFactory.addControllerFailureTransition(WALKING, DO_NOTHING_BEHAVIOR);
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
-
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(false, scsInitialSetup.getHeightMap());
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
@@ -135,7 +126,7 @@ public class AtlasPatrolBehaviorTest
       avatarSimulationFactory.setShapeCollisionSettings(robotModel.getShapeCollisionSettings());
       avatarSimulationFactory.setHighLevelHumanoidControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(testEnvironment);
-      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+      avatarSimulationFactory.setRobotInitialSetup(robotModel.getDefaultRobotInitialSetup(0.0, 0.0));
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "humanoid_simulation_controller");
@@ -145,8 +136,6 @@ public class AtlasPatrolBehaviorTest
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
       avatarSimulation.start();
-      variables = new AtlasTestYoVariables(scs);
-      conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      return scs;
    }
 }
