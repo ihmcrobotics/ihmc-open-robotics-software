@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTou
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalculator.JointTorqueProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -24,6 +26,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class QuadrupedFootSwitchFactory
@@ -48,11 +51,19 @@ public class QuadrupedFootSwitchFactory
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant,
-                                                                                                                                    footContactableBodies.get()
-                                                                                                                                                         .get(robotQuadrant),
+         List<JointTorqueProvider> jointTorqueProviders = new ArrayList<>();
+         for (OneDoFJointBasics oneDoFJointBasics : fullRobotModel.get().getLegJointsList(robotQuadrant))
+            jointTorqueProviders.add(oneDoFJointBasics::getTau);
 
-                                                                                                                                    totalRobotWeight, registry);
+         ContactablePlaneBody contactableFoot = footContactableBodies.get().get(robotQuadrant);
+
+         JointTorqueBasedWrenchCalculator estimatedTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator(fullRobotModel.get(), robotQuadrant,
+                                                                                                                      contactableFoot.getSoleFrame(),
+                                                                                                                      jointTorqueProviders);
+
+         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactableFoot,
+                                                                                                              estimatedTorqueBasedWrenchCalculator,
+                                                                                                              totalRobotWeight, registry);
          if (useKneeTorqueTouchdown.get())
          {
             JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
@@ -60,19 +71,17 @@ public class QuadrupedFootSwitchFactory
             jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH),
                                                                                       dontDetectTouchdownIfAtJointLimit, registry);
             jointTorqueBasedTouchdownDetector.setTorqueThreshold(kneeTorqueTouchdownThreshold.get().get(robotQuadrant));
-            touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
+            footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
-         JointTorqueBasedWrenchCalculator jointTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator(fullRobotModel.get(), robotQuadrant,
-                                                                                                                  footContactableBodies.get().get(robotQuadrant).getSoleFrame());
-         ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(jointTorqueBasedWrenchCalculator, robotQuadrant, registry);
-         touchdownDetectorBasedFootSwitch.addTouchdownDetector(forceBasedTouchDownDetection);
+         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(estimatedTorqueBasedWrenchCalculator, robotQuadrant, registry);
+         footSwitch.addTouchdownDetector(estimatedForceBasedTouchDownDetection);
 
-         footSwitches.set(robotQuadrant, touchdownDetectorBasedFootSwitch);
+         footSwitches.set(robotQuadrant, footSwitch);
       }
    }
 
-   protected void setupWrenchBasedPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   private void setupWrenchBasedPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       if (!simulatedRobot.hasValue())
       {

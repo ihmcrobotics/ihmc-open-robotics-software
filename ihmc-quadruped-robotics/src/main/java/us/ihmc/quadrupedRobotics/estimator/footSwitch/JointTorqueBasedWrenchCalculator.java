@@ -33,10 +33,12 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    private final DenseMatrix64F jointTorques = new DenseMatrix64F(3, 1);
 
    private final GeometricJacobian footJacobian;
-   private final List<OneDoFJointBasics> legOneDoFJoints;
+   private final List<JointTorqueProvider> jointTorqueProviders;
 
-   public JointTorqueBasedWrenchCalculator(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame)
+   public JointTorqueBasedWrenchCalculator(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame,
+                                           List<JointTorqueProvider> jointTorqueProviders)
    {
+      this.jointTorqueProviders = jointTorqueProviders;
       RigidBodyBasics body = robotModel.getRootBody();
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
@@ -50,18 +52,13 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       MatrixTools.removeRow(linearSelectionMatrix, 0);
       MatrixTools.removeRow(linearSelectionMatrix, 0);
       MatrixTools.removeRow(linearSelectionMatrix, 0);
-
-      legOneDoFJoints = robotModel.getLegJointsList(robotQuadrant);
    }
 
    @Override
    public void calculate()
    {
-      for(int i = 0; i < legOneDoFJoints.size(); i++)
-      {
-         OneDoFJointBasics oneDoFJoint = legOneDoFJoints.get(i);
-         jointTorques.set(i, 0, oneDoFJoint.getTau());
-      }
+      for(int i = 0; i < jointTorqueProviders.size(); i++)
+         jointTorques.set(i, 0, jointTorqueProviders.get(i).getTorque());
 
       footJacobian.compute();
       DenseMatrix64F jacobianMatrix = footJacobian.getJacobianMatrix();
@@ -89,5 +86,10 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    public WrenchReadOnly getWrench()
    {
       return wrench;
+   }
+
+   public interface JointTorqueProvider
+   {
+      double getTorque();
    }
 }
