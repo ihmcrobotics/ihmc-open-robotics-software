@@ -7,40 +7,36 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class QuadrupedDebugFootSwitch implements FootSwitchInterface
+public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final WrenchCalculatorInterface wrenchCalculatorInterface;
-   private final ContactablePlaneBody contactablePlaneBody;
+   private final WrenchCalculatorWrapper wrenchCalculator;
    private final ReferenceFrame measurementFrame;
 
    private final YoDouble forceThreshold;
 
-   private final FrameVector3D measuredForce = new FrameVector3D();
-   private final FrameVector3D measuredForceWorld = new FrameVector3D();
    private final YoFrameVector3D yoMeasuredForceWorld;
    private final YoBoolean hasFootHitGround;
 
    private final double totalRobotWeight;
 
-   public QuadrupedDebugFootSwitch(WrenchCalculatorInterface wrenchCalculatorInterface, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoVariableRegistry registry)
+   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoVariableRegistry registry)
    {
-      this.wrenchCalculatorInterface = wrenchCalculatorInterface;
-      this.contactablePlaneBody = contactablePlaneBody;
+      this.wrenchCalculator = wrenchCalculator;
       this.totalRobotWeight = totalRobotWeight;
       measurementFrame = contactablePlaneBody.getSoleFrame();
-      forceThreshold = new YoDouble(contactablePlaneBody.getName() + "ForceThreshold", registry);
+      String name = contactablePlaneBody.getName();
+      forceThreshold = new YoDouble(name + "ForceThreshold", registry);
       forceThreshold.set(0.04 * totalRobotWeight);
 
-      yoMeasuredForceWorld = new YoFrameVector3D(contactablePlaneBody.getName() + "MeasuredForceWorld", worldFrame, registry);
-      hasFootHitGround = new YoBoolean(contactablePlaneBody.getName() + "HasFootHitGround", registry);
+      yoMeasuredForceWorld = new YoFrameVector3D(name + "MeasuredForceWorld", worldFrame, registry);
+      hasFootHitGround = new YoBoolean(name + "HasFootHitGround", registry);
    }
 
    public void setForceThreshold(double threshold)
@@ -50,11 +46,8 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
 
    private void updateMeasurement()
    {
-      wrenchCalculatorInterface.calculate();
-      MatrixTools.extractFrameTupleFromEJMLVector(measuredForce, wrenchCalculatorInterface.getWrench(), measurementFrame, 3);
-      measuredForceWorld.setIncludingFrame(measuredForce);
-      measuredForceWorld.changeFrame(worldFrame);
-      yoMeasuredForceWorld.setMatchingFrame(measuredForce);
+      wrenchCalculator.calculate();
+      yoMeasuredForceWorld.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
    }
 
    @Override
@@ -87,9 +80,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
       updateMeasurement();
-      ReferenceFrame bodyFixedFrame = contactablePlaneBody.getRigidBody().getBodyFixedFrame();
-      footWrenchToPack.setToZero(bodyFixedFrame, measurementFrame);
-      footWrenchToPack.getLinearPart().set(measuredForce);
+      footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
    }
 
    @Override

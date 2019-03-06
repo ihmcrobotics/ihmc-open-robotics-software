@@ -72,7 +72,7 @@ public class QuadrupedFootSwitchFactory
       }
    }
 
-   protected void setupGroundContactPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
+   protected void setupWrenchBasedPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
       if (!simulatedRobot.hasValue())
       {
@@ -82,7 +82,7 @@ public class QuadrupedFootSwitchFactory
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
+      {  // this only works in simulation, as it's polling from the ground contact point
          ContactablePlaneBody contactablePlaneBody = footContactableBodies.get().get(robotQuadrant);
          JointBasics parentJoint = contactablePlaneBody.getRigidBody().getParentJoint();
          String jointName = parentJoint.getName();
@@ -91,9 +91,9 @@ public class QuadrupedFootSwitchFactory
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = robot.getOneDegreeOfFreedomJoint(jointName);
          List<GroundContactPoint> contactPoints = forceTorqueSensorJoint.getGroundContactPointGroup().getGroundContactPoints();
          RigidBodyTransform transformToParentJoint = contactablePlaneBody.getSoleFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
-         WrenchCalculatorInterface wrenchCaluclator = new GroundContactPointBasedWrenchCalculator(forceSensorName, contactPoints, forceTorqueSensorJoint,
-                                                                                                  transformToParentJoint, robot.getRobotsYoVariableRegistry());
-         FootSwitchInterface footSwitch = new QuadrupedDebugFootSwitch(wrenchCaluclator, contactablePlaneBody, totalRobotWeight, registry);
+         WrenchCalculatorInterface wrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensorName, contactPoints, forceTorqueSensorJoint, transformToParentJoint, robot.getRobotsYoVariableRegistry());
+         WrenchCalculatorWrapper wrenchCalculatorWrapper = new WrenchCalculatorWrapper(wrenchCalculator, contactablePlaneBody.getSoleFrame());
+         FootSwitchInterface footSwitch = new QuadrupedWrenchBasedFootSwitch(wrenchCalculatorWrapper, contactablePlaneBody, totalRobotWeight, registry);
          footSwitches.set(robotQuadrant, footSwitch);
       }
    }
@@ -125,7 +125,7 @@ public class QuadrupedFootSwitchFactory
          setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
          break;
       case WrenchBased:
-         setupGroundContactPointFootSwitches(footSwitches, totalRobotWeight);
+         setupWrenchBasedPointFootSwitches(footSwitches, totalRobotWeight);
          break;
       default:
          setupSettableFootSwitches(footSwitches, totalRobotWeight);
