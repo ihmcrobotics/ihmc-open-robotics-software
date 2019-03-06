@@ -405,6 +405,8 @@ public class QuadrupedUIMessageConverter
 
    public void publishStepListMessage(QuadrupedTimedStepListMessage stepListMessage)
    {
+      if (verbose)
+         PrintTools.info("Sending out footsteps to the robot.");
       stepListMessagePublisher.publish(stepListMessage);
    }
 

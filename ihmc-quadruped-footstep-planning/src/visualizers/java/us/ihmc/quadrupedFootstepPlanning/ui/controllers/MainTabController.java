@@ -154,6 +154,10 @@ public class MainTabController
          stepMessage.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
       }
 
+      stepMessages.setIsExpressedInAbsoluteTime(false);
+
+      if (verbose)
+         PrintTools.info(this, "Sending step list...");
       messager.submitMessage(stepListMessageTopic, stepMessages);
    }
 
