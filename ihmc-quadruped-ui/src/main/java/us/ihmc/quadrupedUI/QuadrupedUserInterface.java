@@ -141,6 +141,7 @@ public class QuadrupedUserInterface
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
+      view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       view3dFactory.addNodeToView(pawPathViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
