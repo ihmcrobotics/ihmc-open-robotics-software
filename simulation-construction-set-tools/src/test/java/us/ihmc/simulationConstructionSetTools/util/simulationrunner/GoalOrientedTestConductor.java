@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.opentest4j.AssertionFailedError;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.testing.GoalOrientedTestGoal;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -123,7 +123,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          message.append("\nTerminal goal met: ");
          message.append(goal.toString());
       }
-      PrintTools.info(this, message.toString());
+      LogTools.info(message.toString());
    }
    
    private void printSimulatingMessage()
@@ -145,7 +145,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          message.append("\nTerminal goal: ");
          message.append(goal.toString());
       }
-      PrintTools.info(this, message.toString());
+      LogTools.info(message.toString());
    }
 
    private void createAssertionFailedException()
@@ -215,7 +215,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       else if(scsHasCrashed.get())
       {
          stop();
-         PrintTools.error(scsCrashedException);
+         LogTools.error(scsCrashedException);
          fail();
       }
       
@@ -224,7 +224,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       
       if (assertionFailedMessage != null)
       {
-         PrintTools.error(this, assertionFailedMessage);
+         LogTools.error(assertionFailedMessage);
          
          throw new AssertionFailedError(assertionFailedMessage);
       }
@@ -312,7 +312,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         PrintTools.error(throwable.getMessage());
+         LogTools.error(throwable.getMessage());
       }
       scsCrashedException = throwable.getMessage();
       scsHasCrashed.set(true);
