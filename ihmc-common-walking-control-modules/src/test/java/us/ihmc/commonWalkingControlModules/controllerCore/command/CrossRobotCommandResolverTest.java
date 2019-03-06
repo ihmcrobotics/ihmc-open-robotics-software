@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
@@ -19,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -34,6 +37,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
@@ -297,6 +301,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveJointspaceAccelerationCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointspaceAccelerationCommand in = nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointspaceAccelerationCommand expectedOut = nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceAccelerationCommand actualOut = new JointspaceAccelerationCommand();
+         crossRobotCommandResolver.resolveJointspaceAccelerationCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -346,8 +372,8 @@ class CrossRobotCommandResolverTest
                                                                                              ReferenceFrame... possibleFrames)
    {
       JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
-      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
 
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
@@ -364,13 +390,29 @@ class CrossRobotCommandResolverTest
       JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
-
       int numberOfJoints = random.nextInt(allJoints.size());
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          next.addLimitEnforcementMethod(allJoints.remove(random.nextInt(allJoints.size())), nextElementIn(random, JointLimitEnforcement.values()),
                                         nextJointLimitParameters(random));
+      }
+
+      return next;
+   }
+
+   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   {
+      JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
+
+      List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         DenseMatrix64F desiredAcceleration = RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random);
+         next.addJoint(joint, desiredAcceleration, random.nextDouble());
       }
 
       return next;
