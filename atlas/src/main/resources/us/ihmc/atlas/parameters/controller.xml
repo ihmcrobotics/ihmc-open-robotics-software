@@ -49,9 +49,6 @@
                         <parameter name="DefaultAngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="DefaultAngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="DefaultAngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="HighLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
                     <registry name="JointspaceGains">
                         <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>

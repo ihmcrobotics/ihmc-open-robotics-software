@@ -45,11 +45,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private Vector3DReadOnly defaultLinearMomentumRateWeight;
-   private Vector3DReadOnly defaultAngularMomentumRateWeight;
-   private Vector3DReadOnly highLinearMomentumRateWeight;
-   private final YoFrameVector3D angularMomentumRateWeight = new YoFrameVector3D("CurrentAngularMomentumRateWeight", worldFrame, registry);
-   private final YoFrameVector3D linearMomentumRateWeight = new YoFrameVector3D("CurrentLinearMomentumRateWeight", worldFrame, registry);
+   private Vector3DReadOnly linearMomentumRateWeight;
+   private Vector3DReadOnly angularMomentumRateWeight;
 
    private final YoBoolean minimizeAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
 
@@ -131,15 +128,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumWeight(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
+   public void setMomentumWeight(Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight)
    {
-      defaultLinearMomentumRateWeight = linearWeight;
-      defaultAngularMomentumRateWeight = angularWeight;
-   }
-
-   public void setHighMomentumWeightForRecovery(Vector3DReadOnly highLinearWeight)
-   {
-      highLinearMomentumRateWeight = highLinearWeight;
+      this.linearMomentumRateWeight = linearMomentumRateWeight;
+      this.angularMomentumRateWeight = angularMomentumRateWeight;
    }
 
    public void setOmega0(double omega0)
@@ -197,18 +189,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    public void setTransferToSide(RobotSide transferToSide)
    {
       this.transferToSide = transferToSide;
-   }
-
-   public void setHighMomentumWeight()
-   {
-      linearMomentumRateWeight.set(highLinearMomentumRateWeight);
-      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
-   }
-
-   public void setDefaultMomentumWeight()
-   {
-      linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
-      angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
    }
 
    public void clearPlan()

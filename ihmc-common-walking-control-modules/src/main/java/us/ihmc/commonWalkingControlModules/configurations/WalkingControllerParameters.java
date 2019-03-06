@@ -504,18 +504,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Usually the desired CMP will be projected into the support area to avoid the generation of large amounts of
-    * angular momentum. This method determines whether the desired CMP is allowed to be in area that is larger then
-    * the support. The size of the area is determined by the value {@link #getMaxAllowedDistanceCMPSupport()}
-    *
-    * @return alwaysAllowMomentum
-    */
-   public boolean alwaysAllowMomentum()
-   {
-      return false;
-   }
-
-   /**
     * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
     * the vertical axis during swing only.
     * Useful when the robot has heavy legs and tends to slips during swing.
