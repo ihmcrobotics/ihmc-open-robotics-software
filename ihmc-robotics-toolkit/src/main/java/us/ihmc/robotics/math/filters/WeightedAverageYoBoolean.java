@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
@@ -12,9 +13,9 @@ public class WeightedAverageYoBoolean extends YoBoolean
    private final List<DoubleProvider> booleanWeights = new ArrayList<>();
    private final List<BooleanProvider> booleansToAverage = new ArrayList<>();
 
-   public WeightedAverageYoBoolean(String name)
+   public WeightedAverageYoBoolean(String name, YoVariableRegistry registry)
    {
-      super(name, "WeightedAverageYoBoolean", null);
+      super(name, "WeightedAverageYoBoolean", registry);
    }
 
    public void addBooleanToAverage(DoubleProvider booleanWeight, BooleanProvider booleanToAverage)

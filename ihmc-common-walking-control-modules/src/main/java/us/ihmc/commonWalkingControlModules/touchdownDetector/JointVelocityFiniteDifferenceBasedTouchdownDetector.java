@@ -81,4 +81,10 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    {
       touchdownDetected.set(false);
    }
+
+   @Override
+   public String getName()
+   {
+      return getClass().getSimpleName();
+   }
 }

@@ -54,4 +54,10 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       measuredZForce.set(0.0);
       isInContact.set(false);
    }
+
+   @Override
+   public String getName()
+   {
+      return getClass().getSimpleName();
+   }
 }
