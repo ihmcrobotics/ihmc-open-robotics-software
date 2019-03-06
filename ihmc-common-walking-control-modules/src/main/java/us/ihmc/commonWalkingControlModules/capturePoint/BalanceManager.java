@@ -151,14 +151,7 @@ public class BalanceManager
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
-                         YoVariableRegistry parentRegistry)
-   {
-      this(controllerToolbox, walkingControllerParameters, icpPlannerParameters, angularMomentumModifierParameters, parentRegistry, true);
-   }
-
-   public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                         ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
-                         YoVariableRegistry parentRegistry, boolean use2DCMPProjection)
+                         Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight, YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -181,8 +174,9 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
                                                                                                            controllerToolbox.getICPControlPolygons(),
                                                                                                            contactableFeet, walkingControllerParameters, yoTime,
-                                                                                                           totalMass, gravityZ, controlDT, registry,
-                                                                                                           yoGraphicsListRegistry);
+                                                                                                           totalMass, gravityZ, controlDT,
+                                                                                                           angularMomentumRateWeight, linearMomentumRateWeight,
+                                                                                                           registry, yoGraphicsListRegistry);
       ICPOptimizationControllerInterface icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
@@ -289,11 +283,6 @@ public class BalanceManager
       yoPerfectCoP.setToNaN();
 
       parentRegistry.addChild(registry);
-   }
-
-   public void setMomentumWeight(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
-   {
-      linearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
    }
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)

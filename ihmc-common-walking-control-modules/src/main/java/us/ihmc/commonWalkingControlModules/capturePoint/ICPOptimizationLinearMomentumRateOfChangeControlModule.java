@@ -45,8 +45,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private Vector3DReadOnly linearMomentumRateWeight;
-   private Vector3DReadOnly angularMomentumRateWeight;
+   private final Vector3DReadOnly linearMomentumRateWeight;
+   private final Vector3DReadOnly angularMomentumRateWeight;
 
    private final YoBoolean minimizeAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
 
@@ -101,12 +101,15 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
                                                                  WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
-                                                                 double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
+                                                                 double gravityZ, double controlDT, Vector3DReadOnly angularMomentumRateWeight,
+                                                                 Vector3DReadOnly linearMomentumRateWeight, YoVariableRegistry parentRegistry,
                                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
+      this.linearMomentumRateWeight = linearMomentumRateWeight;
+      this.angularMomentumRateWeight = angularMomentumRateWeight;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
@@ -126,12 +129,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
                                                                 controlDT, registry, yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
-   }
-
-   public void setMomentumWeight(Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight)
-   {
-      this.linearMomentumRateWeight = linearMomentumRateWeight;
-      this.angularMomentumRateWeight = angularMomentumRateWeight;
    }
 
    public void setOmega0(double omega0)

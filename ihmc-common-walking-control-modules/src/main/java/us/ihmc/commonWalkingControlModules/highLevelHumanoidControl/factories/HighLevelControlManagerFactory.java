@@ -159,8 +159,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
-                                          registry);
-      balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
+                                angularMomentumWeight, linearMomentumWeight, registry);
       return balanceManager;
    }
 
