@@ -270,10 +270,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       achievedCMPToPack.add(centerOfMass2d);
    }
 
-   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   public boolean compute(FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
    {
       boolean inputsAreOk = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
-      computeCMPInternal(desiredCMPPreviousValue);
+      computeCMPInternal();
 
       capturePoint.changeFrame(worldFrame);
       desiredCMP.changeFrame(worldFrame);
@@ -383,7 +383,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       return groundReactionForce;
    }
 
-   private void computeCMPInternal(FramePoint2DReadOnly desiredCMPPreviousValue)
+   private void computeCMPInternal()
    {
       if (perfectCoP.containsNaN())
       {
