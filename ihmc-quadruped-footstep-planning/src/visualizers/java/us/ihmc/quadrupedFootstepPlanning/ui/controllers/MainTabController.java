@@ -626,6 +626,11 @@ public class MainTabController
       private void calculateFrames()
       {
          FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
+         footPositionScene.clear();
+
+         if (footstepPlan == null)
+            return;
+
          List<QuadrupedTimedStep> steps = new ArrayList<>();
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             steps.add(footstepPlan.getFootstep(i));
@@ -634,7 +639,6 @@ public class MainTabController
          TimeIntervalTools.sortByStartTime(steps);
          double startTime = steps.get(0).getTimeInterval().getStartTime() - 1.0;
 
-         footPositionScene.clear();
 
          PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
          xGaitFrame.setPoseAndUpdate(footstepPlan.getStartPose());

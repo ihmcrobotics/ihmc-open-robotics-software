@@ -118,6 +118,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
       meshBuilder.clear();
       QuadrantDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
 
+      if (plan == null)
+      {
+         reset.set(true);
+         return;
+      }
       FramePoint3D footPosition = new FramePoint3D();
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
