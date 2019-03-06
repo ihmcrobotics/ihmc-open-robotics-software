@@ -2,6 +2,10 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import java.util.ArrayList;
 
+/**
+ * This class is a combination of touchdown sensors. For it to detect touchdown, all the component touchdown sensors are "necessary", meaning that they must
+ * all have detected touchdown.
+ */
 public class NecessaryTouchdownDetectors implements TouchdownDetector
 {
    private final ArrayList<TouchdownDetector> touchdownDetectors = new ArrayList<>();
