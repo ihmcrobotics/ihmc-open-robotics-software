@@ -394,7 +394,10 @@ public class BalanceManager
    public void setICPPlanTransferFromSide(RobotSide robotSide)
    {
       icpPlanner.setTransferFromSide(robotSide);
-      linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
+      if (robotSide != null)
+      {
+         linearMomentumRateOfChangeControlModule.setTransferToSide(robotSide.getOppositeSide());
+      }
    }
 
    public void endTick()
@@ -423,6 +426,9 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCoP2d);
 
       double omega0 = controllerToolbox.getOmega0();
+      if (Double.isNaN(omega0))
+         throw new RuntimeException("omega0 is NaN");
+
       if (supportLeg == null)
          pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
       else
@@ -475,9 +481,8 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
       linearMomentumRateOfChangeControlModule.setOmega0(omega0);
-      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d);
+      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d, desiredCapturePointVelocity2d);
       linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
-      linearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateOfChangeControlModule.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
