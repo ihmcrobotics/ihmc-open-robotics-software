@@ -12,12 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -48,6 +51,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsPlanningToolboxModule kinematicsPlanningToolboxModule;
 
+   private final FramePose3D desiredFramePose = new FramePose3D();
    private Point2D doorLocation;
 
    @BeforeEach
@@ -123,12 +127,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       RobotSide robotSide = RobotSide.RIGHT;
 
       List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
-      FramePose3D desiredFramePose = new FramePose3D();
-      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
-      desiredFramePose.appendYawRotation(Math.PI);
-      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
-      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
-
+      defineDesiredFramePoseToDoorKnob(envrionment);
       Pose3D desiredPose = new Pose3D(desiredFramePose);
 
       FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -197,11 +196,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       RobotSide robotSide = RobotSide.RIGHT;
 
       List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
-      FramePose3D desiredFramePose = new FramePose3D();
-      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
-      desiredFramePose.appendYawRotation(Math.PI);
-      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
-      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
+      defineDesiredFramePoseToDoorKnob(envrionment);
 
       Pose3D desiredPose = new Pose3D(desiredFramePose);
 
@@ -236,6 +231,186 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @Test
+   public void testLastKeyFrameBadPositionPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
+      doorLocation = envrionment.getDoorLocation();
+
+      DRCStartingLocation startingLocation = new DRCStartingLocation()
+      {
+         @Override
+         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+         {
+            return new OffsetAndYawRobotInitialSetup(new Vector3D(doorLocation.getX() - 0.2, doorLocation.getY() - 0.7, 0.0), Math.PI / 2);
+         }
+      };
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+
+      setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel(), sdfFullRobotModel);
+
+      RobotSide robotSide = RobotSide.RIGHT;
+      ReferenceFrame bodyFixedFrame = sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame();
+
+      FramePose3D initialPose = new FramePose3D(bodyFixedFrame);
+      initialPose.changeFrame(ReferenceFrame.getWorldFrame());
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(initialPose));
+
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
+
+      Pose3D desiredPoseInHandFrame = new Pose3D();
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseOne = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseTwo = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseThree = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 1.0);
+      FramePose3D desiredPoseBad = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+
+      desiredPoseOne.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseTwo.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseThree.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseBad.changeFrame(ReferenceFrame.getWorldFrame());
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseOne));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseTwo));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseThree));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseBad));
+
+      keyFrameTimes.add(1.0);
+      keyFrameTimes.add(2.0);
+      keyFrameTimes.add(3.0);
+      keyFrameTimes.add(4.0);
+      desiredPoses.add(desiredPoseOne);
+      desiredPoses.add(desiredPoseTwo);
+      desiredPoses.add(desiredPoseThree);
+      desiredPoses.add(desiredPoseBad);
+
+      behavior.setKeyFrameTimes(keyFrameTimes);
+      behavior.setEndEffectorKeyFrames(robotSide, desiredPoses);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      drcBehaviorTestHelper.dispatchBehavior(behavior);
+
+      int planningResult = behavior.getPlanningResult();
+      int expectedPlanningResult = KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_POSITION_LIMIT;
+
+      PrintTools.info(" " + planningResult + " " + expectedPlanningResult);
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      assertTrue(planningResult == expectedPlanningResult);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testLastKeyFrameBadVelocityPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      ValkyrieEODObstacleCourseEnvironment envrionment = new ValkyrieEODObstacleCourseEnvironment();
+      doorLocation = envrionment.getDoorLocation();
+
+      DRCStartingLocation startingLocation = new DRCStartingLocation()
+      {
+         @Override
+         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
+         {
+            return new OffsetAndYawRobotInitialSetup(new Vector3D(doorLocation.getX() - 0.2, doorLocation.getY() - 0.7, 0.0), Math.PI / 2);
+         }
+      };
+
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), startingLocation, simulationTestingParameters, getRobotModel());
+
+      setUpCamera(startingLocation.getStartingLocationOffset().getAdditionalOffset());
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      KinematicsPlanningBehavior behavior = new KinematicsPlanningBehavior(drcBehaviorTestHelper.getRobotName(), drcBehaviorTestHelper.getRos2Node(),
+                                                                           getRobotModel(), sdfFullRobotModel);
+
+      RobotSide robotSide = RobotSide.RIGHT;
+      ReferenceFrame bodyFixedFrame = sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame();
+
+      FramePose3D initialPose = new FramePose3D(bodyFixedFrame);
+      initialPose.changeFrame(ReferenceFrame.getWorldFrame());
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(initialPose));
+
+      TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+      List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
+
+      Pose3D desiredPoseInHandFrame = new Pose3D();
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseOne = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseTwo = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseThree = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+      desiredPoseInHandFrame.appendTranslation(0.0, 0.0, 0.05);
+      FramePose3D desiredPoseBad = new FramePose3D(bodyFixedFrame, desiredPoseInHandFrame);
+
+      desiredPoseOne.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseTwo.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseThree.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPoseBad.changeFrame(ReferenceFrame.getWorldFrame());
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseOne));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseTwo));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseThree));
+      drcBehaviorTestHelper.getSimulationConstructionSet().addStaticLinkGraphics(createEndEffectorKeyFrameVisualization(desiredPoseBad));
+
+      keyFrameTimes.add(1.0);
+      keyFrameTimes.add(2.0);
+      keyFrameTimes.add(3.0);
+      keyFrameTimes.add(3.1);
+      desiredPoses.add(desiredPoseOne);
+      desiredPoses.add(desiredPoseTwo);
+      desiredPoses.add(desiredPoseThree);
+      desiredPoses.add(desiredPoseBad);
+
+      behavior.setKeyFrameTimes(keyFrameTimes);
+      behavior.setEndEffectorKeyFrames(robotSide, desiredPoses);
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      drcBehaviorTestHelper.dispatchBehavior(behavior);
+
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+
+      int planningResult = behavior.getPlanningResult();
+      int expectedPlanningResult = KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT;
+
+      PrintTools.info(" " + planningResult + " " + expectedPlanningResult);
+
+      assertTrue(planningResult == expectedPlanningResult);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private void defineDesiredFramePoseToDoorKnob(ValkyrieEODObstacleCourseEnvironment envrionment)
+   {
+      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
+      desiredFramePose.appendYawRotation(Math.PI);
+      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
+      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
+   }
+
    private void setupKinematicsPlanningToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -243,12 +418,16 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
                                                                             PubSubImplementation.INTRAPROCESS);
    }
 
-   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3D pose)
+   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
    {
       Graphics3DObject object = new Graphics3DObject();
       object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
       object.addSphere(0.01);
       object.addCylinder(0.1, 0.005, YoAppearance.Blue());
+      RigidBodyTransform transformZToY = new RigidBodyTransform();
+      transformZToY.appendRollRotation(Math.PI / 2);
+      object.transform(transformZToY);
+      object.addCylinder(0.1, 0.005, YoAppearance.Green());
 
       return object;
    }
