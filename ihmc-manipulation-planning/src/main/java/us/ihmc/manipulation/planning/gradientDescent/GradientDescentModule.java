@@ -41,7 +41,7 @@ public class GradientDescentModule
          this.initialInput.add(initial.get(i));
          this.optimalInput.add(0.0);
          this.inputUpperLimit.add(Double.MAX_VALUE);
-         this.inputLowerLimit.add(Double.MIN_VALUE);
+         this.inputLowerLimit.add(-Double.MIN_VALUE);
       }
    }
 
