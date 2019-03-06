@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -364,7 +363,6 @@ public class BalanceManager
       return icpPlanner.getTouchdownDuration(0);
    }
 
-
    public boolean checkAndUpdateFootstep(Footstep footstep)
    {
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
@@ -554,11 +552,6 @@ public class BalanceManager
       desiredCMPToPack.setIncludingFrame(yoDesiredCMP);
    }
 
-   public void getPerfectCMP(FramePoint2D desiredCMPToPack)
-   {
-      desiredCMPToPack.setIncludingFrame(yoPerfectCMP);
-   }
-
    public void getDesiredICP(FramePoint2D desiredICPToPack)
    {
       desiredICPToPack.setIncludingFrame(yoDesiredCapturePoint);
@@ -578,11 +571,6 @@ public class BalanceManager
          inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
       }
       return inverseDynamicsCommandList;
-   }
-
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
@@ -737,11 +725,6 @@ public class BalanceManager
       return icpPlannerDone.getValue();
    }
 
-   public boolean isOnExitCMP()
-   {
-      return icpPlanner.isOnExitCMP();
-   }
-
    public boolean isPushRecoveryEnabled()
    {
       return pushRecoveryControlModule.isEnabled();
@@ -863,7 +846,6 @@ public class BalanceManager
    {
       return linearMomentumRateOfChangeControlModule.getICPOptimizationController().getICPShiftFromStepAdjustment();
    }
-
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
    {
