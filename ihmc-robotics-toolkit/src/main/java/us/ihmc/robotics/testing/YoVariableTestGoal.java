@@ -8,43 +8,22 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.commons.FormattingTools;
 
-public abstract class YoVariableTestGoal implements VariableChangedListener
+public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 {
    private static final int SIGNIFICANT_FIGURES_FOR_PRINT_OUT = 3;
-
-   private boolean hasMetGoal = false;
 
    protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
       for (YoVariable<?> yoVariable : yoVariables)
       {
-         yoVariable.addVariableChangedListener(this);
+         yoVariable.addVariableChangedListener(this::notifyOfVariableChange);
       }
    }
 
-   @Override
    public void notifyOfVariableChange(YoVariable<?> v)
    {
-      if (!hasMetGoal && currentlyMeetsGoal())
-      {
-         hasMetGoal = true;
-      }
+      update();
    }
-
-   public boolean hasMetGoal()
-   {
-      return hasMetGoal;
-   }
-
-   public void reset()
-   {
-      hasMetGoal = false;
-   }
-
-   public abstract boolean currentlyMeetsGoal();
-
-   @Override
-   public abstract String toString();
 
    public static YoVariableTestGoal variablesEqual(final YoDouble variableOne, final YoDouble variableTwo, final double epsilon)
    {

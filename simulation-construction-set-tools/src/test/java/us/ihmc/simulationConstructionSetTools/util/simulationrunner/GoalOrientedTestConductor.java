@@ -7,10 +7,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.testing.GoalOrientedTestGoal;
+import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
@@ -26,14 +27,14 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    
    private boolean yoTimeChangedListenerActive = false;
    
-   private List<YoVariableTestGoal> sustainGoals = new ArrayList<>();
-   private List<YoVariableTestGoal> waypointGoals = new ArrayList<>();
-   private List<YoVariableTestGoal> terminalGoals = new ArrayList<>();
+   private List<GoalOrientedTestGoal> sustainGoals = new ArrayList<>();
+   private List<GoalOrientedTestGoal> waypointGoals = new ArrayList<>();
+   private List<GoalOrientedTestGoal> terminalGoals = new ArrayList<>();
    
    // Temp lists for reporting
-   private List<YoVariableTestGoal> sustainGoalsNotMeeting = new ArrayList<>();
-   private List<YoVariableTestGoal> waypointGoalsNotMet = new ArrayList<>();
-   private List<YoVariableTestGoal> terminalGoalsNotMeeting = new ArrayList<>();
+   private List<GoalOrientedTestGoal> sustainGoalsNotMeeting = new ArrayList<>();
+   private List<GoalOrientedTestGoal> waypointGoalsNotMet = new ArrayList<>();
+   private List<GoalOrientedTestGoal> terminalGoalsNotMeeting = new ArrayList<>();
 
    private final AtomicBoolean createAssertionFailedException = new AtomicBoolean();
    private final AtomicBoolean printSuccessMessage = new AtomicBoolean();
@@ -107,17 +108,17 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       StringBuffer message = new StringBuffer();
       message.append("Success:");
-      for (YoVariableTestGoal goal : sustainGoals)
+      for (GoalOrientedTestGoal goal : sustainGoals)
       {
          message.append("\nGoal sustained: ");
          message.append(goal.toString());
       }
-      for (YoVariableTestGoal goal : waypointGoals)
+      for (GoalOrientedTestGoal goal : waypointGoals)
       {
          message.append("\nWaypoint met: ");
          message.append(goal.toString());
       }
-      for (YoVariableTestGoal goal : terminalGoals)
+      for (GoalOrientedTestGoal goal : terminalGoals)
       {
          message.append("\nTerminal goal met: ");
          message.append(goal.toString());
@@ -129,17 +130,17 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    {
       StringBuffer message = new StringBuffer();
       message.append("Simulating with goals:");
-      for (YoVariableTestGoal goal : sustainGoals)
+      for (GoalOrientedTestGoal goal : sustainGoals)
       {
          message.append("\nSustain goal: ");
          message.append(goal.toString());
       }
-      for (YoVariableTestGoal goal : waypointGoals)
+      for (GoalOrientedTestGoal goal : waypointGoals)
       {
          message.append("\nWaypoint goal: ");
          message.append(goal.toString());
       }
-      for (YoVariableTestGoal goal : terminalGoals)
+      for (GoalOrientedTestGoal goal : terminalGoals)
       {
          message.append("\nTerminal goal: ");
          message.append(goal.toString());
@@ -276,17 +277,17 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       terminalGoals.add(YoVariableTestGoal.timeInFuture(timeYoVariable, durationFromNow));
    }
    
-   public void addSustainGoal(YoVariableTestGoal yoVariableTestGoal)
+   public void addSustainGoal(GoalOrientedTestGoal yoVariableTestGoal)
    {
       sustainGoals.add(yoVariableTestGoal);
    }
 
-   public void addWaypointGoal(YoVariableTestGoal yoVariableTestGoal)
+   public void addWaypointGoal(GoalOrientedTestGoal yoVariableTestGoal)
    {
       waypointGoals.add(yoVariableTestGoal);
    }
 
-   public void addTerminalGoal(YoVariableTestGoal yoVariableTestGoal)
+   public void addTerminalGoal(GoalOrientedTestGoal yoVariableTestGoal)
    {
       terminalGoals.add(yoVariableTestGoal);
    }
