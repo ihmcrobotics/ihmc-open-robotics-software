@@ -41,6 +41,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeM
 import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -82,6 +83,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(BoundingBoxParametersMessage.class);
       privateNetClassList.registerPacketField(NormalEstimationParameters.class);
       privateNetClassList.registerPacketField(PlanarRegionSegmentationParameters.class);
+      privateNetClassList.registerPacketField(CustomRegionMergeParameters.class);
       privateNetClassList.registerPacketField(IntersectionEstimationParameters.class);
       privateNetClassList.registerPacketField(PolygonizerParameters.class);
       privateNetClassList.registerPacketField(NormalOcTreeMessage.class);

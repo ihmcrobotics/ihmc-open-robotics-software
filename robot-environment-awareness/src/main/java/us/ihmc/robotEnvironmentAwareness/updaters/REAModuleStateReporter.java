@@ -53,11 +53,13 @@ public class REAModuleStateReporter
 
    public void registerLidarScanMessage(LidarScanMessage message)
    {
-      reaMessager.submitMessage(REAModuleAPI.LidarScanState, new LidarScanMessage(message));
+      if (reaMessager.isMessagerOpen())
+         reaMessager.submitMessage(REAModuleAPI.LidarScanState, new LidarScanMessage(message));
    }
 
    public void registerStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
    {
-      reaMessager.submitMessage(REAModuleAPI.StereoVisionPointCloudState, new StereoVisionPointCloudMessage(message));
+      if (reaMessager.isMessagerOpen())
+         reaMessager.submitMessage(REAModuleAPI.StereoVisionPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 }
