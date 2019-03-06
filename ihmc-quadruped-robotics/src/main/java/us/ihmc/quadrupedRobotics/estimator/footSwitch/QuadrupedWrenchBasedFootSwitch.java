@@ -7,6 +7,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -19,7 +20,7 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    private final WrenchCalculatorWrapper wrenchCalculator;
    private final ReferenceFrame measurementFrame;
 
-   private final YoDouble forceThreshold;
+   private final DoubleParameter forceThreshold;
 
    private final YoFrameVector3D yoMeasuredForceWorld;
    private final YoBoolean hasFootHitGround;
@@ -32,16 +33,10 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       measurementFrame = contactablePlaneBody.getSoleFrame();
       String name = contactablePlaneBody.getName();
-      forceThreshold = new YoDouble(name + "ForceThreshold", registry);
-      forceThreshold.set(0.04 * totalRobotWeight);
+      forceThreshold = new DoubleParameter(name + "ForceThreshold", registry, 0.04 * totalRobotWeight);
 
       yoMeasuredForceWorld = new YoFrameVector3D(name + "MeasuredForceWorld", worldFrame, registry);
       hasFootHitGround = new YoBoolean(name + "HasFootHitGround", registry);
-   }
-
-   public void setForceThreshold(double threshold)
-   {
-      forceThreshold.set(threshold);
    }
 
    private void updateMeasurement()
@@ -54,7 +49,7 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    public boolean hasFootHitGround()
    {
       updateMeasurement();
-      hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getDoubleValue());
+      hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
       return hasFootHitGround.getBooleanValue();
    }
 
@@ -98,7 +93,7 @@ public class QuadrupedWrenchBasedFootSwitch implements FootSwitchInterface
    public boolean getForceMagnitudePastThreshhold()
    {
       updateMeasurement();
-      hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getDoubleValue());
+      hasFootHitGround.set(Math.abs(yoMeasuredForceWorld.getZ()) > forceThreshold.getValue());
       return hasFootHitGround.getBooleanValue();
    }
 

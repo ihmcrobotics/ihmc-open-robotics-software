@@ -2,9 +2,11 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -21,21 +23,30 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final YoFramePoint2D yoResolvedCoP;
    private final GlitchFilteredYoBoolean touchdownDetected;
    private final YoBoolean trustTouchdownDetectors;
+   private final WrenchCalculator wrenchCalculator;
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, double totalRobotWeight, YoVariableRegistry parentRegistry)
+   private final YoFixedFrameWrench measuredWrench;
+
+   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
+                                                    double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
-      this(robotQuadrant, foot, defaultGlitchWindow, totalRobotWeight, parentRegistry);
+      this(robotQuadrant, foot, wrenchCalculator, defaultGlitchWindow, totalRobotWeight, parentRegistry);
    }
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, int glitchWindow, double totalRobotWeight, YoVariableRegistry parentRegistry)
+   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
+                                                    int glitchWindow, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
 
       this.foot = foot;
+      this.wrenchCalculator = wrenchCalculator;
       this.totalRobotWeight = totalRobotWeight;
       yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
+
+      measuredWrench = new YoFixedFrameWrench(robotQuadrant.getCamelCaseName() + "_MeasuredWrench", foot.getRigidBody().getBodyFixedFrame(),
+                                              foot.getSoleFrame(), registry);
    }
 
    public YoBoolean getControllerSetFootSwitch()
@@ -48,9 +59,17 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       touchdownDetectors.add(touchdownDetector);
    }
 
+   private void updateMeasurement()
+   {
+      wrenchCalculator.calculate();
+      measuredWrench.setMatchingFrame(wrenchCalculator.getWrench());
+   }
+
    @Override
    public boolean hasFootHitGround()
    {
+      updateMeasurement();
+
       boolean touchdown = true;
       for (int i = 0; i < touchdownDetectors.size(); i++)
       {
@@ -69,13 +88,14 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public double computeFootLoadPercentage()
    {
-      return Double.NaN;
+      updateMeasurement();
+      return Math.abs(measuredWrench.getLinearPartZ()) / totalRobotWeight;
    }
 
    @Override
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      copToPack.setToZero(getMeasurementFrame());
    }
 
    @Override
@@ -87,9 +107,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.setToZero();
-      if (hasFootHitGround())
-         footWrenchToPack.setLinearPartZ(totalRobotWeight / 4.0);
+      footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
    }
 
    @Override
