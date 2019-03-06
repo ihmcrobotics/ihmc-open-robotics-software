@@ -694,10 +694,7 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
+   public abstract ICPOptimizationParameters getICPOptimizationParameters();
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.

@@ -115,9 +115,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
          }
-
       }
-      else if (balanceManager.useICPOptimization()) // TODO figure out a way of combining the two following modules
+      else if (true) // TODO: archive old push recovery. Always using ICP optimization now.
       {
          boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
 
