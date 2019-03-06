@@ -449,8 +449,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      desiredCMP.set(yoDesiredCMP);
-      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP, desiredCoP);
+      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCoP);
       yoDesiredCMP.set(desiredCMP);
 
       desiredCoP.changeFrame(midFootZUpFrame);
