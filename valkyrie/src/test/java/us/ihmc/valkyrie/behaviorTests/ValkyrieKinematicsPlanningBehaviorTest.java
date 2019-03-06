@@ -42,4 +42,18 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
    {
       super.testSingleKeyFrameInput();
    }
+   
+   @Override
+   @Test
+   public void testLastKeyFrameBadPositionPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testLastKeyFrameBadPositionPlanning();
+   }
+
+   @Override
+   @Test
+   public void testLastKeyFrameBadVelocityPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testLastKeyFrameBadVelocityPlanning();
+   }
 }
