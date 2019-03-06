@@ -9,9 +9,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 /**
@@ -45,50 +58,29 @@ public class CrossRobotCommandResolver
    public void resolveCenterOfPressureCommand(CenterOfPressureCommand in, CenterOfPressureCommand out)
    {
       out.setConstraintType(in.getConstraintType());
-      int contactingRigidBodyHashCode = in.getContactingRigidBody().hashCode();
-      out.setContactingRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(contactingRigidBodyHashCode));
-      int weightFrameHashCode = in.getWeight().getReferenceFrame().hashCode();
-      out.getWeight().setIncludingFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightFrameHashCode), in.getWeight());
-      int desiredCoPFrameHashCode = in.getDesiredCoP().getReferenceFrame().hashCode();
-      out.getDesiredCoP().setIncludingFrame(referenceFrameHashCodeResolver.getReferenceFrame(desiredCoPFrameHashCode), in.getDesiredCoP());
+      out.setContactingRigidBody(resolveRigidBody(in.getContactingRigidBody()));
+      resolveFrameTuple2D(in.getWeight(), out.getWeight());
+      resolveFrameTuple2D(in.getDesiredCoP(), out.getDesiredCoP());
    }
 
    public void resolveContactWrenchCommand(ContactWrenchCommand in, ContactWrenchCommand out)
    {
       out.setConstraintType(in.getConstraintType());
-      int rigidBodyHashCode = in.getRigidBody().hashCode();
-      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(rigidBodyHashCode));
-      int wrenchFrameHashCode = in.getWrench().getReferenceFrame().hashCode();
-      int wrenchBodyFrameHashCode = in.getWrench().getBodyFrame().hashCode();
-      out.getWrench().setIncludingFrame(in.getWrench());
-      out.getWrench().setReferenceFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchFrameHashCode));
-      out.getWrench().setBodyFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchBodyFrameHashCode));
-      int weightAngularFrameHashCode = in.getWeightMatrix().getAngularWeightFrame().hashCode();
-      int weightLinearFrameHashCode = in.getWeightMatrix().getLinearWeightFrame().hashCode();
-      out.getWeightMatrix().set(in.getWeightMatrix());
-      out.getWeightMatrix().getAngularPart().setWeightFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightAngularFrameHashCode));
-      out.getWeightMatrix().getLinearPart().setWeightFrame(referenceFrameHashCodeResolver.getReferenceFrame(weightLinearFrameHashCode));
-      int selectionAngularFrameHashCode = in.getSelectionMatrix().getAngularSelectionFrame().hashCode();
-      int selectionLinearFrameHashCode = in.getSelectionMatrix().getLinearSelectionFrame().hashCode();
-      out.getSelectionMatrix().set(in.getSelectionMatrix());
-      out.getSelectionMatrix().getAngularPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionAngularFrameHashCode));
-      out.getSelectionMatrix().getLinearPart().setSelectionFrame(referenceFrameHashCodeResolver.getReferenceFrame(selectionLinearFrameHashCode));
+      out.setRigidBody(resolveRigidBody(in.getRigidBody()));
+      resolveWrench(in.getWrench(), out.getWrench());
+      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
    public void resolveExternalWrenchCommand(ExternalWrenchCommand in, ExternalWrenchCommand out)
    {
-      int rigidBodyHashCode = in.getRigidBody().hashCode();
-      out.setRigidBody(rigidBodyHashCodeResolver.castAndGetRigidBody(rigidBodyHashCode));
-      int wrenchFrameHashCode = in.getExternalWrench().getReferenceFrame().hashCode();
-      int wrenchBodyFrameHashCode = in.getExternalWrench().getBodyFrame().hashCode();
-      out.getExternalWrench().setIncludingFrame(in.getExternalWrench());
-      out.getExternalWrench().setReferenceFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchFrameHashCode));
-      out.getExternalWrench().setBodyFrame(referenceFrameHashCodeResolver.getReferenceFrame(wrenchBodyFrameHashCode));
+      out.setRigidBody(resolveRigidBody(in.getRigidBody()));
+      resolveWrench(in.getExternalWrench(), out.getExternalWrench());
    }
 
    public void resolveInverseDynamicsOptimizationSettingsCommand(InverseDynamicsOptimizationSettingsCommand in, InverseDynamicsOptimizationSettingsCommand out)
    {
-      // There is no thread sensitive information in this command, so the output can directly be set to the input.
+      // There is no robot sensitive information in this command, so the output can directly be set to the input.
       out.set(in);
    }
 
@@ -98,9 +90,8 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
       {
-         int jointHashCode = in.getJointToComputeDesiredPositionFor(jointIndex).hashCode();
-         out.addJointToComputeDesiredPositionFor(jointHashCodeResolver.castAndGetJoint(jointHashCode));
-         // There is no thread sensitive information in this command, so the output can directly be set to the input.
+         out.addJointToComputeDesiredPositionFor(resolveJoint(in.getJointToComputeDesiredPositionFor(jointIndex)));
+         // There is no robot sensitive information in this command, so the output can directly be set to the input.
          out.setJointParameters(jointIndex, in.getJointParameters(jointIndex));
       }
    }
@@ -111,8 +102,7 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         int jointHashCode = in.getJoint(jointIndex).hashCode();
-         OneDoFJointBasics joint = jointHashCodeResolver.castAndGetJoint(jointHashCode);
+         OneDoFJointBasics joint = resolveJoint(in.getJoint(jointIndex));
          JointLimitParameters parameters = in.getJointLimitParameters(jointIndex);
          JointLimitEnforcement method = in.getJointLimitReductionFactor(jointIndex);
          out.addLimitEnforcementMethod(joint, method, parameters);
@@ -125,8 +115,66 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         int jointHashCode = in.getJoint(jointIndex).hashCode();
-         out.addJoint(jointHashCodeResolver.castAndGetJoint(jointHashCode), in.getDesiredAcceleration(jointIndex), in.getWeight(jointIndex));
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredAcceleration(jointIndex), in.getWeight(jointIndex));
       }
+   }
+
+   public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
+   {
+      out.setIncludingFrame(in);
+      out.setReferenceFrame(resolveReferenceFrame(in.getReferenceFrame()));
+      out.setBodyFrame(resolveReferenceFrame(in.getBodyFrame()));
+   }
+
+   public void resolveSelectionMatrix3D(SelectionMatrix3D in, SelectionMatrix3D out)
+   {
+      out.set(in);
+      out.setSelectionFrame(resolveReferenceFrame(in.getSelectionFrame()));
+   }
+
+   public void resolveSelectionMatrix6D(SelectionMatrix6D in, SelectionMatrix6D out)
+   {
+      resolveSelectionMatrix3D(in.getAngularPart(), out.getAngularPart());
+      resolveSelectionMatrix3D(in.getLinearPart(), out.getLinearPart());
+   }
+
+   public void resolveWeightMatrix3D(WeightMatrix3D in, WeightMatrix3D out)
+   {
+      out.set(in);
+      out.setWeightFrame(resolveReferenceFrame(in.getWeightFrame()));
+   }
+
+   public void resolveWeightMatrix6D(WeightMatrix6D in, WeightMatrix6D out)
+   {
+      resolveWeightMatrix3D(in.getAngularPart(), out.getAngularPart());
+      resolveWeightMatrix3D(in.getLinearPart(), out.getLinearPart());
+   }
+
+   public void resolveFrameTuple2D(FrameTuple2DReadOnly in, FrameTuple2DBasics out)
+   {
+      out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
+   }
+
+   public void resolveFrameTuple3D(FrameTuple3DReadOnly in, FrameTuple3DBasics out)
+   {
+      out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
+   }
+
+   private ReferenceFrame resolveReferenceFrame(ReferenceFrame in)
+   {
+      if (in == null)
+         return null;
+      else
+         return referenceFrameHashCodeResolver.getReferenceFrame(in.hashCode());
+   }
+
+   private <B extends RigidBodyReadOnly> B resolveRigidBody(B in)
+   {
+      return rigidBodyHashCodeResolver.castAndGetRigidBody(in.hashCode());
+   }
+
+   private <J extends JointReadOnly> J resolveJoint(J in)
+   {
+      return jointHashCodeResolver.castAndGetJoint(in.hashCode());
    }
 }
