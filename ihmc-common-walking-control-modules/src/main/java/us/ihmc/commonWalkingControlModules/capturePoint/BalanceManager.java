@@ -140,9 +140,6 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
-
    private final ReferenceFrame midFootZUpFrame;
    private final FrameVector2D tempVector2D = new FrameVector2D();
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
@@ -464,11 +461,6 @@ public class BalanceManager
       momentumRecoveryControlModule.setCapturePoint(capturePoint2d);
       momentumRecoveryControlModule.setSupportPolygon(bipedSupportPolygons.getSupportPolygonInWorld());
       momentumRecoveryControlModule.compute();
-
-      momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
-      if (!keepCMPInsideSupportPolygon)
-         areaToProjectInto.clearAndUpdate(worldFrame);
-      linearMomentumRateOfChangeControlModule.setCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (momentumRecoveryControlModule.getUseHighMomentumWeight())
       {

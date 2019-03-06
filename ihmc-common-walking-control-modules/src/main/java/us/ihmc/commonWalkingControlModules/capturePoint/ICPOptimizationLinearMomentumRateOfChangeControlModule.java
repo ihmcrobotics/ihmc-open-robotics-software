@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -12,13 +13,12 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
@@ -36,12 +36,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
                                                                  double gravityZ, double controlDT, YoVariableRegistry parentRegistry,
                                                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry);
+      super(referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry);
 
       this.yoTime = yoTime;
 
-      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet,
+                                                                controlDT, registry, yoGraphicsListRegistry);
 
       supportLegPreviousTick = YoEnum.create("SupportLegPreviousTick", "", RobotSide.class, registry, true);
    }
@@ -60,15 +60,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    {
       if (robotSide != null)
          this.transferToSide = robotSide.getOppositeSide();
-   }
-
-   @Override
-   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
-   {
-      boolean inputsAreOk = super.compute(desiredCMPPreviousValue, desiredCMPToPack);
-      supportLegPreviousTick.set(supportSide);
-
-      return inputsAreOk;
    }
 
    @Override
@@ -157,9 +148,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
    }
 
-   @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
-      this.icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 }
