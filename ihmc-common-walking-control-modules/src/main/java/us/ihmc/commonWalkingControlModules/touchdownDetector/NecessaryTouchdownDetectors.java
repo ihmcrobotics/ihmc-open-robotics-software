@@ -20,7 +20,7 @@ public class NecessaryTouchdownDetectors implements TouchdownDetector
    {
       for (int i = 0; i < touchdownDetectors.size(); i++)
       {
-         if (!hasTouchedDown())
+         if (!touchdownDetectors.get(i).hasTouchedDown())
             return false;
       }
 
