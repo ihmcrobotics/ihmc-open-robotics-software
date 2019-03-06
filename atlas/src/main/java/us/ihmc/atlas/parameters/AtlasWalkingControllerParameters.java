@@ -555,12 +555,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public boolean alwaysAllowMomentum()
-   {
-      return false;
-   }
-
-   @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
       return 0.15;

@@ -38,12 +38,6 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public boolean alwaysAllowMomentum()
-            {
-               return true;
-            }
-
-            @Override
             public ICPOptimizationParameters getICPOptimizationParameters()
             {
                return new AtlasICPOptimizationParameters(false)

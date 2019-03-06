@@ -77,7 +77,6 @@ public class BalanceManager
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
-   private final MomentumRecoveryControlModule momentumRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
@@ -252,11 +251,6 @@ public class BalanceManager
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
-      SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
-      double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
-      boolean alwaysAllowMomentum = walkingControllerParameters.alwaysAllowMomentum();
-      momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, alwaysAllowMomentum, registry, yoGraphicsListRegistry);
-
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
       String graphicListName = getClass().getSimpleName();
@@ -302,11 +296,6 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
    }
 
-   public void setHighMomentumWeightForRecovery(Vector3DReadOnly highLinearWeight)
-   {
-      linearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
-   }
-
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpPlanner.addFootstepToPlan(footstep, timing);
@@ -330,7 +319,6 @@ public class BalanceManager
     */
    public void setNextFootstep(Footstep nextFootstep)
    {
-      momentumRecoveryControlModule.setNextFootstep(nextFootstep);
       if (ENABLE_DYN_REACHABILITY)
          dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
@@ -460,20 +448,6 @@ public class BalanceManager
       finalDesiredCapturePoint2d.setIncludingFrame(yoFinalDesiredICP);
 
       getICPError(icpError2d);
-      momentumRecoveryControlModule.setICPError(icpError2d);
-      momentumRecoveryControlModule.setSupportSide(supportLeg);
-      momentumRecoveryControlModule.setCapturePoint(capturePoint2d);
-      momentumRecoveryControlModule.setSupportPolygon(bipedSupportPolygons.getSupportPolygonInWorld());
-      momentumRecoveryControlModule.compute();
-
-      if (momentumRecoveryControlModule.getUseHighMomentumWeight())
-      {
-         linearMomentumRateOfChangeControlModule.setHighMomentumWeight();
-      }
-      else
-      {
-         linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
-      }
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
