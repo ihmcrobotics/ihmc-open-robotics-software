@@ -11,7 +11,6 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -74,7 +73,7 @@ public class BalanceManager
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final LeggedLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
+   private final ICPOptimizationLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
@@ -144,11 +143,7 @@ public class BalanceManager
    private final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
-   private final boolean useICPOptimizationControl;
-   private final YoICPControlGains icpControlGains;
-
    private final ReferenceFrame midFootZUpFrame;
-   private final FramePoint2D tempPoint2D = new FramePoint2D();
    private final FrameVector2D tempVector2D = new FrameVector2D();
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
@@ -188,23 +183,11 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      ICPOptimizationParameters icpOptimizationParameters = walkingControllerParameters.getICPOptimizationParameters();
-      useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
-
-      if (useICPOptimizationControl)
-      {
-         icpControlGains = null;
-         linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               controllerToolbox.getICPControlPolygons(), contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ,
-               controlDT, registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         icpControlGains = new YoICPControlGains("", registry);
-         icpControlGains.set(walkingControllerParameters.createICPControlGains());
-         linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-               totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
-      }
+      linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
+                                                                                                           controllerToolbox.getICPControlPolygons(),
+                                                                                                           contactableFeet, walkingControllerParameters, yoTime,
+                                                                                                           totalMass, gravityZ, controlDT, registry,
+                                                                                                           yoGraphicsListRegistry);
       ICPOptimizationControllerInterface icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
@@ -772,11 +755,6 @@ public class BalanceManager
       return pushRecoveryControlModule.isEnabled();
    }
 
-   public boolean useICPOptimization()
-   {
-      return useICPOptimizationControl;
-   }
-
    public boolean isRecovering()
    {
       return pushRecoveryControlModule.isRecovering();
@@ -903,10 +881,5 @@ public class BalanceManager
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
       linearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
-   }
-
-   public YoICPControlGains getIcpControllerGains()
-   {
-      return icpControlGains;
    }
 }

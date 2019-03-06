@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -14,14 +15,20 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
-public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LeggedLinearMomentumRateOfChangeControlModule
+public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
    private final ICPOptimizationControllerInterface icpOptimizationController;
    private final YoDouble yoTime;
    private final FrameVector2D perfectCMPDelta = new FrameVector2D();
+
+   private RobotSide supportSide = null;
+   private RobotSide transferToSide = null;
+   private final YoEnum<RobotSide> supportLegPreviousTick;
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
@@ -35,39 +42,69 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
 
       icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
                                                                 contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+
+      supportLegPreviousTick = YoEnum.create("SupportLegPreviousTick", "", RobotSide.class, registry, true);
+   }
+
+   public void setSupportLeg(RobotSide newSupportSide)
+   {
+      supportSide = newSupportSide;
+   }
+
+   public void setTransferToSide(RobotSide transferToSide)
+   {
+      this.transferToSide = transferToSide;
+   }
+
+   public void setTransferFromSide(RobotSide robotSide)
+   {
+      if (robotSide != null)
+         this.transferToSide = robotSide.getOppositeSide();
    }
 
    @Override
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack)
+   {
+      boolean inputsAreOk = super.compute(desiredCMPPreviousValue, desiredCMPToPack);
+      supportLegPreviousTick.set(supportSide);
+
+      return inputsAreOk;
+   }
+
+   @Override
+   public boolean compute(FramePoint2DReadOnly desiredCMPPreviousValue, FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   {
+      boolean inputsAreOk = super.compute(desiredCMPPreviousValue, desiredCMPToPack, desiredCoPToPack);
+      supportLegPreviousTick.set(supportSide);
+
+      return inputsAreOk;
+   }
+
    public void clearPlan()
    {
       icpOptimizationController.clearPlan();
    }
 
-   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpOptimizationController.addFootstepToPlan(footstep, timing);
    }
 
-   @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
    }
 
-   @Override
    public void initializeForStanding()
    {
       icpOptimizationController.initializeForStanding(yoTime.getDoubleValue());
    }
 
-   @Override
    public void initializeForSingleSupport()
    {
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0);
    }
 
-   @Override
    public void initializeForTransfer()
    {
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
@@ -95,7 +132,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       yoUnprojectedDesiredCMP.set(desiredCMP);
    }
 
-   @Override
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       if (icpOptimizationController.useStepAdjustment())
@@ -106,19 +142,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Legg
       return icpOptimizationController.wasFootstepAdjusted();
    }
 
-   @Override
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
       icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
    }
 
-   @Override
    public ICPOptimizationControllerInterface getICPOptimizationController()
    {
       return icpOptimizationController;
    }
 
-   @Override
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
       icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
