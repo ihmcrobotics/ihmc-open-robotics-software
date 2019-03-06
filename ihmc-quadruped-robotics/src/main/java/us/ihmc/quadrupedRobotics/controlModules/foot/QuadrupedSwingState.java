@@ -163,7 +163,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
       //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, 0.04, 0.3, registry,
+
+      double minSwingHeight = 0.04;
+      double maxSwingHeight = 0.3;
+      double defaultSwingHeight = 0.04;
+
+      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                         graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
