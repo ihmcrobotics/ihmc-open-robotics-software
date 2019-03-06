@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -323,6 +324,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveMomentumRateCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         MomentumRateCommand in = nextMomentumRateCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         MomentumRateCommand expectedOut = nextMomentumRateCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         MomentumRateCommand actualOut = new MomentumRateCommand();
+         crossRobotCommandResolver.resolveMomentumRateCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -415,6 +438,15 @@ class CrossRobotCommandResolverTest
          next.addJoint(joint, desiredAcceleration, random.nextDouble());
       }
 
+      return next;
+   }
+
+   public static MomentumRateCommand nextMomentumRateCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   {
+      MomentumRateCommand next = new MomentumRateCommand();
+      next.setMomentumRate(RandomMatrices.createRandom(6, 1, random));
+      next.setWeights(nextWeightMatrix6D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
       return next;
    }
 
