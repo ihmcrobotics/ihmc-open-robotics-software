@@ -103,6 +103,9 @@ public class KryoMessager implements Messager
 
       Topic<?> messageTopic = messagerAPI.findTopic(message.getTopicID());
 
+      if (allowSelfSubmit)
+         receiveREAMessage(message);
+
       if (!objectCommunicator.isConnected())
       {
          LogTools.warn("This messager is closed, message's topic: " + messageTopic.getName());
@@ -111,9 +114,6 @@ public class KryoMessager implements Messager
 
       if (DEBUG)
          LogTools.info("Submit message for topic: " + messageTopic.getName());
-
-      if (allowSelfSubmit)
-         receiveREAMessage(message);
 
       // Variable update over network
       objectCommunicator.send(message);
