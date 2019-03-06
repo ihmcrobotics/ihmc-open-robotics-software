@@ -25,6 +25,9 @@ public class RobotControlTabController
    private Button standUpButton;
 
    @FXML
+   private Button standButton;
+
+   @FXML
    private CheckBox enablePoseTeleopControl;
 
    @FXML
@@ -87,10 +90,21 @@ public class RobotControlTabController
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, HighLevelControllerName.STAND_PREP_STATE);
    }
 
+   public void requestStopWalking()
+   {
+      messager.submitMessage(QuadrupedUIMessagerAPI.FootstepPlanTopic, null);
+      requestStanding();
+   }
+
    public void requestStanding()
    {
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
    }
+
+//   public void requestAbortWalking()
+//   {
+//      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, HighLevelControllerName.STAND_PREP_STATE);
+//   }
 
    public void bindControls()
    {
