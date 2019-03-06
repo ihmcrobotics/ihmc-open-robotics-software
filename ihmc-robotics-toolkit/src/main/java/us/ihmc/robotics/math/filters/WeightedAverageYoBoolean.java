@@ -13,9 +13,18 @@ public class WeightedAverageYoBoolean extends YoBoolean
    private final List<DoubleProvider> booleanWeights = new ArrayList<>();
    private final List<BooleanProvider> booleansToAverage = new ArrayList<>();
 
+   private final boolean biasToPositive;
+
    public WeightedAverageYoBoolean(String name, YoVariableRegistry registry)
    {
+      this(name, registry, false);
+   }
+
+   public WeightedAverageYoBoolean(String name, YoVariableRegistry registry, boolean biasToPositive)
+   {
       super(name, "WeightedAverageYoBoolean", registry);
+
+      this.biasToPositive = biasToPositive;
    }
 
    public void addBooleanToAverage(DoubleProvider booleanWeight, BooleanProvider booleanToAverage)
@@ -34,20 +43,44 @@ public class WeightedAverageYoBoolean extends YoBoolean
       {
          double weight = booleanWeights.get(i).getValue();
          estimatedValue += weight * (booleansToAverage.get(i).getValue() ? 1.0 : 0.0);
-         totalWeight += totalWeight;
+         totalWeight += weight;
       }
+
+      if (totalWeight <= 0.0)
+         throw new RuntimeException("Invalid weights in the weighted average variable.");
 
       estimatedValue /= totalWeight;
 
-      if (estimatedValue >= 0.5)
+      return evaluate(estimatedValue);
+   }
+
+   private boolean evaluate(double estimatedValue)
+   {
+      if (biasToPositive)
       {
-         set(true);
-         return true;
+         if (estimatedValue >= 0.5)
+         {
+            set(true);
+            return true;
+         }
+         else
+         {
+            set(false);
+            return false;
+         }
       }
       else
       {
-         set(false);
-         return false;
+         if (estimatedValue > 0.5)
+         {
+            set(true);
+            return true;
+         }
+         else
+         {
+            set(false);
+            return false;
+         }
       }
    }
 }
