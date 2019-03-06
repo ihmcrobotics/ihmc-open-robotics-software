@@ -8,6 +8,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 
+/**
+ * This class is a combination of touchdown sensors. For it to detect touchdown, the weighted average of all the component touchdown sensors must be true.
+ */
 public class WeightedAverageTouchdownDetectors implements TouchdownDetector
 {
    private final ArrayList<TouchdownDetector> touchdownDetectors = new ArrayList<>();
