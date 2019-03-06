@@ -87,7 +87,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    {
       joints.clear();
       desiredAccelerations.clear();
-      weights.clear();
+      weights.reset();
    }
 
    /**

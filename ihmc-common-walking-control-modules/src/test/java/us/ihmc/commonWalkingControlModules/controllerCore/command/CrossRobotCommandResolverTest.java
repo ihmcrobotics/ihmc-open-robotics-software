@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -186,7 +187,7 @@ class CrossRobotCommandResolverTest
          CenterOfPressureCommand expectedOut = nextCenterOfPressureCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          CenterOfPressureCommand actualOut = new CenterOfPressureCommand();
          crossRobotCommandResolver.resolveCenterOfPressureCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -208,7 +209,7 @@ class CrossRobotCommandResolverTest
          ContactWrenchCommand expectedOut = nextContactWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          ContactWrenchCommand actualOut = new ContactWrenchCommand();
          crossRobotCommandResolver.resolveContactWrenchCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -230,7 +231,7 @@ class CrossRobotCommandResolverTest
          ExternalWrenchCommand expectedOut = nextExternalWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          ExternalWrenchCommand actualOut = new ExternalWrenchCommand();
          crossRobotCommandResolver.resolveExternalWrenchCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -254,7 +255,7 @@ class CrossRobotCommandResolverTest
                                                                                                                  testData.frameTreeB);
          InverseDynamicsOptimizationSettingsCommand actualOut = new InverseDynamicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseDynamicsOptimizationSettingsCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -276,7 +277,7 @@ class CrossRobotCommandResolverTest
          JointAccelerationIntegrationCommand expectedOut = nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          JointAccelerationIntegrationCommand actualOut = new JointAccelerationIntegrationCommand();
          crossRobotCommandResolver.resolveJointAccelerationIntegrationCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -298,7 +299,7 @@ class CrossRobotCommandResolverTest
          JointLimitEnforcementMethodCommand expectedOut = nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          JointLimitEnforcementMethodCommand actualOut = new JointLimitEnforcementMethodCommand();
          crossRobotCommandResolver.resolveJointLimitEnforcementMethodCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -320,7 +321,7 @@ class CrossRobotCommandResolverTest
          JointspaceAccelerationCommand expectedOut = nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          JointspaceAccelerationCommand actualOut = new JointspaceAccelerationCommand();
          crossRobotCommandResolver.resolveJointspaceAccelerationCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -342,7 +343,29 @@ class CrossRobotCommandResolverTest
          MomentumRateCommand expectedOut = nextMomentumRateCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          MomentumRateCommand actualOut = new MomentumRateCommand();
          crossRobotCommandResolver.resolveMomentumRateCommand(in, actualOut);
-         assertEquals(expectedOut, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolvePlaneContactStateCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         PlaneContactStateCommand in = nextPlaneContactStateCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         PlaneContactStateCommand expectedOut = nextPlaneContactStateCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PlaneContactStateCommand actualOut = new PlaneContactStateCommand();
+         crossRobotCommandResolver.resolvePlaneContactStateCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -447,6 +470,31 @@ class CrossRobotCommandResolverTest
       next.setMomentumRate(RandomMatrices.createRandom(6, 1, random));
       next.setWeights(nextWeightMatrix6D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      return next;
+   }
+
+   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   {
+      PlaneContactStateCommand next = new PlaneContactStateCommand();
+      next.setContactingRigidBody(nextElementIn(random, rootBody.subtreeList()));
+      next.setCoefficientOfFriction(random.nextDouble());
+      next.setContactNormal(EuclidFrameRandomTools.nextFrameVector3D(random, nextElementIn(random, possibleFrames)));
+      next.setUseHighCoPDamping(random.nextBoolean());
+      next.setHasContactStateChanged(random.nextBoolean());
+      if (random.nextBoolean())
+         next.getContactFramePoseInBodyFixedFrame().set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+
+      int numberOfContactPoints = random.nextInt(20);
+
+      for (int i = 0; i < numberOfContactPoints; i++)
+      {
+         next.addPointInContact(EuclidFrameRandomTools.nextFramePoint3D(random, nextElementIn(random, possibleFrames)));
+         if (random.nextBoolean())
+            next.setMaxContactPointNormalForce(i, random.nextDouble());
+         if (random.nextBoolean())
+            next.setRhoWeight(i, random.nextDouble());
+      }
+
       return next;
    }
 

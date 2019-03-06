@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -121,10 +122,29 @@ public class CrossRobotCommandResolver
    }
 
    public void resolveMomentumRateCommand(MomentumRateCommand in, MomentumRateCommand out)
+
    {
       out.setMomentumRate(in.getMomentumRate());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
+   {
+      out.clearContactPoints();
+      out.setContactingRigidBody(resolveRigidBody(in.getContactingRigidBody()));
+      out.setCoefficientOfFriction(in.getCoefficientOfFriction());
+      out.setUseHighCoPDamping(in.isUseHighCoPDamping());
+      out.setHasContactStateChanged(in.getHasContactStateChanged());
+      resolveFrameTuple3D(in.getContactNormal(), out.getContactNormal());
+      out.getContactFramePoseInBodyFixedFrame().set(in.getContactFramePoseInBodyFixedFrame());
+
+      for (int contactPointIndex = 0; contactPointIndex < in.getNumberOfContactPoints(); contactPointIndex++)
+      {
+         resolveFrameTuple3D(in.getContactPoint(contactPointIndex), out.addPointInContact());
+         out.setMaxContactPointNormalForce(contactPointIndex, in.getMaxContactPointNormalForce(contactPointIndex));
+         out.setRhoWeight(contactPointIndex, in.getRhoWeight(contactPointIndex));
+      }
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
