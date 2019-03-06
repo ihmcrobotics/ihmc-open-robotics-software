@@ -42,24 +42,24 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (300 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (3000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -122,35 +122,35 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getRegionId().size() <= 300)
+      if(data.getRegionId().size() <= 3000)
       cdr.write_type_e(data.getRegionId());else
           throw new RuntimeException("region_id field exceeds the maximum length");
 
-      if(data.getRegionOrigin().size() <= 300)
+      if(data.getRegionOrigin().size() <= 3000)
       cdr.write_type_e(data.getRegionOrigin());else
           throw new RuntimeException("region_origin field exceeds the maximum length");
 
-      if(data.getRegionOrientation().size() <= 300)
+      if(data.getRegionOrientation().size() <= 3000)
       cdr.write_type_e(data.getRegionOrientation());else
           throw new RuntimeException("region_orientation field exceeds the maximum length");
 
-      if(data.getRegionNormal().size() <= 300)
+      if(data.getRegionNormal().size() <= 3000)
       cdr.write_type_e(data.getRegionNormal());else
           throw new RuntimeException("region_normal field exceeds the maximum length");
 
-      if(data.getConcaveHullsSize().size() <= 300)
+      if(data.getConcaveHullsSize().size() <= 3000)
       cdr.write_type_e(data.getConcaveHullsSize());else
           throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
 
-      if(data.getNumberOfConvexPolygons().size() <= 300)
+      if(data.getNumberOfConvexPolygons().size() <= 3000)
       cdr.write_type_e(data.getNumberOfConvexPolygons());else
           throw new RuntimeException("number_of_convex_polygons field exceeds the maximum length");
 
-      if(data.getConvexPolygonsSize().size() <= 1000)
+      if(data.getConvexPolygonsSize().size() <= 3000)
       cdr.write_type_e(data.getConvexPolygonsSize());else
           throw new RuntimeException("convex_polygons_size field exceeds the maximum length");
 
-      if(data.getVertexBuffer().size() <= 5000)
+      if(data.getVertexBuffer().size() <= 50000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
