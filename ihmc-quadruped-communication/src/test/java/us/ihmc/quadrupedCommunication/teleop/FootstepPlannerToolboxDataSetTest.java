@@ -325,11 +325,18 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    protected void packPlanningRequest(DataSet dataset)
    {
+      Quaternion startOrientation = new Quaternion();
+      Quaternion goalOrientation = new Quaternion();
+      if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
+         startOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
+      if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
+         goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
+
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
 
       PlannerInput plannerInput = dataset.getPlannerInput();
-      
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
@@ -337,8 +344,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, plannerInput.getQuadrupedStartPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
 
       ThreadTools.sleep(1000);
 
