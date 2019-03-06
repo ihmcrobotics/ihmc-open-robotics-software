@@ -73,11 +73,7 @@ public class JointLimitEnforcementMethodCommand
    @Override
    public boolean equals(Object object)
    {
-      if (object == null)
-      {
-         return false;
-      }
-      else if (object == this)
+      if (object == this)
       {
          return true;
       }
