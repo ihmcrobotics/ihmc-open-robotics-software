@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
@@ -20,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -107,6 +111,13 @@ public class LinearMomentumRateControlModule
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
+
+   private boolean initializeForStanding = false;
+   private boolean initializeForSingleSupport = false;
+   private boolean initializeForTransfer = false;
+   private double finalTransferDuration;
+   private final List<Footstep> footsteps = new ArrayList<>();
+   private final List<FootstepTiming> footstepTimings = new ArrayList<>();
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
@@ -205,49 +216,48 @@ public class LinearMomentumRateControlModule
       this.transferToSide = transferToSide;
    }
 
-   public void clearPlan()
-   {
-      icpOptimizationController.clearPlan();
-   }
-
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      icpOptimizationController.addFootstepToPlan(footstep, timing);
+      this.footsteps.add(footstep);
+      this.footstepTimings.add(timing);
    }
 
    public void setFinalTransferDuration(double finalTransferDuration)
    {
-      icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+      this.finalTransferDuration = finalTransferDuration;
+   }
+
+   public void initializeForStanding()
+   {
+      initializeForStanding = true;
+   }
+
+   public void initializeForSingleSupport()
+   {
+      initializeForSingleSupport = true;
+   }
+
+   public void initializeForTransfer()
+   {
+      initializeForTransfer = true;
    }
 
    public void setNextTransferDuration(double nextTransferDuration)
    {
+      // Must be AFTER call to initializeFor...
       icpOptimizationController.setNextTransferDuration(nextTransferDuration);
    }
 
    public void setTransferDuration(double transferDuration)
    {
+      // Must be AFTER call to initializeFor...
       icpOptimizationController.setTransferDuration(transferDuration);
    }
 
    public void setSwingDuration(double swingDuration)
    {
+      // Must be AFTER call to initializeFor...
       icpOptimizationController.setSwingDuration(swingDuration);
-   }
-
-   public void initializeForStanding()
-   {
-      icpOptimizationController.initializeForStanding(yoTime.getDoubleValue());
-   }
-
-   public void initializeForSingleSupport()
-   {
-      icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0);
-   }
-
-   public void initializeForTransfer()
-   {
-      icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide);
    }
 
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
@@ -265,14 +275,19 @@ public class LinearMomentumRateControlModule
       icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
-   public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
+   public FramePose3DReadOnly getFootstepSolution()
    {
-      if (icpOptimizationController.useStepAdjustment())
-      {
-         icpOptimizationController.getFootstepSolution(footstepToPack);
-      }
+      return icpOptimizationController.getFootstepSolution();
+   }
 
+   public boolean getFootstepWasAdjusted()
+   {
       return icpOptimizationController.wasFootstepAdjusted();
+   }
+
+   public boolean getUsingStepAdjustment()
+   {
+      return icpOptimizationController.useStepAdjustment();
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -301,6 +316,7 @@ public class LinearMomentumRateControlModule
 
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
+      updateICPControllerState();
       computeICPController();
 
       checkOutputs();
@@ -324,18 +340,56 @@ public class LinearMomentumRateControlModule
       return success;
    }
 
+   private void updateICPControllerState()
+   {
+      if ((initializeForStanding && initializeForTransfer) || (initializeForTransfer && initializeForSingleSupport)
+            || (initializeForSingleSupport && initializeForStanding))
+      {
+         throw new RuntimeException("Can only initialize once per compute.");
+      }
+
+      if (initializeForStanding || initializeForTransfer || initializeForSingleSupport)
+      {
+         icpOptimizationController.clearPlan();
+         icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+         for (int i = 0; i < footsteps.size(); i++)
+         {
+            icpOptimizationController.addFootstepToPlan(footsteps.get(i), footstepTimings.get(i));
+         }
+         footsteps.clear();
+         footstepTimings.clear();
+      }
+
+      if (initializeForStanding)
+      {
+         icpOptimizationController.initializeForStanding(yoTime.getValue());
+         initializeForStanding = false;
+      }
+      if (initializeForSingleSupport)
+      {
+         icpOptimizationController.initializeForSingleSupport(yoTime.getValue(), supportSide, omega0);
+         initializeForSingleSupport = false;
+      }
+
+      if (initializeForTransfer)
+      {
+         icpOptimizationController.initializeForTransfer(yoTime.getValue(), transferToSide);
+         initializeForTransfer = false;
+      }
+   }
+
    private void computeICPController()
    {
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
                                            capturePointVelocity, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
                                            capturePointVelocity, omega0);
       }
       icpOptimizationController.getDesiredCMP(desiredCMP);

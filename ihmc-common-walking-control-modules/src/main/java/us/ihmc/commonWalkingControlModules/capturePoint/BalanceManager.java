@@ -26,8 +26,10 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -131,6 +133,13 @@ public class BalanceManager
 
    private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
+
+   private boolean initializeForStanding = false;
+   private boolean initializeForSingleSupport = false;
+   private boolean initializeForTransfer = false;
+   private boolean footstepWasAdjusted = false;
+   private boolean usingStepAdjustment = false;
+   private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -323,13 +332,17 @@ public class BalanceManager
 
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
-      return linearMomentumRateOfChangeControlModule.getUpcomingFootstepSolution(footstep);
+      if (!usingStepAdjustment || initializeForSingleSupport || initializeForTransfer || initializeForStanding)
+      {
+         return false;
+      }
+      footstep.setPose(footstepSolution);
+      return footstepWasAdjusted;
    }
 
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
-      linearMomentumRateOfChangeControlModule.clearPlan();
    }
 
    public void setICPPlanSupportSide(RobotSide robotSide)
@@ -414,6 +427,22 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
+      if (initializeForStanding)
+      {
+         linearMomentumRateOfChangeControlModule.initializeForStanding();
+         initializeForStanding = false;
+      }
+      if (initializeForTransfer)
+      {
+         linearMomentumRateOfChangeControlModule.initializeForTransfer();
+         initializeForTransfer = false;
+      }
+      if (initializeForSingleSupport)
+      {
+         linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+         initializeForSingleSupport = false;
+      }
+
       if (ENABLE_DYN_REACHABILITY && updateTimings)
       {
          double adjustedFinalTransferDuration = dynamicReachabilityCalculator.getFinalTransferDuration();
@@ -446,6 +475,10 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
       boolean success = linearMomentumRateOfChangeControlModule.compute();
+
+      footstepSolution.set(linearMomentumRateOfChangeControlModule.getFootstepSolution());
+      footstepWasAdjusted = linearMomentumRateOfChangeControlModule.getFootstepWasAdjusted();
+      usingStepAdjustment = linearMomentumRateOfChangeControlModule.getUsingStepAdjustment();
 
       if (!success)
       {
@@ -565,7 +598,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
-      linearMomentumRateOfChangeControlModule.initializeForStanding();
+      initializeForStanding = true;
    }
 
    public void prepareForDoubleSupportPushRecovery()
@@ -577,7 +610,7 @@ public class BalanceManager
    {
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+      initializeForSingleSupport = true;
 
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
@@ -605,7 +638,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForStanding();
+      initializeForStanding = true;
 
       icpPlannerDone.set(false);
    }
@@ -619,7 +652,7 @@ public class BalanceManager
       }
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      linearMomentumRateOfChangeControlModule.initializeForStanding();
+      initializeForStanding = true;
 
       icpPlannerDone.set(false);
    }
@@ -634,7 +667,7 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
-      linearMomentumRateOfChangeControlModule.initializeForTransfer();
+      initializeForTransfer = true;
 
       if (Double.isFinite(swingTime) && Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
