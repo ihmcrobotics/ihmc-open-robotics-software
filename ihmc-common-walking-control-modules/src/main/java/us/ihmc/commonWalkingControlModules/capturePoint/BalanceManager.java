@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
@@ -109,8 +108,6 @@ public class BalanceManager
    private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
    private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
 
-   private final FramePoint2D desiredCoP = new FramePoint2D();
-
    private final FrameVector2D icpError2d = new FrameVector2D();
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
@@ -128,11 +125,7 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final ReferenceFrame midFootZUpFrame;
-   private final FrameVector2D tempVector2D = new FrameVector2D();
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
-   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
-   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
@@ -157,7 +150,6 @@ public class BalanceManager
       yoTime = controllerToolbox.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
@@ -433,12 +425,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCoP);
-
-      desiredCoP.changeFrame(midFootZUpFrame);
-      tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-      centerOfPressureCommand.setDesiredCoP(desiredCoP);
-      centerOfPressureCommand.setWeight(tempVector2D);
+      boolean success = linearMomentumRateOfChangeControlModule.compute();
 
       if (!success)
       {
@@ -518,7 +505,7 @@ public class BalanceManager
       inverseDynamicsCommandList.addCommand(linearMomentumRateOfChangeControlModule.getMomentumRateCommand());
       if (useCoPObjective.getValue())
       {
-         inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
+         inverseDynamicsCommandList.addCommand(linearMomentumRateOfChangeControlModule.getCenterOfPressureCommand());
       }
       return inverseDynamicsCommandList;
    }
