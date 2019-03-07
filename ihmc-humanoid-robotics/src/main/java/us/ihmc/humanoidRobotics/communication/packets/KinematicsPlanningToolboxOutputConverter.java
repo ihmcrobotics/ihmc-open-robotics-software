@@ -1,13 +1,22 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,11 +24,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class KinematicsPlanningToolboxOutputConverter
 {
@@ -27,12 +41,44 @@ public class KinematicsPlanningToolboxOutputConverter
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
-   
+
+   private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<KinematicsToolboxOutputStatus>();
+   private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
+   private final AtomicReference<KinematicsPlanningToolboxOutputStatus> solution;
+   private int numberOfTrajectoryPoints;
+
    private static final boolean startAndFinishVelocityIsZero = true;
+   private static final boolean useArmJointSpace = true;
+
+   private final SideDependentList<List<String>> armJointNamesFromShoulder = new SideDependentList<List<String>>();
 
    public KinematicsPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       converter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+      solution = new AtomicReference<KinematicsPlanningToolboxOutputStatus>();
+      for (RobotSide robotSide : RobotSide.values)
+         armJointNamesFromShoulder.put(robotSide, new ArrayList<String>());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<String> armJointNamesFromHand = new ArrayList<String>();
+         JointBasics armJoint = converter.getFullRobotModel().getHand(robotSide).getParentJoint();
+         while (armJoint.getPredecessor() != converter.getFullRobotModel().getElevator())
+         {
+            String armJointName = armJoint.getName();
+            if (armJointName.contains(robotSide.getLowerCaseName()))
+            {
+               armJointNamesFromHand.add(armJointName);
+               LogTools.info("" + armJointName);
+            }
+            armJoint = armJoint.getPredecessor().getParentJoint();
+         }
+         for (int i = armJointNamesFromHand.size(); i > 0; i--)
+         {
+            armJointNamesFromShoulder.get(robotSide).add(armJointNamesFromHand.get(i - 1));
+            LogTools.info("" + armJointNamesFromHand.get(i - 1));
+         }
+      }
    }
 
    private void computeHandTrajectoryMessages(KinematicsPlanningToolboxOutputStatus solution)
@@ -212,10 +258,83 @@ public class KinematicsPlanningToolboxOutputConverter
 
    public void computeWholeBodyTrajectoryMessage(KinematicsPlanningToolboxOutputStatus solution)
    {
-      computeHandTrajectoryMessages(solution);
-      computeChestTrajectoryMessage(solution);
-      computePelvisTrajectoryMessage(solution);
-      computeNeckTrajectoryMessage(solution);
+      if (useArmJointSpace)
+      {
+         getToolboxSolution(solution);
+         computeArmTrajectoryMessages();
+         computeChestTrajectoryMessage();
+         computePelvisTrajectoryMessage();
+      }
+      else
+      {
+         computeHandTrajectoryMessages(solution);
+         computeChestTrajectoryMessage(solution);
+         computePelvisTrajectoryMessage(solution);
+         computeNeckTrajectoryMessage(solution);
+      }
+   }
+
+   private void computeChestTrajectoryMessage()
+   {
+
+   }
+
+   private void computePelvisTrajectoryMessage()
+   {
+
+   }
+
+   private void computeArmTrajectoryMessages()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         computeArmTrajectoryMessage(robotSide);
+   }
+
+   private void computeArmTrajectoryMessage(RobotSide robotSide)
+   {
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+      JointspaceTrajectoryMessage jointspaceTrajectory = message.getJointspaceTrajectory();
+      
+      List<String> armJointNames = armJointNamesFromShoulder.get(robotSide);
+      for (String jointName : armJointNames)
+      {
+         OneDoFTrajectoryPointList trajectoryPoints = new OneDoFTrajectoryPointList();
+         LogTools.info(""+jointName);
+         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         {
+            KinematicsToolboxOutputStatus keyFrame = solution.get().getRobotConfigurations().get(i);
+
+            converter.updateFullRobotModel(keyFrame);
+            OneDoFJointBasics oneDoFJoint = converter.getFullRobotModel().getOneDoFJointByName(jointName);
+            double desiredPosition = MathTools.clamp(oneDoFJoint.getQ(), oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+            double desiredVelocity = oneDoFJoint.getQd();
+            
+            trajectoryPoints.addTrajectoryPoint(keyFrameTimes.get(i), desiredPosition, desiredVelocity);
+            
+            LogTools.info(keyFrameTimes.get(i)+" "+oneDoFJoint.getQ()+" "+ oneDoFJoint.getQd()+" "+oneDoFJoint.getJointLimitLower()+" "+oneDoFJoint.getJointLimitUpper());
+         }
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(trajectoryPoints);
+         
+         jointspaceTrajectory.getJointTrajectoryMessages().add().set(oneDoFJointTrajectoryMessage);
+      }
+      
+      if (robotSide == RobotSide.LEFT)
+         wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage().set(message);
+      else
+         wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage().set(message);
+   }
+
+   private void getToolboxSolution(KinematicsPlanningToolboxOutputStatus toolboxSolution)
+   {
+      solution.set(toolboxSolution);
+
+      keyFrames.clear();
+      keyFrames.addAll(solution.get().getRobotConfigurations());
+      
+      keyFrameTimes.clear();
+      keyFrameTimes.addAll(solution.get().getKeyFrameTimes());
+      
+      numberOfTrajectoryPoints = keyFrames.size();
    }
 
    public void setMessageToCreate(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
