@@ -127,8 +127,8 @@ public class HighLevelControlManagerFactory
       loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
       loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
 
-      linearMomentumWeight = new ParameterVector3D("DefaultLinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
-      angularMomentumWeight = new ParameterVector3D("DefaultAngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
+      linearMomentumWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
+      angularMomentumWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
 
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
