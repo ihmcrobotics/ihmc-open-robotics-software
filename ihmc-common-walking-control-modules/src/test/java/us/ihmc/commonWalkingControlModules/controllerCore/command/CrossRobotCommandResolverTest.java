@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -492,17 +493,17 @@ class CrossRobotCommandResolverTest
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
-   
+
    @Test
    void testResolvePrivilegedConfigurationCommand() throws Exception
    {
       Random random = new Random(657654);
-      
+
       TestData testData = new TestData(random, 20, 20);
-      
+
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
-      
+
       for (int i = 0; i < ITERATIONS; i++)
       {
          long seed = random.nextLong();
@@ -511,6 +512,28 @@ class CrossRobotCommandResolverTest
          PrivilegedConfigurationCommand expectedOut = nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          PrivilegedConfigurationCommand actualOut = new PrivilegedConfigurationCommand();
          crossRobotCommandResolver.resolvePrivilegedConfigurationCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolvePrivilegedJointSpaceCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         PrivilegedJointSpaceCommand in = nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         PrivilegedJointSpaceCommand expectedOut = nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PrivilegedJointSpaceCommand actualOut = new PrivilegedJointSpaceCommand();
+         crossRobotCommandResolver.resolvePrivilegedJointSpaceCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -725,6 +748,30 @@ class CrossRobotCommandResolverTest
       {
          OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
          next.addJoint(joint, nextOneDoFJointPrivilegedConfigurationParameters(random));
+      }
+
+      if (random.nextBoolean())
+         next.enable();
+      else
+         next.disable();
+
+      return next;
+   }
+
+   public static PrivilegedJointSpaceCommand nextPrivilegedJointSpaceCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      PrivilegedJointSpaceCommand next = new PrivilegedJointSpaceCommand();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+
+         next.addJoint(joint, random.nextDouble());
+         if (random.nextBoolean())
+            next.setWeight(jointIndex, random.nextDouble());
       }
 
       if (random.nextBoolean())
