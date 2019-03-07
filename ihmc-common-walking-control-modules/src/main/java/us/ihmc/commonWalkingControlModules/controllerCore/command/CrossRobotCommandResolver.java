@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -163,10 +164,21 @@ public class CrossRobotCommandResolver
       out.setScaleSecondaryTaskJointWeight(in.scaleSecondaryTaskJointWeight(), in.getSecondaryTaskJointWeightScale());
    }
 
-   public void resolveInverseKinematicsOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand in, InverseKinematicsOptimizationSettingsCommand out)
+   public void resolveInverseKinematicsOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand in,
+                                                                   InverseKinematicsOptimizationSettingsCommand out)
    {
       // There is no robot sensitive information in this command, so the output can directly be set to the input.
       out.set(in);
+   }
+
+   public void resolveJointLimitReductionCommand(JointLimitReductionCommand in, JointLimitReductionCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         out.addReductionFactor(resolveJoint(in.getJoint(jointIndex)), in.getJointLimitReductionFactor(jointIndex));
+      }
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)

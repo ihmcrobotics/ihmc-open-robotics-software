@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -411,10 +412,34 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseKinematicsOptimizationSettingsCommand in = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         InverseKinematicsOptimizationSettingsCommand expectedOut = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         InverseKinematicsOptimizationSettingsCommand in = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
+                                                                                                            testData.frameTreeA);
+         InverseKinematicsOptimizationSettingsCommand expectedOut = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                     testData.frameTreeB);
          InverseKinematicsOptimizationSettingsCommand actualOut = new InverseKinematicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseKinematicsOptimizationSettingsCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolveJointLimitReductionCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointLimitReductionCommand in = nextJointLimitReductionCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointLimitReductionCommand expectedOut = nextJointLimitReductionCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitReductionCommand actualOut = new JointLimitReductionCommand();
+         crossRobotCommandResolver.resolveJointLimitReductionCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -565,11 +590,28 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static InverseKinematicsOptimizationSettingsCommand nextInverseKinematicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static InverseKinematicsOptimizationSettingsCommand nextInverseKinematicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
+                                                                                                               ReferenceFrame... possibleFrames)
    {
       InverseKinematicsOptimizationSettingsCommand next = new InverseKinematicsOptimizationSettingsCommand();
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
+      return next;
+   }
+
+   public static JointLimitReductionCommand nextJointLimitReductionCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      JointLimitReductionCommand next = new JointLimitReductionCommand();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.addReductionFactor(joint, random.nextDouble());
+      }
+
       return next;
    }
 
