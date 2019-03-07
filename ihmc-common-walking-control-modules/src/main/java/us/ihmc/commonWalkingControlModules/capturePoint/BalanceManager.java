@@ -820,6 +820,6 @@ public class BalanceManager
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
-      linearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
+      linearMomentumRateOfChangeControlModule.setMinimizeAngularMomentumRateZ(enable);
    }
 }
