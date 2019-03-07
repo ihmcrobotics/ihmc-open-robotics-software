@@ -476,7 +476,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private void packSolution()
    {
       isDone.set(true);
-      if (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_POSITION_LIMIT)
+      if (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME)
       {
          reportMessage(solution);
          return;
@@ -547,7 +547,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
       else
       {
-         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_POSITION_LIMIT);
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME);
          solution.setSolutionQuality(-1);
          return false;
       }
