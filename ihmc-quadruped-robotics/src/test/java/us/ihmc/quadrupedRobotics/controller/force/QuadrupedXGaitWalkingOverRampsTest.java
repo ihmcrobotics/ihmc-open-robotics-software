@@ -73,7 +73,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       stepTeleopManager.setEndDoubleSupportDuration(0.05);
-      stepTeleopManager.setStanceLength(1.00);
+//      stepTeleopManager.setStanceLength(1.00);
       stepTeleopManager.setStanceWidth(0.30);
       stepTeleopManager.setStepDuration(0.35);
       stepTeleopManager.setStepGroundClearance(0.1);
