@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -42,7 +41,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private static final double stepLength = 0.8;
    private static final double runLength = 1.5;
    private static final int numberOfWalkingSteps = 0;
-   private static final int numberOfRunningSteps = 5;
+   private static final int numberOfRunningSteps = 30;
 
    private static final double extraSimDuration = 0.5;
 
@@ -76,6 +75,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final YoFramePoint3D desiredDCMPosition;
    private final YoFrameVector3D desiredDCMVelocity;
    private final YoFramePoint3D desiredVRPPosition;
+   private final YoFramePoint3D desiredECMPPosition;
    private final YoFramePoint3D desiredCoPPosition;
 
    private final YoDouble omega;
@@ -100,6 +100,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final YoFrameConvexPolygon2D yoNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextFootstep", "", worldFrame, 4, registry);
    private final YoFrameConvexPolygon2D yoNextNextNextFootstepPolygon = new YoFrameConvexPolygon2D("nextNextNextFootstep", "", worldFrame, 4, registry);
 
+   private final YoDouble springStiffness = new YoDouble("springStiffness", registry);
+   private final YoDouble currentSpringLength = new YoDouble("currentSpringLength", registry);
+   private final YoDouble restingSpringLength = new YoDouble("restingSpringLength", registry);
+   private final YoDouble springDeflection = new YoDouble("springDeflection", registry);
+   private final YoFrameVector3D springAcceleration = new YoFrameVector3D("springAcceleration", worldFrame, registry);
+
    private final List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> nextFootstepPolygons = new ArrayList<>();
 
@@ -121,6 +127,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
       desiredDCMPosition = new YoFramePoint3D("desiredDCMPosition", worldFrame, registry);
       desiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
       desiredVRPPosition = new YoFramePoint3D("desiredVRPPosition", worldFrame, registry);
+      desiredECMPPosition = new YoFramePoint3D("desiredECMPPosition", worldFrame, registry);
       desiredCoPPosition = new YoFramePoint3D("desiredCoPPosition", worldFrame, registry);
 
       omega = new YoDouble("omega", registry);
@@ -137,7 +144,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
       YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", desiredCoPPosition, desiredForce, 0.1, YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("desiredForce", desiredECMPPosition, desiredForce, 0.1, YoAppearance.Red());
 
       yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", forceVector);
       yoGraphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
@@ -181,8 +188,11 @@ public class BipedCoMTrajectoryPlannerVisualizer
       nextFootstepPolygons.add(yoNextNextNextFootstepPolygon);
 
       planner = new BipedCoMTrajectoryPlanner(soleFrames, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
-//      steps = createSteps(soleFrames);
-      steps = createFancySteps(soleFrames);
+      steps = createSteps(soleFrames);
+//      steps = createFancySteps(soleFrames);
+
+      springStiffness.set(computeStiffness());
+      restingSpringLength.set(computeSpringRestingLength(nominalHeight, springStiffness.getDoubleValue()));
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + extraSimDuration;
 
@@ -209,6 +219,20 @@ public class BipedCoMTrajectoryPlannerVisualizer
       scs.startOnAThread();
       simulate();
       ThreadTools.sleepForever();
+   }
+
+   private static double computeStiffness()
+   {
+      double stanceTime = swingDuration - flightDuration;
+      double oscillationPeriod = 2.0 * stanceTime;
+      double oscillationFrequency = 2.0 * Math.PI / oscillationPeriod;
+      return MathTools.square(oscillationFrequency);
+   }
+
+   private static double computeSpringRestingLength(double nominalHeight, double stiffness)
+   {
+      double requiredCompression = gravity / stiffness;
+      return nominalHeight + requiredCompression;
    }
 
    private static SideDependentList<TranslationMovingReferenceFrame> createSoleFrames()
@@ -535,8 +559,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
          desiredDCMVelocity.set(planner.getDesiredDCMVelocity());
          desiredVRPPosition.set(planner.getDesiredVRPPosition());
 
-         desiredCoPPosition.set(desiredVRPPosition);
-         desiredCoPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
+         desiredECMPPosition.set(desiredVRPPosition);
+         desiredECMPPosition.subZ(gravity / MathTools.square(omega.getDoubleValue()));
+
+         desiredCoPPosition.set(desiredECMPPosition);
+         desiredCoPPosition.setZ(0.0);
+
 
          desiredForce.set(desiredCoMAcceleration);
          desiredForce.addZ(gravity);
@@ -546,11 +574,32 @@ public class BipedCoMTrajectoryPlannerVisualizer
          comTrajectory.setBallLoop(desiredCoMPosition);
          vrpTrajectory.setBallLoop(desiredVRPPosition);
 
+         computeStiffnessThatBestMeetsAcceleration();
+
+
          yoTime.add(simDt);
          updateFeetStates(yoTime.getDoubleValue());
 
          scs.tickAndUpdate();
       }
+   }
+
+   private void computeStiffnessThatBestMeetsAcceleration()
+   {
+      if (MathTools.epsilonEquals(desiredForce.length(), 0.0, 1e-1))
+      {
+         springAcceleration.setToZero();
+         springAcceleration.setZ(-gravity);
+         return;
+      }
+
+      springAcceleration.sub(desiredCoMPosition, desiredCoPPosition);
+      currentSpringLength.set(springAcceleration.length());
+      springDeflection.set(restingSpringLength.getDoubleValue() - currentSpringLength.getDoubleValue());
+
+      springAcceleration.normalize();
+      springAcceleration.scale(springStiffness.getDoubleValue() * springDeflection.getDoubleValue());
+      springAcceleration.subZ(gravity);
    }
 
    private final PoseReferenceFrame stepPoseFrame = new PoseReferenceFrame("stepPoseFrame", worldFrame);
@@ -598,6 +647,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
       }
 
       int nextStepIndex = 0;
+
+
       int stepIndex = 0;
       while (stepIndex < steps.size() && nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
       {
