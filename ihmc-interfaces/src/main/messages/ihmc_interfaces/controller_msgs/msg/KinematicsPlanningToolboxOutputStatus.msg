@@ -3,6 +3,12 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+byte KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION = 0
+byte KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT = 1
+byte KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME = 2
+
+int32 plan_id -1
+
 # List of times for each key frames.
 # The length of this should be same with the length of the configurations. 
 float64[] key_frame_times
