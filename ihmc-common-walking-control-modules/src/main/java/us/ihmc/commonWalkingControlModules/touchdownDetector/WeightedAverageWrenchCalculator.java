@@ -26,10 +26,10 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
 
    private final Wrench wrench = new Wrench();
 
-   public WeightedAverageWrenchCalculator(YoVariableRegistry registry, PairList<DoubleProvider, WrenchCalculator> wrenchCalculatorPairs)
+   public WeightedAverageWrenchCalculator(String prefix, YoVariableRegistry registry, PairList<DoubleProvider, WrenchCalculator> wrenchCalculatorPairs)
    {
-      averageAngularForce = new WeightedAverageYoFrameVector3D("weightedAverageAngularForce", ReferenceFrame.getWorldFrame(), registry);
-      averageLinearForce = new WeightedAverageYoFrameVector3D("weightedAverageLinearForce", ReferenceFrame.getWorldFrame(), registry);
+      averageAngularForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageAngularForce", ReferenceFrame.getWorldFrame(), registry);
+      averageLinearForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageLinearForce", ReferenceFrame.getWorldFrame(), registry);
 
       for (ImmutablePair<DoubleProvider, WrenchCalculator> wrenchCalculatorPair : wrenchCalculatorPairs)
       {
