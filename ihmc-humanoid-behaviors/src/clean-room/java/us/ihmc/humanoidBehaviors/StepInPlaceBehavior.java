@@ -70,7 +70,6 @@ public class StepInPlaceBehavior
 
    private void consumeFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
-      LogTools.info("Received footstep status: {}", footstepStatusMessage);
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
          footstepsTaken.increment();
