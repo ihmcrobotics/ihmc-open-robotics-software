@@ -45,7 +45,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
 
-      measuredWrench = new YoFixedFrameWrench(robotQuadrant.getCamelCaseName() + "_MeasuredWrench", foot.getRigidBody().getBodyFixedFrame(),
+      measuredWrench = new YoFixedFrameWrench(robotQuadrant.getCamelCaseName() + "_MeasuredWrench", null,
                                               foot.getSoleFrame(), registry);
    }
 

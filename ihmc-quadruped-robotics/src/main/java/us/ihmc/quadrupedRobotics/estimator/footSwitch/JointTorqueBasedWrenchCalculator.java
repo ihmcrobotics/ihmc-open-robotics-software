@@ -46,6 +46,8 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
 
+      wrench.setToZero(ReferenceFrame.getWorldFrame());
+
       // remove linear part
       MatrixTools.removeRow(angularSelectionMatrix, 3);
       MatrixTools.removeRow(angularSelectionMatrix, 3);
