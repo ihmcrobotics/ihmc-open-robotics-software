@@ -220,6 +220,21 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
    }
 
+   public void setNextTransferDuration(double nextTransferDuration)
+   {
+      icpOptimizationController.setNextTransferDuration(nextTransferDuration);
+   }
+
+   public void setTransferDuration(double transferDuration)
+   {
+      icpOptimizationController.setTransferDuration(transferDuration);
+   }
+
+   public void setSwingDuration(double swingDuration)
+   {
+      icpOptimizationController.setSwingDuration(swingDuration);
+   }
+
    public void initializeForStanding()
    {
       icpOptimizationController.initializeForStanding(yoTime.getDoubleValue());
@@ -260,11 +275,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       return icpOptimizationController.wasFootstepAdjusted();
    }
 
-   public ICPOptimizationControllerInterface getICPOptimizationController()
-   {
-      return icpOptimizationController;
-   }
-
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;
@@ -278,6 +288,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    public FramePoint2DReadOnly getDesiredCMP()
    {
       return desiredCMP;
+   }
+
+   public FrameVector3DReadOnly getEffectiveICPAdjustment()
+   {
+      return icpOptimizationController.getICPShiftFromStepAdjustment();
    }
 
    public boolean compute()
