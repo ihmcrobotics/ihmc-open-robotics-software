@@ -5,8 +5,8 @@ import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class TriangleToolsTest
 {
