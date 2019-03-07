@@ -58,6 +58,10 @@ public class QuadrupedFootSwitchFactory
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
+      DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight", registry, 1.0);
+      DoubleParameter desiredWrenchWeight = new DoubleParameter("desiredWrenchAverageWeight", registry, 0.0);
+
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          List<JointTorqueProvider> estimatedJointTorqueProviders = new ArrayList<>();
@@ -70,20 +74,18 @@ public class QuadrupedFootSwitchFactory
 
          ContactablePlaneBody contactableFoot = footContactableBodies.get().get(robotQuadrant);
 
-         DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight", registry, 1.0);
-         DoubleParameter desiredWrenchWeight = new DoubleParameter("desiredWrenchAverageWeight", registry, 0.0);
 
-         JointTorqueBasedWrenchCalculator estimatedTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator("estimated", fullRobotModel.get(), robotQuadrant,
+         JointTorqueBasedWrenchCalculator estimatedTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator(robotQuadrant.getShortName() + "estimated", fullRobotModel.get(), robotQuadrant,
                                                                                                                       contactableFoot.getSoleFrame(),
                                                                                                                       estimatedJointTorqueProviders);
-         JointTorqueBasedWrenchCalculator desiredTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator("desired", fullRobotModel.get(), robotQuadrant,
+         JointTorqueBasedWrenchCalculator desiredTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator(robotQuadrant.getShortName() + "desired", fullRobotModel.get(), robotQuadrant,
                                                                                                                     contactableFoot.getSoleFrame(),
                                                                                                                     desiredJointTorqueProviders);
          PairList<DoubleProvider, WrenchCalculator> wrenchCalculatorPairList = new PairList<>();
          wrenchCalculatorPairList.add(estimatedWrenchWeight, estimatedTorqueBasedWrenchCalculator);
          wrenchCalculatorPairList.add(desiredWrenchWeight, desiredTorqueBasedWrenchCalculator);
 
-         WeightedAverageWrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(registry, wrenchCalculatorPairList);
+         WeightedAverageWrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(robotQuadrant.getShortName(), registry, wrenchCalculatorPairList);
 
          QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactableFoot,
                                                                                                               weightedAverageWrenchCalculator, totalRobotWeight,
