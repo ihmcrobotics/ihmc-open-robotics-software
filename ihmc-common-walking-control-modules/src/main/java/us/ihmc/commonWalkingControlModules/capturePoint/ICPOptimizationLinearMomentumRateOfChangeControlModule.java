@@ -34,7 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -85,7 +84,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private double desiredCoMHeightAcceleration = 0.0;
 
    private final FramePoint3D cmp3d = new FramePoint3D();
-   private final FrameVector3D groundReactionForce = new FrameVector3D();
+   private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
 
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
@@ -295,7 +294,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    public boolean compute()
    {
-      boolean inputsAreOk = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
+      boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       if (perfectCoP.containsNaN())
       {
@@ -343,12 +342,18 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       yoDesiredCMP.set(desiredCMP);
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
-      FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
-      linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
+      centerOfMass.setToZero(centerOfMassFrame);
+      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
+      WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);
+      linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
       linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
 
       if (linearMomentumRateOfChange.containsNaN())
-         throw new RuntimeException("linearMomentumRateOfChange = " + linearMomentumRateOfChange);
+      {
+         LogTools.error("Desired LinearMomentumRateOfChange contained NaN, setting it to zero and failing.");
+         linearMomentumRateOfChange.setToZero();
+         success = false;
+      }
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
@@ -368,7 +373,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
       supportLegPreviousTick.set(supportSide);
 
-      return inputsAreOk;
+      return success;
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
@@ -404,17 +409,5 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       }
 
       return inputsAreOk;
-   }
-
-   private FrameVector3D computeGroundReactionForce(FramePoint2DReadOnly cmp2d, double fZ)
-   {
-      centerOfMass.setToZero(centerOfMassFrame);
-      WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);
-
-      centerOfMass.setToZero(centerOfMassFrame);
-      WrenchDistributorTools.computeForce(groundReactionForce, centerOfMass, cmp3d, fZ);
-      groundReactionForce.changeFrame(centerOfMassFrame);
-
-      return groundReactionForce;
    }
 }
