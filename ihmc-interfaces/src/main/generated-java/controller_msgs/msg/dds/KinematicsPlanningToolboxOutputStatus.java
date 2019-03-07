@@ -8,12 +8,16 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlanningToolboxOutputStatus> implements Settable<KinematicsPlanningToolboxOutputStatus>, EpsilonComparable<KinematicsPlanningToolboxOutputStatus>
 {
+   public static final byte KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION = (byte) 0;
+   public static final byte KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT = (byte) 1;
+   public static final byte KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME = (byte) 2;
    /**
             * This message is part of the IHMC whole-body inverse kinematics module.
             * This output status will be converted into the WholeBodyTrajectoryMessage.
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   public int plan_id_ = -1;
    /**
             * List of times for each key frames.
             * The length of this should be same with the length of the configurations.
@@ -52,6 +56,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    {
       sequence_id_ = other.sequence_id_;
 
+      plan_id_ = other.plan_id_;
+
       key_frame_times_.set(other.key_frame_times_);
       robot_configurations_.set(other.robot_configurations_);
       solution_quality_ = other.solution_quality_;
@@ -76,6 +82,15 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setPlanId(int plan_id)
+   {
+      plan_id_ = plan_id;
+   }
+   public int getPlanId()
+   {
+      return plan_id_;
    }
 
 
@@ -143,6 +158,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.key_frame_times_, other.key_frame_times_, epsilon)) return false;
 
       if (this.robot_configurations_.size() != other.robot_configurations_.size()) { return false; }
@@ -170,6 +187,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.plan_id_ != otherMyClass.plan_id_) return false;
+
       if (!this.key_frame_times_.equals(otherMyClass.key_frame_times_)) return false;
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
@@ -187,6 +206,8 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
       builder.append("KinematicsPlanningToolboxOutputStatus {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("plan_id=");
+      builder.append(this.plan_id_);      builder.append(", ");
       builder.append("key_frame_times=");
       builder.append(this.key_frame_times_);      builder.append(", ");
       builder.append("robot_configurations=");
