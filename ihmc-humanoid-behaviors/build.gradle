@@ -43,6 +43,13 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
 }
 
+cleanRoomDependencies {
+   compile ihmc.sourceSetProject("main")
+
+   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.0.0"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: "source"
+}
+
 fxUiDependencies {
    compile ihmc.sourceSetProject("main")
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
