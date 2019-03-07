@@ -2,7 +2,7 @@ int8 KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION=0
 
 int8 KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT=1
 
-int8 KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_POSITION_LIMIT=2
+int8 KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME=2
 
 # This message is part of the IHMC whole-body inverse kinematics module.
 # This output status will be converted into the WholeBodyTrajectoryMessage.

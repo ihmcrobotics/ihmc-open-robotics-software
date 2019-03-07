@@ -10,7 +10,7 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 {
    public static final byte KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION = (byte) 0;
    public static final byte KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT = (byte) 1;
-   public static final byte KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_POSITION_LIMIT = (byte) 2;
+   public static final byte KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME = (byte) 2;
    /**
             * This message is part of the IHMC whole-body inverse kinematics module.
             * This output status will be converted into the WholeBodyTrajectoryMessage.
