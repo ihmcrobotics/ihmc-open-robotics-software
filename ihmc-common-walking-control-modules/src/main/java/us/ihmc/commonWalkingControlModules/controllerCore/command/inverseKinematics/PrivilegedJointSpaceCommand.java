@@ -3,32 +3,24 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<PrivilegedJointSpaceCommand>, InverseDynamicsCommand<PrivilegedJointSpaceCommand>
 {
    /** Initial capacity of the internal memory. */
    private final int initialCapacity = 40;
-   /**
-    * Internal memory to save the names of the joints to be controlled. This is used when passing
-    * the command between two modules using different instances of hte same physical robot.
-    */
-   private final List<String> jointNames = new ArrayList<>(initialCapacity);
-   /** internal memory to save the joints to be controlled. */
-   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
-   /** internal memory to save the desired joint space commands in */
-   private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointCommands = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
    /** sets whether or not to utilize the privileged acceleration calculator */
    private boolean enable = false;
 
-   private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   /** internal memory to save the joints to be controlled. */
+   private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
+   /** internal memory to save the desired joint space commands in */
+   private final TDoubleArrayList privilegedOneDoFJointCommands = new TDoubleArrayList(initialCapacity);
+   private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
    /**
     * Creates an empty command.
@@ -44,7 +36,6 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    public void clear()
    {
       enable = false;
-      jointNames.clear();
       joints.clear();
       privilegedOneDoFJointCommands.clear();
 
@@ -63,7 +54,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
 
    public void setWeight(int jointIndex, double weight)
    {
-      weights.get(jointIndex).setValue(weight);
+      weights.set(jointIndex, weight);
    }
 
    /**
@@ -76,12 +67,9 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    {
       enable();
       joints.add(joint);
-      jointNames.add(joint.getName());
-      privilegedOneDoFJointCommands.add().setValue(privilegedAcceleration);
-
-      weights.add().setValue(Double.NaN);
+      privilegedOneDoFJointCommands.add(privilegedAcceleration);
+      weights.add(Double.NaN);
    }
-
 
    /**
     * Updates the desired privileged acceleration for a joint already registered give its index.
@@ -91,9 +79,8 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
     */
    public void setOneDoFJoint(int jointIndex, double privilegedAcceleration)
    {
-      MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
-      privilegedOneDoFJointCommands.get(jointIndex).setValue(privilegedAcceleration);
+      privilegedOneDoFJointCommands.set(jointIndex, privilegedAcceleration);
    }
 
    /**
@@ -107,14 +94,12 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
       clear();
       enable = other.enable;
 
-      for (int i = 0; i < other.getNumberOfJoints(); i++)
+      for (int jointIndex = 0; jointIndex < other.getNumberOfJoints(); jointIndex++)
       {
-         OneDoFJointBasics joint = other.joints.get(i);
+         OneDoFJointBasics joint = other.joints.get(jointIndex);
          joints.add(joint);
-         jointNames.add(other.jointNames.get(i));
-         privilegedOneDoFJointCommands.add().setValue(other.privilegedOneDoFJointCommands.get(i));
-
-         weights.add().setValue(other.weights.get(i));
+         privilegedOneDoFJointCommands.add(other.privilegedOneDoFJointCommands.get(jointIndex));
+         weights.add(other.weights.get(jointIndex));
       }
    }
 
@@ -145,7 +130,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
     */
    public double getWeight(int jointIndex)
    {
-      return weights.get(jointIndex).doubleValue();
+      return weights.get(jointIndex);
    }
 
    /**
@@ -155,7 +140,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
     */
    public boolean hasNewPrivilegedCommand(int jointIndex)
    {
-      return !Double.isNaN(privilegedOneDoFJointCommands.get(jointIndex).doubleValue());
+      return !Double.isNaN(privilegedOneDoFJointCommands.get(jointIndex));
    }
 
    /**
@@ -165,7 +150,7 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
     */
    public double getPrivilegedCommand(int jointIndex)
    {
-      return privilegedOneDoFJointCommands.get(jointIndex).doubleValue();
+      return privilegedOneDoFJointCommands.get(jointIndex);
    }
 
    public int getNumberOfJoints()
