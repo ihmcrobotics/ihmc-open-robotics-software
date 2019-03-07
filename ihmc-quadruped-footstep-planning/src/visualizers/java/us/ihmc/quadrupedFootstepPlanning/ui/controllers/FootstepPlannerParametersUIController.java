@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import javafx.fxml.FXML;
@@ -8,7 +9,6 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -72,6 +72,8 @@ public class FootstepPlannerParametersUIController
    private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
+   private Topic<FootstepPlannerParameters> plannerParametersTopic;
+
    public FootstepPlannerParametersUIController()
    {
       File configurationFile = new File(CONFIGURATION_FILE_NAME);
@@ -92,6 +94,12 @@ public class FootstepPlannerParametersUIController
    {
       this.messager = messager;
    }
+
+   public void setPlannerParametersTopic(Topic<FootstepPlannerParameters> plannerParametersTopic)
+   {
+      this.plannerParametersTopic = plannerParametersTopic;
+   }
+
 
    public void setPlannerParameters(FootstepPlannerParameters parameters)
    {
@@ -155,7 +163,7 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindHeuristicsWeight(heuristicsWeight.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
+      messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
    }
 
    @FXML

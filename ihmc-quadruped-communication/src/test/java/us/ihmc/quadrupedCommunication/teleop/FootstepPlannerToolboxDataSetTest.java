@@ -27,6 +27,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -43,6 +44,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -267,6 +269,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
+      List<String> failingMessages = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -281,6 +284,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+            failingMessages.add(errorMessagesForCurrentFile);
          }
 
          if (DEBUG || VERBOSE)
@@ -296,7 +300,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
-         message += "\n" + failingDatasets.get(i);
+         message += "\n" + failingDatasets.get(i) + " : " + failingMessages.get(i);
       }
       if (VISUALIZE)
       {
@@ -321,32 +325,29 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    protected void packPlanningRequest(DataSet dataset)
    {
-      FramePose3D startPose = new FramePose3D();
-      FramePose3D goalPose = new FramePose3D();
-      startPose.setPosition(dataset.getPlannerInput().getQuadrupedStartPosition());
-      goalPose.setPosition(dataset.getPlannerInput().getQuadrupedGoalPosition());
+      Quaternion startOrientation = new Quaternion();
+      Quaternion goalOrientation = new Quaternion();
       if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
-         startPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
+         startOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
       if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
-         goalPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
+         goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
       double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
 
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
+      PlannerInput plannerInput = dataset.getPlannerInput();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, plannerInput.getQuadrupedStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
+
+      ThreadTools.sleep(1000);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -542,7 +543,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (Double.isFinite(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > FootstepNode.gridSizeYaw)
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
