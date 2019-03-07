@@ -34,4 +34,10 @@ public class WrenchCalculatorWrapper implements WrenchCalculator
    {
       return measuredWrench;
    }
+
+   @Override
+   public String getName()
+   {
+      return wrenchCalculatorInterface.getName();
+   }
 }
