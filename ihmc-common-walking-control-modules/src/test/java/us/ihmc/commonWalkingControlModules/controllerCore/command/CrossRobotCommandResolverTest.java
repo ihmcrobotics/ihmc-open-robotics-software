@@ -30,10 +30,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -489,6 +492,28 @@ class CrossRobotCommandResolverTest
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
+   
+   @Test
+   void testResolvePrivilegedConfigurationCommand() throws Exception
+   {
+      Random random = new Random(657654);
+      
+      TestData testData = new TestData(random, 20, 20);
+      
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         PrivilegedConfigurationCommand in = nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         PrivilegedConfigurationCommand expectedOut = nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PrivilegedConfigurationCommand actualOut = new PrivilegedConfigurationCommand();
+         crossRobotCommandResolver.resolvePrivilegedConfigurationCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
 
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
@@ -686,6 +711,30 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static PrivilegedConfigurationCommand nextPrivilegedConfigurationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      PrivilegedConfigurationCommand next = new PrivilegedConfigurationCommand();
+
+      if (random.nextBoolean())
+         next.setDefaultParameters(nextOneDoFJointPrivilegedConfigurationParameters(random));
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.addJoint(joint, nextOneDoFJointPrivilegedConfigurationParameters(random));
+      }
+
+      if (random.nextBoolean())
+         next.enable();
+      else
+         next.disable();
+
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -782,6 +831,26 @@ class CrossRobotCommandResolverTest
       next.setJointLimitDistanceForMaxVelocity(random.nextDouble());
       next.setJointLimitFilterBreakFrequency(random.nextDouble());
       next.setVelocityControlGain(random.nextDouble());
+      return next;
+   }
+
+   public static OneDoFJointPrivilegedConfigurationParameters nextOneDoFJointPrivilegedConfigurationParameters(Random random)
+   {
+      OneDoFJointPrivilegedConfigurationParameters next = new OneDoFJointPrivilegedConfigurationParameters();
+      if (random.nextBoolean())
+         next.setPrivilegedConfiguration(random.nextDouble());
+      if (random.nextBoolean())
+         next.setPrivilegedConfigurationOption(nextElementIn(random, PrivilegedConfigurationOption.values()));
+      if (random.nextBoolean())
+         next.setWeight(random.nextDouble());
+      if (random.nextBoolean())
+         next.setConfigurationGain(random.nextDouble());
+      if (random.nextBoolean())
+         next.setVelocityGain(random.nextDouble());
+      if (random.nextBoolean())
+         next.setMaxVelocity(random.nextDouble());
+      if (random.nextBoolean())
+         next.setMaxAcceleration(random.nextDouble());
       return next;
    }
 
