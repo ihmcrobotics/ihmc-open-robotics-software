@@ -44,6 +44,6 @@ public class NecessaryTouchdownDetectors implements TouchdownDetector
    @Override
    public String getName()
    {
-      return "SufficientTouchdownDetectors";
+      return "NecessaryTouchdownDetectors";
    }
 }
