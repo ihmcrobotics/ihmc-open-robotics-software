@@ -16,9 +16,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -38,7 +39,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -72,11 +72,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
    private final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
-   private final FramePoint2D perfectCMP = new FramePoint2D();
-   private final FramePoint2D perfectCoP = new FramePoint2D();
-   private final FramePoint2D desiredCMP = new FramePoint2D();
-   private final FramePoint2D desiredCoP = new FramePoint2D();
-   private final FramePoint2D achievedCMP = new FramePoint2D();
+   private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
+   private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
+   private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
+   private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
+   private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
+   private final FixedFramePoint2DBasics desiredCoPInMidFeet;
 
    private boolean controlHeightWithMomentum;
 
@@ -95,12 +96,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    private final YoDouble yoTime;
 
-   private final FrameVector2D perfectCMPDelta = new FrameVector2D();
+   private final FixedFrameVector2DBasics perfectCMPDelta = new FrameVector2D();
 
    private RobotSide supportSide = null;
    private RobotSide transferToSide = null;
-
-   private final YoEnum<RobotSide> supportLegPreviousTick = YoEnum.create("SupportLegPreviousTick", "", RobotSide.class, registry, true);
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
@@ -126,6 +125,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
+      desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -177,12 +177,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
-      this.perfectCMP.setIncludingFrame(perfectCMP);
+      this.perfectCMP.setMatchingFrame(perfectCMP);
    }
 
    public void setPerfectCoP(FramePoint2DReadOnly perfectCoP)
    {
-      this.perfectCoP.setIncludingFrame(perfectCoP);
+      this.perfectCoP.setMatchingFrame(perfectCoP);
    }
 
    public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
@@ -286,6 +286,31 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
+      computeICPController();
+
+      checkOutputs();
+
+      yoDesiredCMP.set(desiredCMP);
+      yoAchievedCMP.set(achievedCMP);
+
+      success = success && computeDesiredLinearMomentumRateOfChange();
+
+      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+      selectionMatrix.selectAngularZ(minimizeAngularMomentumRateZ.getBooleanValue());
+      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+      momentumRateCommand.setSelectionMatrix(selectionMatrix);
+      momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
+
+      desiredCoPInMidFeet.setMatchingFrame(desiredCoP);
+      centerOfPressureCommand.setDesiredCoP(desiredCoP);
+      centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
+
+      return success;
+   }
+
+   private void computeICPController()
+   {
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
@@ -300,11 +325,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       }
       icpOptimizationController.getDesiredCMP(desiredCMP);
       icpOptimizationController.getDesiredCoP(desiredCoP);
+   }
 
-      capturePoint.changeFrame(worldFrame);
-      desiredCMP.changeFrame(worldFrame);
-      desiredCoP.changeFrame(worldFrame);
-
+   private void checkOutputs()
+   {
       if (desiredCMP.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
@@ -328,8 +352,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       {
          desiredCoPcontainedNaN = false;
       }
+   }
 
-      yoDesiredCMP.set(desiredCMP);
+   private boolean computeDesiredLinearMomentumRateOfChange()
+   {
+      boolean success = true;
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       centerOfMass.setToZero(centerOfMassFrame);
@@ -342,26 +369,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       {
          LogTools.error("Desired LinearMomentumRateOfChange contained NaN, setting it to zero and failing.");
          linearMomentumRateOfChange.setToZero();
-         success = false;
+         success  = false;
       }
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
-
       linearMomentumRateOfChange.changeFrame(worldFrame);
-      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-      selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.selectLinearZ(controlHeightWithMomentum);
-      selectionMatrix.selectAngularZ(minimizeAngularMomentumRateZ.getBooleanValue());
-      momentumRateCommand.setSelectionMatrix(selectionMatrix);
-      momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
-                                     linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
-
-      desiredCoP.changeFrame(midFootZUpFrame);
-      centerOfPressureCommand.setDesiredCoP(desiredCoP);
-      centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
-
-      supportLegPreviousTick.set(supportSide);
 
       return success;
    }
@@ -384,12 +397,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       achievedCMP.set(achievedCoMAcceleration2d);
       achievedCMP.scale(-1.0 / (omega0 * omega0));
       achievedCMP.add(centerOfMass2d);
-
-      yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
-                                      FrameVector2DBasics desiredCapturePointVelocity, FramePoint2DBasics perfectCoP, FramePoint2DBasics perfectCMP)
+                                      FixedFrameVector2DBasics desiredCapturePointVelocity, FixedFramePoint2DBasics perfectCoP,
+                                      FixedFramePoint2DBasics perfectCMP)
    {
       boolean inputsAreOk = true;
       if (desiredCapturePoint.containsNaN())
