@@ -359,6 +359,11 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
 
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+         }
          if (!desiredAccelerations.equals(other.desiredAccelerations))
             return false;
          if (!weights.equals(other.weights))
