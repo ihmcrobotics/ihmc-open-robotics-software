@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -78,11 +80,10 @@ public interface ICPOptimizationControllerInterface
    void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
 
    /**
-    * Gets the desired Footstep location computed by the ICP controller.
-    * Only modifies {@param footstepSolutionToPack} if {@link #useStepAdjustment()} is true.
-    * @param footstepSolutionToPack desired footstep solution. Modified.
+    * Gets the desired Footstep pose computed by the ICP controller.
+    * @return pose of the footstep solution.
     */
-   void getFootstepSolution(Footstep footstepSolutionToPack);
+   FramePose3DReadOnly getFootstepSolution();
 
    /**
     * Returns whether or not the controller adjusted the footstep this tick.
