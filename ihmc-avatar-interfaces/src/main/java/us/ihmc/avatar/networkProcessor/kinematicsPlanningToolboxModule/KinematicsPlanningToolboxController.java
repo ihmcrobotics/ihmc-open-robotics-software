@@ -70,7 +70,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final CommandInputManager commandInputManager;
 
    private final List<String> armJointNames = new ArrayList<String>();
-   private final Map<String, Pair<Double, Double>> jointVelocityLimitMap;
+   private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
    private final KeyFrameBasedTrajectoryGenerator keyFrameBasedTrajectoryGenerator;
    private static final double searchingTimeTickForVelocityBound = 0.002;
    private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = false;
@@ -109,7 +109,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       this.desiredFullRobotModel = fullRobotModel;
 
-      jointVelocityLimitMap = new HashMap<>();
+      armJointVelocityLimitMap = new HashMap<>();
       keyFrameBasedTrajectoryGenerator = new KeyFrameBasedTrajectoryGenerator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
@@ -214,7 +214,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!initialized)
          throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
 
-      jointVelocityLimitMap.clear();
+      armJointVelocityLimitMap.clear();
       for (RobotSide robotSide : RobotSide.values)
       {
          JointBasics armJoint = desiredFullRobotModel.getHand(robotSide).getParentJoint();
@@ -227,7 +227,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                OneDoFJointBasics oneDoFJointByName = desiredFullRobotModel.getOneDoFJointByName(armJointName);
                Pair<Double, Double> velocityLimit = new Pair<Double, Double>(oneDoFJointByName.getVelocityLimitLower(),
                                                                              oneDoFJointByName.getVelocityLimitUpper());
-               jointVelocityLimitMap.put(armJointName, velocityLimit);
+               armJointVelocityLimitMap.put(armJointName, velocityLimit);
             }
             armJoint = armJoint.getPredecessor().getParentJoint();
          }
@@ -483,15 +483,21 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
 
       generateTrajectoriesToPreview(false);
-      // TODO : generate once more if useKeyFrameTimeOptimizerIfJointVelocityExceedLimits is true.
-
-      if (isVelocityLimitExceeded())
+      
+      if(isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
+         generateTrajectoriesToPreview(true);
+      
+      if(isVelocityLimitExceeded())
+      {
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
-      else
-         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
-
+         reportMessage(solution);
+         return;
+      }
+      
+      keyFrameBasedTrajectoryGenerator.packOptimizedVelocities(solution);
+      solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
       solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
-      LogTools.info("convertWholeBodyTrajectoryMessage");
+      
       convertWholeBodyTrajectoryMessage();
 
       if (DEBUG)
@@ -518,7 +524,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          double jointVelocityLowerBound = keyFrameBasedTrajectoryGenerator.getJointVelocityLowerBound(armJointName);
          double jointVelocityUpperBound = keyFrameBasedTrajectoryGenerator.getJointVelocityUpperBound(armJointName);
 
-         Pair<Double, Double> velocityLimit = jointVelocityLimitMap.get(armJointName);
+         Pair<Double, Double> velocityLimit = armJointVelocityLimitMap.get(armJointName);
          if (velocityLimit.i > jointVelocityLowerBound || velocityLimit.ii < jointVelocityUpperBound)
             return true;
       }
