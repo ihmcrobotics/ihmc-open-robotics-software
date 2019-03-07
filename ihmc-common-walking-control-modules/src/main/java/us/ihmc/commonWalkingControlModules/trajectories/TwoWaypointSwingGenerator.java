@@ -156,14 +156,12 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    public void setSwingHeight(double swingHeight)
    {
-      double epsilon = 1e-4;
-      boolean useDefaultSwing =
-            Double.isNaN(swingHeight) || !MathTools.intervalContains(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue(), epsilon);
+      boolean useDefaultSwing = Double.isNaN(swingHeight) || swingHeight <= 0.0;
 
       if(useDefaultSwing)
          this.swingHeight.set(defaultSwingHeight.getDoubleValue());
       else
-         this.swingHeight.set(swingHeight);
+         this.swingHeight.set(MathTools.clamp(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue()));
    }
 
    public void setStanceFootPosition(FramePoint3D stanceFootPosition)
