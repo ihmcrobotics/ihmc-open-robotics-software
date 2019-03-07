@@ -31,8 +31,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -538,6 +539,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveSpatialVelocityCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         SpatialVelocityCommand in = nextSpatialVelocityCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         SpatialVelocityCommand expectedOut = nextSpatialVelocityCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialVelocityCommand actualOut = new SpatialVelocityCommand();
+         crossRobotCommandResolver.resolveSpatialVelocityCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -779,6 +802,22 @@ class CrossRobotCommandResolverTest
       else
          next.disable();
 
+      return next;
+   }
+
+   public static SpatialVelocityCommand nextSpatialVelocityCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      SpatialVelocityCommand next = new SpatialVelocityCommand();
+      next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
+      next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
+      next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getDesiredAngularVelocity().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      if (random.nextBoolean())
+         next.setPrimaryBase(nextElementIn(random, rootBody.subtreeList()));
+      if (random.nextBoolean())
+         next.setScaleSecondaryTaskJointWeight(true, random.nextDouble());
       return next;
    }
 

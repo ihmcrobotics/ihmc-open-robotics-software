@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -232,6 +233,18 @@ public class CrossRobotCommandResolver
          out.enable();
       else
          out.disable();
+   }
+
+   public void resolveSpatialVelocityCommand(SpatialVelocityCommand in, SpatialVelocityCommand out)
+   {
+      resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
+      out.getDesiredLinearVelocity().set(in.getDesiredLinearVelocity());
+      out.getDesiredAngularVelocity().set(in.getDesiredAngularVelocity());
+      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+      out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
+      out.setPrimaryBase(resolveRigidBody(in.getPrimaryBase()));
+      out.setScaleSecondaryTaskJointWeight(in.scaleSecondaryTaskJointWeight(), in.getSecondaryTaskJointWeightScale());
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
