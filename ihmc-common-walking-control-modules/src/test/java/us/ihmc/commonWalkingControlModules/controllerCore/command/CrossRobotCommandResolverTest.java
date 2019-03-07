@@ -26,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -396,6 +397,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveInverseKinematicsOptimizationSettingsCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         InverseKinematicsOptimizationSettingsCommand in = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         InverseKinematicsOptimizationSettingsCommand expectedOut = nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         InverseKinematicsOptimizationSettingsCommand actualOut = new InverseKinematicsOptimizationSettingsCommand();
+         crossRobotCommandResolver.resolveInverseKinematicsOptimizationSettingsCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -539,6 +562,14 @@ class CrossRobotCommandResolverTest
          next.setPrimaryBase(nextElementIn(random, rootBody.subtreeList()));
       if (random.nextBoolean())
          next.setScaleSecondaryTaskJointWeight(true, random.nextDouble());
+      return next;
+   }
+
+   public static InverseKinematicsOptimizationSettingsCommand nextInverseKinematicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      InverseKinematicsOptimizationSettingsCommand next = new InverseKinematicsOptimizationSettingsCommand();
+      next.setJointVelocityWeight(random.nextDouble());
+      next.setJointAccelerationWeight(random.nextDouble());
       return next;
    }
 

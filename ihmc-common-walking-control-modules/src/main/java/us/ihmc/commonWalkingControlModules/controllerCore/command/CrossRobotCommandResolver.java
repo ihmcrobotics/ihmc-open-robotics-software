@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -160,6 +161,12 @@ public class CrossRobotCommandResolver
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
       out.setPrimaryBase(resolveRigidBody(in.getPrimaryBase()));
       out.setScaleSecondaryTaskJointWeight(in.scaleSecondaryTaskJointWeight(), in.getSecondaryTaskJointWeightScale());
+   }
+
+   public void resolveInverseKinematicsOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand in, InverseKinematicsOptimizationSettingsCommand out)
+   {
+      // There is no robot sensitive information in this command, so the output can directly be set to the input.
+      out.set(in);
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
