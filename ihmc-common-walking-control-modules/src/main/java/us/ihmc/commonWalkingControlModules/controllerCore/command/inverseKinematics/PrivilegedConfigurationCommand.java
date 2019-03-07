@@ -12,7 +12,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class PrivilegedConfigurationCommand
       implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
 {
-
    /** different options for the desired privileged configurations. Made for ease of access. */
    public enum PrivilegedConfigurationOption
    {
