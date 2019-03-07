@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -21,8 +22,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -73,10 +74,9 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
+   private final FramePoint2D achievedCMP = new FramePoint2D();
 
    private boolean controlHeightWithMomentum;
-
-   private final YoFramePoint2D yoUnprojectedDesiredCMP = new YoFramePoint2D("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
 
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
@@ -98,6 +98,9 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    private final YoEnum<RobotSide> supportLegPreviousTick = YoEnum.create("SupportLegPreviousTick", "", RobotSide.class, registry, true);
 
+   private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
+   private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
+
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
                                                                  WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
@@ -117,13 +120,13 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
       if (yoGraphicsListRegistry != null)
       {
-         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(),
-                                                                            YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
-         artifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), artifact);
+         YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
       }
-      yoUnprojectedDesiredCMP.setToNaN();
+      yoDesiredCMP.setToNaN();
+      yoAchievedCMP.setToNaN();
 
       icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet,
                                                                 controlDT, registry, yoGraphicsListRegistry);
@@ -253,7 +256,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       return momentumRateCommand;
    }
 
-   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate, FramePoint2DBasics achievedCMPToPack)
+   public FramePoint2DReadOnly getDesiredCMP()
+   {
+      return desiredCMP;
+   }
+
+   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       if (achievedLinearMomentumRate.containsNaN())
          return;
@@ -265,15 +273,31 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       achievedCoMAcceleration2d.scale(1.0 / totalMass);
       achievedCoMAcceleration2d.changeFrame(worldFrame);
 
-      achievedCMPToPack.set(achievedCoMAcceleration2d);
-      achievedCMPToPack.scale(-1.0 / (omega0 * omega0));
-      achievedCMPToPack.add(centerOfMass2d);
+      achievedCMP.set(achievedCoMAcceleration2d);
+      achievedCMP.scale(-1.0 / (omega0 * omega0));
+      achievedCMP.add(centerOfMass2d);
+
+      yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
-   public boolean compute(FramePoint2D desiredCMPToPack, FramePoint2D desiredCoPToPack)
+   public boolean compute(FramePoint2D desiredCoPToPack)
    {
       boolean inputsAreOk = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
-      computeCMPInternal();
+
+      if (perfectCoP.containsNaN())
+      {
+         perfectCMPDelta.setToZero();
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
+                                           capturePointVelocity, omega0);
+      }
+      else
+      {
+         perfectCMPDelta.sub(perfectCMP, perfectCoP);
+         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
+                                           capturePointVelocity, omega0);
+      }
+      icpOptimizationController.getDesiredCMP(desiredCMP);
+      icpOptimizationController.getDesiredCoP(desiredCoP);
 
       capturePoint.changeFrame(worldFrame);
       desiredCMP.changeFrame(worldFrame);
@@ -303,8 +327,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
          desiredCoPcontainedNaN = false;
       }
 
-      desiredCMPToPack.setIncludingFrame(desiredCMP);
-      desiredCMPToPack.changeFrame(worldFrame);
+      yoDesiredCMP.set(desiredCMP);
 
       desiredCoPToPack.setIncludingFrame(desiredCoP);
       desiredCoPToPack.changeFrame(worldFrame);
@@ -381,26 +404,5 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       groundReactionForce.changeFrame(centerOfMassFrame);
 
       return groundReactionForce;
-   }
-
-   private void computeCMPInternal()
-   {
-      if (perfectCoP.containsNaN())
-      {
-         perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
-                                           capturePointVelocity, omega0);
-      }
-      else
-      {
-         perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
-                                           capturePointVelocity, omega0);
-      }
-
-      icpOptimizationController.getDesiredCMP(desiredCMP);
-      icpOptimizationController.getDesiredCoP(desiredCoP);
-
-      yoUnprojectedDesiredCMP.set(desiredCMP);
    }
 }

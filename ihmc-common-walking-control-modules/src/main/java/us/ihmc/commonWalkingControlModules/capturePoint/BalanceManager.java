@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -88,12 +86,6 @@ public class BalanceManager
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
    /** CMP position according to the ICP planner */
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
-   /** CMP position according to the ICP controller */
-   private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
-
-   // TODO It seems that the achieved CMP can be off sometimes.
-   // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
-   private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
 
    private final YoBoolean editStepTimingForReachability = new YoBoolean("editStepTimingForReachability", registry);
 
@@ -117,9 +109,7 @@ public class BalanceManager
    private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
    private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
 
-   private final FramePoint2D desiredCMP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
-   private final FramePoint2D achievedCMP = new FramePoint2D();
 
    private final FrameVector2D icpError2d = new FrameVector2D();
 
@@ -254,8 +244,6 @@ public class BalanceManager
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
-         YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
          YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
@@ -265,8 +253,6 @@ public class BalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, centerOfMassViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCMPViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(graphicListName, achievedCMPViz.createArtifact());
          YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
          perfectCMPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCMPArtifact);
@@ -277,8 +263,6 @@ public class BalanceManager
       yoCenterOfMass.setToNaN();
       yoDesiredCapturePoint.setToNaN();
       yoFinalDesiredICP.setToNaN();
-      yoDesiredCMP.setToNaN();
-      yoAchievedCMP.setToNaN();
       yoPerfectCMP.setToNaN();
       yoPerfectCoP.setToNaN();
 
@@ -449,8 +433,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCoP);
-      yoDesiredCMP.set(desiredCMP);
+      boolean success = linearMomentumRateOfChangeControlModule.compute(desiredCoP);
 
       desiredCoP.changeFrame(midFootZUpFrame);
       tempVector2D.setIncludingFrame(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
@@ -516,7 +499,7 @@ public class BalanceManager
 
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMPToPack.setIncludingFrame(yoDesiredCMP);
+      desiredCMPToPack.setIncludingFrame(linearMomentumRateOfChangeControlModule.getDesiredCMP());
    }
 
    public void getDesiredICP(FramePoint2D desiredICPToPack)
@@ -767,8 +750,7 @@ public class BalanceManager
 
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
-      linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
-      yoAchievedCMP.setMatchingFrame(achievedCMP);
+      linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
