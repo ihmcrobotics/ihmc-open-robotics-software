@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -444,6 +445,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveJointspaceVelocityCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointspaceVelocityCommand in = nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointspaceVelocityCommand expectedOut = nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceVelocityCommand actualOut = new JointspaceVelocityCommand();
+         crossRobotCommandResolver.resolveJointspaceVelocityCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -610,6 +633,22 @@ class CrossRobotCommandResolverTest
       {
          OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
          next.addReductionFactor(joint, random.nextDouble());
+      }
+
+      return next;
+   }
+
+   public static JointspaceVelocityCommand nextJointspaceVelocityCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      JointspaceVelocityCommand next = new JointspaceVelocityCommand();
+
+      List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
       }
 
       return next;
