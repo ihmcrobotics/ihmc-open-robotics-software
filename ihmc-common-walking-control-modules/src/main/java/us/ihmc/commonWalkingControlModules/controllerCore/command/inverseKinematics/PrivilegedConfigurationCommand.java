@@ -18,16 +18,15 @@ public class PrivilegedConfigurationCommand
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
    }
 
+   /** sets whether or not to utilize the privileged configuration calculator */
+   private boolean enable = false;
+   private final OneDoFJointPrivilegedConfigurationParameters defaultParameters = new OneDoFJointPrivilegedConfigurationParameters();
    /** Initial capacity of the internal memory. */
    private final int initialCapacity = 40;
    /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<OneDoFJointPrivilegedConfigurationParameters> jointSpecificParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                                      OneDoFJointPrivilegedConfigurationParameters.class);
-   /** sets whether or not to utilize the privileged configuration calculator */
-   private boolean enable = false;
-
-   private final OneDoFJointPrivilegedConfigurationParameters defaultParameters = new OneDoFJointPrivilegedConfigurationParameters();
 
    /**
     * Creates an empty command.
@@ -55,6 +54,11 @@ public class PrivilegedConfigurationCommand
    public void enable()
    {
       enable = true;
+   }
+
+   public void setDefaultParameters(OneDoFJointPrivilegedConfigurationParameters defaultParameters)
+   {
+      this.defaultParameters.set(defaultParameters);
    }
 
    public void setPrivilegedConfigurationOption(PrivilegedConfigurationOption option)
@@ -101,6 +105,80 @@ public class PrivilegedConfigurationCommand
    public void setDefaultMaxAcceleration(double defaultMaxAcceleration)
    {
       defaultParameters.setMaxAcceleration(defaultMaxAcceleration);
+   }
+
+   public void addJoint(OneDoFJointBasics joint, OneDoFJointPrivilegedConfigurationParameters jointSpecificParameters)
+   {
+      enable();
+      joints.add(joint);
+      this.jointSpecificParameters.add().set(jointSpecificParameters);
+   }
+
+   /**
+    * Adds a joint to set the privileged configuration for.
+    *
+    * @param joint the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    */
+   public void addJoint(OneDoFJointBasics joint, double privilegedConfiguration)
+   {
+      enable();
+      joints.add(joint);
+      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.add();
+      parameters.clear();
+      parameters.setPrivilegedConfiguration(privilegedConfiguration);
+   }
+
+   /**
+    * Adds a joint to set the privileged configuration option for.
+    *
+    * @param joint the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration option for the joint to
+    *           achieve.
+    */
+   public void addJoint(OneDoFJointBasics joint, PrivilegedConfigurationOption privilegedConfiguration)
+   {
+      enable();
+      joints.add(joint);
+      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.add();
+      parameters.clear();
+      parameters.setPrivilegedConfigurationOption(privilegedConfiguration);
+   }
+
+   public void setOneDoFJoint(int jointIndex, OneDoFJointPrivilegedConfigurationParameters jointSpecificParameters)
+   {
+      enable();
+      this.jointSpecificParameters.get(jointIndex).set(jointSpecificParameters);
+   }
+
+   /**
+    * Updates the desired privileged configuration for a joint already registered give its index.
+    *
+    * @param jointIndex index of the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    */
+   public void setOneDoFJoint(int jointIndex, double privilegedConfiguration)
+   {
+      enable();
+      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.get(jointIndex);
+      parameters.setPrivilegedConfiguration(privilegedConfiguration);
+      parameters.setPrivilegedConfigurationOption(null);
+   }
+
+   /**
+    * Updates the desired privileged configuration option for a joint already registered give its
+    * index.
+    *
+    * @param jointIndex index of the joint to set the configuration opiton of.
+    * @param privilegedConfiguration the desired privileged configuration option for the joint to
+    *           achieve.
+    */
+   public void setOneDoFJoint(int jointIndex, PrivilegedConfigurationOption privilegedConfiguration)
+   {
+      enable();
+      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.get(jointIndex);
+      parameters.setPrivilegedConfigurationOption(privilegedConfiguration);
+      parameters.setPrivilegedConfiguration(Double.NaN);
    }
 
    public void setWeight(int jointIndex, double weight)
@@ -150,89 +228,6 @@ public class PrivilegedConfigurationCommand
    {
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          setMaxAcceleration(jointIndex, maxAcceleration);
-   }
-
-   /**
-    * Adds a joint to set the privileged configuration for.
-    *
-    * @param joint the joint to set the configuration of.
-    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
-    */
-   public void addJoint(OneDoFJointBasics joint, double privilegedConfiguration)
-   {
-      enable();
-      joints.add(joint);
-      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.add();
-      parameters.clear();
-      parameters.setPrivilegedConfiguration(privilegedConfiguration);
-   }
-
-   /**
-    * Adds a joint to set the privileged configuration option for.
-    *
-    * @param joint the joint to set the configuration of.
-    * @param privilegedConfiguration the desired privileged configuration option for the joint to
-    *           achieve.
-    */
-   public void addJoint(OneDoFJointBasics joint, PrivilegedConfigurationOption privilegedConfiguration)
-   {
-      enable();
-      joints.add(joint);
-      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.add();
-      parameters.clear();
-      parameters.setPrivilegedConfigurationOption(privilegedConfiguration);
-   }
-
-   /**
-    * Adds or Updates the desired privileged configuration for a joint If the joint hasn't been
-    * registered it will be added to the command
-    *
-    * @param joint the joint to set the configuration of.
-    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
-    */
-   public void addOrSetOneDoFJoint(OneDoFJointBasics joint, double privilegedConfiguration)
-   {
-      String jointName = joint.getName();
-      for (int jointIndex = 0; jointIndex < jointSpecificParameters.size(); jointIndex++)
-      {
-         if (joints.get(jointIndex).getName().equals(jointName))
-         {
-            setOneDoFJoint(jointIndex, privilegedConfiguration);
-            return;
-         }
-      }
-
-      addJoint(joint, privilegedConfiguration);
-   }
-
-   /**
-    * Updates the desired privileged configuration for a joint already registered give its index.
-    *
-    * @param jointIndex index of the joint to set the configuration of.
-    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
-    */
-   public void setOneDoFJoint(int jointIndex, double privilegedConfiguration)
-   {
-      enable();
-      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.get(jointIndex);
-      parameters.setPrivilegedConfiguration(privilegedConfiguration);
-      parameters.setPrivilegedConfigurationOption(null);
-   }
-
-   /**
-    * Updates the desired privileged configuration option for a joint already registered give its
-    * index.
-    *
-    * @param jointIndex index of the joint to set the configuration opiton of.
-    * @param privilegedConfiguration the desired privileged configuration option for the joint to
-    *           achieve.
-    */
-   public void setOneDoFJoint(int jointIndex, PrivilegedConfigurationOption privilegedConfiguration)
-   {
-      enable();
-      OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.get(jointIndex);
-      parameters.setPrivilegedConfigurationOption(privilegedConfiguration);
-      parameters.setPrivilegedConfiguration(Double.NaN);
    }
 
    /**
@@ -288,5 +283,49 @@ public class PrivilegedConfigurationCommand
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.PRIVILEGED_CONFIGURATION;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof PrivilegedConfigurationCommand)
+      {
+         PrivilegedConfigurationCommand other = (PrivilegedConfigurationCommand) object;
+
+         if (enable != other.enable)
+            return false;
+         if (!defaultParameters.equals(other.defaultParameters))
+            return false;
+         if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+         }
+         if (!jointSpecificParameters.equals(other.jointSpecificParameters))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": enabled: " + enable + ", default parameters: " + defaultParameters.toString();
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      {
+         ret += "\nJoint: " + joints.get(jointIndex).getName() + ", " + jointSpecificParameters.get(jointIndex).toString();
+      }
+      return ret;
    }
 }
