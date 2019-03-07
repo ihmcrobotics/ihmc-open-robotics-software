@@ -1,38 +1,21 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.DRCPushRecoveryWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS, false)
-      {
-         @Override
-         public WalkingControllerParameters getWalkingControllerParameters()
-         {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
-            {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return false;
-               }
-            };
-         }
-      };
+      return new ValkyrieRobotModel(RobotTarget.SCS, false);
    }
 
    @Override
@@ -41,6 +24,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
+   @Override
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
@@ -69,6 +53,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightLateSwing();
    }
 
+   @Override
    @Test
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
