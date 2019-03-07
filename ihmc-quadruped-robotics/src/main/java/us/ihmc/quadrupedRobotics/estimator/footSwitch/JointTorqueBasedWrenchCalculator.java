@@ -35,9 +35,12 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    private final GeometricJacobian footJacobian;
    private final List<JointTorqueProvider> jointTorqueProviders;
 
-   public JointTorqueBasedWrenchCalculator(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame,
+   private final String prefix;
+
+   public JointTorqueBasedWrenchCalculator(String prefix, FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame,
                                            List<JointTorqueProvider> jointTorqueProviders)
    {
+      this.prefix = prefix;
       this.jointTorqueProviders = jointTorqueProviders;
       RigidBodyBasics body = robotModel.getRootBody();
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
@@ -88,8 +91,16 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       return wrench;
    }
 
+   @Override
+   public String getName()
+   {
+      return prefix + "JointTorqueWrenchCalculator";
+   }
+
    public interface JointTorqueProvider
    {
       double getTorque();
    }
+
+
 }
