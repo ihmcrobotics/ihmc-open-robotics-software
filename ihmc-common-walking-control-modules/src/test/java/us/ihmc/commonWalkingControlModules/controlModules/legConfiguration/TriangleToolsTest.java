@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
@@ -12,7 +12,7 @@ public class TriangleToolsTest
 {
    private static final double epsilon = 1e-4;
 
-   @Test(timeout = 30000)
+   @Test
    public void testReturnsTheSame()
    {
       Random random = new Random(1738L);
@@ -40,7 +40,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngle()
    {
       Random random = new Random(1738L);
@@ -58,7 +58,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngleVelocity()
    {
       Random random = new Random(1738L);
@@ -80,7 +80,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorVelocityNumerically()
    {
       Random random = new Random(1738L);
@@ -107,7 +107,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngleAccelerationA()
    {
       Random random = new Random(1738L);
@@ -134,7 +134,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngleAccelerationB()
    {
       Random random = new Random(1738L);
@@ -162,7 +162,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAccelerationNumerically()
    {
       Random random = new Random(1738L);
@@ -196,7 +196,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideLength()
    {
       Random random = new Random(1738L);
@@ -214,7 +214,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideVelocity()
    {
       Random random = new Random(1738L);
@@ -234,7 +234,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideVelocityNumerically()
    {
       Random random = new Random(1738L);
@@ -261,7 +261,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideAccelerationA()
    {
       Random random = new Random(1738L);
@@ -290,7 +290,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideAccelerationB()
    {
       Random random = new Random(1738L);
@@ -319,7 +319,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideAccelerationNumerically()
    {
       Random random = new Random(1738L);
@@ -353,7 +353,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindFarSideLengthPastPi()
    {
       Random random = new Random(1738L);
@@ -373,7 +373,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngleVelocityDirectionality()
    {
       Random random = new Random(1738L);
@@ -402,7 +402,7 @@ public class TriangleToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testFindInteriorAngleAccelerationDirectionality()
    {
       Random random = new Random(1738L);
