@@ -73,7 +73,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
    private final KeyFrameBasedTrajectoryGenerator keyFrameBasedTrajectoryGenerator;
    private static final double searchingTimeTickForVelocityBound = 0.002;
-   private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = false;
+   private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = true;
 
    private final KinematicsPlanningToolboxOutputStatus solution;
    private final KinematicsPlanningToolboxOutputConverter outputConverter;
@@ -483,21 +483,24 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
 
       generateTrajectoriesToPreview(false);
-      
-      if(isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
+
+      if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
+      {
+         System.out.println("re planning for velocity optimization");
          generateTrajectoriesToPreview(true);
-      
-      if(isVelocityLimitExceeded())
+      }
+
+      if (isVelocityLimitExceeded())
       {
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
          reportMessage(solution);
          return;
       }
-      
+
       keyFrameBasedTrajectoryGenerator.packOptimizedVelocities(solution);
       solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
       solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
-      
+
       convertWholeBodyTrajectoryMessage();
 
       if (DEBUG)
