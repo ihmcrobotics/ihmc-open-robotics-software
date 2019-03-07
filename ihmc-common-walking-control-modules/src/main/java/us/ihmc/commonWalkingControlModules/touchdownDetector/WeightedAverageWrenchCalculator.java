@@ -55,6 +55,7 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
       for (int i = 0; i < wrenchCalculators.size(); i++)
       {
          WrenchCalculator wrenchCalculator = wrenchCalculators.get(i);
+         wrenchCalculator.calculate();
 
          WrenchReadOnly wrench = wrenchCalculator.getWrench();
          linearForces.get(wrenchCalculator).set(wrench.getLinearPart());

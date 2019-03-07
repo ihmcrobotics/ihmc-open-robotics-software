@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalc
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -66,11 +67,18 @@ public class QuadrupedFootSwitchFactory
       {
          List<JointTorqueProvider> estimatedJointTorqueProviders = new ArrayList<>();
          for (OneDoFJointBasics oneDoFJointBasics : fullRobotModel.get().getLegJointsList(robotQuadrant))
-            estimatedJointTorqueProviders.add(oneDoFJointBasics::getTau);
+            estimatedJointTorqueProviders.add(new JointTorqueProvider()
+            {
+               @Override
+               public double getTorque()
+               {
+                  return oneDoFJointBasics.getTau();
+               }
+            });
 
          List<JointTorqueProvider> desiredJointTorqueProviders = new ArrayList<>();
          for (OneDoFJointBasics oneDoFJointBasics : fullRobotModel.get().getLegJointsList(robotQuadrant))
-            desiredJointTorqueProviders.add(() -> jointDesiredOutputList.get().getDesiredJointTorque(oneDoFJointBasics));
+            desiredJointTorqueProviders.add(new JointDesiredOutputTorqueProvider(jointDesiredOutputList.get().getJointDesiredOutput(oneDoFJointBasics)));
 
          ContactablePlaneBody contactableFoot = footContactableBodies.get().get(robotQuadrant);
 
@@ -215,5 +223,21 @@ public class QuadrupedFootSwitchFactory
    public void setSimulatedRobot(FloatingRootJointRobot simulatedRobot)
    {
       this.simulatedRobot.set(simulatedRobot);
+   }
+
+   private class JointDesiredOutputTorqueProvider implements JointTorqueProvider
+   {
+      private final JointDesiredOutputReadOnly jointDesiredOutput;
+
+      public JointDesiredOutputTorqueProvider(JointDesiredOutputReadOnly jointDesiredOutputReadOnly)
+      {
+         this.jointDesiredOutput = jointDesiredOutputReadOnly;
+      }
+
+      @Override
+      public double getTorque()
+      {
+         return jointDesiredOutput.getDesiredTorque();
+      }
    }
 }
