@@ -9,9 +9,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
@@ -147,6 +150,18 @@ public class CrossRobotCommandResolver
       }
    }
 
+   public void resolveSpatialAccelerationCommand(SpatialAccelerationCommand in, SpatialAccelerationCommand out)
+   {
+      resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
+      out.getDesiredLinearAcceleration().set(in.getDesiredLinearAcceleration());
+      out.getDesiredAngularAcceleration().set(in.getDesiredAngularAcceleration());
+      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+      out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
+      out.setPrimaryBase(resolveRigidBody(in.getPrimaryBase()));
+      out.setScaleSecondaryTaskJointWeight(in.scaleSecondaryTaskJointWeight(), in.getSecondaryTaskJointWeightScale());
+   }
+
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
    {
       out.setIncludingFrame(in);
@@ -188,6 +203,11 @@ public class CrossRobotCommandResolver
       out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
    }
 
+   public void resolveFramePose3D(FramePose3DReadOnly in, FramePose3DBasics out)
+   {
+      out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
+   }
+
    private ReferenceFrame resolveReferenceFrame(ReferenceFrame in)
    {
       if (in == null)
@@ -198,11 +218,17 @@ public class CrossRobotCommandResolver
 
    private <B extends RigidBodyReadOnly> B resolveRigidBody(B in)
    {
-      return rigidBodyHashCodeResolver.castAndGetRigidBody(in.hashCode());
+      if (in == null)
+         return null;
+      else
+         return rigidBodyHashCodeResolver.castAndGetRigidBody(in.hashCode());
    }
 
    private <J extends JointReadOnly> J resolveJoint(J in)
    {
-      return jointHashCodeResolver.castAndGetJoint(in.hashCode());
+      if (in == null)
+         return null;
+      else
+         return jointHashCodeResolver.castAndGetJoint(in.hashCode());
    }
 }
