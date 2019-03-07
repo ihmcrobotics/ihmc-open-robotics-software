@@ -14,6 +14,11 @@ public class ControllerFailedTransition implements StateTransitionCondition
       controllerFailed = controllerToolbox.getControllerFailedBoolean();
    }
 
+   public ControllerFailedTransition(YoBoolean controllerFailed)
+   {
+      this.controllerFailed = controllerFailed;
+   }
+
    private boolean pollControllerFailed()
    {
       boolean controllerFailed = this.controllerFailed.getBooleanValue();
