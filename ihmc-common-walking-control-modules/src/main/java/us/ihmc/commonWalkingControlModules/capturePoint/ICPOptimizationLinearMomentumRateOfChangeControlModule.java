@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -32,7 +33,9 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.sensorProcessing.frames.ReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -101,7 +104,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
 
-   public ICPOptimizationLinearMomentumRateOfChangeControlModule(ReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
+   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
+   private final ReferenceFrame midFootZUpFrame;
+
+   public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
                                                                  WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
                                                                  double gravityZ, double controlDT, Vector3DReadOnly angularMomentumRateWeight,
@@ -115,6 +122,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       this.angularMomentumRateWeight = angularMomentumRateWeight;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
 
@@ -256,6 +264,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       return momentumRateCommand;
    }
 
+   public CenterOfPressureCommand getCenterOfPressureCommand()
+   {
+      return centerOfPressureCommand;
+   }
+
    public FramePoint2DReadOnly getDesiredCMP()
    {
       return desiredCMP;
@@ -280,7 +293,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
-   public boolean compute(FramePoint2D desiredCoPToPack)
+   public boolean compute()
    {
       boolean inputsAreOk = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
@@ -329,9 +342,6 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
       yoDesiredCMP.set(desiredCMP);
 
-      desiredCoPToPack.setIncludingFrame(desiredCoP);
-      desiredCoPToPack.changeFrame(worldFrame);
-
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       FrameVector3D linearMomentumRateOfChange = computeGroundReactionForce(desiredCMP, fZ);
       linearMomentumRateOfChange.changeFrame(centerOfMassFrame);
@@ -345,14 +355,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
       linearMomentumRateOfChange.changeFrame(worldFrame);
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
-
       selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
       selectionMatrix.selectAngularZ(minimizeAngularMomentumRateZ.getBooleanValue());
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
-
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      desiredCoP.changeFrame(midFootZUpFrame);
+      centerOfPressureCommand.setDesiredCoP(desiredCoP);
+      centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
 
       supportLegPreviousTick.set(supportSide);
 
