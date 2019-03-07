@@ -228,18 +228,18 @@ public abstract class YoVariableTestGoal extends GoalOrientedTestGoal
 
    private static String getFormattedBooleanYoVariable(final YoBoolean yoBoolean)
    {
-      return yoBoolean.getName() + ":" + yoBoolean.getBooleanValue();
+      return yoBoolean.getName() + ": " + yoBoolean.getBooleanValue();
    }
 
    private static <T extends Enum<T>> String getFormattedEnumYoVariable(final YoEnum<T> yoEnum)
    {
       String enumValueName = yoEnum.getEnumValue() != null ? yoEnum.getEnumValue().name() : "null";
-      return yoEnum.getName() + ":" + enumValueName;
+      return yoEnum.getName() + ": " + enumValueName;
    }
 
    public static String getFormattedDoubleYoVariable(YoDouble yoDouble)
    {
-      return yoDouble.getName() + ":"
+      return yoDouble.getName() + ": "
             + FormattingTools.getFormattedToSignificantFigures(yoDouble.getDoubleValue(), SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
    }
 }
