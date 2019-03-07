@@ -10,11 +10,11 @@ import java.util.Map;
 
 import org.fest.swing.util.Pair;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -49,10 +49,7 @@ public class KeyFrameBasedTrajectoryGenerator
       converter = new KinematicsToolboxOutputConverter(drcRobotModel);
 
       for (int i = 0; i < numberOfWholeBodyJoints; i++)
-      {
          jointNames.add(allJointsExcludingHands[i].getName());
-         LogTools.info(""+i+" "+allJointsExcludingHands[i].getName());
-      }
 
       for (String jointName : jointNames)
          jointNameToTrajectoriesMap.put(jointName, new ArrayList<Trajectory>());
@@ -60,21 +57,44 @@ public class KeyFrameBasedTrajectoryGenerator
 
    public void computeOptimizingKeyFrameTimes()
    {
-      // TODO : Don't forget! multiply last key frame time to recover from normalized time.
+      trajectoryPointOptimizer.compute();
+      getOptimizedKeyFrameTimes();
+      getOptimizedVelocities();
    }
 
    public void compute()
    {
-      // normalize key frame times.
       double lastKeyFrameTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
       TDoubleArrayList normalizedKeyFrameTimes = new TDoubleArrayList();
       for (int i = 1; i < keyFrameTimes.size() - 1; i++)
          normalizedKeyFrameTimes.add(keyFrameTimes.get(i) / lastKeyFrameTime);
 
-      // compute.
       trajectoryPointOptimizer.computeForFixedTime(normalizedKeyFrameTimes);
 
-      // save optimized joint velocities on map.
+      getOptimizedVelocities();
+   }
+
+   private void getOptimizedKeyFrameTimes()
+   {
+      double lastKeyFrameTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
+
+      TDoubleArrayList normalizedKeyFrameTimes = new TDoubleArrayList();
+      trajectoryPointOptimizer.getWaypointTimes(normalizedKeyFrameTimes);
+
+      keyFrameTimes.clear();
+      keyFrameTimes.add(0.0);
+      for (int i = 0; i < normalizedKeyFrameTimes.size(); i++)
+         keyFrameTimes.add(normalizedKeyFrameTimes.get(i) * lastKeyFrameTime);
+
+      keyFrameTimes.add(lastKeyFrameTime);
+   }
+
+   private void getOptimizedVelocities()
+   {
+      double lastKeyFrameTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
+      for (String jointName : jointNames)
+         jointNameToVelocitiesMap.get(jointName).clear();
+
       for (String jointName : jointNames)
          jointNameToVelocitiesMap.get(jointName).add(0.0);
 
@@ -83,10 +103,9 @@ public class KeyFrameBasedTrajectoryGenerator
       {
          trajectoryPointOptimizer.getWaypointVelocity(velocityToPack, i - 1);
          for (int j = 0; j < jointNames.size(); j++)
-         {
             jointNameToVelocitiesMap.get(jointNames.get(j)).add(velocityToPack.get(j) / lastKeyFrameTime);
-         }
       }
+
       for (String jointName : jointNames)
          jointNameToVelocitiesMap.get(jointName).add(0.0);
    }
@@ -94,10 +113,8 @@ public class KeyFrameBasedTrajectoryGenerator
    public void addInitialConfiguration(KinematicsToolboxOutputStatus initialConfiguration)
    {
       if (keyFrames.size() > 0 || keyFrameTimes.size() > 0)
-      {
-         LogTools.warn("keyFrames should be cleared");
          clear();
-      }
+
       keyFrames.add(initialConfiguration);
       keyFrameTimes.add(0.0);
    }
@@ -254,8 +271,6 @@ public class KeyFrameBasedTrajectoryGenerator
       {
          ex.printStackTrace();
       }
-
-      LogTools.info("done");
    }
 
    private int findTrajectoryIndex(double time)
@@ -270,6 +285,20 @@ public class KeyFrameBasedTrajectoryGenerator
          }
       }
       return indexOfTrajectory;
+   }
+
+   public void packOptimizedVelocities(KinematicsPlanningToolboxOutputStatus solution)
+   {
+      List<KinematicsToolboxOutputStatus> robotConfigurations = solution.getRobotConfigurations();
+      for (int i = 0; i < robotConfigurations.size(); i++)
+      {
+         KinematicsToolboxOutputStatus keyFrameSolution = robotConfigurations.get(i);
+         for (String jointName : jointNames)
+         {
+            float wayPointJointVelocity = (float) jointNameToVelocitiesMap.get(jointName).get(i + 1);
+            keyFrameSolution.getDesiredJointVelocities().add(wayPointJointVelocity);
+         }
+      }
    }
 
    public double getJointVelocityUpperBound(String jointName)
