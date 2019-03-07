@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -61,13 +62,13 @@ public interface ICPOptimizationControllerInterface
     * Gets the desired CMP location computed by the ICP controller.
     * @param desiredCMPToPack where the CMP location is stored. Modified.
     */
-   void getDesiredCMP(FramePoint2D desiredCMPToPack);
+   void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack);
 
    /**
     * Gets the desired CoP location computed by the ICP controller.
     * @param desiredCoPToPack where the CoP location is stored. Modified.
     */
-   void getDesiredCoP(FramePoint2D desiredCoPToPack);
+   void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
 
    /**
     * Gets the desired Footstep location computed by the ICP controller.
