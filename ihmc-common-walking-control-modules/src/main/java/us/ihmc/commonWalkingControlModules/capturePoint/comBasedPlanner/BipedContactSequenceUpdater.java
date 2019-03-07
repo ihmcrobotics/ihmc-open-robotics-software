@@ -331,7 +331,7 @@ public class BipedContactSequenceUpdater
 
    private static boolean isValidTransition(BipedStepTransition stepTransition)
    {
-      if (stepTransition.getNumberOfFeetInTransition() > 1 && stepTransition.getTransitionType(0) == stepTransition.getTransitionType(1))
+      if (stepTransition.getNumberOfFeetInTransition() > 2)
       { // just started or landed from a jump
          return false;
       }
