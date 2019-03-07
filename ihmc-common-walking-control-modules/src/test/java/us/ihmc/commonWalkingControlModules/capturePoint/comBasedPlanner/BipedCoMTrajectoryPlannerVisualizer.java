@@ -304,6 +304,10 @@ public class BipedCoMTrajectoryPlannerVisualizer
       worldGraphics.translate(9.25 + 3.0, 0.0, 0.0);
       worldGraphics.addCube(6.5, 1.5, 1.0, YoAppearance.Gray());
 
+      worldGraphics.identity();
+      worldGraphics.translate(11.45, 0.0, 1.0);
+      worldGraphics.addCube(0.2, 1.5, 0.3, YoAppearance.Gray());
+
 
       BipedTimedStep step1 = new BipedTimedStep();
       step1.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration);
@@ -373,37 +377,37 @@ public class BipedCoMTrajectoryPlannerVisualizer
       step7.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.5, stanceWidth / 2.0, currentHeight), new FrameQuaternion());
 
       steps.add(step7);
-      stepStartTime += swingDuration - 1.5 * flightDuration;
+      stepStartTime += swingDuration - flightDuration;
       currentPosition += 1.5;
 
       BipedTimedStep step8 = new BipedTimedStep();
-      step8.getTimeInterval().setInterval(stepStartTime, stepStartTime + 0.2 + swingDuration);
+      step8.getTimeInterval().setInterval(stepStartTime, stepStartTime + 2.0 * swingDuration);
       step8.setRobotSide(RobotSide.RIGHT);
       step8.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 0.5, -0.75 * stanceWidth, currentHeight + 0.4), new FrameQuaternion());
 
       steps.add(step8);
-      stepStartTime += 0.2 + swingDuration - 1.5 * flightDuration;
+      stepStartTime += 2.0 * swingDuration - 2.0 * flightDuration;
       currentPosition += 0.5;
       currentHeight += 0.4;
 
       BipedTimedStep step9 = new BipedTimedStep();
-      step9.getTimeInterval().setInterval(stepStartTime, stepStartTime + 0.2 + swingDuration);
+      step9.getTimeInterval().setInterval(stepStartTime, stepStartTime + 2.0 * swingDuration);
       step9.setRobotSide(RobotSide.LEFT);
       step9.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 0.5, 0.75 * stanceWidth, currentHeight + 0.4), new FrameQuaternion());
 
       steps.add(step9);
-      stepStartTime += 0.2 + swingDuration - 1.5 * flightDuration;
+      stepStartTime += 2.0 * swingDuration - 2.0 * flightDuration;
       currentPosition += 0.5;
       currentHeight += 0.4;
 
       BipedTimedStep step10 = new BipedTimedStep();
-      step10.getTimeInterval().setInterval(stepStartTime, stepStartTime + 0.2 + swingDuration);
+      step10.getTimeInterval().setInterval(stepStartTime, stepStartTime + 2.0 * swingDuration);
       step10.setRobotSide(RobotSide.RIGHT);
       step10.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 0.5, -0.5 * stanceWidth, currentHeight + 0.2), new FrameQuaternion());
 
       steps.add(step10);
 
-      stepStartTime += 0.2 + swingDuration - 0.1;
+      stepStartTime += 2.0 * swingDuration - flightDuration;
       currentPosition += 0.5;
       currentHeight += 0.2;
 
@@ -414,50 +418,49 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       steps.add(step11);
 
-      stepStartTime += swingDuration - 0.2; // slightly longer flight
+      stepStartTime += swingDuration - flightDuration; // slightly longer flight
       currentPosition += 0.75;
 
-      // double jump
+      /* double jump set up, where we align both feet */
       BipedTimedStep step12 = new BipedTimedStep();
-      step12.getTimeInterval().setInterval(stepStartTime, stepStartTime + (swingDuration + 0.1));
+      step12.getTimeInterval().setInterval(stepStartTime, stepStartTime + 1.25 * swingDuration);
       step12.setRobotSide(RobotSide.RIGHT);
       step12.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.0, -0.5 * stanceWidth, currentHeight), new FrameQuaternion());
 
       steps.add(step12);
 
-      // FIXME make these happen at the same time.
       stepStartTime += 0.1;
 
       BipedTimedStep step13 = new BipedTimedStep();
-      step13.getTimeInterval().setInterval(stepStartTime + 0.5 * swingDuration, stepStartTime + (swingDuration + 0.1)); // fixme remove that 0.1
+      step13.getTimeInterval().setInterval(stepStartTime + 0.5 * swingDuration, stepStartTime + 1.25 * swingDuration);
       step13.setRobotSide(RobotSide.LEFT);
       step13.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.0, 0.5 * stanceWidth, currentHeight), new FrameQuaternion());
 
       steps.add(step13);
 
 
-      stepStartTime += swingDuration + 0.1 + stanceDuration;
+      stepStartTime += 1.25 * swingDuration + 2.0 * stanceDuration;
       currentPosition += 1.0;
 
 
+      /* double jump flight */
       BipedTimedStep step14 = new BipedTimedStep();
-      step14.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration + 0.1 );
+      step14.getTimeInterval().setInterval(stepStartTime, stepStartTime + 1.15 * swingDuration);
       step14.setRobotSide(RobotSide.RIGHT);
       step14.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.0, -0.5 * stanceWidth, currentHeight), new FrameQuaternion());
 
       steps.add(step14);
 
-      stepStartTime += 0.1; // fixme remove
 
       BipedTimedStep step15 = new BipedTimedStep();
-      step15.getTimeInterval().setInterval(stepStartTime + 0.1, stepStartTime + swingDuration + 0.15); // fixme remove 0.1
+      step15.getTimeInterval().setInterval(stepStartTime, stepStartTime + 1.15 * swingDuration);
       step15.setRobotSide(RobotSide.LEFT);
       step15.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.0, 0.5 * stanceWidth, currentHeight), new FrameQuaternion());
 
       steps.add(step15);
 
 
-      stepStartTime += swingDuration + 0.15 + stanceDuration;
+      stepStartTime += 1.15 * swingDuration + 2.0 * stanceDuration;
       currentPosition += 1.0;
 
 
