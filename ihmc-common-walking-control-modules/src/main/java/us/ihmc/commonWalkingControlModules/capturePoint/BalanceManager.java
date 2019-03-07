@@ -8,7 +8,6 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -71,6 +70,7 @@ public class BalanceManager
    private final PrecomputedICPPlanner precomputedICPPlanner;
    private final ICPOptimizationLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
+   private boolean updateTimings = false;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -159,7 +159,6 @@ public class BalanceManager
                                                                                                            totalMass, gravityZ, controlDT,
                                                                                                            angularMomentumRateWeight, linearMomentumRateWeight,
                                                                                                            registry, yoGraphicsListRegistry);
-      ICPOptimizationControllerInterface icpOptimizationController = linearMomentumRateOfChangeControlModule.getICPOptimizationController();
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       ICPPlannerInterface icpPlanner;
@@ -206,8 +205,9 @@ public class BalanceManager
 
       if (ENABLE_DYN_REACHABILITY)
       {
-         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, icpOptimizationController, fullRobotModel, centerOfMassFrame,
-               walkingControllerParameters.getDynamicReachabilityParameters(), registry, yoGraphicsListRegistry);
+         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame,
+                                                                           walkingControllerParameters.getDynamicReachabilityParameters(), registry,
+                                                                           yoGraphicsListRegistry);
       }
       else
       {
@@ -414,6 +414,26 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
+      if (ENABLE_DYN_REACHABILITY && updateTimings)
+      {
+         double adjustedFinalTransferDuration = dynamicReachabilityCalculator.getFinalTransferDuration();
+         if (!Double.isNaN(adjustedFinalTransferDuration))
+         {
+            linearMomentumRateOfChangeControlModule.setFinalTransferDuration(adjustedFinalTransferDuration);
+         }
+
+         double nextTransferDuration = dynamicReachabilityCalculator.getNextTransferDuration();
+         if (!Double.isNaN(nextTransferDuration))
+         {
+            linearMomentumRateOfChangeControlModule.setNextTransferDuration(nextTransferDuration);
+         }
+
+         linearMomentumRateOfChangeControlModule.setTransferDuration(dynamicReachabilityCalculator.getTransferDuration());
+         linearMomentumRateOfChangeControlModule.setSwingDuration(dynamicReachabilityCalculator.getSwingDuration());
+
+         updateTimings = false;
+      }
+
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
       linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
@@ -564,9 +584,14 @@ public class BalanceManager
          dynamicReachabilityCalculator.setInSwing();
 
          if (editStepTimingForReachability.getBooleanValue())
+         {
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
+            updateTimings = dynamicReachabilityCalculator.wasTimingAdjusted();
+         }
          else
+         {
             dynamicReachabilityCalculator.checkReachabilityOfStep();
+         }
       }
 
       icpPlannerDone.set(false);
@@ -616,9 +641,14 @@ public class BalanceManager
          dynamicReachabilityCalculator.setInTransfer();
 
          if (editStepTimingForReachability.getBooleanValue())
+         {
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
+            updateTimings = dynamicReachabilityCalculator.wasTimingAdjusted();
+         }
          else
+         {
             dynamicReachabilityCalculator.checkReachabilityOfStep();
+         }
       }
 
       icpPlannerDone.set(false);
@@ -780,7 +810,7 @@ public class BalanceManager
 
    public FrameVector3DReadOnly getEffectiveICPAdjustment()
    {
-      return linearMomentumRateOfChangeControlModule.getICPOptimizationController().getICPShiftFromStepAdjustment();
+      return linearMomentumRateOfChangeControlModule.getEffectiveICPAdjustment();
    }
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
