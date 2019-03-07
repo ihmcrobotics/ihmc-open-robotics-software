@@ -3,18 +3,25 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WeightedAverageWrenchCalculator;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalculator.JointTorqueProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.tools.factories.OptionalFactoryField;
+import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -36,8 +43,10 @@ public class QuadrupedFootSwitchFactory
    private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>(
          "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<JointDesiredOutputListReadOnly> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
    private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
+
    private final OptionalFactoryField<Boolean> useKneeTorqueTouchdown = new OptionalFactoryField<>("useKneeTorqueTouchdown");
 
    // Used to create the ground contact point based foot switches.
@@ -51,19 +60,34 @@ public class QuadrupedFootSwitchFactory
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         List<JointTorqueProvider> jointTorqueProviders = new ArrayList<>();
+         List<JointTorqueProvider> estimatedJointTorqueProviders = new ArrayList<>();
          for (OneDoFJointBasics oneDoFJointBasics : fullRobotModel.get().getLegJointsList(robotQuadrant))
-            jointTorqueProviders.add(oneDoFJointBasics::getTau);
+            estimatedJointTorqueProviders.add(oneDoFJointBasics::getTau);
+
+         List<JointTorqueProvider> desiredJointTorqueProviders = new ArrayList<>();
+         for (OneDoFJointBasics oneDoFJointBasics : fullRobotModel.get().getLegJointsList(robotQuadrant))
+            desiredJointTorqueProviders.add(() -> jointDesiredOutputList.get().getDesiredJointTorque(oneDoFJointBasics));
 
          ContactablePlaneBody contactableFoot = footContactableBodies.get().get(robotQuadrant);
 
-         JointTorqueBasedWrenchCalculator estimatedTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator(fullRobotModel.get(), robotQuadrant,
+         DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight", registry, 1.0);
+         DoubleParameter desiredWrenchWeight = new DoubleParameter("desiredWrenchAverageWeight", registry, 0.0);
+
+         JointTorqueBasedWrenchCalculator estimatedTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator("estimated", fullRobotModel.get(), robotQuadrant,
                                                                                                                       contactableFoot.getSoleFrame(),
-                                                                                                                      jointTorqueProviders);
+                                                                                                                      estimatedJointTorqueProviders);
+         JointTorqueBasedWrenchCalculator desiredTorqueBasedWrenchCalculator = new JointTorqueBasedWrenchCalculator("desired", fullRobotModel.get(), robotQuadrant,
+                                                                                                                    contactableFoot.getSoleFrame(),
+                                                                                                                    desiredJointTorqueProviders);
+         PairList<DoubleProvider, WrenchCalculator> wrenchCalculatorPairList = new PairList<>();
+         wrenchCalculatorPairList.add(estimatedWrenchWeight, estimatedTorqueBasedWrenchCalculator);
+         wrenchCalculatorPairList.add(desiredWrenchWeight, desiredTorqueBasedWrenchCalculator);
+
+         WeightedAverageWrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(registry, wrenchCalculatorPairList);
 
          QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactableFoot,
-                                                                                                              estimatedTorqueBasedWrenchCalculator,
-                                                                                                              totalRobotWeight, registry);
+                                                                                                              weightedAverageWrenchCalculator, totalRobotWeight,
+                                                                                                              registry);
          if (useKneeTorqueTouchdown.get())
          {
             JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
@@ -169,6 +193,11 @@ public class QuadrupedFootSwitchFactory
    public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
+   }
+
+   public void setJointDesiredOutputList(JointDesiredOutputListReadOnly jointDesiredOutputList)
+   {
+      this.jointDesiredOutputList.set(jointDesiredOutputList);
    }
 
    public void setFootSwitchType(FootSwitchType footSwitchType)

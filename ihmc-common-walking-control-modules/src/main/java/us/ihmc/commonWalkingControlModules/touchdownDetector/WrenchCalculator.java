@@ -6,4 +6,5 @@ public interface WrenchCalculator
 {
    void calculate();
    WrenchReadOnly getWrench();
+   String getName();
 }
