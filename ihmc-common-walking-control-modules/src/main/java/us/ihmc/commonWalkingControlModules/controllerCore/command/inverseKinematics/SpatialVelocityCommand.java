@@ -92,10 +92,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    private RigidBodyBasics optionalPrimaryBase;
 
-   private String baseName;
-   private String endEffectorName;
-   private String optionalPrimaryBaseName;
-
    /**
     * Flag to indicate whether or not to custom scale the weights below the intermediate base
     * {@code optionalPrimaryBase} to control against, as opposed to using the default weight in
@@ -130,11 +126,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
 
       optionalPrimaryBase = other.optionalPrimaryBase;
-      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
@@ -156,11 +149,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       command.getSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
-      baseName = command.getBaseName();
-      endEffectorName = command.getEndEffectorName();
-
       optionalPrimaryBase = command.getPrimaryBase();
-      optionalPrimaryBaseName = command.getPrimaryBaseName();
    }
 
    /**
@@ -178,9 +167,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
@@ -205,7 +191,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       optionalPrimaryBase = primaryBase;
-      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    /**
@@ -827,16 +812,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
-    * Gets the name of the base rigid-body.
-    * 
-    * @return the base's name.
-    */
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /**
     * Gets the reference to the end-effector of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
@@ -848,16 +823,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /**
-    * Gets the name of the end-effector rigid-body.
-    * 
-    * @return the end-effector's name.
-    */
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**
@@ -873,16 +838,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public RigidBodyBasics getPrimaryBase()
    {
       return optionalPrimaryBase;
-   }
-
-   /**
-    * Gets the name of the primary base rigid-body.
-    * 
-    * @return the primary base's name.
-    */
-   public String getPrimaryBaseName()
-   {
-      return optionalPrimaryBaseName;
    }
 
    /**

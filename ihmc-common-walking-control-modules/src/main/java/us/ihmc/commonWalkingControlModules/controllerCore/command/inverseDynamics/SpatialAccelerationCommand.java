@@ -88,10 +88,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    private RigidBodyBasics optionalPrimaryBase;
 
-   private String baseName;
-   private String endEffectorName;
-   private String optionalPrimaryBaseName;
-
    /**
     * Flag to indicate whether or not to custom scale the weights below the intermediate base
     * {@code optionalPrimaryBase} to control against, as opposed to using the default weight in
@@ -126,11 +122,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
 
       optionalPrimaryBase = other.optionalPrimaryBase;
-      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
@@ -154,9 +147,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
@@ -181,7 +171,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       optionalPrimaryBase = primaryBase;
-      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    /**
@@ -846,16 +835,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the name of the base rigid-body.
-    * 
-    * @return the base's name.
-    */
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /**
     * Gets the reference to the end-effector of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
@@ -867,16 +846,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /**
-    * Gets the name of the end-effector rigid-body.
-    * 
-    * @return the end-effector's name.
-    */
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**
@@ -892,16 +861,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public RigidBodyBasics getPrimaryBase()
    {
       return optionalPrimaryBase;
-   }
-
-   /**
-    * Gets the name of the primary base rigid-body.
-    * 
-    * @return the primary base's name.
-    */
-   public String getPrimaryBaseName()
-   {
-      return optionalPrimaryBaseName;
    }
 
    /**

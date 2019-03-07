@@ -71,9 +71,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    /** The end-effector is the rigid-body to be controlled. */
    private RigidBodyBasics endEffector;
 
-   private String baseName;
-   private String endEffectorName;
-
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
@@ -91,8 +88,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
 
       controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularTorque.set(other.desiredAngularTorque);
@@ -110,8 +105,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
       command.getSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
-      baseName = command.getBaseName();
-      endEffectorName = command.getEndEffectorName();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
@@ -132,9 +125,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
@@ -522,16 +512,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    }
 
    /**
-    * Gets the name of the base rigid-body.
-    * 
-    * @return the base's name.
-    */
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /**
     * Gets the reference to the end-effector of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
@@ -543,16 +523,6 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /**
-    * Gets the name of the end-effector rigid-body.
-    * 
-    * @return the end-effector's name.
-    */
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**

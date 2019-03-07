@@ -66,9 +66,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    /** The end-effector is the rigid-body to be controlled. */
    private RigidBodyBasics endEffector;
 
-   private String baseName;
-   private String endEffectorName;
-
    /**
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
@@ -86,9 +83,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
-
 
       controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularTorque.set(other.desiredAngularTorque);
@@ -105,8 +99,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       command.getAngularSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
-      baseName = command.getBaseName();
-      endEffectorName = command.getEndEffectorName();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
@@ -127,9 +119,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
@@ -403,23 +392,9 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**
