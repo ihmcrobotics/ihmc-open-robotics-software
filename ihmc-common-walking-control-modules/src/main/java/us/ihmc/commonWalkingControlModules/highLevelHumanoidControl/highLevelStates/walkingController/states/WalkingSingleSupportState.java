@@ -116,26 +116,6 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.updateCurrentICPPlan();
          }
       }
-      else if (true) // TODO: archive old push recovery. Always using ICP optimization now.
-      {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
-
-         if (footstepIsBeingAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            balanceManager.updateCurrentICPPlan();
-            //legConfigurationManager.prepareForLegBracing(swingSide);
-         }
-
-         // if the footstep was adjusted, shift the CoM plan, if there is one.
-         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
-      }
       else if (balanceManager.isPushRecoveryEnabled())
       {
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
@@ -161,6 +141,26 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
          }
+      }
+      else
+      {
+         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+
+         if (footstepIsBeingAdjusted)
+         {
+            requestSwingSpeedUp = true;
+            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+            failureDetectionControlModule.setNextFootstep(nextFootstep);
+            updateFootstepParameters();
+
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+
+            balanceManager.updateCurrentICPPlan();
+            //legConfigurationManager.prepareForLegBracing(swingSide);
+         }
+
+         // if the footstep was adjusted, shift the CoM plan, if there is one.
+         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
 
       if (requestSwingSpeedUp)
