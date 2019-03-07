@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
@@ -31,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,9 +43,12 @@ import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
@@ -369,7 +374,29 @@ class CrossRobotCommandResolverTest
       }
    }
 
-   public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   @Test
+   void testResolveSpatialAccelerationCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         SpatialAccelerationCommand in = nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         SpatialAccelerationCommand expectedOut = nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialAccelerationCommand actualOut = new SpatialAccelerationCommand();
+         crossRobotCommandResolver.resolveSpatialAccelerationCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
       next.setConstraintType(nextElementIn(random, ConstraintType.values()));
@@ -379,7 +406,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static ContactWrenchCommand nextContactWrenchCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static ContactWrenchCommand nextContactWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       ContactWrenchCommand next = new ContactWrenchCommand();
       next.setConstraintType(nextElementIn(random, ConstraintType.values()));
@@ -390,7 +417,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static ExternalWrenchCommand nextExternalWrenchCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static ExternalWrenchCommand nextExternalWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       ExternalWrenchCommand next = new ExternalWrenchCommand();
       next.setRigidBody(nextElementIn(random, rootBody.subtreeList()));
@@ -398,7 +425,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBody rootBody,
+   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
                                                                                                            ReferenceFrame... possibleFrames)
    {
       InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
@@ -414,7 +441,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, RigidBody rootBody,
+   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, RigidBodyBasics rootBody,
                                                                                              ReferenceFrame... possibleFrames)
    {
       JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
@@ -431,7 +458,8 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, RigidBodyBasics rootBody,
+                                                                                           ReferenceFrame... possibleFrames)
    {
       JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
 
@@ -447,7 +475,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
 
@@ -464,7 +492,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static MomentumRateCommand nextMomentumRateCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static MomentumRateCommand nextMomentumRateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       MomentumRateCommand next = new MomentumRateCommand();
       next.setMomentumRate(RandomMatrices.createRandom(6, 1, random));
@@ -473,7 +501,7 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBody rootBody, ReferenceFrame... possibleFrames)
+   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(nextElementIn(random, rootBody.subtreeList()));
@@ -495,6 +523,22 @@ class CrossRobotCommandResolverTest
             next.setRhoWeight(i, random.nextDouble());
       }
 
+      return next;
+   }
+
+   public static SpatialAccelerationCommand nextSpatialAccelerationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      SpatialAccelerationCommand next = new SpatialAccelerationCommand();
+      next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
+      next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
+      next.getDesiredLinearAcceleration().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getDesiredAngularAcceleration().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      if (random.nextBoolean())
+         next.setPrimaryBase(nextElementIn(random, rootBody.subtreeList()));
+      if (random.nextBoolean())
+         next.setScaleSecondaryTaskJointWeight(true, random.nextDouble());
       return next;
    }
 
@@ -529,9 +573,20 @@ class CrossRobotCommandResolverTest
       return EuclidFrameRandomTools.nextFrameVector3D(random, nextElementIn(random, possibleFrames));
    }
 
+   public static FramePose3D nextFramePose3D(Random random, ReferenceFrame... possibleFrames)
+   {
+      return EuclidFrameRandomTools.nextFramePose3D(random, nextElementIn(random, possibleFrames));
+   }
+
    public static Wrench nextWrench(Random random, ReferenceFrame... possibleFrames)
    {
       return MecanoRandomTools.nextWrench(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
+   }
+
+   public static SpatialAcceleration nextSpatialAcceleration(Random random, ReferenceFrame... possibleFrames)
+   {
+      return MecanoRandomTools.nextSpatialAcceleration(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames),
+                                                       nextElementIn(random, possibleFrames));
    }
 
    public static WeightMatrix3D nextWeightMatrix3D(Random random, ReferenceFrame... possibleFrames)
@@ -593,8 +648,8 @@ class CrossRobotCommandResolverTest
       private final ReferenceFrame rootFrameB = ReferenceFrameTools.constructARootFrame("rootFrameB");
       private final ReferenceFrame[] frameTreeB;
 
-      private final RigidBody rootBodyA = new RigidBody("rootBodyA", rootFrameA);
-      private final RigidBody rootBodyB = new RigidBody("rootBodyB", rootFrameB);
+      private final RigidBodyBasics rootBodyA = new RigidBody("rootBody", rootFrameA);
+      private final RigidBodyBasics rootBodyB;
       private final List<OneDoFJoint> chainA;
       private final List<OneDoFJoint> chainB;
 
@@ -604,23 +659,42 @@ class CrossRobotCommandResolverTest
 
       public TestData(Random random, int numberOfFrames, int numberOfJoints)
       {
-         frameTreeA = EuclidFrameRandomTools.nextReferenceFrameTree("frameTreeA", random, rootFrameA, numberOfFrames);
-         frameTreeB = EuclidFrameRandomTools.nextReferenceFrameTree("frameTreeB", random, rootFrameB, numberOfFrames);
 
-         for (int i = 0; i < frameTreeA.length; i++)
-         { // We force the hash-codes for B to correspond to A, so it is as if the 2 trees are identical.
-            frameResolverForB.put(frameTreeB[i], frameTreeA[i].hashCode());
+         frameResolverForB.put(rootFrameB, rootFrameA.hashCode());
+         frameTreeA = EuclidFrameRandomTools.nextReferenceFrameTree("frameTreeA", random, rootFrameA, numberOfFrames);
+         frameTreeB = new ReferenceFrame[frameTreeA.length];
+         frameTreeB[0] = rootFrameB;
+
+         for (int frameIndex = 1; frameIndex < frameTreeA.length; frameIndex++)
+         {
+            ReferenceFrame frameA = frameTreeA[frameIndex];
+            ReferenceFrame parentFrameA = frameA.getParent();
+            ReferenceFrame parentFrameB = frameResolverForB.getReferenceFrame(parentFrameA.hashCode());
+            ReferenceFrame frameB = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("frameTreeB" + (frameIndex - 1), parentFrameB,
+                                                                                                      frameA.getTransformToParent());
+            frameTreeB[frameIndex] = frameB;
+            frameResolverForB.put(frameB, frameA.hashCode());
          }
 
-         chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainA", rootBodyA, numberOfJoints);
-         chainB = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chainB", rootBodyB, numberOfJoints);
+         chainA = MultiBodySystemRandomTools.nextOneDoFJointChain(random, "chain", rootBodyA, numberOfJoints);
+         rootBodyB = MultiBodySystemFactories.cloneMultiBodySystem(rootBodyA, rootFrameB, "Cloned");
+         chainB = SubtreeStreams.fromChildren(OneDoFJoint.class, rootBodyB).collect(Collectors.toList());
 
          bodyResolverForB.put(rootBodyB, rootBodyA.hashCode());
+         frameResolverForB.put(rootBodyB.getBodyFixedFrame(), rootBodyA.getBodyFixedFrame().hashCode());
 
          for (int i = 0; i < chainA.size(); i++)
          {
-            jointResolverForB.put(chainB.get(i), chainA.get(i).hashCode());
-            bodyResolverForB.put(chainB.get(i).getSuccessor(), chainA.get(i).getSuccessor().hashCode());
+            OneDoFJoint chainAJoint = chainA.get(i);
+            OneDoFJoint chainBJoint = chainB.get(i);
+            RigidBodyBasics chainABody = chainAJoint.getSuccessor();
+            RigidBodyBasics chainBBody = chainBJoint.getSuccessor();
+
+            jointResolverForB.put(chainBJoint, chainAJoint.hashCode());
+            bodyResolverForB.put(chainBBody, chainABody.hashCode());
+            frameResolverForB.put(chainBBody.getBodyFixedFrame(), chainABody.getBodyFixedFrame().hashCode());
+            frameResolverForB.put(chainBJoint.getFrameAfterJoint(), chainAJoint.getFrameAfterJoint().hashCode());
+            frameResolverForB.put(chainBJoint.getFrameBeforeJoint(), chainAJoint.getFrameBeforeJoint().hashCode());
          }
       }
    }
