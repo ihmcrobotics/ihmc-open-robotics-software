@@ -80,7 +80,9 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    private boolean controlHeightWithMomentum;
 
+   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
+
    private double desiredCoMHeightAcceleration = 0.0;
 
    private final FramePoint3D cmp3d = new FramePoint3D();
@@ -183,6 +185,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       this.perfectCoP.setIncludingFrame(perfectCoP);
    }
 
+   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
+   {
+      this.achievedLinearMomentumRate.setIncludingFrame(achievedLinearMomentumRate);
+   }
+
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
    {
       this.controlHeightWithMomentum = controlHeightWithMomentum;
@@ -273,27 +280,10 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       return desiredCMP;
    }
 
-   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      if (achievedLinearMomentumRate.containsNaN())
-         return;
-
-      centerOfMass2d.setToZero(centerOfMassFrame);
-      centerOfMass2d.changeFrame(worldFrame);
-
-      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
-      achievedCoMAcceleration2d.scale(1.0 / totalMass);
-      achievedCoMAcceleration2d.changeFrame(worldFrame);
-
-      achievedCMP.set(achievedCoMAcceleration2d);
-      achievedCMP.scale(-1.0 / (omega0 * omega0));
-      achievedCMP.add(centerOfMass2d);
-
-      yoAchievedCMP.setMatchingFrame(achievedCMP);
-   }
-
    public boolean compute()
    {
+      computeAchievedCMP();
+
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       if (perfectCoP.containsNaN())
@@ -374,6 +364,28 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       supportLegPreviousTick.set(supportSide);
 
       return success;
+   }
+
+   private void computeAchievedCMP()
+   {
+      if (achievedLinearMomentumRate.containsNaN())
+      {
+         yoAchievedCMP.setToNaN();
+         return;
+      }
+
+      centerOfMass2d.setToZero(centerOfMassFrame);
+      centerOfMass2d.changeFrame(worldFrame);
+
+      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration2d.scale(1.0 / totalMass);
+      achievedCoMAcceleration2d.changeFrame(worldFrame);
+
+      achievedCMP.set(achievedCoMAcceleration2d);
+      achievedCMP.scale(-1.0 / (omega0 * omega0));
+      achievedCMP.add(centerOfMass2d);
+
+      yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,

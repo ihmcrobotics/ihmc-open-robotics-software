@@ -735,9 +735,9 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
-   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
+   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
-      linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate);
+      linearMomentumRateOfChangeControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
