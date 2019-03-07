@@ -72,8 +72,8 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       UnrolledInverseFromMinor.inv3(linearPartOfJacobian, linearJacobianInverse, 1.0);
       UnrolledInverseFromMinor.inv3(angularPartOfJacobian, angularJacobianInverse, 1.0);
 
-      CommonOps.multTransA(linearJacobianInverse, jointTorques, footLinearForce);
-      CommonOps.multTransA(angularJacobianInverse, jointTorques, footAngularForce);
+      CommonOps.multTransA(-1.0, linearJacobianInverse, jointTorques, footLinearForce);
+      CommonOps.multTransA(-1.0, angularJacobianInverse, jointTorques, footAngularForce);
 
 
       wrench.setToZero(footJacobian.getJacobianFrame());
