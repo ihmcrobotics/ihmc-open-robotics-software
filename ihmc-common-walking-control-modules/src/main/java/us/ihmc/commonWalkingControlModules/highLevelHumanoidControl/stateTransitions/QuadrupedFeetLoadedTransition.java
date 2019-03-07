@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -62,6 +63,9 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotQuadrant);
 
          footSwitches.get(robotQuadrant).computeAndPackFootWrench(temporaryFootWrench);
+
+         temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
+
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
 
