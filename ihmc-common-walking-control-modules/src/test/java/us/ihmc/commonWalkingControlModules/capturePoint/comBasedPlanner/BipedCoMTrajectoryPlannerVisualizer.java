@@ -105,6 +105,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
    private final YoDouble restingSpringLength = new YoDouble("restingSpringLength", registry);
    private final YoDouble springDeflection = new YoDouble("springDeflection", registry);
    private final YoFrameVector3D springAcceleration = new YoFrameVector3D("springAcceleration", worldFrame, registry);
+   private final YoFrameVector3D springDirection = new YoFrameVector3D("springDirection", worldFrame, registry);
 
    private final List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> nextFootstepPolygons = new ArrayList<>();
@@ -192,7 +193,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
 //      steps = createFancySteps(soleFrames);
 
       springStiffness.set(computeStiffness());
-      restingSpringLength.set(computeSpringRestingLength(nominalHeight, springStiffness.getDoubleValue()));
+//      restingSpringLength.set(computeSpringRestingLength(nominalHeight, springStiffness.getDoubleValue()));
+      restingSpringLength.set(1.4);
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + extraSimDuration;
 
@@ -223,7 +225,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private static double computeStiffness()
    {
-      double stanceTime = swingDuration - flightDuration;
+      double stanceTime = swingDuration - 2.0 * flightDuration;
       double oscillationPeriod = 2.0 * stanceTime;
       double oscillationFrequency = 2.0 * Math.PI / oscillationPeriod;
       return MathTools.square(oscillationFrequency);
@@ -588,15 +590,17 @@ public class BipedCoMTrajectoryPlannerVisualizer
    {
       if (MathTools.epsilonEquals(desiredForce.length(), 0.0, 1e-1))
       {
+         springDirection.setToZero();
          springAcceleration.setToZero();
          springAcceleration.setZ(-gravity);
          return;
       }
 
-      springAcceleration.sub(desiredCoMPosition, desiredCoPPosition);
-      currentSpringLength.set(springAcceleration.length());
+      springDirection.sub(desiredCoMPosition, desiredCoPPosition);
+      currentSpringLength.set(springDirection.length());
       springDeflection.set(restingSpringLength.getDoubleValue() - currentSpringLength.getDoubleValue());
 
+      springAcceleration.set(springDirection);
       springAcceleration.normalize();
       springAcceleration.scale(springStiffness.getDoubleValue() * springDeflection.getDoubleValue());
       springAcceleration.subZ(gravity);
