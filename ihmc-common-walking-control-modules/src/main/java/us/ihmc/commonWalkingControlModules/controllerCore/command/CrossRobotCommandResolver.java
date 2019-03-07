@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -209,6 +210,22 @@ public class CrossRobotCommandResolver
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
          out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getJointSpecificParameters(jointIndex));
+      }
+
+      if (in.isEnabled())
+         out.enable();
+      else
+         out.disable();
+   }
+
+   public void resolvePrivilegedJointSpaceCommand(PrivilegedJointSpaceCommand in, PrivilegedJointSpaceCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getPrivilegedCommand(jointIndex));
+         out.setWeight(jointIndex, in.getWeight(jointIndex));
       }
 
       if (in.isEnabled())

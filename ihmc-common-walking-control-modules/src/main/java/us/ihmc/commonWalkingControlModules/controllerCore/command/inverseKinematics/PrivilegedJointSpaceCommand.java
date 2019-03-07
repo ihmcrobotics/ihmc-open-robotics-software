@@ -38,7 +38,6 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
       enable = false;
       joints.clear();
       privilegedOneDoFJointCommands.clear();
-
       weights.clear();
    }
 
@@ -167,5 +166,54 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.PRIVILEGED_JOINTSPACE_COMMAND;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof PrivilegedJointSpaceCommand)
+      {
+         PrivilegedJointSpaceCommand other = (PrivilegedJointSpaceCommand) object;
+
+         if (isEnabled() != other.isEnabled())
+            return false;
+         if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+            if (Double.compare(weights.get(jointIndex), other.weights.get(jointIndex)) != 0)
+               return false;
+         }
+         if (!privilegedOneDoFJointCommands.equals(other.privilegedOneDoFJointCommands))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": enabled: " + enable;
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      {
+         ret += "\nJoint: " + joints.get(jointIndex).getName();
+         if (hasNewPrivilegedCommand(jointIndex))
+            ret += ", command: " + getPrivilegedCommand(jointIndex);
+         if (hasWeight(jointIndex))
+            ret += ", weight: " + getWeight(jointIndex);
+      }
+      return ret;
    }
 }
