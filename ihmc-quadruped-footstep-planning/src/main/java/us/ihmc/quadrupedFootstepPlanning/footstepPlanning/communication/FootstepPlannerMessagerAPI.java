@@ -104,7 +104,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<RobotConfigurationData> RobotConfigurationDataTopic = Root.topic(RobotConfigurationData);
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(PlanarRegion).topic(Data);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(PlanarRegion).topic(Show);
-   public static final Topic<Boolean> AcceptNewPlanarRegions = Root.child(PlanarRegion).topic(Enable);
+   public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(PlanarRegion).topic(Enable);
    public static final Topic<PlanarRegion> SelectedRegionTopic = Root.child(SelectedRegion).topic(Data);
 
    public static final Topic<FootstepPlan> FootstepPlanTopic = Root.child(FootstepPlan).topic(Data);
@@ -116,7 +116,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ComputePathTopic = Root.child(FootstepPlan).topic(ComputePath);
    public static final Topic<Boolean> AbortPlanningTopic = Root.child(FootstepPlan).topic(AbortPlanning);
    public static final Topic<Boolean> RequestPlannerStatistics = Root.child(Statistics).topic(Show);
-   public static final Topic<Boolean> AssumeFlatGround = Root.child(FlatGround).topic(Enable);
+   public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(FlatGround).topic(Enable);
    public static final Topic<FootstepPlannerParameters> PlannerParametersTopic = Root.child(Parameters).topic(FootstepPlannerParameters);
    public static final Topic<QuadrupedXGaitSettingsReadOnly> XGaitSettingsTopic = Root.child(Parameters).topic(XGaitSettings);
    public static final Topic<QuadrupedTimedStepListMessage> FootstepDataListTopic = Root.child(FootstepPlan).topic(FootstepDataListMessage);
@@ -160,7 +160,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<List<? extends Point3DReadOnly>> BodyPathDataTopic = Root.child(BodyPath).topic(Data);
 
-   public static final Topic<Boolean> ShowBodyPath = Root.child(BodyPath).topic(Show);
+   public static final Topic<Boolean> ShowBodyPathTopic = Root.child(BodyPath).topic(Show);
 
    public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = Root.child(VisibilityGraphs).topic(Data);
 
