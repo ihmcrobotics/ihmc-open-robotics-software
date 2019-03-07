@@ -2,59 +2,45 @@ package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.StepInPlaceBehavior.API;
+import us.ihmc.humanoidBehaviors.tools.FXUIMessagerAPIFactory;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.messager.kryo.MessagerUpdateThread;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-
-import java.util.concurrent.TimeUnit;
 
 public class BehaviorModule
 {
-   private static int UPDATE_PERIOD_MILLIS = 5;
-   private final PeriodicNonRealtimeThreadScheduler thread;
-   private final KryoMessager messager;
+   private final Messager messager;
 
-   public static BehaviorModule createForTest(DRCRobotModel robotModel)
+   public static BehaviorModule createForBackpack(DRCRobotModel robotModel)
    {
-      return new BehaviorModule(robotModel, PubSubImplementation.INTRAPROCESS);
+      KryoMessager messager = KryoMessager.createServer(FXUIMessagerAPIFactory.createAPIFor(BehaviorModule.class, StepInPlaceBehavior.API.create()),
+                                                      NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorModule.class.getSimpleName(), 5);
+      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      return new BehaviorModule(robotModel, messager);
    }
 
-   public static BehaviorModule createForTeleop(DRCRobotModel robotModel)
+   public static BehaviorModule createForTest(DRCRobotModel robotModel, Messager messager)
    {
-      return new BehaviorModule(robotModel, PubSubImplementation.FAST_RTPS);
+      return new BehaviorModule(robotModel, messager);
    }
 
-   private BehaviorModule(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   private BehaviorModule(DRCRobotModel robotModel, Messager messager)
    {
-      thread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      messager = KryoMessager.createServer(API.create(), NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), new UpdateThread());
+      this.messager = messager;
 
-      MessageTopicNameGenerator controllerTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
+      PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "humanoid_behavior_module");
 
-      new StepInPlaceBehavior(messager, ros2Node, controllerTopicNameGenerator, robotModel);
-   }
-
-   private class UpdateThread implements MessagerUpdateThread
-   {
-      @Override
-      public void start(Runnable runnable)
-      {
-         UPDATE_PERIOD_MILLIS = 1;
-         thread.schedule(runnable, UPDATE_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
-      }
-
-      @Override
-      public void stop()
-      {
-         thread.shutdown();
-      }
+      new StepInPlaceBehavior(messager, ros2Node, robotModel);
    }
 
    public static class API
@@ -65,5 +51,10 @@ public class BehaviorModule
       {
          return apiFactory.getAPIAndCloseFactory();
       }
+   }
+
+   public static MessagerAPI getBehaviorAPI()
+   {
+      return FXUIMessagerAPIFactory.createAPIFor(BehaviorModule.class, StepInPlaceBehavior.API.create());
    }
 }

@@ -12,16 +12,22 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -47,7 +53,6 @@ public class AtlasPatrolBehaviorTest
    private GoalOrientedTestConductor conductor;
    private AvatarSimulation avatarSimulation;
    private AtlasRobotModel robotModel;
-   private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
 
    @Test
    public void testDoNothingBehavior()
@@ -58,18 +63,40 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      FootstepDataListMessage footMessage = new FootstepDataListMessage();
-      MovingReferenceFrame stepFrame = avatarSimulation.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT);
-      FramePoint3D footLocation = new FramePoint3D(stepFrame);
-      FrameQuaternion footOrientation = new FrameQuaternion(stepFrame);
-      footLocation.changeFrame(ReferenceFrame.getWorldFrame());
-      footOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      footMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, footLocation, footOrientation));
-      footMessage.setAreFootstepsAdjustable(true);
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
+      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      footstepDataListPublisher.publish(footMessage);
+      LogTools.info("Creating behavior module");
+      BehaviorModule.createForTest(robotModel, messager);
 
-      AtlasTestScripts.nextTouchdown(conductor, variables, 3.0);
+      LogTools.info("Creating behavior teleop");
+      BehaviorTeleop behaviorTeleop = BehaviorTeleop.createForTest(robotModel, messager);
+
+      LogTools.info("Set stepping true");
+      behaviorTeleop.setStepping(true);
+
+      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+//      int steps = footMessage.getFootstepDataList().size();
+
+      LogTools.info("Awaiting touchdowns");
+      double timeLimit = 6.0;
+      LogTools.info("Waiting for touchdown 1");
+      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
+      LogTools.info("Waiting for touchdown 2");
+      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
+      LogTools.info("Waiting for touchdown 3");
+      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
+      LogTools.info("Waiting for touchdown 4");
+      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
+
+      behaviorTeleop.setStepping(false);
+      behaviorTeleop.abort();
+
+      AtlasTestScripts.wait(conductor, variables, 3.0);
+
+      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, timeLimit);
    }
 
    @AfterEach
@@ -144,10 +171,6 @@ public class AtlasPatrolBehaviorTest
       avatarSimulationFactory.setCreateYoVariableServer(true);
 
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
-      MessageTopicNameGenerator controllerTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName());
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "humanoid_behavior_module");
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(), controllerTopicNameGenerator);
 
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()
