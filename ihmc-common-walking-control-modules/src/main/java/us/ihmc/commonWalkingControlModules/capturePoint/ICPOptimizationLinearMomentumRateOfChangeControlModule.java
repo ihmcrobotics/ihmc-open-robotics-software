@@ -165,7 +165,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       this.desiredCoMHeightAcceleration = desiredCoMHeightAcceleration;
    }
 
-   public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
+   public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
    {
       this.minimizeAngularMomentumRateZ.set(minimizeAngularMomentumRateZ);
    }
