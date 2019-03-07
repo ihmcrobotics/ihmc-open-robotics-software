@@ -136,13 +136,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
-    *
-    * @return boolean (true = use ICP Optimization, false = use ICP Proportional Controller)
-    */
-   public abstract boolean useOptimizationBasedICPController();
-
-   /**
     * The desired position of the CMP is computed based on a feedback control law on the ICP. This method returns
     * the gains used in this controller.
     */
