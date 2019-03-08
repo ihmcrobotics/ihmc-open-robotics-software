@@ -7,22 +7,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportState extends QuadrupedFootState
@@ -59,8 +55,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final YoBoolean footBarelyLoaded;
-   private final DoubleParameter footLoadThreshold;
+   private final DoubleProvider barelyLoadedWindowLength;
+   private final GlitchFilteredYoBoolean footBarelyLoaded;
+   private final DoubleParameter footBarelyLoadedThreshold;
+   private final DoubleParameter footFullyLoadedThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FramePose3D bodyFixedControlledPose = new FramePose3D();
@@ -73,6 +71,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
 
+   private final double controlDT;
+
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
@@ -82,8 +82,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.footBody = contactState.getRigidBody();
       this.parameters = controllerToolbox.getFootControlModuleParameters();
+      this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
-      desiredSoleFrame = new PoseReferenceFrame(robotQuadrant.getShortName() + "DesiredSoleFrame", worldFrame);
+      String prefix = robotQuadrant.getShortName();
+      desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
       rootBody = controllerToolbox.getFullRobotModel().getElevator();
 
@@ -99,10 +101,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
       spatialFeedbackControlCommand.set(rootBody, footBody);
       spatialFeedbackControlCommand.setPrimaryBase(controllerToolbox.getFullRobotModel().getBody());
 
-      minimumTimeInSupportState = new DoubleParameter(robotQuadrant.getShortName() + "TimeInSupportState", registry, 0.05);
+      minimumTimeInSupportState = new DoubleParameter(prefix + "TimeInSupportState", registry, 0.05);
 
-      footBarelyLoaded = new YoBoolean(robotQuadrant.getShortName() + "_BarelyLoaded", registry);
-      footLoadThreshold = new DoubleParameter(robotQuadrant.getShortName() + "_FootLoadThreshold", registry, 0.15);
+      barelyLoadedWindowLength = new DoubleParameter(prefix + "_BarelyLoadedWindowLength", registry, 0.05);
+      footBarelyLoaded = new GlitchFilteredYoBoolean(prefix + "_BarelyLoaded", registry, (int) (0.05 / controlDT));
+      footBarelyLoadedThreshold = new DoubleParameter(prefix + "_FootBarelyLoadedThreshold", registry, 0.10);
+      footFullyLoadedThreshold = new DoubleParameter(prefix + "_FootFullyLoadedThreshold", registry, 0.15);
 
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
    }
@@ -130,7 +134,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
    public void doAction(double timeInState)
    {
       // determine foot state
-      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getValue());
+      footBarelyLoaded.setWindowSize((int) (barelyLoadedWindowLength.getValue() / controlDT));
+      if (footBarelyLoaded.getBooleanValue())
+         footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footFullyLoadedThreshold.getValue()); // if it is barely loaded, make it harder to switch back to barely loaded by using a different threshold
+      else
+         footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footBarelyLoadedThreshold.getValue());
+
 
       updateHoldPositionSetpoints();
 
