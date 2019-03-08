@@ -1,17 +1,13 @@
 package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.WeightedAverageWrenchCalculator;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.JointTorqueBasedWrenchCalculator.JointTorqueProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -108,7 +104,7 @@ public class QuadrupedFootSwitchFactory
             footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
-         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(estimatedTorqueBasedWrenchCalculator, robotQuadrant, registry);
+         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(weightedAverageWrenchCalculator, robotQuadrant, registry);
          footSwitch.addTouchdownDetector(estimatedForceBasedTouchDownDetection);
 
          footSwitches.set(robotQuadrant, footSwitch);
