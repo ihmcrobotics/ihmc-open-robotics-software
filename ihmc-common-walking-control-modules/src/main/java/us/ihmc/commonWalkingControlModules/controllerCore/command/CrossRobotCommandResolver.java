@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -313,6 +314,17 @@ public class CrossRobotCommandResolver
       out.getFeedForwardLinearAction().set(in.getFeedForwardLinearAction());
       out.setGains(in.getGains());
       resolveMomentumRateCommand(in.getMomentumRateCommand(), out.getMomentumRateCommand());
+   }
+
+   public void resolveJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand in, JointspaceFeedbackControlCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredPosition(jointIndex), in.getDesiredVelocity(jointIndex),
+                      in.getFeedForwardAction(jointIndex), in.getGains(jointIndex), in.getWeightForSolver(jointIndex));
+      }
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)

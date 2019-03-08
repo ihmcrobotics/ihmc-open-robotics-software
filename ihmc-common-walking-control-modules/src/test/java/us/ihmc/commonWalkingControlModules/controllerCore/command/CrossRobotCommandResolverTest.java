@@ -15,6 +15,7 @@ import org.reflections.Reflections;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -70,6 +71,7 @@ import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -704,17 +706,17 @@ class CrossRobotCommandResolverTest
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
-   
+
    @Test
    void testResolveCenterOfMassFeedbackControlCommand() throws Exception
    {
       Random random = new Random(657654);
-      
+
       TestData testData = new TestData(random, 20, 20);
-      
+
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
-      
+
       for (int i = 0; i < ITERATIONS; i++)
       {
          long seed = random.nextLong();
@@ -723,6 +725,28 @@ class CrossRobotCommandResolverTest
          CenterOfMassFeedbackControlCommand expectedOut = nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          CenterOfMassFeedbackControlCommand actualOut = new CenterOfMassFeedbackControlCommand();
          crossRobotCommandResolver.resolveCenterOfMassFeedbackControlCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolveJointspaceFeedbackControlCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointspaceFeedbackControlCommand in = nextJointspaceFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointspaceFeedbackControlCommand expectedOut = nextJointspaceFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceFeedbackControlCommand actualOut = new JointspaceFeedbackControlCommand();
+         crossRobotCommandResolver.resolveJointspaceFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -1070,7 +1094,8 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static CenterOfMassFeedbackControlCommand nextCenterOfMassFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static CenterOfMassFeedbackControlCommand nextCenterOfMassFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+                                                                                           ReferenceFrame... possibleFrames)
    {
       CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
       next.getDesiredPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
@@ -1078,6 +1103,23 @@ class CrossRobotCommandResolverTest
       next.getFeedForwardLinearAction().set(EuclidCoreRandomTools.nextVector3D(random));
       next.setGains(nextPID3DGains(random));
       next.getMomentumRateCommand().set(nextMomentumRateCommand(random, rootBody, possibleFrames));
+      return next;
+   }
+
+   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+                                                                                       ReferenceFrame... possibleFrames)
+   {
+      JointspaceFeedbackControlCommand next = new JointspaceFeedbackControlCommand();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.addJoint(joint, random.nextDouble(), random.nextDouble(), random.nextDouble(), nextPDGains(random), random.nextDouble());
+      }
+
       return next;
    }
 
@@ -1224,6 +1266,13 @@ class CrossRobotCommandResolverTest
       next.setMaxDerivativeError(random.nextDouble());
       next.setMaxFeedbackAndFeedbackRate(random.nextDouble(), random.nextDouble());
 
+      return next;
+   }
+
+   public static PDGains nextPDGains(Random random)
+   {
+      PDGains next = new PDGains();
+      next.set(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
       return next;
    }
 
