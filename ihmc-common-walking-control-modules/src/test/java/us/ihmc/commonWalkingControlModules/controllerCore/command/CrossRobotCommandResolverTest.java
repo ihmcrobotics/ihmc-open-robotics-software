@@ -13,6 +13,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -67,6 +68,8 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -648,8 +651,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         VirtualModelControlOptimizationSettingsCommand in = nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         VirtualModelControlOptimizationSettingsCommand expectedOut = nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         VirtualModelControlOptimizationSettingsCommand in = nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                testData.frameTreeA);
+         VirtualModelControlOptimizationSettingsCommand expectedOut = nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                         testData.frameTreeB);
          VirtualModelControlOptimizationSettingsCommand actualOut = new VirtualModelControlOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveVirtualModelControlOptimizationSettingsCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -696,6 +701,28 @@ class CrossRobotCommandResolverTest
          VirtualWrenchCommand expectedOut = nextVirtualWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
          VirtualWrenchCommand actualOut = new VirtualWrenchCommand();
          crossRobotCommandResolver.resolveVirtualWrenchCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+   
+   @Test
+   void testResolveCenterOfMassFeedbackControlCommand() throws Exception
+   {
+      Random random = new Random(657654);
+      
+      TestData testData = new TestData(random, 20, 20);
+      
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         CenterOfMassFeedbackControlCommand in = nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         CenterOfMassFeedbackControlCommand expectedOut = nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         CenterOfMassFeedbackControlCommand actualOut = new CenterOfMassFeedbackControlCommand();
+         crossRobotCommandResolver.resolveCenterOfMassFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -1004,7 +1031,8 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static VirtualModelControlOptimizationSettingsCommand nextVirtualModelControlOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static VirtualModelControlOptimizationSettingsCommand nextVirtualModelControlOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
+                                                                                                                   ReferenceFrame... possibleFrames)
    {
       VirtualModelControlOptimizationSettingsCommand next = new VirtualModelControlOptimizationSettingsCommand();
       next.setRhoMin(random.nextDouble());
@@ -1028,17 +1056,28 @@ class CrossRobotCommandResolverTest
 
       return next;
    }
-   
+
    public static VirtualWrenchCommand nextVirtualWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       VirtualWrenchCommand next = new VirtualWrenchCommand();
-      
+
       next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
       next.getDesiredLinearForce().set(EuclidCoreRandomTools.nextVector3D(random));
       next.getDesiredAngularTorque().set(EuclidCoreRandomTools.nextVector3D(random));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
-      
+
+      return next;
+   }
+
+   public static CenterOfMassFeedbackControlCommand nextCenterOfMassFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
+      next.getDesiredPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getFeedForwardLinearAction().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.setGains(nextPID3DGains(random));
+      next.getMomentumRateCommand().set(nextMomentumRateCommand(random, rootBody, possibleFrames));
       return next;
    }
 
@@ -1172,6 +1211,19 @@ class CrossRobotCommandResolverTest
       next.setTorqueUpperLimit(random.nextDouble());
       next.setPositionLimitStiffness(random.nextDouble());
       next.setPositionLimitDamping(random.nextDouble());
+      return next;
+   }
+
+   public static PID3DGains nextPID3DGains(Random random)
+   {
+      PID3DGains next = new DefaultPID3DGains();
+
+      next.setProportionalGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setDerivativeGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setIntegralGains(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setMaxDerivativeError(random.nextDouble());
+      next.setMaxFeedbackAndFeedbackRate(random.nextDouble(), random.nextDouble());
+
       return next;
    }
 

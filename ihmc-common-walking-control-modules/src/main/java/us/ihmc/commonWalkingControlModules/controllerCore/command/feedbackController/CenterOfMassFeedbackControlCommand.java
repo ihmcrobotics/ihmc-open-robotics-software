@@ -10,8 +10,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -41,14 +45,14 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
 
    private final Point3D desiredPositionInWorld = new Point3D();
    private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
-   private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
+   private final Vector3D feedForwardLinearActionInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
 
    /**
-    * Momentum rate command used to save different control properties such as the weight to be used
-    * in the QP optimization.
+    * Momentum rate command used to save different control properties such as the weight to be used in
+    * the QP optimization.
     * <p>
     * Should not be accessed from the user side.
     * </p>
@@ -72,7 +76,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    {
       desiredPositionInWorld.set(other.desiredPositionInWorld);
       desiredLinearVelocityInWorld.set(other.desiredLinearVelocityInWorld);
-      feedForwardLinearAccelerationInWorld.set(other.feedForwardLinearAccelerationInWorld);
+      feedForwardLinearActionInWorld.set(other.feedForwardLinearActionInWorld);
       setGains(other.gains);
 
       momentumRateCommand.set(other.momentumRateCommand);
@@ -94,41 +98,42 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * The desired linear velocity and feed-forward linear acceleration are set to zero.
     * </p>
     *
-    * @param desiredPosition describes the position that the center of mass should reach. Not
-    *           modified.
+    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition)
+   public void set(FramePoint3DReadOnly desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.setToZero();
-      feedForwardLinearAccelerationInWorld.setToZero();
+      feedForwardLinearActionInWorld.setToZero();
    }
 
    /**
     * Sets the desired data expressed in world frame to be used during the next control tick.
     *
-    * @param desiredPosition describes the position that the center of mass should reach. Not
-    *           modified.
-    * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect
-    *           to world. Not modified.
-    * @param feedForwardLinearAcceleration describes the desired center of mass linear acceleration
-    *           with respect to the world. Not modified.
+    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
+    * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
+    *           world. Not modified.
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
+   public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
-      feedForwardLinearAcceleration.checkReferenceFrameMatch(worldFrame);
 
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.set(desiredLinearVelocity);
-      feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);
+      feedForwardLinearActionInWorld.setToZero();
+   }
+
+   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
+   {
+      feedForwardLinearAction.checkReferenceFrameMatch(worldFrame);
+      feedForwardLinearActionInWorld.set(feedForwardLinearAction);
    }
 
    /**
@@ -141,8 +146,8 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Convenience method that sets up the selection matrix such that only the x and y components of
-    * the linear part of this command will be considered in the optimization.
+    * Convenience method that sets up the selection matrix such that only the x and y components of the
+    * linear part of this command will be considered in the optimization.
     */
    public void setSelectionMatrixForLinearXYControl()
    {
@@ -152,13 +157,13 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    /**
     * Sets this command's selection matrix to the given one.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
@@ -191,9 +196,9 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * commands value will be treated as more important than the other commands.
     * </p>
     *
-    * @param weight dense matrix holding the weights to use for each component of the desired center
-    *           of mass position. It is expected to be a 3-by-1 vector ordered as: {@code linearX},
-    *           {@code linearY}, {@code linearZ}. Not modified.
+    * @param weightVector dense matrix holding the weights to use for each component of the desired
+    *           center of mass position. It is expected to be a 3-by-1 vector ordered as:
+    *           {@code linearX}, {@code linearY}, {@code linearZ}. Not modified.
     */
    public void setWeightsForSolver(DenseMatrix64F weightVector)
    {
@@ -219,11 +224,27 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       momentumRateCommand.setAngularWeightsToZero();
    }
 
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D feedForwardLinearAccelerationToPack)
+   public Point3DBasics getDesiredPosition()
+   {
+      return desiredPositionInWorld;
+   }
+
+   public Vector3DBasics getDesiredLinearVelocity()
+   {
+      return desiredLinearVelocityInWorld;
+   }
+
+   public Vector3DBasics getFeedForwardLinearAction()
+   {
+      return feedForwardLinearActionInWorld;
+   }
+
+   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack,
+                                 FrameVector3D feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);
-      feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearAccelerationInWorld);
+      feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearActionInWorld);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -242,4 +263,40 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       return ControllerCoreCommandType.MOMENTUM;
    }
 
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof CenterOfMassFeedbackControlCommand)
+      {
+         CenterOfMassFeedbackControlCommand other = (CenterOfMassFeedbackControlCommand) object;
+
+         if (!desiredPositionInWorld.equals(other.desiredPositionInWorld))
+            return false;
+         if (!desiredLinearVelocityInWorld.equals(other.desiredLinearVelocityInWorld))
+            return false;
+         if (!feedForwardLinearActionInWorld.equals(other.feedForwardLinearActionInWorld))
+            return false;
+         if (!gains.equals(other.gains))
+            return false;
+         if (!momentumRateCommand.equals(other.momentumRateCommand))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": desired position: " + desiredPositionInWorld + ", desired velocity: " + desiredLinearVelocityInWorld
+            + ", feed-forward: " + feedForwardLinearActionInWorld;
+   }
 }
