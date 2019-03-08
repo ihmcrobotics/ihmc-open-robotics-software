@@ -45,7 +45,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    {
       footForce.setIncludingFrame(wrenchCalculator.getWrench().getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
-      measuredZForce.set(footForce.getZ() * -1.0);
+      measuredZForce.set(footForce.getZ());
       isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
    }
 

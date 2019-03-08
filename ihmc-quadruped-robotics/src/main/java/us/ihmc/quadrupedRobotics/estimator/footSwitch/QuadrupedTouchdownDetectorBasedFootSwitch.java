@@ -101,7 +101,9 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
+      footWrenchToPack.setToZero();
+      if (hasFootHitGround())
+         footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
    }
 
    @Override
