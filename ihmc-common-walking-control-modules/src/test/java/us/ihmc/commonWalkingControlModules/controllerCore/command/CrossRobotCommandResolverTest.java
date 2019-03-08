@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -608,6 +609,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveVirtualForceCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         VirtualForceCommand in = nextVirtualForceCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         VirtualForceCommand expectedOut = nextVirtualForceCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         VirtualForceCommand actualOut = new VirtualForceCommand();
+         crossRobotCommandResolver.resolveVirtualForceCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -896,6 +919,18 @@ class CrossRobotCommandResolverTest
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
          next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random));
       }
+
+      return next;
+   }
+
+   public static VirtualForceCommand nextVirtualForceCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      VirtualForceCommand next = new VirtualForceCommand();
+
+      next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
+      next.getDesiredLinearForce().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix3D(random, possibleFrames));
 
       return next;
    }

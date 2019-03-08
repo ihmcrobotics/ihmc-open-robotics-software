@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -267,6 +268,14 @@ public class CrossRobotCommandResolver
       {
          out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex));
       }
+   }
+
+   public void resolveVirtualForceCommand(VirtualForceCommand in, VirtualForceCommand out)
+   {
+      out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
+      resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
+      out.getDesiredLinearForce().set(in.getDesiredLinearForce());
+      resolveSelectionMatrix3D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
