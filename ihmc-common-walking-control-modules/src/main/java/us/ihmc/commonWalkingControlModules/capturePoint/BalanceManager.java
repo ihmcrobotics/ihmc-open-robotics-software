@@ -14,8 +14,10 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -121,7 +123,6 @@ public class BalanceManager
    private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
-   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final DoubleProvider maxICPErrorBeforeSingleSupportX;
@@ -139,21 +140,23 @@ public class BalanceManager
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
    private boolean initializeForTransfer = false;
-   private RobotSide supportSide;
-   private RobotSide transferToSide;
    private boolean minimizeAngularMomentumRateZ = false;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
    private boolean updatePlanarRegions = false;
-   private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
-   private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
+   private RobotSide supportSide;
+   private RobotSide transferToSide;
+   private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
+   private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics achievedLinearMomentumRate = new FrameVector3D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
+   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -176,12 +179,10 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons,
-                                                                                                           controllerToolbox.getICPControlPolygons(),
-                                                                                                           contactableFeet, walkingControllerParameters, yoTime,
-                                                                                                           totalMass, gravityZ, controlDT,
-                                                                                                           angularMomentumRateWeight, linearMomentumRateWeight,
-                                                                                                           registry, yoGraphicsListRegistry);
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons, controllerToolbox.getICPControlPolygons(),
+                                                                            contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ,
+                                                                            controlDT, angularMomentumRateWeight, linearMomentumRateWeight, registry,
+                                                                            yoGraphicsListRegistry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       ICPPlannerInterface icpPlanner;
@@ -249,8 +250,6 @@ public class BalanceManager
 
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
-
-      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
       String graphicListName = getClass().getSimpleName();
 
@@ -449,7 +448,7 @@ public class BalanceManager
       linearMomentumRateControlModule.setFootsteps(footsteps, footstepTimings);
       linearMomentumRateControlModule.setFinalTransferDuration(finalTransferDuration);
       linearMomentumRateControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
-      linearMomentumRateControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
+      linearMomentumRateControlModule.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
       linearMomentumRateControlModule.setOmega0(omega0);
@@ -475,6 +474,8 @@ public class BalanceManager
       footstepSolution.set(linearMomentumRateControlModule.getFootstepSolution());
       footstepWasAdjusted = linearMomentumRateControlModule.getFootstepWasAdjusted();
       usingStepAdjustment = linearMomentumRateControlModule.getUsingStepAdjustment();
+      momentumRateCommand.set(linearMomentumRateControlModule.getMomentumRateCommand());
+      centerOfPressureCommand.set(linearMomentumRateControlModule.getCenterOfPressureCommand());
 
       initializeForStanding = false;
       initializeForTransfer = false;
@@ -556,10 +557,10 @@ public class BalanceManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-      inverseDynamicsCommandList.addCommand(linearMomentumRateControlModule.getMomentumRateCommand());
+      inverseDynamicsCommandList.addCommand(momentumRateCommand);
       if (useCoPObjective.getValue())
       {
-         inverseDynamicsCommandList.addCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
+         inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
       }
       return inverseDynamicsCommandList;
    }
