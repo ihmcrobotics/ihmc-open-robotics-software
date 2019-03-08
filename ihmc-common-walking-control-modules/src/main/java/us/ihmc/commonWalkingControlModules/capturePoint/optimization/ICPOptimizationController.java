@@ -1046,7 +1046,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   public void submitCurrentPlanarRegions(List<PlanarRegion> planarRegions)
    {
       if (planarRegionConstraintProvider != null)
          planarRegionConstraintProvider.setPlanarRegions(planarRegions);

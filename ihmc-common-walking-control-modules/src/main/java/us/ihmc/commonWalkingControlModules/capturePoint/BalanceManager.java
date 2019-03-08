@@ -141,13 +141,19 @@ public class BalanceManager
    private boolean initializeForTransfer = false;
    private RobotSide supportSide;
    private RobotSide transferToSide;
+   private boolean minimizeAngularMomentumRateZ = false;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
+   private boolean updatePlanarRegions = false;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private double finalTransferDuration;
+   private double timeRemainingInSwing = Double.NaN;
    private final FixedFrameVector3DBasics achievedLinearMomentumRate = new FrameVector3D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
+   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
+   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -277,9 +283,6 @@ public class BalanceManager
 
       parentRegistry.addChild(registry);
    }
-
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
@@ -457,6 +460,10 @@ public class BalanceManager
       linearMomentumRateControlModule.setSupportLeg(supportSide);
       linearMomentumRateControlModule.setTransferToSide(transferToSide);
       linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
+      linearMomentumRateControlModule.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
+      linearMomentumRateControlModule.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
+      linearMomentumRateControlModule.setPlanarRegions(planarRegions);
+      linearMomentumRateControlModule.setUpdatePlanarRegions(updatePlanarRegions);
 
       if (!linearMomentumRateControlModule.compute())
       {
@@ -472,10 +479,12 @@ public class BalanceManager
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
+      updatePlanarRegions = false;
       footstepTimings.clear();
       footsteps.clear();
       supportSide = null;
       transferToSide = null;
+      timeRemainingInSwing = Double.NaN;
 
       // This is for debugging such that the momentum trajectory handler YoVariables contain the current value:
       if (momentumTrajectoryHandler != null)
@@ -845,7 +854,12 @@ public class BalanceManager
 
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
-      linearMomentumRateControlModule.submitCurrentPlanarRegions(planarRegions);
+      updatePlanarRegions = true;
+      this.planarRegions.clear();
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         this.planarRegions.add().set(planarRegions.get(i));
+      }
    }
 
    public void updateCurrentICPPlan()
@@ -855,7 +869,7 @@ public class BalanceManager
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
    {
-      linearMomentumRateControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
+      this.timeRemainingInSwing = timeRemainingInSwing;
    }
 
    public FrameVector3DReadOnly getEffectiveICPAdjustment()
@@ -868,8 +882,8 @@ public class BalanceManager
       controllerToolbox.getCapturePoint(capturePointToPack);
    }
 
-   public void minimizeAngularMomentumRateZ(boolean enable)
+   public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
    {
-      linearMomentumRateControlModule.setMinimizeAngularMomentumRateZ(enable);
+      this.minimizeAngularMomentumRateZ = minimizeAngularMomentumRateZ;
    }
 }

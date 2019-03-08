@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -113,12 +112,16 @@ public class LinearMomentumRateControlModule
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
 
-   private boolean initializeForStanding = false;
-   private boolean initializeForSingleSupport = false;
-   private boolean initializeForTransfer = false;
+   private boolean initializeForStanding;
+   private boolean initializeForSingleSupport;
+   private boolean initializeForTransfer;
+   private boolean keepCoPInsideSupportPolygon;
+   private boolean updatePlanarRegions;
    private double finalTransferDuration;
+   private double remainingTimeInSwingUnderDisturbance;
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
    private final FrameVector3D effectiveICPAdjustment = new FrameVector3D();
    private boolean usingStepAdjustment;
@@ -224,6 +227,8 @@ public class LinearMomentumRateControlModule
 
    public void setFootsteps(List<Footstep> footsteps, List<FootstepTiming> footstepTimings)
    {
+      this.footsteps.clear();
+      this.footstepTimings.clear();
       for (int i = 0; i < footsteps.size(); i++)
       {
          this.footsteps.add().set(footsteps.get(i));
@@ -251,19 +256,28 @@ public class LinearMomentumRateControlModule
       this.initializeForTransfer = initializeForTransfer;
    }
 
-   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   public void setRemainingTimeInSwingUnderDisturbance(double remainingTimeInSwingUnderDisturbance)
    {
-      icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
+      this.remainingTimeInSwingUnderDisturbance = remainingTimeInSwingUnderDisturbance;
    }
 
-   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   public void setUpdatePlanarRegions(boolean updatePlanarRegions)
    {
-      icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
+      this.updatePlanarRegions = updatePlanarRegions;
+   }
+
+   public void setPlanarRegions(List<PlanarRegion> planarRegions)
+   {
+      this.planarRegions.clear();
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         this.planarRegions.add().set(planarRegions.get(i));
+      }
    }
 
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
-      icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      this.keepCoPInsideSupportPolygon = keepCoPInsideSupportPolygon;
    }
 
    public FramePose3DReadOnly getFootstepSolution()
@@ -347,25 +361,31 @@ public class LinearMomentumRateControlModule
          {
             icpOptimizationController.addFootstepToPlan(footsteps.get(i), footstepTimings.get(i));
          }
-         footsteps.clear();
-         footstepTimings.clear();
       }
 
       if (initializeForStanding)
       {
          icpOptimizationController.initializeForStanding(yoTime.getValue());
-         initializeForStanding = false;
       }
       if (initializeForSingleSupport)
       {
          icpOptimizationController.initializeForSingleSupport(yoTime.getValue(), supportSide, omega0);
-         initializeForSingleSupport = false;
       }
-
       if (initializeForTransfer)
       {
          icpOptimizationController.initializeForTransfer(yoTime.getValue(), transferToSide);
-         initializeForTransfer = false;
+      }
+
+      icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+
+      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
+      {
+         icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
+      }
+
+      if (updatePlanarRegions)
+      {
+         icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
       }
    }
 

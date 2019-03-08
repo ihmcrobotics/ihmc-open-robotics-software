@@ -12,6 +12,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.List;
+
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -152,7 +155,7 @@ public interface ICPOptimizationControllerInterface
     *
     * @param planarRegions list of the current planar regions that describe the environment.
     */
-   void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
+   void submitCurrentPlanarRegions(List<PlanarRegion> planarRegions);
 
    /**
     * This controller combines both ICP error feedback and step adjustment. Step adjustment can be though

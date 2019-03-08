@@ -27,7 +27,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -54,7 +53,7 @@ public class PlanarRegionConstraintProvider
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+   private final RecyclingArrayList<PlanarRegion> planarRegionsList = new RecyclingArrayList<>(PlanarRegion.class);
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
    private final YoInteger numberOfPlanarListsToConsider;
 
@@ -159,7 +158,7 @@ public class PlanarRegionConstraintProvider
 
       if (planarRegion != null)
       {
-         planarRegionsList.addPlanarRegion(planarRegion);
+         planarRegionsList.add().set(planarRegion);
       }
       else
       {
@@ -171,7 +170,7 @@ public class PlanarRegionConstraintProvider
 
    private final Vector3D planeNormal = new Vector3D();
    private final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
-   public void setPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   public void setPlanarRegions(List<PlanarRegion> planarRegions)
    {
       if (allowUsePlanarRegionConstraints)
       {
@@ -187,7 +186,7 @@ public class PlanarRegionConstraintProvider
 
             if (angle < maxNormalAngleFromVertical)
             {
-               planarRegionsList.addPlanarRegion(planarRegions.get(i));
+               planarRegionsList.add().set(planarRegions.get(i));
                numberOfPlanarListsToConsider.increment();
             }
          }
@@ -319,9 +318,9 @@ public class PlanarRegionConstraintProvider
 
    private void findPlanarRegionAttachedToFootstep(FramePose3DReadOnly upcomingFootstep)
    {
-      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < planarRegionsList.size(); regionIndex++)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+         PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
          planarRegion.getTransformToWorld(planeTransformToWorld);
          planeReferenceFrame.update();
@@ -380,9 +379,9 @@ public class PlanarRegionConstraintProvider
       PlanarRegion activePlanarRegion = null;
       activePlanarRegionConvexHullInControlFrame.clear();
 
-      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < planarRegionsList.size(); regionIndex++)
       {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+         PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
          icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
