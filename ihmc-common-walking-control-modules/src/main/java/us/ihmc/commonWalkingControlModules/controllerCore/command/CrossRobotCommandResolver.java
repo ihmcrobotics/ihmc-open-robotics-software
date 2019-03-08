@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -293,6 +294,15 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredAngularTorque().set(in.getDesiredAngularTorque());
       resolveSelectionMatrix3D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveVirtualWrenchCommand(VirtualWrenchCommand in, VirtualWrenchCommand out)
+   {
+      out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
+      resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
+      out.getDesiredLinearForce().set(in.getDesiredLinearForce());
+      out.getDesiredAngularTorque().set(in.getDesiredAngularTorque());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)

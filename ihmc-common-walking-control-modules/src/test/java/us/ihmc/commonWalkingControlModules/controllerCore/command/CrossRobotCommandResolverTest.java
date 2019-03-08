@@ -40,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -677,6 +678,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveVirtualWrenchCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         VirtualWrenchCommand in = nextVirtualWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         VirtualWrenchCommand expectedOut = nextVirtualWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         VirtualWrenchCommand actualOut = new VirtualWrenchCommand();
+         crossRobotCommandResolver.resolveVirtualWrenchCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -1003,6 +1026,19 @@ class CrossRobotCommandResolverTest
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix3D(random, possibleFrames));
 
+      return next;
+   }
+   
+   public static VirtualWrenchCommand nextVirtualWrenchCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      VirtualWrenchCommand next = new VirtualWrenchCommand();
+      
+      next.set(nextElementIn(random, rootBody.subtreeList()), nextElementIn(random, rootBody.subtreeList()));
+      next.getDesiredLinearForce().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getDesiredAngularTorque().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      
       return next;
    }
 
