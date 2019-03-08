@@ -20,7 +20,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -309,7 +308,6 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       int planningResult = behavior.getPlanningResult();
       int expectedPlanningResult = KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME;
 
-      PrintTools.info(" " + planningResult + " " + expectedPlanningResult);
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
       assertTrue(planningResult == expectedPlanningResult);
 
@@ -393,12 +391,13 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
 
-      int planningResult = behavior.getPlanningResult();
-      int expectedPlanningResult = KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT;
+      Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
-      PrintTools.info(" " + planningResult + " " + expectedPlanningResult);
-
-      assertTrue(planningResult == expectedPlanningResult);
+      double positionDistance = desiredPoses.get(desiredPoses.size() - 1).getPositionDistance(finalPose);
+      double orientationDistance = Math.abs(desiredPoses.get(desiredPoses.size() - 1).getPositionDistance(finalPose));
+      double orientationDistanceRotation = Math.abs(desiredPoses.get(desiredPoses.size() - 1).getOrientationDistance(finalPose) - Math.PI * 2);
+      assertEquals("Hand too far from the last desired point ", 0.0, positionDistance, 0.011);
+      assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
