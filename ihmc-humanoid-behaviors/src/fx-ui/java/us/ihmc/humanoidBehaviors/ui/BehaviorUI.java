@@ -16,17 +16,18 @@ import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -139,12 +140,17 @@ public class BehaviorUI
 
    public static class API
    {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(BehaviorUI.class);
+      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
+      private static final Category rootCategory = apiFactory.createRootCategory(apiFactory.createCategoryTheme("BehaviorUI"));
 
-      public static final Topic<FXUIEditor> ActiveEditor = apiFactory.createTopic("ActiveEditor", FXUIEditor.class);
-      public static final Topic<PlanarRegionsList> PlanarRegionsList = apiFactory.createTopic("PlanarRegionsList", PlanarRegionsList.class);
-      public static final Topic<FXUIEditableGraphic> SelectedGraphic = apiFactory.createTopic("SelectedGraphic", FXUIEditableGraphic.class);
-      public static final Topic<FXUIStateMachine> ActiveStateMachine = apiFactory.createTopic("ActiveStateMachine", FXUIStateMachine.class);
+      private static final CategoryTheme ActiveEditorTheme = apiFactory.createCategoryTheme("ActiveEditorTheme");
+      public static final Topic<FXUIEditor> ActiveEditor = rootCategory.child(ActiveEditorTheme).topic(apiFactory.createTypedTopicTheme("FXUIEditor"));
+      private static final CategoryTheme SelectedGraphicTheme = apiFactory.createCategoryTheme("SelectedGraphicTheme");
+      public static final Topic<FXUIEditableGraphic> SelectedGraphic = rootCategory.child(SelectedGraphicTheme)
+                                                                                   .topic(apiFactory.createTypedTopicTheme("FXUIEditableGraphic"));
+      private static final CategoryTheme ActiveStateMachineTheme = apiFactory.createCategoryTheme("ActiveStateMachineTheme");
+      public static final Topic<FXUIStateMachine> ActiveStateMachine = rootCategory.child(ActiveStateMachineTheme)
+                                                                                   .topic(apiFactory.createTypedTopicTheme("FXUIStateMachine"));
 
       public static final MessagerAPI create()
       {
