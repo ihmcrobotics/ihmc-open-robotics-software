@@ -251,24 +251,6 @@ public class LinearMomentumRateControlModule
       this.initializeForTransfer = initializeForTransfer;
    }
 
-   public void setNextTransferDuration(double nextTransferDuration)
-   {
-      // Must be AFTER call to initializeFor...
-      icpOptimizationController.setNextTransferDuration(nextTransferDuration);
-   }
-
-   public void setTransferDuration(double transferDuration)
-   {
-      // Must be AFTER call to initializeFor...
-      icpOptimizationController.setTransferDuration(transferDuration);
-   }
-
-   public void setSwingDuration(double swingDuration)
-   {
-      // Must be AFTER call to initializeFor...
-      icpOptimizationController.setSwingDuration(swingDuration);
-   }
-
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
    {
       icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);

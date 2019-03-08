@@ -72,7 +72,6 @@ public class BalanceManager
    private final PrecomputedICPPlanner precomputedICPPlanner;
    private final LinearMomentumRateControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
-   private boolean updateTimings = false;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -140,6 +139,7 @@ public class BalanceManager
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
+   private double finalTransferDuration;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -437,29 +437,12 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateOfChangeControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
       linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
+      linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferDuration);
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
-
-      if (ENABLE_DYN_REACHABILITY && updateTimings)
-      {
-         double adjustedFinalTransferDuration = dynamicReachabilityCalculator.getFinalTransferDuration();
-         if (!Double.isNaN(adjustedFinalTransferDuration))
-         {
-            linearMomentumRateOfChangeControlModule.setFinalTransferDuration(adjustedFinalTransferDuration);
-         }
-
-         double nextTransferDuration = dynamicReachabilityCalculator.getNextTransferDuration();
-         if (!Double.isNaN(nextTransferDuration))
-         {
-            linearMomentumRateOfChangeControlModule.setNextTransferDuration(nextTransferDuration);
-         }
-
-         linearMomentumRateOfChangeControlModule.setTransferDuration(dynamicReachabilityCalculator.getTransferDuration());
-         linearMomentumRateOfChangeControlModule.setSwingDuration(dynamicReachabilityCalculator.getSwingDuration());
-
-         updateTimings = false;
-      }
+      footstepTimings.clear();
+      footsteps.clear();
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
       linearMomentumRateOfChangeControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
@@ -617,7 +600,7 @@ public class BalanceManager
          if (editStepTimingForReachability.getBooleanValue())
          {
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
-            updateTimings = dynamicReachabilityCalculator.wasTimingAdjusted();
+            adjustTimingsUsingReachability();
          }
          else
          {
@@ -626,6 +609,31 @@ public class BalanceManager
       }
 
       icpPlannerDone.set(false);
+   }
+
+   private void adjustTimingsUsingReachability()
+   {
+      if (!dynamicReachabilityCalculator.wasTimingAdjusted())
+      {
+         return;
+      }
+
+      if (footstepTimings.isEmpty())
+      {
+         throw new RuntimeException("Can not adjust empty list of timings. This is probably called at the wrong time.");
+      }
+
+      footstepTimings.get(0).setTimings(dynamicReachabilityCalculator.getSwingDuration(), dynamicReachabilityCalculator.getTransferDuration());
+      if (footstepTimings.size() > 0)
+      {
+         footstepTimings.get(1).setTransferTime(dynamicReachabilityCalculator.getNextTransferDuration());
+      }
+
+      double adjustedFinalTransferDuration = dynamicReachabilityCalculator.getFinalTransferDuration();
+      if (!Double.isNaN(adjustedFinalTransferDuration))
+      {
+         finalTransferDuration = adjustedFinalTransferDuration;
+      }
    }
 
    public void initializeICPPlanForStanding()
@@ -674,7 +682,7 @@ public class BalanceManager
          if (editStepTimingForReachability.getBooleanValue())
          {
             dynamicReachabilityCalculator.verifyAndEnsureReachability();
-            updateTimings = dynamicReachabilityCalculator.wasTimingAdjusted();
+            adjustTimingsUsingReachability();
          }
          else
          {
@@ -779,10 +787,10 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   public void setFinalTransferTime(double finalTransferTime)
+   public void setFinalTransferTime(double finalTransferDuration)
    {
-      icpPlanner.setFinalTransferDuration(finalTransferTime);
-      linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);
+      icpPlanner.setFinalTransferDuration(finalTransferDuration);
+      this.finalTransferDuration = finalTransferDuration;
    }
 
    /**
