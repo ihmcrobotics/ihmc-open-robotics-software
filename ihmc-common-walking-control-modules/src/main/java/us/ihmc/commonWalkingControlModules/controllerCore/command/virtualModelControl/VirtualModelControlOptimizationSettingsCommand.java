@@ -348,4 +348,44 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualModelControlOptimizationSettingsCommand)
+      {
+         VirtualModelControlOptimizationSettingsCommand other = (VirtualModelControlOptimizationSettingsCommand) object;
+         if (rhoMin != other.rhoMin)
+            return false;
+         if (rhoWeight != other.rhoWeight)
+            return false;
+         if (rhoRateWeight != other.rhoRateWeight)
+            return false;
+         if (!centerOfPressureWeight.equals(other.centerOfPressureWeight))
+            return false;
+         if (!centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+            return false;
+         if (momentumRateWeight != other.momentumRateWeight)
+            return false;
+         if (momentumAccelerationWeight != other.momentumAccelerationWeight)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": rho min: " + rhoMin + ", rho weight: " + rhoWeight + ", rho rate weight: " + rhoRateWeight + ", CoP weight: "
+            + centerOfPressureWeight + ", CoP rate weight: " + centerOfPressureRateWeight + ", momentum rate weight: " + momentumRateWeight
+            + ", momentum acceleration weight: " + momentumAccelerationWeight;
+   }
 }

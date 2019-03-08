@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -276,6 +277,13 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearForce().set(in.getDesiredLinearForce());
       resolveSelectionMatrix3D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveVirtualModelControlOptimizationSettingsCommand(VirtualModelControlOptimizationSettingsCommand in,
+                                                                     VirtualModelControlOptimizationSettingsCommand out)
+   {
+      // There is no robot sensitive information in this command, so the output can directly be set to the input.
+      out.set(in);
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
