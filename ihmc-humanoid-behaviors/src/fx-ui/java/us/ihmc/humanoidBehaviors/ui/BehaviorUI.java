@@ -141,16 +141,12 @@ public class BehaviorUI
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category rootCategory = apiFactory.createRootCategory(apiFactory.createCategoryTheme("BehaviorUI"));
+      private static final Category Root = apiFactory.createRootCategory("Behavior");
+      private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
 
-      private static final CategoryTheme ActiveEditorTheme = apiFactory.createCategoryTheme("ActiveEditorTheme");
-      public static final Topic<FXUIEditor> ActiveEditor = rootCategory.child(ActiveEditorTheme).topic(apiFactory.createTypedTopicTheme("FXUIEditor"));
-      private static final CategoryTheme SelectedGraphicTheme = apiFactory.createCategoryTheme("SelectedGraphicTheme");
-      public static final Topic<FXUIEditableGraphic> SelectedGraphic = rootCategory.child(SelectedGraphicTheme)
-                                                                                   .topic(apiFactory.createTypedTopicTheme("FXUIEditableGraphic"));
-      private static final CategoryTheme ActiveStateMachineTheme = apiFactory.createCategoryTheme("ActiveStateMachineTheme");
-      public static final Topic<FXUIStateMachine> ActiveStateMachine = rootCategory.child(ActiveStateMachineTheme)
-                                                                                   .topic(apiFactory.createTypedTopicTheme("FXUIStateMachine"));
+      public static final Topic<FXUIEditor> ActiveEditor = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveEditor"));
+      public static final Topic<FXUIEditableGraphic> SelectedGraphic = Root.child(UI).topic(apiFactory.createTypedTopicTheme("SelectedGraphic"));
+      public static final Topic<FXUIStateMachine> ActiveStateMachine = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveStateMachine"));
 
       public static final MessagerAPI create()
       {
