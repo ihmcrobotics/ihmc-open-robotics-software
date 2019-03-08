@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -259,6 +261,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       this.selectionMatrix.set(selectionMatrix);
    }
 
+   public Vector3DBasics getDesiredLinearForce()
+   {
+      return desiredLinearForce;
+   }
+
    /**
     * Packs the control frame and desired linear force held in this command.
     * <p>
@@ -321,6 +328,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       getDesiredLinearForce(desiredLinearForceToPack);
    }
 
+   public FramePose3DBasics getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
    /**
     * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this
     * command.
@@ -334,6 +346,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
     *           Modified.
     */
+   @Override
    public void getControlFrame(PoseReferenceFrame controlFrameToPack)
    {
       controlFramePose.changeFrame(controlFrameToPack.getParent());
@@ -362,6 +375,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    {
       positionToPack.setIncludingFrame(controlFramePose.getPosition());
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
+   }
+
+   public SelectionMatrix3D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    /** {@inheritDoc} */
@@ -410,6 +428,37 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    {
       return ControllerCoreCommandType.VIRTUAL_FORCE;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualForceCommand)
+      {
+         VirtualForceCommand other = (VirtualForceCommand) object;
+
+         if (!controlFramePose.equals(other.controlFramePose))
+            return false;
+         if (!desiredLinearForce.equals(other.desiredLinearForce))
+            return false;
+         if (!selectionMatrix.equals(other.selectionMatrix))
+            return false;
+         if (base != other.base)
+            return false;
+         if (endEffector != other.endEffector)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
 
    @Override
    public String toString()
