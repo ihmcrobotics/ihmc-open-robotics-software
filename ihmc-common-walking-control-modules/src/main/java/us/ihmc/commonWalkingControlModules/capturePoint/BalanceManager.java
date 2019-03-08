@@ -29,6 +29,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -70,7 +71,7 @@ public class BalanceManager
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final LinearMomentumRateControlModule linearMomentumRateOfChangeControlModule;
+   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
@@ -139,6 +140,7 @@ public class BalanceManager
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
+   private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private double finalTransferDuration;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -162,7 +164,7 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      linearMomentumRateOfChangeControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons,
                                                                                                            controllerToolbox.getICPControlPolygons(),
                                                                                                            contactableFeet, walkingControllerParameters, yoTime,
                                                                                                            totalMass, gravityZ, controlDT,
@@ -354,13 +356,13 @@ public class BalanceManager
    public void setICPPlanSupportSide(RobotSide robotSide)
    {
       icpPlanner.setSupportLeg(robotSide);
-      linearMomentumRateOfChangeControlModule.setSupportLeg(robotSide);
+      linearMomentumRateControlModule.setSupportLeg(robotSide);
    }
 
    public void setICPPlanTransferToSide(RobotSide robotSide)
    {
       icpPlanner.setTransferToSide(robotSide);
-      linearMomentumRateOfChangeControlModule.setTransferToSide(robotSide);
+      linearMomentumRateControlModule.setTransferToSide(robotSide);
    }
 
    public void setICPPlanTransferFromSide(RobotSide robotSide)
@@ -368,7 +370,7 @@ public class BalanceManager
       icpPlanner.setTransferFromSide(robotSide);
       if (robotSide != null)
       {
-         linearMomentumRateOfChangeControlModule.setTransferToSide(robotSide.getOppositeSide());
+         linearMomentumRateControlModule.setTransferToSide(robotSide.getOppositeSide());
       }
    }
 
@@ -433,38 +435,40 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
-      linearMomentumRateOfChangeControlModule.setInitializeForStanding(initializeForStanding);
-      linearMomentumRateOfChangeControlModule.setInitializeForTransfer(initializeForTransfer);
-      linearMomentumRateOfChangeControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
-      linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
-      linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferDuration);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
+
+      linearMomentumRateControlModule.setInitializeForStanding(initializeForStanding);
+      linearMomentumRateControlModule.setInitializeForTransfer(initializeForTransfer);
+      linearMomentumRateControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
+      linearMomentumRateControlModule.setFootsteps(footsteps, footstepTimings);
+      linearMomentumRateControlModule.setFinalTransferDuration(finalTransferDuration);
+      linearMomentumRateControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+      linearMomentumRateControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
+      linearMomentumRateControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
+      linearMomentumRateControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
+      linearMomentumRateControlModule.setOmega0(omega0);
+      linearMomentumRateControlModule.setDesiredCapturePoint(desiredCapturePoint2d, desiredCapturePointVelocity2d);
+      linearMomentumRateControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
+      linearMomentumRateControlModule.setPerfectCMP(yoPerfectCMP);
+      linearMomentumRateControlModule.setPerfectCoP(yoPerfectCoP);
+      linearMomentumRateControlModule.setSupportLeg(supportLeg);
+
+      if (!linearMomentumRateControlModule.compute())
+      {
+         controllerToolbox.reportControllerFailureToListeners(emptyVector);
+      }
+
+      desiredCMP.set(linearMomentumRateControlModule.getDesiredCMP());
+      footstepSolution.set(linearMomentumRateControlModule.getFootstepSolution());
+      footstepWasAdjusted = linearMomentumRateControlModule.getFootstepWasAdjusted();
+      usingStepAdjustment = linearMomentumRateControlModule.getUsingStepAdjustment();
+
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
       footstepTimings.clear();
       footsteps.clear();
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
-      linearMomentumRateOfChangeControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
-      linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
-      linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
-      linearMomentumRateOfChangeControlModule.setOmega0(omega0);
-      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(desiredCapturePoint2d, desiredCapturePointVelocity2d);
-      linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
-      linearMomentumRateOfChangeControlModule.setPerfectCMP(yoPerfectCMP);
-      linearMomentumRateOfChangeControlModule.setPerfectCoP(yoPerfectCoP);
-      linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-      boolean success = linearMomentumRateOfChangeControlModule.compute();
-
-      footstepSolution.set(linearMomentumRateOfChangeControlModule.getFootstepSolution());
-      footstepWasAdjusted = linearMomentumRateOfChangeControlModule.getFootstepWasAdjusted();
-      usingStepAdjustment = linearMomentumRateOfChangeControlModule.getUsingStepAdjustment();
-
-      if (!success)
-      {
-         controllerToolbox.reportControllerFailureToListeners(emptyVector);
-      }
 
       // This is for debugging such that the momentum trajectory handler YoVariables contain the current value:
       if (momentumTrajectoryHandler != null)
@@ -520,7 +524,7 @@ public class BalanceManager
 
    public void getDesiredCMP(FramePoint2D desiredCMPToPack)
    {
-      desiredCMPToPack.setIncludingFrame(linearMomentumRateOfChangeControlModule.getDesiredCMP());
+      desiredCMPToPack.setIncludingFrame(desiredCMP);
    }
 
    public void getDesiredICP(FramePoint2D desiredICPToPack)
@@ -536,10 +540,10 @@ public class BalanceManager
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-      inverseDynamicsCommandList.addCommand(linearMomentumRateOfChangeControlModule.getMomentumRateCommand());
+      inverseDynamicsCommandList.addCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       if (useCoPObjective.getValue())
       {
-         inverseDynamicsCommandList.addCommand(linearMomentumRateOfChangeControlModule.getCenterOfPressureCommand());
+         inverseDynamicsCommandList.addCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
       }
       return inverseDynamicsCommandList;
    }
@@ -806,7 +810,7 @@ public class BalanceManager
 
    public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
-      linearMomentumRateOfChangeControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
+      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
@@ -834,7 +838,7 @@ public class BalanceManager
 
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
-      linearMomentumRateOfChangeControlModule.submitCurrentPlanarRegions(planarRegions);
+      linearMomentumRateControlModule.submitCurrentPlanarRegions(planarRegions);
    }
 
    public void updateCurrentICPPlan()
@@ -844,12 +848,12 @@ public class BalanceManager
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
    {
-      linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
+      linearMomentumRateControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
    }
 
    public FrameVector3DReadOnly getEffectiveICPAdjustment()
    {
-      return linearMomentumRateOfChangeControlModule.getEffectiveICPAdjustment();
+      return linearMomentumRateControlModule.getEffectiveICPAdjustment();
    }
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
@@ -859,6 +863,6 @@ public class BalanceManager
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
-      linearMomentumRateOfChangeControlModule.setMinimizeAngularMomentumRateZ(enable);
+      linearMomentumRateControlModule.setMinimizeAngularMomentumRateZ(enable);
    }
 }
