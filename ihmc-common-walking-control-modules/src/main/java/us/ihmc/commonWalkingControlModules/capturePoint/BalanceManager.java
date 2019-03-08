@@ -270,10 +270,14 @@ public class BalanceManager
       parentRegistry.addChild(registry);
    }
 
+   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
+   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpPlanner.addFootstepToPlan(footstep, timing);
-      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep, timing);
+      footsteps.add().set(footstep);
+      footstepTimings.add().set(timing);
    }
 
    /**
@@ -343,6 +347,8 @@ public class BalanceManager
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
+      footsteps.clear();
+      footstepTimings.clear();
    }
 
    public void setICPPlanSupportSide(RobotSide robotSide)
@@ -430,16 +436,19 @@ public class BalanceManager
       if (initializeForStanding)
       {
          linearMomentumRateOfChangeControlModule.initializeForStanding();
+         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
          initializeForStanding = false;
       }
       if (initializeForTransfer)
       {
          linearMomentumRateOfChangeControlModule.initializeForTransfer();
+         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
          initializeForTransfer = false;
       }
       if (initializeForSingleSupport)
       {
          linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
          initializeForSingleSupport = false;
       }
 
