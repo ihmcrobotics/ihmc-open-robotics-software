@@ -55,7 +55,7 @@ public class LinearMomentumRateControlModule
    private final Vector3DReadOnly linearMomentumRateWeight;
    private final Vector3DReadOnly angularMomentumRateWeight;
 
-   private final YoBoolean minimizeAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
+   private final YoBoolean minimizingAngularMomentumRateZ = new YoBoolean("MinimizingAngularMomentumRateZ", registry);
 
    private final YoFrameVector3D controlledCoMAcceleration;
 
@@ -187,7 +187,7 @@ public class LinearMomentumRateControlModule
 
    public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
    {
-      this.minimizeAngularMomentumRateZ.set(minimizeAngularMomentumRateZ);
+      this.minimizingAngularMomentumRateZ.set(minimizeAngularMomentumRateZ);
    }
 
    public void setFinalDesiredCapturePoint(FramePoint2DReadOnly finalDesiredCapturePoint)
@@ -333,7 +333,7 @@ public class LinearMomentumRateControlModule
 
       selectionMatrix.setToLinearSelectionOnly();
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
-      selectionMatrix.selectAngularZ(minimizeAngularMomentumRateZ.getBooleanValue());
+      selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
