@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -256,6 +257,16 @@ public class CrossRobotCommandResolver
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
       out.setPrimaryBase(resolveRigidBody(in.getPrimaryBase()));
       out.setScaleSecondaryTaskJointWeight(in.scaleSecondaryTaskJointWeight(), in.getSecondaryTaskJointWeightScale());
+   }
+
+   public void resolveJointTorqueCommand(JointTorqueCommand in, JointTorqueCommand out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
+      {
+         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredTorque(jointIndex));
+      }
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
