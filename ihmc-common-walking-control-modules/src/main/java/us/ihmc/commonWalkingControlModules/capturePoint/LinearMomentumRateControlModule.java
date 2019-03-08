@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -118,6 +119,11 @@ public class LinearMomentumRateControlModule
    private double finalTransferDuration;
    private final List<Footstep> footsteps = new ArrayList<>();
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
+
+   private final FrameVector3D effectiveICPAdjustment = new FrameVector3D();
+   private boolean usingStepAdjustment;
+   private boolean footstepWasAdjusted;
+   private final FramePose3D footstepSolution = new FramePose3D();
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
@@ -277,17 +283,17 @@ public class LinearMomentumRateControlModule
 
    public FramePose3DReadOnly getFootstepSolution()
    {
-      return icpOptimizationController.getFootstepSolution();
+      return footstepSolution;
    }
 
    public boolean getFootstepWasAdjusted()
    {
-      return icpOptimizationController.wasFootstepAdjusted();
+      return footstepWasAdjusted;
    }
 
    public boolean getUsingStepAdjustment()
    {
-      return icpOptimizationController.useStepAdjustment();
+      return usingStepAdjustment;
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -307,7 +313,7 @@ public class LinearMomentumRateControlModule
 
    public FrameVector3DReadOnly getEffectiveICPAdjustment()
    {
-      return icpOptimizationController.getICPShiftFromStepAdjustment();
+      return effectiveICPAdjustment;
    }
 
    public boolean compute()
@@ -394,6 +400,10 @@ public class LinearMomentumRateControlModule
       }
       icpOptimizationController.getDesiredCMP(desiredCMP);
       icpOptimizationController.getDesiredCoP(desiredCoP);
+      effectiveICPAdjustment.setIncludingFrame(icpOptimizationController.getICPShiftFromStepAdjustment());
+      footstepSolution.setIncludingFrame(icpOptimizationController.getFootstepSolution());
+      usingStepAdjustment = icpOptimizationController.useStepAdjustment();
+      footstepWasAdjusted = icpOptimizationController.wasFootstepAdjusted();
    }
 
    private void checkOutputs()
