@@ -529,7 +529,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
          Pair<Double, Double> velocityLimit = armJointVelocityLimitMap.get(armJointName);
          if (velocityLimit.i > jointVelocityLowerBound || velocityLimit.ii < jointVelocityUpperBound)
+         {
+            System.out.println(armJointName + " trajectory exceeds joint velocity limit." + " " + jointVelocityLowerBound + " " + jointVelocityUpperBound);
             return true;
+         }
       }
 
       return false;
