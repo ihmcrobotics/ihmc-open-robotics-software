@@ -56,9 +56,34 @@ public class KeyFrameBasedTrajectoryGenerator
          jointNameToTrajectoriesMap.put(jointName, new ArrayList<Trajectory>());
    }
 
+   public void addInitialConfiguration(KinematicsToolboxOutputStatus initialConfiguration)
+   {
+      if (keyFrames.size() > 0 || keyFrameTimes.size() > 0)
+         clear();
+
+      keyFrames.add(initialConfiguration);
+      keyFrameTimes.add(0.0);
+   }
+
+   public void addKeyFrames(List<KinematicsToolboxOutputStatus> solutionKeyFrames, TDoubleArrayList solutionKeyFrameTimes)
+   {
+      keyFrames.addAll(solutionKeyFrames);
+      keyFrameTimes.addAll(solutionKeyFrameTimes);
+   }
+
+   private void clear()
+   {
+      keyFrames.clear();
+      keyFrameTimes.clear();
+   }
+   
    public void computeOptimizingKeyFrameTimes()
    {
-      trajectoryPointOptimizer.compute();
+      double lastKeyFrameTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
+      TDoubleArrayList normalizedKeyFrameTimes = new TDoubleArrayList();
+      for (int i = 1; i < keyFrameTimes.size() - 1; i++)
+         normalizedKeyFrameTimes.add(keyFrameTimes.get(i) / lastKeyFrameTime);
+      trajectoryPointOptimizer.compute(20, normalizedKeyFrameTimes);
       getOptimizedKeyFrameTimes();
       getOptimizedVelocities();
    }
@@ -109,27 +134,6 @@ public class KeyFrameBasedTrajectoryGenerator
 
       for (String jointName : jointNames)
          jointNameToVelocitiesMap.get(jointName).add(0.0);
-   }
-
-   public void addInitialConfiguration(KinematicsToolboxOutputStatus initialConfiguration)
-   {
-      if (keyFrames.size() > 0 || keyFrameTimes.size() > 0)
-         clear();
-
-      keyFrames.add(initialConfiguration);
-      keyFrameTimes.add(0.0);
-   }
-
-   public void addKeyFrames(List<KinematicsToolboxOutputStatus> solutionKeyFrames, TDoubleArrayList solutionKeyFrameTimes)
-   {
-      keyFrames.addAll(solutionKeyFrames);
-      keyFrameTimes.addAll(solutionKeyFrameTimes);
-   }
-
-   private void clear()
-   {
-      keyFrames.clear();
-      keyFrameTimes.clear();
    }
 
    public void initializeTrajectoryGenerator()
