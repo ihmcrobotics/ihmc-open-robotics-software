@@ -16,6 +16,7 @@ import org.reflections.Reflections;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -50,6 +51,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -751,6 +753,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveOrientationFeedbackControlCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         OrientationFeedbackControlCommand in = nextOrientationFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         OrientationFeedbackControlCommand expectedOut = nextOrientationFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         OrientationFeedbackControlCommand actualOut = new OrientationFeedbackControlCommand();
+         crossRobotCommandResolver.resolveOrientationFeedbackControlCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -1123,6 +1147,22 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static OrientationFeedbackControlCommand nextOrientationFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
+
+      next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getGains().set(nextPID3DGains(random));
+      next.setGainsFrame(nextElementIn(random, possibleFrames));
+      next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
+      next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -1152,6 +1192,11 @@ class CrossRobotCommandResolverTest
    public static FrameVector3D nextFrameVector3D(Random random, ReferenceFrame... possibleFrames)
    {
       return EuclidFrameRandomTools.nextFrameVector3D(random, nextElementIn(random, possibleFrames));
+   }
+
+   public static FrameQuaternion nextFrameQuaternion(Random random, ReferenceFrame... possibleFrames)
+   {
+      return EuclidFrameRandomTools.nextFrameQuaternion(random, nextElementIn(random, possibleFrames));
    }
 
    public static FramePose3D nextFramePose3D(Random random, ReferenceFrame... possibleFrames)

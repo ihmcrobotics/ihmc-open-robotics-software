@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -30,6 +31,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
@@ -327,6 +330,18 @@ public class CrossRobotCommandResolver
       }
    }
 
+   public void resolveOrientationFeedbackControlCommand(OrientationFeedbackControlCommand in, OrientationFeedbackControlCommand out)
+   {
+      resolveFrameQuaternion(in.getBodyFixedOrientationToControl(), out.getBodyFixedOrientationToControl());
+      resolveFrameQuaternion(in.getDesiredOrientation(), out.getDesiredOrientation());
+      resolveFrameTuple3D(in.getDesiredAngularVelocity(), out.getDesiredAngularVelocity());
+      resolveFrameTuple3D(in.getFeedForwardAngularAction(), out.getFeedForwardAngularAction());
+      out.getGains().set(in.getGains());
+      out.setGainsFrame(resolveReferenceFrame(in.getAngularGainsFrame()));
+      resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
+      out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
+   }
+
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
    {
       out.setIncludingFrame(in);
@@ -364,6 +379,11 @@ public class CrossRobotCommandResolver
    }
 
    public void resolveFrameTuple3D(FrameTuple3DReadOnly in, FrameTuple3DBasics out)
+   {
+      out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
+   }
+
+   public void resolveFrameQuaternion(FrameQuaternionReadOnly in, FrameQuaternionBasics out)
    {
       out.setIncludingFrame(resolveReferenceFrame(in.getReferenceFrame()), in);
    }
