@@ -42,7 +42,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-public class ICPOptimizationLinearMomentumRateOfChangeControlModule
+public class LinearMomentumRateControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -108,7 +108,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
 
-   public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+   public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
                                                                  ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
                                                                  WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
                                                                  double gravityZ, double controlDT, Vector3DReadOnly angularMomentumRateWeight,

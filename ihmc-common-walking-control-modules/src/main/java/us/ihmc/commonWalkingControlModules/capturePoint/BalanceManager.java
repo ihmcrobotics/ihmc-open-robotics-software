@@ -68,7 +68,7 @@ public class BalanceManager
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final ICPOptimizationLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
+   private final LinearMomentumRateControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
    private boolean updateTimings = false;
 
@@ -153,7 +153,7 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
+      linearMomentumRateOfChangeControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons,
                                                                                                            controllerToolbox.getICPControlPolygons(),
                                                                                                            contactableFeet, walkingControllerParameters, yoTime,
                                                                                                            totalMass, gravityZ, controlDT,
