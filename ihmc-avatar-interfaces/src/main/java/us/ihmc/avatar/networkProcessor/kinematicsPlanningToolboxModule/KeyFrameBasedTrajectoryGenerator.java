@@ -15,6 +15,7 @@ import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -287,6 +288,14 @@ public class KeyFrameBasedTrajectoryGenerator
       return indexOfTrajectory;
    }
 
+   private void packOptimizedKeyFrames(KinematicsPlanningToolboxOutputStatus solution)
+   {
+      solution.getKeyFrameTimes().clear();
+      List<KinematicsToolboxOutputStatus> robotConfigurations = solution.getRobotConfigurations();
+      for (int i = 0; i < robotConfigurations.size(); i++)
+         solution.getKeyFrameTimes().add(keyFrameTimes.get(i + 1));
+   }
+
    public void packOptimizedVelocities(KinematicsPlanningToolboxOutputStatus solution)
    {
       List<KinematicsToolboxOutputStatus> robotConfigurations = solution.getRobotConfigurations();
@@ -299,6 +308,7 @@ public class KeyFrameBasedTrajectoryGenerator
             keyFrameSolution.getDesiredJointVelocities().add(wayPointJointVelocity);
          }
       }
+      packOptimizedKeyFrames(solution);
    }
 
    public double getJointVelocityUpperBound(String jointName)
