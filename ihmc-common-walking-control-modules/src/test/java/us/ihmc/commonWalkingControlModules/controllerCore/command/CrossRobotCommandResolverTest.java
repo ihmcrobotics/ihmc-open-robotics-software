@@ -34,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -61,6 +62,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
+import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -561,6 +563,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveJointLimitEnforcementCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         JointLimitEnforcementCommand in = nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         JointLimitEnforcementCommand expectedOut = nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitEnforcementCommand actualOut = new JointLimitEnforcementCommand();
+         crossRobotCommandResolver.resolveJointLimitEnforcementCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -821,6 +845,22 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static JointLimitEnforcementCommand nextJointLimitEnforcementCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      JointLimitEnforcementCommand next = new JointLimitEnforcementCommand();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.addJoint(joint, nextJointLimitData(random));
+      }
+
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -937,6 +977,20 @@ class CrossRobotCommandResolverTest
          next.setMaxVelocity(random.nextDouble());
       if (random.nextBoolean())
          next.setMaxAcceleration(random.nextDouble());
+      return next;
+   }
+
+   public static JointLimitData nextJointLimitData(Random random)
+   {
+      JointLimitData next = new JointLimitData();
+      next.setPositionSoftLowerLimit(random.nextDouble());
+      next.setPositionSoftUpperLimit(random.nextDouble());
+      next.setVelocityLowerLimit(random.nextDouble());
+      next.setVelocityUpperLimit(random.nextDouble());
+      next.setTorqueLowerLimit(random.nextDouble());
+      next.setTorqueUpperLimit(random.nextDouble());
+      next.setPositionLimitStiffness(random.nextDouble());
+      next.setPositionLimitDamping(random.nextDouble());
       return next;
    }
 
