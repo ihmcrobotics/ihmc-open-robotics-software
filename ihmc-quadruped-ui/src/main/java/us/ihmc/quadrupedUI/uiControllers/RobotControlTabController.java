@@ -13,7 +13,7 @@ import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MainTabController
+public class RobotControlTabController
 {
    @FXML
    private TextField currentStateViewer;
@@ -23,6 +23,9 @@ public class MainTabController
 
    @FXML
    private Button standUpButton;
+
+   @FXML
+   private Button standButton;
 
    @FXML
    private CheckBox enablePoseTeleopControl;
@@ -87,10 +90,21 @@ public class MainTabController
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, HighLevelControllerName.STAND_PREP_STATE);
    }
 
+   public void requestStopWalking()
+   {
+      messager.submitMessage(QuadrupedUIMessagerAPI.FootstepPlanTopic, null);
+      requestStanding();
+   }
+
    public void requestStanding()
    {
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingNameTopic, QuadrupedSteppingStateEnum.STAND);
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
    }
+
+//   public void requestAbortWalking()
+//   {
+//      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, HighLevelControllerName.STAND_PREP_STATE);
+//   }
 
    public void bindControls()
    {
