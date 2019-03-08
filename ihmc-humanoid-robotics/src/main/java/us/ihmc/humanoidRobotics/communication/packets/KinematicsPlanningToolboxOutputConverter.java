@@ -262,8 +262,8 @@ public class KinematicsPlanningToolboxOutputConverter
       {
          getToolboxSolution(solution);
          computeArmTrajectoryMessages();
-//         computeChestTrajectoryMessage();
-//         computePelvisTrajectoryMessage();
+         computeChestTrajectoryMessage();
+         computePelvisTrajectoryMessage();
       }
       else
       {
