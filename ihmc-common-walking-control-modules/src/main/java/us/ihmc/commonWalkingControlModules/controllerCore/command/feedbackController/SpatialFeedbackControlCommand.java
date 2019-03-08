@@ -202,7 +202,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     * <p>
     * If true, the controller uses the custom defined scaling factor
-    * {@param secondaryTaskJointWeightScale} to scale the weights before the {@code primaryBase} in
+    * {@code secondaryTaskJointWeightScale} to scale the weights before the {@code primaryBase} in
     * the kinematic chain between the {@code base} and {@code endEffector}.
     * </p>
     * <p>
