@@ -236,19 +236,19 @@ public class LinearMomentumRateControlModule
       this.finalTransferDuration = finalTransferDuration;
    }
 
-   public void initializeForStanding()
+   public void setInitializeForStanding(boolean initializeForStanding)
    {
-      initializeForStanding = true;
+      this.initializeForStanding = initializeForStanding;
    }
 
-   public void initializeForSingleSupport()
+   public void setInitializeForSingleSupport(boolean initializeForSingleSupport)
    {
-      initializeForSingleSupport = true;
+      this.initializeForSingleSupport = initializeForSingleSupport;
    }
 
-   public void initializeForTransfer()
+   public void setInitializeForTransfer(boolean initializeForTransfer)
    {
-      initializeForTransfer = true;
+      this.initializeForTransfer = initializeForTransfer;
    }
 
    public void setNextTransferDuration(double nextTransferDuration)

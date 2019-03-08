@@ -433,24 +433,13 @@ public class BalanceManager
 
       getICPError(icpError2d);
 
-      if (initializeForStanding)
-      {
-         linearMomentumRateOfChangeControlModule.initializeForStanding();
-         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
-         initializeForStanding = false;
-      }
-      if (initializeForTransfer)
-      {
-         linearMomentumRateOfChangeControlModule.initializeForTransfer();
-         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
-         initializeForTransfer = false;
-      }
-      if (initializeForSingleSupport)
-      {
-         linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
-         linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
-         initializeForSingleSupport = false;
-      }
+      linearMomentumRateOfChangeControlModule.setInitializeForStanding(initializeForStanding);
+      linearMomentumRateOfChangeControlModule.setInitializeForTransfer(initializeForTransfer);
+      linearMomentumRateOfChangeControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
+      linearMomentumRateOfChangeControlModule.setFootsteps(footsteps, footstepTimings);
+      initializeForStanding = false;
+      initializeForTransfer = false;
+      initializeForSingleSupport = false;
 
       if (ENABLE_DYN_REACHABILITY && updateTimings)
       {
