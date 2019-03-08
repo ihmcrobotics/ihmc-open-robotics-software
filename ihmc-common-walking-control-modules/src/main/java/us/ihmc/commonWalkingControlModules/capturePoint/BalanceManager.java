@@ -28,9 +28,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -137,11 +139,15 @@ public class BalanceManager
    private boolean initializeForStanding = false;
    private boolean initializeForSingleSupport = false;
    private boolean initializeForTransfer = false;
+   private RobotSide supportSide;
+   private RobotSide transferToSide;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private double finalTransferDuration;
+   private final FixedFrameVector3DBasics achievedLinearMomentumRate = new FrameVector3D();
+   private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -353,25 +359,22 @@ public class BalanceManager
       footstepTimings.clear();
    }
 
-   public void setICPPlanSupportSide(RobotSide robotSide)
+   public void setICPPlanSupportSide(RobotSide supportSide)
    {
-      icpPlanner.setSupportLeg(robotSide);
-      linearMomentumRateControlModule.setSupportLeg(robotSide);
+      icpPlanner.setSupportLeg(supportSide);
+      this.supportSide = supportSide;
    }
 
-   public void setICPPlanTransferToSide(RobotSide robotSide)
+   public void setICPPlanTransferToSide(RobotSide transferToSide)
    {
-      icpPlanner.setTransferToSide(robotSide);
-      linearMomentumRateControlModule.setTransferToSide(robotSide);
+      icpPlanner.setTransferToSide(transferToSide);
+      this.transferToSide = transferToSide;
    }
 
    public void setICPPlanTransferFromSide(RobotSide robotSide)
    {
       icpPlanner.setTransferFromSide(robotSide);
-      if (robotSide != null)
-      {
-         linearMomentumRateControlModule.setTransferToSide(robotSide.getOppositeSide());
-      }
+      this.transferToSide = robotSide != null ? robotSide.getOppositeSide() : null;
    }
 
    public void endTick()
@@ -451,7 +454,9 @@ public class BalanceManager
       linearMomentumRateControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       linearMomentumRateControlModule.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModule.setPerfectCoP(yoPerfectCoP);
-      linearMomentumRateControlModule.setSupportLeg(supportLeg);
+      linearMomentumRateControlModule.setSupportLeg(supportSide);
+      linearMomentumRateControlModule.setTransferToSide(transferToSide);
+      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
 
       if (!linearMomentumRateControlModule.compute())
       {
@@ -459,6 +464,7 @@ public class BalanceManager
       }
 
       desiredCMP.set(linearMomentumRateControlModule.getDesiredCMP());
+      effectiveICPAdjustment.set(linearMomentumRateControlModule.getEffectiveICPAdjustment());
       footstepSolution.set(linearMomentumRateControlModule.getFootstepSolution());
       footstepWasAdjusted = linearMomentumRateControlModule.getFootstepWasAdjusted();
       usingStepAdjustment = linearMomentumRateControlModule.getUsingStepAdjustment();
@@ -468,7 +474,8 @@ public class BalanceManager
       initializeForSingleSupport = false;
       footstepTimings.clear();
       footsteps.clear();
-
+      supportSide = null;
+      transferToSide = null;
 
       // This is for debugging such that the momentum trajectory handler YoVariables contain the current value:
       if (momentumTrajectoryHandler != null)
@@ -810,7 +817,7 @@ public class BalanceManager
 
    public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
-      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
+      this.achievedLinearMomentumRate.set(achievedLinearMomentumRate);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
@@ -853,7 +860,7 @@ public class BalanceManager
 
    public FrameVector3DReadOnly getEffectiveICPAdjustment()
    {
-      return linearMomentumRateControlModule.getEffectiveICPAdjustment();
+      return effectiveICPAdjustment;
    }
 
    public void getCapturePoint(FramePoint2D capturePointToPack)
