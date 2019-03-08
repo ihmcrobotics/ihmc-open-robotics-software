@@ -117,8 +117,8 @@ public class LinearMomentumRateControlModule
    private boolean initializeForSingleSupport = false;
    private boolean initializeForTransfer = false;
    private double finalTransferDuration;
-   private final List<Footstep> footsteps = new ArrayList<>();
-   private final List<FootstepTiming> footstepTimings = new ArrayList<>();
+   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
+   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
 
    private final FrameVector3D effectiveICPAdjustment = new FrameVector3D();
    private boolean usingStepAdjustment;
@@ -222,10 +222,13 @@ public class LinearMomentumRateControlModule
       this.transferToSide = transferToSide;
    }
 
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void setFootsteps(List<Footstep> footsteps, List<FootstepTiming> footstepTimings)
    {
-      this.footsteps.add(footstep);
-      this.footstepTimings.add(timing);
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         this.footsteps.add().set(footsteps.get(i));
+         this.footstepTimings.add().set(footstepTimings.get(i));
+      }
    }
 
    public void setFinalTransferDuration(double finalTransferDuration)
