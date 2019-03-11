@@ -25,10 +25,7 @@ public class ValkyrieBehaviorUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
-      MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      apiFactory.createRootCategory(getClass().getSimpleName());
-      apiFactory.includeMessagerAPIs(BehaviorUI.API.create());
-      messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
+      messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_behavior_ui");
 //      AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
