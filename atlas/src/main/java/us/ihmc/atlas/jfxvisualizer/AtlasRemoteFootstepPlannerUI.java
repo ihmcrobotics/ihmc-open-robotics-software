@@ -39,7 +39,6 @@ public class AtlasRemoteFootstepPlannerUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-      DRCRobotModel previewRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
@@ -49,7 +48,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewRobotModel,
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, null,
                                               drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
