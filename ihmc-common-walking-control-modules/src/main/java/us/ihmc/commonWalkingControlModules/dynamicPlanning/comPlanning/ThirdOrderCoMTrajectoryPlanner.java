@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -74,16 +72,26 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private final DenseMatrix64F coefficientMultipliers = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F coefficientMultipliersInv = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F xCoefficientConstants = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F yCoefficientConstants = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F zCoefficientConstants = new DenseMatrix64F(0, 1);
+
+   private final DenseMatrix64F xEquivalents = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F yEquivalents = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F zEquivalents = new DenseMatrix64F(0, 1);
+
+   private final DenseMatrix64F xConstants = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F yConstants = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F zConstants = new DenseMatrix64F(0, 1);
+
+   private final DenseMatrix64F vrpWaypointJacobian = new DenseMatrix64F(0, 1);
+
+   private final DenseMatrix64F vrpXWaypoints = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F vrpYWaypoints = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F vrpZWaypoints = new DenseMatrix64F(0, 1);
+
    private final DenseMatrix64F xCoefficientVector = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F yCoefficientVector = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F zCoefficientVector = new DenseMatrix64F(0, 1);
 
    private final FramePoint3D finalDCMPosition = new FramePoint3D();
-
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
    private final DoubleProvider omega;
    private final double gravityZ;
@@ -119,6 +127,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    private final List<YoFramePoint3D> comCornerPoints = new ArrayList<>();
 
    private int numberOfConstraints = 0;
+   private int numberOfWaypoints = 0;
 
    public ThirdOrderCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
                                          YoVariableRegistry parentRegistry)
@@ -189,21 +198,32 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
       indexHandler.update();
       int size = indexHandler.getTotalSize();
+      int numberOfVRPWaypoints = indexHandler.getNumberOfVRPWaypoints();
 
       coefficientMultipliers.reshape(size, size);
       coefficientMultipliersInv.reshape(size, size);
-      xCoefficientConstants.reshape(size, 1);
-      yCoefficientConstants.reshape(size, 1);
-      zCoefficientConstants.reshape(size, 1);
+      xEquivalents.reshape(size, 1);
+      yEquivalents.reshape(size, 1);
+      zEquivalents.reshape(size, 1);
+      xConstants.reshape(size, 1);
+      yConstants.reshape(size, 1);
+      zConstants.reshape(size, 1);
+      vrpWaypointJacobian.reshape(size, numberOfVRPWaypoints);
+      vrpXWaypoints.reshape(numberOfVRPWaypoints, 1);
+      vrpYWaypoints.reshape(numberOfVRPWaypoints, 1);
+      vrpZWaypoints.reshape(numberOfVRPWaypoints, 1);
       xCoefficientVector.reshape(size, 1);
       yCoefficientVector.reshape(size, 1);
       zCoefficientVector.reshape(size, 1);
 
       coefficientMultipliers.zero();
       coefficientMultipliersInv.zero();
-      xCoefficientConstants.zero();
-      yCoefficientConstants.zero();
-      zCoefficientConstants.zero();
+      xEquivalents.zero();
+      yEquivalents.zero();
+      zEquivalents.zero();
+      xConstants.zero();
+      yConstants.zero();
+      zConstants.zero();
       xCoefficientVector.zero();
       yCoefficientVector.zero();
       zCoefficientVector.zero();
@@ -216,6 +236,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       computeVRPWaypointsFromContactSequence();
 
       numberOfConstraints = 0;
+      numberOfWaypoints = 0;
 
       // set initial constraint
       setCoMPositionConstraint(currentCoMPosition);
@@ -239,11 +260,19 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       setDCMTerminalConstraint(numberOfPhases - 1, finalDCMPosition);
       setDynamicsFinalConstraint(numberOfPhases - 1);
 
+      // map from VRP waypoints to the value
+      xEquivalents.set(xConstants);
+      yEquivalents.set(yConstants);
+      zEquivalents.set(zConstants);
+      CommonOps.multAddTransA(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+      CommonOps.multAddTransA(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+      CommonOps.multAddTransA(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+
       // solve for coefficients
       NativeCommonOps.invert(coefficientMultipliers, coefficientMultipliersInv);
-      CommonOps.mult(coefficientMultipliersInv, xCoefficientConstants, xCoefficientVector);
-      CommonOps.mult(coefficientMultipliersInv, yCoefficientConstants, yCoefficientVector);
-      CommonOps.mult(coefficientMultipliersInv, zCoefficientConstants, zCoefficientVector);
+      CommonOps.mult(coefficientMultipliersInv, xEquivalents, xCoefficientVector);
+      CommonOps.mult(coefficientMultipliersInv, yEquivalents, yCoefficientVector);
+      CommonOps.mult(coefficientMultipliersInv, zEquivalents, zCoefficientVector);
 
       // update coefficient holders
       int firstCoefficientIndex = 0;
@@ -511,9 +540,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, 4, getCoMPositionFifthCoefficient(0.0));
       coefficientMultipliers.set(numberOfConstraints, 5, getCoMPositionSixthCoefficient());
 
-      xCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getX());
-      yCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getY());
-      zCoefficientConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getZ());
+      xEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getX());
+      yEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getY());
+      zEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getZ());
 
       numberOfConstraints++;
    }
@@ -570,9 +599,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, c4);
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, c5);
 
-      xCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getX());
-      yCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getY());
-      zCoefficientConstants.add(numberOfConstraints, 0, terminalDCMPosition.getZ());
+      xEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getX());
+      yEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getY());
+      zEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getZ());
 
       numberOfConstraints++;
    }
@@ -733,6 +762,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       double omega = this.omega.getValue();
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
+      int vrpWaypointNumber = indexHandler.getVRPWaypointNumber(sequenceId);
 
       desiredVRPPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -742,9 +772,12 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getVRPPositionFourthCoefficient(omega, time));
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getVRPPositionFifthCoefficient(time));
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getVRPPositionSixthCoefficient());
-      xCoefficientConstants.set(numberOfConstraints, 0, desiredVRPPosition.getX());
-      yCoefficientConstants.set(numberOfConstraints, 0, desiredVRPPosition.getY());
-      zCoefficientConstants.set(numberOfConstraints, 0, desiredVRPPosition.getZ());
+
+      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointNumber, 1.0);
+
+      vrpXWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getX());
+      vrpYWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getY());
+      vrpZWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getZ());
 
       numberOfConstraints++;
    }
@@ -754,6 +787,8 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       double omega = this.omega.getValue();
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
+      int vrpWaypointNumber = indexHandler.getVRPWaypointNumber(sequenceId);
+
       desiredVRPVelocity.checkReferenceFrameMatch(worldFrame);
 
       coefficientMultipliers.set(numberOfConstraints, startIndex + 0, getVRPVelocityFirstCoefficient());
@@ -762,9 +797,12 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getVRPVelocityFourthCoefficient(time));
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getVRPVelocityFifthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getVRPVelocitySixthCoefficient());
-      xCoefficientConstants.set(numberOfConstraints, 0, desiredVRPVelocity.getX());
-      yCoefficientConstants.set(numberOfConstraints, 0, desiredVRPVelocity.getY());
-      zCoefficientConstants.set(numberOfConstraints, 0, desiredVRPVelocity.getZ());
+
+      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointNumber, 1.0);
+
+      vrpXWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getX());
+      vrpYWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getY());
+      vrpZWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getZ());
 
       numberOfConstraints++;
    }
@@ -781,9 +819,8 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getCoMAccelerationFourthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getCoMAccelerationFifthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getCoMAccelerationSixthCoefficient());
-      xCoefficientConstants.set(numberOfConstraints, 0, 0.0);
-      yCoefficientConstants.set(numberOfConstraints, 0, 0.0);
-      zCoefficientConstants.set(numberOfConstraints, 0, -Math.abs(gravityZ));
+
+      zConstants.set(numberOfConstraints, 0, -Math.abs(gravityZ));
 
       numberOfConstraints++;
    }
@@ -800,9 +837,6 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 3, getCoMJerkFourthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getCoMJerkFifthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getCoMJerkSixthCoefficient());
-      xCoefficientConstants.set(numberOfConstraints, 0, 0.0);
-      yCoefficientConstants.set(numberOfConstraints, 0, 0.0);
-      zCoefficientConstants.set(numberOfConstraints, 0, 0.0);
 
       numberOfConstraints++;
    }
