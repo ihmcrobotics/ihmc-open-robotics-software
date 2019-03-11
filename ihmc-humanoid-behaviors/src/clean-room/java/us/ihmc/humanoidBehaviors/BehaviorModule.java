@@ -1,14 +1,10 @@
 package us.ihmc.humanoidBehaviors;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidBehaviors.StepInPlaceBehavior.API;
-import us.ihmc.humanoidBehaviors.tools.FXUIMessagerAPIFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -22,7 +18,7 @@ public class BehaviorModule
 
    public static BehaviorModule createForBackpack(DRCRobotModel robotModel)
    {
-      KryoMessager messager = KryoMessager.createServer(FXUIMessagerAPIFactory.createAPIFor(BehaviorModule.class, StepInPlaceBehavior.API.create()),
+      KryoMessager messager = KryoMessager.createServer(getBehaviorAPI(),
                                                       NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorModule.class.getSimpleName(), 5);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
       return new BehaviorModule(robotModel, messager);
@@ -43,18 +39,8 @@ public class BehaviorModule
       new StepInPlaceBehavior(messager, ros2Node, robotModel);
    }
 
-   public static class API
-   {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(BehaviorModule.class);
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
-      }
-   }
-
    public static MessagerAPI getBehaviorAPI()
    {
-      return FXUIMessagerAPIFactory.createAPIFor(BehaviorModule.class, StepInPlaceBehavior.API.create());
+      return StepInPlaceBehavior.API.create();
    }
 }
