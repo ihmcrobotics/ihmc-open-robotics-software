@@ -2,10 +2,10 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest extends AbstractSimpleActiveSetQPSolverTest
 {
@@ -13,8 +13,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
 
    public abstract ActiveSetQPSolverWithInactiveVariablesInterface createSolverToTest();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleCasesWithInequalityConstraintsAndInactiveVariables()
    {
       testSimpleCasesWithInequalityConstraintsAndInactiveVariables(1);
@@ -195,8 +194,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
       assertTrue(Double.isNaN(solution[1]));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
    {
       testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 3, 2, false);

@@ -2,6 +2,7 @@ package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -9,10 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -68,13 +66,13 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePoint3DReadOnly position, FrameQuaternionReadOnly orientation)
+   public void setPoseAndUpdate(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation)
    {
       originPose.set(position, orientation);
       this.update();
    }
 
-   public void setPoseAndUpdate(Point3DReadOnly position, QuaternionReadOnly orientation)
+   public void setPoseAndUpdate(Point3DReadOnly position, Orientation3DReadOnly orientation)
    {
       originPose.set(position, orientation);
       this.update();
@@ -123,7 +121,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       update();
    }
 
-   public void setOrientationAndUpdate(FrameQuaternionReadOnly frameOrientation)
+   public void setOrientationAndUpdate(FrameOrientation3DReadOnly frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(getParent());
       originPose.setOrientation(frameOrientation);
@@ -173,7 +171,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       return originPose.getRoll();
    }
 
-   public void getPose(Point3D pointToPack, Quaternion quaternionToPack)
+   public void getPose(Point3D pointToPack, Orientation3DBasics quaternionToPack)
    {
       originPose.get(pointToPack, quaternionToPack);
    }
@@ -187,7 +185,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       getTransformToParent(transformToPack);
    }
 
-   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameQuaternion frameOrientationToPack)
+   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameOrientation3DBasics frameOrientationToPack)
    {
       originPose.get(framePointToPack, frameOrientationToPack);
    }
@@ -217,7 +215,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       return originPose.getOrientation();
    }
 
-   public void getOrientation(Quaternion quaternionToPack)
+   public void getOrientation(Orientation3DBasics quaternionToPack)
    {
       quaternionToPack.set(originPose.getOrientation());
    }

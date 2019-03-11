@@ -4,19 +4,15 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Assert;
-import org.junit.Test;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ICPQPInputTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSize()
    {
       Random random = new Random(10L);
@@ -35,8 +31,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testReshape()
    {
       Random random = new Random(10L);
@@ -65,8 +60,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testReset()
    {
       Random random = new Random(10L);
@@ -92,8 +86,7 @@ public class ICPQPInputTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEquals()
    {
       Random random = new Random(10L);
@@ -140,8 +133,7 @@ public class ICPQPInputTest
       Assert.assertTrue(icpqpInput.equals(other));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeCost()
    {
       DenseMatrix64F quadratic = new DenseMatrix64F(2, 2);

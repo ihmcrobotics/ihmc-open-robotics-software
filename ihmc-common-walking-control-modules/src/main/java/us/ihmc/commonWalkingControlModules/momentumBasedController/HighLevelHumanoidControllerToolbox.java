@@ -168,7 +168,8 @@ public class HighLevelHumanoidControllerToolbox
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
-                                             SideDependentList<FootSwitchInterface> footSwitches, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                             SideDependentList<? extends FootSwitchInterface> footSwitches,
+                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ, double omega0,
                                              SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -185,7 +186,7 @@ public class HighLevelHumanoidControllerToolbox
       bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
-      this.footSwitches = footSwitches;
+      this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
@@ -381,24 +382,7 @@ public class HighLevelHumanoidControllerToolbox
                                                                                               yoAngularMomentum);
       momentumGain.set(0.0);
 
-      attachControllerFailureListener(new ControllerFailureListener()
-      {
-         @Override
-         public void controllerFailed(FrameVector2D fallingDirection)
-         {
-            reportControllerFailed();
-         }
-      });
-   }
-
-   public void reportControllerFailed()
-   {
-      controllerFailed.set(true);
-   }
-
-   public YoBoolean getControllerFailedBoolean()
-   {
-      return controllerFailed;
+      attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
    }
 
    public static JointBasics[] computeJointsToOptimizeFor(FullHumanoidRobotModel fullRobotModel, JointBasics... jointsToRemove)
@@ -763,7 +747,7 @@ public class HighLevelHumanoidControllerToolbox
       }
    }
 
-   private void resetFootPlaneContactPoint(RobotSide robotSide)
+   public void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
       YoPlaneContactState footContactState = footContactStates.get(robotSide);
@@ -929,6 +913,11 @@ public class HighLevelHumanoidControllerToolbox
    public OneDoFJointBasics[] getControlledOneDoFJoints()
    {
       return controlledOneDoFJoints;
+   }
+
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerFailed;
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

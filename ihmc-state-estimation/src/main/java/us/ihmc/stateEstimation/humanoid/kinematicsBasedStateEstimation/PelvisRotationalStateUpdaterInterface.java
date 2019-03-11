@@ -8,10 +8,6 @@ public interface PelvisRotationalStateUpdaterInterface
 
    void initialize();
 
-   void initializeForFrozenState();
-
-   void updateForFrozenState();
-
    void updateRootJointOrientationAndAngularVelocity();
 
    void getEstimatedOrientation(FrameQuaternion estimatedOrientation);

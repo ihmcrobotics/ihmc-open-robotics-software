@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.nodeChecking;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -13,15 +13,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -31,8 +32,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
-import java.util.List;
-
 public class SnapBasedNodeCheckerTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -40,11 +39,7 @@ public class SnapBasedNodeCheckerTest
 
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
-   @Rule
-   public TestName name = new TestName();
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingingThroughObstacle0()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -120,8 +115,7 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSwingingThroughObstacle1()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -197,8 +191,7 @@ public class SnapBasedNodeCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testValidNode()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -213,8 +206,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node1));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStartNodeValid()
    {
       FootstepNodeSnapper snapper = new TestSnapper();
@@ -228,8 +220,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node, null));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test
    public void testSameNodes()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
@@ -238,11 +229,10 @@ public class SnapBasedNodeCheckerTest
 
       // the checker should not allow checking a node against itself since this
       // is likely caused by a mistake inside the planning logic.
-      checker.isNodeValid(node, node);
+      Assertions.assertThrows(RuntimeException.class, () -> checker.isNodeValid(node, node));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTooHighNode()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
@@ -283,8 +273,7 @@ public class SnapBasedNodeCheckerTest
       Assert.assertTrue(checker.isNodeValid(node0, node3));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTooSmallFoothold()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();

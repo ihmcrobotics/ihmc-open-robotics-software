@@ -34,6 +34,7 @@ import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -154,7 +155,7 @@ public class ControllerAPIDefinition
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
       statusMessages.add(TextToSpeechPacket.class);
-      statusMessages.add(RequestPlanarRegionsListMessage.class);
+      statusMessages.add(ControllerCrashNotificationPacket.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
    }

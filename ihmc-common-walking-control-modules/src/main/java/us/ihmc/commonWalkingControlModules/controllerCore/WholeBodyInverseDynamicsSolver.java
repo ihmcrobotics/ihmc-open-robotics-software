@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.OptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -36,7 +36,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -72,7 +71,6 @@ public class WholeBodyInverseDynamicsSolver
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
-   private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
@@ -103,7 +101,6 @@ public class WholeBodyInverseDynamicsSolver
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
-      rigidBodyAccelerationProvider = toolbox.getRigidBodyAccelerationProvider();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
@@ -155,11 +152,7 @@ public class WholeBodyInverseDynamicsSolver
          dynamicsMatrixCalculator.reset();
       else
          inverseDynamicsCalculator.compute();
-   }
 
-   public void reinitialize()
-   {
-      initialize();
       optimizationControlModule.resetRateRegularization();
       for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
          lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
@@ -315,7 +308,7 @@ public class WholeBodyInverseDynamicsSolver
             submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);
             break;
          case OPTIMIZATION_SETTINGS:
-            optimizationControlModule.submitOptimizationSettingsCommand((OptimizationSettingsCommand) command);
+            optimizationControlModule.submitOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) command);
             break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");

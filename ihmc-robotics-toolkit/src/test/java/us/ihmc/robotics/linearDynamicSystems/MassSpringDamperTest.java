@@ -1,13 +1,14 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class MassSpringDamperTest
@@ -25,7 +26,7 @@ public class MassSpringDamperTest
 
    private EigenvalueDecomposer eigenvalueDecomposerA;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       matrixA = new Matrix(new double[][]
@@ -43,7 +44,7 @@ public class MassSpringDamperTest
       new LinearDynamicSystem(matrixA, null, null, null);
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       matrixA = null;
@@ -55,8 +56,7 @@ public class MassSpringDamperTest
       eigenvalueDecomposerA = null;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testVDotWEqualsOne()
    {
       ComplexNumber dotProduct = new ComplexNumber(0.0, 0.0);
@@ -69,8 +69,7 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testVDotWCongEqualsZero()
    {
       ComplexNumber dotProduct = new ComplexNumber(0.0, 0.0);
@@ -83,15 +82,14 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDecomposerGotEigenvaluesRight()
    {
       ComplexNumber[] eigenvaluesFromDecomposer = eigenvalueDecomposerA.getEigenvalues();
       DynamicSystemsTestHelpers.assertEpsilonEquals(eigenvalues, eigenvaluesFromDecomposer, 1e-7);
    }
 
-//   @Test(timeout=300000)
+//   @Test
 //   public void testDynamicSystem()
 //   {
 //      @SuppressWarnings("unused") TransferFunctionMatrix transferFunctionMatrix = dynamicSystem.getTransferFunctionMatrix();

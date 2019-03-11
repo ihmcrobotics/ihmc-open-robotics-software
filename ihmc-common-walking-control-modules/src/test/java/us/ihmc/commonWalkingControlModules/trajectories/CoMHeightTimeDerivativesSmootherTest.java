@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -21,21 +22,20 @@ public class CoMHeightTimeDerivativesSmootherTest
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void showMemoryUsageAfterTest()
    {
       ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testConstantHeight()
    {
       double dt = 0.001;
@@ -67,8 +67,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       assertEquals(comHeightAcceleration, comHeightAccelerationOut, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testDiscreetJump()
    {
       boolean visualize = false;
@@ -160,8 +159,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @Test
    public void testSinusoidalInput()
    {
       boolean visualize = false;

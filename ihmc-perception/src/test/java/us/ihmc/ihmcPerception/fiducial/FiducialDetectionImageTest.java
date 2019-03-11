@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.fiducial;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
@@ -23,16 +23,16 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import georegression.struct.se.Se3_F64;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class FiducialDetectionImageTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test(timeout = 30000)
+   @Test
    public void testFiducialDetected() throws IOException
    {
       FiducialDetector<GrayF32> detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(0.1), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10),

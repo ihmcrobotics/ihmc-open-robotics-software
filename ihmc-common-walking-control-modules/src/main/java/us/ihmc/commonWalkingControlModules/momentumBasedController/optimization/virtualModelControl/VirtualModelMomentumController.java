@@ -20,7 +20,6 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class VirtualModelMomentumController
@@ -68,7 +67,7 @@ public class VirtualModelMomentumController
     *
     * @return true if the command was successfully added.
     */
-   public boolean addVirtualEffortCommand(VirtualEffortCommand commandToAdd)
+   public boolean addVirtualEffortCommand(VirtualEffortCommand<?> commandToAdd)
    {
       commandToAdd.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.

@@ -2,7 +2,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 
 import java.io.InputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -15,82 +15,76 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarPushRecoveryOverCinderBlocksTest
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOverCinderBlocksTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 72.3)
-   @Test(timeout = 360000)
+   @Test
    public void testNoPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 64.7)
-   @Test(timeout = 320000)
+   @Test
    public void testNoPushForwardWalkOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushForwardWalkOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 94.5)
-   @Test(timeout = 470000)
+   @Test
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushTiltedBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 68.6)
-   @Test(timeout = 340000)
+   @Test
    public void testNoPushForwardTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushForwardTiltedBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 180000)
+   @Disabled
+   @Test
    public void testPushOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testPushOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 180000)
+   @Disabled
+   @Test
    public void testForwardPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testForwardPushWalkWithOffsetOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 180000)
+   @Disabled
+   @Test
    public void testLeftSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testLeftSidewaysPushWalkWithOffsetOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 180000)
+   @Disabled
+   @Test
    public void testRightSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testRightSidewaysPushWalkWithOffsetOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 180000)
+   @Disabled
+   @Test
    public void testPushOverTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testPushOverTiltedBlocks();

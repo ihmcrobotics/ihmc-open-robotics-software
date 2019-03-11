@@ -85,6 +85,14 @@
                     </content>
                 </Tab>
 
+                <Tab text="Robot Operation">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="uiRobot" source="UIRobot.fxml" />
+                        </children>
+                    </content>
+                </Tab>
 
             </tabs>
         </TabPane>

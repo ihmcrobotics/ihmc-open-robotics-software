@@ -1,27 +1,24 @@
 package us.ihmc.robotics.quadTree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testGetAllPoints()
    {
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(0.01, Double.MAX_VALUE, Double.MAX_VALUE, Integer.MAX_VALUE, 0.0, -1);
@@ -47,8 +44,7 @@ public class QuadTreeForGroundTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testCommonCaseWithNoFilteringOrPointAveraging()
    {
       Random random = new Random(1178L);
@@ -98,8 +94,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPointLimiter()
    {
 
@@ -173,8 +168,7 @@ public class QuadTreeForGroundTest
       assertFalse(NE.hasChildren());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleCasesOne()
    {
       float minX = -10.0f;
@@ -241,8 +235,7 @@ public class QuadTreeForGroundTest
       assertEquals(1, quadTree.getNumberOfQuads());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWithFilteringAndPointAveraging()
    {
       Random random = new Random(1398L);
@@ -326,8 +319,7 @@ public class QuadTreeForGroundTest
       assertEquals(16, quadTree.getNumberOfQuads()); // Still 16 here.
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetClosestPoint()
    {
       Random random = new Random(1776L);
@@ -373,8 +365,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAllPointsWithinBounds()
    {
       Random random = new Random(1178L);
@@ -415,8 +406,7 @@ public class QuadTreeForGroundTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAllPointsWithinDistance()
    {
       Random random = new Random(1984L);

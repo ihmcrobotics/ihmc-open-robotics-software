@@ -42,17 +42,27 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -70,6 +80,9 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPositionInWorld(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getBodyOrientationInWorld(), current_alignment);
@@ -78,9 +91,21 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getGoalOrientationInWorld(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsListMessage(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -91,12 +116,22 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_9(data.getInitialStepRobotQuadrant());
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBodyPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getBodyOrientationInWorld(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
       cdr.write_type_2(data.getPlannerRequestId());
+
+      cdr.write_type_9(data.getRequestedFootstepPlannerType());
+
+      cdr.write_type_6(data.getTimeout());
+
+      cdr.write_type_6(data.getHorizonLength());
+
+      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsListMessage(), cdr);
+      cdr.write_type_7(data.getAssumeFlatGround());
 
    }
 
@@ -104,12 +139,22 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      data.setInitialStepRobotQuadrant(cdr.read_type_9());
+      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBodyPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getBodyOrientationInWorld(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
       data.setPlannerRequestId(cdr.read_type_2());
+      	
+      data.setRequestedFootstepPlannerType(cdr.read_type_9());
+      	
+      data.setTimeout(cdr.read_type_6());
+      	
+      data.setHorizonLength(cdr.read_type_6());
+      	
+      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsListMessage(), cdr);	
+      data.setAssumeFlatGround(cdr.read_type_7());
       	
 
    }
@@ -118,6 +163,7 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    public final void serialize(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_9("initial_step_robot_quadrant", data.getInitialStepRobotQuadrant());
       ser.write_type_a("body_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getBodyPositionInWorld());
 
       ser.write_type_a("body_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getBodyOrientationInWorld());
@@ -126,15 +172,20 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       ser.write_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
+      ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+      ser.write_type_9("requested_footstep_planner_type", data.getRequestedFootstepPlannerType());
+      ser.write_type_6("timeout", data.getTimeout());
+      ser.write_type_6("horizon_length", data.getHorizonLength());
       ser.write_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
-      ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+      ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setInitialStepRobotQuadrant(ser.read_type_9("initial_step_robot_quadrant"));
       ser.read_type_a("body_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getBodyPositionInWorld());
 
       ser.read_type_a("body_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getBodyOrientationInWorld());
@@ -143,9 +194,13 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       ser.read_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
+      data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+      data.setRequestedFootstepPlannerType(ser.read_type_9("requested_footstep_planner_type"));
+      data.setTimeout(ser.read_type_6("timeout"));
+      data.setHorizonLength(ser.read_type_6("horizon_length"));
       ser.read_type_a("planar_regions_list_message", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsListMessage());
 
-      data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+      data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket dest)

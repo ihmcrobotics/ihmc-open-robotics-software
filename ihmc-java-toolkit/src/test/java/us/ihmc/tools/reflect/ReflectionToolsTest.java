@@ -1,30 +1,29 @@
 package us.ihmc.tools.reflect;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Field;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ReflectionToolsTest
 {
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public final void testPrintDeclaredFields() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException
    {
       Double testDouble = 1.234;

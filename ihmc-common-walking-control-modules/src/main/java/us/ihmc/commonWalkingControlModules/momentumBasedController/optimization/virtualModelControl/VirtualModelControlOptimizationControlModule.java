@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
@@ -17,10 +18,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
@@ -96,7 +97,8 @@ public class VirtualModelControlOptimizationControlModule
       qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
       qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
 
-      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(), centerOfMassFrame, toolbox.getTotalRobotMass(), toolbox.getContactablePlaneBodies());
+      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(), centerOfMassFrame, toolbox.getTotalRobotMass(),
+                                                        toolbox.getContactablePlaneBodies());
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
       maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
@@ -147,7 +149,7 @@ public class VirtualModelControlOptimizationControlModule
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            LogTools.warn("Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
          }
 
          hasNotConvergedInPast.set(true);
@@ -176,7 +178,6 @@ public class VirtualModelControlOptimizationControlModule
       return virtualModelControlSolution;
    }
 
-
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       boolean success = convertMomentumRateCommand(command, momentumQPInput);
@@ -192,6 +193,24 @@ public class VirtualModelControlOptimizationControlModule
    public void submitExternalWrench(RigidBodyBasics rigidBody, WrenchReadOnly wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   public void submitOptimizationSettingsCommand(VirtualModelControlOptimizationSettingsCommand command)
+   {
+      if (command.hasRhoMin())
+         rhoMin.set(command.getRhoMin());
+      if (command.hasRhoWeight())
+         wrenchMatrixCalculator.setRhoWeight(command.getRhoWeight());
+      if (command.hasRhoRateWeight())
+         wrenchMatrixCalculator.setRhoRateWeight(command.getRhoRateWeight());
+      if (command.hasCenterOfPressureWeight())
+         wrenchMatrixCalculator.setDesiredCoPWeight(command.getCenterOfPressureWeight());
+      if (command.hasCenterOfPressureRateWeight())
+         wrenchMatrixCalculator.setCoPRateWeight(command.getCenterOfPressureRateWeight());
+      if (command.hasMomentumRateWeight())
+         qpSolver.setMomentumRateRegularization(command.getMomentumRateWeight());
+      if (command.hasMomentumAccelerationWeight())
+         qpSolver.setMomentumAccelerationRegularization(command.getMomentumAccelerationWeight());
    }
 
    /**

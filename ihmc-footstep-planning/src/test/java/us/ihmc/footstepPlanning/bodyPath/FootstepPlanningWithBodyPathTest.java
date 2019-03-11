@@ -1,19 +1,19 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanDistanceAndYawBasedCost;
@@ -41,28 +42,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FootstepPlanningWithBodyPathTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
 
-   @Rule
-   public TestName name = new TestName();
-
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 7.0)
-   @Test(timeout = 30000)
-   public void testWaypointPathOnFlat()
+   @Test
+   public void testWaypointPathOnFlat(TestInfo testInfo)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
@@ -91,9 +85,9 @@ public class FootstepPlanningWithBodyPathTest
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose, bodyPath);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   public void testMaze()
+   @Test
+   @Disabled
+   public void testMaze(TestInfo testInfo)
    {
       WaypointDefinedBodyPathPlanner bodyPath = new WaypointDefinedBodyPathPlanner();
       List<Point3D> waypoints = new ArrayList<>();
@@ -118,7 +112,7 @@ public class FootstepPlanningWithBodyPathTest
       Pose2D finalPose = new Pose2D();
       bodyPath.getPointAlongPath(1.0, finalPose);
 
-      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 

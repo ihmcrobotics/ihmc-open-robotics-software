@@ -16,11 +16,15 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
             */
    public long sequence_id_;
    public long robot_timestamp_;
+   public us.ihmc.euclid.tuple3D.Point3D sensor_position_;
+   public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
    public us.ihmc.idl.IDLSequence.Float  point_cloud_;
    public us.ihmc.idl.IDLSequence.Integer  colors_;
 
    public StereoVisionPointCloudMessage()
    {
+      sensor_position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      sensor_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       point_cloud_ = new us.ihmc.idl.IDLSequence.Float (600000, "type_5");
 
       colors_ = new us.ihmc.idl.IDLSequence.Integer (200000, "type_2");
@@ -39,6 +43,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       robot_timestamp_ = other.robot_timestamp_;
 
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.sensor_position_, sensor_position_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.sensor_orientation_, sensor_orientation_);
       point_cloud_.set(other.point_cloud_);
       colors_.set(other.colors_);
    }
@@ -65,6 +71,18 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public long getRobotTimestamp()
    {
       return robot_timestamp_;
+   }
+
+
+   public us.ihmc.euclid.tuple3D.Point3D getSensorPosition()
+   {
+      return sensor_position_;
+   }
+
+
+   public us.ihmc.euclid.tuple4D.Quaternion getSensorOrientation()
+   {
+      return sensor_orientation_;
    }
 
 
@@ -101,6 +119,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_timestamp_, other.robot_timestamp_, epsilon)) return false;
 
+      if (!this.sensor_position_.epsilonEquals(other.sensor_position_, epsilon)) return false;
+      if (!this.sensor_orientation_.epsilonEquals(other.sensor_orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.point_cloud_, other.point_cloud_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.colors_, other.colors_, epsilon)) return false;
@@ -122,6 +142,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
       if(this.robot_timestamp_ != otherMyClass.robot_timestamp_) return false;
 
+      if (!this.sensor_position_.equals(otherMyClass.sensor_position_)) return false;
+      if (!this.sensor_orientation_.equals(otherMyClass.sensor_orientation_)) return false;
       if (!this.point_cloud_.equals(otherMyClass.point_cloud_)) return false;
       if (!this.colors_.equals(otherMyClass.colors_)) return false;
 
@@ -138,6 +160,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_timestamp=");
       builder.append(this.robot_timestamp_);      builder.append(", ");
+      builder.append("sensor_position=");
+      builder.append(this.sensor_position_);      builder.append(", ");
+      builder.append("sensor_orientation=");
+      builder.append(this.sensor_orientation_);      builder.append(", ");
       builder.append("point_cloud=");
       builder.append(this.point_cloud_);      builder.append(", ");
       builder.append("colors=");

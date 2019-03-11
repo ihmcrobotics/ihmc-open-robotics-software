@@ -1,17 +1,16 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,11 +18,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.random.RandomGeometry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class LeastSquaresZPlaneFitterTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
@@ -52,8 +49,7 @@ public class LeastSquaresZPlaneFitterTest
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testSimpleFlatCase()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
@@ -70,8 +66,7 @@ public class LeastSquaresZPlaneFitterTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+	@Test
    public void testRandomlyGeneratedPointsOnRandomPlanes()
    {
       int numberOfTests = 1000;
@@ -139,8 +134,7 @@ public class LeastSquaresZPlaneFitterTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCornerCaseWithOnlyTwoPoints()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
@@ -157,8 +151,7 @@ public class LeastSquaresZPlaneFitterTest
       assertTrue(isNaN(plane3d.getNormalCopy()));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCornerCaseWithColinearPoints()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
@@ -187,8 +180,8 @@ public class LeastSquaresZPlaneFitterTest
    }
 
    // Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testStraightUpAndDownPlane()
    {
       LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();

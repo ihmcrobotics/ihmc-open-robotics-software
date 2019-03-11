@@ -1,33 +1,34 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static us.ihmc.robotics.Assert.*;
 
 public class IntGlobalParameterTest
 {
    private static final boolean VERBOSE = false;
    private final int DEFAULT_VALUE = 11;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testGetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -38,8 +39,7 @@ public class IntGlobalParameterTest
       assertEquals(DEFAULT_VALUE, intGlobalParameter.getValue());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testSetValue()
    {
       SystemOutGlobalParameterChangedListener systemOutGlobalParameterChangedListener = null;
@@ -66,24 +66,22 @@ public class IntGlobalParameterTest
       assertEquals(newValue, intGlobalParameter.getValue());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "parent", DEFAULT_VALUE, null);
       @SuppressWarnings("unused")
       IntGlobalParameter invalidChild = new IntGlobalParameter("invalidChild", "test description", new GlobalParameter[] {parent}, null);
 
-      parent.set(1);
+      assertThrows(RuntimeException.class, () -> parent.set(1));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000,expected = RuntimeException.class)
+	@Test
    public void testCantSetChild()
    {
       IntGlobalParameter parent = new IntGlobalParameter("parent", "", 0, null);
       IntGlobalParameter child = new IntGlobalParameter("child", "", new GlobalParameter[] {parent}, null);
 
-      child.set(2, "Shouldn't be able to change this!");
+      assertThrows(RuntimeException.class, () -> child.set(2, "Shouldn't be able to change this!"));
    }
 }

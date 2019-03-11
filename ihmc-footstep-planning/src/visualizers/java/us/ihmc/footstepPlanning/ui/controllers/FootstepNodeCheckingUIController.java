@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
@@ -25,6 +26,8 @@ public class FootstepNodeCheckingUIController
    private Spinner<Double> nodeCheckerFootYSpinner;
    @FXML
    private Spinner<Double> nodeCheckerFootYaw;
+   @FXML
+   private CheckBox renderShiftedWaypointSteps;
 
    private JavaFXMessager messager;
    private final Point3DProperty nodeCheckerFootPosition = new Point3DProperty(this, "nodeCheckerFootPosition", new Point3D());
@@ -53,6 +56,8 @@ public class FootstepNodeCheckingUIController
 
       nodeCheckerFootYawProperty.bindBidirectionalYaw(nodeCheckerFootYaw.getValueFactory().valueProperty());
       messager.bindBidirectional(FootstepPlannerMessagerAPI.NodeCheckingOrientation, nodeCheckerFootYawProperty, false);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RenderShiftedWaypointsTopic, renderShiftedWaypointSteps.selectedProperty(), false);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createPositionValueFactory()

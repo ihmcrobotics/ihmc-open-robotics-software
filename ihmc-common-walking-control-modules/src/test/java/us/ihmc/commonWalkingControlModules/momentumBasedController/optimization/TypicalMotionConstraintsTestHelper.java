@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.data.DenseMatrix64F;

@@ -2,10 +2,9 @@ package us.ihmc.quadrupedRobotics.controller.force;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,7 +31,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -40,7 +39,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       quadrupedTestFactory.setUseNetworking(true);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -53,8 +52,7 @@ public abstract class QuadrupedWalkOverSteppingStonesTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 103.5)
-   @Test(timeout = 520000)
+   @Test
    public void testWalkOverSteppingStones() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       SteppingStonesEnvironment environment = new SteppingStonesEnvironment();

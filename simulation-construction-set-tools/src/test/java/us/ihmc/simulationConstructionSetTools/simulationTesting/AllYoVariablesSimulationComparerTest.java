@@ -1,16 +1,15 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Link;
@@ -38,19 +37,19 @@ public class AllYoVariablesSimulationComparerTest
 	
 	YoDouble yoDoubleA12;
 
-	 @Before
+	 @BeforeEach
 	   public void showMemoryUsageBeforeTest()
 	   {
 	      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 	   }
 	   
-	   @After
+	   @AfterEach
 	   public void showMemoryUsageAfterTest()
 	   {
 	      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
 	   }
 	
-	@Before
+	@BeforeEach
 	public void setUp()
 	{
 		robot1 = createSimpleRobotOne("robot"); 
@@ -121,8 +120,7 @@ public class AllYoVariablesSimulationComparerTest
 	      return ret;
 	   }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
+	@Test
 	public void testCompareWithZeroEpsilon() 
 	{
 		AllYoVariablesSimulationComparer comparerWithZeroEpsilon = new AllYoVariablesSimulationComparer(0.0);
@@ -156,8 +154,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertEquals(yoDouble4, differences.get(0)[1]);
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-	@Test(timeout = 30000)
+	@Test
 	public void testWithLowEpsilon()
 	{
 		AllYoVariablesSimulationComparer comparerWithLowEpsilon = new AllYoVariablesSimulationComparer(0.01);
@@ -185,8 +182,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+	@Test
 	public void testWithHighEpsilon()
 	{
 	   AllYoVariablesSimulationComparer comparerWithLargeEpsilon = new AllYoVariablesSimulationComparer(5.0);

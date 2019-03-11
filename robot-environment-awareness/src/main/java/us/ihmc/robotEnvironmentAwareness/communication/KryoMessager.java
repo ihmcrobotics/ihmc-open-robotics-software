@@ -32,22 +32,27 @@ public class KryoMessager implements Messager
    private final ConcurrentHashMap<Topic<?>, List<TopicListener<Object>>> topicListenersMap = new ConcurrentHashMap<>();
    private final List<MessagerStateListener> messagerStateListeners = new ArrayList<>();
 
+   /**
+    * When {@code true}, then a call to {@link #submitMessage(Message)} on this messager will also ensure the local inputs and listeners are receiving the message.
+    * When {@code false}, {@link #submitMessage(Message)} will only submit the message to the other endpoint.
+    */
+   private boolean allowSelfSubmit = false;
    private final NetworkedObjectCommunicator objectCommunicator;
 
-   public static Messager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static KryoMessager createTCPServer(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       NetworkedObjectCommunicator communicator = new KryoObjectServer(port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       return new KryoMessager(messagerAPI, communicator);
    }
 
-   public static Messager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
+   public static KryoMessager createTCPClient(MessagerAPI messagerAPI, String host, NetworkPorts port, NetClassList netClassList)
    {
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(true);
       return new KryoMessager(messagerAPI, objectCommunicator);
    }
 
-   public static Messager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
+   public static KryoMessager createIntraprocess(MessagerAPI messagerAPI, NetworkPorts port, NetClassList netClassList)
    {
       return new KryoMessager(messagerAPI, new IntraprocessObjectCommunicator(port.getPort(), netClassList));
    }
@@ -57,6 +62,15 @@ public class KryoMessager implements Messager
       this.messagerAPI = messagerAPI;
       this.objectCommunicator = objectCommunicator;
       this.objectCommunicator.attachListener(Message.class, this::receiveREAMessage);
+   }
+
+   /**
+    * When {@code true}, then a call to {@link #submitMessage(Message)} on this messager will also ensure the local inputs and listeners are receiving the message.
+    * When {@code false}, {@link #submitMessage(Message)} will only submit the message to the other endpoint.
+    */
+   public void setAllowSelfSubmit(boolean allowSelfSubmit)
+   {
+      this.allowSelfSubmit = allowSelfSubmit;
    }
 
    private <T> void receiveREAMessage(Message<T> message)
@@ -97,6 +111,9 @@ public class KryoMessager implements Messager
 
       if (DEBUG)
          LogTools.info("Submit message for topic: " + messageTopic.getName());
+
+      if (allowSelfSubmit)
+         receiveREAMessage(message);
 
       // Variable update over network
       objectCommunicator.send(message);

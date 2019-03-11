@@ -1,26 +1,25 @@
 package us.ihmc.convexOptimization.experimental;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ExperimentalSOCPSolverUsingJOptimizerTest
 {
    public static final boolean VERBOSE = false;
 
    // At time of test writing JOptimizer wasn't working for SOCPs...
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testASimpleSecondOrderConeProblem()
    {
       // Minimize -(x + y) subject to z <= sqrt(18) and ||(x, y, 0)|| <= z. Answer should be (3, 3, sqrt(18))
@@ -52,8 +51,8 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    }
    
    //At time of test writing JOptimizer wasn't working for SOCPs...
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test(timeout=300000)
+	@Disabled
+	@Test
    public void testARotatedSecondOrderConeProblem()
    {
       // Cone constraint: Given cone tilted to a normal vector and friction like constraints, with mu

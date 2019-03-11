@@ -30,6 +30,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,10 +38,15 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
+import java.util.List;
+
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean debug = false;
+
+   private static final double[] defaultWaypointProportions = new double[] {0.33, 0.66};
+   private static final double[] defaultObstacleClearanceWaypointProportions = new double[] {0.25, 0.75};
 
    //   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
    private final TwoWaypointSwingGenerator swingTrajectoryWaypointCalculator;
@@ -157,7 +163,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
       //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, new double[] {0.33, 0.66}, new double[] {0.25, 0.75}, 0.04, 0.3, registry,
+      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, 0.04, 0.3, registry,
                                                                         graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
@@ -349,6 +355,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
          swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
          swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
          swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         double[] waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ? defaultObstacleClearanceWaypointProportions : defaultWaypointProportions;
+         swingTrajectoryWaypointCalculator.setWaypointProportions(waypointProportions);
          swingTrajectoryWaypointCalculator.initialize();
       }
 

@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
@@ -20,6 +20,7 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 
+@Tag("quadruped-planning")
 public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
@@ -27,7 +28,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -56,7 +57,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -68,8 +69,7 @@ public abstract class QuadrupedBodyPathPlanTest implements QuadrupedMultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 120)
-   @Test(timeout = 200000)
+   @Test
    public void testSimpleBodyPathPlan()
    {
       setUpSimulation(null);

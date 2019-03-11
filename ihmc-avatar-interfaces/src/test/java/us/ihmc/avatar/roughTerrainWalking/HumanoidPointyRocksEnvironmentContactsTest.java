@@ -1,24 +1,24 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -35,6 +35,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Tag("humanoid-rough-terrain")
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -54,8 +55,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
    protected abstract DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints);
 
-   @ContinuousIntegrationTest(estimatedDuration = 210.0) // fix the contacts
-   @Test(timeout = 690000)
+   @Test
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
       PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.LINES, 6);
@@ -116,8 +116,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       drcSimulationTestHelper.checkNothingChanged();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0) // fix the contacts
-   @Test(timeout = 350000)
+   @Test
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {
       PointyRocksWorld world = new PointyRocksWorld(PointyRocksType.POINT, 0);
@@ -178,13 +177,13 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       drcSimulationTestHelper.checkNothingChanged();
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

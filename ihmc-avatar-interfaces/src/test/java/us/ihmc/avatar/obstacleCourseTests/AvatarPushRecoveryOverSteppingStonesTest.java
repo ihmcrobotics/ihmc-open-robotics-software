@@ -1,19 +1,19 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,6 +44,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-obstacle-3")
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -57,14 +57,14 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private double swingTime, totalMass;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -96,8 +96,9 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
-      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -137,8 +138,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 52.4)
-	@Test(timeout = 260000)
+	@Test
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
       setupTest();

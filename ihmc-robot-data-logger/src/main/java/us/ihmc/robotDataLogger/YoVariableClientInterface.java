@@ -2,6 +2,7 @@ package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
+import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -16,6 +17,12 @@ public interface YoVariableClientInterface
 
    /**
     * 
+    * @return true if the client interface is connected
+    */
+   boolean isConnected();
+   
+   /**
+    * 
     * @return YoVariableRegistry with debug variables for this instance of the YoVariableClient
     */
    YoVariableRegistry getDebugRegistry();
@@ -26,7 +33,27 @@ public interface YoVariableClientInterface
     * If no session is available, this request gets silently ignored.
     */
    void sendClearLogRequest();
+   
+   
+   /**
+    * Send a command to the server
+    * 
+    * @param command
+    * @param argument
+    */
+   void sendCommand(DataServerCommand command, int argument);
 
+   
+   /**
+    * Set the variable update rate for this client
+    * 
+    * Note: If the controller does not send monotonically increasing timestamps this could result in no received data. 
+    * 
+    * @param updateRate Desired update rate in milliseconds
+    */
+   void setVariableUpdateRate(int updateRate);
+   
+   
    /**
     * Stops the client completely. 
     * 
