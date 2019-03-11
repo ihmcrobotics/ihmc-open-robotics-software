@@ -23,10 +23,7 @@ public class AtlasBehaviorUI extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-      MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      apiFactory.createRootCategory(getClass().getSimpleName());
-      apiFactory.includeMessagerAPIs(BehaviorUI.API.create());
-      messager = new SharedMemoryJavaFXMessager(apiFactory.getAPIAndCloseFactory());
+      messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
 
       messager.startMessager();
 
