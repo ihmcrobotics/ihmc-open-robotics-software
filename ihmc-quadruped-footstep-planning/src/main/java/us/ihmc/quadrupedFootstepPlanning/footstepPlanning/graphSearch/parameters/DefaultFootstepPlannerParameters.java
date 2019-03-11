@@ -114,6 +114,21 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       return 0.04;
    }
 
+   public double getPaceSpeed()
+   {
+      return 0.25;
+   }
+
+   public double getCrawlSpeed()
+   {
+      return 0.25;
+   }
+
+   public double getTrotSpeed()
+   {
+      return 1.0;
+   }
+
    @Override
    public double getMinXClearanceFromFoot()
    {

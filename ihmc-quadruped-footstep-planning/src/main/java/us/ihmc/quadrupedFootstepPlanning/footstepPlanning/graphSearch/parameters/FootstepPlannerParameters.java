@@ -1,8 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.trajectories.CubicSplineCurveGenerator;
 
 public interface FootstepPlannerParameters
 {
@@ -43,6 +47,19 @@ public interface FootstepPlannerParameters
    double getMinXClearanceFromFoot();
 
    double getMinYClearanceFromFoot();
+
+
+   default double getDesiredWalkingSpeed(double phase)
+   {
+      if (phase < 90)
+         return InterpolationTools.hermiteInterpolate(getPaceSpeed(), getCrawlSpeed(), phase / 90.0);
+      else
+         return InterpolationTools.hermiteInterpolate(getCrawlSpeed(), getTrotSpeed(), (phase - 90.0) / 90.0);
+   }
+
+   double getCrawlSpeed();
+   double getTrotSpeed();
+   double getPaceSpeed();
 
    /**
     * Distance which a foothold is projected into planar region. Should be a positive value,
