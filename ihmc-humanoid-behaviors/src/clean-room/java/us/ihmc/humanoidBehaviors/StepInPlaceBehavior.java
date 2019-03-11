@@ -7,12 +7,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.ActivationReference;
-import us.ihmc.humanoidBehaviors.tools.FXUIMessagerAPIFactory;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -20,6 +18,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -114,10 +115,12 @@ public class StepInPlaceBehavior
 
    public static class API
    {
-      private static final FXUIMessagerAPIFactory apiFactory = new FXUIMessagerAPIFactory(StepInPlaceBehavior.class);
+      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
+      private static final Category Root = apiFactory.createRootCategory("StepInPlace");
+      private static final CategoryTheme BEHAVIOR = apiFactory.createCategoryTheme("Behavior");
 
-      public static final Topic<Boolean> Stepping = apiFactory.createTopic("Stepping", Boolean.class);
-      public static final Topic<Boolean> Abort = apiFactory.createTopic("Abort", Boolean.class);
+      public static final Topic<Boolean> Stepping = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Stepping"));
+      public static final Topic<Boolean> Abort = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Abort"));
 
       public static final MessagerAPI create()
       {
