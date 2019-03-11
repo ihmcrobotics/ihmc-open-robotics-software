@@ -1,6 +1,7 @@
 package us.ihmc.atlas.jfxvisualizer;
 
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -16,6 +17,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
@@ -79,11 +81,14 @@ public class AtlasRemoteFootstepPlannerUI extends Application
    private class AtlasLowLevelMessenger implements RobotLowLevelMessenger
    {
       private final IHMCRealtimeROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
+      private final IHMCRealtimeROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
 
       public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
       {
          lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class,
                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+         bdiBehaviorPublisher = ROS2Tools.createPublisher(ros2Node, BDIBehaviorCommandPacket.class,
+                                                          ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
       }
 
       @Override
@@ -100,6 +105,13 @@ public class AtlasRemoteFootstepPlannerUI extends Application
          AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
          message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
          lowLevelModePublisher.publish(message);
+      }
+
+      @Override
+      public void sendShutdownRequest()
+      {
+         BDIBehaviorCommandPacket message = HumanoidMessageTools.createBDIBehaviorCommandPacket(true);
+         bdiBehaviorPublisher.publish(message);
       }
    }
 }
