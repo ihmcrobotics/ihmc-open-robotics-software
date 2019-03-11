@@ -1,4 +1,4 @@
-package us.ihmc.atlas.jfxvisualizer;
+package us.ihmc.atlas.behaviors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
