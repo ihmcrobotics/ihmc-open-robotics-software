@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -14,8 +15,7 @@ public class AlphaFilteredYoVariableTest
 {
    private final Random rng = new Random();
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testNoisyFixedPosition()
    {
       // Use a reasonably large alpha for a reasonably large amount of noise
@@ -42,8 +42,7 @@ public class AlphaFilteredYoVariableTest
       assertEquals(10, alphaFilteredYoVariable.getDoubleValue(), 1);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testAlphaAndBreakFrequencyComputations()
    {
       for (int i = 0; i < 1000; i++)

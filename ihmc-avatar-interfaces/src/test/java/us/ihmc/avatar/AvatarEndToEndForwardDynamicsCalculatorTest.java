@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -57,19 +58,20 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-flat-ground-3")
 public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -89,7 +91,7 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Test(timeout = 300000)
+   @Test
    public void testStanding() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -108,7 +110,7 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Test(timeout = 300000)
+   @Test
    public void testWalking() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -130,7 +132,7 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @Test(timeout = 300000)
+   @Test
    public void testFloating() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

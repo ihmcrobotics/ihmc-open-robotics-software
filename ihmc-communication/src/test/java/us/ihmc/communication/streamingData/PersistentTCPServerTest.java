@@ -1,6 +1,6 @@
 package us.ihmc.communication.streamingData;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,16 +11,16 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class PersistentTCPServerTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-	@Test(timeout = 30000)
+	@Test
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {
       EstablishedConnectionCounter establishedConnectionCounter = new EstablishedConnectionCounter();

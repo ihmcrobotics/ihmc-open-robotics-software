@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -20,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
@@ -55,6 +53,8 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class WholeBodyVirtualModelControlSolver
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;
@@ -276,6 +276,9 @@ public class WholeBodyVirtualModelControlSolver
             break;
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
+            break;
+         case OPTIMIZATION_SETTINGS:
+            optimizationControlModule.submitOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) command);
             break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Virtual Model Control solver mode.");

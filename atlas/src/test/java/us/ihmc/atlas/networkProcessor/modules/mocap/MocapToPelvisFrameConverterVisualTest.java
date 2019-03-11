@@ -3,15 +3,15 @@ package us.ihmc.atlas.networkProcessor.modules.mocap;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import optiTrack.MocapMarker;
 import optiTrack.MocapRigidBody;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToPelvisFrameConverter;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,20 +30,20 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
+@Tag("gui-slow")
 public class MocapToPelvisFrameConverterVisualTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final String modelDirectory = "models/GFE/atlas_description/meshes_unplugged/";
    private final Random random = new Random(456654321123L);
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -55,8 +55,7 @@ public class MocapToPelvisFrameConverterVisualTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 28.6)
-   @Test(timeout = 14000)
+   @Test
    public void testVisuallyForMarkerToPelvisAlignment()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

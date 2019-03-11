@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,18 +18,17 @@ public class HysteresisFilteredYoVariableTest
    private HysteresisFilteredYoVariable filteredYoVariable = new HysteresisFilteredYoVariable("test", registry, guideLineHysteresis);
    private double epsilon = 1e-7;
 
-   @Before
+   @BeforeEach
    public void setUp() throws Exception
    {
    }
 
-   @After
+   @AfterEach
    public void tearDown() throws Exception
    {
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNoHysteresis()
    {
       guideLineHysteresis.set(0.0);
@@ -50,8 +50,7 @@ public class HysteresisFilteredYoVariableTest
       //    plot(x, new double[][]{unfilteredValues, filteredValues}, "No Hysteresis");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSomeHysteresis()
    {
       guideLineHysteresis.set(0.2);

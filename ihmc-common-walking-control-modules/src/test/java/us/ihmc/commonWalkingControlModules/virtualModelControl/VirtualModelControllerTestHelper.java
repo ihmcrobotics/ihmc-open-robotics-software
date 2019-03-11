@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Assert;
-
+import us.ihmc.robotics.Assert;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;

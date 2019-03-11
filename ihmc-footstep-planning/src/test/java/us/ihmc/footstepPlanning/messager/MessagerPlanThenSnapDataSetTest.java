@@ -1,13 +1,12 @@
 package us.ihmc.footstepPlanning.messager;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
+@Tag("footstep-planning-slow")
 public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
@@ -17,16 +16,15 @@ public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
    }
 
    @Override
-   @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 21.8)
+   @Test
    public void testDatasetsWithoutOcclusion()
    {
       super.testDatasetsWithoutOcclusion();
    }
 
    @Override
-   @Test(timeout = 500000)
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 90.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @Test
+   @Disabled
    public void testDatasetsWithoutOcclusionInDevelopment()
    {
       super.testDatasetsWithoutOcclusionInDevelopment();
@@ -35,10 +33,8 @@ public class MessagerPlanThenSnapDataSetTest extends FootstepPlannerDataSetTest
    public static void main(String[] args) throws Exception
    {
       MessagerPlanThenSnapDataSetTest test = new MessagerPlanThenSnapDataSetTest();
-      String prefix = "unitTestData/testable/";
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), prefix + "20171218_205040_SimpleMaze");
+      test.runAssertionsOnDataset(test::runAssertions, "20190219_182005_SteppingStones");
       test.tearDown();
-
    }
 }

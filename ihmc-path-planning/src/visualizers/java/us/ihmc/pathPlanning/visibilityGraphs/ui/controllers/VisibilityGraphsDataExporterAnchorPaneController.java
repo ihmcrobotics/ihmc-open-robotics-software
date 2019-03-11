@@ -1,8 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.controllers;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -10,8 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.VisibilityGraphsIOTools;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 
 public class VisibilityGraphsDataExporterAnchorPaneController
@@ -26,20 +23,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
 
    public VisibilityGraphsDataExporterAnchorPaneController()
    {
-      File file = new File(".");
-
-      try
-      {
-         URL testDataFolderURL = Thread.currentThread().getContextClassLoader().getResource(VisibilityGraphsIOTools.TEST_DATA_URL);
-         file = new File(testDataFolderURL.toURI());
-      }
-      catch(URISyntaxException e)
-      {
-         LogTools.error("Could not load test data folder with URL: " + VisibilityGraphsIOTools.TEST_DATA_URL);
-         e.printStackTrace();
-      }
-
-      defaultDataFolder = file;
+      this.defaultDataFolder = new File(DataSetIOTools.RESOURCES_DIRECTORY + File.separator + DataSetIOTools.DATA_SET_DIRECTORY_PATH);
    }
 
    public void setMainWindow(Window ownerWindow)
@@ -66,7 +50,7 @@ public class VisibilityGraphsDataExporterAnchorPaneController
    }
 
    @FXML
-   private void exportPlanarRegion()
+   private void exportDataSet()
    {
       messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestPath, currentPlanarRegionDataFolderTextField.getText());
       messager.submitMessage(UIVisibilityGraphsTopics.exportUnitTestDataFile, true);

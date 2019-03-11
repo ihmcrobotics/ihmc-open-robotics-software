@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import georegression.fitting.plane.FitPlane3D_F64;
 import georegression.geometry.UtilPlane3D_F64;
@@ -12,15 +12,14 @@ import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class FitPlaneWeighted3DTest
 {
    Random rand = new Random(1231L);
    double eps = 3e-7;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testAgainstUnweighted() {
       for (int i = 0; i<100; i++) {
          int n = rand.nextInt(500) + 4;

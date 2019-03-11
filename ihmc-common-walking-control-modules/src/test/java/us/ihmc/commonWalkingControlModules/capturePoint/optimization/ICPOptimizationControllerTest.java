@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -17,9 +17,8 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -38,7 +37,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -50,14 +48,13 @@ public class ICPOptimizationControllerTest
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testStandingWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -127,8 +124,7 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTransferWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -198,8 +194,7 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testStandingConstrained() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -280,8 +275,7 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(desiredCMPExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");

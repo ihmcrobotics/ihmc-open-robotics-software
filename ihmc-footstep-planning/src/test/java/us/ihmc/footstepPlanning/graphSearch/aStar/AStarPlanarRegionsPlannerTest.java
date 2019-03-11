@@ -1,24 +1,20 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -50,20 +46,18 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
 {
 //   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean visualize = false;
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFootstepGraph()
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
@@ -117,12 +111,11 @@ public class AStarPlanarRegionsPlannerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testFootstepNode()
    {
-      double gridX = FootstepNode.gridSizeXY;
-      double gridY = FootstepNode.gridSizeXY;
+      double gridX = LatticeNode.gridSizeXY;
+      double gridY = LatticeNode.gridSizeXY;
       FootstepNode node;
 
       node = new FootstepNode(gridX * 0.3, 0.0);
@@ -146,8 +139,7 @@ public class AStarPlanarRegionsPlannerTest
       assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNodeExpansion()
    {
       if (!visualize)
@@ -186,8 +178,7 @@ public class AStarPlanarRegionsPlannerTest
       ThreadTools.sleepForever();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleExpansion()
    {
       // make planar regions
@@ -254,7 +245,7 @@ public class AStarPlanarRegionsPlannerTest
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
-         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, LatticeNode.gridSizeXY));
 
          heuristicCost.set(5.0);
 

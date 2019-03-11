@@ -1,20 +1,18 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.skippy.SkippySimulation.SkippyControllerMode;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SkippyTest
 {
    private static final SkippyControllerMode controllerMode = SkippyControllerMode.ICP_BASED;
@@ -23,8 +21,8 @@ public class SkippyTest
    private SkippySimulation skippySimulation;
 
    
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 100000)
+   @Disabled
+   @Test
    public void testStanding() throws SimulationExceededMaximumTimeException
    {
       SkippyRobot skippy = skippySimulation.getSkippy();
@@ -34,8 +32,7 @@ public class SkippyTest
       assertTrue(skippySimulation.run(10.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.9)
-   @Test(timeout = 30000)
+   @Test
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {
       double pushDuration = 0.03;
@@ -54,13 +51,13 @@ public class SkippyTest
       skippy.setRootJointForce(0.0, 0.0, 0.0);
    }
 
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       skippySimulation = new SkippySimulation(controllerMode);
    }
 
-   @After
+   @AfterEach
    public void afterTest()
    {
       if (sleepAfterTest)

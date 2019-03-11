@@ -1,13 +1,13 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -15,7 +15,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -29,17 +30,18 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("humanoid-behaviors")
 public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -57,7 +59,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @AfterClass
+   @AfterAll
    public static void printMemoryUsageAfterClass()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(HumanoidHandDesiredConfigurationBehaviorTest.class + " after class.");
@@ -66,7 +68,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    private final boolean DEBUG = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
@@ -75,8 +77,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
                                                         simulationTestingParameters, getRobotModel());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
+   @Test
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -103,8 +104,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
+   @Test
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -145,8 +145,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.7)
-   @Test(timeout = 83115)
+   @Test
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

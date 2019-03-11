@@ -1,17 +1,16 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -26,8 +25,7 @@ public class PrincipalComponentAnalysis3DTest
    private static final double EPSILON_HIGH_PRECISION = 5.0e-7;
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWith1DData()
    {
       Random random = new Random(5516315L);
@@ -164,8 +162,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testWith2DData()
    {
       Random random = new Random(5516315L);
@@ -348,8 +345,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testWith3DData()
    {
       Random random = new Random(5516315L);
@@ -546,8 +542,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-	@Test(timeout = 30000)
+	@Test
 	/**
 	 * Make sure PCA does not crap out if it gets an empty list of data points.
 	 */
@@ -559,8 +554,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-	@Test(timeout = 30000)
+	@Test
 	/**
 	 * Make sure PCA does not crap out if a single data point is passed to it.
 	 */
@@ -575,8 +569,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-	@Test(timeout = 30000)
+	@Test
 	/**
 	 * Make sure PCA does not crap out if two data points are passed to it.
 	 */
@@ -592,8 +585,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-	@Test(timeout = 30000)
+	@Test
 	/**
 	 * Edge case:
 	 * PCA used to fail if all data points are on the y axis. Make sure it returns the correct principal

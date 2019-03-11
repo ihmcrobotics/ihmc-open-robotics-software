@@ -1,6 +1,6 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci-plugin") version "0.18.0"
+   id("us.ihmc.ihmc-build") version "0.15.7"
+   id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
@@ -9,11 +9,6 @@ ihmc {
    
    configureDependencyResolution()
    configurePublications()
-}
-
-testSuites {
-   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
 }
 
 project.sourceSets.main.java.srcDirs += ["generated-src"]
@@ -39,17 +34,14 @@ mainDependencies {
    compile group: "org.ros.rosjava_messages", name: "tf", version: "1.10.8"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.24.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
 }
 
 testDependencies {
-   compile group: "junit", name: "junit", version: "4.12"
-   compile group: "org.junit.vintage", name: "junit-vintage-engine", version: "5.3.1"
 
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.18.0"
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.24.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

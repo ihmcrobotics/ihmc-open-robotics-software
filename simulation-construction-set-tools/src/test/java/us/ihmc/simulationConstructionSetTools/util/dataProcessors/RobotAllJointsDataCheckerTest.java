@@ -1,21 +1,19 @@
 package us.ihmc.simulationConstructionSetTools.util.dataProcessors;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RobotAllJointsDataCheckerTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -24,8 +22,7 @@ public class RobotAllJointsDataCheckerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 7.2)
-   @Test(timeout = 36000)
+   @Test
    public void test()
    {
       TwoLinkRobotForTesting twoLinkRobotForTesting = new TwoLinkRobotForTesting();

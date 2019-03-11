@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.networkProcessor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -10,20 +9,19 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.ConcurrentPacketQueue;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY})
+@Disabled
 public class NetworkProcessorTest
 {
    private static final boolean DEBUG = false;
@@ -124,8 +122,7 @@ public class NetworkProcessorTest
       
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.3)
-   @Test (timeout = 30000)
+   @Test
    public void testSendPackets() throws IOException
    {
       connectCommunicators();
@@ -171,8 +168,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
-   @Test(timeout = 30000)
+   @Test
    public void testDetatchObjectCommunicator() throws IOException
    {
       connectCommunicators();
@@ -210,8 +206,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
-   @Test(timeout = 30000)
+   @Test
    public void testForwarder() throws IOException
    {
       connectCommunicators();
@@ -236,8 +231,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
+   @Test
    public void testDoubleForwarder() throws IOException
    {
       connectCommunicators();
@@ -255,8 +249,7 @@ public class NetworkProcessorTest
       assertTrue(threwException);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 30000)
+   @Test
    public void testDisconnectDoesNotFail() throws IOException
    {
       connectCommunicators();

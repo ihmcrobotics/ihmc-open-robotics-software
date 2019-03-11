@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepProcessingParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 
 public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
@@ -27,7 +27,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.35;
+      return 0.4;
    }
 
    @Override
@@ -69,7 +69,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getBodyBoxBaseX()
    {
-      return 0.0;
+      return 0.03;
    }
 
    @Override
@@ -123,19 +123,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getWiggleInsideDelta()
    {
-      return 0.01;
+      return 0.03;
    }
 
    @Override
    public boolean getWiggleIntoConvexHullOfPlanarRegions()
    {
       return true;
-   }
-
-   @Override
-   public double getStepTranslationBoundingBoxScaleFactor()
-   {
-      return 0.65;
    }
 
    @Override
@@ -157,8 +151,32 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public FootstepProcessingParameters getFootstepProcessingParameters()
+   public AdaptiveSwingParameters getAdaptiveSwingParameters()
    {
-      return new ValkyrieFootstepProcessingParameters();
+      return new ValkyrieAdaptiveSwingParameters();
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return 0.32;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return 0.23;
    }
 }

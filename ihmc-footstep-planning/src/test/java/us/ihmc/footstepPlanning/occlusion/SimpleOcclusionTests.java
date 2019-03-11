@@ -1,14 +1,17 @@
 package us.ihmc.footstepPlanning.occlusion;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
+import java.awt.Color;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,7 +21,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
@@ -33,6 +41,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -46,13 +55,11 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class SimpleOcclusionTests
 {
@@ -67,23 +74,19 @@ public class SimpleOcclusionTests
    private static final int stepsPerSideToVisualize = 4;
    private static final double defaultMaxAllowedSolveTime = 5.0;
 
-   @Rule
-   public TestName name = new TestName();
-
-   @Test(timeout = 300000)
-   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.EXCLUDE})
-   public void testSimpleOcclusions()
+   @Test
+   @Disabled
+   public void testSimpleOcclusions(TestInfo testInfo)
    {
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, defaultMaxAllowedSolveTime);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
-   @Ignore // Resource file does not seem to exist.
-   public void testOcclusionsFromData()
+   @Test
+   @Disabled // Resource file does not seem to exist.
+   public void testOcclusionsFromData(TestInfo testInfo)
    {
       FramePose3D startPose = new FramePose3D(worldFrame);
       startPose.setPosition(0.25, -0.25, 0.0);
@@ -95,7 +98,7 @@ public class SimpleOcclusionTests
       Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
       PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
 
-      runTest(startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
+      runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
    }
 
    private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
@@ -113,26 +116,25 @@ public class SimpleOcclusionTests
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
-   @Ignore
-   public void testMazeWithOcclusions()
+   @Test
+   @Disabled
+   public void testMazeWithOcclusions(TestInfo testInfo)
    {
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       PlanarRegionsList regions = createMazeOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, defaultMaxAllowedSolveTime);
    }
 
-   private void runTest(FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, double maxAllowedSolveTime)
+   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, double maxAllowedSolveTime)
    {
-      runTest(startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, getParameters(), getVisibilityGraphsParameters(), maxAllowedSolveTime);
    }
 
-   private void runTest(FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters,
+   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters,
                         VisibilityGraphsParameters visibilityGraphsParameters, double maxAllowedSolveTime)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FootstepPlanner planner = getPlanner(parameters, visibilityGraphsParameters, graphicsListRegistry, registry);
@@ -222,7 +224,7 @@ public class SimpleOcclusionTests
          YoGraphicPosition observerVisualization = new YoGraphicPosition("Observer", observerPoint, 0.05, YoAppearance.Red());
          graphicsListRegistry.registerYoGraphic("viz", observerVisualization);
 
-         scs = setupSCS(name.getMethodName(), registry, regions, startPose, goalPose);
+         scs = setupSCS(testInfo.getTestMethod().get().getName(), registry, regions, startPose, goalPose);
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.setInPoint();
       }

@@ -7,14 +7,35 @@ module controller_msgs
   {
     module dds
     {
+      /**
+       * The robot has begun its initial transfer/sway at the start of a walking plan.
+       */
       const octet STARTED =
       0;
 
+      /**
+       * The robot has finished its final transfer/sway at the end of a walking plan.
+       */
       const octet COMPLETED =
       1;
 
+      /**
+       * A walking abort has been requested by the controller.
+       */
       const octet ABORT_REQUESTED =
       2;
+
+      /**
+       * The robot is back to standing on a break waiting for either an un-pause command or new footsteps.
+       */
+      const octet PAUSED =
+      3;
+
+      /**
+       * The robot is resuming the series of footsteps that were paused.
+       */
+      const octet RESUMED =
+      4;
 
 
       /**

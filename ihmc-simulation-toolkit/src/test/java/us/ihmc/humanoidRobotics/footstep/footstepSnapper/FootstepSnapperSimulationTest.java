@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
@@ -65,7 +64,7 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 public class FootstepSnapperSimulationTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();

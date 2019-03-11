@@ -1,7 +1,8 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -16,12 +17,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class FootstepNodeTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {
       Random random = new Random(3823L);
@@ -45,8 +45,7 @@ public class FootstepNodeTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testShiftInSoleFrame()
    {
       Vector3D soleTranslation = new Vector3D();

@@ -18,15 +18,18 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
@@ -40,10 +43,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -83,6 +89,7 @@ public class WalkingMessageHandler
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
    private final YoBoolean isWalkingPaused = new YoBoolean("isWalkingPaused", registry);
+   private final YoBoolean isWalkingResuming = new YoBoolean("isWalkingResuming", registry);
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
@@ -110,9 +117,14 @@ public class WalkingMessageHandler
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
 
-   private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
+   private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
+   private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
+
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
+
+   private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
+   private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
                                 double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -164,15 +176,20 @@ public class WalkingMessageHandler
          switch (command.getExecutionMode())
          {
          case OVERRIDE:
-            offsettingPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+            offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
             planOffsetInWorld.setToZero();
             clearFootsteps();
             clearFootTrajectory();
             break;
          case QUEUE:
-            if (offsettingPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
+            if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
             {
-               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with exectuion error!");
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
+            }
+            if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
+            {
+               PrintTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
             }
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
@@ -208,6 +225,17 @@ public class WalkingMessageHandler
       }
 
       lastCommandID.set(command.getCommandId());
+
+      if (isWalkingPaused.getValue())
+      { 
+         /*
+          * The walking was paused, when paused isWalking remains true. We're
+          * receiving a new series of footsteps, let's reset isWalking so the
+          * controller reports that it starts walking.
+          */
+         isWalking.set(false);
+      }
+
       isWalkingPaused.set(false);
       double commandDefaultTransferTime = command.getDefaultTransferDuration();
       double commandDefaultSwingTime = command.getDefaultSwingDuration();
@@ -236,8 +264,16 @@ public class WalkingMessageHandler
          currentNumberOfFootsteps.increment();
       }
 
-      if (!checkTimings(upcomingFootstepTimings))
+      if (!checkTimings(upcomingFootstepTimings, yoTime))
+      {
          clearFootsteps();
+      }
+
+      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
+      {
+         clearFootsteps();
+      }
+
       checkForPause();
 
       updateVisualization();
@@ -269,6 +305,9 @@ public class WalkingMessageHandler
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
    {
+      if (!command.isPauseRequested() && isWalkingPaused.getValue())
+         isWalkingResuming.set(true);
+
       isWalkingPaused.set(command.isPauseRequested());
    }
 
@@ -536,56 +575,57 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   private final Point3D desiredFootPositionInWorld = new Point3D();
-   private final Quaternion desiredFootOrientationInWorld = new Quaternion();
-   private final Point3D actualFootPositionInWorld = new Point3D();
-   private final Quaternion actualFootOrientationInWorld = new Quaternion();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide, FramePose3D desiredFootPoseInWorld, FramePose3D actualFootPoseInWorld)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
    {
-      desiredFootPoseInWorld.get(desiredFootPositionInWorld, desiredFootOrientationInWorld);
-      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
-
-      footstepStatus.setFootstepStatus(FootstepStatus.STARTED.toByte());
-      footstepStatus.setRobotSide(robotSide.toByte());
-      footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
-      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
-      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
-      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
-      statusOutputManager.reportStatusMessage(footstepStatus);
-
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld);
       executingFootstep.set(true);
 
       if (yoTime != null)
          timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
-   public void reportFootstepCompleted(RobotSide robotSide, FramePose3D actualFootPoseInWorld)
+   public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
    {
-      actualFootPoseInWorld.get(actualFootPositionInWorld, actualFootOrientationInWorld);
-      desiredFootOrientationInWorld.setToNaN();
-      desiredFootPositionInWorld.setToNaN();
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld);
+      executingFootstep.set(false);
+   }
 
-      footstepStatus.setFootstepStatus(FootstepStatus.COMPLETED.toByte());
+   private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
+                                     FramePose3DReadOnly actualFootPoseInWorld)
+   {
+      desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
+      actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
+
+      footstepStatus.setFootstepStatus(status.toByte());
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
-      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
-      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
-      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
+      footstepStatus.getActualFootOrientationInWorld().set(actualFootPoseInWorld.getOrientation());
+      footstepStatus.getActualFootPositionInWorld().set(actualFootPoseInWorld.getPosition());
+      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootPoseInWorld.getOrientation());
+      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPoseInWorld.getPosition());
       statusOutputManager.reportStatusMessage(footstepStatus);
-
-      executingFootstep.set(false);
    }
 
    private final WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
 
    public void reportWalkingStarted()
    {
+      if (isWalking.getValue())
+      {
+         if (isWalkingResuming.getValue())
+         {
+            walkingStatusMessage.setWalkingStatus(WalkingStatus.RESUMED.toByte());
+            statusOutputManager.reportStatusMessage(walkingStatusMessage);
+            isWalkingResuming.set(false);
+         }
+
+         return;
+      }
+
       walkingStatusMessage.setWalkingStatus(WalkingStatus.STARTED.toByte());
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
       reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.WALKING);
@@ -595,10 +635,17 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      if (!isWalking.getValue())
+      {
+         return;
+      }
+
       // If we have transitioned to standing this will be called. However, we might just be taking a break because of a long
       // transfer. In that case do not report walking complete. Instead compute when to continue walking.
       if (!upcomingFootsteps.isEmpty())
       {
+         walkingStatusMessage.setWalkingStatus(WalkingStatus.PAUSED.toByte());
+         statusOutputManager.reportStatusMessage(walkingStatusMessage);
          checkForPause();
          return;
       }
@@ -792,11 +839,7 @@ public class WalkingMessageHandler
    private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
    {
       footstepToSet.set(footstepData, trustHeight, isAdjustable);
-
-      if (offsettingPlanWithFootstepError.getBooleanValue())
-      {
-         footstepToSet.addOffset(planOffsetInWorld);
-      }
+      footstepToSet.addOffset(planOffsetInWorld);
    }
 
    private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
@@ -821,7 +864,7 @@ public class WalkingMessageHandler
       }
 
       double touchdownDuration = footstep.getTouchdownDuration();
-      if(Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
+      if (Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
       {
          touchdownDuration = defaultTouchdownTime.getDoubleValue();
       }
@@ -878,7 +921,7 @@ public class WalkingMessageHandler
       }
    }
 
-   private boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings)
+   private static boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings, YoDouble yoTime)
    {
       // TODO: This is somewhat duplicated in the PacketValidityChecker.
       // The reason it has to be here is that this also checks that the timings are monotonically increasing if messages
@@ -907,34 +950,157 @@ public class WalkingMessageHandler
 
       if (atLeastOneFootstepHadTiming && !timingsValid)
       {
-         PrintTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
+         LogTools.warn("Recieved footstep data with invalid timings. Using swing and transfer times instead.");
          return false;
       }
 
       if (atLeastOneFootstepHadTiming && yoTime == null)
       {
-         PrintTools.warn("Recieved absolute footstep timings but " + getClass().getSimpleName() + " was created with no yoTime.");
+         LogTools.warn("Recieved absolute footstep timings but " + WalkingMessageHandler.class.getSimpleName() + " was created with no yoTime.");
          return false;
       }
 
       return true;
    }
 
+   private final FramePoint3DBasics tempStanceLocation = new FramePoint3D();
+   private final FramePoint3DBasics tempStepOrigin = new FramePoint3D();
+
+   /**
+    * Does sanity checks on the provided footsteps:
+    * <p>
+    * Will return false if this method finds</br>
+    *  - a step that is too far from the stance foot in XY</br>
+    *  - a step that has a swing trajectory that is too far from a straight line swing in XY</br>
+    *  - a step that has a swing trajectory that is too far from the step origin or destination in Z</br>
+    *
+    * @return if the footsteps were found to be safe
+    */
+   private static boolean checkFootsteps(List<Footstep> footsteps, SideDependentList<ReferenceFrame> soleFrames, double maxStepDistance,
+                                         double maxSwingDistance, FramePoint3DBasics tempStanceLocation, FramePoint3DBasics tempStepOrigin)
+   {
+      if (footsteps.isEmpty())
+      {
+         return true;
+      }
+
+      tempStanceLocation.setToZero(soleFrames.get(footsteps.get(0).getRobotSide().getOppositeSide()));
+      tempStepOrigin.setToZero(soleFrames.get(footsteps.get(0).getRobotSide()));
+      tempStanceLocation.changeFrame(worldFrame);
+      tempStepOrigin.changeFrame(worldFrame);
+
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         Footstep footstep = footsteps.get(i);
+         FixedFramePoint3DBasics stepPosition = footstep.getFootstepPose().getPosition();
+         double distance = stepPosition.distanceXY(tempStanceLocation);
+         if (distance > maxStepDistance)
+         {
+            LogTools.warn("Received step that was too far to be executed safely. Distance from previous step was " + distance
+                  + ". If that is acceptable increase the MaxStepDistance parameter.");
+            return false;
+         }
+
+         // Check the swing trajectory
+         if (footstep.getTrajectoryType() == TrajectoryType.WAYPOINTS)
+         {
+            List<FrameSE3TrajectoryPoint> swingTrajectory = footstep.getSwingTrajectory();
+            for (int j = 0; j < swingTrajectory.size(); j++)
+            {
+               FramePoint3DReadOnly position = swingTrajectory.get(j).getPosition();
+               if (!checkPositionIsValid(position, tempStepOrigin, stepPosition, maxSwingDistance))
+               {
+                  return false;
+               }
+            }
+         }
+
+         // Check position waypoints
+         if (footstep.getTrajectoryType() == TrajectoryType.CUSTOM)
+         {
+            List<FramePoint3D> positionWaypoints = footstep.getCustomPositionWaypoints();
+            for (int j = 0; j < positionWaypoints.size(); j++)
+            {
+               FramePoint3DReadOnly position = positionWaypoints.get(j);
+               if (!checkPositionIsValid(position, tempStepOrigin, stepPosition, maxSwingDistance))
+               {
+                  return false;
+               }
+            }
+         }
+
+         if (i < footsteps.size() - 1)
+         {
+            if (footsteps.get(i + 1).getRobotSide() != footstep.getRobotSide())
+            {
+               // If the next step is with the other foot the step origin is the previous stance location.
+               tempStepOrigin.set(tempStanceLocation);
+               tempStanceLocation.set(stepPosition);
+            }
+            else
+            {
+               // If the next step is with the same foot the step origin is the previous step location.
+               tempStepOrigin.set(stepPosition);
+            }
+         }
+      }
+
+      return true;
+   }
+
+   private static boolean checkPositionIsValid(FramePoint3DReadOnly positionToCheck, FramePoint3DReadOnly location1, FramePoint3DReadOnly location2,
+                                               double maxDistance)
+   {
+      // Check the distance to a straight line on the ground from location1 to location 2
+      double distanceXY = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(positionToCheck.getX(), positionToCheck.getY(), location1.getX(),
+                                                                                 location1.getY(), location2.getX(), location2.getY());
+      if (distanceXY > maxDistance)
+      {
+         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
+               + distanceXY + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         return false;
+      }
+
+      // Check the smaller distance in z from the locations
+      double distanceZ = Math.min(Math.abs(location1.getZ() - positionToCheck.getZ()), Math.abs(location2.getZ() - positionToCheck.getZ()));
+      if (distanceZ > maxDistance)
+      {
+         LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The Z distance from the closer location was "
+               + distanceZ + ". If that is acceptable increase the MaxSwingDistance parameter.");
+         return false;
+      }
+
+      return true;
+   }
+
+   private final FrameVector3D footstepOffsetVector = new FrameVector3D();
+
    public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
-      if (!offsettingPlanWithFootstepError.getBooleanValue())
+      if (!offsettingXYPlanWithFootstepError.getValue() && !offsettingHeightPlanWithFootstepError.getValue())
       {
          return;
       }
 
+      footstepOffsetVector.setIncludingFrame(offset);
+
+      if (!offsettingXYPlanWithFootstepError.getValue())
+      {
+         footstepOffsetVector.setX(0.0);
+         footstepOffsetVector.setY(0.0);
+      }
+      if (!offsettingHeightPlanWithFootstepError.getValue())
+      {
+         footstepOffsetVector.setZ(0.0);
+      }
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
          Footstep footstep = upcomingFootsteps.get(stepIdx);
-         footstep.addOffset(offset);
+         footstep.addOffset(footstepOffsetVector);
       }
 
-      this.planOffsetInWorld.add(offset);
+      this.planOffsetInWorld.add(footstepOffsetVector);
       setPlanOffsetInternal(planOffsetInWorld);
 
       planOffsetFromAdjustment.setToZero();

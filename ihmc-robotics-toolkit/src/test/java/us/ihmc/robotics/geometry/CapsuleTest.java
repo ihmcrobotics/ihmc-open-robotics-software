@@ -1,21 +1,18 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CapsuleTest
 {
    private void transformAndCheck(RigidBodyTransform trans, Point3D expected, Point3D result)
@@ -26,8 +23,7 @@ public class CapsuleTest
       assertTrue(result.epsilonEquals(exp, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void test()
    {
       Point3D res1 = new Point3D();
@@ -101,8 +97,7 @@ public class CapsuleTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOther()
    {
       Random rand = new Random();
@@ -120,8 +115,7 @@ public class CapsuleTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testOther_2()
    {
       Random rand = new Random();

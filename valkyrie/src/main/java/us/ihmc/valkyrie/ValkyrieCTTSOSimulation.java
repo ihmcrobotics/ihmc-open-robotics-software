@@ -5,60 +5,36 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotEnvironmentAwareness.tools.ConstantPlanarRegionsPublisher;
-import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.TwoBollardEnvironment;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class ValkyrieCTTSOSimulation
 {
-   private static final Environment environment = Environment.JERSEY_BARRIERS_2;
-
-   private enum Environment
-   {
-      JERSEY_BARRIERS("20181210_JerseyBarrierData", 0.54, 0.32, -0.24, true),
-      JERSEY_BARRIERS_2("20181213_JerseyBarrierData2", -0.75, 3.47, 2.7, true),
-      CINDERS("20181211_CinderBlocksData", 0.38, 0.0, -0.4, true);
-
-      final String fileName;
-      final double startX;
-      final double startY;
-      final double startYaw;
-      final boolean generateGroundPlane;
-
-      Environment(String fileName, double startX, double startY, double startYaw, boolean generateGroundPlane)
-      {
-         this.fileName = fileName;
-         this.startX = startX;
-         this.startY = startY;
-         this.startYaw = startYaw;
-         this.generateGroundPlane = generateGroundPlane;
-      }
-   }
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190220_172417_EOD_Cinders;
 
    public static void main(String[] args)
    {
+      DataSet dataSet = DataSetIOTools.loadDataSet(DATA_SET_TO_USE);
+
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-      Path path = Paths.get(Thread.currentThread().getContextClassLoader().getResource("environmentData/" + environment.fileName).getPath());
-      PlanarRegionsList planarRegionsList = PlanarRegionDataImporter.importPlanarRegionData(path.toFile());
-      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.001, environment.generateGroundPlane);
+      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.001, true);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(environment.startX, environment.startY, 0.001, environment.startYaw));
+      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw()));
 
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 
       // talk to controller and footstep planner
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
+      networkProcessorParameters.enableWalkingPreviewToolbox(true);
+      networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
+
       networkProcessorParameters.enablePerceptionModule(true);
 
       // disable everything else
@@ -75,12 +51,13 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableKinematicsPlanningToolbox(false);
       networkProcessorParameters.enableRobotEnvironmentAwerenessModule(false);
       networkProcessorParameters.enableMocapModule(false);
+      networkProcessorParameters.enableAutoREAStateUpdater(true);
 
       // start sim
       simulationStarter.startSimulation(networkProcessorParameters, false);
 
       // spoof and publish planar regions
-      ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(planarRegionsList);
+      ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(dataSet.getPlanarRegionsList());
       constantPlanarRegionsPublisher.start(2000);
    }
 }

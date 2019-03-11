@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -18,10 +19,12 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
+import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -34,7 +37,7 @@ public class DCMPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 50;
@@ -71,6 +74,9 @@ public class DCMPlanner
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
+   private final DoubleProvider maximumWeightShiftForward = new DoubleParameter("maximumWeightShiftForward", registry, 0.0);
+   private final DoubleProvider angleForMaxWeightShiftForward = new DoubleParameter("angleForMaxWeightShiftForward", registry, Math.toRadians(20.0));
+
    private final boolean debug;
 
    public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
@@ -89,8 +95,15 @@ public class DCMPlanner
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
+
+      WeightDistributionCalculator weightDistributionCalculator = (pitchAngle ->
+      {
+         double percentTotal = MathTools.clamp(pitchAngle / angleForMaxWeightShiftForward.getValue(), 1.0);
+         return percentTotal * maximumWeightShiftForward.getValue();
+      });
+
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
-      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
+      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, weightDistributionCalculator, registry);
 
       parentRegistry.addChild(registry);
 
@@ -184,8 +197,8 @@ public class DCMPlanner
 
    private void computeTransitionTrajectory()
    {
-      double transitionEndTime = piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1);
-      double transitionStartTime = Math.max(timeAtStartOfState.getDoubleValue(), transitionEndTime - initialTransitionDurationParameter.getValue());
+      double transitionStartTime = timeAtStartOfState.getDoubleValue();
+      double transitionEndTime = Math.min(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1), transitionStartTime + initialTransitionDurationParameter.getValue());
 
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalTransitionDCMPosition);

@@ -1,16 +1,15 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -23,19 +22,17 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
    {
       FramePose3D upToDatePoseInPresent = new FramePose3D(worldFrame);
@@ -57,8 +54,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
    {
       FramePose3D upToDatePoseInPresent = new FramePose3D(worldFrame);
@@ -84,8 +80,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputedRotationError()
    {
       Random random = new Random(1987L);
@@ -143,8 +138,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputedTranslationError()
    {
       Random random = new Random(1987L);
@@ -208,8 +202,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputedError()
    {
       Random random = new Random(1987L);
@@ -267,8 +260,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleTranslationAtKnownLocation()
    {
       Random random = new Random(1987L);
@@ -296,8 +288,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNoDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D upToDatePoseInPresent = new FramePose3D(worldFrame);
@@ -332,9 +323,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testKnownDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
@@ -376,8 +366,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testKnownTranslationAndYawDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
@@ -420,9 +409,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testKnownTranslationYawAndPitchDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose3D stateEstimatorPresent = new FramePose3D(worldFrame);
@@ -464,8 +452,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       assertTrue(calculatedPose.epsilonEquals(expectedPose, 1e-4));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSimpleRotationAtKnownLocation()
    {
       Random random = new Random(1987L);
@@ -496,9 +483,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
 
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
-   @Ignore
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Disabled
+   @Test
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
       int numberOfUpToDateTransforms = 10;

@@ -172,15 +172,35 @@
 <parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
 <parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
                             </registry>
+                            <registry name="CenterOfMassHeightControlState">
+<registry name="LookAheadCoMHeightTrajectoryGenerator">
+    <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
+</registry>
+                            </registry>
                         </registry>
-                    </registry>
-                    <registry name="HighLevelControlManagerFactory">
                         <registry name="FeetManager">
+                            <registry name="SupportStateParameters">
+<parameter name="avoidFootRotations" type="BooleanParameter" value="false"/>
+<parameter name="dampFootRotations" type="BooleanParameter" value="false"/>
+<parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                            </registry>
+                            <registry name="FootRotationDetectorParameters">
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                            </registry>
                             <registry name="leftFootControlModule">
 <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
                             </registry>
                             <registry name="rightFootControlModule">
 <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
+                            </registry>
+                            <registry name="ToeOffManager">
+<parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true"/>
+                            </registry>
+                        </registry>
+                        <registry name="BalanceManager">
+                            <registry name="PelvisICPBasedTranslationManager">
+<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                             </registry>
                         </registry>
                     </registry>

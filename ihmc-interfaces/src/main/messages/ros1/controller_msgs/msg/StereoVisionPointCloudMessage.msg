@@ -3,6 +3,10 @@ uint32 sequence_id
 
 int64 robot_timestamp
 
+geometry_msgs/Point sensor_position
+
+geometry_msgs/Quaternion sensor_orientation
+
 float32[] point_cloud
 
 int32[] colors

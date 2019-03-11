@@ -2,8 +2,8 @@ package us.ihmc.robotics.dataStructures.parameters;
 
 import java.util.Random;
 
-import org.junit.Assert;
-import org.junit.Test;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterPolynomialTest
 {
-   @Test(timeout = 30000)
+   @Test
    public void testAgainstYoPolynomial()
    {
       Random random = new Random(438218L);
