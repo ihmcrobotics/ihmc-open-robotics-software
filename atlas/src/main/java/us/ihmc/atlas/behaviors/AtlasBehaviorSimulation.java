@@ -25,7 +25,19 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 public class AtlasBehaviorSimulation
 {
-   public static SimulationConstructionSet create(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   {
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS);
+   }
+
+   public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   {
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS);
+   }
+
+   private static SimulationConstructionSet create(DRCRobotModel robotModel,
+                                                   CommonAvatarEnvironmentInterface environment,
+                                                   PubSubImplementation pubSubImplementation)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -46,7 +58,7 @@ public class AtlasBehaviorSimulation
                                                             contactPointParameters.getAdditionalContactTransforms().get(i));
       }
 
-      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "humanoid_simulation_controller");
+      RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "humanoid_simulation_controller");
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     robotModel.getSensorInformation().getFeetForceSensorNames(),
@@ -82,11 +94,13 @@ public class AtlasBehaviorSimulation
       avatarSimulation.start();
       realtimeRos2Node.spin();  // TODO Should probably happen in start()
 
+      // TODO set up some useful graphs
+
       return avatarSimulation.getSimulationConstructionSet();
    }
 
    public static void main(String[] args)
    {
-      create(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
+      createForManualTest(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
    }
 }

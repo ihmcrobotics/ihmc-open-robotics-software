@@ -1,12 +1,10 @@
 package us.ihmc.humanoidBehaviors;
 
-import com.esotericsoftware.minlog.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.StepInPlaceBehavior.API;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.kryo.KryoMessager;
 
@@ -16,7 +14,6 @@ public class BehaviorTeleop
 
    public static BehaviorTeleop createForUI(DRCRobotModel robotModel, String backpackAddress)
    {
-      Log.TRACE();
       KryoMessager backpackMessager = KryoMessager
             .createClient(BehaviorBackpack.getBehaviorAPI(), backpackAddress, NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorTeleop.class.getSimpleName(),
                           5);
@@ -29,12 +26,9 @@ public class BehaviorTeleop
       return new BehaviorTeleop(robotModel, messager);
    }
 
-   private BehaviorTeleop(DRCRobotModel robotModel, Messager moduleMessager)
+   private BehaviorTeleop(DRCRobotModel robotModel, Messager backpackMessager)
    {
-      this.moduleMessager = moduleMessager;
-
-      LogTools.info("Waiting for teleop to connect");
-      while (!moduleMessager.isMessagerOpen());
+      this.moduleMessager = backpackMessager;
    }
 
    public void setStepping(boolean stepping)

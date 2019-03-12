@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors;
 
-import com.esotericsoftware.minlog.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -19,7 +18,6 @@ public class BehaviorBackpack
 
    public static BehaviorBackpack createForBackpack(DRCRobotModel robotModel)
    {
-      Log.TRACE();
       KryoMessager messager = KryoMessager.createServer(getBehaviorAPI(),
                                                         NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorBackpack.class.getSimpleName(), 5);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
