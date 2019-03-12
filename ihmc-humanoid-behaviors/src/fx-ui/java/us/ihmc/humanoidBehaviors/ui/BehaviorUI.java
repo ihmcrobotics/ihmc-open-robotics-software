@@ -9,8 +9,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
@@ -19,6 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -26,10 +28,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -49,10 +48,14 @@ public class BehaviorUI
 
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
 
-   public BehaviorUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+   public BehaviorUI(Stage primaryStage,
+                     BehaviorTeleop teleop,
+                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory) throws Exception
    {
       this.primaryStage = primaryStage;
-      this.messager = messager;
+
+      messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
+      messager.startMessager();
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -124,18 +127,8 @@ public class BehaviorUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
-   }
 
-   public static BehaviorUI createMessagerUI(Stage primaryStage, JavaFXMessager messager,
-                                             FootstepPlannerParameters plannerParameters,
-                                             VisibilityGraphsParameters visibilityGraphsParameters,
-                                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                                             RobotContactPointParameters<RobotSide> contactPointParameters,
-                                             WalkingControllerParameters walkingControllerParameters)
-         throws Exception
-   {
-      return new BehaviorUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory,
-                                   contactPointParameters, walkingControllerParameters);
+      ExceptionTools.handle(() -> messager.closeMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public static class API

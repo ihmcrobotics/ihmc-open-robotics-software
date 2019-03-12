@@ -87,6 +87,6 @@ public class AtlasBehaviorSimulation
 
    public static void main(String[] args)
    {
-      create(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
+      create(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
    }
 }
