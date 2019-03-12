@@ -21,7 +21,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
       settings.setStanceLength(0.9);
       settings.setStanceWidth(0.5);
-      settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
+      settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.5 + 0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
       settings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());

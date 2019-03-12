@@ -70,8 +70,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
          }
       };
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
+      AStarMessagerListener listener = new AStarMessagerListener(messager);
 
-      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, null, expansion, registry);
+      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, expansion, registry);
    }
 
    @Override
@@ -86,7 +87,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_220208_SimpleStairs");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
