@@ -61,19 +61,12 @@ public class XGaitCost implements FootstepCost
       return cost * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }
 
-   // FIXME this needs a lot of work
    double computeTimeDeltaBetweenSteps(RobotQuadrant previousQuadrant)
    {
-      double phaseShift = xGaitSettings.getEndPhaseShift();
-      double phaseTimeShift = phaseShift / 180.0 * xGaitSettings.getStepDuration();
+      double endPhaseShift = previousQuadrant.isQuadrantInFront() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
+      double endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
+      endTimeShift *= Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
 
-      if (previousQuadrant.isQuadrantInFront())
-      {
-         return phaseTimeShift;
-      }
-      else
-      {
-         return phaseTimeShift + xGaitSettings.getEndDoubleSupportDuration();
-      }
+      return endTimeShift;
    }
 }

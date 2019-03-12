@@ -8,7 +8,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class XGaitCostTest
@@ -52,11 +51,11 @@ public class XGaitCostTest
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
 
       String errorMessage = "";
-      errorMessage += testTimeDelta(0.5 * stepDuration, RobotQuadrant.FRONT_LEFT, xGaitCost);
-      errorMessage += testTimeDelta(0.5 * stepDuration, RobotQuadrant.FRONT_RIGHT, xGaitCost);
+      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.FRONT_LEFT, xGaitCost);
+      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.FRONT_RIGHT, xGaitCost);
 
-      errorMessage += testTimeDelta(0.5 * stepDuration + doubleSupportDuration, RobotQuadrant.HIND_RIGHT, xGaitCost);
-      errorMessage += testTimeDelta(0.5 * stepDuration + doubleSupportDuration, RobotQuadrant.HIND_LEFT, xGaitCost);
+      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.HIND_RIGHT, xGaitCost);
+      errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.HIND_LEFT, xGaitCost);
 
       assertTrue(errorMessage, errorMessage.isEmpty());
    }
@@ -65,7 +64,7 @@ public class XGaitCostTest
    public void testComputeTimeDeltaBetweenStepsTrot()
    {
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(90);
+      xGaitSettings.setEndPhaseShift(180.0);
       xGaitSettings.setStepDuration(stepDuration);
       xGaitSettings.setEndDoubleSupportDuration(doubleSupportDuration);
 
@@ -83,7 +82,7 @@ public class XGaitCostTest
       assertTrue(errorMessage, errorMessage.isEmpty());
    }
 
-   private String testTimeDelta( double expectedDuration, RobotQuadrant robotQuadrant, XGaitCost xGaitCost)
+   private String testTimeDelta(double expectedDuration, RobotQuadrant robotQuadrant, XGaitCost xGaitCost)
    {
       String message = "";
       double actual = xGaitCost.computeTimeDeltaBetweenSteps(robotQuadrant);
