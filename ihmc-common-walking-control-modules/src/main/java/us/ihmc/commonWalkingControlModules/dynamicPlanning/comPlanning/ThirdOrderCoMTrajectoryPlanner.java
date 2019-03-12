@@ -127,7 +127,6 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    private final List<YoFramePoint3D> comCornerPoints = new ArrayList<>();
 
    private int numberOfConstraints = 0;
-   private int numberOfWaypoints = 0;
 
    public ThirdOrderCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
                                          YoVariableRegistry parentRegistry)
@@ -208,7 +207,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       xConstants.reshape(size, 1);
       yConstants.reshape(size, 1);
       zConstants.reshape(size, 1);
-      vrpWaypointJacobian.reshape(size, numberOfVRPWaypoints);
+      vrpWaypointJacobian.reshape(size, numberOfVRPWaypoints); // only position
       vrpXWaypoints.reshape(numberOfVRPWaypoints, 1);
       vrpYWaypoints.reshape(numberOfVRPWaypoints, 1);
       vrpZWaypoints.reshape(numberOfVRPWaypoints, 1);
@@ -231,12 +230,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
-      ContactState currentContactState = contactSequence.get(0).getContactState();
-
       computeVRPWaypointsFromContactSequence();
 
       numberOfConstraints = 0;
-      numberOfWaypoints = 0;
 
       // set initial constraint
       setCoMPositionConstraint(currentCoMPosition);
@@ -264,9 +260,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       xEquivalents.set(xConstants);
       yEquivalents.set(yConstants);
       zEquivalents.set(zConstants);
-      CommonOps.multAddTransA(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
-      CommonOps.multAddTransA(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
-      CommonOps.multAddTransA(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
+      CommonOps.multAdd(vrpWaypointJacobian, vrpXWaypoints, xEquivalents);
+      CommonOps.multAdd(vrpWaypointJacobian, vrpYWaypoints, yEquivalents);
+      CommonOps.multAdd(vrpWaypointJacobian, vrpZWaypoints, zEquivalents);
 
       // solve for coefficients
       NativeCommonOps.invert(coefficientMultipliers, coefficientMultipliersInv);
@@ -730,8 +726,8 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       ContactState contactState = contactStateProvider.getContactState();
       if (contactState.isLoadBearing())
       {
-         setVRPPosition(sequenceId, 0.0, startVRPPositions.get(sequenceId));
-         setVRPVelocity(sequenceId, 0.0, zeroVector);
+         setVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
+         setVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, zeroVector);
       }
       else
       {
@@ -747,8 +743,8 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       double duration = contactStateProvider.getTimeInterval().getDuration();
       if (contactState.isLoadBearing())
       {
-         setVRPPosition(sequenceId, duration, endVRPPositions.get(sequenceId));
-         setVRPVelocity(sequenceId, duration, zeroVector);
+         setVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
+         setVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, zeroVector);
       }
       else
       {
@@ -757,12 +753,11 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       }
    }
 
-   private void setVRPPosition(int sequenceId, double time, FramePoint3DReadOnly desiredVRPPosition)
+   private void setVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
    {
       double omega = this.omega.getValue();
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
-      int vrpWaypointNumber = indexHandler.getVRPWaypointNumber(sequenceId);
 
       desiredVRPPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -773,21 +768,20 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getVRPPositionFifthCoefficient(time));
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getVRPPositionSixthCoefficient());
 
-      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointNumber, 1.0);
+      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointPositionIndex, 1.0);
 
-      vrpXWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getX());
-      vrpYWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getY());
-      vrpZWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getZ());
+      vrpXWaypoints.set(vrpWaypointPositionIndex, 0, desiredVRPPosition.getX());
+      vrpYWaypoints.set(vrpWaypointPositionIndex, 0, desiredVRPPosition.getY());
+      vrpZWaypoints.set(vrpWaypointPositionIndex, 0, desiredVRPPosition.getZ());
 
       numberOfConstraints++;
    }
 
-   private void setVRPVelocity(int sequenceId, double time, FrameVector3DReadOnly desiredVRPVelocity)
+   private void setVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
    {
       double omega = this.omega.getValue();
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
-      int vrpWaypointNumber = indexHandler.getVRPWaypointNumber(sequenceId);
 
       desiredVRPVelocity.checkReferenceFrameMatch(worldFrame);
 
@@ -798,11 +792,11 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, getVRPVelocityFifthCoefficient());
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, getVRPVelocitySixthCoefficient());
 
-      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointNumber, 1.0);
+      vrpWaypointJacobian.set(numberOfConstraints, vrpWaypointVelocityIndex, 1.0);
 
-      vrpXWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getX());
-      vrpYWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getY());
-      vrpZWaypoints.set(vrpWaypointNumber, 0, desiredVRPPosition.getZ());
+      vrpXWaypoints.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getX());
+      vrpYWaypoints.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getY());
+      vrpZWaypoints.set(vrpWaypointVelocityIndex, 0, desiredVRPVelocity.getZ());
 
       numberOfConstraints++;
    }
