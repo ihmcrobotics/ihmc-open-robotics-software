@@ -21,6 +21,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidBehaviors.BehaviorBackpack;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -129,6 +130,8 @@ public class DRCNetworkProcessor
             new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(), robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(),
                                             sensorInformation);
          }
+
+         BehaviorBackpack.createForBackpack(robotModel);
 
          String methodName = "setupBehaviorModule ";
          printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
