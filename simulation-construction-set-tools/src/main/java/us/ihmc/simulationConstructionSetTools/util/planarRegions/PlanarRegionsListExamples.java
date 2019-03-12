@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.planarRegions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -69,10 +70,22 @@ public class PlanarRegionsListExamples
    public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation, double extrusionLength,
                                                double startingBlockLength)
    {
+      double defaultTiltAngle = Math.toRadians(15.0);
+      double randomHeightVariation = 0.1;
+
+      generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation,
+                               extrusionLength, startingBlockLength, 0.0, defaultTiltAngle, defaultTiltAngle, randomHeightVariation);
+   }
+
+   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight,
+                                               int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation,
+                                               double extrusionLength, double startingBlockLength, double absentBlockPercentage, double minTiltAngle,
+                                               double maxTiltAngle, double randomHeightVariation)
+   {
       double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
 
       generator.addRectangle(startingBlockLength + extrusionLength, courseWidth + extrusionLength); // standing platform
-      generator.translate(0.2 + 0.5 * startingBlockLength, 0.0, 0.0); // forward to first row
+      generator.translate(0.5 * startingBlockLength + 0.5 * cinderBlockSize, 0.0, 0.0); // forward to first row
       generator.translate(0.0, -0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid origin
 
       Random random = new Random(1231239L);
@@ -83,8 +96,14 @@ public class PlanarRegionsListExamples
             int angleType = Math.abs(random.nextInt() % 3);
             int axisType = Math.abs(random.nextInt() % 2);
 
-            generateSingleCiderBlock(generator, cinderBlockSize + extrusionLength, cinderBlockHeight + extrusionLength, angleType, axisType);
+            double extraHeightVariation = EuclidCoreRandomTools.nextDouble(random, randomHeightVariation);
+            generator.translate(0.0, 0.0, extraHeightVariation);
 
+            double tiltAngle = EuclidCoreRandomTools.nextDouble(random, minTiltAngle, maxTiltAngle);
+            if(random.nextDouble() > absentBlockPercentage)
+               generateSingleCiderBlock(generator, cinderBlockSize + extrusionLength, cinderBlockHeight + extrusionLength, angleType, axisType, tiltAngle);
+
+            generator.translate(0.0, 0.0, -extraHeightVariation);
             generator.translate(0.0, cinderBlockSize, 0.0);
          }
 
@@ -100,8 +119,8 @@ public class PlanarRegionsListExamples
          generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
       }
 
-      generator.identity();
-      generator.translate(startingBlockLength + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
+      generator.translate(0.5 * startingBlockLength - 0.5 * cinderBlockSize, 0.0, 0.0); // forward to platform middle
+      generator.translate(0.0, 0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid middle
       generator.addRectangle(startingBlockLength + extrusionLength, courseWidth + extrusionLength);
    }
 
@@ -135,7 +154,14 @@ public class PlanarRegionsListExamples
    }
 
    public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
-                                                int axisType)
+                                               int axisType)
+   {
+      double defaultTiltAngle = Math.toRadians(15.0);
+      generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType, defaultTiltAngle);
+   }
+
+   public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
+                                                int axisType, double tiltAngle)
    {
       double angle = 0;
       switch (angleType)
@@ -144,10 +170,10 @@ public class PlanarRegionsListExamples
          angle = 0.0;
          break;
       case 1:
-         angle = Math.toRadians(15);
+         angle = tiltAngle;
          break;
       case 2:
-         angle = -Math.toRadians(15);
+         angle = - tiltAngle;
          break;
       }
 
@@ -451,17 +477,36 @@ public class PlanarRegionsListExamples
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
 //      PlanarRegionsList planarRegionsList = createMazeEnvironment();
-      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
+//      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double cinderBlockSize = 0.08;
+      double cinderBlockHeight = 0.015;
+      double courseLength = 3.25;
+      double courseWidth = 0.9;
+      double heightVariation = 0.0;
+      double extrusionLength = -0.01;
+      double percentageAbsent = 0.22;
+      double minTilt = Math.toRadians(10.0);
+      double maxTilt = Math.toRadians(75.0);
+      double randomHeightVariation = 0.0;
+
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) (courseLength / cinderBlockSize),
+                                                         (int) (courseWidth / cinderBlockSize), heightVariation, extrusionLength, 0.5, percentageAbsent,
+                                                         minTilt, maxTilt, randomHeightVariation);
+
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment",
-                                                                                                new PlanarRegionsList[] {planarRegionsList}, null, 1e-5, false);
+                                                                                                new PlanarRegionsList[] {generator.getPlanarRegionsList()},
+                                                                                                null, 1e-5, false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       scs.setGroundVisible(false);
 
-//      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
-//      startAndEndGraphics.translate(0.0, 0.0, 0.5);
-//      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
-//      startAndEndGraphics.identity();
+      //      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
+      //      startAndEndGraphics.translate(0.0, 0.0, 0.5);
+      //      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
+      //      startAndEndGraphics.identity();
 //      startAndEndGraphics.translate(3.0, 2.5, 0.5);
 //      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
 //      scs.addStaticLinkGraphics(startAndEndGraphics);
