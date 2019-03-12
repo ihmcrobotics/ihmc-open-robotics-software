@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors;
 
+import com.esotericsoftware.minlog.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -11,15 +12,16 @@ import us.ihmc.messager.kryo.KryoMessager;
 
 public class BehaviorTeleop
 {
-   private final Messager messager;
+   private final Messager moduleMessager;
 
-   public static BehaviorTeleop createForTeleop(DRCRobotModel robotModel, String backpackAddress)
+   public static BehaviorTeleop createForUI(DRCRobotModel robotModel, String backpackAddress)
    {
-      KryoMessager messager = KryoMessager
-            .createClient(BehaviorModule.getBehaviorAPI(), backpackAddress, NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorTeleop.class.getSimpleName(),
+      Log.TRACE();
+      KryoMessager backpackMessager = KryoMessager
+            .createClient(BehaviorBackpack.getBehaviorAPI(), backpackAddress, NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorTeleop.class.getSimpleName(),
                           5);
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      return new BehaviorTeleop(robotModel, messager);
+      ExceptionTools.handle(() -> backpackMessager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      return new BehaviorTeleop(robotModel, backpackMessager);
    }
 
    public static BehaviorTeleop createForTest(DRCRobotModel robotModel, Messager messager)
@@ -27,21 +29,21 @@ public class BehaviorTeleop
       return new BehaviorTeleop(robotModel, messager);
    }
 
-   private BehaviorTeleop(DRCRobotModel robotModel, Messager messager)
+   private BehaviorTeleop(DRCRobotModel robotModel, Messager moduleMessager)
    {
-      this.messager = messager;
+      this.moduleMessager = moduleMessager;
 
       LogTools.info("Waiting for teleop to connect");
-      while (!messager.isMessagerOpen());
+      while (!moduleMessager.isMessagerOpen());
    }
 
    public void setStepping(boolean stepping)
    {
-      messager.submitMessage(API.Stepping, stepping);
+      moduleMessager.submitMessage(API.Stepping, stepping);
    }
 
    public void abort()
    {
-      messager.submitMessage(API.Abort, true);
+      moduleMessager.submitMessage(API.Abort, true);
    }
 }

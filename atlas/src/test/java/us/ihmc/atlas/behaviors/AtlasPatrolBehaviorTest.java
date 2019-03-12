@@ -7,7 +7,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.BehaviorBackpack;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -36,11 +36,11 @@ public class AtlasPatrolBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorBackpack.getBehaviorAPI());
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");
-      BehaviorModule.createForTest(robotModel, messager);
+      BehaviorBackpack.createForTest(robotModel, messager);
 
       LogTools.info("Creating behavior teleop");
       BehaviorTeleop behaviorTeleop = BehaviorTeleop.createForTest(robotModel, messager);
