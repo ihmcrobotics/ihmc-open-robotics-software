@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 
 @Tag("humanoid-behaviors")
-public class AtlasPatrolBehaviorTest
+public class AtlasStepInPlaceBehaviorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private AtlasBehaviorTestYoVariables variables;
@@ -96,6 +96,6 @@ public class AtlasPatrolBehaviorTest
    @AfterAll
    public static void printMemoryUsageAfterClass()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasPatrolBehaviorTest.class + " after class.");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(AtlasStepInPlaceBehaviorTest.class + " after class.");
    }
 }
