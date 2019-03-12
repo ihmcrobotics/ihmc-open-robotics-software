@@ -27,6 +27,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.SpeedAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
@@ -325,11 +326,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       List<FootstepNode> path = graph.getPathFromStart(endNode);
       addGoalNodesToEnd(path);
 
-      double currentTime = 0;
+      double lastStepStartTime = 0;
 
       for (int i = 0; i < path.size(); i++)
       {
-         currentTime += xGaitSettings.getEndDoubleSupportDuration();
+         lastStepStartTime += xGaitSettings.getEndDoubleSupportDuration();
 
          FootstepNode node = path.get(i);
 
@@ -338,10 +339,22 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          QuadrupedTimedOrientedStep newStep = new QuadrupedTimedOrientedStep();
          newStep.setRobotQuadrant(robotQuadrant);
 
+         double endTimeShift;
+         if (i == 0)
+         {
+            endTimeShift = 0.0;
+         }
+         else
+         {
+            double endPhaseShift = robotQuadrant.isQuadrantInHind() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
+            endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
+            endTimeShift *= Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
+         }
+         double thisStepStartTime = lastStepStartTime + endTimeShift;
+         double thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();
+
          TimeInterval timeInterval = newStep.getTimeInterval();
-         timeInterval.setStartTime(currentTime);
-         currentTime += xGaitSettings.getStepDuration();
-         timeInterval.setEndTime(currentTime);
+         timeInterval.setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
@@ -350,6 +363,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          newStep.setGoalPosition(position);
 
          plan.addFootstep(newStep);
+
+         lastStepStartTime = thisStepStartTime;
       }
 
       return plan;
@@ -637,7 +652,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
-      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters);
+//      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, xGaitSettings);
+      CostToGoHeuristics heuristics = new SpeedAndYawBasedHeuristics(parameters, xGaitSettings);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
