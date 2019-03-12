@@ -11,13 +11,13 @@ public class BehaviorCoactiveElement implements CoactiveElement
    @Override
    public void initializeUserInterfaceSide()
    {
-      System.err.println("BehaviorCoactiveElement - initializeUserInterfaceSide not implemented");
+
    }
 
    @Override
    public void updateUserInterfaceSide()
    {
-      System.err.println("BehaviorCoactiveElement - updateUserInterfaceSide not implemented");
+
    }
 
    @Override
@@ -29,14 +29,12 @@ public class BehaviorCoactiveElement implements CoactiveElement
    @Override
    public void initializeMachineSide()
    {
-      System.err.println("BehaviorCoactiveElement - initializeMachineSide not implemented");
 
    }
 
    @Override
    public void updateMachineSide()
    {
-      System.err.println("BehaviorCoactiveElement - updateMachineSide not implemented");
 
    }
 
