@@ -33,6 +33,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -188,6 +189,7 @@ public abstract class FootstepPlannerDataSetTest
 
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
+      List<String> failingMessages = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -201,6 +203,7 @@ public abstract class FootstepPlannerDataSetTest
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+            failingMessages.add(errorMessagesForCurrentFile);
          }
 
          if (DEBUG || VERBOSE)
@@ -216,7 +219,7 @@ public abstract class FootstepPlannerDataSetTest
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
-         message += "\n" + failingDatasets.get(i);
+         message += "\n" + failingDatasets.get(i) + " : " + failingMessages.get(i);
       }
       if (VISUALIZE)
       {
@@ -323,7 +326,8 @@ public abstract class FootstepPlannerDataSetTest
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (!Double.isNaN(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
+         double yawError = AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw);
+         if (yawError > FootstepNode.gridSizeYaw)
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
