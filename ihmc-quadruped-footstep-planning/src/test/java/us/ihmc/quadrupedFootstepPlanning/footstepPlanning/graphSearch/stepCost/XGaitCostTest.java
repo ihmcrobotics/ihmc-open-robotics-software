@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import org.junit.jupiter.api.Test;
-import org.omg.PortableServer.IMPLICIT_ACTIVATION_POLICY_ID;
 import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
