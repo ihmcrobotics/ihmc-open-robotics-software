@@ -4,13 +4,15 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface CoactiveElement
 {
-   // User Interface Side:
-   public abstract void initializeUserInterfaceSide();
-   public abstract void updateUserInterfaceSide();
-   public abstract YoVariableRegistry getUserInterfaceWritableYoVariableRegistry();
+   void initializeUserInterfaceSide();
 
-   // Robot Side:
-   public abstract void initializeMachineSide();
-   public abstract void updateMachineSide();
-   public abstract YoVariableRegistry getMachineWritableYoVariableRegistry();
+   void updateUserInterfaceSide();
+
+   YoVariableRegistry getUserInterfaceWritableYoVariableRegistry();
+
+   void initializeMachineSide();
+
+   void updateMachineSide();
+
+   YoVariableRegistry getMachineWritableYoVariableRegistry();
 }
