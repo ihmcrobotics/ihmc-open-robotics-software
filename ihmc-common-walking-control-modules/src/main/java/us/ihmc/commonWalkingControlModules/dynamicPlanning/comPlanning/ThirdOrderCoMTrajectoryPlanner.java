@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
 /**
  * <p>
@@ -109,6 +110,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
+   private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
@@ -253,7 +255,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
       finalDCMPosition.set(lastContactPhase.getCopEndPosition());
       finalDCMPosition.addZ(nominalCoMHeight);
-      setDCMTerminalConstraint(numberOfPhases - 1, finalDCMPosition);
+      setDCMPositionConstraint(numberOfPhases - 1, lastContactPhase.getTimeInterval().getDuration(), finalDCMPosition);
       setDynamicsFinalConstraint(numberOfPhases - 1);
 
       // map from VRP waypoints to the value
@@ -453,6 +455,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       computeDesiredCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       computeDesiredCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
       computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, vrpPositionToPack);
+//      computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, desiredVRPVelocity);
    }
 
    /** {@inheritDoc} */
@@ -536,9 +539,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, 4, getCoMPositionFifthCoefficient(0.0));
       coefficientMultipliers.set(numberOfConstraints, 5, getCoMPositionSixthCoefficient());
 
-      xEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getX());
-      yEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getY());
-      zEquivalents.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getZ());
+      xConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getX());
+      yConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getY());
+      zConstants.add(numberOfConstraints, 0, centerOfMassLocationForConstraint.getZ());
 
       numberOfConstraints++;
    }
@@ -567,23 +570,20 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
     *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
     * </p>
     * @param sequenceId i in the above equations
-    * @param terminalDCMPosition desired final location. x<sub>f</sub> in the above equations.
+    * @param desiredDCMPosition desired final location. x<sub>f</sub> in the above equations.
     */
-   private void setDCMTerminalConstraint(int sequenceId, FramePoint3DReadOnly terminalDCMPosition)
+   private void setDCMPositionConstraint(int sequenceId, double time, FramePoint3DReadOnly desiredDCMPosition)
    {
-      terminalDCMPosition.checkReferenceFrameMatch(worldFrame);
-
-      ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
+      desiredDCMPosition.checkReferenceFrameMatch(worldFrame);
 
       double omega = this.omega.getValue();
-      double duration = contactStateProvider.getTimeInterval().getDuration();
 
-      double c0 = getCoMPositionFirstCoefficient(omega, duration) + 1.0 / omega * getCoMVelocityFirstCoefficient(omega, duration);
-      double c1 = getCoMPositionSecondCoefficient(omega, duration) + 1.0 / omega * getCoMVelocitySecondCoefficient(omega, duration);
-      double c2 = getCoMPositionThirdCoefficient(duration) + 1.0 / omega * getCoMVelocityThirdCoefficient(duration);
-      double c3 = getCoMPositionFourthCoefficient(duration) + 1.0 / omega * getCoMVelocityFourthCoefficient(duration);
-      double c4 = getCoMPositionFifthCoefficient(duration) + 1.0 / omega * getCoMVelocityFifthCoefficient();
-      double c5 = getCoMPositionSixthCoefficient() + 1.0 / omega * getCoMVelocitySixthCoefficient();
+      double c0 = getCoMPositionFirstCoefficient(omega, time)  + 1.0 / omega * getCoMVelocityFirstCoefficient(omega, time);
+      double c1 = getCoMPositionSecondCoefficient(omega, time) + 1.0 / omega * getCoMVelocitySecondCoefficient(omega, time);
+      double c2 = getCoMPositionThirdCoefficient(time)         + 1.0 / omega * getCoMVelocityThirdCoefficient(time);
+      double c3 = getCoMPositionFourthCoefficient(time)        + 1.0 / omega * getCoMVelocityFourthCoefficient(time);
+      double c4 = getCoMPositionFifthCoefficient(time)         + 1.0 / omega * getCoMVelocityFifthCoefficient();
+      double c5 = getCoMPositionSixthCoefficient()             + 1.0 / omega * getCoMVelocitySixthCoefficient();
 
       int startIndex = indexHandler.getContactSequenceStartIndex(sequenceId);
 
@@ -595,9 +595,9 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       coefficientMultipliers.set(numberOfConstraints, startIndex + 4, c4);
       coefficientMultipliers.set(numberOfConstraints, startIndex + 5, c5);
 
-      xEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getX());
-      yEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getY());
-      zEquivalents.add(numberOfConstraints, 0, terminalDCMPosition.getZ());
+      xConstants.add(numberOfConstraints, 0, desiredDCMPosition.getX());
+      yConstants.add(numberOfConstraints, 0, desiredDCMPosition.getY());
+      zConstants.add(numberOfConstraints, 0, desiredDCMPosition.getZ());
 
       numberOfConstraints++;
    }
@@ -837,7 +837,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMPositionFirstCoefficient(double omega, double time)
    {
-      return Math.exp(omega * time);
+      return Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
    private static double getCoMPositionSecondCoefficient(double omega, double time)
@@ -847,17 +847,17 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMPositionThirdCoefficient(double time)
    {
-      return time * time * time;
+      return Math.min(sufficientlyLarge, time * time * time);
    }
 
    private static double getCoMPositionFourthCoefficient(double time)
    {
-      return time * time;
+      return Math.min(sufficientlyLarge, time * time);
    }
 
    private static double getCoMPositionFifthCoefficient(double time)
    {
-      return time;
+      return Math.min(sufficientlyLarge, time);
    }
 
    private static double getCoMPositionSixthCoefficient()
@@ -867,7 +867,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMVelocityFirstCoefficient(double omega, double time)
    {
-      return omega * Math.exp(omega * time);
+      return omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
    private static double getCoMVelocitySecondCoefficient(double omega, double time)
@@ -877,12 +877,12 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMVelocityThirdCoefficient(double time)
    {
-      return 3.0 * time * time;
+      return 3.0 * Math.min(sufficientlyLarge, time * time);
    }
 
    private static double getCoMVelocityFourthCoefficient(double time)
    {
-      return 2.0 * time;
+      return 2.0 * Math.min(sufficientlyLarge, time);
    }
 
    private static double getCoMVelocityFifthCoefficient()
@@ -897,7 +897,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMAccelerationFirstCoefficient(double omega, double time)
    {
-      return omega * omega * Math.exp(omega * time);
+      return omega * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
    private static double getCoMAccelerationSecondCoefficient(double omega, double time)
@@ -907,7 +907,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMAccelerationThirdCoefficient(double time)
    {
-      return 6.0 * time;
+      return 6.0 * Math.min(sufficientlyLarge, time);
    }
 
    private static double getCoMAccelerationFourthCoefficient()
@@ -927,7 +927,7 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getCoMJerkFirstCoefficient(double omega, double time)
    {
-      return omega * omega * omega * Math.exp(omega * time);
+      return omega * omega * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
    private static double getCoMJerkSecondCoefficient(double omega, double time)
@@ -967,17 +967,17 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getVRPPositionThirdCoefficient(double omega, double time)
    {
-      return time * time * time - 6.0 * time / (omega * omega) ;
+      return Math.min(sufficientlyLarge, time * time * time) - 6.0 * Math.min(sufficientlyLarge, time) / (omega * omega);
    }
 
    private static double getVRPPositionFourthCoefficient(double omega, double time)
    {
-      return time * time - 2.0 / (omega * omega);
+      return Math.min(sufficientlyLarge, time * time) - 2.0 / (omega * omega);
    }
 
    private static double getVRPPositionFifthCoefficient(double time)
    {
-      return time;
+      return Math.min(sufficientlyLarge, time);
    }
 
    private static double getVRPPositionSixthCoefficient()
@@ -997,12 +997,12 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private static double getVRPVelocityThirdCoefficient(double omega, double time)
    {
-      return 3.0 * time * time - 6.0 / (omega * omega);
+      return 3.0 * Math.min(sufficientlyLarge, time * time) - 6.0 / (omega * omega);
    }
 
    private static double getVRPVelocityFourthCoefficient(double time)
    {
-      return 2.0 * time;
+      return 2.0 * Math.min(sufficientlyLarge, time);
    }
 
    private static double getVRPVelocityFifthCoefficient()
