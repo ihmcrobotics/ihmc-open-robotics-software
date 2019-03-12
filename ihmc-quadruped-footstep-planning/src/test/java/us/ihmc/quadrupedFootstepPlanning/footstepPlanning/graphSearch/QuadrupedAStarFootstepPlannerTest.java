@@ -204,6 +204,8 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.setStanceWidth(stanceWidth);
       xGaitSettings.setEndPhaseShift(90.0);
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.getAmbleMediumTimings().setStepDuration(0.4);
+      xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.35);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
