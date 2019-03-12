@@ -13,6 +13,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
@@ -46,6 +47,7 @@ public class BehaviorUI
    private final PlanarRegionsGraphic planarRegionsGraphic;
    private final JavaFXRobotVisualizer robotVisualizer;
 
+   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
 
    public BehaviorUI(Stage primaryStage,
@@ -82,6 +84,7 @@ public class BehaviorUI
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
+      stepInPlaceBehaviorUIController.init(teleop);
       patrolBehaviorUIController.init(messager, subScene);
 
       planarRegionsGraphic = new PlanarRegionsGraphic();
