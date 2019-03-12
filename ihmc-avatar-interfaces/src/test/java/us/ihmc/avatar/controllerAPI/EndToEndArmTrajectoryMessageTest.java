@@ -488,8 +488,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
          {
             OneDoFJointBasics armJoint = armJoints[jointIndex];
+
+            String jointName = armJoints[jointIndex].getName();
+            String namespace = jointName + "PDController";
             assertEquals(1, findNumberOfTrajectoryPoints(fullRobotModel.getHand(robotSide).getName(), armJoint, scs));
-            desiredJointPositions[jointIndex] = armJoints[jointIndex].getQ();
+            desiredJointPositions[jointIndex] = getDoubleYoVariable(scs, "q_" + jointName, namespace).getValue();
          }
 
          assertNumberOfWaypoints(fullRobotModel.getHand(robotSide).getName(), armJoints, 1, scs);
