@@ -11,6 +11,7 @@
 				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.rowIndex="1"/>
 				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="2" />
 				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="3" />
+				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="4" />
 
 				<Label text="Support regions" style="-fx-font-weight: bold" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
 				<Label text="Enable support regions" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
