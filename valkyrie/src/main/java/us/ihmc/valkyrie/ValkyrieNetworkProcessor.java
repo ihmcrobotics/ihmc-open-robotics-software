@@ -23,25 +23,24 @@ public class ValkyrieNetworkProcessor
       
       networkModuleParams.enableControllerCommunicator(true);
       networkModuleParams.enableLocalControllerCommunicator(false);
-      networkModuleParams.enableUiModule(true);
-      networkModuleParams.enableBehaviorModule(true);
-      networkModuleParams.enableBehaviorVisualizer(true);
       String is_gazebo = System.getenv("IS_GAZEBO");
       if (is_gazebo != null && is_gazebo.equals("true")) {
     	  System.out.println("IS_GAZEBO=true -- starting REA");
           startREA = true;
       }
       networkModuleParams.enableRobotEnvironmentAwerenessModule(startREA);
+      networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
       networkModuleParams.enableKinematicsToolbox(true);
       networkModuleParams.enableKinematicsPlanningToolbox(true);
       networkModuleParams.enableFootstepPlanningToolbox(launchFootstepPlannerModule);
       networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-      networkModuleParams.setEnableJoystickBasedStepping(true);
       networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
       networkModuleParams.enableWalkingPreviewToolbox(true);
+      networkModuleParams.enableAutoREAStateUpdater(true);
 
 //      uncomment these for the sensors
       URI rosuri = NetworkParameters.getROSURI();
+
       if(rosuri != null)
       {
          networkModuleParams.enableRosModule(true);

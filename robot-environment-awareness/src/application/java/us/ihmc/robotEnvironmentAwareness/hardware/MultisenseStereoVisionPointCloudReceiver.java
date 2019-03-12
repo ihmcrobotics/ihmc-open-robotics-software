@@ -3,13 +3,9 @@ package us.ihmc.robotEnvironmentAwareness.hardware;
 import java.awt.Color;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TFloatArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -24,7 +20,7 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
-   private static final int MAX_NUMBER_OF_POINTS = 200000;
+   private static final int MAX_NUMBER_OF_POINTS = 100000;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
@@ -50,37 +46,36 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
       Point3D[] pointCloud = pointCloudData.getPoints();
       Color[] colors = pointCloudData.getPointColors();
 
-      List<Point3D> pointCloudToPublish = Arrays.stream(pointCloud).collect(Collectors.toList());
-      List<Color> colorsToPublish = Arrays.stream(colors).collect(Collectors.toList());
-
       Random random = new Random();
-      while (pointCloudToPublish.size() > MAX_NUMBER_OF_POINTS)
-      {
-         int indexToRemove = random.nextInt(pointCloudToPublish.size());
-         pointCloudToPublish.remove(indexToRemove);
-         colorsToPublish.remove(indexToRemove);
-      }
+      int numberOfPoints = pointCloud.length;
 
-      int numberOfPoints = pointCloudToPublish.size();
+      while (numberOfPoints > MAX_NUMBER_OF_POINTS)
+      {
+         int indexToRemove = random.nextInt(numberOfPoints);
+         int lastIndex = numberOfPoints - 1;
+
+         pointCloud[indexToRemove] = pointCloud[lastIndex];
+         colors[indexToRemove] = colors[lastIndex];
+
+         numberOfPoints--;
+      }
 
       long timestamp = cloudHolder.getHeader().getStamp().totalNsecs();
-      TFloatArrayList pointCloudBuffer = new TFloatArrayList();
+      float[] pointCloudBuffer = new float[3 * numberOfPoints];
+      int[] colorsInteger = new int[numberOfPoints];
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D scanPoint = pointCloudToPublish.get(i);
+         Point3D scanPoint = pointCloud[i];
 
-         pointCloudBuffer.add((float) scanPoint.getX());
-         pointCloudBuffer.add((float) scanPoint.getY());
-         pointCloudBuffer.add((float) scanPoint.getZ());
+         pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
+         pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
+         pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
+
+         colorsInteger[i] = colors[i].getRGB();
       }
 
-      int[] colorsInteger = new int[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-         colorsInteger[i] = colorsToPublish.get(i).getRGB();
-
-      StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer.toArray(),
-                                                                                                           colorsInteger);
+      StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
    }

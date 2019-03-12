@@ -1,6 +1,6 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.5"
-   id("us.ihmc.ihmc-ci") version "4.7"
+   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.log-tools") version "0.2.2"
 }
 
@@ -16,7 +16,7 @@ mainDependencies {
    compile group: "us.ihmc.thirdparty.org.kc7bfi", name: "jflac", version: "1.4.0"
    compile group: "commons-io", name: "commons-io", version: "2.6"
 
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.4"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
@@ -24,6 +24,6 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.0"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

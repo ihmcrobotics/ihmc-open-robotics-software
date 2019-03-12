@@ -1,6 +1,7 @@
 package us.ihmc.robotDataLogger.handshake;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +9,8 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphicFactory;
@@ -21,12 +24,12 @@ import us.ihmc.robotDataLogger.GraphicObjectMessage;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.JointDefinition;
 import us.ihmc.robotDataLogger.LoadStatus;
+import us.ihmc.robotDataLogger.ReferenceFrameInformation;
 import us.ihmc.robotDataLogger.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
-import us.ihmc.robotics.graphics.RoboticsRemoteYoGraphicFactory;
 import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -66,9 +69,13 @@ public class YoVariableHandShakeBuilder
                {
                   throw new RuntimeException("The number of YoGraphics exceeds the maximum amount for the logger (" + handshake.getGraphicObjects().capacity() + ")");
                }
-               GraphicObjectMessage msg = handshake.getGraphicObjects().add();
-               msg.setListName(yoGraphicsList.getLabel());
-               messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
+               
+               if(verifyDynamicGraphicObject((RemoteYoGraphic) yoGraphic))
+               {
+                  GraphicObjectMessage msg = handshake.getGraphicObjects().add();
+                  msg.setListName(yoGraphicsList.getLabel());
+                  messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
+               }
 
             }
             else
@@ -92,8 +99,12 @@ public class YoVariableHandShakeBuilder
                {
                   throw new RuntimeException("The number of Artifacts exceeds the maximum amount for the logger (" + handshake.getArtifacts().capacity() + ")");
                }
-               GraphicObjectMessage msg = handshake.getArtifacts().add();
-               messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
+               
+               if(verifyDynamicGraphicObject((RemoteYoGraphic) artifact))
+               {
+                  GraphicObjectMessage msg = handshake.getArtifacts().add();
+                  messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
+               }
             }
             else
             {
@@ -313,6 +324,21 @@ public class YoVariableHandShakeBuilder
       }
 
    }
+   
+   private boolean verifyDynamicGraphicObject(RemoteYoGraphic obj)
+   {
+      for (YoVariable<?> yoVar : obj.getVariables())
+      {
+         if (!this.yoVariableIndices.containsKey(yoVar))
+         {
+            System.err.println("Backing YoVariableRegistry not added for " + obj.getName() + ", variable: " + yoVar + ". Disabling visualizer for " + obj.getName());
+            return false;
+         }
+      }
+      
+      return true;
+   }
+   
 
    private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, GraphicObjectMessage objectMessage)
    {
@@ -385,4 +411,13 @@ public class YoVariableHandShakeBuilder
       }
    }
 
+   public void setFrames(ReferenceFrame rootFrame)
+   {
+      Collection<ReferenceFrame> frames = ReferenceFrameTools.getAllFramesInTree(rootFrame);
+      ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
+      frames.forEach(frame -> {
+         referenceFrameInformation.getFrameNames().add(frame.getName());
+         referenceFrameInformation.getFrameIndices().add(frame.getFrameIndex());
+      });
+   }
 }

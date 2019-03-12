@@ -1,0 +1,7 @@
+start_position 0.0 -0.7 0.0
+goal_position 4.0 3.5 0.0
+start_yaw 1.5707963267948963
+goal_yaw 0.0
+planar_region_bipedal_timeout 10.0 
+a_star_timeout 5.0 
+step_planner_status test

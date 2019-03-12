@@ -192,6 +192,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
          if (stateEstimatorModeSubscriber != null)
             stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
+
       case STAND_READY:
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
@@ -346,15 +347,14 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                             createRequestedTransition(HighLevelControllerName.STAND_PREP_STATE));
 
       // Set up foot loaded transition
-      StateTransitionCondition footLoadedTransition = new QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName.WALKING, requestedControllerState,
+      StateTransitionCondition footLoadedTransition = new QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName.STAND_TRANSITION_STATE, requestedControllerState,
                                                                                                       runtimeEnvironment.getFootSwitches(),
                                                                                                       runtimeEnvironment.getControlDT(),
                                                                                                       runtimeEnvironment.getFullRobotModel().getTotalMass(),
                                                                                                       runtimeEnvironment.getGravity(),
                                                                                                       runtimeEnvironment.getHighLevelControllerParameters(),
                                                                                                       registry);
-      factory.addTransition(HighLevelControllerName.STAND_READY, new StateTransition<>(HighLevelControllerName.WALKING, footLoadedTransition));
-
+      factory.addTransition(HighLevelControllerName.STAND_READY, new StateTransition<>(HighLevelControllerName.STAND_TRANSITION_STATE, footLoadedTransition));
 
       factory.addStateChangedListener((from, to) -> {
          byte fromByte = from == null ? -1 : from.toByte();

@@ -26,6 +26,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
+@Tag("humanoid-behaviors")
 public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestInterface
 {
 

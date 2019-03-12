@@ -125,6 +125,8 @@ public class PlanarRegionFileTools
     * Load from the given data folder planar region data that has been previously exported via
     * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
     *
+    * When calling this method, dataFolder is expressed relative to the package name of the the given Class.
+    *
     * @param clazz the class which has the resource folder.
     * @param dataFolder the name of data folder containing the files with the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
@@ -136,6 +138,42 @@ public class PlanarRegionFileTools
          PlanarRegionsList loadedRegions = importPlanarRegionDataInternalForTests(filename -> {
             String resourceName = dataFolder + "/" + filename;
             InputStream inputStream = clazz.getResourceAsStream(resourceName);
+            if (inputStream == null)
+            {
+               LogTools.error("Could not open resource: " + resourceName, PlanarRegionsList.class);
+               return null;
+            }
+            return new BufferedReader(new InputStreamReader(inputStream));
+         });
+         if (loadedRegions == null)
+            LogTools.error("Could not load the file: " + dataFolder);
+         return loadedRegions;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+
+   /**
+    * Load from the given data folder planar region data that has been previously exported via
+    * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
+    *
+    * When calling this method, dataFolder should be the fully qualified name of the resource, e.g.
+    * /us/ihmc/.../planarRegions/
+    *
+    * @param classLoader the classLoader for loading the planarRegionsList
+    * @param dataFolder the fully qualified name of data folder containing the files with the planar region data.
+    * @return the planar regions if succeeded, {@code null} otherwise.
+    */
+   public static PlanarRegionsList importPlanarRegionData(ClassLoader classLoader, String dataFolder)
+   {
+      try
+      {
+         PlanarRegionsList loadedRegions = importPlanarRegionDataInternalForTests(filename -> {
+            String resourceName = dataFolder + "/" + filename;
+            InputStream inputStream = classLoader.getResourceAsStream(resourceName);
             if (inputStream == null)
             {
                LogTools.error("Could not open resource: " + resourceName, PlanarRegionsList.class);
@@ -476,6 +514,8 @@ public class PlanarRegionFileTools
    {
       try
       {
+         System.out.println("=================================================================");
+         System.out.println(relativePath);
          return IOUtils.readLines(loadingClass.getClassLoader().getResourceAsStream(relativePath), StandardCharsets.UTF_8.name());
       }
       catch (IOException e)

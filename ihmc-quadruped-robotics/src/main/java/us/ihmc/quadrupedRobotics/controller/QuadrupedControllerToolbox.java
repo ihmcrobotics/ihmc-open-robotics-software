@@ -18,8 +18,8 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleP
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector;
-import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.estimator.YoGroundPlaneEstimator;
+import us.ihmc.robotics.geometry.GroundPlaneEstimator;
+import us.ihmc.robotics.geometry.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -133,7 +133,7 @@ public class QuadrupedControllerToolbox
                                                     referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
 
 
-      update(); 
+      update();
    }
 
    public void update()

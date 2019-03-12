@@ -44,7 +44,18 @@ public class ParameterTuningTools
       List<GuiRegistry> guiRegistries = new ArrayList<>();
       if (registries != null)
       {
-         registries.stream().forEach(registry -> guiRegistries.add(buildGuiRegistryFromXML(registry)));
+         registries.stream().forEach(registry -> {
+            try
+            {
+               guiRegistries.add(buildGuiRegistryFromXML(registry));
+            }
+            catch (Exception e)
+            {
+               throw new RuntimeException("Your file has valid XML structure but is not a valid parameter file. "
+                     + "Likely reasons include duplicate registries and malformed identification strings. " + "Original message:\n" + "\"" + e.getMessage()
+                     + "\"");
+            }
+         });
       }
       return guiRegistries;
    }

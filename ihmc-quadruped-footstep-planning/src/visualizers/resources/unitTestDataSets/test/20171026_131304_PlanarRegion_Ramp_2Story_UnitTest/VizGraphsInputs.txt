@@ -1,4 +1,0 @@
-<Start,1.038, 0.356, 0.000,Start>
-<Goal,9.169, -0.764, 0.625,Goal>
-<Type,A_STAR,Type>
-<Timeout,5.0,Timeout>

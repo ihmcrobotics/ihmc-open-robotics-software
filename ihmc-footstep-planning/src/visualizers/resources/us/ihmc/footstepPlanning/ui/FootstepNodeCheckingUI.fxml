@@ -34,6 +34,9 @@
                 <Spinner fx:id="nodeCheckerFootXSpinner" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
                 <Spinner fx:id="nodeCheckerFootYSpinner" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
                 <Spinner fx:id="nodeCheckerFootYaw" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+                <Label text="Debug custom waypoints" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <CheckBox fx:id="renderShiftedWaypointSteps" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             </children>
         </GridPane>
     </children>

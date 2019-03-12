@@ -31,6 +31,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("video")
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -95,6 +96,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
+      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public abstract double getPelvisOffsetHeight();

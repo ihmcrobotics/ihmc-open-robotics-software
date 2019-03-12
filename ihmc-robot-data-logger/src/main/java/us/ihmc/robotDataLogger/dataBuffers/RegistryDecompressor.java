@@ -6,8 +6,8 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.robotDataLogger.interfaces.VariableChangedProducer;
 import us.ihmc.robotDataLogger.jointState.JointState;
-import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.tools.compression.CompressionImplementation;
 import us.ihmc.tools.compression.CompressionImplementationFactory;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -68,7 +68,7 @@ public class RegistryDecompressor
       }
       int numberOfVariables = buffer.getNumberOfVariables();
       
-      int offset = registryOffset + buffer.getOffset();
+      int offset = registryOffset;
       for(int i = 0; i < numberOfVariables; i++)
       {
          setAndNotify(variables.get(i + offset), longData.get());

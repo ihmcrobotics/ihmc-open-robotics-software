@@ -27,6 +27,8 @@ public class KinematicsPlanningToolboxOutputConverter
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
+   
+   private static final boolean startAndFinishVelocityIsZero = true;
 
    public KinematicsPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -75,7 +77,7 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(startAndFinishVelocityIsZero);
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
@@ -182,7 +184,7 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(startAndFinishVelocityIsZero);
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)

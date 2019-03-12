@@ -38,12 +38,18 @@ public class TuningTabManager
       });
       saveTab.setOnAction(event -> {
          TuningTab selectedTab = (TuningTab) tabPane.getSelectionModel().getSelectedItem();
-         tabSaver.saveTab(selectedTab);
+         if (selectedTab != null)
+         {
+            tabSaver.saveTab(selectedTab);
+         }
       });
       loadTab.setOnAction(event -> {
          TuningTab newTab = tabSaver.loadTab(tabPane, tunerMap);
-         newTab.setSliderboard(sliderboard);
-         updateMenuItems();
+         if (newTab != null)
+         {
+            newTab.setSliderboard(sliderboard);
+            updateMenuItems();
+         }
       });
 
       ContextMenu tabContextMenu = new ContextMenu();
@@ -52,6 +58,8 @@ public class TuningTabManager
       tabContextMenu.getItems().add(saveTab);
       tabContextMenu.getItems().add(closeTab);
       tabPane.setContextMenu(tabContextMenu);
+
+      updateMenuItems();
    }
 
    private void createNewTab(TabPane tabPane)

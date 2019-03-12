@@ -1,0 +1,32 @@
+#ifndef __controller_msgs__msg__BipedalSupportPlanarRegionParametersMessage__idl__
+#define __controller_msgs__msg__BipedalSupportPlanarRegionParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message sets the parameters of the BipedalSupportPlanarRegionPublisher
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BipedalSupportPlanarRegionParametersMessage_")
+      struct BipedalSupportPlanarRegionParametersMessage
+      {
+        /**
+         * Enables the BipedalSupportPlanarRegionPublish module
+         */
+        boolean enable;
+        /**
+         * The support planar region is a scaled version of the actual support region.
+         * This value specifies how much to scale by.
+         */
+        @defaultValue(value=1.0)
+        double support_region_scale_factor;
+      };
+    };
+  };
+};
+
+#endif
