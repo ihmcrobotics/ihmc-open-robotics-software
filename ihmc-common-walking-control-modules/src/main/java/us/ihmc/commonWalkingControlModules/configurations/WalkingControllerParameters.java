@@ -8,11 +8,16 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -722,6 +727,7 @@ public abstract class WalkingControllerParameters
    /**
     * Parameter for the CoM height trajectory generation.
     */
+   @Deprecated // Remove this. It is not actually doing anything.
    public abstract double defaultOffsetHeightAboveAnkle();
 
    /**
