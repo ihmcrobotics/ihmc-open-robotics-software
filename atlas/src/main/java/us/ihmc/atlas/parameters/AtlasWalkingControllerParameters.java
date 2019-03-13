@@ -486,13 +486,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean useOptimizationBasedICPController()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean controlToeDuringSwing()
    {
       return true;
@@ -552,12 +545,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public LeapOfFaithParameters getLeapOfFaithParameters()
    {
       return leapOfFaithParameters;
-   }
-
-   @Override
-   public boolean alwaysAllowMomentum()
-   {
-      return false;
    }
 
    @Override
