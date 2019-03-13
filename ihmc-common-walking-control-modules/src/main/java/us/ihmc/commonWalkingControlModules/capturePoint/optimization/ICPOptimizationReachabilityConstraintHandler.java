@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -65,7 +64,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
-   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
+   public ICPOptimizationReachabilityConstraintHandler(SideDependentList<ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
                                                        SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -85,7 +84,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame supportSoleFrame = bipedSupportPolygons.getSoleZUpFrames().get(robotSide);
+         ReferenceFrame supportSoleFrame = soleZUpFrames.get(robotSide);
 
          YoInteger yoNumberOfReachabilityVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
          yoNumberOfReachabilityVertices.set(numberOfVertices);

@@ -275,7 +275,7 @@ public class SphereControlToolbox
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       omega0.addVariableChangedListener(var -> icpControlPlane.setOmega0(omega0.getValue()));
@@ -284,6 +284,16 @@ public class SphereControlToolbox
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
+   }
+
+   public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+   {
+      return ankleZUpFrames;
+   }
+
+   public ReferenceFrame getMidFeetZUpFrame()
+   {
+      return midFeetZUpFrame;
    }
 
    public FullRobotModel getFullRobotModel()

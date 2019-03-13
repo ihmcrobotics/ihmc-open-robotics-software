@@ -178,7 +178,8 @@ public class HighLevelHumanoidControllerToolbox
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>(referenceFrames.getSoleFrames());
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;

@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -181,11 +182,12 @@ public class LinearMomentumRateControlModule
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>(referenceFrames.getSoleFrames());
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
-      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet,
-                                                                controlDT, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
+      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, soleZUpFrames, bipedSupportPolygons, icpControlPolygons,
+                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }

@@ -68,6 +68,7 @@ public class LIPMDDPCalculatorVisualizer
    private static final double nominalComHeight = 1.0;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
@@ -169,11 +170,12 @@ public class LIPMDDPCalculatorVisualizer
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         ankleFrames.put(robotSide, ankleFrame);
       }
 
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, ankleFrames, registry, yoGraphicsListRegistry);
 
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet);
       List<FootstepTiming> timings = new ArrayList<>();

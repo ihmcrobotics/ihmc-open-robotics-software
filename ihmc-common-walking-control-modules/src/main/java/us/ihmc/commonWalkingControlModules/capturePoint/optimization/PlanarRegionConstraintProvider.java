@@ -83,8 +83,9 @@ public class PlanarRegionConstraintProvider
 
    private final boolean allowUsePlanarRegionConstraints;
 
-   public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters walkingParameters, ICPOptimizationParameters optimizationParameters,
-                                         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters walkingParameters,
+                                         ICPOptimizationParameters optimizationParameters, BipedSupportPolygons bipedSupportPolygons,
+                                         SideDependentList<ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                          String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
@@ -95,7 +96,7 @@ public class PlanarRegionConstraintProvider
 
       if (allowUsePlanarRegionConstraints)
       {
-         captureRegionCalculator = new OneStepCaptureRegionCalculator(bipedSupportPolygons, walkingParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+         captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
          yoActivePlanarRegion = new YoFrameConvexPolygon2D(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
          yoShrunkActivePlanarRegion = new YoFrameConvexPolygon2D(yoNamePrefix + "ShrunkActivePlanarRegionConstraint", "", worldFrame, 12, registry);
