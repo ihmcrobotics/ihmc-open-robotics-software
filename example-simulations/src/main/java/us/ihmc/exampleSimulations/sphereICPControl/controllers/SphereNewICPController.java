@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPProportionalController;
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
