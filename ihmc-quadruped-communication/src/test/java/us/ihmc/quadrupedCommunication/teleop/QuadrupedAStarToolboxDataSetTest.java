@@ -29,9 +29,9 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    public static void main(String[] args) throws Exception
