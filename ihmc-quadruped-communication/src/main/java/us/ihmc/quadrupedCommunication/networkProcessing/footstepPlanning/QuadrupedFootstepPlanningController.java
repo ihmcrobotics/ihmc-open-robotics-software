@@ -171,10 +171,9 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       start.setInitialQuadrant(RobotQuadrant.fromByte(request.getInitialStepRobotQuadrant()));
       goal.setGoalPose(goalPose);
 
-      // FIXME
-//      double horizonLength = request.getHorizonLength();
-//      if (horizonLength > 0.0 && Double.isFinite(horizonLength))
-//         planner.setPlanningHorizonLength(horizonLength);
+      double horizonLength = request.getHorizonLength();
+      if (horizonLength > 0.0 && Double.isFinite(horizonLength))
+         planner.setPlanningHorizonLength(horizonLength);
 
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
