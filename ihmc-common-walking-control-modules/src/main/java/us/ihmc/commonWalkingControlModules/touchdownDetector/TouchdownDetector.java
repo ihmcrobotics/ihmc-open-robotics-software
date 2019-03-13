@@ -10,4 +10,6 @@ public interface TouchdownDetector
    void update();
 
    void reset();
+
+   String getName();
 }

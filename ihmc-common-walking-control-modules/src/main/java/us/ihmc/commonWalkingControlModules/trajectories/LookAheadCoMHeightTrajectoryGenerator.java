@@ -254,7 +254,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
       isReadyToHandleQueuedCommands.set(false);
       numberOfQueuedCommands.set(0);
-      offsetHeightAboveGround.set(0.0);
+
+      offsetHeightAboveGround.set(0.0, false);
+      offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
+      offsetHeightTrajectoryGenerator.clear();
+      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, 0.0, 0.0);
+      offsetHeightTrajectoryGenerator.initialize();
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)

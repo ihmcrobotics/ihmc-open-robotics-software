@@ -73,8 +73,8 @@ module robotDataLogger{
 
 	struct ReferenceFrameInformation
 	{
-		sequence<unsigned long, 2048> frameIndices
-		sequence<string, 2048> frameNames
+		sequence<unsigned long, 4096> frameIndices
+		sequence<string, 4096> frameNames
 	}
 
 	struct EnumType

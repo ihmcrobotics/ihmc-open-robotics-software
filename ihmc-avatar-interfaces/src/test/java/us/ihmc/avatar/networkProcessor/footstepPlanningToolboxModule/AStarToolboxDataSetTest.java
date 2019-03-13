@@ -9,6 +9,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pubsub.DomainFactory;
 
 public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
@@ -37,7 +38,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    @Test
    public void testCorridor()
    {
-      DataSet dataSet = DataSetIOTools.loadDataSet("20190219_182005_Corridor");
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Corridor);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlanningParameters()
       {
@@ -53,7 +54,7 @@ public class AStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
    @Test
    public void testBetweenTwoBollards()
    {
-      DataSet dataSet = DataSetIOTools.loadDataSet("20190219_182005_Bollards");
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Bollards);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParametersTopic, new DefaultFootstepPlanningParameters()
       {
