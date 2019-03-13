@@ -27,35 +27,35 @@ module controller_msgs
         /**
          * ID number referring to each planar region, it should be unique.
          */
-        sequence<long, 300> region_id;
+        sequence<long, 3000> region_id;
         /**
          * The coordinates in world of the origin of each planar region.
          */
-        sequence<geometry_msgs::msg::dds::Point, 300> region_origin;
+        sequence<geometry_msgs::msg::dds::Point, 3000> region_origin;
         /**
          * The orientation with respect to world of each planar region.
          */
-        sequence<geometry_msgs::msg::dds::Quaternion, 300> region_orientation;
+        sequence<geometry_msgs::msg::dds::Quaternion, 3000> region_orientation;
         /**
          * The normal expressed in world of each planar region.
          */
-        sequence<geometry_msgs::msg::dds::Vector3, 300> region_normal;
+        sequence<geometry_msgs::msg::dds::Vector3, 3000> region_normal;
         /**
          * Indicates for each planar region the number of vertices for the concave hull.
          */
-        sequence<long, 300> concave_hulls_size;
+        sequence<long, 3000> concave_hulls_size;
         /**
          * Indicates for each planar region the number of convex polygons.
          */
-        sequence<long, 300> number_of_convex_polygons;
+        sequence<long, 3000> number_of_convex_polygons;
         /**
          * Indicates successively the number of vertices for each convex polygon of each planar region.
          */
-        sequence<long, 1000> convex_polygons_size;
+        sequence<long, 3000> convex_polygons_size;
         /**
          * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
          */
-        sequence<geometry_msgs::msg::dds::Point, 5000> vertex_buffer;
+        sequence<geometry_msgs::msg::dds::Point, 50000> vertex_buffer;
       };
     };
   };

@@ -66,6 +66,8 @@ public class AtlasNetworkProcessor
         networkModuleParams.setFilterControllerInputMessages(true);
         networkModuleParams.setEnableJoystickBasedStepping(true);
         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
+        networkModuleParams.enableAutoREAStateUpdater(true);
+        networkModuleParams.enableWalkingPreviewToolbox(true);
 
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 
