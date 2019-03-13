@@ -71,8 +71,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-parameter-tuner", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors-clean-room", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors-fx-ui", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-clean-room", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-fx-ui", version: "source"
 }
 
 testDependencies {
