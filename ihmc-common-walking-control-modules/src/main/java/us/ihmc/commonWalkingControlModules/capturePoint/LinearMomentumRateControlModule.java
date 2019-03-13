@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
@@ -48,6 +49,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LinearMomentumRateControlModule
@@ -114,6 +116,7 @@ public class LinearMomentumRateControlModule
 
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
 
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
@@ -158,11 +161,14 @@ public class LinearMomentumRateControlModule
       {
          YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
       }
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
+      yoCenterOfMass.setToNaN();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -358,6 +364,7 @@ public class LinearMomentumRateControlModule
 
       yoDesiredCMP.set(desiredCMP);
       yoAchievedCMP.set(achievedCMP);
+      yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
