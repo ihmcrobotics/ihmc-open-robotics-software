@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -81,6 +82,11 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    public void setWeight(FrameVector2DReadOnly weightInSoleFrame)
    {
       this.weight.setIncludingFrame(weightInSoleFrame);
+   }
+
+   public void setWeight(ReferenceFrame referenceFrame, double weightX, double weightY)
+   {
+      this.weight.setIncludingFrame(referenceFrame, weightX, weightY);
    }
 
    public void setDesiredCoP(FramePoint2DReadOnly desiredCoPInSoleFrame)
