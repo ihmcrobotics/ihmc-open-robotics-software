@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StepInPlaceBehavior
 {
-   private final FullHumanoidRobotModel fullRobotModel;
+   private final RemoteSyncedRobotModel remoteSyncedRobotModel;
    private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private final ActivationReference<Boolean> stepping;
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
@@ -49,7 +49,7 @@ public class StepInPlaceBehavior
                                                             ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
-      fullRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node).getFullRobotModel(); // TODO Check thread safety
+      remoteSyncedRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            FootstepStatusMessage.class,
@@ -89,6 +89,9 @@ public class StepInPlaceBehavior
          if (footstepsTaken.compareAndSet(2, 0))
          {
             LogTools.info("Sending steps");
+
+            FullHumanoidRobotModel fullRobotModel = remoteSyncedRobotModel.pollFullRobotModel();
+
             FootstepDataListMessage footstepList = new FootstepDataListMessage();
 
             for (RobotSide side : RobotSide.values)
