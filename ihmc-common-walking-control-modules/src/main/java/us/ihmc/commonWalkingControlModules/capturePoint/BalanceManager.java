@@ -445,6 +445,13 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
+      // TODO: These should not be part of a command from the walking state machine to the ICP feedback controller.
+      linearMomentumRateControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
+      linearMomentumRateControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
+      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
+      linearMomentumRateControlModule.setPlanarRegions(planarRegions);
+      linearMomentumRateControlModule.setUpdatePlanarRegions(updatePlanarRegions);
+
       linearMomentumRateControlModule.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModule.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
@@ -452,8 +459,6 @@ public class BalanceManager
       linearMomentumRateControlModule.setFinalTransferDuration(finalTransferDuration);
       linearMomentumRateControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
       linearMomentumRateControlModule.setControlHeightWithMomentum(controlHeightWithMomentum);
-      linearMomentumRateControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
       linearMomentumRateControlModule.setOmega0(omega0);
       linearMomentumRateControlModule.setDesiredCapturePoint(desiredCapturePoint2d, desiredCapturePointVelocity2d);
       linearMomentumRateControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
@@ -461,11 +466,8 @@ public class BalanceManager
       linearMomentumRateControlModule.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateControlModule.setSupportLeg(supportSide);
       linearMomentumRateControlModule.setTransferToSide(transferToSide);
-      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
       linearMomentumRateControlModule.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
       linearMomentumRateControlModule.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
-      linearMomentumRateControlModule.setPlanarRegions(planarRegions);
-      linearMomentumRateControlModule.setUpdatePlanarRegions(updatePlanarRegions);
       linearMomentumRateControlModule.setContactStateCommand(contactStateCommands);
 
       if (!linearMomentumRateControlModule.compute())
