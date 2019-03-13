@@ -339,6 +339,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
       messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.POSITIVE_INFINITY);
 
       ThreadTools.sleep(1000);
 
