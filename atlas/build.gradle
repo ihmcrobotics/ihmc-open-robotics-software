@@ -7,10 +7,6 @@ plugins {
    id "application"
 }
 
-applicationName = "IHMCAtlasAPI"
-mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
-applicationDefaultJvmArgs = ["-Xmx4g"]
-
 ihmc {
    loadProductProperties("../product.properties")
    
@@ -88,6 +84,10 @@ testDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: "source"
 }
 
+applicationName = "IHMCAtlasAPI"
+mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
+applicationDefaultJvmArgs = ["-Xmx4g"]
+
 startScripts {
    outputs.upToDateWhen { false }
 
@@ -126,6 +126,66 @@ startScripts {
    }
 }
 
+task createAllStartScripts() {
+   doLast {
+      // just a placeholder
+   }
+}
+def scripts = ['behavior-backpack'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorBackpack'
+]
+scripts.each() { scriptName, className ->
+   def t = tasks.create(name: scriptName, type: CreateStartScripts) {
+      mainClassName = className
+      applicationName = scriptName
+      outputDir = new File(project.buildDir, 'scripts')
+      classpath = jar.outputs.files + project.configurations.runtime
+   }
+   applicationDistribution.into("bin") {
+      from(t)
+      fileMode = 0755
+   }
+   createAllStartScripts.dependsOn(t)
+}
+
 applicationDistribution.from(startScripts.outputDir) {
    into "bin"
+}
+
+remotes {
+   cpu0 {
+      host = "10.7.4.100"
+      user = "shadylady"
+      password = "ShadyLady"
+      knownHosts = allowAnyHosts
+   }
+}
+
+task deploy(dependsOn: installDist) {
+   def directory = "/home/shadylady/atlas-behavior"
+
+   doLast {
+      ssh.run {
+         session(remotes.alcaniz) {
+            execute("mkdir -p " + directory)
+
+            execute("rm -rf " + directory + "/bin")
+            execute("rm -rf " + directory + "/lib")
+            execute("mkdir -p " + directory + "/bin")
+            execute("mkdir -p " + directory + "/lib")
+
+            def from = "build/install/IHMCAtlasAPI/bin/"
+            file(from).list().each {
+               put(from: from + it, into: directory + "/bin")
+            }
+            from = "build/install/IHMCAtlasAPI/lib/"
+            file(from).list().each {
+               put(from: from + it, into: directory + "/lib")
+            }
+
+            execute("chmod +x " + directory + "/bin/behavior-backpack")
+
+            execute("echo " + project.version + " > " + directory + "/version.txt")
+         }
+      }
+   }
 }
