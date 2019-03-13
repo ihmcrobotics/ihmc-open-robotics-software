@@ -86,10 +86,8 @@ public class StepInPlaceBehavior
             LogTools.info("Starting to step");
          }
 
-         if (footstepsTaken.get() >= 2)
+         if (footstepsTaken.compareAndSet(2, 0))
          {
-            footstepsTaken.set(0);
-
             LogTools.info("Sending steps");
             FootstepDataListMessage footstepList = new FootstepDataListMessage();
 
