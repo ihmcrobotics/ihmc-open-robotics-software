@@ -207,21 +207,23 @@ public class QuadrupedAStarFootstepPlannerTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(0.9);
-      xGaitSettings.setStanceWidth(0.5);
+      xGaitSettings.setStanceLength(0.8);
+      xGaitSettings.setStanceWidth(0.45);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
+
+      DataSetName dataSetName = DataSetName._20190313_114517_QuadrupedEnvironment0;
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
+      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
+
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
       if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
+         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(planarRegionsList);
       else
          visualizer = null;
       QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
 
-      DataSetName dataSetName = DataSetName._20190313_114517_QuadrupedEnvironment0;
-      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
-
-      planner.setPlanarRegionsList(dataSet.getPlanarRegionsList());
+      planner.setPlanarRegionsList(planarRegionsList);
 
       FramePose3D startPose = new FramePose3D();
       startPose.setPosition(dataSet.getPlannerInput().getStartPosition());
@@ -247,11 +249,13 @@ public class QuadrupedAStarFootstepPlannerTest
          visualizer.showAndSleep(true);
       }
 
-      assertTrue(result.validForExecution());
+      if(!activelyVisualize && !visualize)
+         assertTrue(result.validForExecution());
+
       FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
-         visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
+         visualizePlan(steps, planarRegionsList, startPose.getPosition(), goalPose.getPosition());
 
       assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
    }
@@ -323,7 +327,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
             graphics3DObject.identity();
             graphics3DObject.translate(point);
-            graphics3DObject.addSphere(0.1, appearanceDefinition);
+            graphics3DObject.addSphere(0.03, appearanceDefinition);
 
          }
       }
