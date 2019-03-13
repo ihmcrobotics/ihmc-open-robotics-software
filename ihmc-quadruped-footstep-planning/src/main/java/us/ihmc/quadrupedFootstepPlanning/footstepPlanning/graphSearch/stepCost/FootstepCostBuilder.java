@@ -51,8 +51,9 @@ public class FootstepCostBuilder
       if (includeHeightCost.get())
          compositeFootstepCost.addFootstepCost(new HeightCost(footstepPlannerParameters.get(), snapper.get()));
 
-      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
+//      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
       compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get()));
+      compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
 
       FactoryTools.disposeFactory(this);
 
