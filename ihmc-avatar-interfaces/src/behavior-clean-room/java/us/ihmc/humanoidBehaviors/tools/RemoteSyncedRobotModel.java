@@ -9,6 +9,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class RemoteSyncedRobotModel
 {
@@ -22,7 +23,9 @@ public class RemoteSyncedRobotModel
    {
       fullRobotModel = robotModel.createFullRobotModel();
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      jointNameHash = FullRobotModelUtils.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
+                                                                           fullRobotModel.getForceSensorDefinitions(),
+                                                                           fullRobotModel.getIMUDefinitions());
 
       robotConfigurationDataQueue = ROS2Tools.createQueuedSubscription(ros2Node, RobotConfigurationData.class,
                                                                        ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()));
