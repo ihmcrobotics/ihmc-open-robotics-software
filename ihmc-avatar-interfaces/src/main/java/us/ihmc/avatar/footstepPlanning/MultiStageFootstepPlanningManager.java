@@ -1,7 +1,27 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
@@ -18,7 +38,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlannerObjective;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
@@ -42,13 +68,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
@@ -1110,8 +1129,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       cancelAllActiveStages();
       cleanupAllPlanningStages();
 
-      for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
-         stepPlanningTasks.remove(planningTask).cancel(true);
+      if (!stepPlanningTasks.isEmpty())
+      {
+         for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
+            stepPlanningTasks.remove(planningTask).cancel(true);
+      }
       waitingForPlanningRequest.set(false);
    }
 

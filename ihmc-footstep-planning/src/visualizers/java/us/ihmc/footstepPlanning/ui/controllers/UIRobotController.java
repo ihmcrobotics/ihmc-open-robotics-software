@@ -22,6 +22,8 @@ public class UIRobotController
    private Button freeze;
    @FXML
    private Button standPrep;
+   @FXML
+   private Button shutdown;
 
    @FXML
    private CheckBox enableSupportRegions;
@@ -39,6 +41,7 @@ public class UIRobotController
       homeAll.setDisable(messager == null);
       freeze.setDisable(robotLowLevelMessenger == null);
       standPrep.setDisable(robotLowLevelMessenger == null);
+      shutdown.setDisable(robotLowLevelMessenger == null);
    }
 
    @FXML
@@ -65,6 +68,12 @@ public class UIRobotController
    public void standPrep()
    {
       robotLowLevelMessenger.sendStandRequest();
+   }
+
+   @FXML
+   public void shutdown()
+   {
+      robotLowLevelMessenger.sendShutdownRequest();
    }
 
    @FXML

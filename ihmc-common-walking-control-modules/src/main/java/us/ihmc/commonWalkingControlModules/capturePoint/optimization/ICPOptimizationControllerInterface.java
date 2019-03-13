@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -58,16 +60,22 @@ public interface ICPOptimizationControllerInterface
    void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0);
 
    /**
-    * Gets the desired CMP location computed by the ICP controller.
+    * Packs the desired CMP location computed by the ICP controller. The CMP to pack is
+    * expected to be in world frame.
+    *
     * @param desiredCMPToPack where the CMP location is stored. Modified.
+    * @throws ReferenceFrameMismatchException if the desiredCMPToPack is not in world frame.
     */
-   void getDesiredCMP(FramePoint2D desiredCMPToPack);
+   void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack);
 
    /**
-    * Gets the desired CoP location computed by the ICP controller.
+    * Packs the desired CoP location computed by the ICP controller. The CoP to pack is
+    * expected to be in world frame.
+    *
     * @param desiredCoPToPack where the CoP location is stored. Modified.
+    * @throws ReferenceFrameMismatchException if the desiredCMPToPack is not in world frame.
     */
-   void getDesiredCoP(FramePoint2D desiredCoPToPack);
+   void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
 
    /**
     * Gets the desired Footstep location computed by the ICP controller.
