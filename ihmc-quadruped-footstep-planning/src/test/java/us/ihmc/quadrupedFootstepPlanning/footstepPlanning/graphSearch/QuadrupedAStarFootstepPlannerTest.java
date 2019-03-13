@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -14,6 +15,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
@@ -40,7 +42,6 @@ import static us.ihmc.robotics.Assert.*;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
-   private static final long timeout = 30000 * 100;
    private static final double epsilon = 1e-3;
    private static final boolean visualize = true;
    private static final boolean activelyVisualize = true;
@@ -50,72 +51,24 @@ public class QuadrupedAStarFootstepPlannerTest
    @Test
    public void testSimpleWalkForward()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(1.0);
-      xGaitSettings.setStanceWidth(0.5);
-      xGaitSettings.setEndPhaseShift(90.0);
-      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      QuadrupedAStarFootstepPlannerVisualizer visualizer;
-      if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
-      else
-         visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
-
       PlanarRegionsList planarRegionsList = null;
 
+      double timeout = 10.0;
+      double stanceLength = 1.0;
+      double stanceWidth = 0.5;
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       goalPose.setPosition(2.0, 0.0, 0.0);
 
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
-
-      planner.setStart(start);
-      planner.setGoal(goal);
-      planner.setTimeout(10.0);
-
-
-
-      FootstepPlanningResult result = planner.plan();
-
-      if (activelyVisualize)
-      {
-         visualizer.showAndSleep(true);
-      }
-
-      assertTrue(result.validForExecution());
-      FootstepPlan steps = planner.getPlan();
-
-      if (visualize && !activelyVisualize)
-         visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
-
-      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
 
    @Test
    public void testWalkAndTurn()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(1.0);
-      xGaitSettings.setStanceWidth(0.5);
-      xGaitSettings.setEndPhaseShift(90.0);
-      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      QuadrupedAStarFootstepPlannerVisualizer visualizer;
-      if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
-      else
-         visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
-
+      double timeout = 10.0;
+      double stanceLength = 1.0;
+      double stanceWidth = 0.5;
       PlanarRegionsList planarRegionsList = null;
 
       FramePose3D startPose = new FramePose3D();
@@ -123,51 +76,15 @@ public class QuadrupedAStarFootstepPlannerTest
       goalPose.setPosition(2.5, 2.5, 0.0);
       goalPose.setOrientationYawPitchRoll(Math.PI / 3.0, 0.0, 0.0);
 
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
-
-      planner.setStart(start);
-      planner.setGoal(goal);
-      planner.setTimeout(10.0);
-
-
-
-      FootstepPlanningResult result = planner.plan();
-
-      if (activelyVisualize)
-      {
-         visualizer.showAndSleep(true);
-      }
-
-      assertTrue(result.validForExecution());
-      FootstepPlan steps = planner.getPlan();
-
-      if (visualize && !activelyVisualize)
-         visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
-
-      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
 
    @Test
    public void testSimpleForwardPoint()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(1.0);
-      xGaitSettings.setStanceWidth(0.5);
-      xGaitSettings.setEndPhaseShift(90.0);
-      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-      QuadrupedAStarFootstepPlannerVisualizer visualizer;
-      if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(null);
-      else
-         visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
-
+      double timeout = 20.0;
+      double stanceLength = 1.0;
+      double stanceWidth = 0.5;
       PlanarRegionsList planarRegionsList = null;
 
       FramePose3D startPose = new FramePose3D();
@@ -175,6 +92,119 @@ public class QuadrupedAStarFootstepPlannerTest
       goalPose.setPosition(1.5, 0.5, 0.0);
       goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
 
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   @Test
+   public void testEnvironment0()
+   {
+      double timeout = 10.0;
+      double stanceLength = 0.8;
+      double stanceWidth = 0.4;
+
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_114517_QuadrupedEnvironment0);
+      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+
+      PlannerInput plannerInput = dataSet.getPlannerInput();
+      startPose.setPosition(plannerInput.getStartPosition());
+      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+
+      goalPose.setPosition(plannerInput.getGoalPosition());
+      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   @Test
+   public void testEnvironment1()
+   {
+      double timeout = 10.0;
+      double stanceLength = 0.8;
+      double stanceWidth = 0.4;
+
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115758_QuadrupedEnvironment1);
+      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+
+      PlannerInput plannerInput = dataSet.getPlannerInput();
+      startPose.setPosition(plannerInput.getStartPosition());
+      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+
+      goalPose.setPosition(plannerInput.getGoalPosition());
+      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   @Test
+   public void testEnvironment2()
+   {
+      double timeout = 10.0;
+      double stanceLength = 0.8;
+      double stanceWidth = 0.4;
+
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115812_QuadrupedEnvironment2);
+      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+
+      PlannerInput plannerInput = dataSet.getPlannerInput();
+      startPose.setPosition(plannerInput.getStartPosition());
+      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+
+      goalPose.setPosition(plannerInput.getGoalPosition());
+      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   @Test
+   @Disabled
+   public void testEnvironment3()
+   {
+      double timeout = 10.0;
+      double stanceLength = 0.8;
+      double stanceWidth = 0.4;
+
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115820_QuadrupedEnvironment3);
+      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+
+      PlannerInput plannerInput = dataSet.getPlannerInput();
+      startPose.setPosition(plannerInput.getStartPosition());
+      startPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0);
+
+      goalPose.setPosition(plannerInput.getGoalPosition());
+      goalPose.setOrientationYawPitchRoll(plannerInput.getQuadrupedGoalYaw(), 0.0, 0.0);
+
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   private void runTest(double stanceLength, double stanceWidth, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList planarRegionsList, double timeout)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setEndPhaseShift(90.0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
+      QuadrupedAStarFootstepPlannerVisualizer visualizer;
+      if (activelyVisualize)
+         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(planarRegionsList);
+      else
+         visualizer = null;
+      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       start.setStartPose(startPose);
@@ -182,9 +212,8 @@ public class QuadrupedAStarFootstepPlannerTest
 
       planner.setStart(start);
       planner.setGoal(goal);
-      planner.setTimeout(20.0);
-
-
+      planner.setTimeout(timeout);
+      planner.setPlanarRegionsList(planarRegionsList);
 
       FootstepPlanningResult result = planner.plan();
 
@@ -194,64 +223,6 @@ public class QuadrupedAStarFootstepPlannerTest
       }
 
       assertTrue(result.validForExecution());
-      FootstepPlan steps = planner.getPlan();
-
-      if (visualize && !activelyVisualize)
-         visualizePlan(steps, null, startPose.getPosition(), goalPose.getPosition());
-
-      assertPlanIsValid(steps, goalPose.getPosition(), goalPose.getYaw());
-   }
-
-   @Test
-   public void testEnvironment0()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setStanceLength(0.8);
-      xGaitSettings.setStanceWidth(0.45);
-      FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-
-      DataSetName dataSetName = DataSetName._20190313_114517_QuadrupedEnvironment0;
-      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
-      PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
-
-      QuadrupedAStarFootstepPlannerVisualizer visualizer;
-      if (activelyVisualize)
-         visualizer = new QuadrupedAStarFootstepPlannerVisualizer(planarRegionsList);
-      else
-         visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
-
-      planner.setPlanarRegionsList(planarRegionsList);
-
-      FramePose3D startPose = new FramePose3D();
-      startPose.setPosition(dataSet.getPlannerInput().getStartPosition());
-      startPose.setOrientationYawPitchRoll(dataSet.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
-
-      FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(dataSet.getPlannerInput().getGoalPosition());
-      goalPose.setOrientationYawPitchRoll(dataSet.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
-
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
-
-      planner.setStart(start);
-      planner.setGoal(goal);
-      planner.setTimeout(20.0);
-
-      FootstepPlanningResult result = planner.plan();
-
-      if (activelyVisualize)
-      {
-         visualizer.showAndSleep(true);
-      }
-
-      if(!activelyVisualize && !visualize)
-         assertTrue(result.validForExecution());
-
       FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
