@@ -8,6 +8,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
@@ -157,6 +159,8 @@ public class BalanceManager
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
+   private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
+                                                                                                            new PlaneContactStateCommand());
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
@@ -179,9 +183,8 @@ public class BalanceManager
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, bipedSupportPolygons, controllerToolbox.getICPControlPolygons(),
-                                                                            contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ,
-                                                                            controlDT, angularMomentumRateWeight, linearMomentumRateWeight, registry,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
+                                                                            gravityZ, controlDT, angularMomentumRateWeight, linearMomentumRateWeight, registry,
                                                                             yoGraphicsListRegistry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
@@ -442,6 +445,12 @@ public class BalanceManager
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+         contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
+      }
+
       linearMomentumRateControlModule.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModule.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
@@ -463,6 +472,7 @@ public class BalanceManager
       linearMomentumRateControlModule.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
       linearMomentumRateControlModule.setPlanarRegions(planarRegions);
       linearMomentumRateControlModule.setUpdatePlanarRegions(updatePlanarRegions);
+      linearMomentumRateControlModule.setContactStateCommand(contactStateCommands);
 
       if (!linearMomentumRateControlModule.compute())
       {

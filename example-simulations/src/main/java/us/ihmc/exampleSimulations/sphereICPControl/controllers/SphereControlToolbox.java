@@ -277,7 +277,9 @@ public class SphereControlToolbox
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega0, centerOfMassFrame, gravityZ, registry);
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
+      omega0.addVariableChangedListener(var -> icpControlPlane.setOmega0(omega0.getValue()));
+      omega0.notifyVariableChangedListeners();
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
