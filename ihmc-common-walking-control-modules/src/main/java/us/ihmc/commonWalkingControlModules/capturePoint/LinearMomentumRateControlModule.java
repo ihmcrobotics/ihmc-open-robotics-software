@@ -6,11 +6,14 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -34,6 +37,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -97,6 +101,9 @@ public class LinearMomentumRateControlModule
    private boolean desiredCoPcontainedNaN = false;
 
    private final ICPOptimizationControllerInterface icpOptimizationController;
+   private final ICPControlPlane icpControlPlane;
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private final ICPControlPolygons icpControlPolygons;
 
    private final YoDouble yoTime;
 
@@ -128,12 +135,12 @@ public class LinearMomentumRateControlModule
    private boolean footstepWasAdjusted;
    private final FramePose3D footstepSolution = new FramePose3D();
 
-   public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-                                                                 ICPControlPolygons icpControlPolygons, SideDependentList<ContactableFoot> contactableFeet,
-                                                                 WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass,
-                                                                 double gravityZ, double controlDT, Vector3DReadOnly angularMomentumRateWeight,
-                                                                 Vector3DReadOnly linearMomentumRateWeight, YoVariableRegistry parentRegistry,
-                                                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final SideDependentList<PlaneContactState> contactStates = new SideDependentList<>();
+
+   public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
+                                          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
+                                          double controlDT, Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight,
+                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
@@ -157,6 +164,20 @@ public class LinearMomentumRateControlModule
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
+         ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
+         List<FramePoint2D> contactPoints2d = contactableFeet.get(robotSide).getContactPoints2d();
+         YoPlaneContactState contactState = new YoPlaneContactState(soleFrame.getName(), foot, soleFrame, contactPoints2d, Double.NaN, registry);
+         contactStates.put(robotSide, contactState);
+      }
+
+      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
+      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
+      icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
       icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons, contactableFeet,
                                                                 controlDT, registry, yoGraphicsListRegistry);
 
@@ -280,6 +301,14 @@ public class LinearMomentumRateControlModule
       this.keepCoPInsideSupportPolygon = keepCoPInsideSupportPolygon;
    }
 
+   public void setContactStateCommand(SideDependentList<PlaneContactStateCommand> contactStateCommands)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactStates.get(robotSide).updateFromPlaneContactStateCommand(contactStateCommands.get(robotSide));
+      }
+   }
+
    public FramePose3DReadOnly getFootstepSolution()
    {
       return footstepSolution;
@@ -321,6 +350,7 @@ public class LinearMomentumRateControlModule
 
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
+      updatePolygons();
       updateICPControllerState();
       computeICPController();
 
@@ -343,6 +373,13 @@ public class LinearMomentumRateControlModule
       centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
 
       return success;
+   }
+
+   private void updatePolygons()
+   {
+      icpControlPlane.setOmega0(omega0);
+      icpControlPolygons.updateUsingContactStates(contactStates);
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
    }
 
    private void updateICPControllerState()

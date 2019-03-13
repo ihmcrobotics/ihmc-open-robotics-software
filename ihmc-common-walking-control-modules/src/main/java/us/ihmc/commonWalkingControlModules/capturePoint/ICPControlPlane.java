@@ -39,9 +39,13 @@ public class ICPControlPlane
 
    private final ConvexPolygon2D scaledConvexHull = new ConvexPolygon2D();
 
-   public ICPControlPlane(YoDouble omega0, ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
+   private final double gravityZ;
+
+   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
+      this.gravityZ = gravityZ;
+
       controlPlaneHeight = new YoDouble("controlPlaneHeight", registry);
       parentRegistry.addChild(registry);
 
@@ -53,16 +57,12 @@ public class ICPControlPlane
             transformToParent.set(planarRegionTransformToWorld);
          }
       };
+   }
 
-      omega0.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            double heightOfPlane = -gravityZ / Math.pow(omega0.getDoubleValue(), 2.0);
-            controlPlaneHeight.set(heightOfPlane);
-         }
-      });
+   public void setOmega0(double omega0)
+   {
+      double heightOfPlane = -gravityZ / Math.pow(omega0, 2.0);
+      controlPlaneHeight.set(heightOfPlane);
    }
 
    public double getControlPlaneHeight()
