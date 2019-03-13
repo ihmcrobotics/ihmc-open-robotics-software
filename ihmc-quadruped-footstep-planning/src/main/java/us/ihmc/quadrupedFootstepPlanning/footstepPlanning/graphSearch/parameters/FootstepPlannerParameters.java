@@ -10,13 +10,16 @@ import us.ihmc.robotics.trajectories.CubicSplineCurveGenerator;
 
 public interface FootstepPlannerParameters
 {
+   /**
+    * The total maximum Euclidean distance length.
+    */
    double getMaximumStepReach();
 
-   double getMaximumStepWidth();
-
-   double getMaximumStepCycleDistance();
+   double getMaximumStepLength();
 
    double getMinimumStepLength();
+
+   double getMaximumStepWidth();
 
    double getMinimumStepWidth();
 
@@ -26,15 +29,13 @@ public interface FootstepPlannerParameters
 
    double getMaximumStepChangeZ();
 
-   double getMaximumStepCycleChangeZ();
-
    double getBodyGroundClearance();
 
-   double getForwardWeight();
-
-   double getLateralWeight();
+   double getDistanceHeuristicWeight();
 
    double getYawWeight();
+
+   double getXGaitWeight();
 
    double getCostPerStep();
 
@@ -42,7 +43,7 @@ public interface FootstepPlannerParameters
 
    double getStepDownWeight();
 
-   double getHeuristicsWeight();
+   double getHeuristicsInflationWeight();
 
    double getMinXClearanceFromFoot();
 

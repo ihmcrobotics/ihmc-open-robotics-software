@@ -15,8 +15,6 @@ public class XGaitCost implements FootstepCost
    private final FootstepPlannerParameters plannerParameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   private double cost = 2.0;
-
    public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.plannerParameters = plannerParameters;
@@ -36,17 +34,15 @@ public class XGaitCost implements FootstepCost
       double phaseShift = xGaitSettings.getEndPhaseShift();
 
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
-      Point2D endXGaitCenter = new Point2D(startXGaitCenter);
 
       double durationBetweenSteps = computeTimeDeltaBetweenSteps(previousQuadrant);
       double desiredSpeed = plannerParameters.getDesiredWalkingSpeed(phaseShift);
 
       Vector2D desiredDistance = new Vector2D(durationBetweenSteps * desiredSpeed, 0.0);
+
       AxisAngle bodyOrientation = new AxisAngle(startNode.getNominalYaw(), 0.0, 0.0);
 
       bodyOrientation.transform(desiredDistance);
-
-      endXGaitCenter.add(desiredDistance);
 
       Vector2D forward = new Vector2D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0);
       Vector2D side = new Vector2D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()));
@@ -54,11 +50,14 @@ public class XGaitCost implements FootstepCost
       bodyOrientation.transform(forward);
       bodyOrientation.transform(side);
 
+      Point2D endXGaitCenter = new Point2D(startXGaitCenter);
+      endXGaitCenter.add(desiredDistance);
+
       Point2D endFoot = new Point2D(endXGaitCenter);
       endFoot.add(forward);
       endFoot.add(side);
 
-      return cost * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
+      return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }
 
    double computeTimeDeltaBetweenSteps(RobotQuadrant previousQuadrant)
