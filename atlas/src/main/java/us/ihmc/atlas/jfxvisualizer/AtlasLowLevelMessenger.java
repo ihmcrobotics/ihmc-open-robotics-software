@@ -33,4 +33,10 @@ public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
       message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
       lowLevelModePublisher.publish(message);
    }
+   
+   @Override
+   public void sendShutdownRequest()
+   {
+      RobotLowLevelMessenger.super.sendShutdownRequest();
+   }
 }
