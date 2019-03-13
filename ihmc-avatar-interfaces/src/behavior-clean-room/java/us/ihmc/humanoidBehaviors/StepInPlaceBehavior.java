@@ -1,10 +1,5 @@
 package us.ihmc.humanoidBehaviors;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.mutable.MutableInt;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -33,6 +28,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class StepInPlaceBehavior
 {
    private final FullHumanoidRobotModel fullRobotModel;
@@ -40,7 +39,7 @@ public class StepInPlaceBehavior
    private final ActivationReference<Boolean> stepping;
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
    private final SideDependentList<FootstepStatusMessage> footstepStatus = new SideDependentList<>();
-   private final MutableInt footstepsTaken = new MutableInt(2);
+   private final AtomicInteger footstepsTaken = new AtomicInteger(2);
 
    public StepInPlaceBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -74,7 +73,7 @@ public class StepInPlaceBehavior
    {
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
-         footstepsTaken.increment();
+         footstepsTaken.incrementAndGet();
       }
    }
 
@@ -87,9 +86,9 @@ public class StepInPlaceBehavior
             LogTools.info("Starting to step");
          }
 
-         if (footstepsTaken.getValue() >= 2)
+         if (footstepsTaken.get() >= 2)
          {
-            footstepsTaken.setValue(0);
+            footstepsTaken.set(0);
 
             LogTools.info("Sending steps");
             FootstepDataListMessage footstepList = new FootstepDataListMessage();
