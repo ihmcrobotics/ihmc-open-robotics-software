@@ -154,9 +154,12 @@ public class FootstepListBehavior extends AbstractBehavior
             switch (WalkingStatus.fromByte(newestPacket.getWalkingStatus()))
             {
             case COMPLETED:
+               System.out.println("***************** FootstepListBehavior ROBOT HAS COMPLETED WALKING");
                isRobotDoneWalking.set(true);
                break;
             case STARTED:
+               System.out.println("***************** FootstepListBehavior ROBOT HAS STARTED WALKING");
+
                hasRobotStartedWalking.set(true);
                break;
             default:
