@@ -112,12 +112,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
          }
 
          @Override
-         public double getMaximumStepCycleDistance()
-         {
-            return 0.65;
-         }
-
-         @Override
          public double getMinimumStepLength()
          {
             return -0.3;

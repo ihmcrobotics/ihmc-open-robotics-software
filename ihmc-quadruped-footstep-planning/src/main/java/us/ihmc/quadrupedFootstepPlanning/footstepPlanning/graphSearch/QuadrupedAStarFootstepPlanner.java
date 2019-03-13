@@ -240,7 +240,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
          hindRightStepPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
-         nodeToReturn = new FootstepNode(quadrant, frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
+         nodeToReturn = new FootstepNode(quadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeftStepPosition, frontRightStepPosition, hindLeftStepPosition, hindRightStepPosition,
                                          xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }
       else if (target.getTargetType().equals(FootstepPlannerTargetType.FOOTSTEPS))
@@ -255,7 +255,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          hindLeftGoalPosition.changeFrame(worldFrame);
          hindRightGoalPosition.changeFrame(worldFrame);
 
-         nodeToReturn = new FootstepNode(quadrant, frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
+         nodeToReturn = new FootstepNode(quadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeftGoalPosition.getX(), frontLeftGoalPosition.getY(), frontRightGoalPosition.getX(),
                                          frontRightGoalPosition.getY(), hindLeftGoalPosition.getX(), hindLeftGoalPosition.getY(), hindRightGoalPosition.getX(),
                                          hindRightGoalPosition.getY(), xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       }

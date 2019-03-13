@@ -45,10 +45,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
             return 0.7;
          }
 
-         @Override
-         public double getMaximumStepCycleDistance()
+         public double getMaximumStepLength()
          {
-            return 0.65;
+            return 0.6;
          }
 
          @Override
@@ -87,8 +86,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();

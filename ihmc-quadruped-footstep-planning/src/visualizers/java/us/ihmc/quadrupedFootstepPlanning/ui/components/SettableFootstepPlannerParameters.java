@@ -5,24 +5,23 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 public class SettableFootstepPlannerParameters implements FootstepPlannerParameters
 {
    private double maximumStepReach;
+   private double maximumStepLength;
    private double maximumStepWidth;
-   private double maximumStepCycleDistance;
    private double minimumStepLength;
    private double minimumStepWidth;
    private double minimumStepYaw;
    private double maximumStepYaw;
 
    private double maximumStepChangeZ;
-   private double maximumStepCycleChangeZ;
    private double bodyGroundClearance;
 
-   private double forwardWeight;
-   private double lateralWeight;
    private double yawWeight;
    private double costPerStep;
    private double stepUpWeight;
    private double stepDownWeight;
    private double heuristicsWeight;
+   private double distanceWeight;
+   private double xGaitWeight;
 
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
@@ -41,23 +40,22 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void set(FootstepPlannerParameters footstepPlannerParameters)
    {
       this.maximumStepReach = footstepPlannerParameters.getMaximumStepReach();
+      this.maximumStepLength = footstepPlannerParameters.getMaximumStepLength();
       this.maximumStepWidth = footstepPlannerParameters.getMaximumStepWidth();
-      this.maximumStepCycleDistance = footstepPlannerParameters.getMaximumStepCycleDistance();
       this.minimumStepLength = footstepPlannerParameters.getMinimumStepLength();
       this.minimumStepWidth = footstepPlannerParameters.getMinimumStepWidth();
       this.maximumStepYaw = footstepPlannerParameters.getMaximumStepYaw();
       this.minimumStepYaw = footstepPlannerParameters.getMinimumStepYaw();
       this.maximumStepChangeZ = footstepPlannerParameters.getMaximumStepChangeZ();
-      this.maximumStepCycleChangeZ = footstepPlannerParameters.getMaximumStepCycleChangeZ();
       this.bodyGroundClearance = footstepPlannerParameters.getBodyGroundClearance();
 
-      this.forwardWeight = footstepPlannerParameters.getForwardWeight();
-      this.lateralWeight = footstepPlannerParameters.getLateralWeight();
       this.yawWeight = footstepPlannerParameters.getYawWeight();
       this.costPerStep = footstepPlannerParameters.getCostPerStep();
       this.stepUpWeight = footstepPlannerParameters.getStepUpWeight();
       this.stepDownWeight = footstepPlannerParameters.getStepDownWeight();
-      this.heuristicsWeight = footstepPlannerParameters.getHeuristicsWeight();
+      this.heuristicsWeight = footstepPlannerParameters.getHeuristicsInflationWeight();
+      this.distanceWeight = footstepPlannerParameters.getDistanceHeuristicWeight();
+      this.xGaitWeight = footstepPlannerParameters.getXGaitWeight();
 
       this.minimumSurfaceInclineRadians = footstepPlannerParameters.getMinimumSurfaceInclineRadians();
       this.minXClearanceFromFoot = footstepPlannerParameters.getMinXClearanceFromFoot();
@@ -74,14 +72,14 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maximumStepReach = maximumStepReach;
    }
 
+   public void setMaximumStepLength(double maximumStepLength)
+   {
+      this.maximumStepLength = maximumStepLength;
+   }
+
    public void setMaximumStepWidth(double maximumStepWidth)
    {
       this.maximumStepWidth = maximumStepWidth;
-   }
-
-   public void setMaximumStepCycleDistance(double maximumStepCycleDistance)
-   {
-      this.maximumStepCycleDistance = maximumStepCycleDistance;
    }
 
    public void setMinimumStepLength(double minimumStepLength)
@@ -109,24 +107,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maximumStepChangeZ = maximumStepChangeZ;
    }
 
-   public void setMaximumStepCycleChangeZ(double maximumStepCycleChangeZ)
-   {
-      this.maximumStepCycleChangeZ = maximumStepCycleChangeZ;
-   }
-
    public void setBodyGroundClearance(double bodyGroundClearance)
    {
       this.bodyGroundClearance = bodyGroundClearance;
-   }
-
-   public void setForwardWeight(double forwardWeight)
-   {
-      this.forwardWeight = forwardWeight;
-   }
-
-   public void setLateralWeight(double lateralWeight)
-   {
-      this.lateralWeight = lateralWeight;
    }
 
    public void setYawWeight(double yawWeight)
@@ -179,14 +162,14 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return maximumStepReach;
    }
 
+   public double getMaximumStepLength()
+   {
+      return maximumStepLength;
+   }
+
    public double getMaximumStepWidth()
    {
       return maximumStepWidth;
-   }
-
-   public double getMaximumStepCycleDistance()
-   {
-      return maximumStepCycleDistance;
    }
 
    public double getMinimumStepLength()
@@ -214,24 +197,19 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return maximumStepChangeZ;
    }
 
-   public double getMaximumStepCycleChangeZ()
-   {
-      return maximumStepCycleChangeZ;
-   }
-
    public double getBodyGroundClearance()
    {
       return bodyGroundClearance;
    }
 
-   public double getForwardWeight()
+   public double getDistanceHeuristicWeight()
    {
-      return forwardWeight;
+      return distanceWeight;
    }
 
-   public double getLateralWeight()
+   public double getXGaitWeight()
    {
-      return lateralWeight;
+      return xGaitWeight;
    }
 
    public double getYawWeight()
@@ -254,7 +232,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       return stepDownWeight;
    }
 
-   public double getHeuristicsWeight()
+   public double getHeuristicsInflationWeight()
    {
       return heuristicsWeight;
    }
