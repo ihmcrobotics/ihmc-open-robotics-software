@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -42,6 +43,9 @@ public class ICPControlPolygons
    private final SideDependentList<YoFrameConvexPolygon2D> controlFootPolygonsViz = new SideDependentList<>();
 
    private final ICPControlPlane icpControlPlane;
+
+   private final FramePoint3D tempProjectedContactPosition = new FramePoint3D();
+   private final FramePoint3D tempContactPosition = new FramePoint3D();
 
    public ICPControlPolygons(ICPControlPlane icpControlPlane, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -82,8 +86,6 @@ public class ICPControlPolygons
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
-
    public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
       boolean inDoubleSupport = true;
@@ -111,9 +113,52 @@ public class ICPControlPolygons
                if (!contactPoint.isInContact())
                   continue;
 
-               icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint.getPosition(), tempFramePoint);
-               footPolygonInWorldFrame.addVertexMatchingFrame(tempFramePoint);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(tempFramePoint);
+               icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint.getPosition(), tempProjectedContactPosition);
+               footPolygonInWorldFrame.addVertexMatchingFrame(tempProjectedContactPosition);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(tempProjectedContactPosition);
+            }
+
+            footPolygonInWorldFrame.update();
+            footPolygonInMidFeetZUp.update();
+         }
+         else
+         {
+            inDoubleSupport = false;
+         }
+      }
+
+      updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
+
+      updateVisualize();
+   }
+
+   public void updateUsingContactStateCommand(SideDependentList<PlaneContactStateCommand> contactStateCommands)
+   {
+      boolean inDoubleSupport = true;
+      boolean neitherFootIsSupportingFoot = true;
+      RobotSide supportSide = null;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         PlaneContactStateCommand contactStateCommand = contactStateCommands.get(robotSide);
+
+         FixedFrameConvexPolygon2DBasics footPolygonInWorldFrame = footControlPolygonsInWorldFrame.get(robotSide);
+         FixedFrameConvexPolygon2DBasics footPolygonInMidFeetZUp = footControlPolygonsInMidFeetZUp.get(robotSide);
+
+         footPolygonInWorldFrame.clearAndUpdate();
+         footPolygonInMidFeetZUp.clearAndUpdate();
+
+         if (!contactStateCommand.isEmpty())
+         {
+            supportSide = robotSide;
+            neitherFootIsSupportingFoot = false;
+
+            for (int i = 0; i < contactStateCommand.getNumberOfContactPoints(); i++)
+            {
+               contactStateCommand.getContactPoint(i, tempContactPosition);
+               icpControlPlane.projectPointOntoControlPlane(worldFrame, tempContactPosition, tempProjectedContactPosition);
+               footPolygonInWorldFrame.addVertexMatchingFrame(tempProjectedContactPosition);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(tempProjectedContactPosition);
             }
 
             footPolygonInWorldFrame.update();

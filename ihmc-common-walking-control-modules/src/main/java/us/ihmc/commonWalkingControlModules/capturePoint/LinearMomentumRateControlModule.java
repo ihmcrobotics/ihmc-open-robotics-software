@@ -7,8 +7,6 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -38,8 +36,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -139,7 +135,8 @@ public class LinearMomentumRateControlModule
    private boolean footstepWasAdjusted;
    private final FramePose3D footstepSolution = new FramePose3D();
 
-   private final SideDependentList<PlaneContactState> contactStates = new SideDependentList<>();
+   private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
+                                                                                                     new PlaneContactStateCommand());
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
                                           WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
@@ -170,15 +167,6 @@ public class LinearMomentumRateControlModule
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyBasics foot = contactableFeet.get(robotSide).getRigidBody();
-         ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
-         List<FramePoint2D> contactPoints2d = contactableFeet.get(robotSide).getContactPoints2d();
-         YoPlaneContactState contactState = new YoPlaneContactState(soleFrame.getName(), foot, soleFrame, contactPoints2d, Double.NaN, registry);
-         contactStates.put(robotSide, contactState);
-      }
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
@@ -313,7 +301,7 @@ public class LinearMomentumRateControlModule
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         contactStates.get(robotSide).updateFromPlaneContactStateCommand(contactStateCommands.get(robotSide));
+         this.contactStateCommands.get(robotSide).set(contactStateCommands.get(robotSide));
       }
    }
 
@@ -387,8 +375,8 @@ public class LinearMomentumRateControlModule
    private void updatePolygons()
    {
       icpControlPlane.setOmega0(omega0);
-      icpControlPolygons.updateUsingContactStates(contactStates);
-      bipedSupportPolygons.updateUsingContactStates(contactStates);
+      icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
+      bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
    }
 
    private void updateICPControllerState()
