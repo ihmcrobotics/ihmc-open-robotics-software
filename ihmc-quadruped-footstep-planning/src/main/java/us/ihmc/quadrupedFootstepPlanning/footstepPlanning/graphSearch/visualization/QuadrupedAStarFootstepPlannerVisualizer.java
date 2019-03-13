@@ -104,7 +104,8 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason reason)
    {
-      validChildNodeMap.get(parentNode).remove(rejectedNode);
+      if(validChildNodeMap.containsKey(parentNode))
+         validChildNodeMap.get(parentNode).remove(rejectedNode);
    }
 
    @Override
