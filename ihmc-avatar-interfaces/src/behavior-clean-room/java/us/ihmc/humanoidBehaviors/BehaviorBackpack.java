@@ -37,7 +37,7 @@ public class BehaviorBackpack
       LogTools.info("Starting behavior backpack");
       
       PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "humanoid_behavior_module");
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
       new StepInPlaceBehavior(messager, ros2Node, robotModel);
    }
