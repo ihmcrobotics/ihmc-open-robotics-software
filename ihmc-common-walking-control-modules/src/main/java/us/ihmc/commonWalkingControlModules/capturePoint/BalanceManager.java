@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
@@ -63,7 +62,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class BalanceManager
@@ -84,7 +82,6 @@ public class BalanceManager
    private final PushRecoveryControlModule pushRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
    private final YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
@@ -258,7 +255,6 @@ public class BalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
@@ -267,7 +263,6 @@ public class BalanceManager
          YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
          yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
 
-         yoGraphicsListRegistry.registerArtifact(graphicListName, centerOfMassViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
          YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
@@ -277,7 +272,6 @@ public class BalanceManager
          perfectCoPArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectCoPArtifact);
       }
-      yoCenterOfMass.setToNaN();
       yoDesiredCapturePoint.setToNaN();
       yoFinalDesiredICP.setToNaN();
       yoPerfectCMP.setToNaN();
@@ -829,8 +823,6 @@ public class BalanceManager
     */
    public void update()
    {
-      centerOfMassPosition.setToZero(centerOfMassFrame);
-      yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
       computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
