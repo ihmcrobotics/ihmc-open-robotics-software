@@ -16,6 +16,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiv
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.VisibilityGraphWithAStarPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -80,6 +81,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       }
       plannerMap.put(FootstepPlannerType.A_STAR,
                      QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
+                                                                                                    visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);

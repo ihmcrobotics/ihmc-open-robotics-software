@@ -25,7 +25,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.SpeedAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
