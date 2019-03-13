@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -268,7 +269,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly actualCapturePointPosition)
    {
       if (isDone())
          return 0.0;
@@ -346,7 +347,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
    private final FramePoint2D actualICP2d = new FramePoint2D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2DReadOnly actualCapturePointPosition)
    {
       desiredICP2d.setIncludingFrame(desiredICPPosition);
       finalICP2d.setIncludingFrame(singleSupportFinalICP);

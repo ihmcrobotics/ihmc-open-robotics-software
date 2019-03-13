@@ -1,5 +1,6 @@
-package us.ihmc.commonWalkingControlModules.capturePoint;
+package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
