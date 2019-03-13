@@ -56,6 +56,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
+   protected double getTimePerWaypoint()
+   {
+      return 0.5;
+   }
+
    @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
@@ -124,7 +129,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      double timePerWaypoint = 0.5;
+      double timePerWaypoint = getTimePerWaypoint();
       int numberOfTrajectoryPoints = 10;
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
 
@@ -278,7 +283,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      double timePerWaypoint = 0.5;
+      double timePerWaypoint = getTimePerWaypoint();
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
 
@@ -322,7 +327,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
             trajectoryPoint1DCalculator.compute(timePerWaypoint * (numberOfTrajectoryPoints - 1));
             OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-            trajectoryData.addTimeOffset(timePerWaypoint);
+            trajectoryData.addTimeOffset(getTimePerWaypoint());
 
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
@@ -400,10 +405,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      double timePerWaypoint = 0.5;
+      double timePerWaypoint = getTimePerWaypoint();
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
-      double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
 
       SideDependentList<OneDoFJointBasics[]> armsJoints = new SideDependentList<>();
       SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();
@@ -452,7 +456,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
                trajectoryPoint1DCalculator.compute(timePerWaypoint * (numberOfTrajectoryPoints - 1));
                OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-               trajectoryData.addTimeOffset(timePerWaypoint);
+               trajectoryData.addTimeOffset(getTimePerWaypoint());
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
@@ -517,10 +521,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      double timePerWaypoint = 0.5;
+      double timePerWaypoint = getTimePerWaypoint();
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
-      double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
 
       SideDependentList<OneDoFJointBasics[]> armsJoints = new SideDependentList<>();
 
@@ -562,7 +565,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
                trajectoryPoint1DCalculator.compute(timePerWaypoint * (numberOfTrajectoryPoints - 1));
                OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-               trajectoryData.addTimeOffset(timePerWaypoint);
+               trajectoryData.addTimeOffset(getTimePerWaypoint());
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
@@ -841,7 +844,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          trajectoryPoint1DCalculator.compute(trajectoryTime);
          OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-         trajectoryData.addTimeOffset(0.5);
+         trajectoryData.addTimeOffset(getTimePerWaypoint());
 
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
          {
