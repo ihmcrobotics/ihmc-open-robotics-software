@@ -36,6 +36,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -186,23 +187,25 @@ public class BalanceManager
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       ICPPlannerInterface icpPlanner;
-      //icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, yoGraphicsListRegistry);
+      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
       if (!icpPlannerParameters.useSmoothCMPPlanner())
       {
+         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
          icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                                           registry, yoGraphicsListRegistry);
+                                                       midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
          smoothCMPPlanner = null;
       }
       else
       {
          MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                                                  momentumTrajectoryHandler, yoTime, registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
+         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet,
+                                                         icpPlannerParameters.getNumberOfFootstepsToConsider(), momentumTrajectoryHandler, yoTime, registry,
+                                                         yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
          icpPlanner = smoothCMPPlanner;
       }
 
-      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, bipedSupportPolygons.getSoleZUpFrames());
+      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, soleZUpFrames);
       parentRegistry.addChild(icpWrapper.getYoVariableRegistry());
 
       this.icpPlanner = icpWrapper;
@@ -723,7 +726,7 @@ public class BalanceManager
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
    {
       getICPError(icpError2d);
-      ReferenceFrame leadingSoleZUpFrame = bipedSupportPolygons.getSoleZUpFrames().get(transferToSide);
+      ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
       normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX.getValue())
             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getValue()));
@@ -802,7 +805,7 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
 
-      FrameConvexPolygon2D supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2DReadOnly supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       convexPolygonShrinker.scaleConvexPolygon(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
 
       centerOfMassPosition.changeFrame(shrunkSupportPolygon.getReferenceFrame());
@@ -844,14 +847,12 @@ public class BalanceManager
       capturePoint2d.checkReferenceFrameMatch(worldFrame);
       desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
 
-      SideDependentList<FrameConvexPolygon2D> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
-
       capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
       capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
-         HumanoidMessageTools.packFootSupportPolygon(robotSide, footSupportPolygons.get(robotSide), capturabilityBasedStatus);
+         HumanoidMessageTools.packFootSupportPolygon(robotSide, bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide), capturabilityBasedStatus);
       }
 
       return capturabilityBasedStatus;

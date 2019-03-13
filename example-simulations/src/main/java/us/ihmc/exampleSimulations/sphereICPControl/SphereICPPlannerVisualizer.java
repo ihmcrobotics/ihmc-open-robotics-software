@@ -675,14 +675,15 @@ public class SphereICPPlannerVisualizer
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
       ContinuousCMPICPPlannerParameters capturePointPlannerParameters = createICPPlannerParameters();
 
-      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters.getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
-//      CapturePointPlannerAdapter icpPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry, yoGraphicsListRegistry, dt, soleFrames, bipedSupportPolygons);
+      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet,
+                                                                                 capturePointPlannerParameters.getNumberOfFootstepsToConsider(),
+                                                                                 midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0);
       icpPlanner.initializeParameters(capturePointPlannerParameters);
       return icpPlanner;

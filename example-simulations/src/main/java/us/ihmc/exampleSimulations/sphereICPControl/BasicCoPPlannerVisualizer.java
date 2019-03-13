@@ -148,7 +148,7 @@ public class BasicCoPPlannerVisualizer
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet);
       List<FootstepTiming> timings = new ArrayList<>();

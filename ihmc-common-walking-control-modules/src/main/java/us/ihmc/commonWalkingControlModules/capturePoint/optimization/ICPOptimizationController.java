@@ -217,18 +217,19 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final BooleanProvider considerAngularMomentumInAdjustment;
    private final BooleanProvider considerFeedbackInAdjustment;
 
-   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet,
-           controlDT, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
+   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, SideDependentList<ReferenceFrame> soleZUpFrames,
                                     BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                     SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), soleZUpFrames, bipedSupportPolygons, icpControlPolygons,
+           contactableFeet, controlDT, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
+                                    SideDependentList<ReferenceFrame> soleZUpFrames, BipedSupportPolygons bipedSupportPolygons,
+                                    ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
@@ -327,12 +328,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons,
                                                                      registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters,
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(soleZUpFrames, icpOptimizationParameters,
                                                                                        walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
                                                                                        VISUALIZE, registry, yoGraphicsListRegistry);
       planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
-                                                                          bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE, registry,
-                                                                          yoGraphicsListRegistry);
+                                                                          bipedSupportPolygons, soleZUpFrames, contactableFeet, yoNamePrefix, VISUALIZE,
+                                                                          registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
