@@ -1,8 +1,12 @@
 package us.ihmc.humanoidBehaviors;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -29,9 +33,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class StepInPlaceBehavior
 {
    private final FullHumanoidRobotModel fullRobotModel;
@@ -49,7 +50,7 @@ public class StepInPlaceBehavior
                                                             ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
-      fullRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node).getFullRobotModel();
+      fullRobotModel = new RemoteSyncedRobotModel(robotModel, ros2Node).getFullRobotModel(); // TODO Check thread safety
 
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            FootstepStatusMessage.class,

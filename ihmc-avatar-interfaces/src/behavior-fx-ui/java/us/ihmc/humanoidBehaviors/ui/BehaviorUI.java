@@ -11,6 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
@@ -29,7 +30,9 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.ros2.Ros2Node;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -52,12 +55,15 @@ public class BehaviorUI
 
    public BehaviorUI(Stage primaryStage,
                      BehaviorTeleop teleop,
-                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory) throws Exception
+                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, 
+                     PubSubImplementation pubSubImplementation) throws Exception
    {
       this.primaryStage = primaryStage;
 
       messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
       messager.startMessager();
+      
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -101,6 +107,9 @@ public class BehaviorUI
       else
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
+//         ros2Node.createSubscription(RobotConfigurationData.class, 
+//                                     robotConfigurationData -> robotVisualizer.submitNewConfiguration(robotConfigurationData), 
+//                                     ControllerAPIDefinition.getPublisherTopicNameGenerator("Atlas"));
          patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
          robotVisualizer.start();

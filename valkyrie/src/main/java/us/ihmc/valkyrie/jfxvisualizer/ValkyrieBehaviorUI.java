@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -34,7 +35,8 @@ public class ValkyrieBehaviorUI extends Application
 
       ui = new BehaviorUI(primaryStage,
                           teleop,
-                          drcRobotModel);
+                          drcRobotModel,
+                          PubSubImplementation.FAST_RTPS);
       ui.show();
 
       messager.startMessager();

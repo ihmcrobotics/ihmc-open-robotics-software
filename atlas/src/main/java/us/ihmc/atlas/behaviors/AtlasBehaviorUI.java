@@ -11,6 +11,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasBehaviorUI extends Application
 {
@@ -27,7 +28,8 @@ public class AtlasBehaviorUI extends Application
 
       ui = new BehaviorUI(primaryStage,
                           teleop,
-                          drcRobotModel);
+                          drcRobotModel,
+                          PubSubImplementation.FAST_RTPS);
       ui.show();
 
       if (launchBehaviorModule)
