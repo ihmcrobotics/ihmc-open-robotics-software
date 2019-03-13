@@ -165,7 +165,7 @@ task deploy(dependsOn: installDist) {
 
    doLast {
       ssh.run {
-         session(remotes.alcaniz) {
+         session(remotes.cpu0) {
             execute("mkdir -p " + directory)
 
             execute("rm -rf " + directory + "/bin")
