@@ -7,6 +7,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -29,15 +31,12 @@ public class ICPControlPolygons
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPControlPolygons");
 
-   // Reference frames:
-   private final ReferenceFrame midFeetZUp;
-
    // Polygons:
-   private final SideDependentList<FrameConvexPolygon2D> footControlPolygonsInWorldFrame = new SideDependentList<>();
-   private final SideDependentList<FrameConvexPolygon2D> footControlPolygonsInMidFeetZUp = new SideDependentList<>();
+   private final SideDependentList<FixedFrameConvexPolygon2DBasics> footControlPolygonsInWorldFrame = new SideDependentList<>();
+   private final SideDependentList<FixedFrameConvexPolygon2DBasics> footControlPolygonsInMidFeetZUp = new SideDependentList<>();
 
-   private final FrameConvexPolygon2D controlPolygonInMidFeetZUp = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D controlPolygonInWorld = new FrameConvexPolygon2D();
+   private final FixedFrameConvexPolygon2DBasics controlPolygonInMidFeetZUp;
+   private final FixedFrameConvexPolygon2DBasics controlPolygonInWorld;
 
    private final YoFrameConvexPolygon2D controlPolygonViz;
    private final SideDependentList<YoFrameConvexPolygon2D> controlFootPolygonsViz = new SideDependentList<>();
@@ -47,7 +46,6 @@ public class ICPControlPolygons
    public ICPControlPolygons(ICPControlPlane icpControlPlane, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
-      this.midFeetZUp = midFeetZUpFrame;
 
       controlPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
@@ -56,10 +54,13 @@ public class ICPControlPolygons
       YoArtifactPolygon controlPolygonArtifact = new YoArtifactPolygon("Combined Control Polygon", controlPolygonViz, combinedColor, false);
       artifactList.add(controlPolygonArtifact);
 
+      controlPolygonInMidFeetZUp = new FrameConvexPolygon2D(midFeetZUpFrame);
+      controlPolygonInWorld = new FrameConvexPolygon2D(worldFrame);
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlPolygonsInWorldFrame.put(robotSide, new FrameConvexPolygon2D());
-         footControlPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D());
+         footControlPolygonsInWorldFrame.put(robotSide, new FrameConvexPolygon2D(worldFrame));
+         footControlPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D(midFeetZUpFrame));
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
          if (VISUALIZE)
@@ -93,11 +94,11 @@ public class ICPControlPolygons
       {
          PlaneContactState contactState = contactStates.get(robotSide);
 
-         FrameConvexPolygon2D footPolygonInWorldFrame = footControlPolygonsInWorldFrame.get(robotSide);
-         FrameConvexPolygon2D footPolygonInMidFeetZUp = footControlPolygonsInMidFeetZUp.get(robotSide);
+         FixedFrameConvexPolygon2DBasics footPolygonInWorldFrame = footControlPolygonsInWorldFrame.get(robotSide);
+         FixedFrameConvexPolygon2DBasics footPolygonInMidFeetZUp = footControlPolygonsInMidFeetZUp.get(robotSide);
 
-         footPolygonInWorldFrame.clearAndUpdate(worldFrame);
-         footPolygonInMidFeetZUp.clearAndUpdate(midFeetZUp);
+         footPolygonInWorldFrame.clearAndUpdate();
+         footPolygonInMidFeetZUp.clearAndUpdate();
 
          if (contactState.inContact())
          {
@@ -139,15 +140,14 @@ public class ICPControlPolygons
 
       if (inDoubleSupport)
       {
-         controlPolygonInMidFeetZUp.setIncludingFrame(footControlPolygonsInMidFeetZUp.get(RobotSide.LEFT), footControlPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         controlPolygonInMidFeetZUp.set(footControlPolygonsInMidFeetZUp.get(RobotSide.LEFT), footControlPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
       }
       else
       {
-         controlPolygonInMidFeetZUp.setIncludingFrame(footControlPolygonsInMidFeetZUp.get(supportSide));
+         controlPolygonInMidFeetZUp.set(footControlPolygonsInMidFeetZUp.get(supportSide));
       }
 
-      controlPolygonInWorld.setIncludingFrame(controlPolygonInMidFeetZUp);
-      controlPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+      controlPolygonInWorld.setMatchingFrame(controlPolygonInMidFeetZUp, true);
    }
 
    private void updateVisualize()
@@ -159,7 +159,7 @@ public class ICPControlPolygons
          for (RobotSide robotSide : RobotSide.values)
          {
             YoFrameConvexPolygon2D footPolygonViz = controlFootPolygonsViz.get(robotSide);
-            FrameConvexPolygon2D footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
+            FixedFrameConvexPolygon2DBasics footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
             if (footPolygon.isEmpty())
                footPolygonViz.clear();
             else
@@ -168,7 +168,7 @@ public class ICPControlPolygons
       }
    }
 
-   public FrameConvexPolygon2D getFootControlPolygonInWorldFrame(RobotSide robotSide)
+   public FrameConvexPolygon2DReadOnly getFootControlPolygonInWorldFrame(RobotSide robotSide)
    {
       return footControlPolygonsInWorldFrame.get(robotSide);
    }
