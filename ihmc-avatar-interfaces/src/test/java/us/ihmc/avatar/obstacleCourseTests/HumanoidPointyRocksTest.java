@@ -125,11 +125,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private void setUpMomentum() throws SimulationExceededMaximumTimeException
    {
-      // enable the use of body momentum in the controller
-      YoBoolean allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInSingleSupport.set(true);
-      YoBoolean allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-      allowUsingHighMomentumWeight.set(true);
+      drcSimulationTestHelper.getYoVariable("LinearMomentumRateWeightX").setValueFromDouble(0.5);
+      drcSimulationTestHelper.getYoVariable("LinearMomentumRateWeightY").setValueFromDouble(0.5);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
