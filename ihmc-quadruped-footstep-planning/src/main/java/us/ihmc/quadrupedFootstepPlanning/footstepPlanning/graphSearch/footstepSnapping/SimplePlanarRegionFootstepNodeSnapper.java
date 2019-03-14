@@ -17,8 +17,6 @@ import java.util.List;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
-   private static final double distanceInsideRegion = 0.02;
-
    private final Point2D footPosition = new Point2D();
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
    private final ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
@@ -46,12 +44,23 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       }
       else
       {
-         RigidBodyTransform transform = projectPointIntoRegion(highestRegion, footPosition.getX(), footPosition.getY());
+         RigidBodyTransform transform = new RigidBodyTransform();
 
-         if(transform == null)
-            return FootstepNodeSnapData.emptyData();
+         if(parameters.getProjectInsideDistance() > 0.0)
+         {
+            projectPointIntoRegion(highestRegion, footPosition.getX(), footPosition.getY(), transform);
+
+            // projection failed
+            if(transform.containsNaN())
+               return FootstepNodeSnapData.emptyData();
+            else
+               return new FootstepNodeSnapData(transform);
+         }
          else
+         {
+            transform.setTranslationZ(highestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
             return new FootstepNodeSnapData(transform);
+         }
       }
    }
 
@@ -81,17 +90,19 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       return highestPlanarRegion;
    }
 
-   private RigidBodyTransform projectPointIntoRegion(PlanarRegion region, double x, double y)
+   private void projectPointIntoRegion(PlanarRegion region, double x, double y, RigidBodyTransform transformToPack)
    {
       Point3D pointToSnap = new Point3D();
       pointToSnap.set(x, y, region.getPlaneZGivenXY(x, y));
-      boolean successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), distanceInsideRegion, scaledRegionPolygon);
+      double projectionDistance = parameters.getProjectInsideDistance();
+      boolean successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon);
 
       // region is too small to wiggle inside
       // TODO either search nearby or make the grid size match the wiggle-inside distance to avoid missing valid footholds inside the cell
       if(!successfulScale)
       {
-         return null;
+         transformToPack.setToNaN();
+         return;
       }
 
       region.transformFromWorldToLocal(pointToSnap);
@@ -99,7 +110,8 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       boolean successfulProjection = scaledRegionPolygon.orthogonalProjection(projectedPoint);
       if(!successfulProjection)
       {
-         return null;
+         transformToPack.setToNaN();
+         return;
       }
 
       Vector3D snapTranslation = new Vector3D();
@@ -107,17 +119,13 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       snapTranslation.sub(pointToSnap.getX(), pointToSnap.getY(), 0.0);
       region.transformFromLocalToWorld(snapTranslation);
 
-      RigidBodyTransform transform = new RigidBodyTransform();
-
       // set horizontal translation from projection
-      transform.setTranslationX(snapTranslation.getX());
-      transform.setTranslationY(snapTranslation.getY());
+      transformToPack.setTranslationX(snapTranslation.getX());
+      transformToPack.setTranslationY(snapTranslation.getY());
 
       // set translation height from region
       double projectedX = x + snapTranslation.getX();
       double projectedY = y + snapTranslation.getY();
-      transform.setTranslationZ(region.getPlaneZGivenXY(projectedX, projectedY));
-
-      return transform;
+      transformToPack.setTranslationZ(region.getPlaneZGivenXY(projectedX, projectedY));
    }
 }
