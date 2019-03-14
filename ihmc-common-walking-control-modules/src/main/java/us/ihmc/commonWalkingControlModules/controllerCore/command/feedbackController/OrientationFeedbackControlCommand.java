@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.ControllerCoreTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -207,15 +206,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param desiredOrientation describes the orientation that the
     *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
-    * @throws IllegalArgumentException if the argument is not expressed in a root frame:
-    *            {@code !desiredOrientation.getReferenceFrame().isRootFrame()}.
     */
    public void set(FrameQuaternionReadOnly desiredOrientation)
    {
-      ControllerCoreTools.checkExpressedInRootFrame(desiredOrientation);
+      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
       desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredAngularVelocityInRootFrame.setToZero(desiredOrientation.getReferenceFrame());
-      feedForwardAngularActionInRootFrame.setToZero(desiredOrientation.getReferenceFrame());
+      desiredOrientationInRootFrame.changeFrame(rootFrame);
+      desiredAngularVelocityInRootFrame.setToZero(rootFrame);
+      feedForwardAngularActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -225,16 +223,15 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
     * @param desiredAngularVelocity describes the desired linear velocity of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
-    * @throws IllegalArgumentException if the given {@code desiredOrientation} is not expressed in a
-    *            root frame: {@code !desiredOrientation.getReferenceFrame().isRootFrame()}.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same frame.
     */
    public void set(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity)
    {
-      ControllerCoreTools.checkExpressedInSameRootFrame(desiredOrientation, desiredAngularVelocity);
+      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
       desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
+      desiredOrientationInRootFrame.changeFrame(rootFrame);
       desiredAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
-      feedForwardAngularActionInRootFrame.setToZero(desiredAngularVelocity.getReferenceFrame());
+      desiredAngularVelocityInRootFrame.changeFrame(rootFrame);
+      feedForwardAngularActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -243,13 +240,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     *
     * @param feedForwardAngularAction describes the desired linear action of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in the same used when
-    *            the desireds were set, i.e. {@link #set(FrameQuaternionReadOnly)} and
-    *            {@link #set(FrameQuaternionReadOnly, FrameVector3DReadOnly)}.
     */
    public void setFeedForwardAction(FrameVector3DReadOnly feedForwardAngularAction)
    {
-      feedForwardAngularActionInRootFrame.set(feedForwardAngularAction);
+      ReferenceFrame rootFrame = feedForwardAngularAction.getReferenceFrame().getRootFrame();
+      feedForwardAngularActionInRootFrame.setIncludingFrame(feedForwardAngularAction);
+      feedForwardAngularActionInRootFrame.changeFrame(rootFrame);
    }
 
    /**
