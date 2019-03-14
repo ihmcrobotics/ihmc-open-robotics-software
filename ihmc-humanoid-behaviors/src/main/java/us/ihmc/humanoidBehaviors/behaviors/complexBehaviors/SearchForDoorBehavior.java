@@ -22,7 +22,6 @@ public class SearchForDoorBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("Searching For The Door");
    }
 
    @Override
