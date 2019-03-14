@@ -86,10 +86,4 @@
             </registry>
         </registry>
     </registry>
-    <registry name="DRCEstimatorThread">
-        <registry name="EstimatorController">
-            <registry name="LeggedRobotEKF">
-            </registry>
-        </registry>
-    </registry>
 </parameters>
