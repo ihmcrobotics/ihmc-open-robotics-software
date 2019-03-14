@@ -76,8 +76,11 @@ public class BalanceManager
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
+
+   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
+   private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
+   private final LinearMomentumRateControlModuleOutput linearMomentumRateControlModuleOutput = new LinearMomentumRateControlModuleOutput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -448,43 +451,46 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-      // TODO: These should not be part of a command from the walking state machine to the ICP feedback controller.
-      linearMomentumRateControlModule.setCapturePoint(capturePoint2d, capturePointVelocity2d);
-      linearMomentumRateControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateControlModule.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
-      linearMomentumRateControlModule.setPlanarRegions(planarRegions);
-      linearMomentumRateControlModule.setUpdatePlanarRegions(updatePlanarRegions);
+      linearMomentumRateControlModuleInput.setCapturePoint(capturePoint2d);
+      linearMomentumRateControlModuleInput.setCapturePointVelocity(capturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
+      linearMomentumRateControlModuleInput.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
+      linearMomentumRateControlModuleInput.setPlanarRegions(planarRegions);
+      linearMomentumRateControlModuleInput.setUpdatePlanarRegions(updatePlanarRegions);
+      linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
+      linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
+      linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
+      linearMomentumRateControlModuleInput.setFootsteps(footsteps);
+      linearMomentumRateControlModuleInput.setFootstepTimings(footstepTimings);
+      linearMomentumRateControlModuleInput.setFinalTransferDuration(finalTransferDuration);
+      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+      linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
+      linearMomentumRateControlModuleInput.setOmega0(omega0);
+      linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
+      linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
+      linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
+      linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
+      linearMomentumRateControlModuleInput.setSupportSide(supportSide);
+      linearMomentumRateControlModuleInput.setTransferToSide(transferToSide);
+      linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
+      linearMomentumRateControlModuleInput.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
+      linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
-      linearMomentumRateControlModule.setInitializeForStanding(initializeForStanding);
-      linearMomentumRateControlModule.setInitializeForTransfer(initializeForTransfer);
-      linearMomentumRateControlModule.setInitializeForSingleSupport(initializeForSingleSupport);
-      linearMomentumRateControlModule.setFootsteps(footsteps, footstepTimings);
-      linearMomentumRateControlModule.setFinalTransferDuration(finalTransferDuration);
-      linearMomentumRateControlModule.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
-      linearMomentumRateControlModule.setControlHeightWithMomentum(controlHeightWithMomentum);
-      linearMomentumRateControlModule.setOmega0(omega0);
-      linearMomentumRateControlModule.setDesiredCapturePoint(desiredCapturePoint2d, desiredCapturePointVelocity2d);
-      linearMomentumRateControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
-      linearMomentumRateControlModule.setPerfectCMP(yoPerfectCMP);
-      linearMomentumRateControlModule.setPerfectCoP(yoPerfectCoP);
-      linearMomentumRateControlModule.setSupportLeg(supportSide);
-      linearMomentumRateControlModule.setTransferToSide(transferToSide);
-      linearMomentumRateControlModule.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
-      linearMomentumRateControlModule.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
-      linearMomentumRateControlModule.setContactStateCommand(contactStateCommands);
-
+      linearMomentumRateControlModule.setInput(linearMomentumRateControlModuleInput);
       if (!linearMomentumRateControlModule.compute())
       {
          controllerToolbox.reportControllerFailureToListeners(emptyVector);
       }
+      linearMomentumRateControlModule.packOutput(linearMomentumRateControlModuleOutput);
 
-      desiredCMP.set(linearMomentumRateControlModule.getDesiredCMP());
-      effectiveICPAdjustment.set(linearMomentumRateControlModule.getEffectiveICPAdjustment());
-      footstepSolution.set(linearMomentumRateControlModule.getFootstepSolution());
-      footstepWasAdjusted = linearMomentumRateControlModule.getFootstepWasAdjusted();
-      usingStepAdjustment = linearMomentumRateControlModule.getUsingStepAdjustment();
-      momentumRateCommand.set(linearMomentumRateControlModule.getMomentumRateCommand());
-      centerOfPressureCommand.set(linearMomentumRateControlModule.getCenterOfPressureCommand());
+      desiredCMP.set(linearMomentumRateControlModuleOutput.getDesiredCMP());
+      effectiveICPAdjustment.set(linearMomentumRateControlModuleOutput.getEffectiveICPAdjustment());
+      footstepSolution.set(linearMomentumRateControlModuleOutput.getFootstepSolution());
+      footstepWasAdjusted = linearMomentumRateControlModuleOutput.getFootstepWasAdjusted();
+      usingStepAdjustment = linearMomentumRateControlModuleOutput.getUsingStepAdjustment();
+      momentumRateCommand.set(linearMomentumRateControlModuleOutput.getMomentumRateCommand());
+      centerOfPressureCommand.set(linearMomentumRateControlModuleOutput.getCenterOfPressureCommand());
 
       initializeForStanding = false;
       initializeForTransfer = false;
