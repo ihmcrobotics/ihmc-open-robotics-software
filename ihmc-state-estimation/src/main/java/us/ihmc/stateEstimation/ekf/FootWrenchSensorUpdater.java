@@ -18,7 +18,12 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
-public class FootWrenchSensor
+/**
+ * Helper class that converts a measured foot wrench into a "zero-linear-velocity" sensor for the CoP location.
+ *
+ * @author Georg Wiedebach
+ */
+public class FootWrenchSensorUpdater
 {
    private static final String parameterGroup = "Foot";
 
@@ -29,7 +34,7 @@ public class FootWrenchSensor
 
    private final FootVelocitySensor footVelocitySensor;
 
-   public FootWrenchSensor(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       this.weight = weight;
 
@@ -123,7 +128,7 @@ public class FootWrenchSensor
       }
    }
 
-   public Sensor getSensor()
+   public Sensor getFootLinearVelocitySensor()
    {
       return footVelocitySensor;
    }
