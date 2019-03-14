@@ -8,12 +8,12 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 
-public class PatrolWaypoint extends FXUIGraphic implements PositionEditable, OrientationEditable
+public class PatrolWaypointGraphic extends FXUIGraphic implements PositionEditable, OrientationEditable
 {
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
 
-   public PatrolWaypoint()
+   public PatrolWaypointGraphic()
    {
       snappedPositionGraphic = new SnappedPositionGraphic(Color.YELLOW);
       orientationGraphic = new OrientationGraphic(snappedPositionGraphic);

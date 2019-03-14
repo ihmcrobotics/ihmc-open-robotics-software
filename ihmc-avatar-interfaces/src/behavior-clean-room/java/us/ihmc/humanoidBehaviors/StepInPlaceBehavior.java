@@ -117,11 +117,11 @@ public class StepInPlaceBehavior
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("StepInPlace");
-      private static final CategoryTheme BEHAVIOR = apiFactory.createCategoryTheme("Behavior");
+      private static final Category Root = apiFactory.createRootCategory("Behavior");
+      private static final CategoryTheme StepInPlace = apiFactory.createCategoryTheme("StepInPlace");
 
-      public static final Topic<Boolean> Stepping = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Stepping"));
-      public static final Topic<Boolean> Abort = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Abort"));
+      public static final Topic<Boolean> Stepping = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Stepping"));
+      public static final Topic<Boolean> Abort = Root.child(StepInPlace).topic(apiFactory.createTypedTopicTheme("Abort"));
 
       public static final MessagerAPI create()
       {

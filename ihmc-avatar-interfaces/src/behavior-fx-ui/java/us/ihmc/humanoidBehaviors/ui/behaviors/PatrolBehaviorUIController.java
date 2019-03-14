@@ -31,7 +31,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private HumanoidReferenceFrames humanoidReferenceFrames;
 
-   private ArrayList<PatrolWaypoint> waypoints = new ArrayList<>();
+   private ArrayList<PatrolWaypointGraphic> waypoints = new ArrayList<>();
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
@@ -48,7 +48,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
-         PatrolWaypoint latestWaypoint = waypoints.get(waypoints.size() - 1);
+         PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
          messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
          messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
@@ -72,7 +72,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private void goToNextWaypointPositionEdit()
    {
-      PatrolWaypoint waypointGraphic = createWaypointGraphic(messager);
+      PatrolWaypointGraphic waypointGraphic = createWaypointGraphic(messager);
       LogTools.debug("Placing waypoint {}", waypoints.size());
       messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
       messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
@@ -111,9 +111,9 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       }
    }
 
-   private PatrolWaypoint createWaypointGraphic(JavaFXMessager messager)
+   private PatrolWaypointGraphic createWaypointGraphic(JavaFXMessager messager)
    {
-      PatrolWaypoint waypoint = new PatrolWaypoint();
+      PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic();
       registerGraphic(waypoint);
       waypoints.add(waypoint);
       return waypoint;
@@ -128,7 +128,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       waypoints.clear();
    }
 
-   private void removeWaypoint(PatrolWaypoint waypoint)
+   private void removeWaypoint(PatrolWaypointGraphic waypoint)
    {
       removeGraphic(waypoint);
       waypoints.remove(waypoint);
