@@ -413,10 +413,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             isDone.set(true);
-            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-            outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
-            outputConverter.computeWholeBodyTrajectoryMessage(solution);
-            solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
+            if(solutionQualityConvergenceDetector.isValid())
+            {
+               WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+               outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
+               outputConverter.computeWholeBodyTrajectoryMessage(solution);
+               solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);               
+            }
 
             if (DEBUG)
                System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime());
