@@ -71,11 +71,13 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
 
+   private final QuadrupedControllerToolbox controllerToolbox;
    private final double controlDT;
 
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = controllerToolbox;
       this.groundPlanePosition = controllerToolbox.getGroundPlanePositions().get(robotQuadrant);
       this.upcomingGroundPlanePosition = controllerToolbox.getUpcomingGroundPlanePositions().get(robotQuadrant);
       this.contactState = controllerToolbox.getFootContactState(robotQuadrant);
@@ -116,6 +118,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
+      controllerToolbox.updateSupportPolygon();
 
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
