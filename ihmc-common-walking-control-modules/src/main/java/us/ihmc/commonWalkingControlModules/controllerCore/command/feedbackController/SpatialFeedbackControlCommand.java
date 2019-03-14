@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,9 +19,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -52,8 +51,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialFeedbackControlCommand implements FeedbackControlCommand<SpatialFeedbackControlCommand>
 {
-   private final Point3D controlFrameOriginInEndEffectorFrame = new Point3D();
-   private final Quaternion controlFrameOrientationInEndEffectorFrame = new Quaternion();
+   private final FramePose3D controlFramePoseInEndEffectorFrame = new FramePose3D();
 
    private final FramePoint3D desiredPositionInRootFrame = new FramePoint3D();
    private final FrameVector3D desiredLinearVelocityInRootFrame = new FrameVector3D();
@@ -110,16 +108,15 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
 
-      controlFrameOriginInEndEffectorFrame.set(other.controlFrameOriginInEndEffectorFrame);
-      controlFrameOrientationInEndEffectorFrame.set(other.controlFrameOrientationInEndEffectorFrame);
+      controlFramePoseInEndEffectorFrame.setIncludingFrame(other.controlFramePoseInEndEffectorFrame);
 
-      desiredPositionInRootFrame.set(other.desiredPositionInRootFrame);
-      desiredLinearVelocityInRootFrame.set(other.desiredLinearVelocityInRootFrame);
-      feedForwardLinearActionInRootFrame.set(other.feedForwardLinearActionInRootFrame);
+      desiredPositionInRootFrame.setIncludingFrame(other.desiredPositionInRootFrame);
+      desiredLinearVelocityInRootFrame.setIncludingFrame(other.desiredLinearVelocityInRootFrame);
+      feedForwardLinearActionInRootFrame.setIncludingFrame(other.feedForwardLinearActionInRootFrame);
 
-      desiredOrientationInRootFrame.set(other.desiredOrientationInRootFrame);
-      desiredAngularVelocityInRootFrame.set(other.desiredAngularVelocityInRootFrame);
-      feedForwardAngularActionInRootFrame.set(other.feedForwardAngularActionInRootFrame);
+      desiredOrientationInRootFrame.setIncludingFrame(other.desiredOrientationInRootFrame);
+      desiredAngularVelocityInRootFrame.setIncludingFrame(other.desiredAngularVelocityInRootFrame);
+      feedForwardAngularActionInRootFrame.setIncludingFrame(other.feedForwardAngularActionInRootFrame);
 
       controlBaseFrame = other.controlBaseFrame;
 
@@ -465,8 +462,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void resetControlFrame()
    {
-      controlFrameOriginInEndEffectorFrame.setToZero();
-      controlFrameOrientationInEndEffectorFrame.setToZero();
+      controlFramePoseInEndEffectorFrame.setToZero(getEndEffector().getBodyFixedFrame());
    }
 
    /**
@@ -487,8 +483,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      controlFrameOriginInEndEffectorFrame.set(position);
-      controlFrameOrientationInEndEffectorFrame.setToZero();
+      controlFramePoseInEndEffectorFrame.setToZero(endEffector.getBodyFixedFrame());
+      controlFramePoseInEndEffectorFrame.setPosition(position);
    }
 
    /**
@@ -510,30 +506,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       orientation.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      controlFrameOriginInEndEffectorFrame.set(position);
-      controlFrameOrientationInEndEffectorFrame.set(orientation);
-   }
-
-   /**
-    * Changes the argument frame to {@code endEffector.getBodyFixedFrame()} and the sets the position
-    * and orientation of the {@code controlFrame} with respect to the
-    * {@code endEffector.getBodyFixedFrame()}.
-    * <p>
-    * The {@code controlFrame} describes on what the feedback control is applied, such that the
-    * feedback controller for this end-effector will do its best to bring the {@code controlFrame} to
-    * the given desired position and orientation.
-    * </p>
-    *
-    * @param position the position of the {@code controlFrame}'s origin. Modified.
-    * @param orientation the orientation of the {@code controlFrame}. Modified.
-    */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint3DBasics position, FrameQuaternionBasics orientation)
-   {
-      RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
-      position.changeFrame(endEffector.getBodyFixedFrame());
-      orientation.changeFrame(endEffector.getBodyFixedFrame());
-      controlFrameOriginInEndEffectorFrame.set(position);
-      controlFrameOrientationInEndEffectorFrame.set(orientation);
+      controlFramePoseInEndEffectorFrame.setIncludingFrame(position, orientation);
    }
 
    /**
@@ -553,7 +526,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       pose.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
-      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      controlFramePoseInEndEffectorFrame.setIncludingFrame(pose);
    }
 
    /**
@@ -569,26 +542,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void setControlFrameFixedInEndEffector(RigidBodyTransform poseInBodyFrame)
    {
-      poseInBodyFrame.getTranslation(controlFrameOriginInEndEffectorFrame);
-      poseInBodyFrame.getRotation(controlFrameOrientationInEndEffectorFrame);
-   }
-
-   /**
-    * Changes the argument frame to {@code endEffector.getBodyFixeFrame()} and then sets the pose of
-    * the {@code controlFrame} with respect to the {@code endEffector.getBodyFixedFrame()}.
-    * <p>
-    * The {@code controlFrame} describes on what the feedback control is applied, such that the
-    * feedback controller for this end-effector will do its best to bring the {@code controlFrame} to
-    * the given desired position and orientation.
-    * </p>
-    *
-    * @param pose the of the {@code controlFrame}. Modified.
-    */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose3DBasics pose)
-   {
-      RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
-      pose.changeFrame(endEffector.getBodyFixedFrame());
-      pose.get(controlFrameOriginInEndEffectorFrame, controlFrameOrientationInEndEffectorFrame);
+      controlFramePoseInEndEffectorFrame.setIncludingFrame(getEndEffector().getBodyFixedFrame(), poseInBodyFrame);
    }
 
    /**
@@ -749,39 +703,43 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInRootFrame);
    }
 
-   public void getControlFramePoseIncludingFrame(FramePoint3DBasics position, FrameQuaternionBasics orientation)
+   public FramePose3DBasics getControlFramePose()
    {
-      RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
-      position.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOriginInEndEffectorFrame);
-      orientation.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOrientationInEndEffectorFrame);
+      return controlFramePoseInEndEffectorFrame;
    }
 
-   public FramePoint3DReadOnly getDesiredPosition()
+   public void getControlFramePoseIncludingFrame(FramePoint3DBasics position, FrameQuaternionBasics orientation)
+   {
+      position.setIncludingFrame(controlFramePoseInEndEffectorFrame.getPosition());
+      orientation.setIncludingFrame(controlFramePoseInEndEffectorFrame.getOrientation());
+   }
+
+   public FramePoint3DBasics getDesiredPosition()
    {
       return desiredPositionInRootFrame;
    }
 
-   public FrameVector3DReadOnly getDesiredLinearVelocity()
+   public FrameVector3DBasics getDesiredLinearVelocity()
    {
       return desiredLinearVelocityInRootFrame;
    }
 
-   public FrameVector3DReadOnly getFeedForwardLinearAction()
+   public FrameVector3DBasics getFeedForwardLinearAction()
    {
       return feedForwardLinearActionInRootFrame;
    }
 
-   public FrameQuaternionReadOnly getDesiredOrientation()
+   public FrameQuaternionBasics getDesiredOrientation()
    {
       return desiredOrientationInRootFrame;
    }
 
-   public FrameVector3DReadOnly getDesiredAngularVelocity()
+   public FrameVector3DBasics getDesiredAngularVelocity()
    {
       return desiredAngularVelocityInRootFrame;
    }
 
-   public FrameVector3DReadOnly getFeedForwardAngularAction()
+   public FrameVector3DBasics getFeedForwardAngularAction()
    {
       return feedForwardAngularActionInRootFrame;
    }
@@ -828,6 +786,50 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.TASKSPACE;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof SpatialFeedbackControlCommand)
+      {
+         SpatialFeedbackControlCommand other = (SpatialFeedbackControlCommand) object;
+
+         if (!controlFramePoseInEndEffectorFrame.equals(other.controlFramePoseInEndEffectorFrame))
+            return false;
+         if (!desiredPositionInRootFrame.equals(other.desiredPositionInRootFrame))
+            return false;
+         if (!desiredOrientationInRootFrame.equals(other.desiredOrientationInRootFrame))
+            return false;
+         if (!desiredLinearVelocityInRootFrame.equals(other.desiredLinearVelocityInRootFrame))
+            return false;
+         if (!desiredAngularVelocityInRootFrame.equals(other.desiredAngularVelocityInRootFrame))
+            return false;
+         if (!feedForwardLinearActionInRootFrame.equals(other.feedForwardLinearActionInRootFrame))
+            return false;
+         if (!feedForwardAngularActionInRootFrame.equals(other.feedForwardAngularActionInRootFrame))
+            return false;
+         if (!gains.equals(other.gains))
+            return false;
+         if (linearGainsFrame != other.linearGainsFrame)
+            return false;
+         if (angularGainsFrame != other.angularGainsFrame)
+            return false;
+         if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
+            return false;
+         if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override
