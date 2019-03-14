@@ -27,17 +27,31 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+/**
+ * A wrapper class for the {@link LeggedRobotEKF}: for parts of the upper body (such as the arms) we do not want to use
+ * the EKF to save some computation time. The joints that are not passed to the EKF are the "simple joints" their
+ * measurements are set directly from the processed sensor output.
+ *
+ * @author Georg Wiedebach
+ */
 public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorController
 {
    private final SensorOutputMapReadOnly processedSensorOutput;
    private final List<OneDoFJoint> simpleJoints;
+
+   /**
+    * The reference joints are needed for now since the estimator operates on a copy of the actual robot model used. To
+    * get the measurements from the sensor map the queries have to be made using the reference joints.
+    * <p>
+    * TODO: once the EKF is ready to be run as an alternative to the DRC estimator the referenceModel should be removed.
+    */
    private final List<OneDoFJoint> referenceJoints;
 
    private final LeggedRobotEKF leggedRobotEKF;
 
    public HumanoidRobotEKFWithSimpleJoints(FullHumanoidRobotModel estimatorFullRobotModel, String primaryImuName, Collection<String> imuNames,
-                                           SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly rawSensorOutput, double dt, double gravity,
-                                           SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
+                                           SideDependentList<String> footForceSensorNames, SensorRawOutputMapReadOnly rawSensorOutput, double dt,
+                                           double gravity, SensorOutputMapReadOnly processedSensorOutput, YoGraphicsListRegistry graphicsListRegistry,
                                            FullHumanoidRobotModel referenceModel)
    {
       this.processedSensorOutput = processedSensorOutput;
@@ -73,8 +87,8 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
       Map<String, String> jointParameterGroups = createJointGroups(estimatorFullRobotModel);
 
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, rawSensorOutput, processedSensorOutput, dt, gravity,
-                                          jointParameterGroups, graphicsListRegistry, referenceJointsForEKF);
+      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, rawSensorOutput, processedSensorOutput, dt,
+                                          gravity, jointParameterGroups, graphicsListRegistry, referenceJointsForEKF);
    }
 
    private static Map<String, String> createJointGroups(FullHumanoidRobotModel fullRobotModel)

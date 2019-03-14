@@ -44,6 +44,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
+/**
+ * A state estimator implementation for legged robots:</br>
+ * - Creates one pose state and joint states</br>
+ * - Creates joint position sensors for one DoF joints</br>
+ * - Creates angular velocity sensors for IMUs</br>
+ * - Creates linear acceleration sensors for primary IMUs</br>
+ * - Creates foot linear velocity sensors for feet in contact</br>
+ * <p>
+ * This class sets up the estimator and wraps it in the {@link StateEstimatorController} interface.
+ *
+ * @author Georg Wiedebach
+ */
 public class LeggedRobotEKF implements StateEstimatorController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
@@ -53,6 +65,10 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final FloatingJointBasics rootJoint;
    private final PoseState rootState;
    private final List<OneDoFJointBasics> oneDoFJoints;
+   /**
+    * These are needed for now since the estimator runs on its own copy of the full robot model. The reference joints
+    * are used to get the sensor measurements.
+    */
    private final List<OneDoFJointBasics> referenceJoints;
    private final List<JointState> jointStates = new ArrayList<>();
 
