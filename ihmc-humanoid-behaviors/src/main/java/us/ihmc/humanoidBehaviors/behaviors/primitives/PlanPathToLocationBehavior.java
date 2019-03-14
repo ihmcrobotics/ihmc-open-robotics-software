@@ -150,9 +150,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          public boolean isDone()
          {
             
-           //for now dont timeout, sut always wait for a plan.
-           // return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
-            return  footPlanStatusQueue.isNewPacketAvailable();
+            return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
 
          }
       };

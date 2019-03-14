@@ -111,12 +111,20 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       BehaviorAction searchForDoorFar = new BehaviorAction(searchForDoorBehavior)
       {
+         
+         @Override
+         public void doTransitionIntoAction()
+         {
+            publishTextToSpeack("Searching For The Door");
+            super.doTransitionIntoAction();
+         }
          @Override
          public void doTransitionOutOfAction()
          {
             super.doTransitionOutOfAction();
             //found the door location, inform the UI of its location
 
+            if(searchForDoorBehavior.getLocation()!=null)
             publisher.publish(HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation()));
 
          }
@@ -132,6 +140,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
             publisher.publish(HumanoidMessageTools.createDoorLocationPacket(searchForDoorBehavior.getLocation()));
 
+         }
+         @Override
+         public void doTransitionIntoAction()
+         {
+            publishTextToSpeack("Confirm door location before walking through");
+
+            super.doTransitionIntoAction();
          }
       };
 

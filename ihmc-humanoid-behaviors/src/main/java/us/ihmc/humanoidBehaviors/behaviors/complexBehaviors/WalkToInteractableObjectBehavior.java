@@ -68,7 +68,6 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Getting Ready To Walk");
          }
       };
 
@@ -78,7 +77,6 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Walking To Object");
             walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
             FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
@@ -169,7 +167,6 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
    public void setWalkPoints(FramePoint3D walkToPoint1, FramePoint3D walkToPoint2)
    {
-      publishTextToSpeack("Walk To Interactable Object Points Set Complete");
       this.walkToPoint1 = walkToPoint1;
       this.walkToPoint2 = walkToPoint2;
    }

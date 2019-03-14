@@ -41,6 +41,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final FootstepListBehavior footstepListBehavior;
    private PlanPathToLocationBehavior planPathToLocationBehavior;
    private final YoDouble yoTime;
+   private boolean setupComplete = false;
 
 
    public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
@@ -80,7 +81,10 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       goalPose.set(null);
       walkSucceded = false;
+      planPathToLocationBehavior.onBehaviorEntered();
+      footstepListBehavior.onBehaviorEntered();
       super.onBehaviorEntered();
+     
    }
 
    @Override
@@ -94,6 +98,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+            setupComplete = true;
 
          }
 
@@ -128,6 +133,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
 
+
             if (planPathToLocationBehavior.getFootStepList() != null)
             {
                footstepListBehavior.set(planPathToLocationBehavior.getFootStepList());
@@ -146,6 +152,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+
             walkSucceded = true;
          }
       };
@@ -209,7 +216,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       isPaused.set(false);
       isAborted.set(false);
-      publishTextToSpeack("WalkToLocationPlannedBehavior: Behavior Exited");
+      setupComplete = false;
    }
 
    private boolean isPlanPathComplete()
@@ -225,6 +232,9 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public boolean isDone()
    {
+      if(setupComplete)
       return getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.DONE) ||  getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.PLAN_FAILED);
+      else
+         return false;
    }
 }

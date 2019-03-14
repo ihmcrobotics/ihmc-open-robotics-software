@@ -177,6 +177,9 @@ public class FootstepListBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
       hasLastStepBeenReached.set(false);
       isRobotDoneWalking.set(false);
+      footstepStatusQueue.clear();
+      walkingStatusQueue.clear();
+
 
       isPaused.set(false);
       isStopped.set(false);
@@ -190,9 +193,11 @@ public class FootstepListBehavior extends AbstractBehavior
       if (DEBUG)
          PrintTools.debug(this, "Finalize");
       footstepStatusQueue.clear();
+      walkingStatusQueue.clear();
       outgoingFootstepDataList = null;
       packetHasBeenSent.set(false);
       numberOfFootsteps.set(-1);
+      
 
       isPaused.set(false);
       isStopped.set(false);
