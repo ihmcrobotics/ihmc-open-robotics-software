@@ -154,7 +154,7 @@ public class QuadrupedControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      supportPolygon.updateUsingContactStates(footContactStates);
+      updateSupportPolygon();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -171,6 +171,11 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
+   }
+
+   public void updateSupportPolygon()
+   {
+      supportPolygon.updateUsingContactStates(footContactStates);
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()
