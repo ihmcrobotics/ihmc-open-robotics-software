@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.ControllerCoreTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -205,15 +204,14 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @param desiredPosition describes the position that the {@code bodyFixedPoint} should reach. It
     *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}. Not
     *           modified.
-    * @throws IllegalArgumentException if the argument is not expressed in a root frame:
-    *            {@code !desiredPosition.getReferenceFrame().isRootFrame()}.
     */
    public void set(FramePoint3DReadOnly desiredPosition)
    {
-      ControllerCoreTools.checkExpressedInRootFrame(desiredPosition);
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
       desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
-      desiredLinearVelocityInRootFrame.setToZero(desiredPosition.getReferenceFrame());
-      feedForwardLinearActionInRootFrame.setToZero(desiredPosition.getReferenceFrame());
+      desiredPositionInRootFrame.changeFrame(rootFrame);
+      desiredLinearVelocityInRootFrame.setToZero(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -228,16 +226,15 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * @param desiredLinearVelocity describes the desired linear velocity of the {@code bodyFixedPoint}
     *           with respect to the {@code base}. It does NOT describe the desired linear velocity of
     *           {@code endEffector.getBodyFixedFrame()}'s origin. Not modified.
-    * @throws IllegalArgumentException if the given {@code desiredPosition} is not expressed in a root
-    *            frame: {@code !desiredPosition.getReferenceFrame().isRootFrame()}.
-    * @throws ReferenceFrameMismatchException if the arguments are not expressed in the same frame.
     */
    public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
    {
-      ControllerCoreTools.checkExpressedInSameRootFrame(desiredPosition, desiredLinearVelocity);
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
       desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
+      desiredPositionInRootFrame.changeFrame(rootFrame);
       desiredLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      feedForwardLinearActionInRootFrame.setToZero();
+      desiredLinearVelocityInRootFrame.changeFrame(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -250,13 +247,12 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
     *           desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin. Not
     *           modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in the same used when
-    *            the desireds were set, i.e. {@link #set(FramePoint3DReadOnly)} and
-    *            {@link #set(FramePoint3DReadOnly, FrameVector3DReadOnly)}.
     */
    public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
-      feedForwardLinearActionInRootFrame.set(feedForwardLinearAcceleration);
+      ReferenceFrame rootFrame = feedForwardLinearAcceleration.getReferenceFrame().getRootFrame();
+      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+      feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
    }
 
    /**
