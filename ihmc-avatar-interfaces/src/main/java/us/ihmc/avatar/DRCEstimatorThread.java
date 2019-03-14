@@ -1,5 +1,6 @@
 package us.ihmc.avatar;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,6 +77,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
    private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
+   private static final boolean CREATE_EKF_ESTIMATOR = true;
 
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
@@ -196,23 +198,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
-
-         // Create EKF Estimator:
-         FullHumanoidRobotModel ekfFullRobotModel = robotModel.createFullRobotModel();
-         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
-         String primaryImuName = sensorInformation.getPrimaryBodyImu();
-         Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
-         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
-                                                                  sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
-                                                                  yoGraphicsListRegistry, estimatorFullRobotModel);
-
-         estimatorController.addRobotController(ekfStateEstimator);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
       {
-         ekfStateEstimator = null;
          drcStateEstimator = null;
          forceSensorStateUpdater = null;
       }
@@ -273,6 +262,32 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
 
+      // Create EKF Estimator:
+      if (sensorReaderFactory.useStateEstimator() && CREATE_EKF_ESTIMATOR)
+      {
+         FullHumanoidRobotModel ekfFullRobotModel = robotModel.createFullRobotModel();
+         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
+         SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+         String primaryImuName = sensorInformation.getPrimaryBodyImu();
+         Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
+         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(ekfFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
+                                                                  sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
+                                                                  yoGraphicsListRegistry, estimatorFullRobotModel);
+
+         InputStream ekfParameterStream = DRCEstimatorThread.class.getResourceAsStream("/ekf.xml");
+         if (ekfParameterStream == null)
+         {
+            throw new RuntimeException("Did not find parameter file for EKF.");
+         }
+         ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+
+         estimatorController.addRobotController(ekfStateEstimator);
+      }
+      else
+      {
+         ekfStateEstimator = null;
+      }
+
       if (robotVisualizer != null)
       {
          robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel.getElevator(), yoGraphicsListRegistry);
@@ -288,7 +303,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
 
          drcStateEstimator.requestStateEstimatorMode(requestedMode);
-         ekfStateEstimator.requestStateEstimatorMode(requestedMode);
+         if (ekfStateEstimator != null)
+            ekfStateEstimator.requestStateEstimatorMode(requestedMode);
       });
    }
 

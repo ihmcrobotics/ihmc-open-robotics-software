@@ -205,38 +205,4 @@
             </registry>
         </registry>
     </registry>
-    <registry name="DRCEstimatorThread">
-        <registry name="EstimatorController">
-            <registry name="LeggedRobotEKF">
-                <parameter name="PelvisAngularAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="PelvisLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="PelvisImuSensorAtPelvisFrameAngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
-                <parameter name="PelvisImuSensorAtPelvisFrameLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                <parameter name="BackBkzAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="BackBkzJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-                <parameter name="BackBkyAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="BackBkyJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-                <parameter name="BackBkxAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="BackBkxJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-                <parameter name="LegHpzAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegHpzJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="LegHpxAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegHpxJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="LegHpyAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegHpyJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="LegKnyAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegKnyJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="LegAkyAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegAkyJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="LegAkxAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                <parameter name="LegAkxJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
-                <parameter name="FootMinVariance" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
-                <parameter name="FootMaxVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E10"/>
-                <parameter name="FootWeightFractionForNoTrust" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
-                <parameter name="FootWeightFractionForFullTrust" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
-                <parameter name="FootForceFilter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-                <parameter name="FootTorqueFilter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-            </registry>
-        </registry>
-    </registry>
 </parameters>
