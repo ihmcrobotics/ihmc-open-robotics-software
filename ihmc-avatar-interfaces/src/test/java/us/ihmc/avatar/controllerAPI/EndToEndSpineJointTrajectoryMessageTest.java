@@ -1,17 +1,15 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
@@ -24,7 +22,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTas
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -53,6 +52,7 @@ import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Tag("controller-api-2")
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final double DESIRED_EPSILON = 1.0E-10;
@@ -74,8 +74,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * This tests the execution of a single spine waypoint.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test(timeout = 110000)
+   @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -94,8 +93,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * It does not test that the desired joint positions are continuous over the state switches anymore.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 33.6)
-   @Test (timeout = 170000)
+   @Test
    public void testSwitchingBetweenControlModes() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -116,8 +114,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * This tests that the joint desireds are continuous when sending multiple joint space messages.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 66.9)
-   @Test (timeout = 330000)
+   @Test
    public void testDesiredsAreContinuous() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -137,8 +134,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * This tests a trajectory with multiple waypoints. This will execute a spine yaw sine wave.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 65.5)
-   @Test (timeout = 330000)
+   @Test
    public void testMultipleWaypoints() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -182,8 +178,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * the controller does not blow up.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 68.9)
-   @Test (timeout = 340000)
+   @Test
    public void testLongMessage() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -210,8 +205,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * queuing.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 38.8)
-   @Test (timeout = 190000)
+   @Test
    public void testMessageQueuing() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -305,8 +299,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
     * queuing.
     * @throws SimulationExceededMaximumTimeException
     */
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 50.1)
-   @Test (timeout = 250000)
+   @Test
    public void testMessageWithDifferentTrajectoryLengthsPerJoint() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -575,13 +568,13 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       drcSimulationTestHelper.addRobotControllerOnControllerThread(controllerSpy);
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

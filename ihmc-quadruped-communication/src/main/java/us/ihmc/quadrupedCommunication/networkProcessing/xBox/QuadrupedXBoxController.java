@@ -35,7 +35,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final YoBoolean isPaused = new YoBoolean("xBoxIsPaused", registry);
 
    private final YoDouble maxBodyYaw = new YoDouble("xBoxMaxBodyYaw", registry);
-   private final YoDouble maxBodyRoll = new YoDouble("xBoxMaxBodyPitch", registry);
+   private final YoDouble maxBodyRoll = new YoDouble("xBoxMaxBodyRoll", registry);
    private final YoDouble maxBodyPitch = new YoDouble("xBoxMaxBodyPitch", registry);
    private final YoDouble maxBodyHeightVelocity = new YoDouble("xBoxMaxBodyHeightVelocity", registry);
 
@@ -79,9 +79,9 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       maxTranslationX.set(0.25);
       maxTranslationY.set(0.15);
 
-      maxVelocityX.set(0.5);
-      maxVelocityY.set(0.25);
-      maxVelocityYaw.set(0.4);
+      maxVelocityX.set(0.25);
+      maxVelocityY.set(0.1);
+      maxVelocityYaw.set(0.2);
 
       bodyOrientationShiftTime.set(0.1);
       this.bodyHeight = new InputValueIntegrator(Conversions.millisecondsToSeconds(updateTimeInMs), nominalBodyHeight);
@@ -141,6 +141,9 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    @Override
    public boolean isDone()
    {
+      if (controllerStateChangeMessage.get() == null)
+         return false;
+
       return controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING;
    }
 

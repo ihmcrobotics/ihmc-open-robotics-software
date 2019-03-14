@@ -1,9 +1,6 @@
 package us.ihmc.tools.containers;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,10 +14,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class ContainerToolsTest
 {
 
@@ -34,8 +31,7 @@ public class ContainerToolsTest
       ONE, TWO, THREE;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testCreateEnumMap()
    {
       EnumMap<TestEnum, Integer> enumMap = ContainerTools.createEnumMap(TestEnum.class);
@@ -53,8 +49,7 @@ public class ContainerToolsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testFindLargestElements()
    {
       ArrayList<Integer> list = new ArrayList<Integer>(Arrays.asList(generateIntegerArray()));
@@ -90,8 +85,7 @@ public class ContainerToolsTest
       assertEquals(3, setOfThreeLargestInts.size());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testFlatten()
    {
       EnumMap<TestEnum, Integer> map1 = ContainerTools.createEnumMap(TestEnum.class);
@@ -137,8 +131,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testToArrayOfArrays()
    {
       EnumMap<TestEnum, Double> map1 = ContainerTools.createEnumMap(TestEnum.class);
@@ -190,8 +183,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testAsSortedList()
    {
       Integer[] baseArray = generateIntegerArray();
@@ -209,8 +201,7 @@ public class ContainerToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testRemoveByReference()
    {
       Set<Integer> set = new TreeSet<Integer>(Arrays.asList(generateIntegerArray()));      

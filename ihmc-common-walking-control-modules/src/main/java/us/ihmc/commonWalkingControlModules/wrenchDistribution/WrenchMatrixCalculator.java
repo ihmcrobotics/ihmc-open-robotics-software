@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
@@ -50,10 +51,12 @@ public class WrenchMatrixCalculator
 
    private final YoDouble rhoWeight = new YoDouble("rhoWeight", registry);
    private final YoDouble rhoRateDefaultWeight = new YoDouble("rhoRateDefaultWeight", registry);
+   @Deprecated
    private final YoDouble rhoRateHighWeight = new YoDouble("rhoRateHighWeight", registry);
    private final YoFrameVector2D desiredCoPWeight = new YoFrameVector2D("desiredCoPWeight", null, registry);
 
    private final YoFrameVector2D copRateDefaultWeight = new YoFrameVector2D("copRateDefaultWeight", null, registry);
+   @Deprecated
    private final YoFrameVector2D copRateHighWeight = new YoFrameVector2D("copRateHighWeight", null, registry);
 
    private final DenseMatrix64F rhoJacobianMatrix;
@@ -142,7 +145,8 @@ public class WrenchMatrixCalculator
 
          FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
-               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
+                                                                                                  maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint,
+                                                                                                  frictionConeRotation, registry);
          helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
          bodyRhoOffsets.put(rigidBody, rhoOffset);
@@ -169,6 +173,26 @@ public class WrenchMatrixCalculator
       copRateHighWeight.set(optimizationSettings.getCoPRateHighWeight());
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setRhoWeight(double rhoWeight)
+   {
+      this.rhoWeight.set(rhoWeight);
+   }
+
+   public void setRhoRateWeight(double rhoRateWeight)
+   {
+      this.rhoRateDefaultWeight.set(rhoRateWeight);
+   }
+
+   public void setDesiredCoPWeight(Tuple2DReadOnly centerOfPressureWeight)
+   {
+      this.desiredCoPWeight.set(centerOfPressureWeight);
+   }
+
+   public void setCoPRateWeight(Tuple2DReadOnly centerOfPressureRateWeight)
+   {
+      this.copRateDefaultWeight.set(centerOfPressureRateWeight);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

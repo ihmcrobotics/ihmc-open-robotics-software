@@ -1,12 +1,12 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static java.lang.Math.PI;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class FourBarCalculatorTest
 {
    private static final double eps = 1e-7;
@@ -14,8 +14,7 @@ public class FourBarCalculatorTest
    private FourbarLink outputLink, groundLink, inputLink, floatingLink;
    private FourbarProperties fourBarProperties;
       
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSquare()
    {
       outputLink = new FourbarLink(1.0);

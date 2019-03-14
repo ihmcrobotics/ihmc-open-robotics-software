@@ -1,20 +1,20 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedTurnWalkTurnPathPlanner;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class QuadrupedTurnWalkTurnPathPlannerTest
 {
    private static final double epsilon = 1e-10;
    private static final int iters = 1000;
 
-   @Test(timeout = 30000)
+   @Test
    public void testComputeTimeToAccelerateToAchieveValueWithNoMaxRate()
    {
       double delta = 0.25;
@@ -30,7 +30,7 @@ public class QuadrupedTurnWalkTurnPathPlannerTest
       assertEquals(timeExpected, time, epsilon);
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLargestQuadraticSolution()
    {
       Random random = new Random(1738L);

@@ -1,10 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -16,12 +12,13 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -31,8 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class CommandConsumerWithDelayBuffersTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -49,8 +45,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
@@ -101,8 +96,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @SuppressWarnings("unchecked")
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
@@ -172,8 +166,7 @@ public class CommandConsumerWithDelayBuffersTest
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(10);
@@ -248,8 +241,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testQueueingManually()
    {
       Random random = new Random(100);
@@ -304,8 +296,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testClearAllQueues()
    {
       Random random = new Random(100);
@@ -350,8 +341,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testClearSingleQueue()
    {
       Random random = new Random(100);
@@ -414,8 +404,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testFlushCommands()
    {
       Random random = new Random(100);
@@ -455,8 +444,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public <C extends Command<C, ?>, M extends Settable<M>> void testAddingTooManyCommands()
    {
       Random random = new Random(100);

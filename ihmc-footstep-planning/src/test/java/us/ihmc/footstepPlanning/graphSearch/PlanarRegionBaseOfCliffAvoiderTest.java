@@ -1,17 +1,17 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
@@ -32,23 +32,20 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
    private boolean visualize = true;
    private final Random random = new Random(4587L);
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testBaseOfCliffAvoiderWithSimpleQueriesOnABlock()
    {
       double stepHeight = 0.2;
@@ -114,19 +111,18 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
 
-      x = closestNodeDistanceToCliff + FootstepNode.gridSizeXY;
+      x = closestNodeDistanceToCliff + LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
       assertFalse(avoider.isNodeValid(node, null));
 
-      x = closestNodeDistanceToCliff - FootstepNode.gridSizeXY;
+      x = closestNodeDistanceToCliff - LatticeNode.gridSizeXY;
       node = new FootstepNode(x, y, 0.0, footstepSide);
       snapper.snapFootstepNode(node);
       assertTrue(avoider.isNodeValid(node, null));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000000)
+   @Test
    public void testAvoidingRotatedAndElevatedCliff()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -171,10 +167,10 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       cliffAvoider.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
 
-      Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - FootstepNode.gridSizeXY, 0.0);
-      Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + FootstepNode.gridSizeXY, 0.0);
-      Vector2D sideNearNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom - FootstepNode.gridSizeXY);
-      Vector2D sideFarNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom + FootstepNode.gridSizeXY);
+      Vector2D frontNearNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength - LatticeNode.gridSizeXY, 0.0);
+      Vector2D frontFarNodeOffset = new Vector2D(0.5 * boxWidth + minimumDistanceFromCliffBottom + 0.5 * footLength + LatticeNode.gridSizeXY, 0.0);
+      Vector2D sideNearNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom - LatticeNode.gridSizeXY);
+      Vector2D sideFarNodeOffset = new Vector2D(0.0, 0.5 * boxWidth + 0.5 * footWidth + minimumDistanceFromCliffBottom + LatticeNode.gridSizeXY);
 
       AxisAngle rotationTransform = new AxisAngle(rotation, 0.0, 0.0);
       rotationTransform.transform(frontNearNodeOffset);

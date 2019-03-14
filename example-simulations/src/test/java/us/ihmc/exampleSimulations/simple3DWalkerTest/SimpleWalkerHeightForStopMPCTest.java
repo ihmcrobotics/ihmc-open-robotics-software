@@ -1,10 +1,11 @@
 package us.ihmc.exampleSimulations.simple3DWalkerTest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.exampleSimulations.simple3DWalker.SimpleWalkerHeightStopMPC;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -18,8 +19,7 @@ public class SimpleWalkerHeightForStopMPCTest
 
    SimpleWalkerHeightStopMPC heightMPC = new SimpleWalkerHeightStopMPC(zmax, zf, umax, registry);
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMaxHeightMaxUOutLoop()
    {
       for (int i = 0; i < 10; i++)
@@ -39,8 +39,7 @@ public class SimpleWalkerHeightForStopMPCTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMaxHeightMaxUInLoop()
    {
       for (int i = 0; i < 10; i++)

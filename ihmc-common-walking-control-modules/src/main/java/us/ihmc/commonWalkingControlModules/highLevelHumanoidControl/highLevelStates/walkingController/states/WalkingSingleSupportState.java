@@ -115,27 +115,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
          }
-
-      }
-      else if (balanceManager.useICPOptimization()) // TODO figure out a way of combining the two following modules
-      {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
-
-         if (footstepIsBeingAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            balanceManager.updateCurrentICPPlan();
-            //legConfigurationManager.prepareForLegBracing(swingSide);
-         }
-
-         // if the footstep was adjusted, shift the CoM plan, if there is one.
-         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
       else if (balanceManager.isPushRecoveryEnabled())
       {
@@ -162,6 +141,26 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
          }
+      }
+      else
+      {
+         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+
+         if (footstepIsBeingAdjusted)
+         {
+            requestSwingSpeedUp = true;
+            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+            failureDetectionControlModule.setNextFootstep(nextFootstep);
+            updateFootstepParameters();
+
+            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+
+            balanceManager.updateCurrentICPPlan();
+            //legConfigurationManager.prepareForLegBracing(swingSide);
+         }
+
+         // if the footstep was adjusted, shift the CoM plan, if there is one.
+         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
       }
 
       if (requestSwingSpeedUp)
@@ -316,10 +315,9 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       actualFootPoseInWorld.checkReferenceFrameMatch(desiredFootPoseInWorld);
       touchdownErrorVector.sub(actualFootPoseInWorld.getPosition(), desiredFootPoseInWorld.getPosition());
-      touchdownErrorVector.setZ(0.0);
       walkingMessageHandler.addOffsetVectorOnTouchdown(touchdownErrorVector);
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, actualFootPoseInWorld);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       setYoVariablesToNaN();

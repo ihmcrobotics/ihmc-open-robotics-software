@@ -1,19 +1,18 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.commons.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
+@Disabled
 public class SkippyV2Test
 {
 
@@ -21,8 +20,7 @@ public class SkippyV2Test
    private SkippySimulationV2 skippySimulationV2;
    private SkippyRobotV2 skippy;
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 100000)
+   @Test
    public void testStanding() throws SimulationExceededMaximumTimeException
    {
       skippy.setQ_hip(0.1);
@@ -31,8 +29,7 @@ public class SkippyV2Test
       System.out.println("testStanding");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 100000)
+   @Test
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {
       double pushDuration = 0.03;
@@ -53,14 +50,14 @@ public class SkippyV2Test
       System.out.println("pushRobot");
    }
 
-   @Before
+   @BeforeEach
    public void setupTest()
    {
       skippySimulationV2 = new SkippySimulationV2();
       skippy = skippySimulationV2.getSkippy();
    }
 
-   @After
+   @AfterEach
    public void afterTest()
    {
       if (sleepAfterTest)

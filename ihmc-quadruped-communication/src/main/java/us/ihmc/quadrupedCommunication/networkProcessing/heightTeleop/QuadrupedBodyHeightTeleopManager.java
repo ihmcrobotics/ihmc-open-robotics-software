@@ -27,7 +27,7 @@ public class QuadrupedBodyHeightTeleopManager
 
    public void initialize()
    {
-      populateBodyHeightMessage();
+      paused.set(false);
    }
 
    public void update()

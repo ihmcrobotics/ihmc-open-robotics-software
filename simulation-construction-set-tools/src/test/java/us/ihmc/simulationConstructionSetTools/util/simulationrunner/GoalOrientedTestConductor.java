@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import junit.framework.AssertionFailedError;
+import org.opentest4j.AssertionFailedError;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -16,7 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
 
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 public class GoalOrientedTestConductor implements SimulationDoneListener
 {
@@ -182,7 +183,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       scs.stop();
    }
    
-   public void simulate() throws AssertionFailedError
+   public void simulate()
    {
       assertionFailedMessage = null;
       yoTimeChangedListenerActive = true;

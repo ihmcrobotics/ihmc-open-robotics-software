@@ -1,17 +1,17 @@
 package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -19,20 +19,19 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testCoactiveElementTCPYoWhiteBoardSynchronizer() throws IOException, InterruptedException
    {
       int port = NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort();
 
-      System.out.println("Creating human");
+      LogTools.info("Creating human");
       SimpleCoactiveElement userInterfaceSideCoactiveElement = new SimpleCoactiveElement();
       userInterfaceSideCoactiveElement.initializeUserInterfaceSide();
       CoactiveElementYoWhiteBoardSynchronizer humanSideSynchronizer = new CoactiveElementYoWhiteBoardSynchronizer(port, HumanOrMachine.HUMAN, userInterfaceSideCoactiveElement);
       assertEquals(HumanOrMachine.HUMAN, humanSideSynchronizer.getWhichSideIsThisRunningOn());
       assertEquals(userInterfaceSideCoactiveElement, humanSideSynchronizer.getCoactiveElement());
 
-      System.out.println("Starting human");
+      LogTools.info("Starting human");
       humanSideSynchronizer.startASynchronizerOnAThread(100L);
       while (port == 0)
       {
@@ -40,7 +39,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
          Thread.yield();
       }
 
-      System.out.println("creating machine");
+      LogTools.info("creating machine");
       
       SimpleCoactiveElement machineSideCoactiveElement = new SimpleCoactiveElement();
       machineSideCoactiveElement.initializeMachineSide();
@@ -48,7 +47,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
       assertEquals(HumanOrMachine.MACHINE, machineSideSynchronizer.getWhichSideIsThisRunningOn());
       assertEquals(machineSideCoactiveElement, machineSideSynchronizer.getCoactiveElement());
 
-      System.out.println("Starting machine");
+      LogTools.info("Starting machine");
       machineSideSynchronizer.startASynchronizerOnAThread(100L);
       
       while(!humanSideSynchronizer.getYoWhiteBoard().isConnected())

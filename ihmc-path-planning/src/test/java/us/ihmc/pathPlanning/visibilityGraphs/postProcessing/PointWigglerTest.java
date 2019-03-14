@@ -1,8 +1,9 @@
 package us.ihmc.pathPlanning.visibilityGraphs.postProcessing;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class PointWigglerTest
 {
@@ -23,8 +24,7 @@ public class PointWigglerTest
    private static final double epsilon = 1e-10;
    private static final int iters = 500;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testAverageDistanceVectorCalculationEasy()
    {
       Point2D pointAtOrigin = new Point2D();
@@ -59,8 +59,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertVector2DGeometricallyEquals(expectedVector, calculatedVector, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testAverageDistanceVectorCalculationEasy2()
    {
       Point2DReadOnly pointToShift = new Point2D(0.33, -0.33);
@@ -121,8 +120,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(shiftedPointExpected, shiftedPoint, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testWithinBoundsOfOneButNotTheOther()
    {
       Point2DReadOnly pointToShift = new Point2D(0.15, 0.25);
@@ -157,8 +155,7 @@ public class PointWigglerTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(codedPointExpected, shiftedPoint, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testAverageDistanceVectorWithRandomlyGeneratedNearbyPoints()
    {
       Random random = new Random(1738L);
@@ -209,8 +206,7 @@ public class PointWigglerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = timeout)
+   @Test
    public void testFancyAverageDistanceVectorWithRandomlyGeneratedNearbyPoints()
    {
       Random random = new Random(1738L);

@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sun.javafx.application.PlatformImpl;
 
@@ -57,7 +56,7 @@ public class SimpleConcaveHullFactoryTest
    private Messager messager;
    private MutableBoolean uiIsGoingDown = new MutableBoolean(false);
 
-   @Before
+   @BeforeEach
    public void setup() throws Exception
    {
       uiIsGoingDown.setFalse();
@@ -99,7 +98,7 @@ public class SimpleConcaveHullFactoryTest
          ThreadTools.sleep(200);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if (VISUALIZE)
@@ -109,7 +108,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSimplePointcloudFormingASquare()
    {
       List<Point2D> expectedHull = new ArrayList<>();
@@ -167,7 +166,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testRandomCircleBasedConvexPointCloud()
    {
       Random random = new Random(5435);
@@ -204,7 +203,7 @@ public class SimpleConcaveHullFactoryTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testPointCloudWithSurroundingLineConstraints()
    {
       List<Point3D> pointcloud = new ArrayList<>();
@@ -237,7 +236,7 @@ public class SimpleConcaveHullFactoryTest
       assertEquals(1, concaveHullCollection.getNumberOfConcaveHulls());
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testSomeLineConstraints()
    {
       List<Point3D> pointcloud = new ArrayList<>();
@@ -277,7 +276,7 @@ public class SimpleConcaveHullFactoryTest
       assertEquals(1, concaveHullCollection.getNumberOfConcaveHulls());
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testOverlappingLineConstraints()
    {
       Random random = new Random(34543);

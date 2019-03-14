@@ -86,7 +86,6 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -1842,8 +1841,7 @@ public class DiagnosticBehavior extends AbstractBehavior
                }
                calculator.appendTrajectoryPoint(desiredJointAngle);
             }
-            calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
-            calculator.computeTrajectoryPointVelocities(true);
+            calculator.compute(flyingTrajectoryTime.getDoubleValue());
             OneDoFTrajectoryPointList trajectoryData = calculator.getTrajectoryData();
             trajectoryData.addTimeOffset(trajectoryTime.getDoubleValue()); // Add time to reach the first waypoint.
 

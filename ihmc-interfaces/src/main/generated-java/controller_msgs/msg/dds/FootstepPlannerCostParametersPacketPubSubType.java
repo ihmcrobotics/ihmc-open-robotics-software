@@ -70,6 +70,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -128,6 +132,12 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -164,6 +174,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getBodyPathBasedHeuristicsWeight());
 
+      cdr.write_type_6(data.getMaximum2dDistanceFromBoundingBoxToPenalize());
+
+      cdr.write_type_6(data.getBoundingBoxCost());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -198,6 +212,10 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       	
       data.setBodyPathBasedHeuristicsWeight(cdr.read_type_6());
       	
+      data.setMaximum2dDistanceFromBoundingBoxToPenalize(cdr.read_type_6());
+      	
+      data.setBoundingBoxCost(cdr.read_type_6());
+      	
 
    }
 
@@ -219,6 +237,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       ser.write_type_6("vis_graph_with_a_star_heuristics_weight", data.getVisGraphWithAStarHeuristicsWeight());
       ser.write_type_6("depth_first_heuristics_weight", data.getDepthFirstHeuristicsWeight());
       ser.write_type_6("body_path_based_heuristics_weight", data.getBodyPathBasedHeuristicsWeight());
+      ser.write_type_6("maximum_2d_distance_from_bounding_box_to_penalize", data.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      ser.write_type_6("bounding_box_cost", data.getBoundingBoxCost());
    }
 
    @Override
@@ -239,6 +259,8 @@ public class FootstepPlannerCostParametersPacketPubSubType implements us.ihmc.pu
       data.setVisGraphWithAStarHeuristicsWeight(ser.read_type_6("vis_graph_with_a_star_heuristics_weight"));
       data.setDepthFirstHeuristicsWeight(ser.read_type_6("depth_first_heuristics_weight"));
       data.setBodyPathBasedHeuristicsWeight(ser.read_type_6("body_path_based_heuristics_weight"));
+      data.setMaximum2dDistanceFromBoundingBoxToPenalize(ser.read_type_6("maximum_2d_distance_from_bounding_box_to_penalize"));
+      data.setBoundingBoxCost(ser.read_type_6("bounding_box_cost"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerCostParametersPacket src, controller_msgs.msg.dds.FootstepPlannerCostParametersPacket dest)

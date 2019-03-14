@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -48,7 +47,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
@@ -85,7 +84,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
       toeOffCalculators.put(toeOffCalculator.getEnum(), toeOffCalculator);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -93,24 +92,21 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructor()
    {
       generator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, parentRegistry);
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testClear()
    {
       generator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, parentRegistry);
       generator.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -123,8 +119,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeToeOffContactPoint()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -143,8 +138,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
       generator.computeToeOffContactPoint(desiredCMP, trailingSide);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetToeOffContactPoint()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -222,12 +216,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
          public double getMinimumSwingTimeForDisturbanceRecovery()
          {
             return 0;
-         }
-
-         @Override
-         public boolean useOptimizationBasedICPController()
-         {
-            return false;
          }
 
          @Override

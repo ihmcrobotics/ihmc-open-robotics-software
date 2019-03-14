@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import gnu.trove.list.array.TByteArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.idl.serializers.extra.PropertiesSerializer;
+import us.ihmc.log.LogTools;
 
 public class LoggerConfigurationLoader
 {
@@ -43,7 +43,7 @@ public class LoggerConfigurationLoader
 
       if (!publicBroadcast)
       {
-         PrintTools.warn("Public broadcasting of logger data is OFF. The logger will only connect to your local computer. To enable public broadcasting, add \"publicBroadcast=true\" to "
+         LogTools.warn("Public broadcasting of logger data is OFF. The logger will only connect to your local computer. To enable public broadcasting, add \"publicBroadcast=true\" to "
                + location + " or pass in -Dihmc.publicBroadcast=true");
       }
 
@@ -94,6 +94,6 @@ public class LoggerConfigurationLoader
 
       PropertiesSerializer<LoggerConfiguration> ser = new PropertiesSerializer<>(type);
 
-      PrintTools.info(ser.serializeToString(config));
+      LogTools.info(ser.serializeToString(config));
    }
 }

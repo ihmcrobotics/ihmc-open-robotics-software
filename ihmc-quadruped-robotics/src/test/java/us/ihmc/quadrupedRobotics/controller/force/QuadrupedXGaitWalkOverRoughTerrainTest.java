@@ -1,7 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
@@ -19,6 +20,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("quadruped-xgait")
 public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements QuadrupedMultiRobotTestInterface
 {
    protected GoalOrientedTestConductor conductor;
@@ -28,13 +30,13 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
 
    public abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -51,8 +53,10 @@ public abstract class QuadrupedXGaitWalkOverRoughTerrainTest implements Quadrupe
       double walkTime = 12.0;
       double walkingSpeed = 0.25;
       double minimumXPositionAfterWalking = 2.0;
+      // Lower a bit the robot so it doesn't fall off by too much, so the state estimator is not thrown off right from the beginning.
+      QuadrupedInitialOffsetAndYaw offsetAndYaw = new QuadrupedInitialOffsetAndYaw(0.0, 0.0, -0.04);
 
-      runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings(), null, Double.NaN);
+      runWalkingOverTerrain(environment, walkTime, walkingSpeed, minimumXPositionAfterWalking, getXGaitSettings(), offsetAndYaw, Double.NaN);
    }
 
    public void testWalkingOverSingleStepUp(double desiredBodyHeight) throws IOException

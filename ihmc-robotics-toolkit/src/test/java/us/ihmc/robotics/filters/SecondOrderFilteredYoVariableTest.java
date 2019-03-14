@@ -1,21 +1,18 @@
 package us.ihmc.robotics.filters;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.filters.SecondOrderFilterType;
 import us.ihmc.robotics.math.filters.SecondOrderFilteredYoVariable;
 import us.ihmc.robotics.testing.JUnitTools;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SecondOrderFilteredYoVariableTest
 {
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testLowPassFilterCoefficients()
    {
       double dt = 0.001;
@@ -34,8 +31,7 @@ public class SecondOrderFilteredYoVariableTest
       JUnitTools.assertDoubleArrayEquals(a, aAssert, 1e-8);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testNotchFilterCoefficients()
    {
       double dt = 0.001;
@@ -54,8 +50,7 @@ public class SecondOrderFilteredYoVariableTest
       JUnitTools.assertDoubleArrayEquals(a, aAssert, 1e-8);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testHighPassFilterCoefficients()
    {
       double dt = 0.001;

@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import java.util.ArrayList;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -23,7 +23,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -150,7 +149,6 @@ public class DynamicReachabilityCalculator
    private final TimeAdjustmentSolver solver;
 
    private final ICPPlannerInterface icpPlanner;
-   private final ICPOptimizationControllerInterface icpOptimizationController;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final TDoubleArrayList originalTransferDurations = new TDoubleArrayList();
@@ -158,13 +156,12 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalTransferAlphas = new TDoubleArrayList();
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
-   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, ICPOptimizationControllerInterface icpOptimizationController, FullHumanoidRobotModel fullRobotModel,
-                                        ReferenceFrame centerOfMassFrame, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
+   public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
+                                        DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.dynamicReachabilityParameters = dynamicReachabilityParameters;
       this.icpPlanner = icpPlanner;
-      this.icpOptimizationController = icpOptimizationController;
       this.fullRobotModel = fullRobotModel;
 
       this.requiredAdjustmentSafetyFactor.set(dynamicReachabilityParameters.getRequiredAdjustmentSafetyFactor());
@@ -682,7 +679,7 @@ public class DynamicReachabilityCalculator
             numberOfAdjustments.increment();
          }
 
-         submitTimingAdjustmentsToController(numberOfHigherSteps);
+         computeTimingAdjustmentsForController(numberOfHigherSteps);
       }
 
       reachabilityTimer.stopMeasurement();
@@ -953,23 +950,32 @@ public class DynamicReachabilityCalculator
       }
    }
 
-   private void submitTimingAdjustmentsToController(int numberOfHigherSteps)
+   private double transferDuration;
+   private double swingDuration;
+   private double finalTransferDuration;
+   private double nextTransferDuration;
+
+   private void computeTimingAdjustmentsForController(int numberOfHigherSteps)
    {
-      if (icpOptimizationController == null)
-         return;
+      finalTransferDuration = Double.NaN;
+      nextTransferDuration = Double.NaN;
 
       int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
 
-      icpOptimizationController.setTransferDuration(originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue());
-      icpOptimizationController.setSwingDuration(originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue());
+      transferDuration = originalTransferDurations.get(0) + currentTransferAdjustment.getDoubleValue();
+      swingDuration = originalSwingDurations.get(0) + currentSwingAdjustment.getDoubleValue();
 
       boolean isThisTheFinalTransfer = (numberOfFootstepsRegistered == 1);
 
       double adjustedTransferDuration = originalTransferDurations.get(1) + nextTransferAdjustment.getDoubleValue();
       if (isThisTheFinalTransfer)
-         icpOptimizationController.setFinalTransferDuration(adjustedTransferDuration);
+      {
+         finalTransferDuration = adjustedTransferDuration;
+      }
       else
-         icpOptimizationController.setNextTransferDuration(adjustedTransferDuration);
+      {
+         nextTransferDuration = adjustedTransferDuration;
+      }
 
       for (int i = 0; i < numberOfHigherSteps; i++)
       {
@@ -979,15 +985,31 @@ public class DynamicReachabilityCalculator
 
          isThisTheFinalTransfer = (numberOfFootstepsRegistered == transferIndex);
          if (isThisTheFinalTransfer)
-            icpOptimizationController.setFinalTransferDuration(transferDuration + transferAdjustment);
+         {
+            finalTransferDuration = transferDuration + transferAdjustment;
+         }
       }
    }
 
+   public double getFinalTransferDuration()
+   {
+      return finalTransferDuration;
+   }
 
+   public double getNextTransferDuration()
+   {
+      return nextTransferDuration;
+   }
 
+   public double getTransferDuration()
+   {
+      return transferDuration;
+   }
 
-
-
+   public double getSwingDuration()
+   {
+      return swingDuration;
+   }
 
    private void computeGradients(int numberOfHigherSteps)
    {

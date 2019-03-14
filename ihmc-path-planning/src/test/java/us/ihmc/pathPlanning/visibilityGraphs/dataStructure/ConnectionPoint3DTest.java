@@ -1,18 +1,16 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.Random;
 
 import org.apache.commons.math3.util.Precision;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,8 +22,7 @@ public class ConnectionPoint3DTest
    private static final int ITERATIONS = 10000;
    private static final double EPSILON = 1.0e-12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAndGetRounded()
    {
       ConnectionPoint3D point = new ConnectionPoint3D(1.00002, 2.00014, 3.00026, 144);
@@ -70,8 +67,7 @@ public class ConnectionPoint3DTest
       assertEquals("ConnectionPoint3D: ( 1.700, -3.400,  0.000 )", outputString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testToString()
    {
       Tuple2DReadOnly tuple = new Point2D(1.7000055, -3.40003);
@@ -81,8 +77,7 @@ public class ConnectionPoint3DTest
       assertEquals("ConnectionPoint3D: ( 1.700, -3.400,  0.000 )", outputString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testHashCode()
    {
       ConnectionPoint3D point = new ConnectionPoint3D(1.00002, 2.00014, 3.00026, 144);
@@ -95,8 +90,7 @@ public class ConnectionPoint3DTest
       assertEquals(hashCode, pointTwo.hashCode());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEquals()
    {
       ConnectionPoint3D pointOne = new ConnectionPoint3D(1.00002, 2.00014, 3.00026, 144);
@@ -126,8 +120,7 @@ public class ConnectionPoint3DTest
       assertFalse(pointThree.equals(nullObject));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEqualsTwo()
    {
       // Points one and two are equal as ConnectionPoints, but not as Point3Ds.
@@ -161,8 +154,7 @@ public class ConnectionPoint3DTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEqualsAndHashConsistency()
    {
       // If two objects are equal, then their hash codes must be equal...
@@ -182,8 +174,7 @@ public class ConnectionPoint3DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testApplyTransformAndInverseTransform()
    {
       ConnectionPoint3D pointOne = new ConnectionPoint3D(1.0000023, 2.0000028, 3.0000063, 144);
@@ -210,8 +201,7 @@ public class ConnectionPoint3DTest
       assertEquals(pointThree.getRegionId(), pointOne.getRegionId());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRound() throws Exception
    {
       Random random = new Random(43566787);

@@ -42,12 +42,16 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -66,6 +70,9 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getKeyFrameTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -77,6 +84,8 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType.getCdrSerializedSize(data.getSuggestedControllerMessage(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,6 +93,8 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    public static void write(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
+
+      cdr.write_type_2(data.getPlanId());
 
       if(data.getKeyFrameTimes().size() <= 100)
       cdr.write_type_e(data.getKeyFrameTimes());else
@@ -95,16 +106,20 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
       cdr.write_type_6(data.getSolutionQuality());
 
+      controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType.write(data.getSuggestedControllerMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
+      data.setPlanId(cdr.read_type_2());
+      	
       cdr.read_type_e(data.getKeyFrameTimes());	
       cdr.read_type_e(data.getRobotConfigurations());	
       data.setSolutionQuality(cdr.read_type_6());
       	
+      controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType.read(data.getSuggestedControllerMessage(), cdr);	
 
    }
 
@@ -112,18 +127,24 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    public final void serialize(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
+      ser.write_type_a("suggested_controller_message", new controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType(), data.getSuggestedControllerMessage());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
+      ser.read_type_a("suggested_controller_message", new controller_msgs.msg.dds.WholeBodyTrajectoryMessagePubSubType(), data.getSuggestedControllerMessage());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus src, controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus dest)

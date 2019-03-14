@@ -6,9 +6,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialAccelerationBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -21,6 +25,9 @@ public class JointAnglesWriter
 {
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairList = new ArrayList<>();
    private final ImmutablePair<FloatingJoint, FloatingJointBasics> rootJointPair;
+
+   private boolean writeJointVelocities = true;
+   private boolean writeJointAccelerations = true;
 
    public JointAnglesWriter(Robot robot, FullRobotModel fullRobotModel)
    {
@@ -42,7 +49,8 @@ public class JointAnglesWriter
          if (oneDoFJoint == null)
             throw new RuntimeException("Could not find the SCS joint with the name: " + name);
 
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, joint);
+         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint,
+                                                                                                                                             joint);
          this.oneDoFJointPairList.add(jointPair);
       }
 
@@ -53,17 +61,28 @@ public class JointAnglesWriter
          scsRootJoint = null;
 
       if (scsRootJoint == null && rootJoint != null)
-         throw new RuntimeException("A " + FloatingJointBasics.class.getSimpleName() + " was provided but there is no "
-               + FloatingJoint.class.getSimpleName());
+         throw new RuntimeException("A " + FloatingJointBasics.class.getSimpleName() + " was provided but there is no " + FloatingJoint.class.getSimpleName());
       if (rootJoint == null && scsRootJoint != null)
-         throw new RuntimeException("A " + FloatingJoint.class.getSimpleName() + " was provided but there is no "
-               + FloatingJointBasics.class.getSimpleName());
+         throw new RuntimeException("A " + FloatingJoint.class.getSimpleName() + " was provided but there is no " + FloatingJointBasics.class.getSimpleName());
 
       if (rootJoint != null)
          rootJointPair = new ImmutablePair<>(scsRootJoint, rootJoint);
       else
          rootJointPair = null;
    }
+
+   public void setWriteJointVelocities(boolean writeJointVelocities)
+   {
+      this.writeJointVelocities = writeJointVelocities;
+   }
+
+   public void setWriteJointAccelerations(boolean writeJointAccelerations)
+   {
+      this.writeJointAccelerations = writeJointAccelerations;
+   }
+
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearAcceleration = new FrameVector3D();
 
    public void updateRobotConfigurationBasedOnFullRobotModel()
    {
@@ -73,8 +92,10 @@ public class JointAnglesWriter
          OneDoFJointBasics revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
-         pinJoint.setQd(revoluteJoint.getQd());
-         pinJoint.setQdd(revoluteJoint.getQdd());
+         if (writeJointVelocities)
+            pinJoint.setQd(revoluteJoint.getQd());
+         if (writeJointAccelerations)
+            pinJoint.setQdd(revoluteJoint.getQdd());
       }
 
       if (rootJointPair != null)
@@ -85,6 +106,24 @@ public class JointAnglesWriter
          RigidBodyTransform transform = new RigidBodyTransform();
          sixDoFJoint.getJointConfiguration(transform);
          floatingJoint.setRotationAndTranslation(transform);
+
+         if (writeJointVelocities)
+         {
+            FixedFrameTwistBasics jointTwist = sixDoFJoint.getJointTwist();
+            floatingJoint.setAngularVelocityInBody(jointTwist.getAngularPart());
+            linearVelocity.setMatchingFrame(jointTwist.getLinearPart());
+            floatingJoint.setVelocity(linearVelocity);
+         }
+
+         if (writeJointAccelerations)
+         {
+            FixedFrameTwistBasics jointTwist = sixDoFJoint.getJointTwist();
+            FixedFrameSpatialAccelerationBasics jointAcceleration = sixDoFJoint.getJointAcceleration();
+            floatingJoint.setAngularVelocityInBody(jointAcceleration.getAngularPart());
+            jointAcceleration.getLinearAccelerationAtBodyOrigin(jointTwist, linearAcceleration);
+            linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+            floatingJoint.setAcceleration(linearAcceleration);
+         }
       }
    }
 }

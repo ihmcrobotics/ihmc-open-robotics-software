@@ -1,27 +1,23 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FootstepNodeToolsTest
 {
    private final Random random = new Random(456789L);
    private final double epsilon = 1e-8;
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetNodeTransform()
    {
       int numTests = 1000;
@@ -32,18 +28,18 @@ public class FootstepNodeToolsTest
          int yLatticeIndex = random.nextInt(1000) - 500;
          int yawLatticeIndex = random.nextInt(100) - 50;
 
-         double x = xLatticeIndex * FootstepNode.gridSizeXY;
-         double y = yLatticeIndex * FootstepNode.gridSizeXY;
-         double yaw = AngleTools.trimAngleMinusPiToPi(yawLatticeIndex * FootstepNode.gridSizeYaw);
+         double x = xLatticeIndex * LatticeNode.gridSizeXY;
+         double y = yLatticeIndex * LatticeNode.gridSizeXY;
+         double yaw = AngleTools.trimAngleMinusPiToPi(yawLatticeIndex * LatticeNode.gridSizeYaw);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, -0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.4995 * FootstepNode.gridSizeYaw);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, -0.4995 * FootstepNode.gridSizeYaw);
+         checkNodeTransform(x, y, yaw, robotSide, 0.4995 * LatticeNode.gridSizeXY, 0.0, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, -0.4995 * LatticeNode.gridSizeXY, 0.0, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.4995 * LatticeNode.gridSizeXY, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, -0.4995 * LatticeNode.gridSizeXY, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.4995 * LatticeNode.gridSizeYaw);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, -0.4995 * LatticeNode.gridSizeYaw);
       }
    }
 
@@ -65,8 +61,7 @@ public class FootstepNodeToolsTest
       assertEquals(rotationYawPitchRoll[2], 0.0, epsilon);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetSnappedNodeTransform()
    {
       int numTests = 10;

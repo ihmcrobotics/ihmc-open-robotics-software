@@ -1,15 +1,14 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class TypicalMotionConstraintsTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
       // Have J x = p; A x = b. Check if an all out solution without requiring optimization. 
@@ -120,8 +119,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDoubleSupportKneesStraightNoSingularity()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -239,8 +237,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -373,8 +370,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testDoubleSupportKneesStraightThree()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
