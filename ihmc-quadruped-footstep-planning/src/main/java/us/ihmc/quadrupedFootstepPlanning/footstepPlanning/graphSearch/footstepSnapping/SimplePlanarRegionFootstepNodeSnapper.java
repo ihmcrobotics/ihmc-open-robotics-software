@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepS
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -45,16 +46,30 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       else
       {
          RigidBodyTransform transform = new RigidBodyTransform();
+         transform.setIdentity();
 
          if(parameters.getProjectInsideDistance() > 0.0)
          {
-            projectPointIntoRegion(highestRegion, footPosition.getX(), footPosition.getY(), transform);
+            Vector2D projectionTranslation = projectPointIntoRegion(highestRegion, footPosition.getX(), footPosition.getY());
 
             // projection failed
-            if(transform.containsNaN())
+            if(projectionTranslation.containsNaN())
+            {
                return FootstepNodeSnapData.emptyData();
+            }
+            // translation pushes the foot outside of it's cell
+            else if(isTranslationBiggerThanGridCell(projectionTranslation))
+            {
+               return FootstepNodeSnapData.emptyData();
+            }
             else
+            {
+               double x = xIndex * FootstepNode.gridSizeXY + projectionTranslation.getX();
+               double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
+               double z = highestRegion.getPlaneZGivenXY(x, y);
+               transform.setTranslation(projectionTranslation.getX(), projectionTranslation.getY(), z);
                return new FootstepNodeSnapData(transform);
+            }
          }
          else
          {
@@ -90,9 +105,11 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       return highestPlanarRegion;
    }
 
-   private void projectPointIntoRegion(PlanarRegion region, double x, double y, RigidBodyTransform transformToPack)
+   private Vector2D projectPointIntoRegion(PlanarRegion region, double x, double y)
    {
+      Vector2D projectionTranslation = new Vector2D();
       Point3D pointToSnap = new Point3D();
+
       pointToSnap.set(x, y, region.getPlaneZGivenXY(x, y));
       double projectionDistance = parameters.getProjectInsideDistance();
       boolean successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon);
@@ -101,31 +118,41 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       // TODO either search nearby or make the grid size match the wiggle-inside distance to avoid missing valid footholds inside the cell
       if(!successfulScale)
       {
-         transformToPack.setToNaN();
-         return;
+         projectionTranslation.setToNaN();
+         return projectionTranslation;
       }
 
       region.transformFromWorldToLocal(pointToSnap);
       Point2D projectedPoint = new Point2D(pointToSnap.getX(), pointToSnap.getY());
+
+      double signedDistanceToPolygon = scaledRegionPolygon.signedDistance(projectedPoint);
+      if(signedDistanceToPolygon <= 0.0)
+      {
+         // return, no need to project
+         projectionTranslation.setToZero();
+         return projectionTranslation;
+      }
+
       boolean successfulProjection = scaledRegionPolygon.orthogonalProjection(projectedPoint);
       if(!successfulProjection)
       {
-         transformToPack.setToNaN();
-         return;
+         projectionTranslation.setToNaN();
+         return projectionTranslation;
       }
 
-      Vector3D snapTranslation = new Vector3D();
-      snapTranslation.set(projectedPoint.getX(), projectedPoint.getY(), 0.0);
-      snapTranslation.sub(pointToSnap.getX(), pointToSnap.getY(), 0.0);
-      region.transformFromLocalToWorld(snapTranslation);
+      Vector3D projectTranslation3D = new Vector3D();
+      projectTranslation3D.set(projectedPoint.getX(), projectedPoint.getY(), 0.0);
+      projectTranslation3D.sub(pointToSnap.getX(), pointToSnap.getY(), 0.0);
+      region.transformFromLocalToWorld(projectTranslation3D);
 
-      // set horizontal translation from projection
-      transformToPack.setTranslationX(snapTranslation.getX());
-      transformToPack.setTranslationY(snapTranslation.getY());
+      projectionTranslation.set(projectTranslation3D);
+      return projectionTranslation;
+   }
 
-      // set translation height from region
-      double projectedX = x + snapTranslation.getX();
-      double projectedY = y + snapTranslation.getY();
-      transformToPack.setTranslationZ(region.getPlaneZGivenXY(projectedX, projectedY));
+
+   private boolean isTranslationBiggerThanGridCell(Vector2D translation)
+   {
+      double maximumTranslationPerAxis = 0.5 * FootstepNode.gridSizeXY;
+      return Math.abs(translation.getX()) > maximumTranslationPerAxis || Math.abs(translation.getY()) > maximumTranslationPerAxis;
    }
 }
