@@ -78,7 +78,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final List<IMUSensorReadOnly> linearAccelerationSensorOutputs = new ArrayList<>();
    private final SensorOutputMapReadOnly processedSensorOutput;
    private final List<JointPositionSensor> jointPositionSensors = new ArrayList<>();
-   private final List<FootWrenchSensor> footVelocitySensors = new ArrayList<>();
+   private final List<FootWrenchSensorUpdater> footWrenchSensorUpdaters = new ArrayList<>();
    private final List<ForceSensorDataReadOnly> forceSensorOutputs = new ArrayList<>();
 
    private final StateEstimator stateEstimator;
@@ -132,11 +132,11 @@ public class LeggedRobotEKF implements StateEstimatorController
          RigidBodyBasics foot = forceSensorOutput.getMeasurementLink();
 
          LogTools.info("Adding foot velocity sensor for " + soleFrame);
-         FootWrenchSensor footWrenchSensor = new FootWrenchSensor(foot, soleFrame, dt, weight, graphicsListRegistry, registry);
+         FootWrenchSensorUpdater footWrenchSensorUpdater = new FootWrenchSensorUpdater(foot, soleFrame, dt, weight, graphicsListRegistry, registry);
 
-         footVelocitySensors.add(footWrenchSensor);
+         footWrenchSensorUpdaters.add(footWrenchSensorUpdater);
          forceSensorOutputs.add(forceSensorOutput);
-         sensors.add(footWrenchSensor.getSensor());
+         sensors.add(footWrenchSensorUpdater.getFootLinearVelocitySensor());
       }
    }
 
@@ -244,10 +244,10 @@ public class LeggedRobotEKF implements StateEstimatorController
          linearAccelerationSensors.get(imuIdx).setMeasurement(linearAccelerationMeasurement);
       }
 
-      for (int footIdx = 0; footIdx < footVelocitySensors.size(); footIdx++)
+      for (int footIdx = 0; footIdx < footWrenchSensorUpdaters.size(); footIdx++)
       {
          forceSensorOutputs.get(footIdx).getWrench(tempWrench);
-         footVelocitySensors.get(footIdx).update(tempWrench, fixRobot.getValue());
+         footWrenchSensorUpdaters.get(footIdx).update(tempWrench, fixRobot.getValue());
       }
    }
 
