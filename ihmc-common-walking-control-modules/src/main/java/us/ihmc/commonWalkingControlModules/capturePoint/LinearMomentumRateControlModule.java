@@ -4,8 +4,6 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
@@ -25,9 +23,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -136,7 +131,7 @@ public class LinearMomentumRateControlModule
    private final FramePose3D footstepSolution = new FramePose3D();
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
-                                                                                                     new PlaneContactStateCommand());
+                                                                                                            new PlaneContactStateCommand());
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
                                           WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
@@ -180,164 +175,59 @@ public class LinearMomentumRateControlModule
       parentRegistry.addChild(registry);
    }
 
-   public void setOmega0(double omega0)
+   public void setInput(LinearMomentumRateControlModuleInput input)
    {
-      this.omega0 = omega0;
-   }
-
-   public void setCapturePoint(FramePoint2DReadOnly capturePoint, FrameVector2DReadOnly capturePointVelocity)
-   {
-      this.capturePoint.setIncludingFrame(capturePoint);
-      this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
-   }
-
-   public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint, FrameVector2DReadOnly desiredCapturePointVelocity)
-   {
-      this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
-      this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
-   }
-
-   public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
-   {
-      this.desiredCoMHeightAcceleration = desiredCoMHeightAcceleration;
-   }
-
-   public void setMinimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
-   {
-      this.minimizingAngularMomentumRateZ.set(minimizeAngularMomentumRateZ);
-   }
-
-   public void setFinalDesiredCapturePoint(FramePoint2DReadOnly finalDesiredCapturePoint)
-   {
-      this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
-   }
-
-   public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
-   {
-      this.perfectCMP.setMatchingFrame(perfectCMP);
-   }
-
-   public void setPerfectCoP(FramePoint2DReadOnly perfectCoP)
-   {
-      this.perfectCoP.setMatchingFrame(perfectCoP);
-   }
-
-   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      this.achievedLinearMomentumRate.setIncludingFrame(achievedLinearMomentumRate);
-   }
-
-   public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
-   {
-      this.controlHeightWithMomentum = controlHeightWithMomentum;
-   }
-
-   public void setSupportLeg(RobotSide supportSide)
-   {
-      this.supportSide = supportSide;
-   }
-
-   public void setTransferToSide(RobotSide transferToSide)
-   {
-      this.transferToSide = transferToSide;
-   }
-
-   public void setFootsteps(List<Footstep> footsteps, List<FootstepTiming> footstepTimings)
-   {
+      this.omega0 = input.getOmega0();
+      this.capturePoint.setIncludingFrame(input.getCapturePoint());
+      this.capturePointVelocity.setIncludingFrame(input.getCapturePointVelocity());
+      this.desiredCapturePoint.setIncludingFrame(input.getDesiredCapturePoint());
+      this.desiredCapturePointVelocity.setIncludingFrame(input.getDesiredCapturePointVelocity());
+      this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
+      this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
+      this.finalDesiredCapturePoint.setIncludingFrame(input.getFinalDesiredCapturePoint());
+      this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
+      this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
+      this.achievedLinearMomentumRate.setIncludingFrame(input.getAchievedLinearMomentumRate());
+      this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
+      this.supportSide = input.getSupportSide();
+      this.transferToSide = input.getTransferToSide();
       this.footsteps.clear();
+      for (int i = 0; i < input.getFootsteps().size(); i++)
+      {
+         this.footsteps.add().set(input.getFootsteps().get(i));
+      }
       this.footstepTimings.clear();
-      for (int i = 0; i < footsteps.size(); i++)
+      for (int i = 0; i < input.getFootstepTimings().size(); i++)
       {
-         this.footsteps.add().set(footsteps.get(i));
-         this.footstepTimings.add().set(footstepTimings.get(i));
+         this.footstepTimings.add().set(input.getFootstepTimings().get(i));
       }
-   }
-
-   public void setFinalTransferDuration(double finalTransferDuration)
-   {
-      this.finalTransferDuration = finalTransferDuration;
-   }
-
-   public void setInitializeForStanding(boolean initializeForStanding)
-   {
-      this.initializeForStanding = initializeForStanding;
-   }
-
-   public void setInitializeForSingleSupport(boolean initializeForSingleSupport)
-   {
-      this.initializeForSingleSupport = initializeForSingleSupport;
-   }
-
-   public void setInitializeForTransfer(boolean initializeForTransfer)
-   {
-      this.initializeForTransfer = initializeForTransfer;
-   }
-
-   public void setRemainingTimeInSwingUnderDisturbance(double remainingTimeInSwingUnderDisturbance)
-   {
-      this.remainingTimeInSwingUnderDisturbance = remainingTimeInSwingUnderDisturbance;
-   }
-
-   public void setUpdatePlanarRegions(boolean updatePlanarRegions)
-   {
-      this.updatePlanarRegions = updatePlanarRegions;
-   }
-
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
-   {
+      this.finalTransferDuration = input.getFinalTransferDuration();
+      this.initializeForStanding = input.getInitializeForStanding();
+      this.initializeForSingleSupport = input.getInitializeForSingleSupport();
+      this.initializeForTransfer = input.getInitializeForTransfer();
+      this.remainingTimeInSwingUnderDisturbance = input.getRemainingTimeInSwingUnderDisturbance();
+      this.updatePlanarRegions = input.getUpdatePlanarRegions();
       this.planarRegions.clear();
-      for (int i = 0; i < planarRegions.size(); i++)
+      for (int i = 0; i < input.getPlanarRegions().size(); i++)
       {
-         this.planarRegions.add().set(planarRegions.get(i));
+         this.planarRegions.add().set(input.getPlanarRegions().get(i));
       }
-   }
-
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
-   {
-      this.keepCoPInsideSupportPolygon = keepCoPInsideSupportPolygon;
-   }
-
-   public void setContactStateCommand(SideDependentList<PlaneContactStateCommand> contactStateCommands)
-   {
+      this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
       {
-         this.contactStateCommands.get(robotSide).set(contactStateCommands.get(robotSide));
+         this.contactStateCommands.get(robotSide).set(input.getContactStateCommands().get(robotSide));
       }
    }
 
-   public FramePose3DReadOnly getFootstepSolution()
+   public void packOutput(LinearMomentumRateControlModuleOutput outputToPack)
    {
-      return footstepSolution;
-   }
-
-   public boolean getFootstepWasAdjusted()
-   {
-      return footstepWasAdjusted;
-   }
-
-   public boolean getUsingStepAdjustment()
-   {
-      return usingStepAdjustment;
-   }
-
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return momentumRateCommand;
-   }
-
-   public CenterOfPressureCommand getCenterOfPressureCommand()
-   {
-      return centerOfPressureCommand;
-   }
-
-   public FramePoint2DReadOnly getDesiredCMP()
-   {
-      return desiredCMP;
-   }
-
-   public FrameVector3DReadOnly getEffectiveICPAdjustment()
-   {
-      return effectiveICPAdjustment;
+      outputToPack.setFootstepSolution(footstepSolution);
+      outputToPack.setFootstepWasAdjusted(footstepWasAdjusted);
+      outputToPack.setUsingStepAdjustment(usingStepAdjustment);
+      outputToPack.setMomentumRateCommand(momentumRateCommand);
+      outputToPack.setCenterOfPressureCommand(centerOfPressureCommand);
+      outputToPack.setDesiredCMP(desiredCMP);
+      outputToPack.setEffectiveICPAdjustment(effectiveICPAdjustment);
    }
 
    public boolean compute()
@@ -428,8 +318,8 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
-                                           capturePointVelocity, omega0);
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, capturePointVelocity,
+                                           omega0);
       }
       else
       {
@@ -487,7 +377,7 @@ public class LinearMomentumRateControlModule
       {
          LogTools.error("Desired LinearMomentumRateOfChange contained NaN, setting it to zero and failing.");
          linearMomentumRateOfChange.setToZero();
-         success  = false;
+         success = false;
       }
 
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
