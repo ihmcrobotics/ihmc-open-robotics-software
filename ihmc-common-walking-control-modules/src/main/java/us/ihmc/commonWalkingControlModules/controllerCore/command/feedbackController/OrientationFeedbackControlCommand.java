@@ -51,9 +51,9 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    /** The end-effector's desired orientation expressed in root frame. */
    private final FrameQuaternion desiredOrientationInRootFrame = new FrameQuaternion();
    /** The end-effector's desired angular velocity expressed in root frame. */
-   private final FrameVector3D desiredAngularVelocityInRoot = new FrameVector3D();
+   private final FrameVector3D desiredAngularVelocityInRootFrame = new FrameVector3D();
    /** The feed-forward to be used for the end-effector. Useful to improve tracking performance. */
-   private final FrameVector3D feedForwardAngularActionInRoot = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularActionInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -96,8 +96,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void set(OrientationFeedbackControlCommand other)
    {
       desiredOrientationInRootFrame.setIncludingFrame(other.desiredOrientationInRootFrame);
-      desiredAngularVelocityInRoot.setIncludingFrame(other.desiredAngularVelocityInRoot);
-      feedForwardAngularActionInRoot.setIncludingFrame(other.feedForwardAngularActionInRoot);
+      desiredAngularVelocityInRootFrame.setIncludingFrame(other.desiredAngularVelocityInRootFrame);
+      feedForwardAngularActionInRootFrame.setIncludingFrame(other.feedForwardAngularActionInRootFrame);
       gains.set(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
@@ -214,8 +214,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    {
       ControllerCoreTools.checkExpressedInRootFrame(desiredOrientation);
       desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredAngularVelocityInRoot.setToZero(desiredOrientation.getReferenceFrame());
-      feedForwardAngularActionInRoot.setToZero(desiredOrientation.getReferenceFrame());
+      desiredAngularVelocityInRootFrame.setToZero(desiredOrientation.getReferenceFrame());
+      feedForwardAngularActionInRootFrame.setToZero(desiredOrientation.getReferenceFrame());
    }
 
    /**
@@ -233,8 +233,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    {
       ControllerCoreTools.checkExpressedInSameRootFrame(desiredOrientation, desiredAngularVelocity);
       desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredAngularVelocityInRoot.setIncludingFrame(desiredAngularVelocity);
-      feedForwardAngularActionInRoot.setToZero(desiredAngularVelocity.getReferenceFrame());
+      desiredAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
+      feedForwardAngularActionInRootFrame.setToZero(desiredAngularVelocity.getReferenceFrame());
    }
 
    /**
@@ -249,7 +249,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     */
    public void setFeedForwardAction(FrameVector3DReadOnly feedForwardAngularAction)
    {
-      feedForwardAngularActionInRoot.set(feedForwardAngularAction);
+      feedForwardAngularActionInRootFrame.set(feedForwardAngularAction);
    }
 
    /**
@@ -279,43 +279,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    {
       bodyFixedOrientationInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
       this.bodyFixedOrientationInEndEffectorFrame.set(bodyFixedOrientationInEndEffectorFrame);
-   }
-
-   /**
-    * Change the reference frame of the given data such that it is expressed in
-    * {@link ReferenceFrame#getRootFrame()}. The data will be used for the next control tick.
-    *
-    * @param desiredOrientation describes the orientation that the
-    *           {@code endEffector.getBodyFixedFrame()} should reach. Modified.
-    * @param desiredAngularVelocity describes the desired linear velocity of
-    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
-    */
-   public void changeFrameAndSet(FrameQuaternionBasics desiredOrientation, FrameVector3DBasics desiredAngularVelocity)
-   {
-      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      desiredOrientation.changeFrame(rootFrame);
-      desiredAngularVelocity.changeFrame(rootFrame);
-
-      desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredAngularVelocityInRoot.setIncludingFrame(desiredAngularVelocity);
-      feedForwardAngularActionInRoot.setToZero(rootFrame);
-   }
-
-   /**
-    * Change the reference frame of the given data such that it is expressed in
-    * {@link ReferenceFrame#getRootFrame()}. The data will be used for the next control tick.
-    * <p>
-    * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
-    * </p>
-    *
-    * @param feedForwardAngularAction describes the desired angular action of {@code controlFrame} with
-    *           respect to the {@code base}. It is equivalent to the desired angular action of
-    *           {@code endEffector.getBodyFixedFrame()}. Modified.
-    */
-   public void changeFrameAndSetFeedForward(FrameVector3DBasics feedForwardAngularAction)
-   {
-      feedForwardAngularAction.changeFrame(feedForwardAngularAction.getReferenceFrame().getRootFrame());
-      feedForwardAngularActionInRoot.set(feedForwardAngularAction);
    }
 
    /**
@@ -402,12 +365,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public void getIncludingFrame(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(desiredOrientationInRootFrame);
-      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocityInRoot);
+      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocityInRootFrame);
    }
 
    public void getFeedForwardActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack)
    {
-      feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInRoot);
+      feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInRootFrame);
    }
 
    public void getBodyFixedOrientationIncludingFrame(FrameQuaternion bodyFixedOrientationToControlToPack)
@@ -427,12 +390,12 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    public FrameVector3DBasics getDesiredAngularVelocity()
    {
-      return desiredAngularVelocityInRoot;
+      return desiredAngularVelocityInRootFrame;
    }
 
    public FrameVector3DBasics getFeedForwardAngularAction()
    {
-      return feedForwardAngularActionInRoot;
+      return feedForwardAngularActionInRootFrame;
    }
 
    public RigidBodyBasics getBase()
@@ -489,9 +452,9 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
             return false;
          if (!desiredOrientationInRootFrame.equals(other.desiredOrientationInRootFrame))
             return false;
-         if (!desiredAngularVelocityInRoot.equals(other.desiredAngularVelocityInRoot))
+         if (!desiredAngularVelocityInRootFrame.equals(other.desiredAngularVelocityInRootFrame))
             return false;
-         if (!feedForwardAngularActionInRoot.equals(other.feedForwardAngularActionInRoot))
+         if (!feedForwardAngularActionInRootFrame.equals(other.feedForwardAngularActionInRootFrame))
             return false;
          if (!gains.equals(other.gains))
             return false;
