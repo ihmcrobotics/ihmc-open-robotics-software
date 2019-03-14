@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -338,6 +339,18 @@ public class CrossRobotCommandResolver
       resolveFrameTuple3D(in.getFeedForwardAngularAction(), out.getFeedForwardAngularAction());
       out.getGains().set(in.getGains());
       out.setGainsFrame(resolveReferenceFrame(in.getAngularGainsFrame()));
+      resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
+      out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
+   }
+   
+   public void resolvePointFeedbackControlCommand(PointFeedbackControlCommand in, PointFeedbackControlCommand out)
+   {
+      resolveFrameTuple3D(in.getBodyFixedPointToControl(), out.getBodyFixedPointToControl());
+      resolveFrameTuple3D(in.getDesiredPosition(), out.getDesiredPosition());
+      resolveFrameTuple3D(in.getDesiredLinearVelocity(), out.getDesiredLinearVelocity());
+      resolveFrameTuple3D(in.getFeedForwardLinearAction(), out.getFeedForwardLinearAction());
+      out.getGains().set(in.getGains());
+      out.setGainsFrame(resolveReferenceFrame(in.getLinearGainsFrame()));
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
    }
