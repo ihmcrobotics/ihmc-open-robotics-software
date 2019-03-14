@@ -107,6 +107,13 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       return 3.0;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistance()
+   {
+      return 0.02;
+   }
+
    @Override
    public double getMinXClearanceFromFoot()
    {

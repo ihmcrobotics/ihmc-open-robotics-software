@@ -27,6 +27,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
    private double minimumSurfaceInclineRadians;
+   private double projectInsideDistance;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -57,6 +58,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minimumSurfaceInclineRadians = footstepPlannerParameters.getMinimumSurfaceInclineRadians();
       this.minXClearanceFromFoot = footstepPlannerParameters.getMinXClearanceFromFoot();
       this.minYClearanceFromFoot = footstepPlannerParameters.getMinYClearanceFromFoot();
+      this.projectInsideDistance = footstepPlannerParameters.getProjectInsideDistance();
    }
 
    public void setMaximumStepReach(double maximumStepReach)
@@ -159,6 +161,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minimumSurfaceInclineRadians = minimumSurfaceInclineRadians;
    }
 
+   public void setProjectInsideDistance(double projectInsideDistance)
+   {
+      this.projectInsideDistance = projectInsideDistance;
+   }
+
    public double getMaximumStepReach()
    {
       return maximumStepReach;
@@ -257,5 +264,10 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMinimumSurfaceInclineRadians()
    {
       return minimumSurfaceInclineRadians;
+   }
+
+   public double getProjectInsideDistance()
+   {
+      return projectInsideDistance;
    }
 }
