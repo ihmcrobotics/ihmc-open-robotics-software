@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -333,25 +334,40 @@ public class CrossRobotCommandResolver
 
    public void resolveOrientationFeedbackControlCommand(OrientationFeedbackControlCommand in, OrientationFeedbackControlCommand out)
    {
+      resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       resolveFrameQuaternion(in.getBodyFixedOrientationToControl(), out.getBodyFixedOrientationToControl());
       resolveFrameQuaternion(in.getDesiredOrientation(), out.getDesiredOrientation());
       resolveFrameTuple3D(in.getDesiredAngularVelocity(), out.getDesiredAngularVelocity());
       resolveFrameTuple3D(in.getFeedForwardAngularAction(), out.getFeedForwardAngularAction());
       out.getGains().set(in.getGains());
       out.setGainsFrame(resolveReferenceFrame(in.getAngularGainsFrame()));
-      resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
    }
-   
+
    public void resolvePointFeedbackControlCommand(PointFeedbackControlCommand in, PointFeedbackControlCommand out)
    {
+      resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       resolveFrameTuple3D(in.getBodyFixedPointToControl(), out.getBodyFixedPointToControl());
       resolveFrameTuple3D(in.getDesiredPosition(), out.getDesiredPosition());
       resolveFrameTuple3D(in.getDesiredLinearVelocity(), out.getDesiredLinearVelocity());
       resolveFrameTuple3D(in.getFeedForwardLinearAction(), out.getFeedForwardLinearAction());
       out.getGains().set(in.getGains());
       out.setGainsFrame(resolveReferenceFrame(in.getLinearGainsFrame()));
+      out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
+   }
+
+   public void resolveSpatialFeedbackControlCommand(SpatialFeedbackControlCommand in, SpatialFeedbackControlCommand out)
+   {
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
+      resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
+      resolveFrameTuple3D(in.getDesiredPosition(), out.getDesiredPosition());
+      resolveFrameQuaternion(in.getDesiredOrientation(), out.getDesiredOrientation());
+      resolveFrameTuple3D(in.getDesiredLinearVelocity(), out.getDesiredLinearVelocity());
+      resolveFrameTuple3D(in.getDesiredAngularVelocity(), out.getDesiredAngularVelocity());
+      resolveFrameTuple3D(in.getFeedForwardLinearAction(), out.getFeedForwardLinearAction());
+      resolveFrameTuple3D(in.getFeedForwardAngularAction(), out.getFeedForwardAngularAction());
+      out.getGains().set(in.getGains());
+      out.setGainsFrames(resolveReferenceFrame(in.getAngularGainsFrame()), resolveReferenceFrame(in.getLinearGainsFrame()));
       out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
    }
 

@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -73,7 +74,9 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -798,6 +801,28 @@ class CrossRobotCommandResolverTest
       }
    }
 
+   @Test
+   void testResolveSpatialFeedbackControlCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         SpatialFeedbackControlCommand in = nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         SpatialFeedbackControlCommand expectedOut = nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialFeedbackControlCommand actualOut = new SpatialFeedbackControlCommand();
+         crossRobotCommandResolver.resolveSpatialFeedbackControlCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
    public static CenterOfPressureCommand nextCenterOfPressureCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       CenterOfPressureCommand next = new CenterOfPressureCommand();
@@ -1199,6 +1224,25 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
+      next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
+      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getGains().set(nextPIDSE3Gains(random));
+      next.setGainsFrames(nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
+      next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
+      next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+      next.getDesiredPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      next.getDesiredLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getFeedForwardLinearAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
+      next.setControlBaseFrame(nextElementIn(random, possibleFrames));
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -1337,6 +1381,13 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static PDGains nextPDGains(Random random)
+   {
+      PDGains next = new PDGains();
+      next.set(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      return next;
+   }
+   
    public static PID3DGains nextPID3DGains(Random random)
    {
       PID3DGains next = new DefaultPID3DGains();
@@ -1350,10 +1401,11 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
-   public static PDGains nextPDGains(Random random)
+   public static PIDSE3Gains nextPIDSE3Gains(Random random)
    {
-      PDGains next = new PDGains();
-      next.set(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      PIDSE3Gains next = new DefaultPIDSE3Gains();
+      next.setPositionGains(nextPID3DGains(random));
+      next.setOrientationGains(nextPID3DGains(random));
       return next;
    }
 
