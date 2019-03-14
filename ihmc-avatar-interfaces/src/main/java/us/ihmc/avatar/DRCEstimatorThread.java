@@ -62,6 +62,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
+import us.ihmc.stateEstimation.ekf.LeggedRobotEKF;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -274,7 +275,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                                   sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
                                                                   yoGraphicsListRegistry, estimatorFullRobotModel);
 
-         InputStream ekfParameterStream = DRCEstimatorThread.class.getResourceAsStream("/ekf.xml");
+         InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
          if (ekfParameterStream == null)
          {
             throw new RuntimeException("Did not find parameter file for EKF.");
