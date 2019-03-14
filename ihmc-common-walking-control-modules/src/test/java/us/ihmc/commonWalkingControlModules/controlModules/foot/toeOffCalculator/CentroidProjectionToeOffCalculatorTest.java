@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -46,7 +45,7 @@ public class CentroidProjectionToeOffCalculatorTest
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
@@ -80,7 +79,7 @@ public class CentroidProjectionToeOffCalculatorTest
 
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
@@ -88,24 +87,21 @@ public class CentroidProjectionToeOffCalculatorTest
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConstructor()
    {
       toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testClear()
    {
       toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, contactableFeet, getToeOffParameters(), parentRegistry);
       toeOffCalculator.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -118,8 +114,7 @@ public class CentroidProjectionToeOffCalculatorTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testComputeToeOffContactPoint()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -139,8 +134,7 @@ public class CentroidProjectionToeOffCalculatorTest
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingSide);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetToeOffContactPoint()
    {
       RobotSide trailingSide = RobotSide.LEFT;
@@ -218,12 +212,6 @@ public class CentroidProjectionToeOffCalculatorTest
          public double getMinimumSwingTimeForDisturbanceRecovery()
          {
             return 0;
-         }
-
-         @Override
-         public boolean useOptimizationBasedICPController()
-         {
-            return false;
          }
 
          @Override

@@ -1,22 +1,22 @@
 package us.ihmc.avatar.straightLegWalking;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,7 +44,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
    private Double stepDownHeight = null;
    private Double stepHeight = null;
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -56,7 +56,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       stepHeight = null;
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -106,8 +106,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       this.stepHeight = stepHeight;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 70000)
+   @Test
    public void testForwardStep() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -126,8 +125,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 70000)
+   @Test
    public void testForwardStepWithPause() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -152,8 +150,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 99990000)
+   @Test
    public void testForwardSteps() throws SimulationExceededMaximumTimeException
    {
       double startingLength = 0.4;
@@ -203,8 +200,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 70000)
+   @Test
    public void testWideStep() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -228,8 +224,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test(timeout = 100000)
+   @Test
    public void testSteppingDown() throws SimulationExceededMaximumTimeException
    {
       runSteppingDown(stepDownHeight, stepDownHeight, stepLength, stanceWidth);
@@ -270,8 +265,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test(timeout = 100000)
+   @Test
    public void testSteppingDownWithClosing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

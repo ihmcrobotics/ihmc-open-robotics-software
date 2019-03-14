@@ -45,7 +45,7 @@ public class RemotePlannerMessageConverter
    private Optional<PlanarRegionsList> planarRegionsList = Optional.empty();
 
    private final AtomicReference<FootstepPlanningResult> resultReference;
-   private final AtomicReference<FootstepPlan> footstepPlanReference;
+   private final AtomicReference<FootstepDataListMessage> footstepPlanReference;
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Integer> receivedPlanIdReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
@@ -73,7 +73,7 @@ public class RemotePlannerMessageConverter
       this.ros2Node = ros2Node;
 
       resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResultTopic);
-      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanTopic);
+      footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
       receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic, 0);
       acceptNewPlanarRegionsReference = messager.createInput(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, true);
@@ -104,7 +104,7 @@ public class RemotePlannerMessageConverter
                                                         FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanningResultTopic, request -> checkAndPublishIfInvalidResult());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanTopic, request -> publishResultingPlan());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponseTopic, request -> publishResultingPlan());
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -188,11 +188,10 @@ public class RemotePlannerMessageConverter
       FootstepPlanningResult planningResult = resultReference.getAndSet(null);
       if (!planningResult.validForExecution())
          throw new RuntimeException("The result is completely invalid, which is a problem.");
-      FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
 
       planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setFootstepPlanningResult(planningResult.toByte());
-      result.getFootstepDataList().set(convertToFootstepDataListMessage(footstepPlan));
+      result.getFootstepDataList().set(footstepPlanReference.getAndSet(null));
       result.setPlanId(plannerRequestIdReference.get());
       receivedPlanIdReference.set(plannerRequestIdReference.get());;
 
@@ -216,49 +215,5 @@ public class RemotePlannerMessageConverter
 
       if (verbose)
          PrintTools.info("Finished planning, but result isn't valid, so publishing blank result on the network.");
-   }
-
-   private static FootstepDataListMessage convertToFootstepDataListMessage(FootstepPlan footstepPlan)
-   {
-      if (footstepPlan == null)
-      {
-         return new FootstepDataListMessage();
-      }
-      else
-      {
-         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-         {
-            SimpleFootstep footstep = footstepPlan.getFootstep(i);
-
-            FramePose3D footstepPose = new FramePose3D();
-            footstep.getSoleFramePose(footstepPose);
-            Point3D location = new Point3D(footstepPose.getPosition());
-            Quaternion orientation = new Quaternion(footstepPose.getOrientation());
-
-            FootstepDataMessage footstepData = new FootstepDataMessage();
-            footstepData.setRobotSide(footstep.getRobotSide().toByte());
-            footstepData.getLocation().set(location);
-            footstepData.getOrientation().set(orientation);
-
-            if (footstep.hasFoothold())
-            {
-               footstepData.getPredictedContactPoints2d().clear();
-
-               ConvexPolygon2D foothold = new ConvexPolygon2D();
-               footstep.getFoothold(foothold);
-
-               for (int j = 0; j < foothold.getNumberOfVertices(); j++)
-               {
-                  footstepData.getPredictedContactPoints2d().add().set(foothold.getVertex(j), 0.0);
-               }
-            }
-
-            footstepDataListMessage.getFootstepDataList().add().set(footstepData);
-         }
-
-         return footstepDataListMessage;
-      }
    }
 }

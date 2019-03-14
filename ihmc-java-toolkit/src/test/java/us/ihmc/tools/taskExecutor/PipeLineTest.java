@@ -1,18 +1,16 @@
 package us.ihmc.tools.taskExecutor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class PipeLineTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testEmptyPipeline()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();
@@ -22,8 +20,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPipelineWithOneSingleTaskStage()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();
@@ -43,8 +40,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPipelineWithTwoSingleTaskStages()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();
@@ -85,8 +81,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPipelineOneStageTwoPipesThenOneSingleTaskStage()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();
@@ -143,8 +138,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTwoParallelPipes()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();
@@ -198,8 +192,7 @@ public class PipeLineTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testThreePipesWithParallelAndSeriesTasks()
    {
       PipeLine<ParallelTaskKey> pipeLine = new PipeLine<ParallelTaskKey>();

@@ -32,7 +32,7 @@ public class ConstantPlanarRegionsPublisher
    public ConstantPlanarRegionsPublisher(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.publisher = new REAPlanarRegionPublicNetworkProvider(new ConstantPlanarRegionProvider(), ros2Node, publisherTopicNameGenerator, subscriberTopicNameGenerator);
+      this.publisher = new REAPlanarRegionPublicNetworkProvider(null, new ConstantPlanarRegionProvider(), ros2Node, publisherTopicNameGenerator, subscriberTopicNameGenerator);
    }
 
    public void start()

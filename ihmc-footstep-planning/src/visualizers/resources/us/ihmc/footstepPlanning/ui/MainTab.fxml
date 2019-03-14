@@ -8,17 +8,21 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.image.Image?>
 <SplitPane dividerPositions="0.5874125874125874" orientation="VERTICAL" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0">
          <children>
-            <SplitPane dividerPositions="0.4, 0.8, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.4, 0.72, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                      <children>
@@ -35,10 +39,13 @@
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Button mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
-                              <Button mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                              <Button mnemonicParsing="false" onAction="#computePath" fx:id="computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
+                              <Button mnemonicParsing="false" onAction="#abortPlanning" fx:id="abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2"/>
+                               <CheckBox fx:id="ignorePartialFootholds" text="Ignore partial footholds" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1"/>
+                              <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
+                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="6" GridPane.columnSpan="1"/>
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                               <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -97,12 +104,18 @@
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               </rowConstraints>
 
-                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <CheckBox fx:id="overrideTiming" text="Override" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                              <CheckBox fx:id="overrideSwingHeight" text="Override" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
 
-                              <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                              <Label text="Swing time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                              <Label text="Transfer time (s)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Swing height (m)" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                              <Spinner fx:id="swingTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                              <Spinner fx:id="transferTimeSpinner" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <Spinner fx:id="swingHeightSpinner" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                              <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                           </GridPane>
                       </children></AnchorPane>
               </items>
@@ -110,7 +123,11 @@
          </children></AnchorPane>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="127.0" prefWidth="995.0">
          <children>
-            <Text layoutX="247.0" layoutY="24.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Goal Selection" textAlignment="CENTER" wrappingWidth="414.7294921875" />
+             <SplitPane dividerPositions="0.65, 1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                 <items>
+                     <AnchorPane minHeight="0.0" minWidth="0.0">
+                         <children>
+                         <Text layoutX="247.0" layoutY="24.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Goal Selection" textAlignment="CENTER" wrappingWidth="414.7294921875" />
             <GridPane layoutX="57.0" layoutY="27.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="90.0" prefWidth="100.0" />
@@ -131,10 +148,10 @@
                   <RowConstraints maxHeight="38.0" minHeight="10.0" prefHeight="38.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                <ToggleButton fx:id="placeStart" mnemonicParsing="false" prefWidth="120.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
-                  <ToggleButton fx:id="rotateStart" layoutX="15.0" layoutY="7.0" mnemonicParsing="false" prefWidth="120.0" text="Rotate Start" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
-                  <ToggleButton fx:id="placeGoal" layoutX="10.0" layoutY="27.0" mnemonicParsing="false" prefWidth="120.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                  <ToggleButton fx:id="rotateGoal" layoutX="10.0" layoutY="67.0" mnemonicParsing="false" prefWidth="120.0" text="Rotate Goal" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Button onAction="#placeStart" fx:id="placeStart" mnemonicParsing="false" prefWidth="120.0" text="Place Start" textAlignment="CENTER" GridPane.halignment="CENTER" />
+                  <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  <Button onAction="#placeGoal" fx:id="placeGoal" layoutX="10.0" layoutY="27.0" mnemonicParsing="false" prefWidth="120.0" text="Place Goal" textAlignment="CENTER" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Region prefWidth="20.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="x" textAlignment="RIGHT" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                   <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="8" GridPane.halignment="RIGHT" />
                   <Label text="yaw" textAlignment="RIGHT" GridPane.columnIndex="8" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
@@ -151,8 +168,57 @@
                   <Spinner fx:id="goalZPosition" layoutX="578.0" layoutY="8.0" GridPane.columnIndex="7" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="9" GridPane.rowIndex="1" />
+                  <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <Label text="initialSupport" textAlignment="RIGHT" GridPane.columnIndex="11" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="12" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                </children>
             </GridPane>
-         </children></AnchorPane>
+         </children>
+                     </AnchorPane>
+
+                     <AnchorPane minHeight="0.0" minWidth="0.0">
+                         <children>
+                             <Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Walking Preview" textAlignment="CENTER"
+                                   wrappingWidth="214.7294921875"/>
+                             <GridPane layoutX="10.0" layoutY="24.0">
+                                 <Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />
+                                 <Slider fx:id="previewSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.0" minorTickCount="4" prefHeight="38.0" prefWidth="300.0" GridPane.columnIndex="1" />
+                                 <Button fx:id="previewPlayButton" onAction="#playWalkingPreview" GridPane.columnIndex="3">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+
+                                 <Button fx:id="previewPauseButton" onAction="#pauseWalkingPreview" GridPane.columnIndex="4">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+
+                                 <Button fx:id="previewStopButton" onAction="#stopWalkingPreview" GridPane.columnIndex="5">
+                                     <graphic>
+                                         <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                 <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />
+                                             </image>
+                                         </ImageView>
+                                     </graphic>
+                                 </Button>
+                             </GridPane>
+                         </children>
+                     </AnchorPane>
+                 </items>
+             </SplitPane>
+         </children>
+
+   </AnchorPane>
   </items>
 </SplitPane>

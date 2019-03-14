@@ -1,19 +1,21 @@
 package us.ihmc.robotics.lidar;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,8 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 public class LidarScanTest
 {
 	
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testFlipNew()
    {
       float[] ranges = new float[720];
@@ -47,8 +48,7 @@ public class LidarScanTest
       assertLidarScanEquals(lidarScan, lidarScan.flipNew().flipNew(), 1e-7, 1e-7f);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAssertLidarScanRangesEqual()
    {
       Random random = new Random();
@@ -59,7 +59,7 @@ public class LidarScanTest
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges1, random.nextInt());
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges2, random.nextInt());
 
-      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionFailedError.class, new RunnableThatThrows()
       {
          @Override
          public void run() throws Throwable
@@ -79,8 +79,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan4, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAssertLidarScanTransformsEqual()
    {
       Random random = new Random();
@@ -110,8 +109,7 @@ public class LidarScanTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testAssertLidarScanEquals()
    {
       Random random = new Random();
@@ -154,8 +152,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan2, rangeTolerance);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor()
    {
       Random random = new Random();
@@ -174,8 +171,7 @@ public class LidarScanTest
       assertEquals(lidarScan1.size(), 720, 1e-7f);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testConstructor2()
    {
       Random random = new Random();
@@ -191,8 +187,7 @@ public class LidarScanTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testGetRanges()
    {
       Random random = new Random();
@@ -212,8 +207,7 @@ public class LidarScanTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testGetCopy()
    {
       Random random = new Random();
@@ -233,8 +227,7 @@ public class LidarScanTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testScanParameters()
    {
       Random random = new Random();
@@ -272,8 +265,7 @@ public class LidarScanTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testGetAllPoints()
    {
       Random random = new Random();

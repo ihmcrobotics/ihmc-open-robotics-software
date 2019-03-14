@@ -5,11 +5,13 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 /**
@@ -19,7 +21,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
  */
 public class ValkyrieRemoteFootstepPlannerUI extends Application
 {
-
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
 
@@ -28,14 +29,22 @@ public class ValkyrieRemoteFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      DRCRobotModel drcRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel model = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel previewModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, false, "DEFAULT", null, false, true, 0.0);
+
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
-      messageConverter = RemoteUIMessageConverter.createConverter(messager, drcRobotModel.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
+      messageConverter = RemoteUIMessageConverter.createConverter(messager, model.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(), drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
+      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, model.getFootstepPlannerParameters(), model.getVisibilityGraphsParameters(), model,
+                                              previewModel, model.getContactPointParameters(), model.getWalkingControllerParameters());
       ui.show();
+
+      if(!ValkyrieNetworkProcessor.launchFootstepPlannerModule)
+      {
+         new MultiStageFootstepPlanningModule(model, model.getLogModelProvider(), false);
+      }
    }
 
    @Override

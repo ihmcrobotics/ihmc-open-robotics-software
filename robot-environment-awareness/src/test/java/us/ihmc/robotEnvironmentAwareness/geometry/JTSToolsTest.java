@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static org.junit.Assert.*;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
@@ -30,7 +30,7 @@ public class JTSToolsTest
 {
    private static final int ITERATIONS = 1000;
 
-   @Test(timeout = 30000)
+   @Test
    public void testPointConversions()
    {
       Random random = new Random(4234234);
@@ -65,7 +65,7 @@ public class JTSToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testLineStringConversion() throws Exception
    {
       Random random = new Random(2423423);
@@ -80,7 +80,7 @@ public class JTSToolsTest
       }
    }
 
-   @Test(timeout = 30000)
+   @Test
    public void testMultiString() throws Exception
    {
       Random random = new Random(43543);

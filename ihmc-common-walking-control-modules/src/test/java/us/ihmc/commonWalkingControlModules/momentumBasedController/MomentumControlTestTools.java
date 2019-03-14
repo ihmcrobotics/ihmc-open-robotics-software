@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static junit.framework.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Collection;
 import java.util.Map;

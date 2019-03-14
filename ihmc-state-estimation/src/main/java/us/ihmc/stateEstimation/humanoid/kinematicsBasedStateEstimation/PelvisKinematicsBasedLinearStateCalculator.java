@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -207,11 +209,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
-   private void reset()
-   {
-      rootJointPosition.setToZero();
-   }
-
    /**
     * Estimates the foot positions corresponding to the given pelvisPosition
     * @param pelvisPosition
@@ -259,7 +256,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
     * @param swingingFoot a foot in swing
     * @param pelvisPosition the current pelvis position
     */
-   private void updateUntrustedFootPosition(RigidBodyBasics swingingFoot, FramePoint3D pelvisPosition)
+   private void updateUntrustedFootPosition(RigidBodyBasics swingingFoot, FramePoint3DReadOnly pelvisPosition)
    {
       YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(swingingFoot);
       footPositionInWorld.set(pelvisPosition);
@@ -385,7 +382,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    public void updateKinematics()
    {
-      reset();
+      rootJointPosition.setToZero();
       updateKinematicsNewTwist();
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
@@ -437,7 +434,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
-   public void updateFeetPositionsWhenTrustingIMUOnly(FramePoint3D pelvisPosition)
+   public void updateFeetPositionsWhenTrustingIMUOnly(FramePoint3DReadOnly pelvisPosition)
    {
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
@@ -446,7 +443,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
    }
 
-   public void estimatePelvisLinearState(List<RigidBodyBasics> trustedFeet, List<RigidBodyBasics> unTrustedFeet, FramePoint3D pelvisPosition)
+   public void estimatePelvisLinearState(List<RigidBodyBasics> trustedFeet, List<RigidBodyBasics> unTrustedFeet, FramePoint3DReadOnly pelvisPosition)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
@@ -487,9 +484,23 @@ public class PelvisKinematicsBasedLinearStateCalculator
       kinematicsIsUpToDate.set(false);
    }
 
-   public void setPelvisPosition(FramePoint3D pelvisPosition)
+   public void setPelvisPosition(FramePoint3DReadOnly pelvisPosition)
    {
       rootJointPosition.set(pelvisPosition);
+   }
+
+   public void setPelvisLinearVelocity(FrameVector3DReadOnly pelvisLinearVelocity)
+   {
+      rootJointLinearVelocityBacklashKinematics.reset();
+      rootJointLinearVelocityBacklashKinematics.set(pelvisLinearVelocity);
+      rootJointLinearVelocityNewTwist.set(pelvisLinearVelocity);
+   }
+
+   public void setPelvisLinearVelocityToZero()
+   {
+      rootJointLinearVelocityBacklashKinematics.reset();
+      rootJointLinearVelocityBacklashKinematics.setToZero();
+      rootJointLinearVelocityNewTwist.setToZero();
    }
 
    public void getRootJointPositionAndVelocity(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack)

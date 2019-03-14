@@ -1,7 +1,6 @@
 package us.ihmc.tools.factories;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class ExampleValidFactory
 {

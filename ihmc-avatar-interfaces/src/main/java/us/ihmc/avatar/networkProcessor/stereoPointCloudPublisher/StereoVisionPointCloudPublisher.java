@@ -1,47 +1,52 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
-import java.awt.Color;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
 public class StereoVisionPointCloudPublisher
 {
+   private static final boolean Debug = false;
+
    private static final int MAX_NUMBER_OF_POINTS = 200000;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
 
-   private final AtomicReference<ColorPointCloudData> pointCloudDataToPublish = new AtomicReference<>(null);
+   private final AtomicReference<PointCloud2> rosPointCloud2ToPublish = new AtomicReference<>(null);
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
+   private ReferenceFrame stereoVisionPointsFrame = worldFrame;
+   private StereoVisionWorldTransformCalculator stereoVisionTransformer = null;
+
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
@@ -55,7 +60,7 @@ public class StereoVisionPointCloudPublisher
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator(robotName));
+      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
    }
 
    public void start()
@@ -85,6 +90,12 @@ public class StereoVisionPointCloudPublisher
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
    }
 
+   public void setCustomStereoVisionTransformer(StereoVisionWorldTransformCalculator transformer)
+   {
+      LogTools.info("setCustomStereoVisionTransformer()");
+      stereoVisionTransformer = transformer;
+   }
+
    private RosPointCloudSubscriber createROSPointCloud2Subscriber()
    {
       return new RosPointCloudSubscriber()
@@ -92,12 +103,10 @@ public class StereoVisionPointCloudPublisher
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-            Point3D[] scanPoints = pointCloudData.getPoints();
-            Color[] colors = pointCloudData.getPointColors();
-            long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
+            rosPointCloud2ToPublish.set(pointCloud);
 
-            pointCloudDataToPublish.set(new ColorPointCloudData(timestamp, scanPoints, colors));
+            if (Debug)
+               System.out.println("Receiving point cloud, n points: " + pointCloud.getHeight() * pointCloud.getWidth());
          }
       };
    }
@@ -106,12 +115,31 @@ public class StereoVisionPointCloudPublisher
    {
       return new Runnable()
       {
+         private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         private final Pose3D sensorPose = new Pose3D();
+
          @Override
          public void run()
          {
-            ColorPointCloudData pointCloudData = pointCloudDataToPublish.getAndSet(null);
-            if (pointCloudData == null)
+            try
+            {
+               transformDataAndPublish();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               executorService.shutdown();
+            }
+         }
+
+         private void transformDataAndPublish()
+         {
+            PointCloud2 pointCloud2 = rosPointCloud2ToPublish.getAndSet(null);
+
+            if (pointCloud2 == null)
                return;
+
+            ColorPointCloudData pointCloudData = new ColorPointCloudData(pointCloud2, MAX_NUMBER_OF_POINTS);
 
             long robotTimestamp;
 
@@ -130,46 +158,70 @@ public class StereoVisionPointCloudPublisher
                   return;
             }
 
-            if (pointCloudData.numberOfPoints > MAX_NUMBER_OF_POINTS)
-               pointCloudData = pointCloudData.trim(MAX_NUMBER_OF_POINTS);
+            if (stereoVisionTransformer != null)
+            {
+               stereoVisionTransformer.computeTransformToWorld(fullRobotModel, stereoVisionPointsFrame, transformToWorld, sensorPose);
+               pointCloudData.applyTransform(transformToWorld);
+            }
+            else
+            {
+               if (!stereoVisionPointsFrame.isWorldFrame())
+               {
+                  stereoVisionPointsFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+                  pointCloudData.applyTransform(transformToWorld);
+               }
 
-            float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
+               fullRobotModel.getHeadBaseFrame().getTransformToDesiredFrame(transformToWorld, worldFrame);
+               sensorPose.set(transformToWorld);
+            }
 
-            int[] colors = pointCloudData.getColors();
-            StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
+            StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage();
+            message.getSensorPosition().set(sensorPose.getPosition());
+            message.getSensorOrientation().set(sensorPose.getOrientation());
+
+            if (Debug)
+               System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
             pointcloudPublisher.publish(message);
          }
       };
    }
 
-   private class ColorPointCloudData
+   public class ColorPointCloudData
    {
       private final long timestamp;
-      private final Point3D[] pointCloud;
       private final int numberOfPoints;
+      private final Point3D[] pointCloud;
       private final int[] colors;
 
-      public ColorPointCloudData(long timestamp, Point3D[] pointCloud, int[] colors)
+      public ColorPointCloudData(PointCloud2 rosPointCloud2, int maxSize)
       {
-         this.timestamp = timestamp;
-         this.pointCloud = pointCloud;
-         this.colors = new int[colors.length];
-         System.arraycopy(colors, 0, this.colors, 0, colors.length);
-         numberOfPoints = pointCloud.length;
-      }
+         timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
 
-      public ColorPointCloudData(long timestamp, Point3D[] pointCloud, Color[] colors)
-      {
-         this.timestamp = timestamp;
-         this.pointCloud = pointCloud;
-         this.colors = new int[colors.length];
+         UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(rosPointCloud2);
+         pointCloud = unpackPointsAndIntensities.getPoints();
+         colors = unpackPointsAndIntensities.getPointColorsRGB();
 
-         for (int i = 0; i < colors.length; i++)
+         if (unpackPointsAndIntensities.getPoints().length <= maxSize)
          {
-            this.getColors()[i] = colors[i].getRGB();
+            numberOfPoints = pointCloud.length;
          }
+         else
+         {
+            Random random = new Random();
+            int currentSize = pointCloud.length;
 
-         numberOfPoints = pointCloud.length;
+            while (currentSize > maxSize)
+            {
+               int nextToRemove = random.nextInt(currentSize);
+               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
+               colors[nextToRemove] = colors[currentSize - 1];
+               pointCloud[currentSize - 1] = null;
+               colors[currentSize - 1] = -1;
+
+               currentSize--;
+            }
+            numberOfPoints = maxSize;
+         }
       }
 
       public long getTimestamp()
@@ -177,49 +229,46 @@ public class StereoVisionPointCloudPublisher
          return timestamp;
       }
 
-      public void transform(RigidBodyTransform transform)
-      {
-         for (int i = 0; i < numberOfPoints; i++)
-            transform.transform(pointCloud[i]);
-      }
-
-      public float[] getPointCloudBuffer()
-      {
-         TFloatArrayList pointCloudBuffer = new TFloatArrayList();
-
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            Point3D scanPoint = pointCloud[i];
-
-            pointCloudBuffer.add((float) scanPoint.getX());
-            pointCloudBuffer.add((float) scanPoint.getY());
-            pointCloudBuffer.add((float) scanPoint.getZ());
-         }
-
-         return pointCloudBuffer.toArray();
-      }
-
       public int[] getColors()
       {
          return colors;
       }
 
-      public ColorPointCloudData trim(int size)
+      public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
       {
-         Random random = new Random();
-         List<Point3D> trimmedPoints = Arrays.stream(pointCloud).collect(Collectors.toList());
-         TIntArrayList trimmedColors = new TIntArrayList(colors);
+         long timestamp = this.timestamp;
+         float[] pointCloudBuffer = new float[3 * numberOfPoints];
+         int[] colorsInteger;
 
-         while (trimmedColors.size() > size)
+         if (colors.length == numberOfPoints)
+            colorsInteger = colors;
+         else
+            colorsInteger = Arrays.copyOf(colors, numberOfPoints);
+
+         for (int i = 0; i < numberOfPoints; i++)
          {
-            int indexToRemove = random.nextInt(trimmedColors.size());
-            int lastIndex = trimmedPoints.size() - 1;
-            Collections.swap(trimmedPoints, indexToRemove, lastIndex);
-            trimmedPoints.remove(lastIndex);
-            trimmedColors.removeAt(indexToRemove);
+            Point3D scanPoint = pointCloud[i];
+
+            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
+            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
+            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
          }
 
-         return new ColorPointCloudData(size, trimmedPoints.toArray(new Point3D[size]), trimmedColors.toArray());
+         return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
       }
+
+      public void applyTransform(RigidBodyTransform transform)
+      {
+         for (int i = 0; i < numberOfPoints; i++)
+         {
+            pointCloud[i].applyTransform(transform);
+         }
+      }
+   }
+
+   public static interface StereoVisionWorldTransformCalculator
+   {
+      public void computeTransformToWorld(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack,
+                                          Pose3DBasics sensorPoseToPack);
    }
 }

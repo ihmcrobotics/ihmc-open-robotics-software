@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedRobotics.providers;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ComPositionPacket;
 import controller_msgs.msg.dds.ComVelocityPacket;
@@ -21,7 +21,8 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.TcpNetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -36,8 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedControllerInputProviderTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testNoVariablesAreMixedUpWhenSendingTeleOpPacket() throws IOException
    {
       double epsilon = 0.01;
@@ -112,8 +112,7 @@ public class QuadrupedControllerInputProviderTest
       assertTrue(randomPlanarVelocity.epsilonEquals(planarVelocityInput, epsilon));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testYoVariableNamesAreCorrectAndUpdateInputs() throws IOException
    {
       double epsilon = 0.001;

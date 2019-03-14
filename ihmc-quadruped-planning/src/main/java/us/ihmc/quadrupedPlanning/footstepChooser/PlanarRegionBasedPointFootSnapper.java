@@ -54,6 +54,10 @@ public class PlanarRegionBasedPointFootSnapper implements PointFootSnapper
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList.clear();
+
+      if (planarRegionsList == null)
+         return;
+
       double minimumPolygonArea = Math.PI * MathTools.square(parameters.distanceInsidePlanarRegion());
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)

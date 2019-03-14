@@ -134,7 +134,7 @@ public class PushRecoveryControlModule
       recoveringFromDoubleSupportFall.set(true);
    }
 
-   public void updateForDoubleSupport(FramePoint2D desiredCapturePoint2d, FramePoint2D capturePoint2d, double omega0)
+   public void updateForDoubleSupport(FramePoint2DReadOnly desiredCapturePoint2d, FramePoint2DReadOnly capturePoint2d, double omega0)
    {
       if (!isEnabled())
          return;
@@ -182,7 +182,7 @@ public class PushRecoveryControlModule
       swingSideForDoubleSupportRecovery.set(closestFootToICP.getEnumValue().getOppositeSide());
    }
 
-   public void updateForSingleSupport(FramePoint2D desiredCapturePoint2d, FramePoint2D capturePoint2d, double omega0)
+   public void updateForSingleSupport(FramePoint2DReadOnly desiredCapturePoint2d, FramePoint2DReadOnly capturePoint2d, double omega0)
    {
       if (!isEnabled())
          return;

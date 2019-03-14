@@ -1,19 +1,19 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.FootstepPlanningTestTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class SettableFootstepPlannerParametersTest
 {
    private final static int iters = 10;
    private final static double epsilon = 1e-7;
 
-   @Test(timeout = 30000)
+   @Test
    public void test()
    {
       Random random = new Random(1738L);

@@ -1,8 +1,9 @@
 package us.ihmc.robotics.math;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,15 +17,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.Random;
 
-import static junit.framework.TestCase.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class DeadbandToolsTest
 {
    private static final double epsilon = 1e-9;
    private static final int iters = 100;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testScalar()
    {
       Random random = new Random(1738L);
@@ -51,8 +51,7 @@ public class DeadbandToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testVector()
    {
       Random random = new Random(1738L);
@@ -106,8 +105,7 @@ public class DeadbandToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testPoint()
    {
       Random random = new Random(1738L);

@@ -1,10 +1,11 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
+import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -16,6 +17,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@Tag("controller-api")
 public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final double epsilon = 0.05;
@@ -109,13 +111,13 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN_FINGERS, epsilon);
    }
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

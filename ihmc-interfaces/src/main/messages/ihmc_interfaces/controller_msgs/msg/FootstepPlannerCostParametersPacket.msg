@@ -53,3 +53,11 @@ float64 depth_first_heuristics_weight -1.0
 # Gets the weight for the heuristics in the Body path based planner.
 float64 body_path_based_heuristics_weight -1.0
 
+# If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
+# @see FootstepPlannerCostParameters#getBoundingBoxCost
+float64 maximum_2d_distance_from_bounding_box_to_penalize -1.0
+
+# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
+# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
+# {@code c * (1 - d / d_max)}, where d_max is this value.
+float64 bounding_box_cost -1.0

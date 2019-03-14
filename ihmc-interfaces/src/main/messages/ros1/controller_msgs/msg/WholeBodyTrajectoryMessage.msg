@@ -16,6 +16,9 @@ controller_msgs/ArmTrajectoryMessage right_arm_trajectory_message
 # Trajectory for the chest
 controller_msgs/ChestTrajectoryMessage chest_trajectory_message
 
+# Trajectory for the spine joints
+controller_msgs/SpineTrajectoryMessage spine_trajectory_message
+
 # Trajectory for the pelvis
 controller_msgs/PelvisTrajectoryMessage pelvis_trajectory_message
 

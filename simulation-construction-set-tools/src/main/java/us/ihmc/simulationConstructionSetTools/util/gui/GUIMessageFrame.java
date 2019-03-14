@@ -22,7 +22,7 @@ import us.ihmc.tools.gui.GUIMessagePanel;
 
 public class GUIMessageFrame
 {
-   private static final boolean SHOW_GUI_MESSAGE_FRAME = true;
+   private static final boolean SHOW_GUI_MESSAGE_FRAME = false;
 
    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("M/d/uu h:mm a: ");
 

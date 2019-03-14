@@ -1,9 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.aStar;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -27,9 +28,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 public class AStarBestEffortTest
 {
@@ -39,7 +40,7 @@ public class AStarBestEffortTest
    private final YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
    private AStarFootstepPlanner planner;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       FootstepPlannerParameters parameters = new BestEffortPlannerParameters(3);
@@ -49,14 +50,13 @@ public class AStarBestEffortTest
       planner.setTimeout(5.0);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.1)
-   @Test(timeout = 30000)
+   @Test
    public void testBestEffort()
    {
       ConvexPolygon2D groundPlane = new ConvexPolygon2D();

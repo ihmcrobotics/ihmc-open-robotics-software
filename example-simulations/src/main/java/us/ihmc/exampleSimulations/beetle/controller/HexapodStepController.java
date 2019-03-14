@@ -57,7 +57,7 @@ public class HexapodStepController
          RobotSextant.class);
    private final SegmentDependentList<RobotSextant, YoFramePoint3D> desiredPositions = new SegmentDependentList<>(RobotSextant.class);
    private final SegmentDependentList<RobotSextant, YoFramePoint3D> currentPositions = new SegmentDependentList<>(RobotSextant.class);
-   
+
    private int legIndex = 0;
    private YoBoolean replanTrajectories;
 

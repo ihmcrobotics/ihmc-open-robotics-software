@@ -1,13 +1,12 @@
 package us.ihmc.robotics.math.filters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -20,7 +19,7 @@ public class RateLimitedYoVariableTest
    double maxRate1, maxRate3;
    double dt1, dt2, dt3, dt4;
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       maxRate2 = new YoDouble("maxRate2", registry);
@@ -47,8 +46,7 @@ public class RateLimitedYoVariableTest
       rateLimitedYoVariable4 = new RateLimitedYoVariable("rateLimitedYoVariable4", registry, maxRate4, position4, dt4);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdate()
    {
       try
@@ -62,8 +60,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateWithNullPointerException()
    {
       try
@@ -79,8 +76,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateWithCurrentPositionParameter()
    {
       for (double angle = 0.0; angle < 3 * 6.28; angle += 1.0)
@@ -112,8 +108,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateWithCurrentPositionParameterExceedingMaxRate()
    {
       for (double angle = 0.0; angle < 3 * 6.28; angle += 1.0)
@@ -173,8 +168,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout=300000)
+	@Test
    public void testUpdateWithMaxRateBeingNegative()
    {
       try

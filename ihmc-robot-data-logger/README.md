@@ -54,19 +54,35 @@ To enable logging and selecting which Decklink cards are captured by the logger,
 Create `~/.ihmc/IHMCLoggerConfiguration.ini` and add the following
 
 ```
-publicBroadcast=true
 camerasToCapture=[comma separated list of Decklink card ID's to capture]
 ```
 
-- `publicBroadcast=true` enables the controller to announce its existance over the network.
 - `camerasToCapture=...` informs the logger which cameras to use for this contorller. 
 
 The Decklink cards are numbered sequentially starting from 0. Video resolution is auto-detected. If you want to log Decklink cards 0 and 2, set "loggedCameras=0,2". If you only want to log Decklink card 1, set "loggedCameras=1". If you do not want to log any cameras, remove the loggedCameras line or set it to an empty string.
 
-Alternatively, you can add `-Dihmc.publicBroadcast=true` and `-Dihmc.camerasToCapture` to the java command line arguments.
+Alternatively, you can add `-Dihmc.camerasToCapture` to the java command line arguments.
 
 Make sure a gateway within the same subnet is set for the interface that is connected to the logger. It does not need to exist on the network, but without a default gateway FastRTPS cannot reliably connect. 
 
+## Adding static hosts
+
+If the logger cannot auto-discover a host, you can add a static host to `~/.ihmc/ControllerHosts.yaml`.
+
+The file is formatted in YAML format. You can easily add more host/port stanzas. For example, to add `10.0.0.10:8008` and `10.0.0.11:8008` as static hosts, put the following in `~/.ihmc/ControllerHosts.yaml`:
+
+```
+---
+hosts:
+- hostname: "10.0.0.10"
+  port: 8008
+- hostname: "10.0.0.11"
+  port: 8008
+```
+
+Alternatively, you can start `SCSVisualizer` from `ihmc-robot-data-visualizer` and add hosts using the GUI. After you close the visualizer, the hosts you added will be saved  `~/.ihmc/ControllerHosts.yaml`. You can copy that file to the logger if it is on a different computer.
+
+ 
  
 ## Starting the logger
 

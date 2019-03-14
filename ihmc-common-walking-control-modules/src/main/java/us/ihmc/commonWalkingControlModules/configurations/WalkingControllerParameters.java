@@ -8,11 +8,16 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
@@ -134,13 +139,6 @@ public abstract class WalkingControllerParameters
    {
       return 0.04;
    }
-
-   /**
-    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
-    *
-    * @return boolean (true = use ICP Optimization, false = use ICP Proportional Controller)
-    */
-   public abstract boolean useOptimizationBasedICPController();
 
    /**
     * The desired position of the CMP is computed based on a feedback control law on the ICP. This method returns
@@ -504,18 +502,6 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Usually the desired CMP will be projected into the support area to avoid the generation of large amounts of
-    * angular momentum. This method determines whether the desired CMP is allowed to be in area that is larger then
-    * the support. The size of the area is determined by the value {@link #getMaxAllowedDistanceCMPSupport()}
-    *
-    * @return alwaysAllowMomentum
-    */
-   public boolean alwaysAllowMomentum()
-   {
-      return false;
-   }
-
-   /**
     * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
     * the vertical axis during swing only.
     * Useful when the robot has heavy legs and tends to slips during swing.
@@ -694,10 +680,7 @@ public abstract class WalkingControllerParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   public ICPOptimizationParameters getICPOptimizationParameters()
-   {
-      return null;
-   }
+   public abstract ICPOptimizationParameters getICPOptimizationParameters();
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.
@@ -722,6 +705,7 @@ public abstract class WalkingControllerParameters
    /**
     * Parameter for the CoM height trajectory generation.
     */
+   @Deprecated // Remove this. It is not actually doing anything.
    public abstract double defaultOffsetHeightAboveAnkle();
 
    /**

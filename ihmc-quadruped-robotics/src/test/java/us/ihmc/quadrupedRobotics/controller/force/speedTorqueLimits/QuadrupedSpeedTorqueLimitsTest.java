@@ -1,22 +1,26 @@
 package us.ihmc.quadrupedRobotics.controller.force.speedTorqueLimits;
 
-import junit.framework.AssertionFailedError;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import java.io.IOException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
+
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-
-import java.io.IOException;
 
 public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRobotTestInterface
 {
@@ -25,7 +29,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   @Before
+   @BeforeEach
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
@@ -47,7 +51,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       }
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       quadrupedTestFactory.close();
@@ -59,8 +63,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 30000)
+   @Test
    public void testStandingLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
@@ -69,8 +72,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 300000)
+   @Test
    public void testStandingOnThreeLegsLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
@@ -89,8 +91,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 30000)
+   @Test
    public void testXGaitWalkingInPlaceLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
@@ -104,8 +105,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 30000)
+   @Test
    public void testXGaitTrottingInPlaceLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
@@ -120,8 +120,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 30000)
+   @Test
    public void testXGaitWalkingLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
@@ -137,7 +136,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   private void standupPrecisely(double desiredCoMHeight) throws AssertionFailedError
+   private void standupPrecisely(double desiredCoMHeight)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -147,7 +146,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.simulate();
    }
 
-   private void lowerHeightUntilFailure(double originalHeight) throws AssertionFailedError
+   private void lowerHeightUntilFailure(double originalHeight)
    {
       for (double heightDelta = 0.0; (originalHeight + heightDelta) > 0.38; heightDelta -= 0.01)
       {
@@ -175,7 +174,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       }
    }
 
-   private void raiseHeightUntilFailure(double originalHeight) throws AssertionFailedError
+   private void raiseHeightUntilFailure(double originalHeight)
    {
       for (double heightDelta = 0.38 - originalHeight; (originalHeight + heightDelta) < originalHeight; heightDelta += 0.01)
       {

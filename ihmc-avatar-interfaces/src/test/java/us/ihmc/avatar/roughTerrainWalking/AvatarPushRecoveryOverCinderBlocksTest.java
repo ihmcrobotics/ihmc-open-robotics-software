@@ -1,15 +1,15 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -19,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,6 +36,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+@Tag("humanoid-rough-terrain")
 public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -133,7 +132,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-      drcSimulationTestHelper.createSubscriberFromController(RequestPlanarRegionsListMessage.class, packet -> drcSimulationTestHelper.publishToController(planarRegionsListMessage));
+      drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), robotModel.createFullRobotModel().getChest().getParentJoint().getName(),
@@ -175,8 +174,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 72.3)
-   @Test(timeout = 360000)
+   @Test
    public void testNoPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpFlatBlockTest();
@@ -190,8 +188,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 64.7)
-   @Test(timeout = 320000)
+   @Test
    public void testNoPushForwardWalkOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpForwardFlatBlockTest();
@@ -205,8 +202,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 94.5)
-   @Test(timeout = 470000)
+   @Test
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpTiltedBlockTest();
@@ -220,8 +216,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 68.6)
-   @Test(timeout = 340000)
+   @Test
    public void testNoPushForwardTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpForwardTiltedBlockTest();
@@ -235,8 +230,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testPushOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpFlatBlockTest();
@@ -335,8 +329,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testForwardPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpForwardFlatBlockTest();
@@ -365,8 +358,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testLeftSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpForwardFlatBlockTest();
@@ -395,8 +387,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testRightSidewaysPushWalkWithOffsetOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpForwardFlatBlockTest();
@@ -425,8 +416,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testPushOverTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpTiltedBlockTest();
@@ -525,8 +515,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    }
 
    /*
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @Test
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -840,13 +829,13 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    }
 
 
-   @Before
+   @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @After
+   @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())

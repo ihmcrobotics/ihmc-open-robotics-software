@@ -1,18 +1,17 @@
 package us.ihmc.tools.inputDevices.ghostMouse;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.event.KeyEvent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class GhostMouseStringToCharTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConvertStringToKeycode()
    {
       assertEquals(KeyEvent.VK_SPACE, GhostMouseStringToChar.convertStringToKeycode("SPACE"));
@@ -27,8 +26,7 @@ public class GhostMouseStringToCharTest
       assertEquals(KeyEvent.VK_9, GhostMouseStringToChar.convertStringToKeycode("9"));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testConvertKeycodeToString()
    {
       assertEquals("SPACE", GhostMouseStringToChar.convertKeycodeToString(KeyEvent.VK_SPACE));

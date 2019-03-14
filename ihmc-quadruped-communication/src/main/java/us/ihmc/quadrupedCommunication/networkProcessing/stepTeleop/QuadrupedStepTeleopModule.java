@@ -12,6 +12,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -25,21 +26,22 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 50;
+   private static final int updatePeriodMilliseconds = 75;
 
    private final QuadrupedStepTeleopController stepTeleopController;
 
    public QuadrupedStepTeleopModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                     PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                    DomainFactory.PubSubImplementation pubSubImplementation)
+                                    boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer, updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
+            new DataServerSettings(logYoVariables, "StepTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
 
       stepTeleopController = new QuadrupedStepTeleopController(defaultXGaitSettings, pointFootSnapperParameters, outputManager, robotDataReceiver, registry,
                                                                yoGraphicsListRegistry, updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer(getClass());
    }
 
    @Override
@@ -48,26 +50,86 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> stepTeleopController.processTimestamp(s.takeNextData().getTimestamp()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> stepTeleopController.setPaused(true));
+                                           s -> processTimestamp(s.takeNextData().getTimestamp()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> stepTeleopController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
-                                           s -> stepTeleopController.processFootstepStatusMessage(s.takeNextData()));
+                                           s -> processFootstepStatusMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> stepTeleopController.processSteppingStateChangeMessage(s.takeNextData()));
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
-                                           s -> stepTeleopController.processGroundPlaneMessage(s.takeNextData()));
+                                           s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicNameGenerator(),
-                                           s -> stepTeleopController.processBodyPathPlanMessage(s.takeNextData()));
+                                           s -> processBodyPathPlanMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> stepTeleopController.processXGaitSettingsPacket(s.takeNextData()));
+                                           s -> processXGaitSettingsPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicNameGenerator(),
-                                           s -> stepTeleopController.processTeleopDesiredVelocity(s.takeNextData()));
+                                           s -> processTeleopDesiredVelocity(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
-                                           s -> stepTeleopController.processPlanarRegionsListMessage(s.takeNextData()));
+                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
+   }
+
+   private void processTimestamp(long timestamp)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processTimestamp(timestamp);
+   }
+
+   private void setPaused(boolean paused)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.setPaused(paused);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processFootstepStatusMessage(QuadrupedFootstepStatusMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processFootstepStatusMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processGroundPlaneMessage(message);
+   }
+
+   private void processBodyPathPlanMessage(QuadrupedBodyPathPlanMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processBodyPathPlanMessage(message);
+   }
+
+   private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processXGaitSettingsPacket(packet);
+   }
+
+   private void processTeleopDesiredVelocity(QuadrupedTeleopDesiredVelocity message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processTeleopDesiredVelocity(message);
+   }
+
+   private void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
+   {
+      if (stepTeleopController != null)
+         stepTeleopController.processPlanarRegionsListMessage(message);
    }
 
    @Override

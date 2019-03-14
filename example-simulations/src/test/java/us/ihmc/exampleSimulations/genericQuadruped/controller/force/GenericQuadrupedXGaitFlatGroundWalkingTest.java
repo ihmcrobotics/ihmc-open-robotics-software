@@ -1,12 +1,9 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitFlatGroundWalkingTest;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGroundWalkingTest
 {
    @Override
@@ -19,6 +16,18 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    public double getPacingWidth()
    {
       return 0.2;
+   }
+
+   @Override
+   public double getPacingStepDuration()
+   {
+      return 0.3;
+   }
+
+   @Override
+   public double getPacingEndDoubleSupportDuration()
+   {
+      return 0.05;
    }
 
    @Override

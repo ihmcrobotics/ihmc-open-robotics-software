@@ -19,6 +19,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class QuadrupedToolboxModule
 {
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -67,33 +68,36 @@ public abstract class QuadrupedToolboxModule
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
+   private final DataServerSettings dataServerSettings;
    private YoVariableServer yoVariableServer;
 
-   public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
+   public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+                                 DataServerSettings dataServerSettings)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, dataServerSettings, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                 int updatePeriodMilliseconds)
+                                 DataServerSettings dataServerSettings, int updatePeriodMilliseconds)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, dataServerSettings, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                 PubSubImplementation pubSubImplementation)
+                                 DataServerSettings dataServerSettings, PubSubImplementation pubSubImplementation)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, dataServerSettings, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
    public QuadrupedToolboxModule(String robotName, FullQuadrupedRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                 int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
+                                 DataServerSettings dataServerSettings, int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
       this.updatePeriodMilliseconds = updatePeriodMilliseconds;
 
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
+      this.dataServerSettings = dataServerSettings;
       this.fullRobotModel = fullRobotModelToLog;
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
@@ -116,15 +120,23 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
+      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      if (fullRobotModel != null)
+      {
+         robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
+         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+                                              s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+      }
+      else
+      {
+         robotDataReceiver = null;
+      }
 
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools
             .createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+
 
       registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
@@ -135,13 +147,12 @@ public abstract class QuadrupedToolboxModule
       timeWithoutInputsBeforeGoingToSleep.set(time);
    }
 
-   protected void startYoVariableServer()
+   protected void startYoVariableServer(Class<?> clazz)
    {
-      if (!startYoVariableServer)
+      if (!startYoVariableServer || dataServerSettings == null)
          return;
 
-      PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
-      yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
+      yoVariableServer = new YoVariableServer(clazz, modelProvider, dataServerSettings, YO_VARIABLE_SERVER_DT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       startYoVariableServerOnAThread(yoVariableServer);
 
@@ -308,7 +319,8 @@ public abstract class QuadrupedToolboxModule
             if (Thread.interrupted())
                return;
 
-            robotDataReceiver.updateRobotModel();
+            if (robotDataReceiver != null)
+               robotDataReceiver.updateRobotModel();
 
             try
             {

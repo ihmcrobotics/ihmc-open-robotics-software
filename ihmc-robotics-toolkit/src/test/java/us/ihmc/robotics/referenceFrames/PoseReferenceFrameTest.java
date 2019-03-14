@@ -1,14 +1,14 @@
 package us.ihmc.robotics.referenceFrames;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,14 +19,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PoseReferenceFrameTest
 {
-   @After
+   @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testAsynchronousUpdatesOne()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -61,8 +60,7 @@ public class PoseReferenceFrameTest
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
-	@Test(timeout = 30000)
+	@Test
    public void testLongChainEfficiency()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -97,8 +95,7 @@ public class PoseReferenceFrameTest
       finalPosition3.changeFrame(worldFrame);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+	@Test
    public void testAsynchronousUpdatesTwo()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

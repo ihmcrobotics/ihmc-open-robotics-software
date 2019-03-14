@@ -1,9 +1,7 @@
 package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 
 import java.util.ArrayList;
@@ -12,11 +10,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -44,8 +43,7 @@ public class PlanarRegionToolsTest
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testComputeMinHeightOfRegionAAboveRegionB()
    {
       double[][] verticesA = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
@@ -97,8 +95,7 @@ public class PlanarRegionToolsTest
 
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testProjectPointToPlanes()
    {
       ConvexPolygon2D convexPolygon = createUnitSquarePolygon();
@@ -125,8 +122,7 @@ public class PlanarRegionToolsTest
       return convexPolygon;
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testTruncatePlanarRegionIfIntersectingWithPlane() throws Exception
    {
       Point3D groundOrigin = new Point3D();
@@ -161,8 +157,7 @@ public class PlanarRegionToolsTest
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedVerticesInWorld[i], actualVerticesInWorld[i], EPSILON);
    }
    
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testTruncatePlanarRegionIfIntersectingWithPlaneTwo() throws Exception
    {
       Point3D groundOrigin = new Point3D(4.25, 8.5, 0.0);
@@ -195,8 +190,7 @@ public class PlanarRegionToolsTest
       return inWorld;
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test
    public void testIsInsidePolygon() throws Exception
    {
       Random random = new Random(324534L);
@@ -233,8 +227,7 @@ public class PlanarRegionToolsTest
       }
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testIsInsidePolygonBug1() throws Exception
    {
       Point2D[] polygon = {new Point2D(-0.3, 0.5), new Point2D(0.3, 0.5), new Point2D(0.3, -0.5), new Point2D(-0.3, -0.5)};
@@ -243,8 +236,7 @@ public class PlanarRegionToolsTest
       assertFalse(PlanarRegionTools.isPointInsidePolygon(polygon, pointToCheck));
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testProjectPointToPlanesVertically()
    {
       Random random = new Random(1738L);
@@ -331,8 +323,7 @@ public class PlanarRegionToolsTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-0.2, 0.0, 0.1), projectedPoint, 1e-6);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterPlanarRegionsWithBoundingCircle()
    {
       Random random = new Random(1738L);
@@ -416,8 +407,7 @@ public class PlanarRegionToolsTest
       }
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterPlanarRegionsWithBoundingCirclePointWithinBigRegion()
    {
       ConvexPolygon2D polygon2D = new ConvexPolygon2D();
@@ -447,8 +437,7 @@ public class PlanarRegionToolsTest
       assertTrue(regionsWithinDistance.contains(planarRegion));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testTrivialCase() throws Exception
    {
       // polygons forming a "|"-shaped region.
@@ -528,8 +517,7 @@ public class PlanarRegionToolsTest
       return convexPolygon.translateCopy(translation);
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterPlanarRegionsWithBoundingCapsule()
    {
       Random random = new Random(1738L);
@@ -622,8 +610,7 @@ public class PlanarRegionToolsTest
       }
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testFilterPlanarRegionsWithBoundingCapsulePointWithinBigRegion()
    {
       ConvexPolygon2D polygon2D = new ConvexPolygon2D();
@@ -655,8 +642,7 @@ public class PlanarRegionToolsTest
       assertTrue(regionsWithinDistance.contains(planarRegion));
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
    public void testIsRegionAOverlapingWithRegionB()
    {
       //TODO: +++JerryPratt: Get this to pass by fixing isRegionAOverlapingWithRegionB()
@@ -707,8 +693,135 @@ public class PlanarRegionToolsTest
       assertTrue(PlanarRegionTools.isRegionAOverlapingWithRegionB(regionC, regionB, epsilonForCheck));
    }
 
-   @Test(timeout = 30000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testFindPlanarRegionsContainingPointByProjectionOntoXYPlane() throws Exception
+   {
+      // polygons forming a "|"-shaped region.
+      List<ConvexPolygon2D> region1ConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      polygon1.addVertex(5.0, 1.0);
+      polygon1.addVertex(5.0, -1.0);
+      polygon1.addVertex(-5.0, -1.0);
+      polygon1.addVertex(-5.0, 1.0);
+
+      region1ConvexPolygons.add(polygon1);
+      for (ConvexPolygon2D convexPolygon : region1ConvexPolygons)
+         convexPolygon.update();
+
+
+      // polygons forming a "--"-shaped region.
+      List<ConvexPolygon2D> region2ConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      polygon2.addVertex(1.0, 5.0);
+      polygon2.addVertex(1.0, -5.0);
+      polygon2.addVertex(-1.0, -5.0);
+      polygon2.addVertex(-1.0, 5.0);
+
+      region2ConvexPolygons.add(polygon2);
+      for (ConvexPolygon2D convexPolygon : region2ConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform region1Transform = new RigidBodyTransform();
+      RigidBodyTransform region2Transform = new RigidBodyTransform();
+
+      region2Transform.setTranslation(0.0, 0.0, 1.0);
+
+      PlanarRegion planarRegion1 = new PlanarRegion(region1Transform, region1ConvexPolygons);
+      PlanarRegion planarRegion2 = new PlanarRegion(region2Transform, region2ConvexPolygons);
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+      planarRegions.add(planarRegion1);
+      planarRegions.add(planarRegion2);
+
+
+      Point2D point2d = new Point2D();
+      List<PlanarRegion> result;
+
+      // Do a bunch of trivial queries with findPlanarRegionsContainingPointByProjectionOntoXYPlane(double x, double y)
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 0.0, 0.0);
+      assertEquals(2, result.size());
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 2.0, 0.0);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, -2.0, 0.0);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 0.0, 2.0);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 0.0, -2.0);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 2.0, 2.0);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, 2.0, -2.0);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, -2.0, -2.0);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, -2.0, 2.0);
+      assertNull(result);
+
+      // Do a bunch of trivial queries with findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2d point)
+      point2d.set(0.0, 0.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertEquals(2, result.size());
+
+      point2d.set(2.0, 0.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      point2d.set(-2.0, 0.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      point2d.set(0.0, 2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      point2d.set(0.0, -2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      point2d.set(2.0, 2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertNull(result);
+      point2d.set(2.0, -2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertNull(result);
+      point2d.set(-2.0, -2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertNull(result);
+      point2d.set(-2.0, 2.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegions, point2d);
+      assertNull(result);
+
+      Point3D point3d = new Point3D();
+      double epsilon = 1.0e-3;
+
+      // Do a bunch of trivial queries with findPlanarRegionsContainingPoint(Point3D point, double epsilon)
+      point3d.set(0.0, 0.0, 0.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPoint(planarRegions, point3d, epsilon);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion1, 1.0e-10));
+      point3d.set(0.0, 0.0, 1.0);
+      result = PlanarRegionTools.findPlanarRegionsContainingPoint(planarRegions, point3d, epsilon);
+      assertEquals(1, result.size());
+      assertTrue(result.get(0).epsilonEquals(planarRegion2, 1.0e-10));
+      point3d.set(0.0, 0.0, 0.5);
+      result = PlanarRegionTools.findPlanarRegionsContainingPoint(planarRegions, point3d, epsilon);
+      assertNull(result);
+      result = PlanarRegionTools.findPlanarRegionsContainingPoint(planarRegions, point3d, 0.51);
+      assertEquals(2, result.size());
+
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(0.2, 0.2);
+      convexPolygon.addVertex(0.2, -0.2);
+      convexPolygon.addVertex(-0.2, -0.2);
+      convexPolygon.addVertex(-0.2, 0.2);
+      convexPolygon.update();
+
+   }
+
+   @Test
    public void testIsPlanarRegionAAbovePlanarRegionB()
    {
       ConvexPolygon2D polygonA = new ConvexPolygon2D();

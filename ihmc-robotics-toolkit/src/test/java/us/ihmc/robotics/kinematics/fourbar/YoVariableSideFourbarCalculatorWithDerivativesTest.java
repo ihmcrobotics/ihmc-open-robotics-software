@@ -4,13 +4,14 @@ import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoVariableSideFourbarCalculatorWithDerivativesTest
@@ -19,8 +20,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
    private static final boolean PRINT = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSquare()
    {
       YoVariableSideFourbarCalculatorWithDerivatives calculator = new YoVariableSideFourbarCalculatorWithDerivatives("testCalculator", registry);
@@ -32,8 +32,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(PI / 2, calculator.getAngleCDA(), eps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testSquareDer()
    {
       YoVariableSideFourbarCalculatorWithDerivatives calculator = new YoVariableSideFourbarCalculatorWithDerivatives("testCalculator", registry);
@@ -45,8 +44,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(-1, calculator.getAngleDtCDA(), eps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testParallelogram()
    {
       YoVariableSideFourbarCalculatorWithDerivatives calculator = new YoVariableSideFourbarCalculatorWithDerivatives("testCalculator", registry);
@@ -62,8 +60,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(-1, calculator.getAngleDtCDA(), eps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test
    public void testRandomQuadrilatteral()
    {
       YoVariableSideFourbarCalculatorWithDerivatives calculator = new YoVariableSideFourbarCalculatorWithDerivatives("testCalculator", registry);
@@ -108,8 +105,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(D, calculator.getAngleCDA(), eps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testMasterAngleComputations()
    {
       YoVariableSideFourbarCalculatorWithDerivatives calculator = new YoVariableSideFourbarCalculatorWithDerivatives("testCalculator", registry);

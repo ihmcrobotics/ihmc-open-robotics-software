@@ -2,18 +2,18 @@ package us.ihmc.valkyrie.joystick;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotLowLevelMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 
-public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotLowLevelMessenger
+public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, RobotLowLevelMessenger
 {
    private final IHMCROS2Publisher<ArmTrajectoryMessage> armTrajectoryPublisher;
    private final IHMCROS2Publisher<HighLevelStateMessage> highLevelStatePublisher;
@@ -56,7 +56,7 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Huma
       jointAngles[index++] = robotSide.negateIfRightSide(0.0); // forearmYaw
       jointAngles[index++] = robotSide.negateIfRightSide(0.0); // wristRoll
       jointAngles[index++] = 0.0; // wristPitch
-      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.4, jointAngles);
+      ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 0.4 * trajectoryDuration, jointAngles);
       armTrajectoryPublisher.publish(message);
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;

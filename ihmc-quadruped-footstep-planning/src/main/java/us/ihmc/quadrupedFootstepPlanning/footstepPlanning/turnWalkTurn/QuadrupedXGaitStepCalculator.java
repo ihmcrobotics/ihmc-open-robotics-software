@@ -141,7 +141,7 @@ public class QuadrupedXGaitStepCalculator
       computeOnlinePlan(currentTime);
    }
 
-   public List<? extends QuadrupedTimedStep> getSteps()
+   public List<QuadrupedTimedOrientedStep> getSteps()
    {
       return getCompleteStepSequence(timestamp.getDoubleValue());
    }
@@ -353,16 +353,14 @@ public class QuadrupedXGaitStepCalculator
       {
          if (currentSteps.get(robotEnd).getTimeInterval().getEndTime() >= currentTime)
          {
-            completeStepSequence.add();
-            completeStepSequence.get(completeStepSequence.size() - 1).set(currentSteps.get(robotEnd));
+            completeStepSequence.add().set(currentSteps.get(robotEnd));
          }
       }
       for (int i = 0; i < stepPlan.size(); i++)
       {
          if (stepPlan.get(i).getTimeInterval().getEndTime() >= currentTime)
          {
-            completeStepSequence.add();
-            completeStepSequence.get(completeStepSequence.size() - 1).set(stepPlan.get(i));
+            completeStepSequence.add().set(stepPlan.get(i));
          }
       }
 

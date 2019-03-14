@@ -3,8 +3,8 @@ package us.ihmc.utilities.ros;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.ros.RosCore;
 
 /**
@@ -38,13 +38,13 @@ public abstract class IHMCRosTestWithRosCore
       }
    }
 
-   @Before
+   @BeforeEach
    public void setUp()
    {
       setUp(true);
    }
 
-   @After
+   @AfterEach
    public void tearDown()
    {
       if(rosCore!=null)

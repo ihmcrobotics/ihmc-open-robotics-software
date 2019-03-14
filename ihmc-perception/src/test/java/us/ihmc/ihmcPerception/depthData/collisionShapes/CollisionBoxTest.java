@@ -1,24 +1,23 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.shape.Box;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionBoxTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test
    public void testInsideBoxPoints()
    {
       Random random = new Random(0101010101L);
@@ -35,8 +34,7 @@ public class CollisionBoxTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void testOutsideBoxPoints()
    {
       Random random = new Random(1098551L);
@@ -53,8 +51,7 @@ public class CollisionBoxTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @Test
    public void compareWithJMEBox()
    {
       Random random = new Random(1098551L);

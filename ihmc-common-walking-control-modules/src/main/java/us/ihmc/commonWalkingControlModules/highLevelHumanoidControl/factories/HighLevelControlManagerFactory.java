@@ -22,12 +22,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
@@ -85,7 +85,6 @@ public class HighLevelControlManagerFactory
    private Vector3DReadOnly loadedFootLinearWeight;
    private Vector3DReadOnly linearMomentumWeight;
    private Vector3DReadOnly angularMomentumWeight;
-   private Vector3DReadOnly highLinearMomentumWeight;
    private PIDSE3GainsReadOnly swingFootGains;
    private PIDSE3GainsReadOnly holdFootGains;
    private PIDSE3GainsReadOnly toeOffFootGains;
@@ -128,9 +127,8 @@ public class HighLevelControlManagerFactory
       loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
       loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
 
-      linearMomentumWeight = new ParameterVector3D("DefaultLinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
-      angularMomentumWeight = new ParameterVector3D("DefaultAngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
-      highLinearMomentumWeight = new ParameterVector3D("HighLinearMomentumRateWeight", momentumOptimizationSettings.getHighLinearMomentumWeightForRecovery(), momentumRegistry);
+      linearMomentumWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
+      angularMomentumWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
 
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
@@ -161,9 +159,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
-                                          registry);
-      balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
-      balanceManager.setHighMomentumWeightForRecovery(highLinearMomentumWeight);
+                                angularMomentumWeight, linearMomentumWeight, registry);
       return balanceManager;
    }
 
@@ -181,6 +177,7 @@ public class HighLevelControlManagerFactory
       Vector3DReadOnly pelvisLinearWeight = taskspaceLinearWeightMap.get(pelvisName);
       centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       centerOfMassHeightManager.setPelvisTaskspaceWeights(pelvisLinearWeight);
+      centerOfMassHeightManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
       return centerOfMassHeightManager;
    }
@@ -305,6 +302,7 @@ public class HighLevelControlManagerFactory
       pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
                                                               registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
+      pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
    }
 
@@ -342,7 +340,7 @@ public class HighLevelControlManagerFactory
 
    private void missingObjectWarning(Class<?> missingObjectClass, Class<?> managerClass)
    {
-      PrintTools.warn(this, missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());
+      LogTools.warn(missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());
    }
 
    public void initializeManagers()

@@ -1,24 +1,23 @@
 package us.ihmc.tools.io;
 
-import static org.junit.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
-
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 public class DatagramOutputStreamTest
 {
    private static final long messageSleepMillis = 200;
    private static final boolean VERBOSE = false;
    
    //works half of the time.
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @Disabled
    public void testDatagramOutputStreamThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = true;
@@ -31,8 +30,7 @@ public class DatagramOutputStreamTest
       runATest(1776, throwOutStalePackets, expectedMessagesToReceive);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 8.6)
-	@Test(timeout = 43000)
+	@Test
    public void testDatagramOutputStreamDoNotThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = false;

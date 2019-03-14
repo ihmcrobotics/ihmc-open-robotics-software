@@ -134,8 +134,10 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract double getPelvisPositionFusingFrequency();
 
+   /** The smaller the value, the more it trusts the IMU **/
    public abstract double getPelvisLinearVelocityFusingFrequency();
 
+   /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 
    public abstract double getDelayTimeForTrustingFoot();
