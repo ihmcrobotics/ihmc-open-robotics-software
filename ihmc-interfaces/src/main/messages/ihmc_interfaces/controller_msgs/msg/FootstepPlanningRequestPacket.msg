@@ -29,7 +29,11 @@ geometry_msgs/Quaternion goal_orientation_in_world
 byte requested_footstep_planner_type 255
 # Timeout in seconds
 float64 timeout
+# Max body path length if using body path
 float64 horizon_length
+# Planar regions to use, if you don't want to assume flat ground
 PlanarRegionsListMessage planar_regions_list_message
+# Explicitly tell the planner to use flat ground
 bool assume_flat_ground
+# Set this id to keep track of your request
 int32 planner_request_id -1
