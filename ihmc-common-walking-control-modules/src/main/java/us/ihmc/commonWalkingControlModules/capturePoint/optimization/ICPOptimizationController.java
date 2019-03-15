@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -568,16 +569,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCMP(FramePoint2D desiredCMPToPack)
+   public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
    {
-      desiredCMPToPack.setIncludingFrame(feedbackCMP);
+      desiredCMPToPack.set(feedbackCMP);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCoP(FramePoint2D desiredCoPToPack)
+   public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
    {
-      desiredCoPToPack.setIncludingFrame(feedbackCoP);
+      desiredCoPToPack.set(feedbackCoP);
    }
 
    /** {@inheritDoc} */

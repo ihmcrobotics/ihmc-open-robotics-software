@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -175,7 +176,7 @@ public interface ICPPlannerInterface
     * @return the estimated time remaining before the capture point reaches its desired position at
     *         the end of this state.
     */
-   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition);
+   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly actualCapturePointPosition);
 
    /**
     * Updates the current state of the ICP plan.
