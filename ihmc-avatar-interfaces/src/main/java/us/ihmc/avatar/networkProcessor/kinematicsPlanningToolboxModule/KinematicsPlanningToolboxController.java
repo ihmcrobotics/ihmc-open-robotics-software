@@ -70,7 +70,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private final List<String> armJointNames = new ArrayList<String>();
    private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
-   private final FullRobotModelTrajectoryCalculator fullRobotModelTrajectoryCalculator;
+   private final WholeBodyTrajectoryPointCalculator fullRobotModelTrajectoryCalculator;
    private static final double searchingTimeTickForVelocityBound = 0.002;
    private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = true;
 
@@ -109,7 +109,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       this.desiredFullRobotModel = fullRobotModel;
 
       armJointVelocityLimitMap = new HashMap<>();
-      fullRobotModelTrajectoryCalculator = new FullRobotModelTrajectoryCalculator(drcRobotModel);
+      fullRobotModelTrajectoryCalculator = new WholeBodyTrajectoryPointCalculator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
       solution.setDestination(-1);
