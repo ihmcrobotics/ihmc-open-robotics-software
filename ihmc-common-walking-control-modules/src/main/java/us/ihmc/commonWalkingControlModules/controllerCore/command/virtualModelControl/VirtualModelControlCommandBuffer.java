@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -8,6 +11,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
+/**
+ * This class is not for general user, it is used for performing cross-robot command conversion in a
+ * garbage free manner.
+ * <p>
+ * This class should only be used with {@link CrossRobotCommandResolver} and
+ * {@link ControllerCoreCommandBuffer} to resolve a {@link ControllerCoreCommand}.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class VirtualModelControlCommandBuffer extends VirtualModelControlCommandList
 {
    private final RecyclingArrayList<CenterOfPressureCommand> centerOfPressureCommandBuffer = new RecyclingArrayList<>(CenterOfPressureCommand.class);
@@ -27,6 +40,10 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
    {
    }
 
+   /**
+    * In addition to clearing the list of commands declared in the super-type, it clears the internal
+    * buffers marking the commands previously used as available.
+    */
    @Override
    public void clear()
    {
@@ -45,30 +62,47 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       virtualModelControlOptimizationSettingsCommandBuffer.clear();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void set(VirtualModelControlCommandList other)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void addCommand(VirtualModelControlCommand<?> command)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void addCommandList(VirtualModelControlCommandList commandList)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public VirtualModelControlCommand<?> pollCommand()
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Gets an available {@link CenterOfPressureCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public CenterOfPressureCommand addCenterOfPressureCommand()
    {
       CenterOfPressureCommand command = centerOfPressureCommandBuffer.add();
@@ -76,6 +110,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link ContactWrenchCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public ContactWrenchCommand addContactWrenchCommand()
    {
       ContactWrenchCommand command = contactWrenchCommandBuffer.add();
@@ -83,6 +122,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link ExternalWrenchCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public ExternalWrenchCommand addExternalWrenchCommand()
    {
       ExternalWrenchCommand command = externalWrenchCommandBuffer.add();
@@ -90,6 +134,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link JointAccelerationIntegrationCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointAccelerationIntegrationCommand addJointAccelerationIntegrationCommand()
    {
       JointAccelerationIntegrationCommand command = jointAccelerationIntegrationCommandBuffer.add();
@@ -97,6 +146,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link MomentumRateCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public MomentumRateCommand addMomentumRateCommand()
    {
       MomentumRateCommand command = momentumRateCommandBuffer.add();
@@ -104,6 +158,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link PlaneContactStateCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public PlaneContactStateCommand addPlaneContactStateCommand()
    {
       PlaneContactStateCommand command = planeContactStateCommandBuffer.add();
@@ -111,6 +170,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link JointLimitEnforcementCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointLimitEnforcementCommand addJointLimitEnforcementCommand()
    {
       JointLimitEnforcementCommand command = jointLimitEnforcementCommandBuffer.add();
@@ -118,6 +182,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link JointTorqueCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointTorqueCommand addJointTorqueCommand()
    {
       JointTorqueCommand command = jointTorqueCommandBuffer.add();
@@ -125,6 +194,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link VirtualForceCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public VirtualForceCommand addVirtualForceCommand()
    {
       VirtualForceCommand command = virtualForceCommandBuffer.add();
@@ -132,6 +206,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link VirtualTorqueCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public VirtualTorqueCommand addVirtualTorqueCommand()
    {
       VirtualTorqueCommand command = virtualTorqueCommandBuffer.add();
@@ -139,6 +218,11 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link VirtualWrenchCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public VirtualWrenchCommand addVirtualWrenchCommand()
    {
       VirtualWrenchCommand command = virtualWrenchCommandBuffer.add();
@@ -146,6 +230,12 @@ public class VirtualModelControlCommandBuffer extends VirtualModelControlCommand
       return command;
    }
 
+   /**
+    * Gets an available {@link VirtualModelControlOptimizationSettingsCommand} and registers it to this
+    * list.
+    * 
+    * @return the available command ready to be set.
+    */
    public VirtualModelControlOptimizationSettingsCommand addVirtualModelControlOptimizationSettingsCommand()
    {
       VirtualModelControlOptimizationSettingsCommand command = virtualModelControlOptimizationSettingsCommandBuffer.add();
