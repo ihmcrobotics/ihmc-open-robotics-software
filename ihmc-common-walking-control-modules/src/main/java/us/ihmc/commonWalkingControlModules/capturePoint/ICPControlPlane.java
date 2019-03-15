@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -61,7 +62,7 @@ public class ICPControlPlane
 
    public void setOmega0(double omega0)
    {
-      double heightOfPlane = -gravityZ / Math.pow(omega0, 2.0);
+      double heightOfPlane = -gravityZ / MathTools.square(omega0);
       controlPlaneHeight.set(heightOfPlane);
    }
 
