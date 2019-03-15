@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,9 +15,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class KinematicsPlanningToolboxOutputConverter
@@ -27,7 +26,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
-   
+
    private static final boolean startAndFinishVelocityIsZero = true;
 
    public KinematicsPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
@@ -53,7 +52,7 @@ public class KinematicsPlanningToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 
@@ -77,16 +76,16 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(startAndFinishVelocityIsZero);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1));
+      FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
-         double time = trajectoryPoints.get(i).getTime();
+         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
@@ -160,7 +159,7 @@ public class KinematicsPlanningToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 
@@ -184,16 +183,16 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(startAndFinishVelocityIsZero);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1));
+      FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
-         double time = trajectoryPoints.get(i).getTime();
+         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
