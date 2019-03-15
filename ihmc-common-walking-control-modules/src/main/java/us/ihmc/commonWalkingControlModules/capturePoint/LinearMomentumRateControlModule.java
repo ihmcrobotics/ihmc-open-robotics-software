@@ -72,7 +72,6 @@ public class LinearMomentumRateControlModule
    private final FrameVector2D capturePointVelocity = new FrameVector2D();
    private final FramePoint2D desiredCapturePoint = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
-   private final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
@@ -183,7 +182,6 @@ public class LinearMomentumRateControlModule
       this.desiredCapturePointVelocity.setIncludingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
-      this.finalDesiredCapturePoint.setIncludingFrame(input.getFinalDesiredCapturePoint());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
       this.achievedLinearMomentumRate.setIncludingFrame(input.getAchievedLinearMomentumRate());

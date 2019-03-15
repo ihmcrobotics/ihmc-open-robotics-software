@@ -111,7 +111,6 @@ public class BalanceManager
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
-   private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
 
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
@@ -393,7 +392,7 @@ public class BalanceManager
 
    private final FramePoint3D copEstimate = new FramePoint3D();
    private final FrameVector2D emptyVector = new FrameVector2D();
-   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
       controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
@@ -440,8 +439,6 @@ public class BalanceManager
       yoDesiredICPVelocity.set(desiredCapturePointVelocity2d);
       yoPerfectCoP.set(perfectCoP2d);
 
-      finalDesiredCapturePoint2d.setIncludingFrame(yoFinalDesiredICP);
-
       getICPError(icpError2d);
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, yoPerfectCMP);
@@ -464,12 +461,11 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setFootsteps(footsteps);
       linearMomentumRateControlModuleInput.setFootstepTimings(footstepTimings);
       linearMomentumRateControlModuleInput.setFinalTransferDuration(finalTransferDuration);
-      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCMPInsideSupportPolygon);
+      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-      linearMomentumRateControlModuleInput.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setSupportSide(supportSide);

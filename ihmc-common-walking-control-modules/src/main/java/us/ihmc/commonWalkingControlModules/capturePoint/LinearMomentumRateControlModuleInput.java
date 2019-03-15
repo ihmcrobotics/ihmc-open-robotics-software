@@ -17,39 +17,157 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ * Command that holds input for the {@link LinearMomentumRateControlModule} coming from the walking controller state
+ * machine that might be running at a slower rate then the ICP feedback.
+ *
+ * @author Georg Wiedebach
+ */
 public class LinearMomentumRateControlModuleInput
 {
+   /**
+    * The time constant for the LIPM model. This might be changed during a run so it is a parameter. Typically the value
+    * is {@code omega0 = sqrt(gravity / comZ)}.
+    */
    private double omega0;
 
+   @Deprecated // Should be computed in the fast thread
    private final FramePoint2D capturePoint = new FramePoint2D();
-   private final FrameVector2D capturePointVelocity = new FrameVector2D();
-   private final FramePoint2D desiredCapturePoint = new FramePoint2D();
-   private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
-   private final FramePoint2D finalDesiredCapturePoint = new FramePoint2D();
 
+   @Deprecated // Should be computed in the fast thread
+   private final FrameVector2D capturePointVelocity = new FrameVector2D();
+
+   /**
+    * The desired capture point that the ICP controller should track.
+    */
+   private final FramePoint2D desiredCapturePoint = new FramePoint2D();
+
+   /**
+    * The desired capture point velocity that the ICP controller should track.
+    */
+   private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
+
+   /**
+    * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
+    * plan.
+    */
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
+
+   /**
+    * Assuming to tracking error for the ICP this is the location that the CoP should be placed at according to the ICP
+    * plan.
+    */
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
 
+   @Deprecated // This will be coming from the controller core
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
+   /**
+    * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
+    */
    private boolean controlHeightWithMomentum;
+
+   @Deprecated // The CoM height control should be moved to the fast thread or this should use the achieved value from the last tick.
    private double desiredCoMHeightAcceleration = 0.0;
 
+   /**
+    * Indicates which foot will be in support when stepping. Note, that this will only be used if
+    * {@link #initializeForSingleSupport} is set to {@code true}.
+    */
    private RobotSide supportSide = null;
+
+   /**
+    * Indicates which foot the robot shifts its weight to when performing a transfer. This will usually be the upcoming
+    * support side. Note, that this will only be used if {@link #initializeForSingleSupport} is set to {@code true}.
+    */
    private RobotSide transferToSide = null;
 
+   /**
+    * Flag that indicates the ICP planner has just transitioned to a standing state. This causes the ICP controller to
+    * to initialize itself for standing.
+    * <p>
+    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
+    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
+    */
    private boolean initializeForStanding;
+
+   /**
+    * Flag that indicates the ICP planner has just transitioned to a single support state. This causes the ICP
+    * controller to to initialize itself for single support.
+    * <p>
+    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
+    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
+    */
    private boolean initializeForSingleSupport;
+
+   /**
+    * Flag that indicates the ICP planner has just transitioned to a transfer state. This causes the ICP controller to
+    * to initialize itself for transfer.
+    * <p>
+    * Note, that this should only be true for one tick. Also, only one of the flags {@link #initializeForStanding},
+    * {@link #initializeForSingleSupport}, and {@link #initializeForTransfer} can be true at a time.
+    */
    private boolean initializeForTransfer;
+
+   /**
+    * Flag that indicates to the ICP controller that the desired feedback CoP should stay within the bounds of the
+    * support polygon. This should generally be true but can be set to false in certain cases where the support polygon
+    * might not be accurate e.g. when using handholds.
+    */
    private boolean keepCoPInsideSupportPolygon;
+
+   /**
+    * Is a flag that enables the z-selection in the angular momentum rate command if {@code true}. The desired angular
+    * momentum will generally be zero.
+    */
    private boolean minimizeAngularMomentumRateZ;
+
+   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
    private boolean updatePlanarRegions;
-   private double finalTransferDuration;
-   private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+
+   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
+   /**
+    * List of upcoming footsteps that are being executed by the controller. This is of interest to the ICP controller
+    * because it might consider n-step capturability or adjust the locations of the upcoming footsteps when needed.
+    * <p>
+    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
+    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    */
+   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
+
+   /**
+    * List of upcoming footstep timings that are being executed by the controller. This is of interest to the ICP
+    * controller because it might consider n-step capturability or adjust the locations of the upcoming footsteps when
+    * needed.
+    * <p>
+    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
+    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    */
+   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+
+   /**
+    * The final transfer duration for a footstep plan. This is a separate field since footsteps only hold the time to
+    * transfer to and the time to swing. Hence, the time for the final transfer back to standing is not contained in the
+    * list of {@link #footstepTimings}.
+    * <p>
+    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
+    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    */
+   private double finalTransferDuration;
+
+   /**
+    * This field can be used to inform the ICP controller that the walking state machine has sped up the swing of the
+    * robot. This can happen under disturbances.
+    * <p>
+    * This value can be set to {@code NaN} or to {@code <= 0.0} to indicate that no swing speed up has been performed.
+    */
+   private double remainingTimeInSwingUnderDisturbance;
+
+   /**
+    * The contact state of the robot. Effectively updates the support polygon for the ICP feedback controller.
+    */
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
@@ -124,16 +242,6 @@ public class LinearMomentumRateControlModuleInput
    public boolean getMinimizeAngularMomentumRateZ()
    {
       return minimizeAngularMomentumRateZ;
-   }
-
-   public void setFinalDesiredCapturePoint(FramePoint2DReadOnly finalDesiredCapturePoint)
-   {
-      this.finalDesiredCapturePoint.setIncludingFrame(finalDesiredCapturePoint);
-   }
-
-   public FramePoint2DReadOnly getFinalDesiredCapturePoint()
-   {
-      return finalDesiredCapturePoint;
    }
 
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
