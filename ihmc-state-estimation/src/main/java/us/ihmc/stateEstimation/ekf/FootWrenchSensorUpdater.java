@@ -34,11 +34,14 @@ public class FootWrenchSensorUpdater
 
    private final FootVelocitySensor footVelocitySensor;
 
+   private final DoubleProvider weightThresholdForTrust;
+
    public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry,
                                   YoVariableRegistry registry)
    {
       this.weight = weight;
 
+      weightThresholdForTrust = FilterTools.findOrCreate(parameterGroup + "WeightThresholdForTrust", registry, 0.3);
       DoubleProvider forceFilter = FilterTools.findOrCreate(parameterGroup + "WrenchFilter", registry, 100.0);
       DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter.getValue(), dt);
 
@@ -109,7 +112,7 @@ public class FootWrenchSensorUpdater
          footVelocitySensor.setLoad(0.0);
       }
 
-      boolean loaded = filteredForce.getZ() / weight > 0.3;
+      boolean loaded = filteredForce.getZ() / weight > weightThresholdForTrust.getValue();
       if (!loaded)
       {
          loadedCount = 0;
