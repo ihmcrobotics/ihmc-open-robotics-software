@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactMotion;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,7 +20,6 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    private final TimeInterval timeInterval = new TimeInterval();
    private final List<RobotSide> feetInContact = new ArrayList<>();
    private ContactState contactState = ContactState.IN_CONTACT;
-   private final ContactMotion contactMotion = ContactMotion.LINEAR;
 
    private final List<RobotSide> startFeet = new ArrayList<>();
    private final List<RobotSide> endFeet = new ArrayList<>();
@@ -70,12 +68,6 @@ public class SimpleBipedContactPhase implements ContactStateProvider
    public ContactState getContactState()
    {
       return contactState;
-   }
-
-   @Override
-   public ContactMotion getContactMotion()
-   {
-      return contactMotion;
    }
 
    public List<RobotSide> getFeetInContact()

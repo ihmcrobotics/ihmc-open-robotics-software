@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactMotion;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -20,7 +19,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final FramePoint3D copPosition = new FramePoint3D();
    private ContactState contactState = ContactState.IN_CONTACT;
-   private ContactMotion contactMotion = ContactMotion.CONSTANT;
 
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<MutableDouble> normalizedContactPressures = new QuadrantDependentList<>();
@@ -65,17 +63,12 @@ public class QuadrupedContactPhase implements ContactStateProvider
          this.solePositions.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
    }
 
-   public void setContactMotion(ContactMotion contactMotion)
-   {
-      this.contactMotion = contactMotion;
-   }
 
    public void set(QuadrupedContactPhase other)
    {
       setTimeInterval(other.getTimeInterval());
       setFeetInContact(other.feetInContact);
       setSolePositions(other.solePositions);
-      setContactMotion(other.contactMotion);
 
       update();
    }
@@ -115,11 +108,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
       return contactState;
    }
 
-   @Override
-   public ContactMotion getContactMotion()
-   {
-      return contactMotion;
-   }
 
    public List<RobotQuadrant> getFeetInContact()
    {

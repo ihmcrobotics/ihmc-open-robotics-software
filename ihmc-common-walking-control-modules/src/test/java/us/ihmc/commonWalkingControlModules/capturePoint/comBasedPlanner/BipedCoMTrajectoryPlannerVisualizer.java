@@ -31,7 +31,7 @@ import java.util.List;
 
 public class BipedCoMTrajectoryPlannerVisualizer
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
 
    private static final double stanceWidth = 0.5;
    private static final double gravity = 9.81;
@@ -830,7 +830,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    public static void main(String[] args)
    {
-      visualize = false;
       BipedCoMTrajectoryPlannerVisualizer visualizer = new BipedCoMTrajectoryPlannerVisualizer(BipedCoMTrajectoryPlannerVisualizer::createFancySteps);
    }
 }
