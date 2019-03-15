@@ -5,15 +5,17 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -25,6 +27,7 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,14 +36,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PatrolBehavior
 {
-   /** Wait to gather perception data, also serves as stop state as it has no action */
-   private final Pair<String, Runnable> STOP_AND_PERCEIVE = Pair.of("STOP_AND_PERCEIVE", this::updateStopAndPerceiveState);
+   /** Stop state that waits for or is triggered by a GoToWaypoint message */
+   private final Pair<String, Runnable> STOP = Pair.of("STOP", this::updateStopState);
    /** Request and wait for footstep planner result */
    private final Pair<String, Runnable> RETRIEVE_FOOTSTEP_PLAN = Pair.of("RETRIEVE_FOOTSTEP_PLAN", this::updateRetrieveFootstepPlanState);
    /** Walking towards goal waypoint */
    private final Pair<String, Runnable> WALK_TO_GOAL_WAYPOINT = Pair.of("WALK_TO_GOAL_WAYPOINT", this::updateWalkToGoalWaypointState);
-
-   public static final double DEFAULT_PERCEPTION_GATHERING_DURATION = 0.0; // TODO Maybe this is not needed if replanning until valid planner result
 
    private Pair<String, Runnable> currentState;
 
@@ -50,17 +51,17 @@ public class PatrolBehavior
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
    private final Notification stopNotification = new Notification();
-
-   private final AtomicReference<Double> perceptionGatheringDuration;
-   private final Stopwatch gatherPerceptionDataStopwatch = new Stopwatch();
-
+   private final Notification goToWaypointNotification = new Notification();
 
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
+
+   private final Notification readyToPlanNotification = new Notification();
+   private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final Activator walking = new Activator();
-   private final int currentGoalWaypointIndex = 0; // Update this
    private final Pose3D currentGoalWaypoint = new Pose3D(); // TODO evaluate if this is a bug
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
@@ -77,20 +78,16 @@ public class PatrolBehavior
 
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
-      perceptionGatheringDuration = messager.createInput(API.PerceptionGatheringDuration, DEFAULT_PERCEPTION_GATHERING_DURATION);
-      messager.submitMessage(API.PerceptionGatheringDuration, DEFAULT_PERCEPTION_GATHERING_DURATION);
-
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
       messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex ->
       {
          goalWaypointIndex.set(goToWaypointIndex);
-         stopNotification.set();
+         goToWaypointNotification.set();
       });
 
       waypoints = messager.createInput(API.Waypoints);
 
-      gatherPerceptionDataStopwatch.start();
-      transitionTo(STOP_AND_PERCEIVE);
+      transitionTo(STOP);
 
       PeriodicNonRealtimeThreadScheduler patrolThread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 1, TimeUnit.MILLISECONDS);
@@ -101,55 +98,77 @@ public class PatrolBehavior
       currentState.getValue().run();
    }
 
-   private void updateStopAndPerceiveState()
+   private void updateStopState()
    {
-      if (checkStopped()) return;
-
-      if (gatherPerceptionDataStopwatch.lapElapsed() >= perceptionGatheringDuration.get())
-      {
-         transitionTo(RETRIEVE_FOOTSTEP_PLAN);
-      }
+      checkForInterruptions();
    }
 
    private void updateRetrieveFootstepPlanState()
    {
-      if (checkStopped()) return;
+      if (checkForInterruptions()) return;
 
-      // else if footstep plan not yet sent
-       // if got a footstep plan
-
-      if ()
+      if (readyToPlanNotification.poll())
       {
-         ArrayList<Pose3D> latestWaypoints = waypoints.get();
-         if (goToWaypoint.get() >= 0 && !latestWaypoints.isEmpty())
-         {
+         MovingReferenceFrame midFeetZUpFrame = remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame();
+         FramePose3D midFeetZUpPose = new FramePose3D(midFeetZUpFrame);
+         midFeetZUpPose.changeFrame(worldFrame);
 
-         }
+         FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(goalWaypointIndex.get()));
 
-         ArrayList<Pose3D> waypoints = this.waypoints.accumulateAndGet() get();
+         new Thread(() -> {
+            remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
+            isPlanning.set(false);
+         }).start();
+      }
+      else if (!isPlanning.get())
+      {
 
-         remoteFootstepPlannerInterface.requestPlanBlocking()
       }
    }
 
    private void updateWalkToGoalWaypointState()
    {
-      if (checkStopped()) return;
+      if (checkForInterruptions()) return;
       // if walking is done
       {
          //
       }
    }
 
-   private boolean checkStopped()
+   private boolean checkForInterruptions()
    {
-      if (stopNotification.poll())
+      stopNotification.poll();
+      goToWaypointNotification.poll();
+
+      if (stopNotification.read())  // favor stop if race condition
       {
-         gatherPerceptionDataStopwatch.reset();
-         transitionTo(STOP_AND_PERCEIVE);
+         sendStopWalking();
+         transitionTo(STOP);
       }
 
-      return stopNotification.read();
+      if (goToWaypointNotification.read())
+      {
+         sendStopWalking();
+
+         ArrayList<Pose3D> latestWaypoints = waypoints.get();
+         int currentGoalWaypointIndex = goalWaypointIndex.get();
+         if (currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size())
+         {
+            readyToPlanNotification.set();
+            transitionTo(RETRIEVE_FOOTSTEP_PLAN);
+         }
+         else
+         {
+            transitionTo(STOP);
+         }
+      }
+
+      return stopNotification.read() || goToWaypointNotification.read();
+   }
+
+   private void sendStopWalking()
+   {
+      footstepDataListPublisher.publish(new FootstepDataListMessage()); // TODO I guess this works?
    }
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
@@ -172,10 +191,6 @@ public class PatrolBehavior
 
       /** Input: When received, the robot stops walking and waits forever. */
       public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
-
-      /** Input: Amount of time in seconds to gather perception data before sending out for a footstep plan. */
-      public static final Topic<Double> PerceptionGatheringDuration =
-            Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PerceptionGatheringDuration"));
 
       /** Output: to visualize the current robot path plan. */
       public static final Topic<WaypointFootstepPlan> FootstepPlan = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("FootstepPlan"));
