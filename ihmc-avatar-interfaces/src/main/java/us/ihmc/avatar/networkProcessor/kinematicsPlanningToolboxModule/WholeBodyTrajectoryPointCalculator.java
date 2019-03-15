@@ -18,11 +18,19 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
+/*
+ * The input of this calculator are a sequence of `KinematicsToolboxOutputStatus` and key frame times.
+ * The calculator will optimize way point velocities to minimize square of acceleration for the entire trajectory.
+ * And also it is able to optimize optimal way point times.
+ * `WholeBodyTrajectoryPointCalculator will return joint velocity bounds and the bounds will be used in `KinematicsPlanningToolboxController`.
+ * Finally, the optimized key frame times and joint velocities will be packed on `KinematicsPlanningToolboxOutputStatus`.
+ */
 public class WholeBodyTrajectoryPointCalculator
 {
    private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<KinematicsToolboxOutputStatus>();
    private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
-
+   private TDoubleArrayList normalizedWaypointTimes = new TDoubleArrayList();
+   
    private final TrajectoryPointOptimizer trajectoryPointOptimizer;
    private static final int numberOfIterationsToOptimizeWaypointTimes = 100;
    private static final double initialJointVelocity = 0.0;
@@ -117,8 +125,6 @@ public class WholeBodyTrajectoryPointCalculator
       for (int i = 1; i < keyFrameTimes.size() - 1; i++)
          normalizedWaypointTimes.add(keyFrameTimes.get(i) / lastKeyFrameTime);
    }
-
-   private TDoubleArrayList normalizedWaypointTimes = new TDoubleArrayList();
 
    public void computeOptimizingKeyFrameTimes()
    {
