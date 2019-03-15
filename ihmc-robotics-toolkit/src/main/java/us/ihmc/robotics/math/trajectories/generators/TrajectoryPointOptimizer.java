@@ -275,7 +275,6 @@ public class TrajectoryPointOptimizer
          double intervalTime = waypointTime - previousWaypointTime;
          if (intervalTime < 0.0 || intervalTime > 1.0)
          {
-            System.out.println("!!!!!!"+intervalTime+" "+waypointTime+" "+previousWaypointTime);
             throw new RuntimeException("Time in this trajectory is from 0.0 to 1.0. Got invalid waypoint times:\n" + waypointTimes.toString());
          }
          intervalTimes.set(i, intervalTime);
