@@ -8,6 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -23,7 +26,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.SteppingStonesEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -67,7 +69,8 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
       PlannerInput plannerInput = dataSet.getPlannerInput();
 
-      TerrainObject3D simulationEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.007, false).getTerrainObject3D();
+      TerrainObject3D simulationEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.02, false).getTerrainObject3D();
+
       QuadrupedInitialOffsetAndYaw offset = new QuadrupedInitialOffsetAndYaw(plannerInput.getQuadrupedStartPosition(), plannerInput.getQuadrupedStartYaw());
 
       quadrupedTestFactory.setScsParameters(simulationConstructionSetParameters);
@@ -103,6 +106,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       planningRequestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(plannerInput.getGoalYaw());
       planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
+      planningRequestPacket.planar_regions_list_message_.set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
