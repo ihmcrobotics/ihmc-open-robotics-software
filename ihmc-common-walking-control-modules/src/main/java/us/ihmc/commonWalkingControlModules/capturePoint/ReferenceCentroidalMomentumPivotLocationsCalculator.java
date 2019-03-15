@@ -80,7 +80,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final YoDouble exitCMPForwardSafetyMarginOnToes;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final FrameConvexPolygon2D predictedSupportPolygon = new FrameConvexPolygon2D();
    private final SideDependentList<FrameConvexPolygon2DReadOnly> supportFootPolygonsInSoleZUpFrame = new SideDependentList<>();
 
@@ -127,7 +127,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public ReferenceCentroidalMomentumPivotLocationsCalculator(String namePrefix, BipedSupportPolygons bipedSupportPolygons,
                                                               SideDependentList<? extends ContactablePlaneBody> contactableFeet, int numberFootstepsToConsider,
-                                                              ReferenceFrame midFeetZUpFrame, SideDependentList<ReferenceFrame> soleZUpFrames,
+                                                              ReferenceFrame midFeetZUpFrame, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                               YoVariableRegistry parentRegistry)
    {
       firstEntryCMPForSingleSupport.setToNaN();

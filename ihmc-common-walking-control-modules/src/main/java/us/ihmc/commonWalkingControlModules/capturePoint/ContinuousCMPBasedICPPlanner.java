@@ -150,7 +150,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
@@ -166,8 +166,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
     *           added to.
     */
    public ContinuousCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                       int numberOfFootstepsToConsider, ReferenceFrame midFeetZUpFrame, SideDependentList<ReferenceFrame> soleZUpFrames,
-                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       int numberOfFootstepsToConsider, ReferenceFrame midFeetZUpFrame,
+                                       SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, numberOfFootstepsToConsider);
       this.midFeetZUpFrame = midFeetZUpFrame;
