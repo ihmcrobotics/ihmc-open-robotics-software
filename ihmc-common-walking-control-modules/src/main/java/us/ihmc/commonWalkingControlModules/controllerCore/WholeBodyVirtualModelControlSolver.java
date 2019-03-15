@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -255,6 +257,12 @@ public class WholeBodyVirtualModelControlSolver
             break;
          case PLANE_CONTACT_STATE:
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
+            break;
+         case CONTACT_WRENCH:
+            optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
+            break;
+         case CENTER_OF_PRESSURE:
+            optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
             break;
          case VIRTUAL_WRENCH:
             handleVirtualWrenchCommand((VirtualWrenchCommand) command);

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -17,7 +18,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * constraint, or add an objective to the QP to prefer a certain wrench at that body.
  * </p>
  */
-public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenchCommand>
+public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenchCommand>, VirtualModelControlCommand<ContactWrenchCommand>
 {
    /**
     * The constraint type for this command.

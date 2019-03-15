@@ -50,8 +50,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
@@ -163,8 +166,13 @@ class CrossRobotCommandResolverTest
 
       Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
       Set<Class<? extends VirtualModelControlCommand>> commandTypes = reflections.getSubTypesOf(VirtualModelControlCommand.class);
+      commandTypes.remove(VirtualModelControlCommandList.class);
+      commandTypes.remove(VirtualModelControlCommandBuffer.class);
 
       String errorMessage = "";
+
+      if (!isResolveMethodAvailableForCommandList(VirtualModelControlCommandList.class, VirtualModelControlCommandBuffer.class, verbose))
+         errorMessage += "Missing resolve method for: " + VirtualModelControlCommandList.class.getSimpleName() + "\n";
 
       for (Class<? extends VirtualModelControlCommand> commandType : commandTypes)
       {
@@ -295,6 +303,35 @@ class CrossRobotCommandResolverTest
          InverseKinematicsCommandList expectedOut = nextInverseKinematicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
          InverseKinematicsCommandBuffer actualOut = new InverseKinematicsCommandBuffer();
          crossRobotCommandResolver.resolveInverseKinematicsCommandList(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testResolveVirtualModelControlCommandList() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends VirtualModelControlCommand>> commandTypes = reflections.getSubTypesOf(VirtualModelControlCommand.class);
+      commandTypes.remove(VirtualModelControlCommandList.class);
+      commandTypes.remove(VirtualModelControlCommandBuffer.class);
+      commandTypes.remove(VirtualEffortCommand.class);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         VirtualModelControlCommandList in = nextVirtualModelControlCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
+         VirtualModelControlCommandList expectedOut = nextVirtualModelControlCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         VirtualModelControlCommandBuffer actualOut = new VirtualModelControlCommandBuffer();
+         crossRobotCommandResolver.resolveVirtualModelControlCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -1395,6 +1432,36 @@ class CrossRobotCommandResolverTest
          Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                         RigidBodyBasics.class, ReferenceFrame[].class);
          InverseKinematicsCommand<?> command = (InverseKinematicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
+         next.addCommand(command);
+      }
+      return next;
+   }
+
+   @SuppressWarnings("rawtypes")
+   public static VirtualModelControlCommandList nextVirtualModelControlCommandList(Random random,
+                                                                           Collection<Class<? extends VirtualModelControlCommand>> commandsToGenerate,
+                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      VirtualModelControlCommandList next = new VirtualModelControlCommandList();
+
+      List<Class<? extends VirtualModelControlCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
+      commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
+
+      while (!commandTypes.isEmpty())
+      {
+         int index = random.nextInt(commandTypes.size());
+         Class<? extends VirtualModelControlCommand> commandType = commandTypes.get(index);
+         if (numberOfCommandsToGenerate.get(index).getAndDecrement() == 0)
+         {
+            commandTypes.remove(index);
+            numberOfCommandsToGenerate.remove(index);
+         }
+
+         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         VirtualModelControlCommand<?> command = (VirtualModelControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
       return next;
