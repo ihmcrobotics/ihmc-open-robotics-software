@@ -18,7 +18,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
-public class FullRobotModelTrajectoryCalculator
+public class WholeBodyTrajectoryPointCalculator
 {
    private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<KinematicsToolboxOutputStatus>();
    private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
@@ -34,7 +34,7 @@ public class FullRobotModelTrajectoryCalculator
    private final KinematicsToolboxOutputConverter converter;
    private final boolean SAVE_TRAJECTORY_DATA = false;
 
-   public FullRobotModelTrajectoryCalculator(DRCRobotModel drcRobotModel)
+   public WholeBodyTrajectoryPointCalculator(DRCRobotModel drcRobotModel)
    {
       OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(drcRobotModel.createFullRobotModel());
       int numberOfWholeBodyJoints = allJointsExcludingHands.length;
