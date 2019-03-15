@@ -183,40 +183,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          throw new IllegalArgumentException("The contact sequence is not valid.");
 
       indexHandler.update();
-      int size = indexHandler.getTotalSize();
-      int numberOfVRPWaypoints = indexHandler.getNumberOfVRPWaypoints();
 
-      coefficientMultipliers.reshape(size, size);
-      coefficientMultipliersInv.reshape(size, size);
-      xEquivalents.reshape(size, 1);
-      yEquivalents.reshape(size, 1);
-      zEquivalents.reshape(size, 1);
-      xConstants.reshape(size, 1);
-      yConstants.reshape(size, 1);
-      zConstants.reshape(size, 1);
-      vrpWaypointJacobian.reshape(size, numberOfVRPWaypoints); // only position
-      vrpXWaypoints.reshape(numberOfVRPWaypoints, 1);
-      vrpYWaypoints.reshape(numberOfVRPWaypoints, 1);
-      vrpZWaypoints.reshape(numberOfVRPWaypoints, 1);
-      xCoefficientVector.reshape(size, 1);
-      yCoefficientVector.reshape(size, 1);
-      zCoefficientVector.reshape(size, 1);
-
-      coefficientMultipliers.zero();
-      coefficientMultipliersInv.zero();
-      xEquivalents.zero();
-      yEquivalents.zero();
-      zEquivalents.zero();
-      xConstants.zero();
-      yConstants.zero();
-      zConstants.zero();
-      vrpWaypointJacobian.zero();
-      vrpXWaypoints.zero();
-      vrpYWaypoints.zero();
-      vrpZWaypoints.zero();
-      xCoefficientVector.zero();
-      yCoefficientVector.zero();
-      zCoefficientVector.zero();
+      resetMatrices();
 
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
@@ -495,6 +463,47 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    public FramePoint3DReadOnly getDesiredVRPPosition()
    {
       return desiredVRPPosition;
+   }
+
+   /**
+    * Resets and resizes the internal matrices.
+    */
+   private void resetMatrices()
+   {
+      int size = indexHandler.getTotalSize();
+      int numberOfVRPWaypoints = indexHandler.getNumberOfVRPWaypoints();
+
+      coefficientMultipliers.reshape(size, size);
+      coefficientMultipliersInv.reshape(size, size);
+      xEquivalents.reshape(size, 1);
+      yEquivalents.reshape(size, 1);
+      zEquivalents.reshape(size, 1);
+      xConstants.reshape(size, 1);
+      yConstants.reshape(size, 1);
+      zConstants.reshape(size, 1);
+      vrpWaypointJacobian.reshape(size, numberOfVRPWaypoints); // only position
+      vrpXWaypoints.reshape(numberOfVRPWaypoints, 1);
+      vrpYWaypoints.reshape(numberOfVRPWaypoints, 1);
+      vrpZWaypoints.reshape(numberOfVRPWaypoints, 1);
+      xCoefficientVector.reshape(size, 1);
+      yCoefficientVector.reshape(size, 1);
+      zCoefficientVector.reshape(size, 1);
+
+      coefficientMultipliers.zero();
+      coefficientMultipliersInv.zero();
+      xEquivalents.zero();
+      yEquivalents.zero();
+      zEquivalents.zero();
+      xConstants.zero();
+      yConstants.zero();
+      zConstants.zero();
+      vrpWaypointJacobian.zero();
+      vrpXWaypoints.zero();
+      vrpYWaypoints.zero();
+      vrpZWaypoints.zero();
+      xCoefficientVector.zero();
+      yCoefficientVector.zero();
+      zCoefficientVector.zero();
    }
 
    /**
