@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.simulationConstructionSetTools.whiteBoard.TCPYoWhiteBoard;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -11,7 +11,6 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 {
-   private static final boolean DEBUG = false;
    private long millisecondsBetweenDataWrites = 300L;
    private boolean closed = true;
    
@@ -25,17 +24,13 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
    
    private int connectionVerificationCounter = 0;
 
-   /**
-    * Server constructor.
-    */
+   /** Server */
    public CoactiveElementYoWhiteBoardSynchronizer(int port, HumanOrMachine whichSideIsThisRunningOn, CoactiveElement coactiveElement)
    {
       this(port, null, whichSideIsThisRunningOn, coactiveElement);
    }
    
-   /**
-    * Client constructor.
-    */
+   /** Client */
    public CoactiveElementYoWhiteBoardSynchronizer(int port, String ipAddress, HumanOrMachine whichSideIsThisRunningOn, CoactiveElement coactiveElement)
    {
       this.whichSideIsThisRunningOn = whichSideIsThisRunningOn;
@@ -88,7 +83,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 
    public void writeData() throws IOException
    {
-      PrintTools.debug(DEBUG, this, "writeData()");
+      LogTools.debug("writeData()");
       tcpYoWhiteBoard.writeData();
    }
 
@@ -99,7 +94,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 
    public void readData() throws IOException
    {
-      PrintTools.debug(DEBUG, this, "readData()");
+      LogTools.debug("readData()");
       tcpYoWhiteBoard.readData();
    }
 
@@ -139,7 +134,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
                   
                   if (connectionVerificationCounter == 5)
                   {
-                     PrintTools.info(this, "Connected! Syncing data.");
+                     LogTools.info("Connected! Syncing data.");
                   }
                }
             }
@@ -148,10 +143,10 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
          {
             connectionVerificationCounter = 0;
             
-            PrintTools.error(this, exception.getMessage());
+            LogTools.error(exception.getMessage());
             while (!tcpYoWhiteBoard.isTCPSocketConnected())
             {
-               PrintTools.debug(DEBUG, this, "Waiting for TCP socket to connect.");
+               LogTools.debug("Waiting for TCP socket to connect.");
                ThreadTools.sleepSeconds(3.0);
             }
             
@@ -159,13 +154,13 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
             {
                synchronized (tcpYoWhiteBoard.getConnectionConch())
                {
-                  PrintTools.info(this, "Connecting White Board");
+                  LogTools.info("Connecting White Board");
                   tcpYoWhiteBoard.connect();
                }
             }
             catch (IOException | NullPointerException ioException)
             {
-               PrintTools.error(this, ioException.getMessage());
+               LogTools.error(ioException.getMessage());
             }
             
             ThreadTools.sleep(500);
@@ -179,7 +174,7 @@ public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
    {
       try
       {
-         PrintTools.info(this, "Closed.");
+         LogTools.info("Closed.");
          closed = true;
          tcpYoWhiteBoard.close();
       }

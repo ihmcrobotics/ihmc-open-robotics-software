@@ -447,6 +447,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          if (DEBUG)
             System.out.println("solved " + solutionQualityConvergenceDetector.isValid() + " " + solutionQualityConvergenceDetector.getNumberOfIteration());
+
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             packSolution();
