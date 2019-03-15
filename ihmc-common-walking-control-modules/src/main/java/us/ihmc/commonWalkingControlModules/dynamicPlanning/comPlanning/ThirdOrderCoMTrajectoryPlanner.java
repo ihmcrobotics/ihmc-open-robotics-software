@@ -26,41 +26,23 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
 
 /**
  * <p>
- *    This guy assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
- *    This means that the final CoP is the terminal ICP location
+ *    This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
+ *    This means that the final VRP is the terminal DCM location
  *  </p>
- *    <p>
- *       If the VRP during contact is a linear function, the CoM follows the following trajectory definitions:
- *    </p>
- *    <p>
- *       IN_CONTACT:
- *       <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t + c<sub>3</sub></li>
- *       <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub></li>
- *       <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup></li>
- *    </p>
- *    <p>
- *       FLIGHT:
- *       <li>      x(t) = -0.5 g t<sup>2</sup> + c<sub>0</sub> t + c<sub>1</sub></li>
- *       <li> d/dt x(t) = - g t + c<sub>0</sub> </li>
- *       <li> d<sup>2</sup> / dt<sup>2</sup> = -g </li>
- *    </p>
- *    <p>
- *        If the VRP during contact is a constant function, the CoM follows the following trajectory definitions:
- *    </p>
- *    <p>
- *        IN_CONTACT:
- *        <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> </li>
- *        <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> </li>
- *        <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup></li>
- *    </p>
- *    <p>
- *        FLIGHT:
- *        <li>      x(t) = -0.5 g t<sup>2</sup> + c<sub>0</sub> t + c<sub>1</sub></li>
- *        <li> d/dt x(t) = - g t + c<sub>0</sub> </li>
- *        <li> d<sup>2</sup> / dt<sup>2</sup> = -g </li>
- *    </p>
+ *  <p>
+ *     The CoM has the following definitions:
+ *     <li>      x(t) = c<sub>0</sub> e<sup>&omega; t</sup> + c<sub>1</sub> e<sup>-&omega; t</sup> + c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> +
+ *     c<sub>4</sub> t + c<sub>5</sub></li>
+ *     <li> d/dt x(t) = &omega; c<sub>0</sub> e<sup>&omega; t</sup> - &omega; c<sub>1</sub> e<sup>-&omega; t</sup> + 3 c<sub>2</sub> t<sup>2</sup> +
+ *     2 c<sub>3</sub> t+ c<sub>4</sub>
+ *     <li> d<sup>2</sup> / dt<sup>2</sup> x(t) = &omega;<sup>2</sup> c<sub>0</sub> e<sup>&omega; t</sup> + &omega;<sup>2</sup> c<sub>1</sub> e<sup>-&omega; t</sup>
+ *     + 6 c<sub>2</sub> t + 2 c<sub>3</sub>  </li>
+ *  </p>
  *
- *    <p> Because of this, the V</p>
+ *
+ *    <p> From this, it follows that the VRP has the trajectory
+ *    <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> + c<sub>5</sub></li>
+ *    </p>
  */
 public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
@@ -110,7 +92,6 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    private final FixedFrameVector3DBasics desiredDCMVelocity = new FrameVector3D(worldFrame);
 
    private final FixedFramePoint3DBasics desiredVRPPosition = new FramePoint3D(worldFrame);
-   private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
@@ -513,23 +494,25 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    }
 
    /**
-    * FIXME doc
-    * <p> Sets the continuity constraint on the initial position. This DOES result in a initial discontinuity on the desired DCM location. </p>
-    * <p> This constraint should be used for the initial position of the center of mass to properly initialize the trajectory. </p><
+    * <p> Sets the continuity constraint on the initial CoM position. This DOES result in a initial discontinuity on the desired DCM location,
+    * coming from a discontinuity on the desired CoM Velocity. </p>
+    * <p> This constraint should be used for the initial position of the center of mass to properly initialize the trajectory. </p>
     * <p> Recall that the equation for the center of mass is defined by </p>
     * <p>
-    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
     * <p>
-    *    This results in the following constraint:
+    *    This constraint defines
     * </p>
     * <p>
-    *    c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + r<sub>vrp,i</sub>= x<sub>0</sub>
+    *    x<sub>0</sub>(0) = x<sub>d</sub>,
     * </p>
     * <p>
-    *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    *    substituting in the coefficients into the constraint matrix.
     * </p>
-    * @param centerOfMassLocationForConstraint x<sub>0</sub> in the above equations
+    * @param centerOfMassLocationForConstraint x<sub>d</sub> in the above equations
     */
    private void setCoMPositionConstraint(FramePoint3DReadOnly centerOfMassLocationForConstraint)
    {
@@ -551,30 +534,27 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    }
 
    /**
-    * FIXME
-    * <p> Sets the terminal constraint on the center of mass trajectory. This constraint states that the final position should be equal to
-    * {@param terminalPosition} and the desired velocity should be equal to 0. </p>
+    * <p> Sets a constraint on the desired DCM position. This constraint is useful for constraining the terminal location of the DCM trajectory. </p>
     * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub> + r<sub>vrp,i</sub>
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
     * <p> and the center of mass velocity is defined by </p>
     * <p>
-    *    v<sub>i</sub>(t) = &omega; c<sub>0,i</sub> e<sup>&omega; t</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub>
-    * </p>
-    * <p> When combined, this makes the DCM trajectory </p>
-    * <p>
-    *    &xi;<sub>i</sub>(t) = c<sub>0,i</sub> 2.0 e<sup>&omega; t</sup> + r<sub>vrp,i</sub>
-    * </p>
-    * <p> The number of variables can be reduced because of this knowledge, making the constraint:</p>
-    * <p>
-    *    c<sub>0,i</sub> 2.0 e<sup>&omega; T<sub>i</sub></sup> + r<sub>vrp,i</sub> = x<sub>f</sub>
+    *    d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
+    *    &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
+    *     2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>
     * </p>
     * <p>
-    *    c<sub>2,i</sub> = c<sub>3,i</sub> = 0
+    *    This constraint is then combining these two, saying
     * </p>
+    * <p> x<sub>i</sub>(t<sub>i</sub>) + 1 / &omega; d/dt x<sub>i</sub>(t<sub>i</sub>) = &xi;<sub>d</sub>,</p>
+    * <p> substituting in the appropriate coefficients. </p>
     * @param sequenceId i in the above equations
-    * @param desiredDCMPosition desired final location. x<sub>f</sub> in the above equations.
+    * @param time t<sub>i</sub> in the above equations
+    * @param desiredDCMPosition desired DCM location. &xi;<sub>d</sub> in the above equations.
     */
    private void setDCMPositionConstraint(int sequenceId, double time, FramePoint3DReadOnly desiredDCMPosition)
    {
@@ -600,38 +580,17 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    }
 
    /**
-    * FIXME fix the doc
-    * Sets up the continuity constraint on the CoM position at a state change.
+    * <p> Set a continuity constraint on the CoM position at a state change, aka a trajectory knot.. </p>
+    * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    The CoM position equation is as follows:
+    *    x<sub>i</sub>(t<sub>i</sub>) = c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> + c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> +
+    *    c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    *    c<sub>4,i</sub> t<sub>i</sub> + c<sub>5,i</sub>.
     * </p>
-    * <p>
-    *    x<sub>i</sub>(t) = c<sub>0,i</sub> e<sup>&omega; t</sup> + c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub> t + c<sub>3,i</sub> + r<sub>vrp,i</sub>
-    * </p>
-    * <p> If both the previous state and the next state are in contact, the constraint used is </p>
-    * <p>
-    *    c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> + c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup> + r<sub>vrp,i-1</sub>
-    *    = c<sub>0,i</sub> e<sup>&omega; 0</sup> + c<sub>1,i</sub> e<sup>-&omega; 0</sup> + r<sub>vrp,i</sub>
-    * </p>
-    * <p>
-    *    c<sub>2,i-1</sub> = c<sub>3,i-1</sub> = c<sub>2,i</sub> = c<sub>3,i</sub> = 0
-    * </p>
-    * <p> If the previous state is in contact and the next state is in flight, the constraint used is </p>
-    * <p>
-    *    c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> + c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup> + r<sub>vrp,i-1</sub>
-    *    = c<sub>2,i</sub> 0 + c<sub>3,i</sub>
-    * </p>
-    * <p>
-    *    c<sub>2,i-1</sub> = c<sub>3,i-1</sub> = c<sub>0,i</sub> = c<sub>1,i</sub> = 0
-    * </p>
-    * <p> If the previous state is in flight and the next state is in contact, the constraint used is </p>
-    * <p>
-    *    c<sub>2,i-1</sub> 0 + c<sub>3,i-1</sub>
-    *       = c<sub>0,i</sub> e<sup>&omega; 0</sup> + c<sub>1,i</sub> e<sup>-&omega; 0</sup> + r<sub>vrp,i</sub>
-    * </p>
-    * <p>
-    *    c<sub>0,i-1</sub> = c<sub>1,i-1</sub> = c<sub>2,i</sub> = c<sub>3,i</sub> = 0
-    * </p>
+    * <p> This constraint is then defined as </p>
+    * <p> x<sub>i-1</sub>(T<sub>i-1</sub>) = x<sub>i</sub>(0), </p>
+    * <p> substituting in the trajectory coefficients. </p>
+    *
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
@@ -663,29 +622,17 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    }
 
    /**
-    * FIXME fix the doc
-    * Sets up the continuity constraint on the CoM velocity at a state change.
+    * <p> Set a continuity constraint on the CoM velocity at a state change, aka a trajectory knot.. </p>
+    * <p> Recall that the equation for the center of mass position is defined by </p>
     * <p>
-    *    The CoM velocity equation is as follows:
+    *    d/dt x<sub>i</sub>(t<sub>i</sub>) = &omega; c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
+    *    &omega; c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> +
+    *     2 c<sub>3,i</sub> t<sub>i</sub> + c<sub>4,i</sub>.
     * </p>
-    * <p>
-    *    v<sub>i</sub>(t) = &omega; c<sub>0,i</sub> e<sup>&omega; t</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; t</sup> + c<sub>2,i</sub>
-    * </p>
-    * <p> If both the previous state and the next state are in contact, the constraint used is </p>
-    * <p>
-    *    &omega; c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> - &omega; c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup>
-    *    = &omega; c<sub>0,i</sub> e<sup>&omega; 0</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; 0</sup>
-    * </p>
-    * <p> If the previous state is in contact and the next state is in flight, the constraint used is </p>
-    * <p>
-    *    &omega; c<sub>0,i-1</sub> e<sup>&omega; T<sub>i-1</sub></sup> - &omega; c<sub>1,i-1</sub> e<sup>-&omega; T<sub>i-1</sub></sup>
-    *    = c<sub>2,i</sub>
-    * </p>
-    * <p> If the previous state is in flight and the next state is in contact, the constraint used is </p>
-    * <p>
-    *    c<sub>2,i-1</sub>
-    *       = &omega; c<sub>0,i</sub> e<sup>&omega; 0</sup> - &omega; c<sub>1,i</sub> e<sup>-&omega; 0</sup>
-    * </p>
+    * <p> This constraint is then defined as </p>
+    * <p> d / dt x<sub>i-1</sub>(T<sub>i-1</sub>) = d / dt x<sub>i</sub>(0), </p>
+    * <p> substituting in the trajectory coefficients. </p>
+    *
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
@@ -717,6 +664,11 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private final FrameVector3D desiredVelocity = new FrameVector3D();
 
+   /**
+    * Used to enforce the dynamics at the beginning of the trajectory segment {@param sequenceId}.
+    *
+    * @param sequenceId desired trajectory segment.
+    */
    private void setDynamicsInitialConstraint(int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
@@ -725,16 +677,21 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       {
          desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
          desiredVelocity.scale(1.0 / contactStateProvider.getTimeInterval().getDuration());
-         setVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
-         setVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, desiredVelocity);
+         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointStartPositionIndex(sequenceId), 0.0, startVRPPositions.get(sequenceId));
+         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointStartVelocityIndex(sequenceId), 0.0, desiredVelocity);
       }
       else
       {
-         setCoMAccelerationToGravity(sequenceId, 0.0);
-         setCoMJerkToZero(sequenceId, 0.0);
+         constrainCoMAccelerationToGravity(sequenceId, 0.0);
+         constraintCoMJerkToZero(sequenceId, 0.0);
       }
    }
 
+   /**
+    * Used to enforce the dynamics at the end of the trajectory segment {@param sequenceId}.
+    *
+    * @param sequenceId desired trajectory segment.
+    */
    private void setDynamicsFinalConstraint(int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
@@ -744,17 +701,31 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       {
          desiredVelocity.sub(endVRPPositions.get(sequenceId), startVRPPositions.get(sequenceId));
          desiredVelocity.scale(1.0 / contactStateProvider.getTimeInterval().getDuration());
-         setVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
-         setVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, desiredVelocity);
+         constrainVRPPosition(sequenceId, indexHandler.getVRPWaypointFinalPositionIndex(sequenceId), duration, endVRPPositions.get(sequenceId));
+         constrainVRPVelocity(sequenceId, indexHandler.getVRPWaypointFinalVelocityIndex(sequenceId), duration, desiredVelocity);
       }
       else
       {
-         setCoMAccelerationToGravity(sequenceId, duration);
-         setCoMJerkToZero(sequenceId, duration);
+         constrainCoMAccelerationToGravity(sequenceId, duration);
+         constraintCoMJerkToZero(sequenceId, duration);
       }
    }
 
-   private void setVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
+   /**
+    * <p> Adds a constraint for the desired VRP position.</p>
+    * <p> Recall that the VRP is defined as </p>
+    * <p> v<sub>i</sub>(t<sub>i</sub>) =  c<sub>2,i</sub> t<sub>i</sub><sup>3</sup> + c<sub>3,i</sub> t<sub>i</sub><sup>2</sup> +
+    * (c<sub>4,i</sub> - 6/&omega;<sup>2</sup> c<sub>2,i</sub>) t<sub>i</sub> - 2/&omega; c<sub>3,i</sub> + c<sub>5,i</sub></p>.
+    * <p> This constraint then says </p>
+    * <p> v<sub>i</sub>(t<sub>i</sub>) = J v<sub>d</sub> </p>
+    * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
+    * <p> v<sub>d,j</sub> = v<sub>r</sub> </p>
+    * @param sequenceId segment of interest, i in the above equations
+    * @param vrpWaypointPositionIndex current vrp waypoint index, j in the above equations
+    * @param time time in the segment, t<sub>i</sub> in the above equations
+    * @param desiredVRPPosition reference VRP position, v<sub>r</sub> in the above equations.
+    */
+   private void constrainVRPPosition(int sequenceId, int vrpWaypointPositionIndex, double time, FramePoint3DReadOnly desiredVRPPosition)
    {
       double omega = this.omega.getValue();
 
@@ -778,7 +749,21 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       numberOfConstraints++;
    }
 
-   private void setVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
+   /**
+    * <p> Adds a constraint for the desired VRP velocity.</p>
+    * <p> Recall that the VRP velocity is defined as </p>
+    * <p> d/dt v<sub>i</sub>(t<sub>i</sub>) =  3 c<sub>2,i</sub> t<sub>i</sub><sup>2</sup> + 2 c<sub>3,i</sub> t<sub>i</sub> +
+    * (c<sub>4,i</sub> - 6/&omega;<sup>2</sup> c<sub>2,i</sub>).
+    * <p> This constraint then says </p>
+    * <p> d/dt v<sub>i</sub>(t<sub>i</sub>) = J v<sub>d</sub> </p>
+    * <p> where J is a Jacobian that maps from a vector of desired VRP waypoints to the constraint form, and </p>
+    * <p> v<sub>d,j</sub> = d/dt v<sub>r</sub> </p>
+    * @param sequenceId segment of interest, i in the above equations
+    * @param vrpWaypointVelocityIndex current vrp waypoint index, j in the above equations
+    * @param time time in the segment, t<sub>i</sub> in the above equations
+    * @param desiredVRPVelocity reference VRP veloctiy, d/dt v<sub>r</sub> in the above equations.
+    */
+   private void constrainVRPVelocity(int sequenceId, int vrpWaypointVelocityIndex, double time, FrameVector3DReadOnly desiredVRPVelocity)
    {
       double omega = this.omega.getValue();
 
@@ -802,7 +787,18 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       numberOfConstraints++;
    }
 
-   private void setCoMAccelerationToGravity(int sequenceId, double time)
+   /**
+    * <p> Adds a constraint for the CoM trajectory to have an acceleration equal to gravity at time t.</p>
+    * <p> Recall that the CoM acceleration is defined as </p>
+    * d<sup>2</sup> / dt<sup>2</sup> x<sub>i</sub>(t<sub>i</sub>) = &omega;<sup>2</sup> c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> +
+    * &omega;<sup>2</sup> c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 6 c<sub>2,i</sub> t<sub>i</sub> + 2 c<sub>3,i</sub>
+    * <p> This constraint then states that </p>
+    * <p> d<sup>2</sup> / dt<sup>2</sup> x<sub>i</sub>(t<sub>i</sub>) = -g, </p>
+    * <p> substituting in the appropriate coefficients. </p>
+    * @param sequenceId segment of interest, i in the above equations.
+    * @param time time for the constraint, t<sub>i</sub> in the above equations.
+    */
+   private void constrainCoMAccelerationToGravity(int sequenceId, double time)
    {
       double omega = this.omega.getValue();
 
@@ -820,7 +816,18 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       numberOfConstraints++;
    }
 
-   private void setCoMJerkToZero(int sequenceId, double time)
+   /**
+    * <p> Adds a constraint for the CoM trajectory to have a jerk equal to 0.0 at time t.</p>
+    * <p> Recall that the CoM jerk is defined as </p>
+    * d<sup>3</sup> / dt<sup>3</sup> x<sub>i</sub>(t<sub>i</sub>) = &omega;<sup>3</sup> c<sub>0,i</sub> e<sup>&omega; t<sub>i</sub></sup> -
+    * &omega;<sup>3</sup> c<sub>1,i</sub> e<sup>-&omega; t<sub>i</sub></sup> + 6 c<sub>2,i</sub>
+    * <p> This constraint then states that </p>
+    * <p> d<sup>3</sup> / dt<sup>3</sup> x<sub>i</sub>(t<sub>i</sub>) = 0.0, </p>
+    * <p> substituting in the appropriate coefficients. </p>
+    * @param sequenceId segment of interest, i in the above equations.
+    * @param time time for the constraint, t<sub>i</sub> in the above equations.
+    */
+   private void constraintCoMJerkToZero(int sequenceId, double time)
    {
       double omega = this.omega.getValue();
 
@@ -836,211 +843,337 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
       numberOfConstraints++;
    }
 
+   /**
+    * e<sup>&omega; t</sup>
+    */
    static double getCoMPositionFirstCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
+   /**
+    * e<sup>-&omega; t</sup>
+    */
    static double getCoMPositionSecondCoefficient(double omega, double time)
    {
       return Math.exp(-omega * time);
    }
 
+   /**
+    * t<sup>3</sup>
+    */
    static double getCoMPositionThirdCoefficient(double time)
    {
       return Math.min(sufficientlyLarge, time * time * time);
    }
 
+   /**
+    * t<sup>2</sup>
+    */
    static double getCoMPositionFourthCoefficient(double time)
    {
       return Math.min(sufficientlyLarge, time * time);
    }
 
+   /**
+    * t
+    */
    static double getCoMPositionFifthCoefficient(double time)
    {
       return Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * 1.0
+    */
    static double getCoMPositionSixthCoefficient()
    {
       return 1.0;
    }
 
+   /**
+    * &omega; e<sup>&omega; t</sup>
+    */
    static double getCoMVelocityFirstCoefficient(double omega, double time)
    {
       return omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
+   /**
+    * -&omega; e<sup>-&omega; t</sup>
+    */
    static double getCoMVelocitySecondCoefficient(double omega, double time)
    {
       return -omega * Math.exp(-omega * time);
    }
 
+   /**
+    * 3 t<sup>2</sup>
+    */
    static double getCoMVelocityThirdCoefficient(double time)
    {
       return 3.0 * Math.min(sufficientlyLarge, time * time);
    }
 
+   /**
+    * 2 t
+    */
    static double getCoMVelocityFourthCoefficient(double time)
    {
       return 2.0 * Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * 1.0
+    */
    static double getCoMVelocityFifthCoefficient()
    {
       return 1.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMVelocitySixthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * &omega;<sup>2</sup> e<sup>&omega; t</sup>
+    */
    static double getCoMAccelerationFirstCoefficient(double omega, double time)
    {
       return omega * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
+   /**
+    * &omega;<sup>2</sup> e<sup>-&omega; t</sup>
+    */
    static double getCoMAccelerationSecondCoefficient(double omega, double time)
    {
       return omega * omega * Math.exp(-omega * time);
    }
 
+   /**
+    * 6 t
+    */
    static double getCoMAccelerationThirdCoefficient(double time)
    {
       return 6.0 * Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * 2
+    */
    static double getCoMAccelerationFourthCoefficient()
    {
       return 2.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMAccelerationFifthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMAccelerationSixthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * &omega;<sup>3</sup> e<sup>&omega; t</sup>
+    */
    static double getCoMJerkFirstCoefficient(double omega, double time)
    {
       return omega * omega * omega * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
+   /**
+    * -&omega;<sup>3</sup> e<sup>-&omega; t</sup>
+    */
    static double getCoMJerkSecondCoefficient(double omega, double time)
    {
       return -omega * omega * omega * Math.exp(-omega * time);
    }
 
+   /**
+    * 6.0
+    */
    static double getCoMJerkThirdCoefficient()
    {
       return 6.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMJerkFourthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMJerkFifthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getCoMJerkSixthCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 2 e<sup>&omega; t</sup>
+    */
    static double getDCMPositionFirstCoefficient(double omega, double time)
    {
       return 2.0 * Math.min(sufficientlyLarge, Math.exp(omega * time));
    }
 
+   /**
+    * 0.0
+    */
    static double getDCMPositionSecondCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * t<sup>3</sup> + 3.0 / &omega; t<sup>2</sup>
+    */
    static double getDCMPositionThirdCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, time * time * time) + 3.0 / omega * Math.min(sufficientlyLarge, time * time);
    }
 
+   /**
+    * t<sup>2</sup> + 2.0 / &omega; t
+    */
    static double getDCMPositionFourthCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, time * time) + 2.0 / omega * Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * t + 1/ &omega;
+    */
    static double getDCMPositionFifthCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, time) + 1.0 / omega;
    }
 
+   /**
+    * 1.0
+    */
    static double getDCMPositionSixthCoefficient()
    {
       return 1.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getVRPPositionFirstCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getVRPPositionSecondCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * t<sup>3</sup> - 6.0 t / &omega;<sup>2</sup>
+    */
    static double getVRPPositionThirdCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, time * time * time) - 6.0 * Math.min(sufficientlyLarge, time) / (omega * omega);
    }
 
+   /**
+    * t<sup>2</sup> - 2.0 / &omega;<sup>2</sup>
+    */
    static double getVRPPositionFourthCoefficient(double omega, double time)
    {
       return Math.min(sufficientlyLarge, time * time) - 2.0 / (omega * omega);
    }
 
+   /**
+    * t
+    */
    static double getVRPPositionFifthCoefficient(double time)
    {
       return Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * 1.0
+    */
    static double getVRPPositionSixthCoefficient()
    {
       return 1.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getVRPVelocityFirstCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getVRPVelocitySecondCoefficient()
    {
       return 0.0;
    }
 
+   /**
+    * 3 t<sup>2</sup> - 6 / &omega;<sup>2</sup>
+    */
    static double getVRPVelocityThirdCoefficient(double omega, double time)
    {
       return 3.0 * Math.min(sufficientlyLarge, time * time) - 6.0 / (omega * omega);
    }
 
+   /**
+    * 2 t
+    */
    static double getVRPVelocityFourthCoefficient(double time)
    {
       return 2.0 * Math.min(sufficientlyLarge, time);
    }
 
+   /**
+    * 1.0
+    */
    static double getVRPVelocityFifthCoefficient()
    {
       return 1.0;
    }
 
+   /**
+    * 0.0
+    */
    static double getVRPVelocitySixthCoefficient()
    {
       return 0.0;
