@@ -5,9 +5,14 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -44,6 +49,12 @@ public class BehaviorBackpack
 
    public static MessagerAPI getBehaviorAPI()
    {
-      return StepInPlaceBehavior.API.create();
+      MessagerAPIFactory apiFactory = new MessagerAPIFactory();
+      apiFactory.createRootCategory("Root");
+
+      apiFactory.includeMessagerAPIs(StepInPlaceBehavior.API.create());
+      apiFactory.includeMessagerAPIs(PatrolBehavior.API.create());
+
+      return apiFactory.getAPIAndCloseFactory();
    }
 }
