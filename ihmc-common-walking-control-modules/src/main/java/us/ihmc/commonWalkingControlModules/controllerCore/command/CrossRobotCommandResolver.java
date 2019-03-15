@@ -31,6 +31,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
@@ -96,6 +99,12 @@ public class CrossRobotCommandResolver
    {
       out.clear();
       resolveInverseKinematicsCommandListInternal(in, out);
+   }
+
+   public void resolveVirtualModelControlCommandList(VirtualModelControlCommandList in, VirtualModelControlCommandBuffer out)
+   {
+      out.clear();
+      resolveVirtualModelControlCommandListInternal(in, out);
    }
 
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
@@ -185,6 +194,59 @@ public class CrossRobotCommandResolver
             break;
          case TASKSPACE:
             resolveSpatialVelocityCommand((SpatialVelocityCommand) commandToResolve, out.addSpatialVelocityCommand());
+            break;
+         default:
+            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+         }
+      }
+   }
+
+   private void resolveVirtualModelControlCommandListInternal(VirtualModelControlCommandList in, VirtualModelControlCommandBuffer out)
+   {
+      for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
+      {
+         VirtualModelControlCommand<?> commandToResolve = in.getCommand(commandIndex);
+         switch (commandToResolve.getCommandType())
+         {
+         case CENTER_OF_PRESSURE:
+            resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
+            break;
+         case CONTACT_WRENCH:
+            resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
+            break;
+         case EXTERNAL_WRENCH:
+            resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
+            break;
+         case OPTIMIZATION_SETTINGS:
+            resolveVirtualModelControlOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) commandToResolve,
+                                                                  out.addVirtualModelControlOptimizationSettingsCommand());
+            break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
+            break;
+         case JOINT_LIMIT_ENFORCEMENT:
+            resolveJointLimitEnforcementCommand((JointLimitEnforcementCommand) commandToResolve, out.addJointLimitEnforcementCommand());
+            break;
+         case JOINTSPACE:
+            resolveJointTorqueCommand((JointTorqueCommand) commandToResolve, out.addJointTorqueCommand());
+            break;
+         case MOMENTUM:
+            resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
+            break;
+         case PLANE_CONTACT_STATE:
+            resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
+            break;
+         case COMMAND_LIST:
+            resolveVirtualModelControlCommandListInternal((VirtualModelControlCommandList) commandToResolve, out);
+            break;
+         case VIRTUAL_FORCE:
+            resolveVirtualForceCommand((VirtualForceCommand) commandToResolve, out.addVirtualForceCommand());
+            break;
+         case VIRTUAL_TORQUE:
+            resolveVirtualTorqueCommand((VirtualTorqueCommand) commandToResolve, out.addVirtualTorqueCommand());
+            break;
+         case VIRTUAL_WRENCH:
+            resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
             break;
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
