@@ -24,7 +24,7 @@ import java.util.Random;
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointPosition;
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class ThirdOrderCoMTrajectoryPlannerTest
+public class CoMTrajectoryPlannerTest
 {
    private static final double epsilon = 1e-4;
 
@@ -38,7 +38,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -131,7 +131,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -210,7 +210,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -282,7 +282,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -387,7 +387,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
 
@@ -484,7 +484,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -548,7 +548,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      ThirdOrderCoMTrajectoryPlanner planner = new ThirdOrderCoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -609,12 +609,12 @@ public class ThirdOrderCoMTrajectoryPlannerTest
          double c4 = time;
          double c5 = 1.0;
 
-         assertEquals(c0, ThirdOrderCoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time), epsilon);
-         assertEquals(c1, ThirdOrderCoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time), epsilon);
-         assertEquals(c2, ThirdOrderCoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time), epsilon);
-         assertEquals(c3, ThirdOrderCoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time), epsilon);
-         assertEquals(c4, ThirdOrderCoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time), epsilon);
-         assertEquals(c5, ThirdOrderCoMTrajectoryPlanner.getCoMPositionSixthCoefficient(), epsilon);
+         assertEquals(c0, CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time), epsilon);
+         assertEquals(c1, CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time), epsilon);
+         assertEquals(c2, CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time), epsilon);
+         assertEquals(c3, CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time), epsilon);
+         assertEquals(c4, CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time), epsilon);
+         assertEquals(c5, CoMTrajectoryPlanner.getCoMPositionSixthCoefficient(), epsilon);
 
          double c0_dot = omega * Math.exp(omega * time);
          double c1_dot = -omega * Math.exp(-omega * time);
@@ -622,23 +622,25 @@ public class ThirdOrderCoMTrajectoryPlannerTest
          double c3_dot = 2.0 * time;
          double c4_dot = 1.0;
          double c5_dot = 0.0;
-         double c0_dot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time)) / dt;
-         double c1_dot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time)) / dt;
-         double c2_dot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time)) / dt;
-         double c3_dot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time)) / dt;
-         double c4_dot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time)) / dt;
+         double c0_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMPositionFirstCoefficient(omega, time)) / dt;
+         double c1_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMPositionSecondCoefficient(omega, time)) / dt;
+         double c2_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time)) / dt;
+         double c3_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time)) / dt;
+         double c4_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time)) / dt;
 
-         assertEquals(c0_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time), epsilon);
-         assertEquals(c1_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time), epsilon);
-         assertEquals(c2_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time), epsilon);
-         assertEquals(c3_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time), epsilon);
-         assertEquals(c4_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFifthCoefficient(), epsilon);
-         assertEquals(c5_dot, ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySixthCoefficient(), epsilon);
-         assertEquals(c0_dot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time), 1e-3 * Math.max(c0_dot, 1.0));
-         assertEquals(c1_dot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time), 1e-3 * Math.max(c1_dot, 1.0));
-         assertEquals(c2_dot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time), 1e-3 * Math.max(c2_dot, 1.0));
-         assertEquals(c3_dot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time), 1e-3 * Math.max(c3_dot, 1.0));
-         assertEquals(c4_dot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFifthCoefficient(), 1e-3 * Math.max(c4_dot, 1.0));
+         assertEquals(c0_dot, CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time), epsilon);
+         assertEquals(c1_dot, CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time), epsilon);
+         assertEquals(c2_dot, CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time), epsilon);
+         assertEquals(c3_dot, CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time), epsilon);
+         assertEquals(c4_dot, CoMTrajectoryPlanner.getCoMVelocityFifthCoefficient(), epsilon);
+         assertEquals(c5_dot, CoMTrajectoryPlanner.getCoMVelocitySixthCoefficient(), epsilon);
+         assertEquals(c0_dot_numerical, CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time), 1e-3 * Math.max(c0_dot, 1.0));
+         assertEquals(c1_dot_numerical, CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time), 1e-3 * Math.max(c1_dot, 1.0));
+         assertEquals(c2_dot_numerical, CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time), 1e-3 * Math.max(c2_dot, 1.0));
+         assertEquals(c3_dot_numerical, CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time), 1e-3 * Math.max(c3_dot, 1.0));
+         assertEquals(c4_dot_numerical, CoMTrajectoryPlanner.getCoMVelocityFifthCoefficient(), 1e-3 * Math.max(c4_dot, 1.0));
 
          double c0_ddot = omega * omega * Math.exp(omega * time);
          double c1_ddot = omega * omega * Math.exp(-omega * time);
@@ -646,21 +648,23 @@ public class ThirdOrderCoMTrajectoryPlannerTest
          double c3_ddot = 2.0;
          double c4_ddot = 0.0;
          double c5_ddot = 0.0;
-         double c0_ddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time)) / dt;
-         double c1_ddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time)) / dt;
-         double c2_ddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time)) / dt;
-         double c3_ddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time)) / dt;
+         double c0_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMVelocityFirstCoefficient(omega, time)) / dt;
+         double c1_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMVelocitySecondCoefficient(omega, time)) / dt;
+         double c2_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time)) / dt;
+         double c3_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time)) / dt;
 
-         assertEquals(c0_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time), epsilon);
-         assertEquals(c1_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time), epsilon);
-         assertEquals(c2_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time), epsilon);
-         assertEquals(c3_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFourthCoefficient(), epsilon);
-         assertEquals(c4_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFifthCoefficient(), epsilon);
-         assertEquals(c5_ddot, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationSixthCoefficient(), epsilon);
-         assertEquals(c0_ddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time), 1e-3 * Math.max(c0_ddot, 1.0));
-         assertEquals(c1_ddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time), 1e-3 * Math.max(c1_ddot, 1.0));
-         assertEquals(c2_ddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time), 1e-3 * Math.max(c2_ddot, 1.0));
-         assertEquals(c3_ddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFourthCoefficient(), 1e-3 * Math.max(c3_dot, 1.0));
+         assertEquals(c0_ddot, CoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time), epsilon);
+         assertEquals(c1_ddot, CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time), epsilon);
+         assertEquals(c2_ddot, CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time), epsilon);
+         assertEquals(c3_ddot, CoMTrajectoryPlanner.getCoMAccelerationFourthCoefficient(), epsilon);
+         assertEquals(c4_ddot, CoMTrajectoryPlanner.getCoMAccelerationFifthCoefficient(), epsilon);
+         assertEquals(c5_ddot, CoMTrajectoryPlanner.getCoMAccelerationSixthCoefficient(), epsilon);
+         assertEquals(c0_ddot_numerical, CoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time), 1e-3 * Math.max(c0_ddot, 1.0));
+         assertEquals(c1_ddot_numerical, CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time), 1e-3 * Math.max(c1_ddot, 1.0));
+         assertEquals(c2_ddot_numerical, CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time), 1e-3 * Math.max(c2_ddot, 1.0));
+         assertEquals(c3_ddot_numerical, CoMTrajectoryPlanner.getCoMAccelerationFourthCoefficient(), 1e-3 * Math.max(c3_dot, 1.0));
 
          double c0_dddot = Math.pow(omega, 3.0) * Math.exp(omega * time);
          double c1_dddot = -Math.pow(omega, 3.0) * Math.exp(-omega * time);
@@ -668,41 +672,44 @@ public class ThirdOrderCoMTrajectoryPlannerTest
          double c3_dddot = 0.0;
          double c4_dddot = 0.0;
          double c5_dddot = 0.0;
-         double c0_dddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time)) / dt;
-         double c1_dddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time)) / dt;
-         double c2_dddot_numerical = (ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time + dt) - ThirdOrderCoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time)) / dt;
+         double c0_dddot_numerical = (CoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMAccelerationFirstCoefficient(omega, time)) / dt;
+         double c1_dddot_numerical = (CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
+               .getCoMAccelerationSecondCoefficient(omega, time)) / dt;
+         double c2_dddot_numerical = (CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time + dt) - CoMTrajectoryPlanner
+               .getCoMAccelerationThirdCoefficient(time)) / dt;
 
 
-         assertEquals(c0_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkFirstCoefficient(omega, time), epsilon);
-         assertEquals(c1_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkSecondCoefficient(omega, time), epsilon);
-         assertEquals(c2_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkThirdCoefficient(), epsilon);
-         assertEquals(c3_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkFourthCoefficient(), epsilon);
-         assertEquals(c4_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkFifthCoefficient(), epsilon);
-         assertEquals(c5_dddot, ThirdOrderCoMTrajectoryPlanner.getCoMJerkSixthCoefficient(), epsilon);
-         assertEquals(c0_dddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMJerkFirstCoefficient(omega, time), 1e-3 * Math.max(c0_dddot, 1.0));
-         assertEquals(c1_dddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMJerkSecondCoefficient(omega, time), 1e-3 * Math.max(c1_dddot, 1.0));
-         assertEquals(c2_dddot_numerical, ThirdOrderCoMTrajectoryPlanner.getCoMJerkThirdCoefficient(), 1e-3 * Math.max(c2_dddot, 1.0));
+         assertEquals(c0_dddot, CoMTrajectoryPlanner.getCoMJerkFirstCoefficient(omega, time), epsilon);
+         assertEquals(c1_dddot, CoMTrajectoryPlanner.getCoMJerkSecondCoefficient(omega, time), epsilon);
+         assertEquals(c2_dddot, CoMTrajectoryPlanner.getCoMJerkThirdCoefficient(), epsilon);
+         assertEquals(c3_dddot, CoMTrajectoryPlanner.getCoMJerkFourthCoefficient(), epsilon);
+         assertEquals(c4_dddot, CoMTrajectoryPlanner.getCoMJerkFifthCoefficient(), epsilon);
+         assertEquals(c5_dddot, CoMTrajectoryPlanner.getCoMJerkSixthCoefficient(), epsilon);
+         assertEquals(c0_dddot_numerical, CoMTrajectoryPlanner.getCoMJerkFirstCoefficient(omega, time), 1e-3 * Math.max(c0_dddot, 1.0));
+         assertEquals(c1_dddot_numerical, CoMTrajectoryPlanner.getCoMJerkSecondCoefficient(omega, time), 1e-3 * Math.max(c1_dddot, 1.0));
+         assertEquals(c2_dddot_numerical, CoMTrajectoryPlanner.getCoMJerkThirdCoefficient(), 1e-3 * Math.max(c2_dddot, 1.0));
 
-         assertEquals(c0 - 1 / (omega * omega) * c0_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionFirstCoefficient(), epsilon);
-         assertEquals(c1 - 1 / (omega * omega) * c1_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionSecondCoefficient(), epsilon);
-         assertEquals(c2 - 1 / (omega * omega) * c2_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionThirdCoefficient(omega, time), epsilon);
-         assertEquals(c3 - 1 / (omega * omega) * c3_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionFourthCoefficient(omega, time), epsilon);
-         assertEquals(c4 - 1 / (omega * omega) * c4_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionFifthCoefficient(time), epsilon);
-         assertEquals(c5 - 1 / (omega * omega) * c5_ddot, ThirdOrderCoMTrajectoryPlanner.getVRPPositionSixthCoefficient(), epsilon);
+         assertEquals(c0 - 1 / (omega * omega) * c0_ddot, CoMTrajectoryPlanner.getVRPPositionFirstCoefficient(), epsilon);
+         assertEquals(c1 - 1 / (omega * omega) * c1_ddot, CoMTrajectoryPlanner.getVRPPositionSecondCoefficient(), epsilon);
+         assertEquals(c2 - 1 / (omega * omega) * c2_ddot, CoMTrajectoryPlanner.getVRPPositionThirdCoefficient(omega, time), epsilon);
+         assertEquals(c3 - 1 / (omega * omega) * c3_ddot, CoMTrajectoryPlanner.getVRPPositionFourthCoefficient(omega, time), epsilon);
+         assertEquals(c4 - 1 / (omega * omega) * c4_ddot, CoMTrajectoryPlanner.getVRPPositionFifthCoefficient(time), epsilon);
+         assertEquals(c5 - 1 / (omega * omega) * c5_ddot, CoMTrajectoryPlanner.getVRPPositionSixthCoefficient(), epsilon);
 
-         assertEquals(c0_dot - 1 / (omega * omega) * c0_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocityFirstCoefficient(), epsilon);
-         assertEquals(c1_dot - 1 / (omega * omega) * c1_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocitySecondCoefficient(), epsilon);
-         assertEquals(c2_dot - 1 / (omega * omega) * c2_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocityThirdCoefficient(omega, time), epsilon);
-         assertEquals(c3_dot - 1 / (omega * omega) * c3_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocityFourthCoefficient(time), epsilon);
-         assertEquals(c4_dot - 1 / (omega * omega) * c4_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocityFifthCoefficient(), epsilon);
-         assertEquals(c5_dot - 1 / (omega * omega) * c5_dddot, ThirdOrderCoMTrajectoryPlanner.getVRPVelocitySixthCoefficient(), epsilon);
+         assertEquals(c0_dot - 1 / (omega * omega) * c0_dddot, CoMTrajectoryPlanner.getVRPVelocityFirstCoefficient(), epsilon);
+         assertEquals(c1_dot - 1 / (omega * omega) * c1_dddot, CoMTrajectoryPlanner.getVRPVelocitySecondCoefficient(), epsilon);
+         assertEquals(c2_dot - 1 / (omega * omega) * c2_dddot, CoMTrajectoryPlanner.getVRPVelocityThirdCoefficient(omega, time), epsilon);
+         assertEquals(c3_dot - 1 / (omega * omega) * c3_dddot, CoMTrajectoryPlanner.getVRPVelocityFourthCoefficient(time), epsilon);
+         assertEquals(c4_dot - 1 / (omega * omega) * c4_dddot, CoMTrajectoryPlanner.getVRPVelocityFifthCoefficient(), epsilon);
+         assertEquals(c5_dot - 1 / (omega * omega) * c5_dddot, CoMTrajectoryPlanner.getVRPVelocitySixthCoefficient(), epsilon);
 
-         assertEquals(c0 + 1 / omega * c0_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionFirstCoefficient(omega, time), epsilon);
-         assertEquals(c1 + 1 / omega * c1_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionSecondCoefficient(), epsilon);
-         assertEquals(c2 + 1 / omega * c2_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionThirdCoefficient(omega, time), epsilon);
-         assertEquals(c3 + 1 / omega * c3_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionFourthCoefficient(omega, time), epsilon);
-         assertEquals(c4 + 1 / omega * c4_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionFifthCoefficient(omega, time), epsilon);
-         assertEquals(c5 + 1 / omega * c5_dot, ThirdOrderCoMTrajectoryPlanner.getDCMPositionSixthCoefficient(), epsilon);
+         assertEquals(c0 + 1 / omega * c0_dot, CoMTrajectoryPlanner.getDCMPositionFirstCoefficient(omega, time), epsilon);
+         assertEquals(c1 + 1 / omega * c1_dot, CoMTrajectoryPlanner.getDCMPositionSecondCoefficient(), epsilon);
+         assertEquals(c2 + 1 / omega * c2_dot, CoMTrajectoryPlanner.getDCMPositionThirdCoefficient(omega, time), epsilon);
+         assertEquals(c3 + 1 / omega * c3_dot, CoMTrajectoryPlanner.getDCMPositionFourthCoefficient(omega, time), epsilon);
+         assertEquals(c4 + 1 / omega * c4_dot, CoMTrajectoryPlanner.getDCMPositionFifthCoefficient(omega, time), epsilon);
+         assertEquals(c5 + 1 / omega * c5_dot, CoMTrajectoryPlanner.getDCMPositionSixthCoefficient(), epsilon);
       }
    }
 
@@ -727,8 +734,8 @@ public class ThirdOrderCoMTrajectoryPlannerTest
          FramePoint3D desiredDCMPosition = new FramePoint3D();
          FrameVector3D desiredCoMVelocity = new FrameVector3D();
 
-         ThirdOrderCoMTrajectoryPlanner.constructDesiredCoMPosition(desiredCoMPosition, c0, c1, c2, c3, c4, c5, time, omega);
-         ThirdOrderCoMTrajectoryPlanner.constructDesiredCoMVelocity(desiredCoMVelocity, c0, c1, c2, c3, c4, c5, time, omega);
+         CoMTrajectoryPlanner.constructDesiredCoMPosition(desiredCoMPosition, c0, c1, c2, c3, c4, c5, time, omega);
+         CoMTrajectoryPlanner.constructDesiredCoMVelocity(desiredCoMVelocity, c0, c1, c2, c3, c4, c5, time, omega);
          CapturePointTools.computeDesiredCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
 
 
@@ -740,94 +747,94 @@ public class ThirdOrderCoMTrajectoryPlannerTest
 
          // com position
          temp.set(c0);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time));
 
          desiredCoMPositionExpected.add(temp);
 
          temp.set(c1);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time));
 
          desiredCoMPositionExpected.add(temp);
 
          temp.set(c2);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time));
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time));
 
          desiredCoMPositionExpected.add(temp);
 
          temp.set(c3);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time));
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time));
 
          desiredCoMPositionExpected.add(temp);
 
          temp.set(c4);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time));
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time));
 
          desiredCoMPositionExpected.add(temp);
 
          temp.set(c5);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMPositionSixthCoefficient());
+         temp.scale(CoMTrajectoryPlanner.getCoMPositionSixthCoefficient());
 
          desiredCoMPositionExpected.add(temp);
 
          // com velocity
          temp.set(c0);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time));
 
          desiredCoMVelocityExpected.add(temp);
 
          temp.set(c1);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time));
 
          desiredCoMVelocityExpected.add(temp);
 
          temp.set(c2);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time));
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time));
 
          desiredCoMVelocityExpected.add(temp);
 
          temp.set(c3);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time));
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time));
 
          desiredCoMVelocityExpected.add(temp);
 
          temp.set(c4);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocityFifthCoefficient());
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocityFifthCoefficient());
 
          desiredCoMVelocityExpected.add(temp);
 
          temp.set(c5);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getCoMVelocitySixthCoefficient());
+         temp.scale(CoMTrajectoryPlanner.getCoMVelocitySixthCoefficient());
 
          desiredCoMVelocityExpected.add(temp);
 
          // dcm position
          temp.set(c0);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionFirstCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionFirstCoefficient(omega, time));
 
          desiredDCMPositionExpected.add(temp);
 
          temp.set(c1);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionSecondCoefficient());
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionSecondCoefficient());
 
          desiredDCMPositionExpected.add(temp);
 
          temp.set(c2);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionThirdCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionThirdCoefficient(omega, time));
 
          desiredDCMPositionExpected.add(temp);
 
          temp.set(c3);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionFourthCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionFourthCoefficient(omega, time));
 
          desiredDCMPositionExpected.add(temp);
 
          temp.set(c4);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionFifthCoefficient(omega, time));
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionFifthCoefficient(omega, time));
 
          desiredDCMPositionExpected.add(temp);
 
          temp.set(c5);
-         temp.scale(ThirdOrderCoMTrajectoryPlanner.getDCMPositionSixthCoefficient());
+         temp.scale(CoMTrajectoryPlanner.getDCMPositionSixthCoefficient());
 
          desiredDCMPositionExpected.add(temp);
 
@@ -837,7 +844,7 @@ public class ThirdOrderCoMTrajectoryPlannerTest
       }
    }
 
-   private static void checkPlannerDynamics(ThirdOrderCoMTrajectoryPlanner planner, double omega)
+   private static void checkPlannerDynamics(CoMTrajectoryPlanner planner, double omega)
    {
       FramePoint3D constructedDCMPosition = new FramePoint3D();
       constructedDCMPosition.scaleAdd(1.0 / omega, planner.getDesiredCoMVelocity(), planner.getDesiredCoMPosition());

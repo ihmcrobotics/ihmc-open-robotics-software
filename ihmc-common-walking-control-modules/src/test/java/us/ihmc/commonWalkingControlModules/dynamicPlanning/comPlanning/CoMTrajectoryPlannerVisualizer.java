@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ThirdOrderCoMTrajectoryPlannerVisualizer
+public class CoMTrajectoryPlannerVisualizer
 {
    private static final double gravity = 9.81;
 //   private static final double nominalHeight = 0.75;
@@ -57,7 +57,7 @@ public class ThirdOrderCoMTrajectoryPlannerVisualizer
    private final YoDouble yoTime;
    private final YoDouble timeInPhase;
 
-   private final ThirdOrderCoMTrajectoryPlanner planner;
+   private final CoMTrajectoryPlanner planner;
 
    private List<ContactStateProvider> contactStates;
 
@@ -76,7 +76,7 @@ public class ThirdOrderCoMTrajectoryPlannerVisualizer
 
    private final YoDouble omega;
 
-   public ThirdOrderCoMTrajectoryPlannerVisualizer()
+   public CoMTrajectoryPlannerVisualizer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -101,7 +101,7 @@ public class ThirdOrderCoMTrajectoryPlannerVisualizer
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
-      planner = new ThirdOrderCoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
+      planner = new CoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
@@ -287,6 +287,6 @@ public class ThirdOrderCoMTrajectoryPlannerVisualizer
 
    public static void main(String[] args)
    {
-      ThirdOrderCoMTrajectoryPlannerVisualizer visualizer = new ThirdOrderCoMTrajectoryPlannerVisualizer();
+      CoMTrajectoryPlannerVisualizer visualizer = new CoMTrajectoryPlannerVisualizer();
    }
 }

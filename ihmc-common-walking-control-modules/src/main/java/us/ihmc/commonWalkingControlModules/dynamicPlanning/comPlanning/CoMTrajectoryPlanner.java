@@ -46,7 +46,7 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools
  *    <li> v(t) =  c<sub>2</sub> t<sup>3</sup> + c<sub>3</sub> t<sup>2</sup> + (c<sub>4</sub> - 6/&omega;<sup>2</sup> c<sub>2</sub>) t - 2/&omega; c<sub>3</sub> + c<sub>5</sub></li>
  *    </p>
  */
-public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
+public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private static final int maxCapacity = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -115,14 +115,14 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
 
    private int numberOfConstraints = 0;
 
-   public ThirdOrderCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                                         YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+                               YoVariableRegistry parentRegistry)
    {
       this(contactSequence, omega, gravityZ, nominalCoMHeight, parentRegistry, null);
    }
 
-   public ThirdOrderCoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                                         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactSequence = contactSequence;
       this.omega = omega;
