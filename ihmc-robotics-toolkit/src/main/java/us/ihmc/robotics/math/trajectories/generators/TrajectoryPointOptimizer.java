@@ -40,8 +40,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class TrajectoryPointOptimizer
 {
-   public static final int maxWaypoints = 50;
-   public static final int maxIterations = 50;
+   public static final int maxWaypoints = 200;
+   public static final int maxIterations = 200;
 
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
