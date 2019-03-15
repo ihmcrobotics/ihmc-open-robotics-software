@@ -243,15 +243,15 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param feedForwardLinearAcceleration describes the desired linear action of the
+    * @param feedForwardLinearAction describes the desired linear action of the
     *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
     *           desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin. Not
     *           modified.
     */
-   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAcceleration)
+   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
    {
-      ReferenceFrame rootFrame = feedForwardLinearAcceleration.getReferenceFrame().getRootFrame();
-      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+      ReferenceFrame rootFrame = feedForwardLinearAction.getReferenceFrame().getRootFrame();
+      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAction);
       feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
    }
 

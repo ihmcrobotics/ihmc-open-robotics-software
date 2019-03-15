@@ -10,12 +10,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -41,11 +40,9 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  */
 public class CenterOfMassFeedbackControlCommand implements FeedbackControlCommand<CenterOfMassFeedbackControlCommand>
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final Point3D desiredPositionInWorld = new Point3D();
-   private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
-   private final Vector3D feedForwardLinearActionInWorld = new Vector3D();
+   private final FramePoint3D desiredPositionInRootFrame = new FramePoint3D();
+   private final FrameVector3D desiredLinearVelocityInRootFrame = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearActionInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -74,9 +71,9 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public void set(CenterOfMassFeedbackControlCommand other)
    {
-      desiredPositionInWorld.set(other.desiredPositionInWorld);
-      desiredLinearVelocityInWorld.set(other.desiredLinearVelocityInWorld);
-      feedForwardLinearActionInWorld.set(other.feedForwardLinearActionInWorld);
+      desiredPositionInRootFrame.setIncludingFrame(other.desiredPositionInRootFrame);
+      desiredLinearVelocityInRootFrame.setIncludingFrame(other.desiredLinearVelocityInRootFrame);
+      feedForwardLinearActionInRootFrame.setIncludingFrame(other.feedForwardLinearActionInRootFrame);
       setGains(other.gains);
 
       momentumRateCommand.set(other.momentumRateCommand);
@@ -99,16 +96,14 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * </p>
     *
     * @param desiredPosition describes the position that the center of mass should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *            {@link ReferenceFrame#getWorldFrame()}.
     */
    public void set(FramePoint3DReadOnly desiredPosition)
    {
-      desiredPosition.checkReferenceFrameMatch(worldFrame);
-
-      desiredPositionInWorld.set(desiredPosition);
-      desiredLinearVelocityInWorld.setToZero();
-      feedForwardLinearActionInWorld.setToZero();
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
+      desiredPositionInRootFrame.changeFrame(rootFrame);
+      desiredLinearVelocityInRootFrame.setToZero(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -122,18 +117,19 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     */
    public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
    {
-      desiredPosition.checkReferenceFrameMatch(worldFrame);
-      desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
-
-      desiredPositionInWorld.set(desiredPosition);
-      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
-      feedForwardLinearActionInWorld.setToZero();
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
+      desiredPositionInRootFrame.changeFrame(rootFrame);
+      desiredLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+      desiredLinearVelocityInRootFrame.changeFrame(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
    {
-      feedForwardLinearAction.checkReferenceFrameMatch(worldFrame);
-      feedForwardLinearActionInWorld.set(feedForwardLinearAction);
+      ReferenceFrame rootFrame = feedForwardLinearAction.getReferenceFrame().getRootFrame();
+      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAction);
+      feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
    }
 
    /**
@@ -224,27 +220,27 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       momentumRateCommand.setAngularWeightsToZero();
    }
 
-   public Point3DBasics getDesiredPosition()
+   public FramePoint3DBasics getDesiredPosition()
    {
-      return desiredPositionInWorld;
+      return desiredPositionInRootFrame;
    }
 
-   public Vector3DBasics getDesiredLinearVelocity()
+   public FrameVector3DBasics getDesiredLinearVelocity()
    {
-      return desiredLinearVelocityInWorld;
+      return desiredLinearVelocityInRootFrame;
    }
 
-   public Vector3DBasics getFeedForwardLinearAction()
+   public FrameVector3DBasics getFeedForwardLinearAction()
    {
-      return feedForwardLinearActionInWorld;
+      return feedForwardLinearActionInRootFrame;
    }
 
    public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack,
                                  FrameVector3D feedForwardLinearAccelerationToPack)
    {
-      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
-      desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);
-      feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearActionInWorld);
+      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
+      desiredLinearVelocityToPack.setIncludingFrame(desiredLinearVelocityInRootFrame);
+      feedForwardLinearAccelerationToPack.setIncludingFrame(feedForwardLinearActionInRootFrame);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -274,11 +270,11 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       {
          CenterOfMassFeedbackControlCommand other = (CenterOfMassFeedbackControlCommand) object;
 
-         if (!desiredPositionInWorld.equals(other.desiredPositionInWorld))
+         if (!desiredPositionInRootFrame.equals(other.desiredPositionInRootFrame))
             return false;
-         if (!desiredLinearVelocityInWorld.equals(other.desiredLinearVelocityInWorld))
+         if (!desiredLinearVelocityInRootFrame.equals(other.desiredLinearVelocityInRootFrame))
             return false;
-         if (!feedForwardLinearActionInWorld.equals(other.feedForwardLinearActionInWorld))
+         if (!feedForwardLinearActionInRootFrame.equals(other.feedForwardLinearActionInRootFrame))
             return false;
          if (!gains.equals(other.gains))
             return false;
@@ -296,7 +292,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": desired position: " + desiredPositionInWorld + ", desired velocity: " + desiredLinearVelocityInWorld
-            + ", feed-forward: " + feedForwardLinearActionInWorld;
+      return getClass().getSimpleName() + ": desired position: " + desiredPositionInRootFrame + ", desired velocity: " + desiredLinearVelocityInRootFrame
+            + ", feed-forward: " + feedForwardLinearActionInRootFrame;
    }
 }
