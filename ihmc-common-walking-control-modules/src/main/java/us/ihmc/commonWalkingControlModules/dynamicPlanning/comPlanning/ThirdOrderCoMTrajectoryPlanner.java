@@ -7,7 +7,10 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -22,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLarge;
 
 /**
  * <p>
@@ -50,6 +52,8 @@ public class ThirdOrderCoMTrajectoryPlanner implements CoMTrajectoryPlannerInter
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean VISUALIZE = true;
    private static final double POINT_SIZE = 0.005;
+
+   private static final double sufficientlyLarge = 1.0e10;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 

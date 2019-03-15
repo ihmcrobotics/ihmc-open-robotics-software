@@ -8,5 +8,4 @@ public interface ContactStateProvider extends TimeIntervalProvider
    FramePoint3DReadOnly getCopStartPosition();
    FramePoint3DReadOnly getCopEndPosition();
    ContactState getContactState();
-   ContactMotion getContactMotion();
 }
