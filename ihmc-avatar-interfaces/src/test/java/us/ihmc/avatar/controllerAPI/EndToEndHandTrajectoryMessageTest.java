@@ -62,7 +62,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -308,7 +308,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-         FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
@@ -524,7 +524,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
       FrameQuaternion tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
 
-      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 
@@ -720,7 +720,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FrameQuaternion tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator,
                                                                                     500);
 
-         FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
          Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 
@@ -846,7 +846,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FrameQuaternion tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator,
                                                                                     500);
 
-         FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
          Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
 

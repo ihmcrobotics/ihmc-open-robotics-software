@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -90,7 +90,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 
@@ -205,7 +205,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 

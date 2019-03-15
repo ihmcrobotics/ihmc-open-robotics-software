@@ -35,7 +35,7 @@ public class SO3TrajectoryPointCalculator
 
    public void compute()
    {
-      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
       int numberOfTrajectoryPoints = trajectoryPoints.size();
       for (int i = 0; i < numberOfTrajectoryPoints; i++)

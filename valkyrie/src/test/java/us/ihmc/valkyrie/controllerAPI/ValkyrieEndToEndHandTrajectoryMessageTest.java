@@ -23,7 +23,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -113,7 +113,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       assertTrue(success);
 
       double firstTrajectoryTime = 1.0;
-      FrameEuclideanTrajectoryPointCalculator calculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator calculator = new EuclideanTrajectoryPointCalculator();
       calculator.appendTrajectoryPoint(0.0, new Point3D(0.25, 0.0, 1.05));
       calculator.appendTrajectoryPoint(0.5, new Point3D(0.4, 0.0, 0.95));
       calculator.appendTrajectoryPoint(0.75, new Point3D(0.5, 0.0, 0.85));
