@@ -36,7 +36,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    public static final long NULL_HASHCODE = 0L;
    private static final boolean DEBUG = false;
 
-   /** the internal map storage. */
+   /** The internal map storage. */
    private final TLongObjectHashMap<ReferenceFrame> hashCodeToReferenceFrameMap = new TLongObjectHashMap<>();
 
    /**
@@ -89,7 +89,7 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * @param referenceFrame the reference frame to register.
     * @throws IllegalArgumentException if a distinct reference frame was already registered under the
     *            same hash-code as {@code referenceFrame.hashCode()}. This usually occurs if: 1- the
-    *            two reference frame are two distinct instances with the same name, 2- (very unlikely)
+    *            two reference frames are two distinct instances with the same name, 2- (very unlikely)
     *            bad luck and the hash-code algorithm generated the same hash-code for the two
     *            reference frames.
     */
@@ -134,17 +134,13 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
     * WARNING: This method generates garbage.
     * </p>
     * <p>
-    * In the case one of the reference frame of the given {@code fullRobotModel} was already
+    * In the case one of the reference frames of the given {@code fullRobotModel} was already
     * registered, this map is not modified.
     * </p>
     * 
     * @param fullRobotModel the robot model to register the reference frames of.
-    * @throws IllegalArgumentException if a distinct reference frame was already registered under the
-    *            same hash-code as one of the model's frame or if two or more distinct reference frames
-    *            from the robot model share the same hash-code. This usually occurs if: 1- the two
-    *            reference frame are two distinct instances with the same name, 2- (very unlikely) bad
-    *            luck and the hash-code algorithm generated the same hash-code for the two reference
-    *            frames.
+    * @throws IllegalArgumentException in the case of a hash-code collision, i.e. two distinct
+    *            reference frames with the same hash-code.
     */
    public void putAllFullRobotModelReferenceFrames(FullRobotModel fullRobotModel)
    {
@@ -243,6 +239,8 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    /**
     * Gets the reference frame associated to the given {@code frameHashCode}.
     * 
+    * @param frameHashCode the hash-code used to retrieve the reference frame, it is usually generated
+    *           from {@code referenceFrame.hashCode()}.
     * @return the corresponding reference frame.
     * @throws RuntimeException if no reference frame is associated to the given hash-code.
     */
