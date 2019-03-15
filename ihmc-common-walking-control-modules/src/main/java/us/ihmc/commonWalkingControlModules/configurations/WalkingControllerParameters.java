@@ -624,7 +624,7 @@ public abstract class WalkingControllerParameters
     * the desired privileged configuration in the legs.
     * @return boolean (true = control height, false = do not control height but leave it up to the optimization)
     */
-   public boolean controlHeightDirectly()
+   public boolean enableHeightFeedbackControl()
    {
       return true;
    }

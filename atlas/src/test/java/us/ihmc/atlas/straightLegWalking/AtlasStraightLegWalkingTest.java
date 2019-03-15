@@ -155,7 +155,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       }
 
       @Override
-      public boolean controlHeightDirectly()
+      public boolean enableHeightFeedbackControl()
       {
          return false;
       }
