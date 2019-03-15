@@ -137,6 +137,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
    {
       spatialAccelerationCommand.set(base, endEffector);
+      resetControlFrame();
    }
 
    /**
