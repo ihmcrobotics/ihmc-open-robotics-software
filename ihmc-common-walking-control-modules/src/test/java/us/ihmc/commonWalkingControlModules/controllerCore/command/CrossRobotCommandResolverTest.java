@@ -50,6 +50,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
@@ -98,6 +99,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 
 class CrossRobotCommandResolverTest
 {
@@ -369,6 +372,27 @@ class CrossRobotCommandResolverTest
          FeedbackControlCommandList expectedOut = nextFeedbackControlCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
          FeedbackControlCommandBuffer actualOut = new FeedbackControlCommandBuffer();
          crossRobotCommandResolver.resolveFeedbackControlCommandList(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolveLowLevelOneDoFJointDesiredDataHolder() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         LowLevelOneDoFJointDesiredDataHolder in = nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         LowLevelOneDoFJointDesiredDataHolder expectedOut = nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         LowLevelOneDoFJointDesiredDataHolder actualOut = new LowLevelOneDoFJointDesiredDataHolder();
+         crossRobotCommandResolver.resolveLowLevelOneDoFJointDesiredDataHolder(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -1534,6 +1558,23 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, RigidBodyBasics rootBody,
+                                                                                               ReferenceFrame... possibleFrames)
+   {
+      LowLevelOneDoFJointDesiredDataHolder next = new LowLevelOneDoFJointDesiredDataHolder();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.registerJointWithEmptyData(joint).set(nextJointDesiredOutput(random));
+      }
+
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -1697,6 +1738,38 @@ class CrossRobotCommandResolverTest
       PIDSE3Gains next = new DefaultPIDSE3Gains();
       next.setPositionGains(nextPID3DGains(random));
       next.setOrientationGains(nextPID3DGains(random));
+      return next;
+   }
+
+   public static JointDesiredOutput nextJointDesiredOutput(Random random)
+   {
+      JointDesiredOutput next = new JointDesiredOutput();
+      next.setControlMode(nextElementIn(random, JointDesiredControlMode.values()));
+      if (random.nextBoolean())
+         next.setDesiredTorque(random.nextDouble());
+      if (random.nextBoolean())
+         next.setDesiredPosition(random.nextDouble());
+      if (random.nextBoolean())
+         next.setDesiredVelocity(random.nextDouble());
+      if (random.nextBoolean())
+         next.setDesiredAcceleration(random.nextDouble());
+      next.setResetIntegrators(random.nextBoolean());
+      if (random.nextBoolean())
+         next.setStiffness(random.nextDouble());
+      if (random.nextBoolean())
+         next.setDamping(random.nextDouble());
+      if (random.nextBoolean())
+         next.setMasterGain(random.nextDouble());
+      if (random.nextBoolean())
+         next.setVelocityScaling(random.nextDouble());
+      if (random.nextBoolean())
+         next.setVelocityIntegrationBreakFrequency(random.nextDouble());
+      if (random.nextBoolean())
+         next.setPositionIntegrationBreakFrequency(random.nextDouble());
+      if (random.nextBoolean())
+         next.setMaxPositionError(random.nextDouble());
+      if (random.nextBoolean())
+         next.setMaxVelocityError(random.nextDouble());
       return next;
    }
 
