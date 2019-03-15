@@ -4,8 +4,8 @@ import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
+import us.ihmc.humanoidBehaviors.tools.ActivationReference;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.references.ActivationReference;
 import us.ihmc.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;
