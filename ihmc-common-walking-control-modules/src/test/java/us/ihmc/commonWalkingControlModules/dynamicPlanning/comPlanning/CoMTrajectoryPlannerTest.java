@@ -338,23 +338,6 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-   private FramePoint3DReadOnly recursivelyComputeInitialDCMPiecewise(List<ContactStateProvider> contactPhases, double nominalHeight, double omega)
-   {
-      int numberOfPhases = contactPhases.size();
-      FramePoint3D lastDCM = new FramePoint3D(contactPhases.get(numberOfPhases - 1).getCopStartPosition());
-      lastDCM.addZ(nominalHeight);
-      FramePoint3D initialDCM = new FramePoint3D(lastDCM);
-      for (int i = numberOfPhases - 2; i >= 0; i--)
-      {
-         FramePoint3D vrp = new FramePoint3D(contactPhases.get(i).getCopStartPosition());
-         vrp.addZ(nominalHeight);
-
-         DCMTrajectoryTools.computeDCMUsingConstantVRP(omega, -contactPhases.get(i).getTimeInterval().getDuration(), initialDCM, vrp, initialDCM);
-      }
-
-      return initialDCM;
-   }
-
    private FramePoint3DReadOnly recursivelyComputeInitialDCMLinear(List<ContactStateProvider> contactPhases, double nominalHeight, double omega)
    {
       int numberOfPhases = contactPhases.size();
@@ -733,15 +716,18 @@ public class CoMTrajectoryPlannerTest
          FramePoint3D desiredCoMPosition = new FramePoint3D();
          FramePoint3D desiredDCMPosition = new FramePoint3D();
          FrameVector3D desiredCoMVelocity = new FrameVector3D();
+         FrameVector3D desiredCoMAcceleration= new FrameVector3D();
 
          CoMTrajectoryPlanner.constructDesiredCoMPosition(desiredCoMPosition, c0, c1, c2, c3, c4, c5, time, omega);
          CoMTrajectoryPlanner.constructDesiredCoMVelocity(desiredCoMVelocity, c0, c1, c2, c3, c4, c5, time, omega);
+         CoMTrajectoryPlanner.constructDesiredCoMAcceleration(desiredCoMAcceleration, c0, c1, c2, c3, c4, c5, time, omega);
          CapturePointTools.computeDesiredCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
 
 
          FramePoint3D desiredCoMPositionExpected = new FramePoint3D();
          FramePoint3D desiredDCMPositionExpected = new FramePoint3D();
          FrameVector3D desiredCoMVelocityExpected = new FrameVector3D();
+         FrameVector3D desiredCoMAccelerationExpected = new FrameVector3D();
 
          FramePoint3D temp = new FramePoint3D();
 
@@ -807,6 +793,38 @@ public class CoMTrajectoryPlannerTest
 
          desiredCoMVelocityExpected.add(temp);
 
+
+         // com acceleration
+         temp.set(c0);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time));
+
+         desiredCoMAccelerationExpected.add(temp);
+
+         temp.set(c1);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time));
+
+         desiredCoMAccelerationExpected.add(temp);
+
+         temp.set(c2);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time));
+
+         desiredCoMAccelerationExpected.add(temp);
+
+         temp.set(c3);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationFourthCoefficient());
+
+         desiredCoMAccelerationExpected.add(temp);
+
+         temp.set(c4);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationFifthCoefficient());
+
+         desiredCoMAccelerationExpected.add(temp);
+
+         temp.set(c5);
+         temp.scale(CoMTrajectoryPlanner.getCoMAccelerationSixthCoefficient());
+
+         desiredCoMAccelerationExpected.add(temp);
+
          // dcm position
          temp.set(c0);
          temp.scale(CoMTrajectoryPlanner.getDCMPositionFirstCoefficient(omega, time));
@@ -840,6 +858,7 @@ public class CoMTrajectoryPlannerTest
 
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredCoMPositionExpected, desiredCoMPosition, epsilon);
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredCoMVelocityExpected, desiredCoMVelocity, epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(desiredCoMAccelerationExpected, desiredCoMAcceleration, epsilon);
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(desiredDCMPositionExpected, desiredDCMPosition, epsilon);
       }
    }
