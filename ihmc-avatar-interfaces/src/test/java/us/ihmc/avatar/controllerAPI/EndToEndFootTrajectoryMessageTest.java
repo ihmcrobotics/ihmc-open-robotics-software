@@ -47,7 +47,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -619,7 +619,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       tempOrientation1.changeFrame(ReferenceFrame.getWorldFrame());
       Vector3D circleRadius = getCircleRadius();
 
-      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       double timeTick = trajectoryTime / (numberOfTrajectoryPoints * numberOfIterations);
       for (int messageIndex = 0; messageIndex < numberOfIterations; messageIndex++)
       {
