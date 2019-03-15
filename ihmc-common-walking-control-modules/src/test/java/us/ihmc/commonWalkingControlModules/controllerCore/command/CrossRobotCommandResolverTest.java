@@ -18,6 +18,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -105,7 +106,48 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 class CrossRobotCommandResolverTest
 {
    private static final String CONTROLLER_CORE_COMMANDS_PACKAGE = "us.ihmc.commonWalkingControlModules.controllerCore.command";
-   private static final int ITERATIONS = 20;
+   private static final int ITERATIONS = 100;
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testResolveControllerCoreCommand() throws Exception
+   {
+      Random random = new Random(657654);
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseDynamicsCommand>> inverseDynamicsCommandsToGenerate = reflections.getSubTypesOf(InverseDynamicsCommand.class);
+      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandList.class);
+      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandBuffer.class);
+      Set<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate = reflections.getSubTypesOf(InverseKinematicsCommand.class);
+      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandList.class);
+      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandBuffer.class);
+      Set<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate = reflections.getSubTypesOf(VirtualModelControlCommand.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandList.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandBuffer.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualEffortCommand.class);
+      Set<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate = reflections.getSubTypesOf(FeedbackControlCommand.class);
+      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandList.class);
+      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandBuffer.class);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         ControllerCoreCommand in = nextControllerCoreCommand(new Random(seed), inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate,
+                                                              virtualModelControlCommandsToGenerate, feedbackControlCommandsToGenerate, testData.rootBodyA,
+                                                              testData.frameTreeA);
+         ControllerCoreCommand expectedOut = nextControllerCoreCommand(new Random(seed), inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate,
+                                                                       virtualModelControlCommandsToGenerate, feedbackControlCommandsToGenerate,
+                                                                       testData.rootBodyB, testData.frameTreeB);
+         ControllerCoreCommandBuffer actualOut = new ControllerCoreCommandBuffer();
+         crossRobotCommandResolver.resolveControllerCoreCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
 
    @SuppressWarnings("rawtypes")
    @Test
@@ -1572,6 +1614,50 @@ class CrossRobotCommandResolverTest
          next.registerJointWithEmptyData(joint).set(nextJointDesiredOutput(random));
       }
 
+      return next;
+   }
+
+   @SuppressWarnings("rawtypes")
+   public static ControllerCoreCommand nextControllerCoreCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseDynamicsCommand>> inverseDynamicsCommandsToGenerate = reflections.getSubTypesOf(InverseDynamicsCommand.class);
+      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandList.class);
+      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandBuffer.class);
+      Set<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate = reflections.getSubTypesOf(InverseKinematicsCommand.class);
+      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandList.class);
+      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandBuffer.class);
+      Set<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate = reflections.getSubTypesOf(VirtualModelControlCommand.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandList.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandBuffer.class);
+      virtualModelControlCommandsToGenerate.remove(VirtualEffortCommand.class);
+      Set<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate = reflections.getSubTypesOf(FeedbackControlCommand.class);
+      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandList.class);
+      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandBuffer.class);
+
+      return nextControllerCoreCommand(random, inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate, virtualModelControlCommandsToGenerate,
+                                       feedbackControlCommandsToGenerate, rootBody, possibleFrames);
+   }
+
+   @SuppressWarnings("rawtypes")
+   public static ControllerCoreCommand nextControllerCoreCommand(Random random,
+                                                                 Collection<Class<? extends InverseDynamicsCommand>> inverseDynamicsCommandsToGenerate,
+                                                                 Collection<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate,
+                                                                 Collection<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate,
+                                                                 Collection<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate,
+                                                                 RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, IllegalAccessException, InvocationTargetException
+   {
+      ControllerCoreCommand next = new ControllerCoreCommand(nextElementIn(random, WholeBodyControllerCoreMode.values()));
+
+      next.getInverseDynamicsCommandList().set(nextInverseDynamicsCommandList(random, inverseDynamicsCommandsToGenerate, rootBody, possibleFrames));
+      next.getInverseKinematicsCommandList().set(nextInverseKinematicsCommandList(random, inverseKinematicsCommandsToGenerate, rootBody, possibleFrames));
+      next.getVirtualModelControlCommandList().set(nextVirtualModelControlCommandList(random, virtualModelControlCommandsToGenerate, rootBody, possibleFrames));
+      next.getFeedbackControlCommandList().set(nextFeedbackControlCommandList(random, feedbackControlCommandsToGenerate, rootBody, possibleFrames));
+      next.getLowLevelOneDoFJointDesiredDataHolder().overwriteWith(nextLowLevelOneDoFJointDesiredDataHolder(random, rootBody, possibleFrames));
+      if (random.nextBoolean())
+         next.requestReinitialization();
       return next;
    }
 
