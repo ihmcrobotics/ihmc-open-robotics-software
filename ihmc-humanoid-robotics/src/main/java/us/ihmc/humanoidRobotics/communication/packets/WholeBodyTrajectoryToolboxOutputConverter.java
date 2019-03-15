@@ -17,8 +17,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.generators.FrameEuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WholeBodyTrajectoryToolboxOutputConverter
@@ -88,7 +90,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 
@@ -114,8 +116,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
       // get velocities.
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      euclideanTrajectoryPointCalculator.compute(solution.getTrajectoryTimes().get(numberOfTrajectoryPoints-1));
+      FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
       // set trajectory points.
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
@@ -123,8 +125,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
-         double time = trajectoryPoints.get(i).getTime();
+         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
@@ -203,7 +205,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
-      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      FrameEuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new FrameEuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
 
@@ -222,15 +224,16 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = firstTrajectoryPointTime + solution.getTrajectoryTimes().get(i);
+         double time = solution.getTrajectoryTimes().get(i);
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPosition));
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
       // get velocities.
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      euclideanTrajectoryPointCalculator.compute(solution.getTrajectoryTimes().get(numberOfTrajectoryPoints-1));
+      FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      trajectoryPoints.addTimeOffset(firstTrajectoryPointTime);
 
       // set trajectory points.
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
@@ -238,8 +241,8 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
-         double time = trajectoryPoints.get(i).getTime();
+         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
