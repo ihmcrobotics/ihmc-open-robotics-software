@@ -8,6 +8,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
@@ -78,6 +81,68 @@ public class CrossRobotCommandResolver
       this.referenceFrameHashCodeResolver = referenceFrameHashCodeResolver;
       this.rigidBodyHashCodeResolver = rigidBodyHashCodeResolver;
       this.jointHashCodeResolver = jointHashCodeResolver;
+   }
+
+   public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
+   {
+      out.clear();
+      resolveInverseDynamicsCommandListInternal(in, out);
+   }
+
+   private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
+   {
+      for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
+      {
+         InverseDynamicsCommand<?> commandToResolve = in.getCommand(commandIndex);
+         switch (commandToResolve.getCommandType())
+         {
+         case CENTER_OF_PRESSURE:
+            resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
+            break;
+         case CONTACT_WRENCH:
+            resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
+            break;
+         case EXTERNAL_WRENCH:
+            resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
+            break;
+         case OPTIMIZATION_SETTINGS:
+            resolveInverseDynamicsOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) commandToResolve,
+                                                              out.addInverseDynamicsOptimizationSettingsCommand());
+            break;
+         case JOINT_ACCELERATION_INTEGRATION:
+            resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
+            break;
+         case JOINT_LIMIT_ENFORCEMENT:
+            resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
+            break;
+         case JOINTSPACE:
+            resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
+            break;
+         case MOMENTUM:
+            resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
+            break;
+         case PLANE_CONTACT_STATE:
+            resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
+            break;
+         case TASKSPACE:
+            resolveSpatialAccelerationCommand((SpatialAccelerationCommand) commandToResolve, out.addSpatialAccelerationCommand());
+            break;
+         case COMMAND_LIST:
+            resolveInverseDynamicsCommandListInternal((InverseDynamicsCommandList) commandToResolve, out);
+            break;
+         case PRIVILEGED_CONFIGURATION:
+            resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
+            break;
+         case PRIVILEGED_JOINTSPACE_COMMAND:
+            resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
+            break;
+         case LIMIT_REDUCTION:
+            resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+            break;
+         default:
+            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+         }
+      }
    }
 
    public void resolveCenterOfPressureCommand(CenterOfPressureCommand in, CenterOfPressureCommand out)
