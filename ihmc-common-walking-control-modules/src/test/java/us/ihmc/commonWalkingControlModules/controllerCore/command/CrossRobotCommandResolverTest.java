@@ -3,11 +3,16 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 import org.junit.jupiter.api.Test;
@@ -23,6 +28,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
@@ -199,6 +206,34 @@ class CrossRobotCommandResolverTest
          if (verbose)
             System.err.println("Encountered following error for method " + methodName + ", error: " + e.getMessage());
          return false;
+      }
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testResolveInverseDynamicsCommandList() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseDynamicsCommand>> commandTypes = reflections.getSubTypesOf(InverseDynamicsCommand.class);
+      commandTypes.remove(InverseDynamicsCommandList.class);
+      commandTypes.remove(InverseDynamicsCommandBuffer.class);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         InverseDynamicsCommandList in = nextInverseDynamicsCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
+         InverseDynamicsCommandList expectedOut = nextInverseDynamicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         InverseDynamicsCommandBuffer actualOut = new InverseDynamicsCommandBuffer();
+         crossRobotCommandResolver.resolveInverseDynamicsCommandList(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
@@ -1243,6 +1278,36 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   @SuppressWarnings("rawtypes")
+   public static InverseDynamicsCommandList nextInverseDynamicsCommandList(Random random,
+                                                                           Collection<Class<? extends InverseDynamicsCommand>> commandsToGenerate,
+                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      InverseDynamicsCommandList next = new InverseDynamicsCommandList();
+
+      List<Class<? extends InverseDynamicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
+      commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
+
+      while (!commandTypes.isEmpty())
+      {
+         int index = random.nextInt(commandTypes.size());
+         Class<? extends InverseDynamicsCommand> commandType = commandTypes.get(index);
+         if (numberOfCommandsToGenerate.get(index).getAndDecrement() == 0)
+         {
+            commandTypes.remove(index);
+            numberOfCommandsToGenerate.remove(index);
+         }
+
+         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         InverseDynamicsCommand<?> command = (InverseDynamicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
+         next.addCommand(command);
+      }
+      return next;
+   }
+
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
    {
@@ -1387,7 +1452,7 @@ class CrossRobotCommandResolverTest
       next.set(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
       return next;
    }
-   
+
    public static PID3DGains nextPID3DGains(Random random)
    {
       PID3DGains next = new DefaultPID3DGains();
