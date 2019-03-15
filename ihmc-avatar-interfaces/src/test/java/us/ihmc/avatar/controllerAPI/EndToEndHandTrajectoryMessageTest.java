@@ -498,10 +498,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
-      double firstTrajectoryPointTime = 0.5;
-      int numberOfTrajectoryPoints = 5;
-      int numberOfMessages = 5;
-      double trajectoryTime = 7.0;
+      double firstTrajectoryPointTime = 1.0;
+      int numberOfTrajectoryPoints = 10;
+      int numberOfMessages = 10;
+      double timeDurationForBetweenWaypoints = 0.1;
 
       ArrayList<HandTrajectoryMessage> handTrajectoryMessages = new ArrayList<>();
       ArrayDeque<FrameSE3TrajectoryPoint> handTrajectoryPoints = new ArrayDeque<>();
@@ -537,10 +537,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          tempPoint.add(sphereCenter);
          tempPoint.changeFrame(worldFrame);
 
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(timeDurationForBetweenWaypoints * i, tempPoint);
       }
 
-      euclideanTrajectoryPointCalculator.compute(trajectoryTime);
+      euclideanTrajectoryPointCalculator.compute(timeDurationForBetweenWaypoints * (numberOfTrajectoryPoints * numberOfMessages - 1));
 
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
       trajectoryPoints.addTimeOffset(firstTrajectoryPointTime);
@@ -694,9 +694,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
-      int numberOfTrajectoryPoints = 5;
-      int numberOfMessages = 5;
-      double trajectoryTime = 7.0;
+      int numberOfTrajectoryPoints = 10;
+      int numberOfMessages = 10;
+      double timeDurationForBetweenWaypoints = 0.1;
 
       // This test was originally made for Atlas, a robot with a leg length of ~0.8m
       double scale = getLegLength() / 0.8;
@@ -732,10 +732,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(i * timeDurationForBetweenWaypoints, tempPoint);
          }
 
-         euclideanTrajectoryPointCalculator.compute(trajectoryTime);
+         euclideanTrajectoryPointCalculator.compute(timeDurationForBetweenWaypoints * (numberOfTrajectoryPoints * numberOfMessages - 1));
 
          FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
          trajectoryPoints.addTimeOffset(firstTrajectoryPointTime);
@@ -822,10 +822,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
-      int numberOfTrajectoryPoints = 5;
-      int numberOfMessages = 5;
-      double trajectoryTime = 7.0;
-
+      int numberOfTrajectoryPoints = 10;
+      int numberOfMessages = 10;
+      double timeDurationForBetweenWaypoints = 0.1;
+      
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       // This test was originally made for Atlas, a robot with a leg length of ~0.8m
@@ -857,10 +857,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint);
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(i * timeDurationForBetweenWaypoints , tempPoint);
          }
 
-         euclideanTrajectoryPointCalculator.compute(trajectoryTime);
+         euclideanTrajectoryPointCalculator.compute(timeDurationForBetweenWaypoints * (numberOfTrajectoryPoints * numberOfMessages - 1));
          FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
          trajectoryPoints.addTimeOffset(firstTrajectoryPointTime);
 
