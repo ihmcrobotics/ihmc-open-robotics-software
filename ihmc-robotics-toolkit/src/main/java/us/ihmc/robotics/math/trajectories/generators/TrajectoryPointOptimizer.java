@@ -40,8 +40,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class TrajectoryPointOptimizer
 {
-   public static final int maxWaypoints = 100;
-   public static final int maxIterations = 100;
+   public static final int maxWaypoints = 200;
+   public static final int maxIterations = 200;
 
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
@@ -275,6 +275,7 @@ public class TrajectoryPointOptimizer
          double intervalTime = waypointTime - previousWaypointTime;
          if (intervalTime < 0.0 || intervalTime > 1.0)
          {
+            System.out.println("!!!!!!"+intervalTime+" "+waypointTime+" "+previousWaypointTime);
             throw new RuntimeException("Time in this trajectory is from 0.0 to 1.0. Got invalid waypoint times:\n" + waypointTimes.toString());
          }
          intervalTimes.set(i, intervalTime);
