@@ -28,8 +28,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
@@ -105,8 +105,13 @@ class CrossRobotCommandResolverTest
 
       Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
       Set<Class<? extends InverseDynamicsCommand>> commandTypes = reflections.getSubTypesOf(InverseDynamicsCommand.class);
+      commandTypes.remove(InverseDynamicsCommandList.class);
+      commandTypes.remove(InverseDynamicsCommandBuffer.class);
 
       String errorMessage = "";
+
+      if (!isResolveMethodAvailableForCommandList(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class, verbose))
+         errorMessage += "Missing resolve method for: " + InverseDynamicsCommandList.class.getSimpleName() + "\n";
 
       for (Class<? extends InverseDynamicsCommand> commandType : commandTypes)
       {
@@ -192,9 +197,31 @@ class CrossRobotCommandResolverTest
    private static boolean isResolveMethodAvailableFor(Class<?> commandType, boolean verbose)
    {
       String methodName = "resolve" + commandType.getSimpleName();
+
       try
       {
          CrossRobotCommandResolver.class.getMethod(methodName, commandType, commandType);
+         return true;
+      }
+      catch (NoSuchMethodException e)
+      {
+         return false;
+      }
+      catch (SecurityException e)
+      {
+         if (verbose)
+            System.err.println("Encountered following error for method " + methodName + ", error: " + e.getMessage());
+         return false;
+      }
+   }
+
+   private static boolean isResolveMethodAvailableForCommandList(Class<?> commandListType, Class<?> commandRecyclingListType, boolean verbose)
+   {
+      String methodName = "resolve" + commandListType.getSimpleName();
+
+      try
+      {
+         CrossRobotCommandResolver.class.getMethod(methodName, commandListType, commandRecyclingListType);
          return true;
       }
       catch (NoSuchMethodException e)
