@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -105,6 +108,12 @@ public class CrossRobotCommandResolver
    {
       out.clear();
       resolveVirtualModelControlCommandListInternal(in, out);
+   }
+
+   public void resolveFeedbackControlCommandList(FeedbackControlCommandList in, FeedbackControlCommandBuffer out)
+   {
+      out.clear();
+      resolveFeedbackControlCommandListInternal(in, out);
    }
 
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
@@ -247,6 +256,34 @@ public class CrossRobotCommandResolver
             break;
          case VIRTUAL_WRENCH:
             resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
+            break;
+         default:
+            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+         }
+      }
+   }
+
+   private void resolveFeedbackControlCommandListInternal(FeedbackControlCommandList in, FeedbackControlCommandBuffer out)
+   {
+      for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
+      {
+         FeedbackControlCommand<?> commandToResolve = in.getCommand(commandIndex);
+         switch (commandToResolve.getCommandType())
+         {
+         case JOINTSPACE:
+            resolveJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) commandToResolve, out.addJointspaceFeedbackControlCommand());
+            break;
+         case ORIENTATION:
+            resolveOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) commandToResolve, out.addOrientationFeedbackControlCommand());
+            break;
+         case POINT:
+            resolvePointFeedbackControlCommand((PointFeedbackControlCommand) commandToResolve, out.addPointFeedbackControlCommand());
+            break;
+         case TASKSPACE:
+            resolveSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) commandToResolve, out.addSpatialFeedbackControlCommand());
+            break;
+         case MOMENTUM:
+            resolveCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) commandToResolve, out.addCenterOfMassFeedbackControlCommand());
             break;
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
