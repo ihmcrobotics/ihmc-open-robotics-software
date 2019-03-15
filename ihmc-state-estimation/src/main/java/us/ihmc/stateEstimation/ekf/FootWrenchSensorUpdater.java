@@ -4,14 +4,15 @@ import us.ihmc.ekf.filter.FilterTools;
 import us.ihmc.ekf.filter.sensor.Sensor;
 import us.ihmc.ekf.filter.sensor.implementations.FootVelocitySensor;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -29,53 +30,48 @@ public class FootWrenchSensorUpdater
 
    private final double weight;
    private final AlphaFilteredYoFrameVector filteredForce;
-   private final AlphaFilteredYoFrameVector filteredTorque;
    private final ReferenceFrame copFrame;
 
    private final FootVelocitySensor footVelocitySensor;
 
-   public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   public FootWrenchSensorUpdater(RigidBodyBasics foot, ReferenceFrame soleFrame, double dt, double weight, YoGraphicsListRegistry graphicsListRegistry,
+                                  YoVariableRegistry registry)
    {
       this.weight = weight;
 
-      DoubleProvider forceFilter = FilterTools.findOrCreate(parameterGroup + "ForceFilter", registry, 100.0);
-      DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter .getValue(), dt);
-      DoubleProvider torqueFilter = FilterTools.findOrCreate(parameterGroup + "TorqueFilter", registry, 100.0);
-      DoubleProvider torqueAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(torqueFilter .getValue(), dt);
+      DoubleProvider forceFilter = FilterTools.findOrCreate(parameterGroup + "WrenchFilter", registry, 100.0);
+      DoubleProvider forceAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(forceFilter.getValue(), dt);
 
       filteredForce = new AlphaFilteredYoFrameVector(foot.getName() + "Force", "", registry, forceAlpha, ReferenceFrame.getWorldFrame());
-      filteredTorque = new AlphaFilteredYoFrameVector(foot.getName() + "Torque", "", registry, torqueAlpha, ReferenceFrame.getWorldFrame());
+      AlphaFilteredYoFramePoint filteredCoP = new AlphaFilteredYoFramePoint(soleFrame.getName() + "CoPPositionInSole", "", registry, forceAlpha, soleFrame);
+      YoFramePoint3D yoCopPosition = new YoFramePoint3D(soleFrame.getName() + "CoPPosition", ReferenceFrame.getWorldFrame(), registry);
 
-      YoFramePoint3D yoCopPosition = new YoFramePoint3D(soleFrame.getName() + "CopFrame", ReferenceFrame.getWorldFrame(), registry);
       copFrame = new ReferenceFrame(soleFrame.getName() + "CopFrame", soleFrame)
       {
-         private final FrameVector3D force = new FrameVector3D();
-         private final FrameVector3D torque = new FrameVector3D();
          private final FramePoint3D copPosition = new FramePoint3D();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            force.setIncludingFrame(filteredForce);
-            torque.setIncludingFrame(filteredTorque);
-            force.changeFrame(soleFrame);
-            torque.changeFrame(soleFrame);
+            wrench.changeFrame(getParent());
 
             // If the measured weight is lower then 1% of the robot weight just set the cop to zero.
-            if (force.getZ() > weight * 0.01)
+            if (wrench.getLinearPartZ() > weight * 0.01)
             {
-               double copX = -torque.getY() / force.getZ();
-               double copY = torque.getX() / force.getZ();
+               double copX = -wrench.getAngularPartY() / wrench.getLinearPartZ();
+               double copY = wrench.getAngularPartX() / wrench.getLinearPartZ();
                copPosition.setIncludingFrame(getParent(), copX, copY, 0.0);
-               yoCopPosition.setMatchingFrame(copPosition);
+               filteredCoP.update(copPosition);
+               yoCopPosition.setMatchingFrame(filteredCoP);
             }
             else
             {
                copPosition.setToZero(getParent());
+               filteredCoP.set(copPosition);
                yoCopPosition.setToNaN();
             }
 
-            transformToParent.setTranslationAndIdentityRotation(copPosition);
+            transformToParent.setTranslationAndIdentityRotation(filteredCoP);
          }
       };
 
@@ -89,20 +85,16 @@ public class FootWrenchSensorUpdater
       footVelocitySensor = new FootVelocitySensor(dt, foot, copFrame, parameterGroup, registry);
    }
 
-   private final FrameVector3D tempVector = new FrameVector3D();
    private int loadedCount = 0;
+   private final Wrench wrench = new Wrench();
 
    public void update(WrenchReadOnly footWrench, boolean fixRobot)
    {
-      tempVector.setIncludingFrame(footWrench.getLinearPart());
-      tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      filteredForce.update(tempVector);
-
-      tempVector.setIncludingFrame(footWrench.getAngularPart());
-      tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      filteredTorque.update(tempVector);
-
+      wrench.setIncludingFrame(footWrench);
       copFrame.update();
+
+      wrench.changeFrame(ReferenceFrame.getWorldFrame());
+      filteredForce.update(wrench.getLinearPart());
 
       if (fixRobot)
       {
