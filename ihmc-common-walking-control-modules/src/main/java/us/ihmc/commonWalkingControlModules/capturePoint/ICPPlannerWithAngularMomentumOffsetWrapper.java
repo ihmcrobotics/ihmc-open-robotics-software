@@ -42,9 +42,9 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private final YoDouble cmpOffsetAlphaFilter;
 
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
-   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<ReferenceFrame> soleZUpFrames)
+   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<? extends ReferenceFrame> soleZUpFrames)
    {
       super(icpPlanner);
 
@@ -94,6 +94,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    private final FrameVector3D desiredICPAcceleration = new FrameVector3D();
 
    // TODO have this guy account for the desired difference between the CMP and CoP.
+   @Override
    public void modifyDesiredICPForAngularMomentum(FramePoint3D copEstimate, RobotSide supportSide)
    {
       super.getDesiredCentroidalMomentumPivotPosition(desiredCMPPosition);
