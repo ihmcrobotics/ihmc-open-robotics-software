@@ -24,7 +24,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -71,7 +70,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private final List<String> armJointNames = new ArrayList<String>();
    private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
-   private final KeyFrameBasedTrajectoryGenerator keyFrameBasedTrajectoryGenerator;
+   private final FullRobotModelTrajectoryCalculator fullRobotModelTrajectoryCalculator;
    private static final double searchingTimeTickForVelocityBound = 0.002;
    private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = true;
 
@@ -110,7 +109,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       this.desiredFullRobotModel = fullRobotModel;
 
       armJointVelocityLimitMap = new HashMap<>();
-      keyFrameBasedTrajectoryGenerator = new KeyFrameBasedTrajectoryGenerator(drcRobotModel);
+      fullRobotModelTrajectoryCalculator = new FullRobotModelTrajectoryCalculator(drcRobotModel);
 
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
       solution.setDestination(-1);
@@ -498,7 +497,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          return;
       }
 
-      keyFrameBasedTrajectoryGenerator.packOptimizedVelocities(solution);
+      fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
       solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
       solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
@@ -511,22 +510,22 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
    {
-      keyFrameBasedTrajectoryGenerator.addInitialConfiguration(initialRobotConfiguration);
-      keyFrameBasedTrajectoryGenerator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
-      keyFrameBasedTrajectoryGenerator.initializeTrajectoryGenerator();
+      fullRobotModelTrajectoryCalculator.addInitialConfiguration(initialRobotConfiguration);
+      fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
+      fullRobotModelTrajectoryCalculator.initializeCalculator();
       if (useKeyFrameOptimizer)
-         keyFrameBasedTrajectoryGenerator.computeOptimizingKeyFrameTimes();
+         fullRobotModelTrajectoryCalculator.computeOptimizingKeyFrameTimes();
       else
-         keyFrameBasedTrajectoryGenerator.compute();
-      keyFrameBasedTrajectoryGenerator.computeVelocityBound(searchingTimeTickForVelocityBound);
+         fullRobotModelTrajectoryCalculator.computeForFixedKeyFrameTimes();
+      fullRobotModelTrajectoryCalculator.computeVelocityBounds(searchingTimeTickForVelocityBound);
    }
 
    private boolean isVelocityLimitExceeded()
    {
       for (String armJointName : armJointNames)
       {
-         double jointVelocityLowerBound = keyFrameBasedTrajectoryGenerator.getJointVelocityLowerBound(armJointName);
-         double jointVelocityUpperBound = keyFrameBasedTrajectoryGenerator.getJointVelocityUpperBound(armJointName);
+         double jointVelocityLowerBound = fullRobotModelTrajectoryCalculator.getJointVelocityLowerBound(armJointName);
+         double jointVelocityUpperBound = fullRobotModelTrajectoryCalculator.getJointVelocityUpperBound(armJointName);
 
          Pair<Double, Double> velocityLimit = armJointVelocityLimitMap.get(armJointName);
          if (velocityLimit.i > jointVelocityLowerBound || velocityLimit.ii < jointVelocityUpperBound)
