@@ -7,6 +7,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
 
+/**
+ * This class is not for general user, it is used for performing cross-robot command conversion in a
+ * garbage free manner.
+ * <p>
+ * This class should only be used with {@link CrossRobotCommandResolver} to resolve a
+ * {@link ControllerCoreCommand}.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class ControllerCoreCommandBuffer implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandBuffer inverseDynamicsCommandBuffer = new InverseDynamicsCommandBuffer();

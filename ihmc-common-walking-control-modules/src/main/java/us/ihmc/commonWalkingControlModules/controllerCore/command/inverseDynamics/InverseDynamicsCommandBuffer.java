@@ -1,10 +1,23 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 
+/**
+ * This class is not for general user, it is used for performing cross-robot command conversion in a
+ * garbage free manner.
+ * <p>
+ * This class should only be used with {@link CrossRobotCommandResolver} and
+ * {@link ControllerCoreCommandBuffer} to resolve a {@link ControllerCoreCommand}.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
 {
    private final RecyclingArrayList<CenterOfPressureCommand> centerOfPressureCommandBuffer = new RecyclingArrayList<>(CenterOfPressureCommand.class);
@@ -25,6 +38,10 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    {
    }
 
+   /**
+    * In addition to clearing the list of commands declared in the super-type, it clears the internal
+    * buffers marking the commands previously used as available.
+    */
    @Override
    public void clear()
    {
@@ -44,30 +61,47 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       privilegedConfigurationCommandBuffer.clear();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void set(InverseDynamicsCommandList other)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void addCommand(InverseDynamicsCommand<?> command)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public void addCommandList(InverseDynamicsCommandList commandList)
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Unsupported operation.
+    */
    @Override
    public InverseDynamicsCommand<?> pollCommand()
    {
       throw new UnsupportedOperationException();
    }
 
+   /**
+    * Gets an available {@link CenterOfPressureCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public CenterOfPressureCommand addCenterOfPressureCommand()
    {
       CenterOfPressureCommand command = centerOfPressureCommandBuffer.add();
@@ -75,6 +109,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link ContactWrenchCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public ContactWrenchCommand addContactWrenchCommand()
    {
       ContactWrenchCommand command = contactWrenchCommandBuffer.add();
@@ -82,6 +121,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link ExternalWrenchCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public ExternalWrenchCommand addExternalWrenchCommand()
    {
       ExternalWrenchCommand command = externalWrenchCommandBuffer.add();
@@ -89,6 +133,12 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link InverseDynamicsOptimizationSettingsCommand} and registers it to this
+    * list.
+    * 
+    * @return the available command ready to be set.
+    */
    public InverseDynamicsOptimizationSettingsCommand addInverseDynamicsOptimizationSettingsCommand()
    {
       InverseDynamicsOptimizationSettingsCommand command = inverseDynamicsOptimizationSettingsCommandBuffer.add();
@@ -96,6 +146,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link JointAccelerationIntegrationCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointAccelerationIntegrationCommand addJointAccelerationIntegrationCommand()
    {
       JointAccelerationIntegrationCommand command = jointAccelerationIntegrationCommandBuffer.add();
@@ -103,6 +158,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link JointLimitEnforcementMethodCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointLimitEnforcementMethodCommand addJointLimitEnforcementMethodCommand()
    {
       JointLimitEnforcementMethodCommand command = jointLimitEnforcementMethodCommandBuffer.add();
@@ -110,6 +170,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link JointspaceAccelerationCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointspaceAccelerationCommand addJointspaceAccelerationCommand()
    {
       JointspaceAccelerationCommand command = jointspaceAccelerationCommandBuffer.add();
@@ -117,6 +182,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link MomentumRateCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public MomentumRateCommand addMomentumRateCommand()
    {
       MomentumRateCommand command = momentumRateCommandBuffer.add();
@@ -124,6 +194,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link PlaneContactStateCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public PlaneContactStateCommand addPlaneContactStateCommand()
    {
       PlaneContactStateCommand command = planeContactStateCommandBuffer.add();
@@ -131,6 +206,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link SpatialAccelerationCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public SpatialAccelerationCommand addSpatialAccelerationCommand()
    {
       SpatialAccelerationCommand command = spatialAccelerationCommandBuffer.add();
@@ -138,6 +218,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link JointLimitReductionCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public JointLimitReductionCommand addJointLimitReductionCommand()
    {
       JointLimitReductionCommand command = jointLimitReductionCommandBuffer.add();
@@ -145,6 +230,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link PrivilegedJointSpaceCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public PrivilegedJointSpaceCommand addPrivilegedJointSpaceCommand()
    {
       PrivilegedJointSpaceCommand command = privilegedJointSpaceCommandBuffer.add();
@@ -152,6 +242,11 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       return command;
    }
 
+   /**
+    * Gets an available {@link PrivilegedConfigurationCommand} and registers it to this list.
+    * 
+    * @return the available command ready to be set.
+    */
    public PrivilegedConfigurationCommand addPrivilegedConfigurationCommand()
    {
       PrivilegedConfigurationCommand command = privilegedConfigurationCommandBuffer.add();
