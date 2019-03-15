@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
@@ -63,6 +64,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
  * The objective of this class is to help the passing commands between two instances of the same
@@ -288,6 +290,16 @@ public class CrossRobotCommandResolver
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
+      }
+   }
+
+   public void resolveLowLevelOneDoFJointDesiredDataHolder(JointDesiredOutputListReadOnly in, LowLevelOneDoFJointDesiredDataHolder out)
+   {
+      out.clear();
+
+      for (int jointIndex = 0; jointIndex < in.getNumberOfJointsWithDesiredOutput(); jointIndex++)
+      {
+         out.registerJointWithEmptyData(resolveJoint(in.getOneDoFJoint(jointIndex))).set(in.getJointDesiredOutput(jointIndex));
       }
    }
 
