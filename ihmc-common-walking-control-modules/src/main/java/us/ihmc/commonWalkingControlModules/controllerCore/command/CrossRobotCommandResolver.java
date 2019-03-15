@@ -94,6 +94,19 @@ public class CrossRobotCommandResolver
       this.jointHashCodeResolver = jointHashCodeResolver;
    }
 
+   public void resolveControllerCoreCommand(ControllerCoreCommandInterface in, ControllerCoreCommandBuffer out)
+   {
+      out.clear();
+      out.setControllerCoreMode(in.getControllerCoreMode());
+      if (in.isReinitializationRequested())
+         out.requestReinitialization();
+      resolveInverseDynamicsCommandList(in.getInverseDynamicsCommandList(), out.getInverseDynamicsCommandList());
+      resolveInverseKinematicsCommandList(in.getInverseKinematicsCommandList(), out.getInverseKinematicsCommandList());
+      resolveVirtualModelControlCommandList(in.getVirtualModelControlCommandList(), out.getVirtualModelControlCommandList());
+      resolveFeedbackControlCommandList(in.getFeedbackControlCommandList(), out.getFeedbackControlCommandList());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolder(), out.getLowLevelOneDoFJointDesiredDataHolder());
+   }
+
    public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
       out.clear();
