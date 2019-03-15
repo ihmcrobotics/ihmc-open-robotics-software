@@ -137,7 +137,7 @@ public class ICPOptimizationSolutionHandler
    }
 
    private final FramePoint2D referenceFootstepLocation2D = new FramePoint2D();
-   private final PoseReferenceFrame deadbandFrame = new PoseReferenceFrame("DeadBandFrame", worldFrame);
+   private final PoseReferenceFrame deadbandFrame = new PoseReferenceFrame("DeadbandFrame", worldFrame);
 
    public void extractFootstepSolution(FixedFramePose3DBasics footstepSolutionToPack, FixedFrameTuple2DBasics unclippedFootstepSolutionToPack,
                                        FramePose3DReadOnly upcomingFootstep, ICPOptimizationQPSolver solver)
