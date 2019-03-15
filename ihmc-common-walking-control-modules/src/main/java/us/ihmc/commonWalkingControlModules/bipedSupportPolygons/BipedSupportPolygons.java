@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
@@ -44,8 +45,14 @@ public class BipedSupportPolygons
 
    private final FramePoint3D tempContactPosition = new FramePoint3D();
 
-   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, SideDependentList<ReferenceFrame> soleZUpFrames, SideDependentList<ReferenceFrame> soleFrames,
-                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedSupportPolygons(CommonHumanoidReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(referenceFrames.getMidFeetZUpFrame(), referenceFrames.getSoleZUpFrames(), referenceFrames.getSoleFrames(), parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public BipedSupportPolygons(ReferenceFrame midFeetZUpFrame, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                               SideDependentList<? extends ReferenceFrame> soleFrames, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
