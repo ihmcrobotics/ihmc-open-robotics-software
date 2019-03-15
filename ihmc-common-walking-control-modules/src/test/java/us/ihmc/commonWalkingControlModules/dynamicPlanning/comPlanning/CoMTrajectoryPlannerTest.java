@@ -497,14 +497,8 @@ public class CoMTrajectoryPlannerTest
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Desired CoM is invalid.", comPosition, planner.getDesiredCoMPosition(), epsilon);
 
-      FramePoint3D firstVRP = new FramePoint3D(firstContact.getCopStartPosition());
-      FramePoint3D secondVRP = new FramePoint3D(secondContact.getCopStartPosition());
-      FramePoint3D thirdVRP = new FramePoint3D(thirdContact.getCopStartPosition());
-      firstVRP.addZ(nominalHeight);
-      secondVRP.addZ(nominalHeight);
-      thirdVRP.addZ(nominalHeight);
-
       FramePoint3D initialDCM = new FramePoint3D(planner.getDesiredDCMPosition());
+      FramePoint3D firstVRP = new FramePoint3D(planner.getDesiredVRPPosition());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -516,6 +510,8 @@ public class CoMTrajectoryPlannerTest
 
          planner.compute(time);
          checkPlannerDynamics(planner, omega.getDoubleValue());
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("i = " + i, firstVRP, planner.getDesiredVRPPosition(), epsilon);
 
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("i = " + i, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
       }
