@@ -123,6 +123,7 @@ public class FrameEuclideanTrajectoryPointCalculator
          computeForFixedTime(trajectoryTime);
       }
 
+      times.clear();
       times.add(0.0);
       for (int i = 0; i < waypoints.size(); i++)
          times.add(trajectoryPointOptimizer.getWaypointTime(i) * trajectoryTime);
