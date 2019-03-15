@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -27,6 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -53,7 +53,7 @@ public class PlanarRegionConstraintProvider
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final RecyclingArrayList<PlanarRegion> planarRegionsList = new RecyclingArrayList<>(PlanarRegion.class);
+   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
    private final YoInteger numberOfPlanarListsToConsider;
 
@@ -159,7 +159,7 @@ public class PlanarRegionConstraintProvider
 
       if (planarRegion != null)
       {
-         planarRegionsList.add().set(planarRegion);
+         planarRegionsList.addPlanarRegion(planarRegion);
       }
       else
       {
@@ -187,7 +187,7 @@ public class PlanarRegionConstraintProvider
 
             if (angle < maxNormalAngleFromVertical)
             {
-               planarRegionsList.add().set(planarRegions.get(i));
+               planarRegionsList.addPlanarRegion(planarRegions.get(i));
                numberOfPlanarListsToConsider.increment();
             }
          }
@@ -319,9 +319,9 @@ public class PlanarRegionConstraintProvider
 
    private void findPlanarRegionAttachedToFootstep(FramePose3DReadOnly upcomingFootstep)
    {
-      for (int regionIndex = 0; regionIndex < planarRegionsList.size(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
-         PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          planarRegion.getTransformToWorld(planeTransformToWorld);
          planeReferenceFrame.update();
@@ -380,9 +380,9 @@ public class PlanarRegionConstraintProvider
       PlanarRegion activePlanarRegion = null;
       activePlanarRegionConvexHullInControlFrame.clear();
 
-      for (int regionIndex = 0; regionIndex < planarRegionsList.size(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
-         PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
 
          icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
