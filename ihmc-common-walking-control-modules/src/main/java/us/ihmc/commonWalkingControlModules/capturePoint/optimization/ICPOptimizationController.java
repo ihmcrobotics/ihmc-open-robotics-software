@@ -108,7 +108,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
 
-   private final YoInteger numberOfSteps = new YoInteger(yoNamePrefix + "NumberOfSteps", registry);
+   private final YoInteger numberOfRegisteredSteps = new YoInteger(yoNamePrefix + "NumberOfRegisteredSteps", registry);
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
    private final RecyclingArrayList<Point2D> upcomingFootstepContactPoints = new RecyclingArrayList<>(Point2D.class);
@@ -366,7 +366,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    @Override
    public void clearPlan()
    {
-      numberOfSteps.set(0);
+      numberOfRegisteredSteps.set(0);
       upcomingFootstep.setToZero();
 
       transferDuration.setToNaN();
@@ -412,7 +412,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          footstepPose.checkReferenceFrameMatch(worldFrame);
          if (!footstepPose.containsNaN())
          {
-            if (numberOfSteps.getValue() == 0)
+            if (numberOfRegisteredSteps.getValue() == 0)
             {
                upcomingFootstep.set(footstepPose);
                upcomingFootstepSide.set(footstep.getRobotSide());
@@ -435,12 +435,12 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
                footstepIsAdjustable.set(footstep.getIsAdjustable());
                useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
             }
-            else if (numberOfSteps.getValue() == 1)
+            else if (numberOfRegisteredSteps.getValue() == 1)
             {
                nextTransferDuration.set(timing.getTransferTime());
             }
 
-            numberOfSteps.increment();
+            numberOfRegisteredSteps.increment();
          }
          else
          {
@@ -491,7 +491,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isStationary.set(false);
       isICPStuck.set(false);
 
-      if (numberOfSteps.getValue() < 2)
+      if (numberOfRegisteredSteps.getValue() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
@@ -526,7 +526,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       isInDoubleSupport.set(false);
       isICPStuck.set(false);
 
-      if (numberOfSteps.getValue() < 2)
+      if (numberOfRegisteredSteps.getValue() < 2)
          nextTransferDuration.set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
@@ -583,7 +583,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (icpError.length() < Math.abs(minICPErrorForStepAdjustment.getValue()) && !includeFootsteps.getBooleanValue())
          return false;
 
-      return numberOfSteps.getValue() > 0;
+      return numberOfRegisteredSteps.getValue() > 0;
    }
 
    /** {@inheritDoc} */
