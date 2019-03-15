@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
@@ -18,6 +18,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -89,6 +92,12 @@ public class CrossRobotCommandResolver
       resolveInverseDynamicsCommandListInternal(in, out);
    }
 
+   public void resolveInverseKinematicsCommandList(InverseKinematicsCommandList in, InverseKinematicsCommandBuffer out)
+   {
+      out.clear();
+      resolveInverseKinematicsCommandListInternal(in, out);
+   }
+
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
       for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
@@ -138,6 +147,44 @@ public class CrossRobotCommandResolver
             break;
          case LIMIT_REDUCTION:
             resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+            break;
+         default:
+            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+         }
+      }
+   }
+
+   private void resolveInverseKinematicsCommandListInternal(InverseKinematicsCommandList in, InverseKinematicsCommandBuffer out)
+   {
+      for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
+      {
+         InverseKinematicsCommand<?> commandToResolve = in.getCommand(commandIndex);
+         switch (commandToResolve.getCommandType())
+         {
+         case OPTIMIZATION_SETTINGS:
+            resolveInverseKinematicsOptimizationSettingsCommand((InverseKinematicsOptimizationSettingsCommand) commandToResolve,
+                                                                out.addInverseKinematicsOptimizationSettingsCommand());
+            break;
+         case LIMIT_REDUCTION:
+            resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+            break;
+         case JOINT_LIMIT_ENFORCEMENT:
+            resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
+            break;
+         case JOINTSPACE:
+            resolveJointspaceVelocityCommand((JointspaceVelocityCommand) commandToResolve, out.addJointspaceVelocityCommand());
+            break;
+         case MOMENTUM:
+            resolveMomentumCommand((MomentumCommand) commandToResolve, out.addMomentumCommand());
+            break;
+         case PRIVILEGED_CONFIGURATION:
+            resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
+            break;
+         case PRIVILEGED_JOINTSPACE_COMMAND:
+            resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
+            break;
+         case TASKSPACE:
+            resolveSpatialVelocityCommand((SpatialVelocityCommand) commandToResolve, out.addSpatialVelocityCommand());
             break;
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");

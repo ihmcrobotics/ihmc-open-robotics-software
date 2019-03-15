@@ -60,8 +60,8 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
     * Adds the commands contained in the given list to this list using the method
     * {@link #addCommand(InverseDynamicsCommand)} for each element.
     * 
-    * @param commandList the list of commands to register. The command's reference is saved, no copy
-    *           is done. Not modified.
+    * @param commandList the list of commands to register. The command's reference is saved, no copy is
+    *           done. Not modified.
     */
    public void addCommandList(InverseDynamicsCommandList commandList)
    {
@@ -172,7 +172,6 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
          return false;
       }
    }
-
 
    @Override
    public String toString()

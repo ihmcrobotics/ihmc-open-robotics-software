@@ -38,6 +38,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -133,8 +135,13 @@ class CrossRobotCommandResolverTest
 
       Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
       Set<Class<? extends InverseKinematicsCommand>> commandTypes = reflections.getSubTypesOf(InverseKinematicsCommand.class);
+      commandTypes.remove(InverseKinematicsCommandList.class);
+      commandTypes.remove(InverseKinematicsCommandBuffer.class);
 
       String errorMessage = "";
+
+      if (!isResolveMethodAvailableForCommandList(InverseKinematicsCommandList.class, InverseKinematicsCommandBuffer.class, verbose))
+         errorMessage += "Missing resolve method for: " + InverseKinematicsCommandList.class.getSimpleName() + "\n";
 
       for (Class<? extends InverseKinematicsCommand> commandType : commandTypes)
       {
@@ -260,6 +267,34 @@ class CrossRobotCommandResolverTest
          InverseDynamicsCommandList expectedOut = nextInverseDynamicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
          InverseDynamicsCommandBuffer actualOut = new InverseDynamicsCommandBuffer();
          crossRobotCommandResolver.resolveInverseDynamicsCommandList(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @SuppressWarnings("rawtypes")
+   @Test
+   void testResolveInverseKinematicsCommandList() throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
+      Set<Class<? extends InverseKinematicsCommand>> commandTypes = reflections.getSubTypesOf(InverseKinematicsCommand.class);
+      commandTypes.remove(InverseKinematicsCommandList.class);
+      commandTypes.remove(InverseKinematicsCommandBuffer.class);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         long seed = random.nextLong();
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         InverseKinematicsCommandList in = nextInverseKinematicsCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
+         InverseKinematicsCommandList expectedOut = nextInverseKinematicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         InverseKinematicsCommandBuffer actualOut = new InverseKinematicsCommandBuffer();
+         crossRobotCommandResolver.resolveInverseKinematicsCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
@@ -1330,6 +1365,36 @@ class CrossRobotCommandResolverTest
          Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                         RigidBodyBasics.class, ReferenceFrame[].class);
          InverseDynamicsCommand<?> command = (InverseDynamicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
+         next.addCommand(command);
+      }
+      return next;
+   }
+
+   @SuppressWarnings("rawtypes")
+   public static InverseKinematicsCommandList nextInverseKinematicsCommandList(Random random,
+                                                                           Collection<Class<? extends InverseKinematicsCommand>> commandsToGenerate,
+                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      InverseKinematicsCommandList next = new InverseKinematicsCommandList();
+
+      List<Class<? extends InverseKinematicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
+      commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
+
+      while (!commandTypes.isEmpty())
+      {
+         int index = random.nextInt(commandTypes.size());
+         Class<? extends InverseKinematicsCommand> commandType = commandTypes.get(index);
+         if (numberOfCommandsToGenerate.get(index).getAndDecrement() == 0)
+         {
+            commandTypes.remove(index);
+            numberOfCommandsToGenerate.remove(index);
+         }
+
+         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         InverseKinematicsCommand<?> command = (InverseKinematicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
       return next;
