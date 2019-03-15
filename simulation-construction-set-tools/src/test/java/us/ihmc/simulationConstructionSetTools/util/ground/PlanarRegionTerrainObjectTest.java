@@ -57,12 +57,12 @@ public class PlanarRegionTerrainObjectTest
    }
 
    @Test
-   public void testHeightAndNormalAt() throws Exception
+   public void testHeightAndNormalAt()
    {
       Random random = new Random(1776L);
 
       Vector3D terrainObjectNormalToPack = new Vector3D();
-      Vector3D planarRegionNormalToPack = new Vector3D();
+      Vector3D expectedTerrainNormal = new Vector3D();
       Vector3D standardGroundNormal = new Vector3D(0.0, 0.0, 1.0);
 
       for (int i = 0; i < 100000; i++)
@@ -80,12 +80,17 @@ public class PlanarRegionTerrainObjectTest
 
          double planarRegionZAtXY = planarRegion.getPlaneZGivenXY(randomXCoord, randomYCoord);
          double heightAt = terrainObject.heightAndNormalAt(randomXCoord, randomYCoord, randomZCoord, terrainObjectNormalToPack);
-         planarRegion.getNormal(planarRegionNormalToPack);
+
+         planarRegion.getNormal(expectedTerrainNormal);
+         if(planarRegion.getNormal().getZ() < 0.0)
+         {
+            expectedTerrainNormal.negate();
+         }
 
          if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
             assertEquals(planarRegionZAtXY, heightAt, 1e-10);
-            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", terrainObjectNormalToPack, planarRegionNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", terrainObjectNormalToPack, expectedTerrainNormal, 1e-10);
          }
          else
          {
