@@ -62,4 +62,9 @@ public class OrientationGraphic
       arrow.setTranslateZ(positionGraphic.getSphere().getTranslateZ());
       arrow.setRotate(Math.toDegrees(startYaw));
    }
+
+   public double getYaw()
+   {
+      return Math.toRadians(arrow.getRotate());
+   }
 }

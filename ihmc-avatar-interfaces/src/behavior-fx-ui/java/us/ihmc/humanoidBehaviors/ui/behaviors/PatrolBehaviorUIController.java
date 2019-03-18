@@ -7,6 +7,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.*;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -23,8 +26,10 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    @FXML private Button pausePatrol;
    @FXML private Button destroyPatrol;
    @FXML private Button placeWaypoints;
+   @FXML private Button goToWaypoint;
 
    private JavaFXMessager messager;
+   private BehaviorTeleop teleop;
    private AtomicReference<FXUIEditor> activeEditor;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
@@ -35,9 +40,10 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   public void init(JavaFXMessager messager, Node sceneNode)
+   public void init(JavaFXMessager messager, Node sceneNode, BehaviorTeleop teleop)
    {
       this.messager = messager;
+      this.teleop = teleop;
 
       activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
 
@@ -62,6 +68,15 @@ public class PatrolBehaviorUIController extends FXUIBehavior
          LogTools.debug("Completed waypoint placement.");
 
          removeWaypoint(waypoints.get(waypoints.size() - 1));
+
+         ArrayList<Pose3D> waypointsToSend = new ArrayList<>();
+         waypoints.forEach(graphicWaypoint ->
+                           {
+                              Point3D pos = graphicWaypoint.getSnappedPositionGraphic().getPosition();
+                              double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
+                              waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), 0.0, 0.0, yaw));
+                           });
+         teleop.setWaypoints(waypointsToSend);
 
          messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
          messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
@@ -144,6 +159,11 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
 
       waypointPlacementStateMachine.start();
+   }
+
+   @FXML public void goToWaypoint()
+   {
+      teleop.goToWaypoint(0);
    }
 
    @FXML public void continuePatrol()
