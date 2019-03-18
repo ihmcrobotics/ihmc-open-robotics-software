@@ -9,11 +9,13 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -135,11 +137,13 @@ public class PatrolBehavior
          if (walkable)
          {
             walkingCompleted.poll(); // acting to clear the notification
+            LogTools.debug("Tasking {} footstep(s) to the robot!", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());
             footstepDataListPublisher.publish(footstepPlanningOutput.getFootstepDataList());
             transitionTo(WALK_TO_GOAL_WAYPOINT);
          }
          else
          {
+            LogTools.warn("Footstep plan result: {}", FootstepPlanningResult.fromByte(footstepPlanningOutput.getFootstepPlanningResult()).name());
             readyToPlanNotification.set();  // plan again until walkable plan, also functions to wait for perception data and user modifications
          }
       }
@@ -168,12 +172,14 @@ public class PatrolBehavior
 
       if (stopNotification.read())  // favor stop if race condition
       {
+         LogTools.info("Interrupted with STOP");
          sendStopWalking();
          transitionTo(STOP);
       }
 
       if (overrideGoToWaypointNotification.read())
       {
+         LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
          sendStopWalking();
 
          ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
@@ -194,6 +200,7 @@ public class PatrolBehavior
 
    private void sendStopWalking()
    {
+      LogTools.error("STOP WALKING");
       abortPublisher.publish(new AbortWalkingMessage());
    }
 
@@ -208,6 +215,7 @@ public class PatrolBehavior
       WalkingStatusMessage walkingStatusMessage;
       while ((walkingStatusMessage = status.takeNextData()) != null)
       {
+         LogTools.debug("Walking status: {}", WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()).name());
          if (walkingStatusMessage.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
          {
             walkingCompleted.set();
@@ -218,7 +226,7 @@ public class PatrolBehavior
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("Behavior");
+      private static final Category Root = apiFactory.createRootCategory("PatrolBehavior");
       private static final CategoryTheme Patrol = apiFactory.createCategoryTheme("Patrol");
 
       /** Input: Update the waypoints */

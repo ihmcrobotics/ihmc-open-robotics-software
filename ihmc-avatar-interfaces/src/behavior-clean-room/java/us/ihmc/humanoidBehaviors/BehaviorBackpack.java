@@ -44,7 +44,8 @@ public class BehaviorBackpack
       PubSubImplementation pubSubImplementation = messager instanceof SharedMemoryMessager ? PubSubImplementation.INTRAPROCESS : PubSubImplementation.FAST_RTPS;
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_backpack");
 
-      new StepInPlaceBehavior(messager, ros2Node, robotModel);
+      new StepInPlaceBehavior(messager, ros2Node, robotModel);  // TODO don't start threads on construction, but right now not hurting anything
+      new PatrolBehavior(messager, ros2Node, robotModel);
    }
 
    public static MessagerAPI getBehaviorAPI()
