@@ -46,7 +46,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
 
       measuredWrench = new YoFixedFrameWrench(robotQuadrant.getCamelCaseName() + "_MeasuredWrench", null,
-                                              foot.getSoleFrame(), registry);
+                                              ReferenceFrame.getWorldFrame(), registry);
    }
 
    public YoBoolean getControllerSetFootSwitch()
@@ -83,6 +83,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public double computeFootLoadPercentage()
    {
       updateMeasurement();
+      measuredWrench.checkExpressedInFrameMatch(ReferenceFrame.getWorldFrame());
       return Math.abs(measuredWrench.getLinearPartZ()) / totalRobotWeight;
    }
 
