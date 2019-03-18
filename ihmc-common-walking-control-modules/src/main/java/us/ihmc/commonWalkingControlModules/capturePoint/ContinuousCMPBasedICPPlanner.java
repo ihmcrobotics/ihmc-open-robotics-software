@@ -149,6 +149,9 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
+   private final ReferenceFrame midFeetZUpFrame;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
+
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
     *
@@ -163,16 +166,19 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
     *           added to.
     */
    public ContinuousCMPBasedICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                       int numberOfFootstepsToConsider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       int numberOfFootstepsToConsider, ReferenceFrame midFeetZUpFrame,
+                                       SideDependentList<? extends ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, numberOfFootstepsToConsider);
+      this.midFeetZUpFrame = midFeetZUpFrame;
+      this.soleZUpFrames = soleZUpFrames;
 
       icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, omega0, registry);
       icpSingleSupportTrajectoryGenerator = new ICPPlannerSegmentedTrajectoryGenerator(namePrefix + "SingleSupport", worldFrame, omega0, registry);
 
-
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
-                                                                                        numberOfFootstepsToConsider, registry);
+                                                                                        numberOfFootstepsToConsider, midFeetZUpFrame, soleZUpFrames, registry);
 
       yoSingleSupportInitialCoM = new YoFramePoint3D(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
       yoSingleSupportFinalCoM = new YoFramePoint3D(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
