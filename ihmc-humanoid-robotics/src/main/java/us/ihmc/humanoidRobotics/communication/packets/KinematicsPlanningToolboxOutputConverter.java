@@ -27,8 +27,6 @@ public class KinematicsPlanningToolboxOutputConverter
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
    private final KinematicsToolboxOutputConverter converter;
 
-   private static final boolean startAndFinishVelocityIsZero = true;
-
    public KinematicsPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       converter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
@@ -55,6 +53,7 @@ public class KinematicsPlanningToolboxOutputConverter
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
+      double firstTimeOffset = solution.getKeyFrameTimes().get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -70,14 +69,15 @@ public class KinematicsPlanningToolboxOutputConverter
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = solution.getKeyFrameTimes().get(i);
+         double time = solution.getKeyFrameTimes().get(i) - firstTimeOffset;
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPosition));
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1));
+      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1) - firstTimeOffset);
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      trajectoryPoints.addTimeOffset(firstTimeOffset);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -113,6 +113,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
+      double firstTimeOffset = solution.getKeyFrameTimes().get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -125,7 +126,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = solution.getKeyFrameTimes().get(i);
+         double time = solution.getKeyFrameTimes().get(i) - firstTimeOffset;
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
@@ -162,6 +163,7 @@ public class KinematicsPlanningToolboxOutputConverter
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
+      double firstTimeOffset = solution.getKeyFrameTimes().get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -177,14 +179,15 @@ public class KinematicsPlanningToolboxOutputConverter
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = solution.getKeyFrameTimes().get(i);
+         double time = solution.getKeyFrameTimes().get(i) - firstTimeOffset;
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPosition));
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1));
+      euclideanTrajectoryPointCalculator.compute(solution.getKeyFrameTimes().get(numberOfTrajectoryPoints - 1) - firstTimeOffset);
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      trajectoryPoints.addTimeOffset(firstTimeOffset);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
