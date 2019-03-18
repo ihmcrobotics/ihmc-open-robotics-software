@@ -10,7 +10,7 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
 {
    public FootstepPlannerType getPlannerType()
    {
-      return FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN;
+      return FootstepPlannerType.VIS_GRAPH_WITH_A_STAR;
    }
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
@@ -18,11 +18,11 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
       settings.setStanceLength(1.0);
       settings.setStanceWidth(0.5);
-//      settings.setEndDoubleSupportDuration(0.25);
-      settings.setEndDoubleSupportDuration(0.5 + 0.25);
-      settings.setStepDuration(0.5);
-      settings.setEndPhaseShift(90);
-//      settings.setEndPhaseShift(180.0);
+      settings.setEndDoubleSupportDuration(0.15);
+//      settings.setEndDoubleSupportDuration(0.5 + 0.25);
+      settings.setStepDuration(0.33);
+//      settings.setEndPhaseShift(90);
+      settings.setEndPhaseShift(180.0);
       return settings;
    }
 
