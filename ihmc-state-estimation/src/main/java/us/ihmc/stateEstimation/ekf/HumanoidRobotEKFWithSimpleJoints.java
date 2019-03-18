@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,6 +24,8 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -77,17 +81,28 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
          }
       }
 
-      Map<String, ReferenceFrame> forceSensorMap = new HashMap<>();
-      SideDependentList<MovingReferenceFrame> soleFrames = estimatorFullRobotModel.getSoleFrames();
+      Map<String, ImmutablePair<ReferenceFrame, ForceSensorDefinition>> forceSensorMap = new HashMap<>();
+      List<ForceSensorDefinition> forceSensorDefinitions = Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions());
       for (RobotSide robotSide : RobotSide.values)
       {
-         forceSensorMap.put(footForceSensorNames.get(robotSide), soleFrames.get(robotSide));
+         String sensorName = footForceSensorNames.get(robotSide);
+         ForceSensorDefinition sensorDefinition = forceSensorDefinitions.stream().filter(d -> d.getSensorName().equals(sensorName)).findFirst().get();
+         MovingReferenceFrame soleFrame = estimatorFullRobotModel.getSoleFrame(robotSide);
+         forceSensorMap.put(sensorName, new ImmutablePair<>(soleFrame, sensorDefinition));
+      }
+
+      Map<String, IMUDefinition> imuSensorMap = new HashMap<>();
+      List<IMUDefinition> imuSensorDefinitions = Arrays.asList(estimatorFullRobotModel.getIMUDefinitions());
+      for (String imuName : imuNames)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.stream().filter(d -> d.getName().equals(imuName)).findFirst().get();
+         imuSensorMap.put(imuName, imuDefinition);
       }
 
       Map<String, String> jointParameterGroups = createJointGroups(estimatorFullRobotModel);
 
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuNames, forceSensorMap, rawSensorOutput, processedSensorOutput, dt,
+      leggedRobotEKF = new LeggedRobotEKF(rootJoint, jointsForEKF, primaryImuName, imuSensorMap, forceSensorMap, rawSensorOutput, processedSensorOutput, dt,
                                           gravity, jointParameterGroups, graphicsListRegistry, referenceJointsForEKF);
    }
 
