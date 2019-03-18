@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
@@ -31,7 +30,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  * reconfigured, and enabled (by submitting a command) or disabled (by NOT submitting a command).
  * </p>
  * <p>
- * All the data contained in this command is expressed in world to ensure that the feedback
+ * All the data contained in this command is expressed in root frame to ensure that the feedback
  * controller can properly interpret it.
  * </p>
  *
@@ -90,7 +89,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * Sets the desired data expressed in root frame to be used during the next control tick.
     * <p>
     * The desired linear velocity and feed-forward linear acceleration are set to zero.
     * </p>
@@ -107,13 +106,11 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * Sets the desired data expressed in root frame to be used during the next control tick.
     *
     * @param desiredPosition describes the position that the center of mass should reach. Not modified.
     * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
-    *           world. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
-    *            {@link ReferenceFrame#getWorldFrame()}.
+    *           root frame. Not modified.
     */
    public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
    {
