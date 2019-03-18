@@ -202,7 +202,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       timeRemainingInStateWithSwingSpeedUp.setToNaN();
 
       controllerToolbox.getFootContactState(robotQuadrant).clear();
-      controllerToolbox.updateSupportPolygon();
       footSwitch.reset();
 
       lastStepPosition.setIncludingFrame(finalPosition);

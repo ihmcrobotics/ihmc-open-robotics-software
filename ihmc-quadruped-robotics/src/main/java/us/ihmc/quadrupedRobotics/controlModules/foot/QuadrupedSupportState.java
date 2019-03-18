@@ -118,7 +118,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
-      controllerToolbox.updateSupportPolygon();
 
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
