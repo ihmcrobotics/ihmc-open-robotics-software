@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -142,7 +143,7 @@ public class PushRecoveryControlModule
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
-      FrameConvexPolygon2D supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
+      FrameConvexPolygon2DReadOnly supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
 
       // Initialize variables
       closestFootToICP.set(null);

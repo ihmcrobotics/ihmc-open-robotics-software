@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -87,7 +88,7 @@ public class PelvisICPBasedTranslationManager
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private FrameConvexPolygon2D supportPolygon;
+   private FrameConvexPolygon2DReadOnly supportPolygon;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
