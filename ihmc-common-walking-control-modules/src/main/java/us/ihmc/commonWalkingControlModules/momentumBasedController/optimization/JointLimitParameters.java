@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 public class JointLimitParameters
 {
-   private double maxAbsJointVelocity; // rad/s
-   private double jointLimitDistanceForMaxVelocity; // rad
-   private double jointLimitFilterBreakFrequency; // 1/s
+   private double maxAbsJointVelocity;               // rad/s
+   private double jointLimitDistanceForMaxVelocity;  // rad
+   private double jointLimitFilterBreakFrequency;    // 1/s
    private double velocityControlGain;
 
    public JointLimitParameters()
