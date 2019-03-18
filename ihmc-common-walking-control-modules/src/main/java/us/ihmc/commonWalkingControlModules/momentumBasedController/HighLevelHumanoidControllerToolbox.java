@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
-import static us.ihmc.robotics.lists.FrameTuple2dArrayList.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -13,8 +13,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -142,8 +140,6 @@ public class HighLevelHumanoidControllerToolbox
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final ICPControlPolygons icpControlPolygons;
-   private final ICPControlPlane icpControlPlane;
 
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
@@ -180,11 +176,7 @@ public class HighLevelHumanoidControllerToolbox
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      this.icpControlPlane = new ICPControlPlane(this.omega0, centerOfMassFrame, gravityZ, registry);
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, yoGraphicsListRegistry);
 
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
@@ -467,7 +459,6 @@ public class HighLevelHumanoidControllerToolbox
    public void updateBipedSupportPolygons()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      icpControlPolygons.updateUsingContactStates(footContactStates);
    }
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -893,11 +884,6 @@ public class HighLevelHumanoidControllerToolbox
    public BipedSupportPolygons getBipedSupportPolygons()
    {
       return bipedSupportPolygons;
-   }
-
-   public ICPControlPolygons getICPControlPolygons()
-   {
-      return icpControlPolygons;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
