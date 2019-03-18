@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.junit.jupiter.api.*;
@@ -13,6 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -35,34 +37,14 @@ public class AtlasFootstepPlanBehaviorTest
    private AtlasBehaviorTestYoVariables variables;
    private GoalOrientedTestConductor conductor;
    private AtlasRobotModel robotModel;
+   private IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
+   private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
+   private Ros2Node ros2Node;
 
    @Test
    public void testExecuteFootstepPlan() throws IOException
    {
-      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
-
-      Ros2Node ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
-
-      IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-      RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
-
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
-
-      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
-      LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
-
-      FramePose3D currentGoalWaypoint = new FramePose3D();
-      currentGoalWaypoint.prependTranslation(1.0, 0.0, 0.0);
-      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
-
-      LogTools.info("Received footstep planning status: {}", output);
-
-      boolean optimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION;
-      boolean subOptimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
-      assertTrue(optimal || subOptimal, "Solution failed");
+      FootstepPlanningToolboxOutputStatus output = setupForFootstepTest();
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
@@ -72,9 +54,55 @@ public class AtlasFootstepPlanBehaviorTest
    }
 
    @Test
-   public void testStopWalking()
+   public void testStopWalking() throws IOException
    {
+      FootstepPlanningToolboxOutputStatus output = setupForFootstepTest();
 
+      footstepDataListPublisher = ROS2Tools
+            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+
+      footstepDataListPublisher.publish(output.getFootstepDataList());
+
+      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size() / 2, 6.0);
+
+      abortPublisher.publish(new AbortWalkingMessage());   // stop
+
+      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 0.5);
+   }
+
+   private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
+   {
+      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+
+      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+
+      footstepDataListPublisher = ROS2Tools
+            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+
+      abortPublisher = ROS2Tools
+            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+
+      RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+      RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
+
+      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+
+      FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
+      LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
+
+      FramePose3D currentGoalWaypoint = new FramePose3D();
+      currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
+      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
+
+      LogTools.info("Received footstep planning status: {}", output);
+
+      boolean optimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION;
+      boolean subOptimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
+      assertTrue(optimal || subOptimal, "Solution failed");
+      return output;
    }
 
    @AfterEach

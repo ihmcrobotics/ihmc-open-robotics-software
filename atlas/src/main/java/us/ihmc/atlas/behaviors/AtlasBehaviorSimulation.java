@@ -27,17 +27,17 @@ public class AtlasBehaviorSimulation
 {
    public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, true);
    }
 
    public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS);
+      return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, false);
    }
 
    private static SimulationConstructionSet create(DRCRobotModel robotModel,
                                                    CommonAvatarEnvironmentInterface environment,
-                                                   PubSubImplementation pubSubImplementation)
+                                                   PubSubImplementation pubSubImplementation, boolean createYoVariableServer)
    {
       SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
@@ -87,7 +87,7 @@ public class AtlasBehaviorSimulation
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
-      avatarSimulationFactory.setCreateYoVariableServer(true);
+      avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
