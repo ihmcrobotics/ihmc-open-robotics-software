@@ -139,9 +139,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
 
-   protected final ReferenceFrame midFeetZUpFrame;
-   protected final SideDependentList<ReferenceFrame> soleZUpFrames;
-
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ContinuousCMPBasedICPPlanner}.
     *
@@ -162,9 +159,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
-
-      midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
-      soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
 
       singleSupportInitialICP = new YoMutableFramePoint3D(namePrefix + "SingleSupportInitialICP", "", registry);
       singleSupportFinalICP = new YoMutableFramePoint3D(namePrefix + "SingleSupportFinalICP", "", registry);
