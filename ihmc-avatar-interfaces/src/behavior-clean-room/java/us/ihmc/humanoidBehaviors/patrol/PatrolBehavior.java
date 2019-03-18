@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
+import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -13,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.tools.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -47,6 +50,7 @@ public class PatrolBehavior
 
    private final Messager messager;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
@@ -55,11 +59,12 @@ public class PatrolBehavior
 
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
-
    private final Notification readyToPlanNotification = new Notification();
-   private final AtomicBoolean isPlanning = new AtomicBoolean();
+   private final Notification footstepPlanCompleted = new Notification();
+
+   private FootstepPlanningToolboxOutputStatus footstepPlanningOutput;
+
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final Activator walking = new Activator();
    private final Pose3D currentGoalWaypoint = new Pose3D(); // TODO evaluate if this is a bug
@@ -73,6 +78,9 @@ public class PatrolBehavior
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
                                                             ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      abortPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                 ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                                                 ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
 
@@ -93,7 +101,7 @@ public class PatrolBehavior
       patrolThread.schedule(this::patrolThread, 1, TimeUnit.MILLISECONDS);
    }
 
-   private void patrolThread()
+   private void patrolThread()   // pretty much just updating whichever state is active
    {
       currentState.getValue().run();
    }
@@ -105,24 +113,33 @@ public class PatrolBehavior
 
    private void updateRetrieveFootstepPlanState()
    {
-      if (checkForInterruptions()) return;
+      if (checkForInterruptions()) return;  // need to return in case of stop condition
 
       if (readyToPlanNotification.poll())
       {
-         MovingReferenceFrame midFeetZUpFrame = remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame();
-         FramePose3D midFeetZUpPose = new FramePose3D(midFeetZUpFrame);
-         midFeetZUpPose.changeFrame(worldFrame);
-
+         FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
          FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(goalWaypointIndex.get()));
 
-         new Thread(() -> {
-            remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
-            isPlanning.set(false);
+         new Thread(() -> {  // plan in a thread to catch interruptions during planning
+            footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
+            footstepPlanCompleted.set();
          }).start();
       }
-      else if (!isPlanning.get())
+      else if (footstepPlanCompleted.poll())
       {
+         boolean walkable =
+               footstepPlanningOutput.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION ||
+               footstepPlanningOutput.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
 
+         if (walkable)
+         {
+            footstepDataListPublisher.publish(footstepPlanningOutput.getFootstepDataList());
+            transitionTo(WALK_TO_GOAL_WAYPOINT);
+         }
+         else
+         {
+            readyToPlanNotification.set();  // plan again until walkable plan, also functions to wait for perception data and user modifications
+         }
       }
    }
 
@@ -137,7 +154,7 @@ public class PatrolBehavior
 
    private boolean checkForInterruptions()
    {
-      stopNotification.poll();
+      stopNotification.poll();         // poll both at the same time to handle race condition
       goToWaypointNotification.poll();
 
       if (stopNotification.read())  // favor stop if race condition
@@ -150,8 +167,8 @@ public class PatrolBehavior
       {
          sendStopWalking();
 
-         ArrayList<Pose3D> latestWaypoints = waypoints.get();
-         int currentGoalWaypointIndex = goalWaypointIndex.get();
+         ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
+         int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
          if (currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size())
          {
             readyToPlanNotification.set();
@@ -168,7 +185,7 @@ public class PatrolBehavior
 
    private void sendStopWalking()
    {
-      footstepDataListPublisher.publish(new FootstepDataListMessage()); // TODO I guess this works?
+      abortPublisher.publish(new AbortWalkingMessage());
    }
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
