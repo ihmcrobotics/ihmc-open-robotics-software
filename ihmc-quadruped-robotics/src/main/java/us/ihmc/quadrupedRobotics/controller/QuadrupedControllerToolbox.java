@@ -143,6 +143,7 @@ public class QuadrupedControllerToolbox
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
       update();
+      updateSupportPolygon();
    }
 
    public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
@@ -154,7 +155,6 @@ public class QuadrupedControllerToolbox
    public void update()
    {
       referenceFrames.updateFrames();
-      updateSupportPolygon();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
