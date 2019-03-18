@@ -48,7 +48,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
    /**
     * The feed-forward to be used for each controlled joint. Useful to improve tracking performance.
     */
-   private final TDoubleArrayList feedForwardActions = new TDoubleArrayList(initialCapacity);
+   private final TDoubleArrayList feedForwardAccelerations = new TDoubleArrayList(initialCapacity);
 
    /** Gains to used by the PD controllers for the next control tick. */
    private final RecyclingArrayList<PDGains> gains = new RecyclingArrayList<>(initialCapacity, PDGains.class);
@@ -71,7 +71,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
       joints.clear();
       desiredPositions.clear();
       desiredVelocities.clear();
-      feedForwardActions.clear();
+      feedForwardAccelerations.clear();
       weightsForSolver.clear();
       gains.clear();
    }
@@ -138,14 +138,15 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param joint the joint to be controlled.
     * @param desiredPosition the joint's desired position.
     * @param desiredVelocity the joint's desired velocity.
-    * @param feedForwardAction the feed-forward for the joint, used to improve tracking performance.
+    * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
+    *           tracking performance.
     */
-   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAction)
+   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
       joints.add(joint);
       desiredPositions.add(desiredPosition);
       desiredVelocities.add(desiredVelocity);
-      feedForwardActions.add(feedForwardAction);
+      feedForwardAccelerations.add(feedForwardAcceleration);
       weightsForSolver.add(Double.POSITIVE_INFINITY);
       gains.add().set(0.0, 0.0, 0.0, 0.0);
    }
@@ -156,14 +157,16 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param joint the joint to be controlled.
     * @param desiredPosition the joint's desired position.
     * @param desiredVelocity the joint's desired velocity.
-    * @param feedForwardAction the feed-forward for the joint, used to improve tracking performance.
+    * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
+    *           tracking performance.
     */
-   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAction, PDGainsReadOnly gains, double weight)
+   public void addJoint(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsReadOnly gains,
+                        double weight)
    {
       joints.add(joint);
       desiredPositions.add(desiredPosition);
       desiredVelocities.add(desiredVelocity);
-      feedForwardActions.add(feedForwardAction);
+      feedForwardAccelerations.add(feedForwardAcceleration);
       weightsForSolver.add(weight);
       this.gains.add().set(gains);
    }
@@ -174,15 +177,15 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param jointIndex the index of the joint for which the desireds are to be updated.
     * @param desiredPosition the new joint's desired position.
     * @param desiredVelocity the new joint's desired velocity.
-    * @param feedForwardAction the new feed-forward for the joint, used to improve tracking
-    *           performance.
+    * @param feedForwardAcceleration the new feed-forward acceleration for the joint, used to improve
+    *           tracking performance.
     */
-   public void setOneDoFJoint(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAction)
+   public void setOneDoFJoint(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       desiredPositions.set(jointIndex, desiredPosition);
       desiredVelocities.set(jointIndex, desiredVelocity);
-      feedForwardActions.set(jointIndex, feedForwardAction);
+      feedForwardAccelerations.set(jointIndex, feedForwardAcceleration);
    }
 
    /**
@@ -200,7 +203,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
          joints.add(other.joints.get(i));
          desiredPositions.add(other.getDesiredPosition(i));
          desiredVelocities.add(other.getDesiredVelocity(i));
-         feedForwardActions.add(other.getFeedForwardAction(i));
+         feedForwardAccelerations.add(other.getFeedForwardAcceleration(i));
          weightsForSolver.add(other.getWeightForSolver(i));
          gains.add().set(other.getGains(i));
       }
@@ -277,9 +280,9 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     * @param jointIndex the index of the joint.
     * @return the feed-forward acceleration for the joint.
     */
-   public double getFeedForwardAction(int jointIndex)
+   public double getFeedForwardAcceleration(int jointIndex)
    {
-      return feedForwardActions.get(jointIndex);
+      return feedForwardAccelerations.get(jointIndex);
    }
 
    /**
@@ -314,7 +317,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
                return false;
             if (desiredVelocities.get(jointIndex) != other.desiredVelocities.get(jointIndex))
                return false;
-            if (feedForwardActions.get(jointIndex) != other.feedForwardActions.get(jointIndex))
+            if (feedForwardAccelerations.get(jointIndex) != other.feedForwardAccelerations.get(jointIndex))
                return false;
             if (weightsForSolver.get(jointIndex) != other.weightsForSolver.get(jointIndex))
                return false;

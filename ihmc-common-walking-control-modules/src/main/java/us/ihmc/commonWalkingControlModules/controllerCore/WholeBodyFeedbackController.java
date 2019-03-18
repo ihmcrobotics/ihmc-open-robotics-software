@@ -318,7 +318,7 @@ public class WholeBodyFeedbackController
          OneDoFJointBasics joint = feedbackControlCommand.getJoint(i);
          double desiredPosition = feedbackControlCommand.getDesiredPosition(i);
          double desiredVelocity = feedbackControlCommand.getDesiredVelocity(i);
-         double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAction(i);
+         double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);
 
          OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
          if (controller.isEnabled())
