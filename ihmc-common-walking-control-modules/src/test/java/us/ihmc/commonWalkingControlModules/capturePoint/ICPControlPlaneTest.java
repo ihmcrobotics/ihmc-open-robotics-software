@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -23,7 +21,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPControlPlaneTest
 {
@@ -39,14 +36,13 @@ public class ICPControlPlaneTest
    public void testProjectPointForwardAndLeftOntoPlane()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
       double planeHeightInCoMFrame = -1.0; //
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+      icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
 
       // test plane height
@@ -245,14 +241,13 @@ public class ICPControlPlaneTest
    public void testProjectPointForwardAndLeftOntoPlaneEdgeCase()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
       double planeHeightInCoMFrame = -1.0; //
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+      icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
 
       // test plane height
@@ -286,7 +281,6 @@ public class ICPControlPlaneTest
       for (int iter = 0; iter < 1000; iter++)
       {
          YoVariableRegistry registry = new YoVariableRegistry("robert");
-         YoDouble omega = new YoDouble("omega", registry);
          double gravity = 9.81;
 
          double xCoMPosition = RandomNumbers.nextDouble(random, 10.0);
@@ -295,8 +289,8 @@ public class ICPControlPlaneTest
          ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(xCoMPosition, yCoMPosition, zCoMPosition);
          double planeHeightInCoMFrame = RandomNumbers.nextDouble(random, -5.0, 0.001);
 
-         ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-         omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+         ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+         icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
          // test plane height
          assertEquals("iteration " + iter, planeHeightInCoMFrame, icpControlPlane.getControlPlaneHeight(), 1e-10);
@@ -326,14 +320,13 @@ public class ICPControlPlaneTest
    public void testProjectPointForwardAndLeftFromPlaneOntoSurface()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
       double planeHeightInCoMFrame = -1.0; //
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+      icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
 
       // test plane height
@@ -525,7 +518,6 @@ public class ICPControlPlaneTest
       for (int iter = 0; iter < 1000; iter++)
       {
          YoVariableRegistry registry = new YoVariableRegistry("robert");
-         YoDouble omega = new YoDouble("omega", registry);
          double gravity = 9.81;
 
          double xCoMPosition = RandomNumbers.nextDouble(random, 10.0);
@@ -534,8 +526,8 @@ public class ICPControlPlaneTest
          ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(xCoMPosition, yCoMPosition, zCoMPosition);
          double planeHeightInCoMFrame = RandomNumbers.nextDouble(random, -5.0, 0.001);
 
-         ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-         omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+         ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+         icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
          // test plane height
          assertEquals("iteration " + iter, planeHeightInCoMFrame, icpControlPlane.getControlPlaneHeight(), 1e-10);
@@ -566,14 +558,13 @@ public class ICPControlPlaneTest
    public void testProjectPlanarRegionMostBasic()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.0, 0.0, 1.0);
       double planeHeightInCoMFrame = -1.0; //
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+      icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
       TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
       referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
@@ -620,14 +611,13 @@ public class ICPControlPlaneTest
    public void testProjectPlanarRegion()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
-      YoDouble omega = new YoDouble("omega", registry);
       double gravity = 9.81;
 
       ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
       double planeHeightInCoMFrame = -1.0; //
 
-      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
-      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+      ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravity, registry);
+      icpControlPlane.setOmega0(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
       TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
       referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
