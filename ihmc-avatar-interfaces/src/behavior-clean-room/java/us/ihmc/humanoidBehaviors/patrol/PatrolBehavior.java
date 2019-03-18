@@ -200,8 +200,8 @@ public class PatrolBehavior
 
    private void sendStopWalking()
    {
-      LogTools.error("STOP WALKING");
-      abortPublisher.publish(new AbortWalkingMessage());
+//      LogTools.error("STOP WALKING");
+//      abortPublisher.publish(new AbortWalkingMessage());
    }
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)

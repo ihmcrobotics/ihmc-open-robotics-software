@@ -91,7 +91,7 @@ public class BehaviorUI
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
       stepInPlaceBehaviorUIController.init(teleop);
-      patrolBehaviorUIController.init(messager, subScene);
+      patrolBehaviorUIController.init(messager, subScene, teleop);
 
       planarRegionsGraphic = new PlanarRegionsGraphic();
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
