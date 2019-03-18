@@ -44,7 +44,7 @@ public class ICPOptimizationControllerTest
    private static final double stanceWidth = 0.35;
 
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
 
    @AfterEach
    public void tearDown()
@@ -93,8 +93,8 @@ public class ICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
-                                                                           null, contactableFeet, controlDT, registry, null);
+      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, soleZUpFrames,
+                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -163,8 +163,8 @@ public class ICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
-                                                                           null, contactableFeet, controlDT, registry, null);
+      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, soleZUpFrames,
+                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -233,8 +233,8 @@ public class ICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
-                                                                           null, contactableFeet, controlDT, registry, null);
+      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, soleZUpFrames,
+                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -319,8 +319,8 @@ public class ICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
-                                                                           null, contactableFeet, controlDT, registry, null);
+      ICPOptimizationController controller = new ICPOptimizationController(walkingControllerParameters, optimizationParameters, soleZUpFrames,
+                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -384,19 +384,18 @@ public class ICPOptimizationControllerTest
 
    private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
    {
-      SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
-         ankleFrames.put(robotSide, ankleFrame);
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBodyBasics foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+         soleFrames.put(robotSide, soleFrame);
          List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
@@ -404,10 +403,10 @@ public class ICPOptimizationControllerTest
          contactStates.put(robotSide, yoPlaneContactState);
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       return bipedSupportPolygons;

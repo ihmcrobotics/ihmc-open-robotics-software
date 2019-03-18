@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -16,7 +17,6 @@ import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,7 +28,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,8 +44,6 @@ public class KinematicsPlanningToolboxOutputConverter
    private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
    private final AtomicReference<KinematicsPlanningToolboxOutputStatus> solution;
    private int numberOfTrajectoryPoints;
-
-   private static final boolean startAndFinishVelocityIsZero = true;
 
    private final SideDependentList<List<String>> armJointNamesFromShoulder = new SideDependentList<List<String>>();
 
@@ -96,6 +94,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
+      double firstTimeOffset = keyFrameTimes.get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -109,7 +108,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = keyFrameTimes.get(i);
+         double time = keyFrameTimes.get(i) - firstTimeOffset;
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
@@ -145,6 +144,7 @@ public class KinematicsPlanningToolboxOutputConverter
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
+      double firstTimeOffset = keyFrameTimes.get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -161,22 +161,23 @@ public class KinematicsPlanningToolboxOutputConverter
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = keyFrameTimes.get(i);
+         double time = keyFrameTimes.get(i) - firstTimeOffset;
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPosition));
          orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
       }
 
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(startAndFinishVelocityIsZero);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      euclideanTrajectoryPointCalculator.compute(keyFrameTimes.get(numberOfTrajectoryPoints - 1) - firstTimeOffset);
+      FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+      trajectoryPoints.addTimeOffset(firstTimeOffset);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
 
-         trajectoryPoints.get(i).get(desiredPositions[i], desiredLinearVelocity);
-         double time = trajectoryPoints.get(i).getTime();
+         trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
+         double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 

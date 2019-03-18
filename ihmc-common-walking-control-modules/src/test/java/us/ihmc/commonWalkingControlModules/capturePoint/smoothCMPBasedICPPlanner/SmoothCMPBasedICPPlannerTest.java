@@ -145,6 +145,7 @@ public class SmoothCMPBasedICPPlannerTest
    private BipedSupportPolygons bipedSupportPolygons;
    private SideDependentList<ReferenceFrame> ankleZUpFrames;
    private SideDependentList<ReferenceFrame> soleZUpFrames;
+   private SideDependentList<ReferenceFrame> soleFrames;
    private ReferenceFrame midFeetZUpFrame;
    private SideDependentList<YoPlaneContactState> contactStates;
    private List<Footstep> footstepList;
@@ -190,6 +191,7 @@ public class SmoothCMPBasedICPPlannerTest
       this.feet = new SideDependentList<>();
       this.ankleZUpFrames = new SideDependentList<>();
       this.soleZUpFrames = new SideDependentList<>();
+      this.soleFrames = new SideDependentList<>();
       this.contactStates = new SideDependentList<>();
       this.updatables = new ArrayList<>();
 
@@ -204,13 +206,14 @@ public class SmoothCMPBasedICPPlannerTest
          this.feet.put(side, foot);
          this.ankleZUpFrames.put(side, new ZUpFrame(worldFrame, foot.getFrameAfterParentJoint(), footName + "AnkleZUpFrame"));
          this.soleZUpFrames.put(side, new ZUpFrame(worldFrame, foot.getSoleFrame(), footName + "SoleZUpFrame"));
+         soleFrames.put(side, foot.getSoleFrame());
          YoPlaneContactState contactState = new YoPlaneContactState(footName + "ContactState", foot.getRigidBody(), foot.getSoleFrame(),
                                                                     foot.getContactPoints2d(), foot.getCoefficientOfFriction(), registry);
          contactState.setFullyConstrained();
          this.contactStates.put(side, contactState);
       }
       this.midFeetZUpFrame = new MidFootZUpGroundFrame("MidFeetFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
-      this.bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
+      this.bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, graphicsListRegistry);
       this.bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       updatables.add(new Updatable()
@@ -444,8 +447,9 @@ public class SmoothCMPBasedICPPlannerTest
          }
       };
 
-      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
-                                                                      null, null, parentRegistry, graphicsListRegistry, gravity);
+      SmoothCMPBasedICPPlanner planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, soleZUpFrames, feet,
+                                                                      plannerParameters.getNumberOfFootstepsToConsider(), null, null, parentRegistry,
+                                                                      graphicsListRegistry, gravity);
       planner.initializeParameters(plannerParameters);
       planner.setFinalTransferDuration(defaultFinalTransferTime);
       planner.setOmega0(omega);
@@ -831,7 +835,7 @@ public class SmoothCMPBasedICPPlannerTest
          updateContactState(currentStepCount, 0.0);
          for (RobotSide robotSide : RobotSide.values)
          {
-            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+            soleZUpFrames.get(robotSide).update();
          }
 
          if (inDoubleSupport.getBooleanValue())
@@ -954,7 +958,7 @@ public class SmoothCMPBasedICPPlannerTest
          updateContactState(currentStepCount, timeInState / totalTime);
          for (RobotSide robotSide : RobotSide.values)
          {
-            bipedSupportPolygons.getSoleZUpFrames().get(robotSide).update();
+            soleZUpFrames.get(robotSide).update();
          }
 
          simulateOneTickAndAssertSamePlan(planner1, planner2);
