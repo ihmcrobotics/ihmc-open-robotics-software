@@ -89,6 +89,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final StateEstimatorController drcStateEstimator;
    private final StateEstimatorController ekfStateEstimator;
+   private final YoBoolean reinitializeEKF;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
    private final SensorReader sensorReader;
@@ -266,6 +267,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       // Create EKF Estimator:
       if (sensorReaderFactory.useStateEstimator() && CREATE_EKF_ESTIMATOR)
       {
+         reinitializeEKF = new YoBoolean("ReinitializeEKF", estimatorRegistry);
+
          FullHumanoidRobotModel ekfFullRobotModel = robotModel.createFullRobotModel();
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
          SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -286,6 +289,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
       else
       {
+         reinitializeEKF = null;
          ekfStateEstimator = null;
       }
 
@@ -383,6 +387,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
 
          estimatorTimer.startMeasurement();
+         if (reinitializeEKF != null && reinitializeEKF.getValue())
+         {
+            reinitializeEKF.set(false);
+            estimatorFullRobotModel.getRootJoint().getJointConfiguration(rootToWorldTransform);
+            ekfStateEstimator.initializeEstimator(rootToWorldTransform);
+         }
          estimatorController.doControl();
          if (forceSensorStateUpdater != null)
          {

@@ -291,6 +291,13 @@ public class LeggedRobotEKF implements StateEstimatorController
    }
 
    @Override
+   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   {
+      rootTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
+      rootState.initialize(rootJointTransform, rootTwist);
+   }
+
+   @Override
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       rootTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
