@@ -564,7 +564,7 @@ public class CrossRobotCommandResolver
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
          out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredPosition(jointIndex), in.getDesiredVelocity(jointIndex),
-                      in.getFeedForwardAction(jointIndex), in.getGains(jointIndex), in.getWeightForSolver(jointIndex));
+                      in.getFeedForwardAcceleration(jointIndex), in.getGains(jointIndex), in.getWeightForSolver(jointIndex));
       }
    }
 
