@@ -109,10 +109,10 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
       }
 
       double elementSum = CommonOps.elementSum(matrixC);
-      double determinant = CommonOps.det(matrixC);
+//      double determinant = CommonOps.det(matrixC);
 
       loadTestData.setSlowTaskFirstResult(elementSum);
-      loadTestData.setSlowTaskSecondResult(determinant);
+      loadTestData.setSlowTaskSecondResult(elementSum * -1.0);
       loadTestData.setFastTaskNumberOfOperations(BarrierSchedulerLoadTestHelper.generateFastTaskNumberOfOperations(random));
 
       executionTimer.stopMeasurement();
