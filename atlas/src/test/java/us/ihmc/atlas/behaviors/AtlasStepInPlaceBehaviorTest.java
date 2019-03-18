@@ -42,28 +42,14 @@ public class AtlasStepInPlaceBehaviorTest
       LogTools.info("Set stepping true");
       behaviorTeleop.setStepping(true);
 
-      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
-      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
-      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
-//      int steps = footMessage.getFootstepDataList().size();
-
-      LogTools.info("Awaiting touchdowns");
-      double timeLimit = 6.0;
-      LogTools.info("Waiting for touchdown 1");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 2");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 3");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
-      LogTools.info("Waiting for touchdown 4");
-      AtlasTestScripts.nextTouchdown(conductor, variables, timeLimit);
+      AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
 
       behaviorTeleop.setStepping(false);
       behaviorTeleop.abort();
 
       AtlasTestScripts.wait(conductor, variables, 3.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, timeLimit);
+      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
    }
 
    @AfterEach

@@ -25,6 +25,16 @@ public class AtlasTestScripts
       conductor.simulate();
    }
 
+   public static void takeSteps(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, int numberOfSteps, double timeLimitPerStep)
+   {
+      LogTools.info("Awaiting steps");
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         LogTools.info("Waiting for step {}", i + 1);
+         nextTouchdown(conductor, variables, timeLimitPerStep);
+      }
+   }
+
    public static void holdDoubleSupport(GoalOrientedTestConductor conductor, AvatarTestYoVariables variables, double holdDuration, double timeLimit)
    {
       LogTools.info("Waiting for double support", holdDuration);
