@@ -18,12 +18,16 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
-/*
- * The input of this calculator are a sequence of `KinematicsToolboxOutputStatus` and key frame times.
+/**
+ * The input of this calculator are a sequence of {@link KinematicsToolboxOutputStatus} and key frame times.
+ * <p>
  * The calculator will optimize way point velocities to minimize square of acceleration for the entire trajectory.
+ * <p>
  * And also it is able to optimize optimal way point times.
- * `WholeBodyTrajectoryPointCalculator will return joint velocity bounds and the bounds will be used in `KinematicsPlanningToolboxController`.
- * Finally, the optimized key frame times and joint velocities will be packed on `KinematicsPlanningToolboxOutputStatus`.
+ * <p>
+ * {@code WholeBodyTrajectoryPointCalculator} will return joint velocity bounds and the bounds will be used in {@link KinematicsPlanningToolboxController}.
+ * <p>
+ * Finally, the optimized key frame times and joint velocities will be packed on {@link KinematicsPlanningToolboxOutputStatus}.
  */
 public class WholeBodyTrajectoryPointCalculator
 {
