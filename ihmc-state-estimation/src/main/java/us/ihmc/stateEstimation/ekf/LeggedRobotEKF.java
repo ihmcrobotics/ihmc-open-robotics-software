@@ -33,6 +33,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -90,8 +91,10 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final RigidBodyTransform rootTransform = new RigidBodyTransform();
    private final Twist rootTwist = new Twist();
 
-   private final List<YoDouble> jointAngles = new ArrayList<>();
-   private final YoFramePose3D rootPose = new YoFramePose3D("RootPose", ReferenceFrame.getWorldFrame(), registry);
+   private final List<YoDouble> yoJointAngles = new ArrayList<>();
+   private final List<YoDouble> yoJointVelocities = new ArrayList<>();
+   private final YoFramePose3D yoRootPose;
+   private final YoFixedFrameTwist yoRootTwist;
 
    private final YoFramePoseUsingYawPitchRoll pelvisPoseViz = new YoFramePoseUsingYawPitchRoll("PelvisPose", ReferenceFrame.getWorldFrame(), registry);
 
@@ -115,6 +118,10 @@ public class LeggedRobotEKF implements StateEstimatorController
 
       RobotState robotState = new RobotState(rootState, jointStates);
       stateEstimator = new StateEstimator(sensors, robotState, registry);
+
+      yoRootPose = new YoFramePose3D("RootPose", ReferenceFrame.getWorldFrame(), registry);
+      yoRootTwist = new YoFixedFrameTwist("RootTwist", rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
+                                          registry);
 
       if (graphicsListRegistry != null)
       {
@@ -191,7 +198,8 @@ public class LeggedRobotEKF implements StateEstimatorController
          JointPositionSensor jointPositionSensor = new JointPositionSensor(jointName, parameterGroup, dt, registry);
          jointPositionSensors.add(jointPositionSensor);
          sensors.add(jointPositionSensor);
-         jointAngles.add(new YoDouble(jointName + "JointAngle", registry));
+         yoJointAngles.add(new YoDouble("q_" + jointName + "_ekf", registry));
+         yoJointVelocities.add(new YoDouble("qd_" + jointName + "_ekf", registry));
       }
       return rootState;
    }
@@ -218,15 +226,19 @@ public class LeggedRobotEKF implements StateEstimatorController
    private void updateYoVariables()
    {
       rootState.getTransform(rootTransform);
-      rootPose.set(rootTransform);
+      rootState.getTwist(rootTwist);
+
+      yoRootPose.set(rootTransform);
+      yoRootTwist.set(rootTwist);
 
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
          JointState jointState = jointStates.get(jointIdx);
-         jointAngles.get(jointIdx).set(jointState.getQ());
+         yoJointAngles.get(jointIdx).set(jointState.getQ());
+         yoJointVelocities.get(jointIdx).set(jointState.getQd());
       }
 
-      pelvisPoseViz.set(rootPose);
+      pelvisPoseViz.set(yoRootPose);
    }
 
    private final Wrench tempWrench = new Wrench();
