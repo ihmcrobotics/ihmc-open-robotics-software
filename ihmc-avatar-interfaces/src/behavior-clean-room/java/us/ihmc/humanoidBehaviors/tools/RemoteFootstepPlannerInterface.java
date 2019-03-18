@@ -79,7 +79,7 @@ public class RemoteFootstepPlannerInterface
 
    public int requestPlan(FramePose3D start, FramePose3D goal)
    {
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // TODO find out if this is necessary
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
       double idealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth() / 2;
       LogTools.debug("Ideal footstep width / 2: {}", idealFootstepWidth / 2);
