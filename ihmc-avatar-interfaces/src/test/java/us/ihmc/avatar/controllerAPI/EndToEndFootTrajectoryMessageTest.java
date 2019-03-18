@@ -620,7 +620,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       Vector3D circleRadius = getCircleRadius();
 
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-      double timeTick = trajectoryTime / (numberOfTrajectoryPoints * numberOfIterations);
+      double timeTick = trajectoryTime / (numberOfTrajectoryPoints * numberOfIterations - 1);
       for (int messageIndex = 0; messageIndex < numberOfIterations; messageIndex++)
       {
          double rot = messageIndex / (numberOfIterations - 1.0) * 1.0 * Math.PI;
@@ -640,11 +640,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                                            circleRadius.getZ() * Math.sin(2.0 * angle) * Math.cos(rot));
             tempPoint.add(circleCenter);
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(trajectoryTime * (i + messageIndex * numberOfTrajectoryPoints) * timeTick, tempPoint);
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint((i + messageIndex * numberOfTrajectoryPoints) * timeTick, tempPoint);
          }
       }
-
-      euclideanTrajectoryPointCalculator.compute(trajectoryTime - timeTick);
+      euclideanTrajectoryPointCalculator.compute(trajectoryTime);
 
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
       trajectoryPoints.addTimeOffset(firstTrajectoryPointTime);
