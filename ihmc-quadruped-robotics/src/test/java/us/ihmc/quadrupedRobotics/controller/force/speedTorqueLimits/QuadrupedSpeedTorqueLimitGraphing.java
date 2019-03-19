@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -54,9 +55,10 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
             phase += dt * 20.0;
 
             stepTeleopManager.setEndPhaseShift(180.0);
+            stepTeleopManager.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
             stepTeleopManager.setStepGroundClearance(0.25);
-            stepTeleopManager.setStepDuration(0.55);
-            stepTeleopManager.setEndDoubleSupportDuration(0.0);
+            stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, 180.0, 0.55);
+            stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.MEDIUM, 180.0, 0.0);
             double yaw = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
             double pitch = 0.1 * Math.sin(variables.getYoTime().getDoubleValue());
             double roll = 0.05 * Math.cos(variables.getYoTime().getDoubleValue());
