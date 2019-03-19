@@ -270,6 +270,12 @@ public class RemoteQuadrupedTeleopManager
       publishXGaitSettings(xGaitSettings);
    }
 
+   public void setQuadrupedSpeed(QuadrupedSpeed speed)
+   {
+      xGaitSettings.setQuadrupedSpeed(speed);
+      publishXGaitSettings(xGaitSettings);
+   }
+
    public void setStanceWidth(double stanceWidth)
    {
       xGaitSettings.setStanceWidth(stanceWidth);
