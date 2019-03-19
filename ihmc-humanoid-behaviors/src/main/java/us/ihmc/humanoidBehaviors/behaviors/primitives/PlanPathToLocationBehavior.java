@@ -37,7 +37,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private FootstepPlanningResult planningResult;
 
-   private PipeLine pipeLine = new PipeLine();
+   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private FramePose3D goalPose = null;
