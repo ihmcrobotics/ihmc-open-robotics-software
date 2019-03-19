@@ -26,7 +26,7 @@ import java.util.List;
 
 public class QuadrupedStepMessageHandler
 {
-   private static final int STEP_QUEUE_SIZE = 40;
+   private static final int STEP_QUEUE_SIZE = 200;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 

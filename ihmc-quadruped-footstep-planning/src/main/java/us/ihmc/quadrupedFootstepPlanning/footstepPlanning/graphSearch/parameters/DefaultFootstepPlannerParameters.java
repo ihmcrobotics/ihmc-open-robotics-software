@@ -111,7 +111,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getProjectInsideDistance()
    {
-      return 0.02;
+      return 0.04;
    }
 
    @Override

@@ -109,11 +109,12 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       planningRequestPacket.planar_regions_list_message_.set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), plannerInput.getQuadrupedStartPosition().getX(), 0.05));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), plannerInput.getQuadrupedStartPosition().getY(), 0.05));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), plannerInput.getQuadrupedStartYaw(), 0.25));
-      conductor.addDurationGoal(variables.getYoTime(), 20.0);
+      conductor.addDurationGoal(variables.getYoTime(), 35.0);
       conductor.simulate();
 
       conductor.concludeTesting();
