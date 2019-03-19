@@ -96,11 +96,17 @@ public class AtlasBehaviorSimulation
 
       // TODO set up some useful graphs
 
-      return avatarSimulation.getSimulationConstructionSet();
+      SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
+      scs.setupGraph("root.atlas.t");
+      scs.setupGraph("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.highLevelControllerNameCurrentState");
+
+      return scs;
    }
 
    public static void main(String[] args)
    {
-      createForManualTest(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false), new FlatGroundEnvironment());
+      SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false),
+                                                                    new FlatGroundEnvironment());
+      scs.simulate();
    }
 }
