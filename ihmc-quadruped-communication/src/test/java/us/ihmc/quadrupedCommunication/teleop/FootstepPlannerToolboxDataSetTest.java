@@ -418,8 +418,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       plannerReceivedPlan.set(false);
       plannerReceivedResult.set(false);
 
-      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getPlannerInput().getQuadrupedGoalPosition(), dataset.getPlannerInput().getQuadrupedGoalYaw());
-
+      errorMessage += assertPlanIsValid(datasetName, result, plan);
       for (int i = 0; i < 100; i++)
          ThreadTools.sleep(10);
 
@@ -504,8 +503,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps, Point3DReadOnly goalPosition,
-                                           double goalYaw)
+   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -527,6 +525,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
+      Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
+      double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
       if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (Double.isFinite(goalYaw))
