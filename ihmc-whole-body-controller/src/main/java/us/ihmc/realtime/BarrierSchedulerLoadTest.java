@@ -136,8 +136,6 @@ public class BarrierSchedulerLoadTest
       schedulerThread.join();
 
       yoVariableServer.close();
-
-      System.out.println("Done");
    }
 
    private void finished()
