@@ -131,6 +131,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
+   private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
+
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -208,6 +210,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.statusOutputManager = statusOutputManager;
 
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
+      enableHeightFeedbackControl.set(walkingControllerParameters.enableHeightFeedbackControl());
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
@@ -660,7 +663,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                                                                                isRecoveringFromPush, feetManager));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
-      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
+      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
          balanceManager.compute(currentState.getTransferToSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,

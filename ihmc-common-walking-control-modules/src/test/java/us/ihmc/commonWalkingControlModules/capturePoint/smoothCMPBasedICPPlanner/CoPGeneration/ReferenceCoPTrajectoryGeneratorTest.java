@@ -116,7 +116,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
          contactStates.put(side, contactState);
       }
       midFeetZUpFrame = new MidFootZUpGroundFrame("DummyRobotMidFootZUpFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, parentRegistry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleZUpFrames, parentRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       numberOfFootstepsToConsider.set(plannerParameters.getNumberOfFootstepsToConsider());
 
@@ -143,9 +143,10 @@ public class ReferenceCoPTrajectoryGeneratorTest
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
-      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons,
-                                                             contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
-                                                             swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, parentRegistry);
+      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons, contactableFeet,
+                                                             numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
+                                                             swingSplitFractions, swingDurationShiftFractions, transferSplitFractions,
+                                                             numberOfUpcomingFootsteps, upcomingFootstepsData, soleZUpFrames, parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);
    }
