@@ -26,8 +26,11 @@ public class XGaitSettingsController
    private Spinner<Double> stanceWidth;
    @FXML
    private Spinner<Double> stepGroundClearance;
+
    @FXML
    private Spinner<Double> endPhaseShift;
+   @FXML
+   private ComboBox<QuadrupedSpeed> quadrupedSpeed;
 
    @FXML
    private Spinner<Double> ambleSlowStepDuration;
@@ -72,8 +75,6 @@ public class XGaitSettingsController
    private Spinner<Double> trotFastMaxSpeed;
 
 
-   @FXML
-   private ComboBox<QuadrupedSpeed> quadrupedSpeed;
 
 
 
