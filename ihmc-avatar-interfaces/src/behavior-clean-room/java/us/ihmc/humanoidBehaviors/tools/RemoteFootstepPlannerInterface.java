@@ -102,7 +102,7 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
       packet.getGoalOrientationInWorld().set(goal.getOrientation());
 
-      packet.setTimeout(30);
+      packet.setTimeout(120);
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
