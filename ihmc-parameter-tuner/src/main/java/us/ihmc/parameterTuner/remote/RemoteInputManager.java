@@ -1,10 +1,19 @@
 package us.ihmc.parameterTuner.remote;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
@@ -13,16 +22,58 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 
 public class RemoteInputManager implements ParameterGuiInterface
 {
+   private static final double TIMEOUT = 2.5;
+
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
    private final ParameterSavingNode savingNode = new ParameterSavingNode(false, false);
 
+   private final Button reconnect = new Button("Reconnect");
+
+   private final AtomicBoolean connected = new AtomicBoolean(false);
    private final ParameterUpdateListener updateListener;
 
    public RemoteInputManager()
    {
       updateListener = new ParameterUpdateListener();
       YoVariableClient client = new YoVariableClient(updateListener);
-      client.start();
+
+      updateListener.addConnectionListener(connected -> {
+         this.connected.set(connected);
+         Platform.runLater(() -> reconnect.setDisable(connected));
+      });
+
+      client.startWithHostSelector();
+      waitForConnection();
+
+      reconnect.setOnAction(event -> {
+         if (connected.get())
+         {
+            return;
+         }
+         LogTools.info("Reconnecting to server.");
+         try
+         {
+            client.reconnect();
+            waitForConnection();
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException("Unable to reconnect.");
+         }
+      });
+   }
+
+   private void waitForConnection()
+   {
+      long startTime = System.nanoTime();
+      while (!connected.get())
+      {
+         ThreadTools.sleep(10);
+         if (Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) > TIMEOUT)
+         {
+            throw new RuntimeException("Connection failed.");
+         }
+      }
    }
 
    @Override
@@ -84,7 +135,14 @@ public class RemoteInputManager implements ParameterGuiInterface
    @Override
    public Node getInputManagerNode()
    {
-      return savingNode;
+      VBox node = new VBox();
+      node.setMaxHeight(Double.NEGATIVE_INFINITY);
+      node.setMaxWidth(Double.NEGATIVE_INFINITY);
+      node.setSpacing(10.0);
+      node.setAlignment(Pos.CENTER_LEFT);
+      node.getChildren().add(reconnect);
+      node.getChildren().add(savingNode);
+      return node;
    }
 
    @Override
