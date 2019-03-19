@@ -2,24 +2,26 @@ package us.ihmc.quadrupedPlanning;
 
 import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 
-public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
+public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 {
+   private double maxSpeed;
    private double stanceLength;
    private double stanceWidth;
    private double stepGroundClearance;
    private double stepDuration;
    private double endDoubleSupportDuration;
-   private double endPhaseShift;
 
    private final QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
 
-   public QuadrupedXGaitSettings()
+   public QuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings)
    {
+      set(defaultSettings);
    }
 
-   public QuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly other)
+   @Override
+   public double getMaxSpeed()
    {
-      set(other);
+      return maxSpeed;
    }
 
    @Override
@@ -53,60 +55,50 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
    }
 
    @Override
-   public double getEndPhaseShift()
+   public void setMaxSpeed(double maxSpeed)
    {
-      return endPhaseShift;
+      this.maxSpeed = maxSpeed;
    }
 
+   @Override
    public void setStanceLength(double stanceLength)
    {
       this.stanceLength = stanceLength;
    }
 
+   @Override
    public void setStanceWidth(double stanceWidth)
    {
       this.stanceWidth = stanceWidth;
    }
 
+   @Override
    public void setStepGroundClearance(double stepGroundClearance)
    {
       this.stepGroundClearance = stepGroundClearance;
    }
 
+   @Override
    public void setStepDuration(double stepDuration)
    {
       this.stepDuration = stepDuration;
    }
 
+   @Override
    public void setEndDoubleSupportDuration(double sndDoubleSupportDuration)
    {
       this.endDoubleSupportDuration = sndDoubleSupportDuration;
    }
 
-   public void setEndPhaseShift(double endPhaseShift)
-   {
-      this.endPhaseShift = endPhaseShift;
-   }
-
-   public void set(QuadrupedXGaitSettingsReadOnly other)
-   {
-      stanceLength = other.getStanceLength();
-      stanceWidth = other.getStanceWidth();
-      stepGroundClearance = other.getStepGroundClearance();
-      stepDuration = other.getStepDuration();
-      endDoubleSupportDuration = other.getEndDoubleSupportDuration();
-      endPhaseShift = other.getEndPhaseShift();
-   }
-
-
+   @Override
    public QuadrupedXGaitSettingsPacket getAsPacket()
    {
-      packet.setStanceLength(stanceLength);
-      packet.setStanceWidth(stanceWidth);
-      packet.setStepGroundClearance(stepGroundClearance);
-      packet.setStepDuration(stepDuration);
-      packet.setEndDoubleSupportDuration(endDoubleSupportDuration);
-      packet.setEndPhaseShift(endPhaseShift);
+      packet.setMaxSpeed(getMaxSpeed());
+      packet.setStanceLength(getStanceLength());
+      packet.setStanceWidth(getStanceWidth());
+      packet.setStepGroundClearance(getStepGroundClearance());
+      packet.setStepDuration(getStepDuration());
+      packet.setEndDoubleSupportDuration(getEndDoubleSupportDuration());
 
       return packet;
    }

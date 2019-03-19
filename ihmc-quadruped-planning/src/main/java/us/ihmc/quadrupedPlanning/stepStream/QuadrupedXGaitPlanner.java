@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.commons.lists.PreallocatedList;
+import us.ihmc.quadrupedPlanning.QuadrupedGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
@@ -26,12 +27,12 @@ public class QuadrupedXGaitPlanner
    private final PoseReferenceFrame xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
    private final EndDependentList<QuadrupedTimedStep> pastSteps;
 
-   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final QuadrupedGaitSettingsReadOnly xGaitSettings;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
    private final FramePose2D bodyPathPose = new FramePose2D();
    private PointFootSnapper snapper = null;
 
-   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public QuadrupedXGaitPlanner(QuadrupedPlanarBodyPathProvider bodyPathProvider, QuadrupedGaitSettingsReadOnly xGaitSettings)
    {
       this.bodyPathProvider = bodyPathProvider;
       this.xGaitSettings = xGaitSettings;
