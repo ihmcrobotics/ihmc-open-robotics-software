@@ -1,9 +1,11 @@
 package us.ihmc.quadrupedPlanning;
 
-import us.ihmc.commons.MathTools;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 
 public interface QuadrupedXGaitSettingsReadOnly
 {
+   double getMaxSpeed();
+
    /**
     * Nominal x offset between front and hind feet (in meters).
     */
@@ -29,19 +31,5 @@ public interface QuadrupedXGaitSettingsReadOnly
     */
    double getEndDoubleSupportDuration();
 
-   /**
-    * Nominal phase shift between front and hind steps (in degrees, 0: pace, 90: amble, 180: trot).
-    */
-   double getEndPhaseShift();
-
-   default boolean epsilonEquals(QuadrupedXGaitSettingsReadOnly other, double epsilon)
-   {
-      boolean equals = MathTools.epsilonEquals(this.getStanceLength(), other.getStanceLength(), epsilon);
-      equals &= MathTools.epsilonEquals(this.getStanceWidth(), other.getStanceWidth(), epsilon);
-      equals &= MathTools.epsilonEquals(this.getStepGroundClearance(), other.getStepGroundClearance(), epsilon);
-      equals &= MathTools.epsilonEquals(this.getStepDuration(), other.getStepDuration(), epsilon);
-      equals &= MathTools.epsilonEquals(this.getEndDoubleSupportDuration(), other.getEndDoubleSupportDuration(), epsilon);
-      equals &= MathTools.epsilonEquals(this.getEndPhaseShift(), other.getEndPhaseShift(), epsilon);
-      return equals;
-   }
+   QuadrupedXGaitSettingsPacket getAsPacket();
 }
