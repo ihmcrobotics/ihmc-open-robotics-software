@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
@@ -21,8 +22,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -76,12 +75,6 @@ public class RigidBodyControlManagerTest
 
    private double q1_home = random.nextDouble();
    private double q2_home = random.nextDouble();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testConstuctor()
@@ -274,7 +267,6 @@ public class RigidBodyControlManagerTest
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
-      referenceFrames.add(null);
       referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));

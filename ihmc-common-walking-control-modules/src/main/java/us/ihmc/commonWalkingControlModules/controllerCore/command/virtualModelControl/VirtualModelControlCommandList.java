@@ -147,6 +147,33 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualModelControlCommandList)
+      {
+         VirtualModelControlCommandList other = (VirtualModelControlCommandList) object;
+
+         if (getNumberOfCommands() != other.getNumberOfCommands())
+            return false;
+         for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)
+         {
+            if (!getCommand(commandIndex).equals(other.getCommand(commandIndex)))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public String toString()
    {
       return "Nb of commands: " + getNumberOfCommands() + "\n" + commandList;

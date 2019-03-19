@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
@@ -79,9 +80,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final YoDouble exitCMPForwardSafetyMarginOnToes;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final FrameConvexPolygon2D predictedSupportPolygon = new FrameConvexPolygon2D();
-   private final SideDependentList<FrameConvexPolygon2D> supportFootPolygonsInSoleZUpFrame = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2DReadOnly> supportFootPolygonsInSoleZUpFrame = new SideDependentList<>();
 
    private final SideDependentList<YoFrameVector2D> entryCMPUserOffsets = new SideDependentList<>();
    private final SideDependentList<YoFrameVector2D> exitCMPUserOffsets = new SideDependentList<>();
@@ -125,7 +126,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final List<ImmutablePair<FrameTuple3DReadOnly, FixedFrameTuple3DBasics>> visualizationUpdatables = new ArrayList<>();
 
    public ReferenceCentroidalMomentumPivotLocationsCalculator(String namePrefix, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, int numberFootstepsToConsider, YoVariableRegistry parentRegistry)
+                                                              SideDependentList<? extends ContactablePlaneBody> contactableFeet, int numberFootstepsToConsider,
+                                                              ReferenceFrame midFeetZUpFrame, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                                              YoVariableRegistry parentRegistry)
    {
       firstEntryCMPForSingleSupport.setToNaN();
 
@@ -161,8 +164,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          tempSupportPolygon.setIncludingFrame(supportFootPolygonsInSoleZUpFrame.get(robotSide)); // Just to allocate memory
       }
 
-      midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
-      soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
+      this.midFeetZUpFrame = midFeetZUpFrame;
+      this.soleZUpFrames = soleZUpFrames;
 
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
@@ -344,8 +347,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       if (atAStop || noUpcomingFootsteps)
       {
-         FrameConvexPolygon2D footA = supportFootPolygonsInSoleZUpFrame.get(transferFromSide);
-         FrameConvexPolygon2D footB = supportFootPolygonsInSoleZUpFrame.get(transferFromSide.getOppositeSide());
+         FrameConvexPolygon2DReadOnly footA = supportFootPolygonsInSoleZUpFrame.get(transferFromSide);
+         FrameConvexPolygon2DReadOnly footB = supportFootPolygonsInSoleZUpFrame.get(transferFromSide.getOppositeSide());
          computeFinalCMPBetweenSupportFeet(cmpIndex, footA, footB);
          cmpIndex++;
 
@@ -763,7 +766,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final FramePoint3D tempCentroid3d = new FramePoint3D();
    private final FrameConvexPolygon2D tempFootPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D upcomingSupport = new FrameConvexPolygon2D();
-   private void computeFinalCMPBetweenSupportFeet(int cmpIndex, FrameConvexPolygon2D footA, FrameConvexPolygon2D footB)
+   private void computeFinalCMPBetweenSupportFeet(int cmpIndex, FrameConvexPolygon2DReadOnly footA, FrameConvexPolygon2DReadOnly footB)
    {
       tempCentroid.setIncludingFrame(footA.getCentroid());
       firstCMP.setIncludingFrame(tempCentroid, 0.0);

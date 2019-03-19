@@ -13,6 +13,8 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -350,5 +352,109 @@ public class PlannerTestEnvironments
       generator.translate(0.0, -blockWidth - corridorWidth, 0.0);
       generator.addCubeReferencedAtBottomMiddle(corridorLength, blockWidth, corridorHeight);
       return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getQuadrupedEnvironment0()
+   {
+      // all flat with some space in between
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double startingBlockLength = 1.0;
+      double cinderBlockSize = 0.25;
+      double cinderBlockHeight = 0.02;
+      double courseLength = 3.0;
+      double courseWidth = 1.0;
+      double heightVariation = 0.0;
+      double extrusionLength = -0.05;
+      double percentageAbsent = 0.0;
+      double minTilt = Math.toRadians(0.0);
+      double maxTilt = Math.toRadians(5.0);
+      double randomHeightVariation = 0.0;
+
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
+                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getQuadrupedEnvironment1()
+   {
+      // all flat with some absent
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double startingBlockLength = 1.0;
+      double cinderBlockSize = 0.15;
+      double cinderBlockHeight = 0.02;
+      double courseLength = 3.0;
+      double courseWidth = 0.75;
+      double heightVariation = 0.0;
+      double extrusionLength = -0.025;
+      double percentageAbsent = 0.2;
+      double minTilt = Math.toRadians(0.0);
+      double maxTilt = Math.toRadians(5.0);
+      double randomHeightVariation = 0.0;
+
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
+                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getQuadrupedEnvironment2()
+   {
+      // large blocks with some height variation
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double startingBlockLength = 1.0;
+      double cinderBlockSize = 0.5;
+      double cinderBlockHeight = 0.02;
+      double courseLength = 3.0;
+      double courseWidth = 1.0;
+      double heightVariation = 0.03;
+      double extrusionLength = -0.05;
+      double percentageAbsent = 0.0;
+      double minTilt = Math.toRadians(0.0);
+      double maxTilt = Math.toRadians(0.0);
+      double randomHeightVariation = 0.04;
+
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
+                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList getQuadrupedEnvironment3()
+   {
+      // small footholds with large angle variation
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double startingBlockLength = 1.0;
+      double cinderBlockSize = 0.1;
+      double cinderBlockHeight = 0.02;
+      double courseLength = 3.0;
+      double courseWidth = 1.0;
+      double heightVariation = 0.0;
+      double extrusionLength = -0.01;
+      double percentageAbsent = 0.1;
+      double minTilt = Math.toRadians(10.0);
+      double maxTilt = Math.toRadians(45.0);
+      double randomHeightVariation = 0.0;
+
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
+                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static void main(String[] args)
+   {
+      String dataSetNameSuffix = "QuadrupedEnvironment0";
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+      String date = LocalDateTime.now().format(dateTimeFormatter);
+
+      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getQuadrupedEnvironment0());
+      DataSetIOTools.exportDataSet(dataSet);
    }
 }
