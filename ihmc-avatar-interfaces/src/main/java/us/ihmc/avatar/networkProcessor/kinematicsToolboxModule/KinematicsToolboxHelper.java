@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -38,6 +39,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 public class KinematicsToolboxHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroLinearVelocity = new FrameVector3D(worldFrame);
 
    /**
     * Convenience method to create and setup a {@link CenterOfMassFeedbackControlCommand} from a
@@ -53,7 +55,7 @@ public class KinematicsToolboxHelper
       feedbackControlCommand.setGains(gains);
       feedbackControlCommand.setWeightsForSolver(command.getWeightVector());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommand.set(command.getDesiredPosition());
+      feedbackControlCommand.setInverseKinematics(command.getDesiredPosition(), zeroLinearVelocity);
       return feedbackControlCommand;
    }
 

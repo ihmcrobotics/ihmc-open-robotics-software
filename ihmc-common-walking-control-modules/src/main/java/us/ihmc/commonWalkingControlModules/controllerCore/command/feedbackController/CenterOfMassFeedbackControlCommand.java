@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContr
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -39,9 +40,10 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  */
 public class CenterOfMassFeedbackControlCommand implements FeedbackControlCommand<CenterOfMassFeedbackControlCommand>
 {
-   private final FramePoint3D desiredPositionInRootFrame = new FramePoint3D();
-   private final FrameVector3D desiredLinearVelocityInRootFrame = new FrameVector3D();
-   private final FrameVector3D feedForwardLinearActionInRootFrame = new FrameVector3D();
+   private WholeBodyControllerCoreMode controlMode = null;
+   private final FramePoint3D referencePositionInRootFrame = new FramePoint3D();
+   private final FrameVector3D referenceLinearVelocityInRootFrame = new FrameVector3D();
+   private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -70,9 +72,10 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public void set(CenterOfMassFeedbackControlCommand other)
    {
-      desiredPositionInRootFrame.setIncludingFrame(other.desiredPositionInRootFrame);
-      desiredLinearVelocityInRootFrame.setIncludingFrame(other.desiredLinearVelocityInRootFrame);
-      feedForwardLinearActionInRootFrame.setIncludingFrame(other.feedForwardLinearActionInRootFrame);
+      controlMode = other.controlMode;
+      referencePositionInRootFrame.setIncludingFrame(other.referencePositionInRootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(other.referenceLinearVelocityInRootFrame);
+      referenceLinearAccelerationInRootFrame.setIncludingFrame(other.referenceLinearAccelerationInRootFrame);
       setGains(other.gains);
 
       momentumRateCommand.set(other.momentumRateCommand);
@@ -89,44 +92,79 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Sets the desired data expressed in root frame to be used during the next control tick.
+    * Sets the expected control mode that the controller core should be using to execute this command.
     * <p>
-    * The desired linear velocity and feed-forward linear acceleration are set to zero.
+    * This is a safety feature, the controller core will throw an exception in the case the control
+    * mode mismatches the active mode of the controller core.
     * </p>
-    *
-    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
+    * 
+    * @param controlMode the expected control mode.
     */
-   public void set(FramePoint3DReadOnly desiredPosition)
+   public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
-      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
-      desiredPositionInRootFrame.changeFrame(rootFrame);
-      desiredLinearVelocityInRootFrame.setToZero(rootFrame);
-      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
+      this.controlMode = controlMode;
    }
 
    /**
-    * Sets the desired data expressed in root frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse kinematics: Sets the desired data expressed
+    * in root frame to be used during the next control tick.
+    * <p>
+    * The reference linear acceleration is set to zero.
+    * </p>
+    *
+    * @param desiredPosition the position that the center of mass should reach. Not modified.
+    * @param feedForwardLinearVelocity the feed-forward linear velocity with respect to root frame used
+    *           to improve tracking performance. Not modified.
+    */
+   public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
+   {
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
+      referencePositionInRootFrame.changeFrame(rootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(feedForwardLinearVelocity);
+      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
+   }
+
+   /**
+    * Configures this feedback command's inputs for inverse dynamics: Sets the desired data expressed
+    * in root frame to be used during the next control tick.
     *
     * @param desiredPosition describes the position that the center of mass should reach. Not modified.
     * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
     *           root frame. Not modified.
+    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame
+    *           used to improved tracking performance. Not modified.
     */
-   public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+                                  FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
-      desiredPositionInRootFrame.changeFrame(rootFrame);
-      desiredLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      desiredLinearVelocityInRootFrame.changeFrame(rootFrame);
-      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
+      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
+      referencePositionInRootFrame.changeFrame(rootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+      referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
    }
 
-   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
+   /**
+    * Configures this feedback command's inputs for virtual model control: Sets the desired data
+    * expressed in root frame to be used during the next control tick.
+    *
+    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
+    * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
+    *           root frame. Not modified.
+    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame
+    *           used to improved tracking performance. Not modified.
+    */
+   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+                                      FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
-      ReferenceFrame rootFrame = feedForwardLinearAction.getReferenceFrame().getRootFrame();
-      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAction);
-      feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
+      setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
    }
 
    /**
@@ -217,27 +255,32 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       momentumRateCommand.setAngularWeightsToZero();
    }
 
+   public WholeBodyControllerCoreMode getControlMode()
+   {
+      return controlMode;
+   }
+
    public FramePoint3DBasics getDesiredPosition()
    {
-      return desiredPositionInRootFrame;
+      return referencePositionInRootFrame;
    }
 
    public FrameVector3DBasics getDesiredLinearVelocity()
    {
-      return desiredLinearVelocityInRootFrame;
+      return referenceLinearVelocityInRootFrame;
    }
 
    public FrameVector3DBasics getFeedForwardLinearAction()
    {
-      return feedForwardLinearActionInRootFrame;
+      return referenceLinearAccelerationInRootFrame;
    }
 
    public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack,
                                  FrameVector3D feedForwardLinearAccelerationToPack)
    {
-      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
-      desiredLinearVelocityToPack.setIncludingFrame(desiredLinearVelocityInRootFrame);
-      feedForwardLinearAccelerationToPack.setIncludingFrame(feedForwardLinearActionInRootFrame);
+      desiredPositionToPack.setIncludingFrame(referencePositionInRootFrame);
+      desiredLinearVelocityToPack.setIncludingFrame(referenceLinearVelocityInRootFrame);
+      feedForwardLinearAccelerationToPack.setIncludingFrame(referenceLinearAccelerationInRootFrame);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -267,11 +310,11 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       {
          CenterOfMassFeedbackControlCommand other = (CenterOfMassFeedbackControlCommand) object;
 
-         if (!desiredPositionInRootFrame.equals(other.desiredPositionInRootFrame))
+         if (!referencePositionInRootFrame.equals(other.referencePositionInRootFrame))
             return false;
-         if (!desiredLinearVelocityInRootFrame.equals(other.desiredLinearVelocityInRootFrame))
+         if (!referenceLinearVelocityInRootFrame.equals(other.referenceLinearVelocityInRootFrame))
             return false;
-         if (!feedForwardLinearActionInRootFrame.equals(other.feedForwardLinearActionInRootFrame))
+         if (!referenceLinearAccelerationInRootFrame.equals(other.referenceLinearAccelerationInRootFrame))
             return false;
          if (!gains.equals(other.gains))
             return false;
@@ -289,7 +332,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": desired position: " + desiredPositionInRootFrame + ", desired velocity: " + desiredLinearVelocityInRootFrame
-            + ", feed-forward: " + feedForwardLinearActionInRootFrame;
+      return getClass().getSimpleName() + ": desired position: " + referencePositionInRootFrame + ", desired velocity: " + referenceLinearVelocityInRootFrame
+            + ", feed-forward: " + referenceLinearAccelerationInRootFrame;
    }
 }

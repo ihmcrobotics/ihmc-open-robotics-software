@@ -249,7 +249,7 @@ public class WholeBodyFeedbackController
       achievedComputationTimer.stopMeasurement();
    }
 
-   public void submitFeedbackControlCommandList(FeedbackControlCommandList feedbackControlCommandList)
+   public void submitFeedbackControlCommandList(WholeBodyControllerCoreMode activeControlMode, FeedbackControlCommandList feedbackControlCommandList)
    {
       while (feedbackControlCommandList.getNumberOfCommands() > 0)
       {
@@ -258,22 +258,22 @@ public class WholeBodyFeedbackController
          switch (commandType)
          {
          case TASKSPACE:
-            submitSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) feedbackControlCommand);
+            submitSpatialFeedbackControlCommand(activeControlMode, (SpatialFeedbackControlCommand) feedbackControlCommand);
             break;
          case POINT:
-            submitPointFeedbackControlCommand((PointFeedbackControlCommand) feedbackControlCommand);
+            submitPointFeedbackControlCommand(activeControlMode, (PointFeedbackControlCommand) feedbackControlCommand);
             break;
          case ORIENTATION:
-            submitOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) feedbackControlCommand);
+            submitOrientationFeedbackControlCommand(activeControlMode, (OrientationFeedbackControlCommand) feedbackControlCommand);
             break;
          case JOINTSPACE:
-            submitJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) feedbackControlCommand);
+            submitJointspaceFeedbackControlCommand(activeControlMode, (JointspaceFeedbackControlCommand) feedbackControlCommand);
             break;
          case MOMENTUM:
-            submitCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) feedbackControlCommand);
+            submitCenterOfMassFeedbackControlCommand(activeControlMode, (CenterOfMassFeedbackControlCommand) feedbackControlCommand);
             break;
          case COMMAND_LIST:
-            submitFeedbackControlCommandList((FeedbackControlCommandList) feedbackControlCommand);
+            submitFeedbackControlCommandList(activeControlMode, (FeedbackControlCommandList) feedbackControlCommand);
             break;
          default:
             throw new RuntimeException("The command type: " + commandType + " is not handled.");
@@ -281,7 +281,7 @@ public class WholeBodyFeedbackController
       }
    }
 
-   private void submitSpatialFeedbackControlCommand(SpatialFeedbackControlCommand feedbackControlCommand)
+   private void submitSpatialFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, SpatialFeedbackControlCommand feedbackControlCommand)
    {
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
@@ -291,7 +291,7 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitPointFeedbackControlCommand(PointFeedbackControlCommand feedbackControlCommand)
+   private void submitPointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, PointFeedbackControlCommand feedbackControlCommand)
    {
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
@@ -301,7 +301,7 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitOrientationFeedbackControlCommand(OrientationFeedbackControlCommand feedbackControlCommand)
+   private void submitOrientationFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OrientationFeedbackControlCommand feedbackControlCommand)
    {
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
@@ -311,7 +311,7 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand feedbackControlCommand)
+   private void submitJointspaceFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, JointspaceFeedbackControlCommand feedbackControlCommand)
    {
       for (int i = 0; i < feedbackControlCommand.getNumberOfJoints(); i++)
       {
@@ -330,8 +330,12 @@ public class WholeBodyFeedbackController
       }
    }
 
-   private void submitCenterOfMassFeedbackControlCommand(CenterOfMassFeedbackControlCommand feedbackControlCommand)
+   private void submitCenterOfMassFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode,
+                                                         CenterOfMassFeedbackControlCommand feedbackControlCommand)
    {
+      if (activeControlMode != feedbackControlCommand.getControlMode())
+         throw new IllegalArgumentException("Incompatible feedback control command: command requires: " + feedbackControlCommand.getControlMode()
+               + ", current mode: " + activeControlMode);
       centerOfMassFeedbackController.submitFeedbackControlCommand(feedbackControlCommand);
       centerOfMassFeedbackController.setEnabled(true);
    }
