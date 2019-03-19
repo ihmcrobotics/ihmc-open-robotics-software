@@ -118,4 +118,14 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
       executionTimer.stopMeasurement();
       BarrierSchedulerLoadTestHelper.doTimingStatistics(timingInformation);
    }
+
+   /**
+    * Perform any cleanup before shutting down. Called the next tick after a
+    * shutdown request from the barrier scheduler.
+    */
+   @Override
+   protected void cleanup()
+   {
+      System.out.println("Cleanup 2");
+   }
 }
