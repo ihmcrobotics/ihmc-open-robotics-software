@@ -91,4 +91,13 @@ public class YoPIDGains extends YoPDGains implements PIDGainsReadOnly
       setMaximumIntegralError(pidGains.getMaxIntegralError());
       setIntegralLeakRatio(pidGains.getIntegralLeakRatio());
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PIDGainsReadOnly)
+         return PIDGainsReadOnly.super.equals((PIDGainsReadOnly) object);
+      else
+         return false;
+   }
 }

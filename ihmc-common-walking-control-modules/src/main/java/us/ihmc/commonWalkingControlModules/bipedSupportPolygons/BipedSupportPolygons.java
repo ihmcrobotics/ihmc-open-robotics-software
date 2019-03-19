@@ -170,7 +170,7 @@ public class BipedSupportPolygons
 
             for (int i = 0; i < contactStateCommand.getNumberOfContactPoints(); i++)
             {
-               contactStateCommand.getContactPoint(i, tempContactPosition);
+               tempContactPosition.setIncludingFrame(contactStateCommand.getContactPoint(i));
                footPolygonInWorldFrame.addVertexMatchingFrame(tempContactPosition);
                footPolygonInSoleFrame.addVertexMatchingFrame(tempContactPosition);
                footPolygonInSoleZUpFrame.addVertexMatchingFrame(tempContactPosition);
