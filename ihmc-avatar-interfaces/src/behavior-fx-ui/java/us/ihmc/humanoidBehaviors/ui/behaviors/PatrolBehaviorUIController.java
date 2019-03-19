@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Spinner;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
@@ -22,11 +23,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PatrolBehaviorUIController extends FXUIBehavior
 {
-   @FXML private Button continuePatrol;
-   @FXML private Button pausePatrol;
-   @FXML private Button destroyPatrol;
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
+   @FXML private Spinner<Integer> waypointIndex;
+   @FXML private Button pauseWalking;
 
    private JavaFXMessager messager;
    private BehaviorTeleop teleop;
@@ -74,7 +74,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                            {
                               Point3D pos = graphicWaypoint.getSnappedPositionGraphic().getPosition();
                               double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
-                              waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), 0.0, 0.0, yaw));
+                              waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), yaw, 0.0, 0.0));
                            });
          teleop.setWaypoints(waypointsToSend);
 
@@ -163,21 +163,11 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    @FXML public void goToWaypoint()
    {
-      teleop.goToWaypoint(0);
+      teleop.goToWaypoint(waypointIndex.getValue());
    }
 
-   @FXML public void continuePatrol()
+   @FXML public void pauseWalking()
    {
-
-   }
-
-   @FXML public void pausePatrol()
-   {
-
-   }
-
-   @FXML public void destroyPatrol()
-   {
-
+      teleop.stopPatrolling();
    }
 }

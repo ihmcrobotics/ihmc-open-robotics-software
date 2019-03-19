@@ -89,6 +89,12 @@ public class RemoteFootstepPlannerInterface
 
       goal.changeFrame(worldFrame);
 
+      LogTools.debug("Planning from {}",
+         start.getPosition().getX() + ", " + start.getPosition().getY() + ", yaw: " + start.getOrientation().getYaw()
+            + " to "
+            + goal.getPosition().getX() + ", " + goal.getPosition().getY() + ", yaw: " + goal.getOrientation().getYaw()
+      );
+
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
       packet.setInitialStanceRobotSide(RobotSide.LEFT.toByte());
       packet.getStanceFootPositionInWorld().set(start.getPosition());             // assuming start pose is left foot center

@@ -9,12 +9,13 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -48,7 +49,7 @@ public class PatrolBehavior
 
    private final Messager messager;
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
-   private final IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
+   private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
@@ -77,8 +78,8 @@ public class PatrolBehavior
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
                                                             ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      abortPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                 ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+      pausePublisher = ROS2Tools.createPublisher(ros2Node,
+                                                 ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
                                                  ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            WalkingStatusMessage.class,
@@ -106,6 +107,7 @@ public class PatrolBehavior
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
+      remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames();
       currentState.getValue().run();
    }
 
@@ -120,7 +122,9 @@ public class PatrolBehavior
 
       if (readyToPlanNotification.poll())
       {
-         FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
+         FramePose3D midFeetZUpPose = new FramePose3D();
+         // prevent frame from continuing to change
+         midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame());
          FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(goalWaypointIndex.get()));
 
          new Thread(() -> {  // plan in a thread to catch interruptions during planning
@@ -172,15 +176,15 @@ public class PatrolBehavior
 
       if (stopNotification.read())  // favor stop if race condition
       {
-         LogTools.info("Interrupted with STOP");
-         sendStopWalking();
+         LogTools.info("Interrupted with PAUSE");
+         sendPauseWalking();
          transitionTo(STOP);
       }
 
       if (overrideGoToWaypointNotification.read())
       {
          LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
-         sendStopWalking();
+         sendPauseWalking();
 
          ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
          int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
@@ -198,14 +202,15 @@ public class PatrolBehavior
       return stopNotification.read() || overrideGoToWaypointNotification.read();
    }
 
-   private void sendStopWalking()
+   private void sendPauseWalking()
    {
-//      LogTools.error("STOP WALKING");
-//      abortPublisher.publish(new AbortWalkingMessage());
+      LogTools.error("PAUSE WALKING");
+      pausePublisher.publish(new PauseWalkingMessage());
    }
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
    {
+      LogTools.info("Transitioning to {}", stateToTransitionTo.getKey());
       currentState = stateToTransitionTo;
       messager.submitMessage(API.CurrentState, currentState.getKey());
    }
