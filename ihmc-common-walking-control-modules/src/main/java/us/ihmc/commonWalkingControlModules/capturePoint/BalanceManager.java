@@ -141,7 +141,6 @@ public class BalanceManager
    private RobotSide transferToSide;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
-   private final FixedFrameVector3DBasics achievedLinearMomentumRate = new FrameVector3D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
@@ -432,7 +431,6 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setCapturePoint(capturePoint2d);
       linearMomentumRateControlModuleInput.setCapturePointVelocity(capturePointVelocity2d);
       linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateControlModuleInput.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
       linearMomentumRateControlModuleInput.setPlanarRegions(planarRegions);
       linearMomentumRateControlModuleInput.setUpdatePlanarRegions(updatePlanarRegions);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
@@ -787,11 +785,6 @@ public class BalanceManager
    {
       computeICPPlan();
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
-   }
-
-   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      this.achievedLinearMomentumRate.set(achievedLinearMomentumRate);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()

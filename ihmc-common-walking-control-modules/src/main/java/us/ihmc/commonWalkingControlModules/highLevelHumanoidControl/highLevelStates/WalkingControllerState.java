@@ -204,6 +204,9 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
+
+      linearMomentumRateControlModule.setInput(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.computeAchievedCMP();
    }
 
    @Override

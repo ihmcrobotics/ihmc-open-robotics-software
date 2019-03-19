@@ -57,7 +57,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -538,13 +537,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    public void doAction()
    {
-      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
-      balanceManager.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
-
       WalkingState currentState = stateMachine.getCurrentState();
       commandConsumer.update();
       commandConsumer.consumeHeadCommands();
