@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.behaviorTests.KinematicsPlanningBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -35,11 +33,25 @@ public class ValkyrieKinematicsPlanningBehaviorTest extends KinematicsPlanningBe
    {
       super.testReachToDoorKnob();
    }
-   
+
    @Override
    @Test
    public void testSingleKeyFrameInput() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSingleKeyFrameInput();
+   }
+
+   @Override
+   @Test
+   public void testLastKeyFrameBadPositionPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testLastKeyFrameBadPositionPlanning();
+   }
+
+   @Override
+   @Test
+   public void testLastKeyFrameBadVelocityPlanning() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testLastKeyFrameBadVelocityPlanning();
    }
 }

@@ -111,8 +111,8 @@ public class SphereICPOptimizationController implements GenericSphereController
       omega0.set(controlToolbox.getOmega0());
       heightController = new BasicHeightController(controlToolbox, registry);
       icpPlanner = new ContinuousCMPBasedICPPlanner(controlToolbox.getBipedSupportPolygons(), controlToolbox.getContactableFeet(),
-                                                    controlToolbox.getCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), registry,
-                                                    yoGraphicsListRegistry);
+                                                    controlToolbox.getCapturePointPlannerParameters().getNumberOfFootstepsToConsider(),
+                                                    controlToolbox.getMidFeetZUpFrame(), controlToolbox.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
       icpPlanner.initializeParameters(controlToolbox.getCapturePointPlannerParameters());
 
@@ -120,9 +120,9 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
-      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getBipedSupportPolygons(),
-                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(),
-                                                                controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getSoleZUpFrames(),
+                                                                controlToolbox.getBipedSupportPolygons(), controlToolbox.getICPControlPolygons(),
+                                                                controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
       StateMachineFactory<SupportState, State> factory = new StateMachineFactory<>(SupportState.class);
       factory.setNamePrefix("supportstateMachine").setRegistry(registry).buildYoClock(yoTime);
@@ -305,7 +305,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
             if (footstep != null)
             {
-               icpOptimizationController.getFootstepSolution(footstep);
+               footstep.setPose(icpOptimizationController.getFootstepSolution());
             }
          }
 
@@ -391,7 +391,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
                if (footstep != null)
                {
-                  icpOptimizationController.getFootstepSolution(footstep);
+                  footstep.setPose(icpOptimizationController.getFootstepSolution());
                }
             }
          }

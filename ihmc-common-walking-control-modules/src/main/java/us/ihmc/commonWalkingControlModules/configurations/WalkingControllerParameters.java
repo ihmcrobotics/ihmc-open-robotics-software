@@ -618,12 +618,13 @@ public abstract class WalkingControllerParameters
 
    /**
     * Determines whether or not to attempt to directly control the height.
-    * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
-    * If false, the height will be controlled inside the nullspace by trying to achieve the desired
-    * privileged configuration in the legs.
-    * @return boolean (true = control height with momentum, false = do not control height with momentum)
+    * If true, the height will be controlled directly via a command to the controller core. This can be
+    * a linear momentum z command or a feedback control command for the pelvis.
+    * If false, the height will be controlled inside the nullspace of other objectives by trying to achieve
+    * the desired privileged configuration in the legs.
+    * @return boolean (true = control height, false = do not control height but leave it up to the optimization)
     */
-   public boolean controlHeightWithMomentum()
+   public boolean enableHeightFeedbackControl()
    {
       return true;
    }

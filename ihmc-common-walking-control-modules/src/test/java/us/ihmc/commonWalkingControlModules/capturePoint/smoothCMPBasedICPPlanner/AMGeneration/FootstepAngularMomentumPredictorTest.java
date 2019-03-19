@@ -192,12 +192,13 @@ public class FootstepAngularMomentumPredictorTest
       numberOfFootstepsToConsider = new YoInteger(testName + "NumberOfFootstepsToConsider", testRegistry);
       numberOfFootstepsToConsider.set(testParameters.getNumberOfFootstepsToConsider());
       midFeetFrame = new MidFootZUpGroundFrame(testName + "MidFeetFrame", soleFrames.get(RobotSide.RIGHT), soleFrames.get(RobotSide.LEFT));
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons( midFeetFrame, soleFrames, testRegistry, null);
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons( midFeetFrame, soleFrames, soleFrames, testRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
-      copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator",
-                                                                   testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,
-                                                                   numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations, swingSplitFractions,
-                                                                   swingShiftFractions, transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, testRegistry);
+      copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfFootstepsToConsider(),
+                                                                   bipedSupportPolygons, contactableFeet, numberOfFootstepsToConsider, swingDurations,
+                                                                   transferDurations, touchdownDurations, swingSplitFractions, swingShiftFractions,
+                                                                   transferSplitFractions, numberOfUpcomingFootsteps, upcomingFootstepsData, soleFrames,
+                                                                   testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isStanding, false, testRegistry, null);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
