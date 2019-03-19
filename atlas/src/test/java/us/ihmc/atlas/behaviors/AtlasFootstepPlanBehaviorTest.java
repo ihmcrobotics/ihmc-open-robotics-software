@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
@@ -41,6 +42,11 @@ public class AtlasFootstepPlanBehaviorTest
    private IHMCROS2Publisher<AbortWalkingMessage> abortPublisher;
    private Ros2Node ros2Node;
 
+   double lastX = 0.0;
+   double lastY = 0.0;
+   double lastYaw = 0.0;
+   private RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
+
    @Test
    public void testExecuteFootstepPlan() throws IOException
    {
@@ -51,6 +57,76 @@ public class AtlasFootstepPlanBehaviorTest
       AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
 
       AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+   }
+
+   @Test
+   public void testWalkNegativePiToPi() throws IOException
+   {
+      new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
+
+      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
+
+      footstepDataListPublisher = ROS2Tools
+            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+
+      abortPublisher = ROS2Tools
+            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+
+      RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
+      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
+
+      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+
+      planSteps(0.0, 0.0, 0.5);  // 0.24 s
+      planSteps(0.0, 0.0, -0.5); // 0.38 s
+      planSteps(0.0, 0.0, 0.5);  // 0.64 s
+      planSteps(0.0, 0.0, -0.5); // 0.25 s
+
+      planSteps(0.0, 0.0, -0.5); // 0.008 s
+      planSteps(0.0, 0.0, -1.0); // 0.028 s
+      planSteps(0.0, 0.0, -3.1); // 8.498 s
+      planSteps(0.0, 0.0, 3.1);  // timeout > 30s
+
+      planSteps(0.0, 0.0, 0.5); // 0.24 s
+      planSteps(0.0, 0.0, 1.0); // 0.14 s
+      planSteps(0.0, 0.0, 3.1); // timeout
+      planSteps(0.0, 0.0, -3.1);
+
+      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+   }
+
+   private void planSteps(double x, double y, double yaw)
+   {
+      FramePose3D startPose = new FramePose3D();
+      startPose.set(lastX, lastY, 0.0, lastYaw, 0.0, 0.0);
+      LogTools.debug("StartPose = {}", startPose);
+
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.set(x, y, 0.0, yaw, 0.0, 0.0);
+
+      LogTools.info("Planning from {}, {}, yaw: {}", lastX, lastY, lastYaw);
+      LogTools.info("to {}, {}, yaw: {}", x, y, yaw);
+
+      FootstepPlanningToolboxOutputStatus output1 = remoteFootstepPlannerInterface.requestPlanBlocking(startPose, goalPose);
+
+      LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(output1.getFootstepPlanningResult()));
+      LogTools.info("Received footstep plan took: {} s", output1.getTimeTaken());
+      LogTools.info("Received footstep planning status: {}", output1);
+
+      boolean optimal = output1.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION;
+      boolean subOptimal = output1.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
+      assertTrue(optimal || subOptimal, "Solution failed");
+      FootstepPlanningToolboxOutputStatus output = output1;
+
+      footstepDataListPublisher.publish(output.getFootstepDataList());
+
+      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
+
+      lastX = x;
+      lastY = y;
+      lastYaw = yaw;
    }
 
    @Test
