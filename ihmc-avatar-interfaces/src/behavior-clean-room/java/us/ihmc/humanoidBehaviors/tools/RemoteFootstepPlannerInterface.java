@@ -20,7 +20,7 @@ import us.ihmc.ros2.Ros2Node;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Taken mostly from {@link us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter}
+ * Taken mostly from us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter
  */
 public class RemoteFootstepPlannerInterface
 {
@@ -102,7 +102,7 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
       packet.getGoalOrientationInWorld().set(goal.getOrientation());
 
-      packet.setTimeout(10);
+      packet.setTimeout(30);
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
