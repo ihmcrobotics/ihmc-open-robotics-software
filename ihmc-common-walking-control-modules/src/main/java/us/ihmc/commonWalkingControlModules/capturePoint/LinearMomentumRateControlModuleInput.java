@@ -6,11 +6,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -58,9 +56,6 @@ public class LinearMomentumRateControlModuleInput
     * plan.
     */
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
-
-   @Deprecated // This will be coming from the controller core
-   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    /**
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
@@ -262,17 +257,6 @@ public class LinearMomentumRateControlModuleInput
    public FramePoint2DReadOnly getPerfectCoP()
    {
       return perfectCoP;
-   }
-
-   @Deprecated // TODO: This is used to compute and visualize the achieved CMP only. Lets do that somewhere else and not pass this around needlessly.
-   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      this.achievedLinearMomentumRate.setIncludingFrame(achievedLinearMomentumRate);
-   }
-
-   public FrameVector3DReadOnly getAchievedLinearMomentumRate()
-   {
-      return achievedLinearMomentumRate;
    }
 
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)

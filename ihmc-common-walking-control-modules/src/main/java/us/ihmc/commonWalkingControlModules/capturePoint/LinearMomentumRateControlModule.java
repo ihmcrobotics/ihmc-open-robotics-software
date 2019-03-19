@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
@@ -183,7 +184,6 @@ public class LinearMomentumRateControlModule
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
-      this.achievedLinearMomentumRate.setIncludingFrame(input.getAchievedLinearMomentumRate());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
       this.supportSide = input.getSupportSide();
       this.transferToSide = input.getTransferToSide();
@@ -215,6 +215,11 @@ public class LinearMomentumRateControlModule
       }
    }
 
+   public void setInput(ControllerCoreOutput controllerCoreOutput)
+   {
+      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
+   }
+
    public LinearMomentumRateControlModuleOutput getOutput()
    {
       return output;
@@ -232,8 +237,6 @@ public class LinearMomentumRateControlModule
 
    public boolean compute()
    {
-      computeAchievedCMP();
-
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       updatePolygons();
@@ -389,7 +392,7 @@ public class LinearMomentumRateControlModule
       return success;
    }
 
-   private void computeAchievedCMP()
+   public void computeAchievedCMP()
    {
       if (achievedLinearMomentumRate.containsNaN())
       {
