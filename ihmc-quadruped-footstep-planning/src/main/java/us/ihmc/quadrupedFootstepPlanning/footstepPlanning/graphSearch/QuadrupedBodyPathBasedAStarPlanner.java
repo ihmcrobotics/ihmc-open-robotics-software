@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -34,6 +35,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
 
    private final BodyPathPlanner bodyPathPlanner;
    private final QuadrupedFootstepPlanner footstepPlanner;
+
+   private final FramePose3D lowLevelGoal = new FramePose3D();
 
    private final BodyPathHeuristics heuristics;
    private final YoDouble planningHorizonLength;
@@ -132,6 +135,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
       footstepPlannerGoal.setOrientationYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
 
+      lowLevelGoal.set(footstepPlannerGoal);
+
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
       goal.setGoalPose(footstepPlannerGoal);
       goal.setGoalType(FootstepPlannerTargetType.POSE_BETWEEN_FEET);
@@ -149,6 +154,9 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
    @Override
    public FootstepPlan getPlan()
    {
-      return footstepPlanner.getPlan();
+      FootstepPlan footstepPlan = footstepPlanner.getPlan();
+      footstepPlan.setLowLevelPlanGoal(lowLevelGoal);
+
+      return footstepPlan;
    }
 }

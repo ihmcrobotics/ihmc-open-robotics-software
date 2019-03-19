@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -105,5 +106,10 @@ public class FootstepPlan
    public FramePose3DReadOnly getStartPose()
    {
       return startPose;
+   }
+
+   public FramePose3DReadOnly getGoalPose()
+   {
+      return goalPose;
    }
 }
