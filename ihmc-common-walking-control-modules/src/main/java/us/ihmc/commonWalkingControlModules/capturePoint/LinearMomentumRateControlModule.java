@@ -11,11 +11,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,6 +31,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -124,24 +125,22 @@ public class LinearMomentumRateControlModule
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
-   private final FrameVector3D effectiveICPAdjustment = new FrameVector3D();
-   private boolean usingStepAdjustment;
-   private boolean footstepWasAdjusted;
-   private final FramePose3D footstepSolution = new FramePose3D();
-
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
+   private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
+
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
                                           WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
-                                          double controlDT, Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight,
-                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
-      this.linearMomentumRateWeight = linearMomentumRateWeight;
-      this.angularMomentumRateWeight = angularMomentumRateWeight;
+
+      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
+      linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
+      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -216,15 +215,19 @@ public class LinearMomentumRateControlModule
       }
    }
 
-   public void packOutput(LinearMomentumRateControlModuleOutput outputToPack)
+   public LinearMomentumRateControlModuleOutput getOutput()
    {
-      outputToPack.setFootstepSolution(footstepSolution);
-      outputToPack.setFootstepWasAdjusted(footstepWasAdjusted);
-      outputToPack.setUsingStepAdjustment(usingStepAdjustment);
-      outputToPack.setMomentumRateCommand(momentumRateCommand);
-      outputToPack.setCenterOfPressureCommand(centerOfPressureCommand);
-      outputToPack.setDesiredCMP(desiredCMP);
-      outputToPack.setEffectiveICPAdjustment(effectiveICPAdjustment);
+      return output;
+   }
+
+   public MomentumRateCommand getMomentumRateCommand()
+   {
+      return momentumRateCommand;
+   }
+
+   public CenterOfPressureCommand getCenterOfPressureCommand()
+   {
+      return centerOfPressureCommand;
    }
 
    public boolean compute()
@@ -237,7 +240,7 @@ public class LinearMomentumRateControlModule
       updateICPControllerState();
       computeICPController();
 
-      checkOutputs();
+      checkAndPackOutputs();
 
       yoDesiredCMP.set(desiredCMP);
       yoAchievedCMP.set(achievedCMP);
@@ -326,13 +329,9 @@ public class LinearMomentumRateControlModule
       }
       icpOptimizationController.getDesiredCMP(desiredCMP);
       icpOptimizationController.getDesiredCoP(desiredCoP);
-      effectiveICPAdjustment.setIncludingFrame(icpOptimizationController.getICPShiftFromStepAdjustment());
-      footstepSolution.setIncludingFrame(icpOptimizationController.getFootstepSolution());
-      usingStepAdjustment = icpOptimizationController.useStepAdjustment();
-      footstepWasAdjusted = icpOptimizationController.wasFootstepAdjusted();
    }
 
-   private void checkOutputs()
+   private void checkAndPackOutputs()
    {
       if (desiredCMP.containsNaN())
       {
@@ -357,6 +356,12 @@ public class LinearMomentumRateControlModule
       {
          desiredCoPcontainedNaN = false;
       }
+
+      output.setDesiredCMP(desiredCMP);
+      output.setEffectiveICPAdjustment(icpOptimizationController.getICPShiftFromStepAdjustment());
+      output.setFootstepSolution(icpOptimizationController.getFootstepSolution());
+      output.setFootstepWasAdjusted(icpOptimizationController.wasFootstepAdjusted());
+      output.setUsingStepAdjustment(icpOptimizationController.useStepAdjustment());
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()

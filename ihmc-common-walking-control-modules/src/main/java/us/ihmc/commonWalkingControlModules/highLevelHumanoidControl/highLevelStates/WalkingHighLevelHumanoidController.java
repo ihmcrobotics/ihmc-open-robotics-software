@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -420,6 +422,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.controllerCoreOutput = controllerCoreOutput;
    }
 
+   public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
+   {
+      balanceManager.setLinearMomentumRateControlModuleOutput(output);
+   }
+
    public void initialize()
    {
       controllerCoreCommand.requestReinitialization();
@@ -715,14 +722,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
-      controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
-
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
+   }
+
+   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   {
+      return balanceManager.getLinearMomentumRateControlModuleInput();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
