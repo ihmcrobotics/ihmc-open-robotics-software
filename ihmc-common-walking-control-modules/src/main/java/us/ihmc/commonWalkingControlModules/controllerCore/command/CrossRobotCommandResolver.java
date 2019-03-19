@@ -550,9 +550,10 @@ public class CrossRobotCommandResolver
 
    public void resolveCenterOfMassFeedbackControlCommand(CenterOfMassFeedbackControlCommand in, CenterOfMassFeedbackControlCommand out)
    {
-      out.getDesiredPosition().set(in.getDesiredPosition());
-      out.getDesiredLinearVelocity().set(in.getDesiredLinearVelocity());
-      out.getFeedForwardLinearAction().set(in.getFeedForwardLinearAction());
+      out.setControlMode(in.getControlMode());
+      out.getReferencePosition().set(in.getReferencePosition());
+      out.getReferenceLinearVelocity().set(in.getReferenceLinearVelocity());
+      out.getReferenceLinearAcceleration().set(in.getReferenceLinearAcceleration());
       out.setGains(in.getGains());
       resolveMomentumRateCommand(in.getMomentumRateCommand(), out.getMomentumRateCommand());
    }

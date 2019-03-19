@@ -40,11 +40,17 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  */
 public class CenterOfMassFeedbackControlCommand implements FeedbackControlCommand<CenterOfMassFeedbackControlCommand>
 {
+   /** Represents the expected control mode to execute this command. */
    private WholeBodyControllerCoreMode controlMode = null;
+   /** The desired center of mass position to use in the feedback controller. */
    private final FramePoint3D referencePositionInRootFrame = new FramePoint3D();
+   /**
+    * The desired or (IK) feed-forward center of mass linear velocity to use in the feedback
+    * controller.
+    */
    private final FrameVector3D referenceLinearVelocityInRootFrame = new FrameVector3D();
+   /** The (ID) feed-forward center of mass linear acceleration to use in the feedback controller. */
    private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
-
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
 
@@ -94,6 +100,13 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    /**
     * Sets the expected control mode that the controller core should be using to execute this command.
     * <p>
+    * Note that the control mode is updated when calling either:
+    * {@link #setInverseKinematics(FramePoint3DReadOnly, FrameVector3DReadOnly)},
+    * {@link #setInverseDynamics(FramePoint3DReadOnly, FrameVector3DReadOnly, FrameVector3DReadOnly)},
+    * or
+    * {@link #setVirtualModelControl(FramePoint3DReadOnly, FrameVector3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    * <p>
     * This is a safety feature, the controller core will throw an exception in the case the control
     * mode mismatches the active mode of the controller core.
     * </p>
@@ -106,15 +119,18 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Configures this feedback command's inputs for inverse kinematics: Sets the desired data expressed
-    * in root frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse kinematics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for inverse kinematics.
+    * </p>
     * <p>
     * The reference linear acceleration is set to zero.
     * </p>
     *
     * @param desiredPosition the position that the center of mass should reach. Not modified.
-    * @param feedForwardLinearVelocity the feed-forward linear velocity with respect to root frame used
-    *           to improve tracking performance. Not modified.
+    * @param feedForwardLinearVelocity the feed-forward linear velocity with respect to root frame. Not
+    *           modified.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
@@ -128,14 +144,17 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Configures this feedback command's inputs for inverse dynamics: Sets the desired data expressed
-    * in root frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse dynamics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control for inverse dynamics.
+    * </p>
     *
-    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
-    * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
-    *           root frame. Not modified.
-    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame
-    *           used to improved tracking performance. Not modified.
+    * @param desiredPosition the position that the center of mass should reach. Not modified.
+    * @param desiredLinearVelocity the desired center of mass linear velocity with respect to root
+    *           frame. Not modified.
+    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
+    *           Not modified.
     */
    public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -151,14 +170,17 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    }
 
    /**
-    * Configures this feedback command's inputs for virtual model control: Sets the desired data
-    * expressed in root frame to be used during the next control tick.
+    * Configures this feedback command's inputs for virtual model control.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for virtual model control.
+    * </p>
     *
-    * @param desiredPosition describes the position that the center of mass should reach. Not modified.
-    * @param desiredLinearVelocity describes the desired center of mass linear velocity with respect to
-    *           root frame. Not modified.
-    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame
-    *           used to improved tracking performance. Not modified.
+    * @param desiredPosition the position that the center of mass should reach. Not modified.
+    * @param desiredLinearVelocity the desired center of mass linear velocity with respect to root
+    *           frame. Not modified.
+    * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
+    *           Not modified.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                       FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -255,32 +277,54 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       momentumRateCommand.setAngularWeightsToZero();
    }
 
+   /**
+    * Gets the expected control mode to execute this command with.
+    * 
+    * @return the expected active controller core control mode.
+    */
    public WholeBodyControllerCoreMode getControlMode()
    {
       return controlMode;
    }
 
-   public FramePoint3DBasics getDesiredPosition()
+   /**
+    * Gets the reference position to use in the feedback controller.
+    * <p>
+    * The reference position typically represents the desired position.
+    * </p>
+    * 
+    * @return the reference position.
+    */
+   public FramePoint3DBasics getReferencePosition()
    {
       return referencePositionInRootFrame;
    }
 
-   public FrameVector3DBasics getDesiredLinearVelocity()
+   /**
+    * Gets the reference linear velocity to use in the feedback controller.
+    * <p>
+    * Depending on the active control mode, it can be used as a desired or a feed-forward term.
+    * </p>
+    * 
+    * @return the reference linear velocity.
+    */
+   public FrameVector3DBasics getReferenceLinearVelocity()
    {
       return referenceLinearVelocityInRootFrame;
    }
 
-   public FrameVector3DBasics getFeedForwardLinearAction()
+   /**
+    * Gets the reference linear acceleration to use in the feedback controller.
+    * <p>
+    * Note that when the controller core is running in inverse kinematics mode, the reference linear
+    * acceleration is not used.
+    * </p>
+    * 
+    * @return the reference linear acceleration.
+    */
+   public FrameVector3DBasics getReferenceLinearAcceleration()
    {
       return referenceLinearAccelerationInRootFrame;
-   }
-
-   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack,
-                                 FrameVector3D feedForwardLinearAccelerationToPack)
-   {
-      desiredPositionToPack.setIncludingFrame(referencePositionInRootFrame);
-      desiredLinearVelocityToPack.setIncludingFrame(referenceLinearVelocityInRootFrame);
-      feedForwardLinearAccelerationToPack.setIncludingFrame(referenceLinearAccelerationInRootFrame);
    }
 
    public MomentumRateCommand getMomentumRateCommand()
@@ -310,6 +354,8 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       {
          CenterOfMassFeedbackControlCommand other = (CenterOfMassFeedbackControlCommand) object;
 
+         if (controlMode != other.controlMode)
+            return false;
          if (!referencePositionInRootFrame.equals(other.referencePositionInRootFrame))
             return false;
          if (!referenceLinearVelocityInRootFrame.equals(other.referenceLinearVelocityInRootFrame))
@@ -332,7 +378,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": desired position: " + referencePositionInRootFrame + ", desired velocity: " + referenceLinearVelocityInRootFrame
-            + ", feed-forward: " + referenceLinearAccelerationInRootFrame;
+      return getClass().getSimpleName() + ": control mode: " + controlMode + ", reference position: " + referencePositionInRootFrame + ", reference velocity: "
+            + referenceLinearVelocityInRootFrame + ", reference acceleration: " + referenceLinearAccelerationInRootFrame;
    }
 }
