@@ -22,6 +22,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -50,6 +51,8 @@ public class QuadrupedAStarFootstepPlannerTest
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
+      xGaitSettings.setEndPhaseShift(90.0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
@@ -99,6 +102,8 @@ public class QuadrupedAStarFootstepPlannerTest
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
+      xGaitSettings.setEndPhaseShift(90.0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
@@ -149,6 +154,8 @@ public class QuadrupedAStarFootstepPlannerTest
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.5);
+      xGaitSettings.setEndPhaseShift(90.0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
