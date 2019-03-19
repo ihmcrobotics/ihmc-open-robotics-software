@@ -525,8 +525,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
-      double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
+      Point3DReadOnly goalPosition = plannedSteps.getGoalPose().getPosition();
+      double goalYaw = plannedSteps.getGoalPose().getYaw();
       if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (Double.isFinite(goalYaw))
