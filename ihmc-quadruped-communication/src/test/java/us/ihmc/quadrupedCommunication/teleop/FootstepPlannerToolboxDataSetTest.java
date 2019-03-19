@@ -39,6 +39,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
