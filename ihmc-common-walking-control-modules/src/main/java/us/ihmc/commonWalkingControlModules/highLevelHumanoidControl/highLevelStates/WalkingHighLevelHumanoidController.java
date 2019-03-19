@@ -46,7 +46,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -106,7 +105,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final StateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final PlanarRegionsListHandler planarRegionsListHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
    private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
@@ -216,7 +214,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      planarRegionsListHandler = walkingMessageHandler.getPlanarRegionsListHandler();
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
                                                    registry);
 
@@ -557,9 +554,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumePlanarRegionsListCommand();
 
       updateFailureDetection();
-
-      if (planarRegionsListHandler.hasNewPlanarRegions())
-         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
 
       // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();

@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -116,12 +115,6 @@ public class LinearMomentumRateControlModuleInput
     * momentum will generally be zero.
     */
    private boolean minimizeAngularMomentumRateZ;
-
-   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
-   private boolean updatePlanarRegions;
-
-   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
    /**
     * List of upcoming footsteps that are being executed by the controller. This is of interest to the ICP controller
@@ -365,32 +358,6 @@ public class LinearMomentumRateControlModuleInput
    public double getRemainingTimeInSwingUnderDisturbance()
    {
       return remainingTimeInSwingUnderDisturbance;
-   }
-
-   @Deprecated // TODO: This should not be coming from the walking controller. Listen to the planar regions message.
-   public void setUpdatePlanarRegions(boolean updatePlanarRegions)
-   {
-      this.updatePlanarRegions = updatePlanarRegions;
-   }
-
-   public boolean getUpdatePlanarRegions()
-   {
-      return updatePlanarRegions;
-   }
-
-   @Deprecated // TODO: This should not be coming from the walking controller. Listen to the planar regions message.
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
-   {
-      this.planarRegions.clear();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         this.planarRegions.add().set(planarRegions.get(i));
-      }
-   }
-
-   public List<PlanarRegion> getPlanarRegions()
-   {
-      return planarRegions;
    }
 
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
