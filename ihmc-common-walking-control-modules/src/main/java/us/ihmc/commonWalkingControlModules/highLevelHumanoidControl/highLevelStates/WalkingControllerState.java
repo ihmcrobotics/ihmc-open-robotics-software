@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -108,6 +109,8 @@ public class WalkingControllerState extends HighLevelControllerState
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry);
+      PlanarRegionsListHandler planarRegionsListHandler = controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler();
+      linearMomentumRateControlModule.setPlanarRegionsListHandler(planarRegionsListHandler);
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }

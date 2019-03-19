@@ -134,7 +134,6 @@ public class BalanceManager
    private boolean minimizeAngularMomentumRateZ = false;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
-   private boolean updatePlanarRegions = false;
    private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
@@ -144,7 +143,6 @@ public class BalanceManager
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
@@ -431,8 +429,6 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setCapturePoint(capturePoint2d);
       linearMomentumRateControlModuleInput.setCapturePointVelocity(capturePointVelocity2d);
       linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateControlModuleInput.setPlanarRegions(planarRegions);
-      linearMomentumRateControlModuleInput.setUpdatePlanarRegions(updatePlanarRegions);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
@@ -455,7 +451,6 @@ public class BalanceManager
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
-      updatePlanarRegions = false;
       footstepTimings.clear();
       footsteps.clear();
       supportSide = null;
@@ -806,16 +801,6 @@ public class BalanceManager
       }
 
       return capturabilityBasedStatus;
-   }
-
-   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
-   {
-      updatePlanarRegions = true;
-      this.planarRegions.clear();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         this.planarRegions.add().set(planarRegions.get(i));
-      }
    }
 
    public void updateCurrentICPPlan()

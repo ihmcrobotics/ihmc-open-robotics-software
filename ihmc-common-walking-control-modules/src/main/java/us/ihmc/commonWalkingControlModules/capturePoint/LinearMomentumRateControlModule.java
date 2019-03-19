@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -33,7 +34,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -119,17 +119,17 @@ public class LinearMomentumRateControlModule
    private boolean initializeForSingleSupport;
    private boolean initializeForTransfer;
    private boolean keepCoPInsideSupportPolygon;
-   private boolean updatePlanarRegions;
    private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
+
+   private PlanarRegionsListHandler planarRegionsListHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
                                           WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
@@ -173,6 +173,11 @@ public class LinearMomentumRateControlModule
       parentRegistry.addChild(registry);
    }
 
+   public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
+   {
+      this.planarRegionsListHandler = planarRegionsListHandler;
+   }
+
    public void setInput(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
@@ -202,12 +207,6 @@ public class LinearMomentumRateControlModule
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();
       this.initializeForTransfer = input.getInitializeForTransfer();
       this.remainingTimeInSwingUnderDisturbance = input.getRemainingTimeInSwingUnderDisturbance();
-      this.updatePlanarRegions = input.getUpdatePlanarRegions();
-      this.planarRegions.clear();
-      for (int i = 0; i < input.getPlanarRegions().size(); i++)
-      {
-         this.planarRegions.add().set(input.getPlanarRegions().get(i));
-      }
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -310,9 +309,9 @@ public class LinearMomentumRateControlModule
          icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
       }
 
-      if (updatePlanarRegions)
+      if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
       {
-         icpOptimizationController.submitCurrentPlanarRegions(planarRegions);
+         icpOptimizationController.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
       }
    }
 
