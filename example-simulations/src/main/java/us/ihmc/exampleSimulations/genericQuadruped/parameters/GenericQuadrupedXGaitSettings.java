@@ -1,7 +1,5 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-
 public class GenericQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
 {
    @Override

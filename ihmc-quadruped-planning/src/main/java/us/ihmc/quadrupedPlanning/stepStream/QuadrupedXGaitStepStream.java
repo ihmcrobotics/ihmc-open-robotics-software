@@ -1,10 +1,7 @@
 package us.ihmc.quadrupedPlanning.stepStream;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedPlanning.QuadrupedGaitSettingsBasics;
-import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
@@ -23,7 +20,7 @@ public class QuadrupedXGaitStepStream
    private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
 
-   private final QuadrupedGaitSettingsBasics gaitSettings;
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final Vector3D desiredPlanarVelocity = new Vector3D();
    private final DoubleProvider firstStepDelay;
 
@@ -31,10 +28,10 @@ public class QuadrupedXGaitStepStream
    private final QuadrupedPlanarFootstepPlan footstepPlan;
    private final QuadrupedPlanarBodyPathProvider bodyPathProvider;
 
-   public QuadrupedXGaitStepStream(QuadrupedGaitSettingsBasics gaitSettings, YoDouble timestamp,
+   public QuadrupedXGaitStepStream(QuadrupedXGaitSettingsBasics gaitSettings, YoDouble timestamp,
                                    QuadrupedPlanarBodyPathProvider bodyPathProvider, DoubleProvider firstStepDelay, YoVariableRegistry parentRegistry)
    {
-      this.gaitSettings = gaitSettings;
+      this.xGaitSettings = gaitSettings;
       this.timestamp = timestamp;
       this.bodyPathProvider = bodyPathProvider;
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, gaitSettings);
@@ -50,10 +47,6 @@ public class QuadrupedXGaitStepStream
 
    private void updateXGaitSettingsFromSpeed()
    {
-      double speed = Math.sqrt(MathTools.square(desiredPlanarVelocity.getX() + MathTools.square(desiredPlanarVelocity.getY())));
-      QuadrupedSpeed quadrupedSpeed = gaitSettings.getSpeedForSettings(speed);
-      QuadrupedXGaitSettingsBasics xGaitSettings = gaitSettings.getCurrentGaitSettings(quadrupedSpeed);
-
       // increase stance dimensions as a function of velocity to prevent self collisions
       double stepDuration = xGaitSettings.getStepDuration();
       double strideRotation = desiredPlanarVelocity.getZ() * stepDuration;
@@ -72,7 +65,7 @@ public class QuadrupedXGaitStepStream
       // initialize step queue
       updateXGaitSettingsFromSpeed();
       double initialTime = timestamp.getDoubleValue() + firstStepDelay.getValue();
-      RobotQuadrant initialQuadrant = (gaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
+      RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       bodyPathProvider.initialize();
       xGaitStepPlanner.computeInitialPlan(footstepPlan, initialQuadrant, initialTime);
       footstepPlan.initializeCurrentStepsFromPlannedSteps();

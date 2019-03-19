@@ -2,5 +2,5 @@ package us.ihmc.quadrupedPlanning;
 
 public interface SettingProvider
 {
-   double getSetting(QuadrupedXGaitSettingsReadOnly settings);
+   double getSetting(QuadrupedGaitTimingsReadOnly settings);
 }

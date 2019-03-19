@@ -1,144 +1,176 @@
 package us.ihmc.quadrupedPlanning;
 
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 {
-   private final YoDouble yoMaxSpeed;
-   private final YoDouble yoStanceLength;
-   private final YoDouble yoStanceWidth;
-   private final YoDouble yoStepGroundClearance;
-   private final YoDouble yoStepDuration;
-   private final YoDouble yoEndDoubleSupportDuration;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
+   private final YoDouble endPhaseShift = new YoDouble("endPhaseShift", registry);
+   private final YoDouble stanceLength = new YoDouble("stanceLength", registry);
+   private final YoDouble stanceWidth = new YoDouble("stanceWidth", registry);
+   private final YoDouble stepGroundClearance = new YoDouble("stepGroundClearance", registry);
+   private final YoEnum<QuadrupedSpeed> quadrupedSpeed = YoEnum.create("quadrupedSpeed", QuadrupedSpeed.class, registry);
 
-   public YoQuadrupedXGaitSettings(String prefix, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
+   private final QuadrupedGaitTimingsBasics paceSlowSettings;
+   private final QuadrupedGaitTimingsBasics paceMediumSettings;
+   private final QuadrupedGaitTimingsBasics paceFastSettings;
+   private final QuadrupedGaitTimingsBasics ambleSlowSettings;
+   private final QuadrupedGaitTimingsBasics ambleMediumSettings;
+   private final QuadrupedGaitTimingsBasics ambleFastSettings;
+   private final QuadrupedGaitTimingsBasics trotSlowSettings;
+   private final QuadrupedGaitTimingsBasics trotMediumSettings;
+   private final QuadrupedGaitTimingsBasics trotFastSettings;
+
+   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings, YoVariableRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      paceSlowSettings = new YoQuadrupedGaitTimings("paceSlow", defaultSettings.getPaceSlowTimings(), registry);
+      paceMediumSettings = new YoQuadrupedGaitTimings("paceMedium", defaultSettings.getPaceMediumTimings(), registry);
+      paceFastSettings = new YoQuadrupedGaitTimings("paceFast", defaultSettings.getPaceMediumTimings(), registry);
+      ambleSlowSettings = new YoQuadrupedGaitTimings("ambleSlow", defaultSettings.getAmbleSlowTimings(), registry);
+      ambleMediumSettings = new YoQuadrupedGaitTimings("ambleMedium", defaultSettings.getAmbleSlowTimings(), registry);
+      ambleFastSettings = new YoQuadrupedGaitTimings("ambleFast", defaultSettings.getAmbleSlowTimings(), registry);
+      trotSlowSettings = new YoQuadrupedGaitTimings("trotSlow", defaultSettings.getAmbleSlowTimings(), registry);
+      trotMediumSettings = new YoQuadrupedGaitTimings("trotMedium", defaultSettings.getAmbleSlowTimings(), registry);
+      trotFastSettings = new YoQuadrupedGaitTimings("trotFast", defaultSettings.getAmbleSlowTimings(), registry);
 
-      yoMaxSpeed = new YoDouble(prefix + "_MaxSpeed", registry);
-      yoStanceLength = new YoDouble(prefix + "_StanceLength", registry);
-      yoStanceWidth = new YoDouble(prefix + "_StanceWidth", registry);
-      yoStepGroundClearance = new YoDouble(prefix + "_StepGroundClearance", registry);
-      yoStepDuration = new YoDouble(prefix + "_StepDuration", registry);
-      yoEndDoubleSupportDuration = new YoDouble(prefix + "_EndDoubleSupportDuration", registry);
-
-      set(defaultXGaitSettings);
+      set(defaultSettings);
 
       parentRegistry.addChild(registry);
    }
 
-   public void addVariableChangedListener(VariableChangedListener listener)
-   {
-      yoMaxSpeed.addVariableChangedListener(listener);
-      yoStanceLength.addVariableChangedListener(listener);
-      yoStanceWidth.addVariableChangedListener(listener);
-      yoStepGroundClearance.addVariableChangedListener(listener);
-      yoStepDuration.addVariableChangedListener(listener);
-      yoEndDoubleSupportDuration.addVariableChangedListener(listener);
-   }
-
+   /** {@inheritDoc} */
    @Override
-   public double getMaxSpeed()
+   public double getEndPhaseShift()
    {
-      return yoMaxSpeed.getDoubleValue();
+      return endPhaseShift.getDoubleValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getStanceLength()
    {
-      return yoStanceLength.getDoubleValue();
+      return stanceLength.getDoubleValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getStanceWidth()
    {
-      return yoStanceWidth.getDoubleValue();
+      return stanceWidth.getDoubleValue();
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getStepGroundClearance()
    {
-      return yoStepGroundClearance.getDoubleValue();
+      return stepGroundClearance.getDoubleValue();
    }
 
+   /** {@inheritDoc} */
    @Override
-   public double getStepDuration()
+   public QuadrupedSpeed getQuadrupedSpeed()
    {
-      return yoStepDuration.getDoubleValue();
+      return quadrupedSpeed.getEnumValue();
    }
 
+   /** {@inheritDoc} */
    @Override
-   public double getEndDoubleSupportDuration()
+   public void setEndPhaseShift(double endPhaseShift)
    {
-      return yoEndDoubleSupportDuration.getDoubleValue();
+      this.endPhaseShift.set(endPhaseShift);
    }
 
-   @Override
-   public void setMaxSpeed(double maxSpeed)
-   {
-      yoMaxSpeed.set(maxSpeed);
-   }
-
+   /** {@inheritDoc} */
    @Override
    public void setStanceLength(double stanceLength)
    {
-      yoStanceLength.set(stanceLength);
+      this.stanceLength.set(stanceLength);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setStanceWidth(double stanceWidth)
    {
-      yoStanceWidth.set(stanceWidth);
+      this.stanceWidth.set(stanceWidth);
    }
 
+   /** {@inheritDoc} */
    @Override
    public void setStepGroundClearance(double stepGroundClearance)
    {
-      yoStepGroundClearance.set(stepGroundClearance);
+      this.stepGroundClearance.set(stepGroundClearance);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void setStepDuration(double stepDuration)
+   public void setQuadrupedSpeed(QuadrupedSpeed quadrupedSpeed)
    {
-      yoStepDuration.set(stepDuration);
+      this.quadrupedSpeed.set(quadrupedSpeed);
    }
 
+   /** {@inheritDoc} */
    @Override
-   public void setEndDoubleSupportDuration(double endDoubleSupportDuration)
+   public QuadrupedGaitTimingsBasics getPaceSlowTimings()
    {
-      yoEndDoubleSupportDuration.set(endDoubleSupportDuration);
+      return paceSlowSettings;
    }
 
-   public void set(QuadrupedXGaitSettingsPacket packet)
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getPaceMediumTimings()
    {
-      if (packet.getMaxSpeed() != -1.0)
-         setMaxSpeed(packet.getMaxSpeed());
-      if (packet.getStanceLength() != -1.0)
-         setStanceLength(packet.getStanceLength());
-      if (packet.getStanceWidth() != -1.0)
-         setStanceWidth(packet.getStanceWidth());
-      if (packet.getStepGroundClearance() != -1.0)
-         setStepGroundClearance(packet.getStepGroundClearance());
-      if (packet.getStepDuration() != -1.0)
-         setStepDuration(packet.getStepDuration());
-      if (packet.getEndDoubleSupportDuration() != -1.0)
-         setEndDoubleSupportDuration(packet.getEndDoubleSupportDuration());
+      return paceMediumSettings;
    }
 
-   public QuadrupedXGaitSettingsPacket getAsPacket()
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getPaceFastTimings()
    {
-      packet.setMaxSpeed(yoMaxSpeed.getDoubleValue());
-      packet.setStanceLength(yoStanceLength.getDoubleValue());
-      packet.setStanceWidth(yoStanceWidth.getDoubleValue());
-      packet.setStepGroundClearance(yoStepGroundClearance.getDoubleValue());
-      packet.setStepDuration(yoStepDuration.getDoubleValue());
-      packet.setEndDoubleSupportDuration(yoEndDoubleSupportDuration.getDoubleValue());
+      return paceFastSettings;
+   }
 
-      return packet;
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleSlowTimings()
+   {
+      return ambleSlowSettings;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleMediumTimings()
+   {
+      return ambleMediumSettings;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleFastTimings()
+   {
+      return ambleFastSettings;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotSlowTimings()
+   {
+      return trotSlowSettings;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotMediumTimings()
+   {
+      return trotMediumSettings;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotFastTimings()
+   {
+      return trotFastSettings;
    }
 }

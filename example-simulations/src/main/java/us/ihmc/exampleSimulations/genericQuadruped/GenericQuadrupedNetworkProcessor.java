@@ -7,7 +7,6 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXG
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
