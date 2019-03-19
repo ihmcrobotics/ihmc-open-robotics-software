@@ -2,16 +2,15 @@ package us.ihmc.quadrupedPlanning.stepStream;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedPlanning.QuadrupedGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedXGaitTools
 {
    public static void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,
-                                              QuadrupedGaitSettingsReadOnly xGaitSettings, QuadrupedSpeed speed)
+                                              QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotEnd thisStepEnd = thisStep.getRobotQuadrant().getEnd();
       RobotSide thisStepSide = thisStep.getRobotQuadrant().getSide();
@@ -21,8 +20,8 @@ public class QuadrupedXGaitTools
       double pastStepEndTimeForOppositeEnd = pastStepOnOppositeEnd.getTimeInterval().getEndTime();
 
       // Compute support durations and end phase shift.
-      double nominalStepDuration = xGaitSettings.getStepDuration(speed);
-      double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration(speed);
+      double nominalStepDuration = xGaitSettings.getStepDuration();
+      double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
       double endPhaseShift = MathTools.clamp(xGaitSettings.getEndPhaseShift(), 0, 359);
       if (thisStepEnd == RobotEnd.HIND)
          endPhaseShift = 360 - endPhaseShift;

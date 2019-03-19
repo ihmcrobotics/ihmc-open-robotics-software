@@ -1,17 +1,26 @@
 package us.ihmc.quadrupedPlanning;
 
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
-
 public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 {
-   private double maxSpeed;
    private double stanceLength;
    private double stanceWidth;
    private double stepGroundClearance;
-   private double stepDuration;
-   private double endDoubleSupportDuration;
+   private double endPhaseShift;
+   private QuadrupedSpeed quadrupedSpeed;
 
-   private final QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
+   private final QuadrupedGaitTimingsBasics paceSlowTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics paceMediumTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics paceFastTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics ambleSlowTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics ambleMediumTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics ambleFastTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics trotSlowTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics trotMediumTimings = new QuadrupedGaitTimings();
+   private final QuadrupedGaitTimingsBasics trotFastTimings = new QuadrupedGaitTimings();
+
+   public QuadrupedXGaitSettings()
+   {
+   }
 
    public QuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings)
    {
@@ -19,9 +28,15 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    }
 
    @Override
-   public double getMaxSpeed()
+   public QuadrupedSpeed getQuadrupedSpeed()
    {
-      return maxSpeed;
+      return quadrupedSpeed;
+   }
+
+   @Override
+   public double getEndPhaseShift()
+   {
+      return endPhaseShift;
    }
 
    @Override
@@ -43,21 +58,15 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    }
 
    @Override
-   public double getStepDuration()
+   public void setEndPhaseShift(double endPhaseShift)
    {
-      return stepDuration;
+      this.endPhaseShift = endPhaseShift;
    }
 
    @Override
-   public double getEndDoubleSupportDuration()
+   public void setQuadrupedSpeed(QuadrupedSpeed quadrupedSpeed)
    {
-      return endDoubleSupportDuration;
-   }
-
-   @Override
-   public void setMaxSpeed(double maxSpeed)
-   {
-      this.maxSpeed = maxSpeed;
+      this.quadrupedSpeed = quadrupedSpeed;
    }
 
    @Override
@@ -79,27 +88,57 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    }
 
    @Override
-   public void setStepDuration(double stepDuration)
+   public QuadrupedGaitTimingsBasics getPaceSlowTimings()
    {
-      this.stepDuration = stepDuration;
+      return paceSlowTimings;
    }
 
    @Override
-   public void setEndDoubleSupportDuration(double sndDoubleSupportDuration)
+   public QuadrupedGaitTimingsBasics getPaceMediumTimings()
    {
-      this.endDoubleSupportDuration = sndDoubleSupportDuration;
+      return paceMediumTimings;
    }
 
    @Override
-   public QuadrupedXGaitSettingsPacket getAsPacket()
+   public QuadrupedGaitTimingsBasics getPaceFastTimings()
    {
-      packet.setMaxSpeed(getMaxSpeed());
-      packet.setStanceLength(getStanceLength());
-      packet.setStanceWidth(getStanceWidth());
-      packet.setStepGroundClearance(getStepGroundClearance());
-      packet.setStepDuration(getStepDuration());
-      packet.setEndDoubleSupportDuration(getEndDoubleSupportDuration());
-
-      return packet;
+      return paceFastTimings;
    }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleSlowTimings()
+   {
+      return ambleSlowTimings;
+   }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleMediumTimings()
+   {
+      return ambleMediumTimings;
+   }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getAmbleFastTimings()
+   {
+      return ambleFastTimings;
+   }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotSlowTimings()
+   {
+      return trotSlowTimings;
+   }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotMediumTimings()
+   {
+      return trotMediumTimings;
+   }
+
+   @Override
+   public QuadrupedGaitTimingsBasics getTrotFastTimings()
+   {
+      return trotFastTimings;
+   }
+
 }

@@ -6,7 +6,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -389,14 +387,7 @@ public class QuadrupedUIMessageConverter
 
    public void publishQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
-      QuadrupedXGaitSettingsPacket packet = new QuadrupedXGaitSettingsPacket();
-
-      packet.setStanceLength(xGaitSettings.getStanceLength());
-      packet.setStanceWidth(xGaitSettings.getStanceWidth());
-      packet.setEndPhaseShift(xGaitSettings.getEndPhaseShift());
-      packet.setEndDoubleSupportDuration(xGaitSettings.getEndDoubleSupportDuration());
-      packet.setStepDuration(xGaitSettings.getStepDuration());
-      packet.setStepGroundClearance(xGaitSettings.getStepGroundClearance());
+      QuadrupedXGaitSettingsPacket packet = xGaitSettings.getAsPacket();
 
       stepTeleopXGaitSettingsPublisher.publish(packet);
       xboxXGaitSettingsPublisher.publish(packet);

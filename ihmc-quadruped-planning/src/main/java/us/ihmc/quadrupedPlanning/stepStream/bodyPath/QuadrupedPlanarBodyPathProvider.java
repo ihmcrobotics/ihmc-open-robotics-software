@@ -12,6 +12,4 @@ public interface QuadrupedPlanarBodyPathProvider
     * @param poseToPack
     */
    void getPlanarPose(double time, FramePose2D poseToPack);
-
-   double getTangentVelocity(double time);
 }

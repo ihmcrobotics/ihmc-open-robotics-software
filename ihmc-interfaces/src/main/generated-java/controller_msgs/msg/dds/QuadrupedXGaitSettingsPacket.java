@@ -12,19 +12,39 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket> implements Settable<QuadrupedXGaitSettingsPacket>, EpsilonComparable<QuadrupedXGaitSettingsPacket>
 {
+   public static final byte SLOW = (byte) 0;
+   public static final byte MEDIUM = (byte) 1;
+   public static final byte FAST = (byte) 2;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   public double end_phase_shift_ = -1.0;
    public double stance_length_ = -1.0;
    public double stance_width_ = -1.0;
    public double step_ground_clearance_ = -1.0;
-   public double step_duration_ = -1.0;
-   public double end_double_support_duration_ = -1.0;
-   public double end_phase_shift_ = -1.0;
+   public byte quadruped_speed_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket pace_slow_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket pace_medium_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket pace_fast_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket amble_slow_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket amble_medium_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket amble_fast_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket trot_slow_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket trot_medium_settings_packet_;
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket trot_fast_settings_packet_;
 
    public QuadrupedXGaitSettingsPacket()
    {
+      pace_slow_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      pace_medium_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      pace_fast_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      amble_slow_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      amble_medium_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      amble_fast_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      trot_slow_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      trot_medium_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
+      trot_fast_settings_packet_ = new controller_msgs.msg.dds.QuadrupedGaitTimingsPacket();
    }
 
    public QuadrupedXGaitSettingsPacket(QuadrupedXGaitSettingsPacket other)
@@ -37,18 +57,25 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    {
       sequence_id_ = other.sequence_id_;
 
+      end_phase_shift_ = other.end_phase_shift_;
+
       stance_length_ = other.stance_length_;
 
       stance_width_ = other.stance_width_;
 
       step_ground_clearance_ = other.step_ground_clearance_;
 
-      step_duration_ = other.step_duration_;
+      quadruped_speed_ = other.quadruped_speed_;
 
-      end_double_support_duration_ = other.end_double_support_duration_;
-
-      end_phase_shift_ = other.end_phase_shift_;
-
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.pace_slow_settings_packet_, pace_slow_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.pace_medium_settings_packet_, pace_medium_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.pace_fast_settings_packet_, pace_fast_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.amble_slow_settings_packet_, amble_slow_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.amble_medium_settings_packet_, amble_medium_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.amble_fast_settings_packet_, amble_fast_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.trot_slow_settings_packet_, trot_slow_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.trot_medium_settings_packet_, trot_medium_settings_packet_);
+      controller_msgs.msg.dds.QuadrupedGaitTimingsPacketPubSubType.staticCopy(other.trot_fast_settings_packet_, trot_fast_settings_packet_);
    }
 
    /**
@@ -64,6 +91,15 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   public void setEndPhaseShift(double end_phase_shift)
+   {
+      end_phase_shift_ = end_phase_shift;
+   }
+   public double getEndPhaseShift()
+   {
+      return end_phase_shift_;
    }
 
    public void setStanceLength(double stance_length)
@@ -93,31 +129,67 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       return step_ground_clearance_;
    }
 
-   public void setStepDuration(double step_duration)
+   public void setQuadrupedSpeed(byte quadruped_speed)
    {
-      step_duration_ = step_duration;
+      quadruped_speed_ = quadruped_speed;
    }
-   public double getStepDuration()
+   public byte getQuadrupedSpeed()
    {
-      return step_duration_;
-   }
-
-   public void setEndDoubleSupportDuration(double end_double_support_duration)
-   {
-      end_double_support_duration_ = end_double_support_duration;
-   }
-   public double getEndDoubleSupportDuration()
-   {
-      return end_double_support_duration_;
+      return quadruped_speed_;
    }
 
-   public void setEndPhaseShift(double end_phase_shift)
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getPaceSlowSettingsPacket()
    {
-      end_phase_shift_ = end_phase_shift;
+      return pace_slow_settings_packet_;
    }
-   public double getEndPhaseShift()
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getPaceMediumSettingsPacket()
    {
-      return end_phase_shift_;
+      return pace_medium_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getPaceFastSettingsPacket()
+   {
+      return pace_fast_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getAmbleSlowSettingsPacket()
+   {
+      return amble_slow_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getAmbleMediumSettingsPacket()
+   {
+      return amble_medium_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getAmbleFastSettingsPacket()
+   {
+      return amble_fast_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getTrotSlowSettingsPacket()
+   {
+      return trot_slow_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getTrotMediumSettingsPacket()
+   {
+      return trot_medium_settings_packet_;
+   }
+
+
+   public controller_msgs.msg.dds.QuadrupedGaitTimingsPacket getTrotFastSettingsPacket()
+   {
+      return trot_fast_settings_packet_;
    }
 
 
@@ -140,18 +212,25 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_phase_shift_, other.end_phase_shift_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stance_length_, other.stance_length_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stance_width_, other.stance_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_ground_clearance_, other.step_ground_clearance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_duration_, other.step_duration_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_speed_, other.quadruped_speed_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_double_support_duration_, other.end_double_support_duration_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_phase_shift_, other.end_phase_shift_, epsilon)) return false;
-
+      if (!this.pace_slow_settings_packet_.epsilonEquals(other.pace_slow_settings_packet_, epsilon)) return false;
+      if (!this.pace_medium_settings_packet_.epsilonEquals(other.pace_medium_settings_packet_, epsilon)) return false;
+      if (!this.pace_fast_settings_packet_.epsilonEquals(other.pace_fast_settings_packet_, epsilon)) return false;
+      if (!this.amble_slow_settings_packet_.epsilonEquals(other.amble_slow_settings_packet_, epsilon)) return false;
+      if (!this.amble_medium_settings_packet_.epsilonEquals(other.amble_medium_settings_packet_, epsilon)) return false;
+      if (!this.amble_fast_settings_packet_.epsilonEquals(other.amble_fast_settings_packet_, epsilon)) return false;
+      if (!this.trot_slow_settings_packet_.epsilonEquals(other.trot_slow_settings_packet_, epsilon)) return false;
+      if (!this.trot_medium_settings_packet_.epsilonEquals(other.trot_medium_settings_packet_, epsilon)) return false;
+      if (!this.trot_fast_settings_packet_.epsilonEquals(other.trot_fast_settings_packet_, epsilon)) return false;
 
       return true;
    }
@@ -167,18 +246,25 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.end_phase_shift_ != otherMyClass.end_phase_shift_) return false;
+
       if(this.stance_length_ != otherMyClass.stance_length_) return false;
 
       if(this.stance_width_ != otherMyClass.stance_width_) return false;
 
       if(this.step_ground_clearance_ != otherMyClass.step_ground_clearance_) return false;
 
-      if(this.step_duration_ != otherMyClass.step_duration_) return false;
+      if(this.quadruped_speed_ != otherMyClass.quadruped_speed_) return false;
 
-      if(this.end_double_support_duration_ != otherMyClass.end_double_support_duration_) return false;
-
-      if(this.end_phase_shift_ != otherMyClass.end_phase_shift_) return false;
-
+      if (!this.pace_slow_settings_packet_.equals(otherMyClass.pace_slow_settings_packet_)) return false;
+      if (!this.pace_medium_settings_packet_.equals(otherMyClass.pace_medium_settings_packet_)) return false;
+      if (!this.pace_fast_settings_packet_.equals(otherMyClass.pace_fast_settings_packet_)) return false;
+      if (!this.amble_slow_settings_packet_.equals(otherMyClass.amble_slow_settings_packet_)) return false;
+      if (!this.amble_medium_settings_packet_.equals(otherMyClass.amble_medium_settings_packet_)) return false;
+      if (!this.amble_fast_settings_packet_.equals(otherMyClass.amble_fast_settings_packet_)) return false;
+      if (!this.trot_slow_settings_packet_.equals(otherMyClass.trot_slow_settings_packet_)) return false;
+      if (!this.trot_medium_settings_packet_.equals(otherMyClass.trot_medium_settings_packet_)) return false;
+      if (!this.trot_fast_settings_packet_.equals(otherMyClass.trot_fast_settings_packet_)) return false;
 
       return true;
    }
@@ -191,18 +277,34 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       builder.append("QuadrupedXGaitSettingsPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("end_phase_shift=");
+      builder.append(this.end_phase_shift_);      builder.append(", ");
       builder.append("stance_length=");
       builder.append(this.stance_length_);      builder.append(", ");
       builder.append("stance_width=");
       builder.append(this.stance_width_);      builder.append(", ");
       builder.append("step_ground_clearance=");
       builder.append(this.step_ground_clearance_);      builder.append(", ");
-      builder.append("step_duration=");
-      builder.append(this.step_duration_);      builder.append(", ");
-      builder.append("end_double_support_duration=");
-      builder.append(this.end_double_support_duration_);      builder.append(", ");
-      builder.append("end_phase_shift=");
-      builder.append(this.end_phase_shift_);
+      builder.append("quadruped_speed=");
+      builder.append(this.quadruped_speed_);      builder.append(", ");
+      builder.append("pace_slow_settings_packet=");
+      builder.append(this.pace_slow_settings_packet_);      builder.append(", ");
+      builder.append("pace_medium_settings_packet=");
+      builder.append(this.pace_medium_settings_packet_);      builder.append(", ");
+      builder.append("pace_fast_settings_packet=");
+      builder.append(this.pace_fast_settings_packet_);      builder.append(", ");
+      builder.append("amble_slow_settings_packet=");
+      builder.append(this.amble_slow_settings_packet_);      builder.append(", ");
+      builder.append("amble_medium_settings_packet=");
+      builder.append(this.amble_medium_settings_packet_);      builder.append(", ");
+      builder.append("amble_fast_settings_packet=");
+      builder.append(this.amble_fast_settings_packet_);      builder.append(", ");
+      builder.append("trot_slow_settings_packet=");
+      builder.append(this.trot_slow_settings_packet_);      builder.append(", ");
+      builder.append("trot_medium_settings_packet=");
+      builder.append(this.trot_medium_settings_packet_);      builder.append(", ");
+      builder.append("trot_fast_settings_packet=");
+      builder.append(this.trot_fast_settings_packet_);
       builder.append("}");
       return builder.toString();
    }
