@@ -21,6 +21,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
@@ -301,7 +302,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       feedbackControlCommand.setGains(getDefaultGains().getPositionGains());
       feedbackControlCommand.setWeightForSolver(momentumWeight.getDoubleValue());
       feedbackControlCommand.setSelectionMatrixForLinearXYControl();
-      feedbackControlCommand.set(positionToHold);
+      feedbackControlCommand.setInverseKinematics(positionToHold, new FrameVector3D());
       return feedbackControlCommand;
    }
 
