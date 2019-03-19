@@ -28,6 +28,7 @@ public class BarrierSchedulerLoadTest
    private final YoDouble actualSchedulerDTMillis = new YoDouble("actualSchedulerDTMillis", registry);
    private final YoDouble actualFastTaskDTMillis = new YoDouble("actualFastTaskDTMillis", registry);
    private final YoDouble actualSlowTaskDTMillis = new YoDouble("actualSlowTaskDTMillis", registry);
+   private PeriodicRealtimeThread schedulerThread;
 
    public void testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(boolean useNativeCommonOps)
    {
@@ -96,6 +97,8 @@ public class BarrierSchedulerLoadTest
 
             if (iterations > NUM_ITERATIONS_OF_SCHEDULER && !isFinished)
             {
+               barrierScheduler.shutdown();
+
                fastTask.doTimingReporting();
                System.out.println();
                slowTask.doTimingReporting();
@@ -104,13 +107,13 @@ public class BarrierSchedulerLoadTest
                BarrierSchedulerLoadTestHelper.printTimingStatisticsCSV("Scheduler", schedulerTimingInformation);
 
                isFinished = true;
+               finished();
             }
 
          }
       };
 
-      PeriodicRealtimeThread schedulerThread = new PeriodicRealtimeThread(schedulerPriority, schedulerPeriodicParameters, schedulerRunnable,
-                                                                          "barrierSchedulerThread");
+      schedulerThread = new PeriodicRealtimeThread(schedulerPriority, schedulerPeriodicParameters, schedulerRunnable, "barrierSchedulerThread");
 
       System.out.println("Pinning scheduler thread to core 1");
       schedulerThread.setAffinity(cpuPackage.getCore(1).getDefaultProcessor());
@@ -128,7 +131,18 @@ public class BarrierSchedulerLoadTest
 
       System.out.println("Starting cyclic test [Iterations: " + NUM_ITERATIONS_OF_SCHEDULER + "; Estimated Duration: " + ESTIMATED_DURATION + "s]");
 
+      fastTaskThread.join();
+      slowTaskThread.join();
       schedulerThread.join();
+
+      yoVariableServer.close();
+
+      System.out.println("Done");
+   }
+
+   private void finished()
+   {
+      schedulerThread.shutdown();
    }
 
    public static void main(String[] args)
