@@ -126,6 +126,5 @@ public class MultiplyBigMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    protected void cleanup()
    {
-      System.out.println("Cleanup 1");
    }
 }
