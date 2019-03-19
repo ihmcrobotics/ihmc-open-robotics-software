@@ -441,4 +441,48 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof InverseDynamicsOptimizationSettingsCommand)
+      {
+         InverseDynamicsOptimizationSettingsCommand other = (InverseDynamicsOptimizationSettingsCommand) object;
+         if (rhoMin != other.rhoMin)
+            return false;
+         if (jointAccelerationMax != other.jointAccelerationMax)
+            return false;
+         if (rhoWeight != other.rhoWeight)
+            return false;
+         if (rhoRateWeight != other.rhoRateWeight)
+            return false;
+         if (!centerOfPressureWeight.equals(other.centerOfPressureWeight))
+            return false;
+         if (!centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+            return false;
+         if (jointAccelerationWeight != other.jointAccelerationWeight)
+            return false;
+         if (jointJerkWeight != other.jointJerkWeight)
+            return false;
+         if (jointTorqueWeight != other.jointTorqueWeight)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": rho min: " + rhoMin + ", qdd max: " + jointAccelerationMax + ", rho weight: " + rhoWeight + ", rho rate weight: "
+            + rhoRateWeight + ", CoP weight: " + centerOfPressureWeight + ", CoP rate weight: " + centerOfPressureRateWeight + ", qdd weight: "
+            + jointAccelerationWeight + ", qddd weight: " + jointJerkWeight + ", tau weight: " + jointTorqueWeight;
+   }
 }

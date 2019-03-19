@@ -100,4 +100,34 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof InverseKinematicsOptimizationSettingsCommand)
+      {
+         InverseKinematicsOptimizationSettingsCommand other = (InverseKinematicsOptimizationSettingsCommand) object;
+
+         if (jointVelocityWeight != other.jointVelocityWeight)
+            return false;
+         if (jointAccelerationWeight != other.jointAccelerationWeight)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": qd weight: " + jointVelocityWeight + ", qdd weight: " + jointAccelerationWeight;
+   }
 }
