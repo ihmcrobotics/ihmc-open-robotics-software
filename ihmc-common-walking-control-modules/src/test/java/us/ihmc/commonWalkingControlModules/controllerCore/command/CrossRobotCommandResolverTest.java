@@ -1407,9 +1407,10 @@ class CrossRobotCommandResolverTest
                                                                                            ReferenceFrame... possibleFrames)
    {
       CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
-      next.getDesiredPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
-      next.getFeedForwardLinearAction().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
+      next.getReferencePosition().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getReferenceLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getReferenceLinearAcceleration().set(EuclidCoreRandomTools.nextVector3D(random));
       next.setGains(nextPID3DGains(random));
       next.getMomentumRateCommand().set(nextMomentumRateCommand(random, rootBody, possibleFrames));
       return next;
