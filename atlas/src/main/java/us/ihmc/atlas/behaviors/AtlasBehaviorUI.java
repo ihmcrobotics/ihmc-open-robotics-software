@@ -15,8 +15,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasBehaviorUI extends Application
 {
-   private static final boolean launchBehaviorModule = false;
-
    private BehaviorUI ui;
 
    @Override
@@ -31,11 +29,6 @@ public class AtlasBehaviorUI extends Application
                           drcRobotModel,
                           PubSubImplementation.FAST_RTPS);
       ui.show();
-
-      if (launchBehaviorModule)
-      {
-         // launch behavior module
-      }
    }
 
    @Override
