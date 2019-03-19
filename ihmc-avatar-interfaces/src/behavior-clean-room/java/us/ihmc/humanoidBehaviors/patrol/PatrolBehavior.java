@@ -205,7 +205,9 @@ public class PatrolBehavior
    private void sendPauseWalking()
    {
       LogTools.error("PAUSE WALKING");
-      pausePublisher.publish(new PauseWalkingMessage());
+      PauseWalkingMessage pause = new PauseWalkingMessage();
+      pause.setPause(true);
+      pausePublisher.publish(pause);
    }
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
