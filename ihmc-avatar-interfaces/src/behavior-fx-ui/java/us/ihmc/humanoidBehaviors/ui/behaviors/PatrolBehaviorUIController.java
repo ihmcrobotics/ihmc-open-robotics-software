@@ -46,6 +46,13 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       this.teleop = teleop;
 
       activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
+      messager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
+      {
+         if (value == null)
+         {
+            teleopUpdateWaypoints();
+         }
+      });
 
       waypointPlacementStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
       {
@@ -69,14 +76,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
          removeWaypoint(waypoints.get(waypoints.size() - 1));
 
-         ArrayList<Pose3D> waypointsToSend = new ArrayList<>();
-         waypoints.forEach(graphicWaypoint ->
-                           {
-                              Point3D pos = graphicWaypoint.getSnappedPositionGraphic().getPosition();
-                              double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
-                              waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), yaw, 0.0, 0.0));
-                           });
-         teleop.setWaypoints(waypointsToSend);
+         teleopUpdateWaypoints();
 
          messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
          messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
@@ -105,7 +105,6 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                PickResult pickResult = event.getPickResult();
                Node intersectedNode = pickResult.getIntersectedNode();
 
-
                for (int i = 0; i < waypoints.size(); i++)
                {
                   if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
@@ -124,6 +123,18 @@ public class PatrolBehaviorUIController extends FXUIBehavior
             }
          }
       }
+   }
+
+   private void teleopUpdateWaypoints()
+   {
+      ArrayList<Pose3D> waypointsToSend = new ArrayList<>();
+      waypoints.forEach(graphicWaypoint ->
+                        {
+                           Point3D pos = graphicWaypoint.getSnappedPositionGraphic().getPosition();
+                           double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
+                           waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), yaw, 0.0, 0.0));
+                        });
+      teleop.setWaypoints(waypointsToSend);
    }
 
    private PatrolWaypointGraphic createWaypointGraphic(JavaFXMessager messager)
