@@ -211,4 +211,48 @@ public class JointLimitData
    {
       this.positionLimitDamping = damping;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointLimitData)
+      {
+         JointLimitData other = (JointLimitData) object;
+
+         if (positionSoftLowerLimit != other.positionSoftLowerLimit)
+            return false;
+         if (positionSoftUpperLimit != other.positionSoftUpperLimit)
+            return false;
+         if (velocityLimitLower != other.velocityLimitLower)
+            return false;
+         if (velocityLimitUpper != other.velocityLimitUpper)
+            return false;
+         if (torqueLimitLower != other.torqueLimitLower)
+            return false;
+         if (torqueLimitUpper != other.torqueLimitUpper)
+            return false;
+         if (positionLimitStiffness != other.positionLimitStiffness)
+            return false;
+         if (positionLimitDamping != other.positionLimitDamping)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": q_min: " + positionSoftLowerLimit + ", q_max: " + positionSoftUpperLimit + ", qd_min: " + velocityLimitLower
+            + ", qd_max: " + velocityLimitUpper + ", tau_min: " + torqueLimitLower + ", tau_max: " + torqueLimitUpper + ", stiffness: " + positionLimitStiffness
+            + ", damping: " + positionLimitDamping;
+   }
 }

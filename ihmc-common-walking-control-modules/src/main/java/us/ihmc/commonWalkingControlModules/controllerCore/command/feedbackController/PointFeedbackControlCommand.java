@@ -8,8 +8,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
@@ -28,8 +26,8 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
  * The objective of a {@link PointFeedbackControlCommand} is to notify the feedback controller
- * dedicated to control the end-effector provided in {@link #set(RigidBodyBasics, RigidBodyBasics)} that it is
- * requested to run during the next control tick.
+ * dedicated to control the end-effector provided in {@link #set(RigidBodyBasics, RigidBodyBasics)}
+ * that it is requested to run during the next control tick.
  * </p>
  * <p>
  * From control tick to control tick each feedback controller can be entirely configured or
@@ -47,14 +45,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 {
    private final FramePoint3D bodyFixedPointInEndEffectorFrame = new FramePoint3D();
 
-   private final FixedFramePoint3DBasics desiredPositionInWorld = new FramePoint3D(ReferenceFrame.getWorldFrame());
-   private final FixedFrameVector3DBasics desiredLinearVelocityInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
-
-   private final FixedFrameVector3DBasics feedForwardLinearActionInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D desiredPositionInRootFrame = new FramePoint3D();
+   private final FrameVector3D desiredLinearVelocityInRootFrame = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearActionInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
-   /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
+   /**
+    * This is the reference frame in which the linear part of the gains are to be applied. If
+    * {@code null}, it is applied in the control frame.
+    */
    private ReferenceFrame linearGainsFrame = null;
 
    /**
@@ -68,8 +68,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /**
     * The control base frame is the reference frame with respect to which the end-effector is to be
-    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
-    * to the control base frame.
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect to
+    * the control base frame.
     */
    private ReferenceFrame controlBaseFrame = null;
 
@@ -88,9 +88,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    @Override
    public void set(PointFeedbackControlCommand other)
    {
-      desiredPositionInWorld.set(other.desiredPositionInWorld);
-      desiredLinearVelocityInWorld.set(other.desiredLinearVelocityInWorld);
-      feedForwardLinearActionInWorld.set(other.feedForwardLinearActionInWorld);
+      desiredPositionInRootFrame.setIncludingFrame(other.desiredPositionInRootFrame);
+      desiredLinearVelocityInRootFrame.setIncludingFrame(other.desiredLinearVelocityInRootFrame);
+      feedForwardLinearActionInRootFrame.setIncludingFrame(other.feedForwardLinearActionInRootFrame);
       setGains(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
@@ -104,8 +104,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Specifies the rigid-body to be controlled, i.e. {@code endEffector}.
     * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be to control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints that
+    * can be to control the end-effector.
     * </p>
     *
     * @param base the rigid-body located right before the first joint to be used for controlling the
@@ -121,18 +121,18 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Intermediate base located between the {@code base} and {@code endEffector}.
     * <p>
-    * This parameter is optional. If provided, it is used to improve singularity avoidance by
-    * applying a privileged joint configuration to the kinematic chain going from
-    * {@code primaryBase} to {@code endEffector}.
+    * This parameter is optional. If provided, it is used to improve singularity avoidance by applying
+    * a privileged joint configuration to the kinematic chain going from {@code primaryBase} to
+    * {@code endEffector}.
     * </p>
     * <p>
     * Here is an example of application: {@code endEffector == leftHand},
     * {@code base == rootJoint.getPredecessor()} such that to control the {@code leftHand}, the
-    * controller core uses the arm joints, the spine joints, and also the non-actuated floating
-    * joint. If {@code primaryBase == chest}, as soon as the left arm comes close to a singular
-    * configuration such as a straight elbow, the privileged configuration framework will help
-    * bending the elbow. This reduces the time needed to escape the singular configuration. It also
-    * prevents unfortunate situation where the elbow would try to bend past the joint limit.
+    * controller core uses the arm joints, the spine joints, and also the non-actuated floating joint.
+    * If {@code primaryBase == chest}, as soon as the left arm comes close to a singular configuration
+    * such as a straight elbow, the privileged configuration framework will help bending the elbow.
+    * This reduces the time needed to escape the singular configuration. It also prevents unfortunate
+    * situation where the elbow would try to bend past the joint limit.
     * </p>
     *
     * @param primaryBase
@@ -144,8 +144,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    /**
     * The control base frame is the reference frame with respect to which the end-effector is to be
-    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
-    * to the control base frame.
+    * controlled. More specifically, the end-effector desired velocity is assumed to be with respect to
+    * the control base frame.
     *
     * @param controlBaseFrame the new control base frame.
     */
@@ -202,16 +202,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * </p>
     *
     * @param desiredPosition describes the position that the {@code bodyFixedPoint} should reach. It
-    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
-    *           Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in
-    *            {@link ReferenceFrame#getWorldFrame()}.
+    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}. Not
+    *           modified.
     */
    public void set(FramePoint3DReadOnly desiredPosition)
    {
-      desiredPositionInWorld.set(desiredPosition);
-      desiredLinearVelocityInWorld.setToZero();
-      feedForwardLinearActionInWorld.setToZero();
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
+      desiredPositionInRootFrame.changeFrame(rootFrame);
+      desiredLinearVelocityInRootFrame.setToZero(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -221,20 +221,20 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * </p>
     *
     * @param desiredPosition describes the position that the {@code bodyFixedPoint} should reach. It
-    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
-    *           Not modified.
-    * @param desiredLinearVelocity describes the desired linear velocity of the
-    *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
-    *           desired linear velocity of {@code endEffector.getBodyFixedFrame()}'s origin. Not
+    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}. Not
     *           modified.
-    * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
-    *            {@link ReferenceFrame#getWorldFrame()}.
+    * @param desiredLinearVelocity describes the desired linear velocity of the {@code bodyFixedPoint}
+    *           with respect to the {@code base}. It does NOT describe the desired linear velocity of
+    *           {@code endEffector.getBodyFixedFrame()}'s origin. Not modified.
     */
    public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
    {
-      desiredPositionInWorld.set(desiredPosition);
-      desiredLinearVelocityInWorld.set(desiredLinearVelocity);
-      feedForwardLinearActionInWorld.setToZero();
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
+      desiredPositionInRootFrame.changeFrame(rootFrame);
+      desiredLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+      desiredLinearVelocityInRootFrame.changeFrame(rootFrame);
+      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -243,16 +243,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param feedForwardLinearAcceleration describes the desired linear action of the
+    * @param feedForwardLinearAction describes the desired linear action of the
     *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
     *           desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin. Not
     *           modified.
-    * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
-    *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAcceleration)
+   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
    {
-      feedForwardLinearActionInWorld.set(feedForwardLinearAcceleration);
+      ReferenceFrame rootFrame = feedForwardLinearAction.getReferenceFrame().getRootFrame();
+      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAction);
+      feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
    }
 
    /**
@@ -269,12 +269,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * {@code endEffector.getBodyFixedFrame()}.
     * <p>
     * The {@code bodyFixedPoint} describes on what the feedback control is applied, such that the
-    * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
-    * to the given desired position.
+    * feedback controller for this end-effector will do its best to bring the {@code controlFrame} to
+    * the given desired position.
     * </p>
     *
-    * @param bodyFixedPointInEndEffectorFrame the position of the {@code bodyFixedPoint}. Not
-    *           modified.
+    * @param bodyFixedPointInEndEffectorFrame the position of the {@code bodyFixedPoint}. Not modified.
     * @throws ReferenceFrameMismatchException if any the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
@@ -296,13 +295,13 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    /**
     * Sets this command's selection matrix to the given one.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
@@ -335,8 +334,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * commands value will be treated as more important than the other commands.
     * </p>
     *
-    * @param weightMatrix weight matrix holding the linear weights to use for each component of the desired
-    *           acceleration. Not modified.
+    * @param weightMatrix weight matrix holding the linear weights to use for each component of the
+    *           desired acceleration. Not modified.
     */
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
    {
@@ -362,18 +361,18 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack)
    {
-      desiredPositionToPack.setIncludingFrame(desiredPositionInWorld);
+      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
    }
 
    public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack, FrameVector3DBasics desiredLinearVelocityToPack)
    {
-      desiredPositionToPack.setIncludingFrame(desiredPositionInWorld);
-      desiredLinearVelocityToPack.setIncludingFrame(desiredLinearVelocityInWorld);
+      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
+      desiredLinearVelocityToPack.setIncludingFrame(desiredLinearVelocityInRootFrame);
    }
 
    public void getFeedForwardActionIncludingFrame(FrameVector3DBasics feedForwardLinearActionToPack)
    {
-      feedForwardLinearActionToPack.setIncludingFrame(feedForwardLinearActionInWorld);
+      feedForwardLinearActionToPack.setIncludingFrame(feedForwardLinearActionInRootFrame);
    }
 
    public void getBodyFixedPointIncludingFrame(FramePoint3D bodyFixedPointToControlToPack)
@@ -381,24 +380,24 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       bodyFixedPointToControlToPack.setIncludingFrame(bodyFixedPointInEndEffectorFrame);
    }
 
-   public FramePoint3DReadOnly getBodyFixedPointToControl()
+   public FramePoint3DBasics getBodyFixedPointToControl()
    {
       return bodyFixedPointInEndEffectorFrame;
    }
 
-   public FramePoint3DReadOnly getDesiredPosition()
+   public FramePoint3DBasics getDesiredPosition()
    {
-      return desiredPositionInWorld;
+      return desiredPositionInRootFrame;
    }
 
-   public FrameVector3DReadOnly getDesiredLinearVelocity()
+   public FrameVector3DBasics getDesiredLinearVelocity()
    {
-      return desiredLinearVelocityInWorld;
+      return desiredLinearVelocityInRootFrame;
    }
 
-   public FrameVector3DReadOnly getFeedForwardLinearAction()
+   public FrameVector3DBasics getFeedForwardLinearAction()
    {
-      return feedForwardLinearActionInWorld;
+      return feedForwardLinearActionInRootFrame;
    }
 
    public RigidBodyBasics getBase()
@@ -441,12 +440,48 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof PointFeedbackControlCommand)
+      {
+         PointFeedbackControlCommand other = (PointFeedbackControlCommand) object;
+
+         if (!bodyFixedPointInEndEffectorFrame.equals(other.bodyFixedPointInEndEffectorFrame))
+            return false;
+         if (!desiredPositionInRootFrame.equals(other.desiredPositionInRootFrame))
+            return false;
+         if (!desiredLinearVelocityInRootFrame.equals(other.desiredLinearVelocityInRootFrame))
+            return false;
+         if (!feedForwardLinearActionInRootFrame.equals(other.feedForwardLinearActionInRootFrame))
+            return false;
+         if (!gains.equals(other.gains))
+            return false;
+         if (linearGainsFrame != other.linearGainsFrame)
+            return false;
+         if (!spatialAccelerationCommand.equals(other.spatialAccelerationCommand))
+            return false;
+         if (controlBaseFrame != other.controlBaseFrame)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + spatialAccelerationCommand.getBaseName() + ", ";
-      ret += "endEffector = " + spatialAccelerationCommand.getEndEffectorName() + ", ";
-      ret += "position = " + desiredPositionInWorld;
+      ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
+      ret += "position = " + desiredPositionInRootFrame;
       return ret;
    }
 }

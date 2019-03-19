@@ -67,7 +67,8 @@ public class OneDoFTrajectoryPointCalculator
       {
          computeForFixedTime(trajectoryTime);
       }
-
+      
+      times.clear();
       times.add(0.0);
       velocities.add(0.0);
       TDoubleArrayList velocityToPack = new TDoubleArrayList();

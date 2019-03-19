@@ -32,8 +32,8 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * desired behaviors to be considered must be submitted to the whole body controller core through
     * this command.
     * 
-    * @param controllerCoreMode desired controller core mode. Choose between Inverse Dynamics,
-    *           Inverse Kinematics, or Virtual Model Control.
+    * @param controllerCoreMode desired controller core mode. Choose between Inverse Dynamics, Inverse
+    *           Kinematics, or Virtual Model Control.
     */
    public ControllerCoreCommand(WholeBodyControllerCoreMode controllerCoreMode)
    {
@@ -49,6 +49,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    /**
     * Clears all the command lists.
     */
+   @Override
    public void clear()
    {
       inverseDynamicsCommandList.clear();
@@ -154,8 +155,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    /**
-    * @return the inverse dynamics command list to be considered by the virtual model controller
-    *         core.
+    * @return the inverse dynamics command list to be considered by the virtual model controller core.
     */
    @Override
    public VirtualModelControlCommandList getVirtualModelControlCommandList()
@@ -174,8 +174,8 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    /**
-    * @return the inverse dynamics command list to be considered by the inverse kinematics
-    *         controller core.
+    * @return the inverse dynamics command list to be considered by the inverse kinematics controller
+    *         core.
     */
    @Override
    public InverseKinematicsCommandList getInverseKinematicsCommandList()
@@ -210,8 +210,10 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    /**
-    * @return {@code true} if the controller core should be reinitialized, for instance clearing integrators.
+    * @return {@code true} if the controller core should be reinitialized, for instance clearing
+    *         integrators.
     */
+   @Override
    public boolean isReinitializationRequested()
    {
       return reinitialize;
@@ -224,6 +226,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public WholeBodyControllerCoreMode getControllerCoreMode()
    {
       return controllerCoreMode;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof ControllerCoreCommandInterface)
+         return ControllerCoreCommandInterface.super.equals((ControllerCoreCommandInterface) object);
+      else
+         return false;
    }
 
    @Override

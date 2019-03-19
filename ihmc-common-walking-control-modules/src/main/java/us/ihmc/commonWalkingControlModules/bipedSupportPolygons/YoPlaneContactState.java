@@ -125,7 +125,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          throw new RuntimeException("The rigid body in the command does not match this rigid body: command.rigidBody = " + planeContactStateCommand.getContactingRigidBody() + ", contactState.rigidBody = " + rigidBody);
 
       coefficientOfFriction.set(planeContactStateCommand.getCoefficientOfFriction());
-      planeContactStateCommand.getContactNormal(contactNormalFrameVector);
+      contactNormalFrameVector.setIncludingFrame(planeContactStateCommand.getContactNormal());
 
       hasContactStateChanged.set(planeContactStateCommand.getHasContactStateChanged());
 
@@ -136,9 +136,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       for (int i = 0; i < planeContactStateCommand.getNumberOfContactPoints(); i++)
       {
-         planeContactStateCommand.getContactPoint(i, tempContactPointPosition);
          YoContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.setPosition(tempContactPointPosition);
+         contactPoint.setPosition(planeContactStateCommand.getContactPoint(i));
          contactPoint.setInContact(true);
 
          double maxContactPointNormalForce = planeContactStateCommand.getMaxContactPointNormalForce(i);

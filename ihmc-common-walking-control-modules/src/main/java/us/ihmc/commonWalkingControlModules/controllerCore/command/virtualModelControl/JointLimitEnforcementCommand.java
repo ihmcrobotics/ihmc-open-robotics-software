@@ -80,4 +80,45 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
    {
       return ControllerCoreCommandType.JOINT_LIMIT_ENFORCEMENT;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointLimitEnforcementCommand)
+      {
+         JointLimitEnforcementCommand other = (JointLimitEnforcementCommand) object;
+
+         if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+         }
+         if (!jointLimitData.equals(other.jointLimitData))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ":";
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      {
+         ret += "\nJoint: " + joints.get(jointIndex).getName() + ", " + jointLimitData.get(jointIndex).toString();
+      }
+      return ret;
+   }
 }
