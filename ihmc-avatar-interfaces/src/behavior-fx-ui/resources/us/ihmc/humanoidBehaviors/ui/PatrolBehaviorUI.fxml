@@ -7,12 +7,10 @@
     <children>
         <GridPane hgap="15.0" vgap="2.0" layoutX="15.0" layoutY="17.0">
             <children>
-                <Button fx:id="placeWaypoints" onAction="#placeWaypoints" prefWidth="130.0" text="Place Waypoints" GridPane.rowIndex="1" />
-                <Button fx:id="goToWaypoint" onAction="#goToWaypoint" prefWidth="130.0" text="Go To Waypoint 0" GridPane.rowIndex="2" />
-
-                <Button fx:id="continuePatrol" onAction="#continuePatrol" prefWidth="130.0" text="Continue Patrol (inactive)" GridPane.rowIndex="5" />
-                <Button fx:id="pausePatrol" onAction="#pausePatrol" prefWidth="130.0" text="Pause Patrol (inactive)" GridPane.rowIndex="6" />
-                <Button fx:id="destroyPatrol" onAction="#destroyPatrol" prefWidth="130.0" text="Destroy Patrol (inactive)" GridPane.rowIndex="7" />
+                <Button fx:id="placeWaypoints" onAction="#placeWaypoints" prefWidth="130.0" text="Place Waypoints" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Button fx:id="goToWaypoint" onAction="#goToWaypoint" prefWidth="130.0" text="Go To Waypoint" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Spinner fx:id="waypointIndex" initialValue="0" editable="true" amountToStepBy="1" min="0" max="500" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <Button fx:id="pauseWalking" onAction="#pauseWalking" prefWidth="130.0" text="Pause Walking" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             </children>
         </GridPane>
     </children>
