@@ -285,9 +285,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       else
       {
          result.getFootstepDataList().set(convertToTimedStepListMessage(footstepPlan));
-
-         if (footstepPlan.hasLowLevelPlanGoal())
-            result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
+         result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
       }
 
       if (bodyPathPlan != null)
