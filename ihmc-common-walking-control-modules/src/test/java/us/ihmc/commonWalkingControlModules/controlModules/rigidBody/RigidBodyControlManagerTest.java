@@ -100,7 +100,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.JOINTSPACE, feedbackControlCommand.getCommandType());
          JointspaceFeedbackControlCommand jointCommand = (JointspaceFeedbackControlCommand) feedbackControlCommand;
          assertEquals(1, jointCommand.getNumberOfJoints());
-         assertEquals(jointCommand.getDesiredPosition(0), q2_init, epsilon);
+         assertEquals(jointCommand.getJointCommand(0).getReferencePosition(), q2_init, epsilon);
       }
 
       // go to time when the joints should be at the home position
@@ -111,7 +111,7 @@ public class RigidBodyControlManagerTest
          assertEquals(ControllerCoreCommandType.JOINTSPACE, feedbackControlCommand.getCommandType());
          JointspaceFeedbackControlCommand jointCommand = (JointspaceFeedbackControlCommand) feedbackControlCommand;
          assertEquals(1, jointCommand.getNumberOfJoints());
-         assertEquals(jointCommand.getDesiredPosition(0), q2_home, epsilon);
+         assertEquals(jointCommand.getJointCommand(0).getReferencePosition(), q2_home, epsilon);
       }
    }
 

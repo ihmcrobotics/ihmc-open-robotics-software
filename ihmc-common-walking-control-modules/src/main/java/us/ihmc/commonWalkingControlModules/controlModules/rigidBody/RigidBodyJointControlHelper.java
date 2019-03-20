@@ -6,6 +6,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -76,7 +77,7 @@ public class RigidBodyJointControlHelper
          pointQueue.clear();
          pointQueues.add(pointQueue);
 
-         feedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
+         feedbackControlCommand.addJointCommand(joint);
 
          numberOfPointsInQueue.add(new YoInteger(prefix + "_" + jointName + "_numberOfPointsInQueue", registry));
          numberOfPointsInGenerator.add(new YoInteger(prefix + "_" + jointName + "_numberOfPointsInGenerator", registry));
@@ -198,7 +199,10 @@ public class RigidBodyJointControlHelper
          currentWeights.get(jointIdx).set(weight);
          if (weight > 0.0)
          {
-            feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gain, weight);
+            OneDoFJointFeedbackControlCommand jointCommand = feedbackControlCommand.addJointCommand(joint);
+            jointCommand.setInverseDynamics(desiredPosition, desiredVelocity, feedForwardAcceleration);
+            jointCommand.setGains(gain);
+            jointCommand.setWeightForSolver(weight);
          }
 
          YoInteger numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);

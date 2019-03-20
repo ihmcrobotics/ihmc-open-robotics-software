@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -1416,6 +1417,25 @@ class CrossRobotCommandResolverTest
       return next;
    }
 
+   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+                                                                                         ReferenceFrame... possibleFrames)
+   {
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      OneDoFJointBasics joint = allJoints.get(random.nextInt(allJoints.size()));
+      return nextOneDoFJointFeedbackControlCommand(random, joint);
+   }
+
+   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, OneDoFJointBasics joint)
+   {
+      OneDoFJointFeedbackControlCommand next = new OneDoFJointFeedbackControlCommand();
+      next.setJoint(joint);
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
+      next.setInverseDynamics(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setGains(nextPDGains(random));
+      next.setWeightForSolver(random.nextDouble());
+      return next;
+   }
+
    public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
                                                                                        ReferenceFrame... possibleFrames)
    {
@@ -1427,7 +1447,7 @@ class CrossRobotCommandResolverTest
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, random.nextDouble(), random.nextDouble(), random.nextDouble(), nextPDGains(random), random.nextDouble());
+         next.addCommand(nextOneDoFJointFeedbackControlCommand(random, joint));
       }
 
       return next;
