@@ -590,8 +590,9 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = " + desiredLinearForce
-            + ", angular = " + desiredAngularTorque;
-      return ret;
+      String baseName = base == null ? "null" : base.getName();
+      String endEffectorName = endEffector == null ? "null" : endEffector.getName();
+      return getClass().getSimpleName() + ": base = " + baseName + ", endEffector = " + endEffectorName + ", linear = " + desiredLinearForce + ", angular = "
+            + desiredAngularTorque;
    }
 }

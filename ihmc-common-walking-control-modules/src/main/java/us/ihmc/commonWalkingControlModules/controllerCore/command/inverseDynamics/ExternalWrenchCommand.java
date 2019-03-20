@@ -76,6 +76,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": body: " + rigidBody.getName() + ", wrench: " + externalWrenchAppliedOnRigidBody;
+      String bodyName = rigidBody == null ? "null" : rigidBody.getName();
+      return getClass().getSimpleName() + ": body: " + bodyName + ", wrench: " + externalWrenchAppliedOnRigidBody;
    }
 }

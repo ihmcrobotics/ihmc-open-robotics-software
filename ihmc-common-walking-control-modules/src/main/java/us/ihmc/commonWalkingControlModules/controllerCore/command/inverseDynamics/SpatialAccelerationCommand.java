@@ -981,7 +981,10 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
+      String baseName = base == null ? "null" : base.getName();
+      String endEffectorName = endEffector == null ? "null" : endEffector.getName();
+      
+      String ret = getClass().getSimpleName() + ": base = " + baseName + ", endEffector = " + endEffectorName + ", linear = "
             + desiredLinearAcceleration + ", angular = " + desiredAngularAcceleration;
       return ret;
    }
