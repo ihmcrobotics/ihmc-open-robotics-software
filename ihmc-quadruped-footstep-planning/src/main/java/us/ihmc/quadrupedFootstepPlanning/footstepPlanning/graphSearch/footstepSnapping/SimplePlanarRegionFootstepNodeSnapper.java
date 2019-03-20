@@ -22,6 +22,8 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
    private final ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
 
+   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+
    public SimplePlanarRegionFootstepNodeSnapper()
    {
       this(new DefaultFootstepPlannerParameters());
@@ -36,56 +38,40 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestRegion = findHighestRegion(footPosition.getX(), footPosition.getY());
+      Vector2D projectionTranslation = new Vector2D();
+      PlanarRegion highestRegion = findHighestRegion(footPosition.getX(), footPosition.getY(), projectionTranslation);
 
-      // TODO either lower grid size or search cell if no region found
-      if(highestRegion == null)
+      if(highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
          return FootstepNodeSnapData.emptyData();
       }
       else
       {
+         double x = xIndex * FootstepNode.gridSizeXY + projectionTranslation.getX();
+         double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
+         double z = highestRegion.getPlaneZGivenXY(x, y);
+
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setIdentity();
+         transform.setTranslation(projectionTranslation.getX(), projectionTranslation.getY(), z);
 
-         if(parameters.getProjectInsideDistance() > 0.0)
-         {
-            Vector2D projectionTranslation = projectPointIntoRegion(highestRegion, footPosition.getX(), footPosition.getY());
-
-            // projection failed
-            if(projectionTranslation.containsNaN())
-            {
-               return FootstepNodeSnapData.emptyData();
-            }
-            // translation pushes the foot outside of it's cell
-            else if(isTranslationBiggerThanGridCell(projectionTranslation))
-            {
-               return FootstepNodeSnapData.emptyData();
-            }
-            else
-            {
-               double x = xIndex * FootstepNode.gridSizeXY + projectionTranslation.getX();
-               double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
-               double z = highestRegion.getPlaneZGivenXY(x, y);
-               transform.setTranslation(projectionTranslation.getX(), projectionTranslation.getY(), z);
-               return new FootstepNodeSnapData(transform);
-            }
-         }
-         else
-         {
-            transform.setTranslationZ(highestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
-            return new FootstepNodeSnapData(transform);
-         }
+         return new FootstepNodeSnapData(transform);
       }
    }
 
-   private PlanarRegion findHighestRegion(double x, double y)
+   private PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack)
    {
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools
-            .findPlanarRegionsContainingPointByProjectionOntoXYPlane(planarRegionsList.getPlanarRegionsAsList(), footPosition);
+      tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
+      tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, - 0.5 * FootstepNode.gridSizeXY);
+      tempPolygon.addVertex(- 0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
+      tempPolygon.addVertex(- 0.5 * FootstepNode.gridSizeXY, - 0.5 * FootstepNode.gridSizeXY);
+      tempPolygon.update();
+      tempPolygon.translate(x, y);
 
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
       if (intersectingRegions == null || intersectingRegions.isEmpty())
+      {
          return null;
+      }
 
       double highestPoint = Double.NEGATIVE_INFINITY;
       PlanarRegion highestPlanarRegion = null;
@@ -93,21 +79,38 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       for (int i = 0; i < intersectingRegions.size(); i++)
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
-         double height = planarRegion.getPlaneZGivenXY(x, y);
+         Vector3D projectionTranslation = projectPointIntoRegion(planarRegion, x, y);
+         double height;
+
+         if(projectionTranslation.containsNaN())
+         {
+            // even if projection fails, remember highest region. this will be considered an obstacle
+            height = planarRegion.getPlaneZGivenXY(x, y);
+         }
+         else
+         {
+            height = planarRegion.getPlaneZGivenXY(x + projectionTranslation.getX(), y + projectionTranslation.getY());
+         }
 
          if (height > highestPoint)
          {
             highestPoint = height;
             highestPlanarRegion = planarRegion;
+            projectionTranslationToPack.set(projectionTranslation);
          }
       }
 
       return highestPlanarRegion;
    }
 
-   private Vector2D projectPointIntoRegion(PlanarRegion region, double x, double y)
+   private Vector3D projectPointIntoRegion(PlanarRegion region, double x, double y)
    {
-      Vector2D projectionTranslation = new Vector2D();
+      if(parameters.getProjectInsideDistance() <= 0.0)
+      {
+         return new Vector3D();
+      }
+
+      Vector3D projectionTranslation = new Vector3D();
       Point3D pointToSnap = new Point3D();
 
       pointToSnap.set(x, y, region.getPlaneZGivenXY(x, y));
@@ -115,7 +118,6 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       boolean successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon);
 
       // region is too small to wiggle inside
-      // TODO either search nearby or make the grid size match the wiggle-inside distance to avoid missing valid footholds inside the cell
       if(!successfulScale)
       {
          projectionTranslation.setToNaN();
@@ -140,15 +142,13 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
          return projectionTranslation;
       }
 
-      Vector3D projectTranslation3D = new Vector3D();
-      projectTranslation3D.set(projectedPoint.getX(), projectedPoint.getY(), 0.0);
-      projectTranslation3D.sub(pointToSnap.getX(), pointToSnap.getY(), 0.0);
-      region.transformFromLocalToWorld(projectTranslation3D);
+      projectionTranslation.set(projectedPoint.getX(), projectedPoint.getY(), 0.0);
+      projectionTranslation.sub(pointToSnap.getX(), pointToSnap.getY(), 0.0);
+      region.transformFromLocalToWorld(projectionTranslation);
+      projectionTranslation.setZ(0.0);
 
-      projectionTranslation.set(projectTranslation3D);
       return projectionTranslation;
    }
-
 
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)
    {
