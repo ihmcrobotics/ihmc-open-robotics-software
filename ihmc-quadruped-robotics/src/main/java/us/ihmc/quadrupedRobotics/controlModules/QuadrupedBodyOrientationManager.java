@@ -14,11 +14,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -225,8 +225,7 @@ public class QuadrupedBodyOrientationManager
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);

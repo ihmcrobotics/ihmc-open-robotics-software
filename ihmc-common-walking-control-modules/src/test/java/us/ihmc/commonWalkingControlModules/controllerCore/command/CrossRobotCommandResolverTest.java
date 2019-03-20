@@ -1437,10 +1437,12 @@ class CrossRobotCommandResolverTest
                                                                                          ReferenceFrame... possibleFrames)
    {
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
@@ -1470,13 +1472,14 @@ class CrossRobotCommandResolverTest
       next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
       next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPIDSE3Gains(random));
       next.setGainsFrames(nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
       next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
       next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
       return next;
