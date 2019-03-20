@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -280,6 +281,7 @@ public class WholeBodyFeedbackController
 
    private void submitSpatialFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, SpatialFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -290,6 +292,7 @@ public class WholeBodyFeedbackController
 
    private void submitPointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, PointFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -300,6 +303,7 @@ public class WholeBodyFeedbackController
 
    private void submitOrientationFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OrientationFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -310,6 +314,7 @@ public class WholeBodyFeedbackController
 
    private void submitOneDoFJointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OneDoFJointFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       OneDoFJointBasics joint = feedbackControlCommand.getJoint();
       OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
       if (controller.isEnabled())
@@ -321,11 +326,16 @@ public class WholeBodyFeedbackController
    private void submitCenterOfMassFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode,
                                                          CenterOfMassFeedbackControlCommand feedbackControlCommand)
    {
-      if (activeControlMode != feedbackControlCommand.getControlMode())
-         throw new IllegalArgumentException("Incompatible feedback control command: command requires: " + feedbackControlCommand.getControlMode()
-               + ", current mode: " + activeControlMode);
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       centerOfMassFeedbackController.submitFeedbackControlCommand(feedbackControlCommand);
       centerOfMassFeedbackController.setEnabled(true);
+   }
+
+   private static void checkRequestedControlMode(WholeBodyControllerCoreMode activeControlMode, WholeBodyControllerCoreMode requestedControlMode)
+   {
+      if (activeControlMode != requestedControlMode)
+         throw new IllegalArgumentException("Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: "
+               + activeControlMode);
    }
 
    public InverseDynamicsCommandList getInverseDynamicsOutput()
