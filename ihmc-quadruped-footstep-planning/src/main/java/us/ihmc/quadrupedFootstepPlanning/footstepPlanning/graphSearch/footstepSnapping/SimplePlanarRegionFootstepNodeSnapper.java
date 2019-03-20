@@ -105,11 +105,6 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
    private Vector3D projectPointIntoRegion(PlanarRegion region, double x, double y)
    {
-      if(parameters.getProjectInsideDistance() <= 0.0)
-      {
-         return new Vector3D();
-      }
-
       Vector3D projectionTranslation = new Vector3D();
       Point3D pointToSnap = new Point3D();
 
