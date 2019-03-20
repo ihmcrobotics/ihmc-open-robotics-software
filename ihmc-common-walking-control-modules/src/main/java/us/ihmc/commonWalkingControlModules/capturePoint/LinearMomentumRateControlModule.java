@@ -178,7 +178,14 @@ public class LinearMomentumRateControlModule
       this.planarRegionsListHandler = planarRegionsListHandler;
    }
 
-   public void setInput(LinearMomentumRateControlModuleInput input)
+   /**
+    * Sets the input to this module that is being computed by the walking state machine.
+    * <p>
+    * Must be called before {@link #computeControllerCoreCommands()}.
+    *
+    * @param input containing quantities such as the desired ICP.
+    */
+   public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
       this.capturePoint.setIncludingFrame(input.getCapturePoint());
@@ -214,27 +221,59 @@ public class LinearMomentumRateControlModule
       }
    }
 
-   public void setInput(ControllerCoreOutput controllerCoreOutput)
+   /**
+    * Sets the input to this module that is being computed by the controller core.
+    * <p>
+    * Must be called before {@link #computeAchievedCMP()}.
+    *
+    * @param controllerCoreOutput containing the achieved linear momentum rate.
+    */
+   public void setInputFromControllerCore(ControllerCoreOutput controllerCoreOutput)
    {
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
    }
 
-   public LinearMomentumRateControlModuleOutput getOutput()
+   /**
+    * Gets the output of this module that will be used by the walking state machine to adjust footsteps and check
+    * transition conditions.
+    *
+    * @return output data of this module meant for the walking state machine.
+    */
+   public LinearMomentumRateControlModuleOutput getOutputForWalkingStateMachine()
    {
       return output;
    }
 
+   /**
+    * Gets the momentum rate command for the controller core.
+    *
+    * @return momentum rate command.
+    */
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;
    }
 
+   /**
+    * Gets the center of pressure command for the controller core.
+    *
+    * @return center of pressure command.
+    */
    public CenterOfPressureCommand getCenterOfPressureCommand()
    {
       return centerOfPressureCommand;
    }
 
-   public boolean compute()
+   /**
+    * Computes the {@link MomentumRateCommand} and the {@link CenterOfPressureCommand} for the controller core.
+    * <p>
+    * This methods requires that the input to this module from the walking state machine is set via
+    * {@link #setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput)} which provides quantities such as
+    * the desired ICP.
+    *
+    * @return whether the computation was successful.
+    */
+   public boolean computeControllerCoreCommands()
    {
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
@@ -261,6 +300,34 @@ public class LinearMomentumRateControlModule
       centerOfPressureCommand.setWeight(midFootZUpFrame, centerOfPressureWeight.getValue(), centerOfPressureWeight.getValue());
 
       return success;
+   }
+
+   /**
+    * Computes the achieved CMP location.
+    * <p>
+    * This method requires that the input to this module from the controller core is set via
+    * {@link #setInputFromControllerCore(ControllerCoreOutput)} to provide the achieved linear momentum rate.
+    */
+   public void computeAchievedCMP()
+   {
+      if (achievedLinearMomentumRate.containsNaN())
+      {
+         yoAchievedCMP.setToNaN();
+         return;
+      }
+
+      centerOfMass2d.setToZero(centerOfMassFrame);
+      centerOfMass2d.changeFrame(worldFrame);
+
+      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration2d.scale(1.0 / totalMass);
+      achievedCoMAcceleration2d.changeFrame(worldFrame);
+
+      achievedCMP.set(achievedCoMAcceleration2d);
+      achievedCMP.scale(-1.0 / (omega0 * omega0));
+      achievedCMP.add(centerOfMass2d);
+
+      yoAchievedCMP.set(achievedCMP);
    }
 
    private void updatePolygons()
@@ -388,28 +455,6 @@ public class LinearMomentumRateControlModule
       linearMomentumRateOfChange.changeFrame(worldFrame);
 
       return success;
-   }
-
-   public void computeAchievedCMP()
-   {
-      if (achievedLinearMomentumRate.containsNaN())
-      {
-         yoAchievedCMP.setToNaN();
-         return;
-      }
-
-      centerOfMass2d.setToZero(centerOfMassFrame);
-      centerOfMass2d.changeFrame(worldFrame);
-
-      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
-      achievedCoMAcceleration2d.scale(1.0 / totalMass);
-      achievedCoMAcceleration2d.changeFrame(worldFrame);
-
-      achievedCMP.set(achievedCoMAcceleration2d);
-      achievedCMP.scale(-1.0 / (omega0 * omega0));
-      achievedCMP.add(centerOfMass2d);
-
-      yoAchievedCMP.set(achievedCMP);
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
