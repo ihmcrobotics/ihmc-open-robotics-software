@@ -69,10 +69,10 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
    public void clear()
    {
       joints.clear();
-      desiredPositions.clear();
-      desiredVelocities.clear();
-      feedForwardAccelerations.clear();
-      weightsForSolver.clear();
+      desiredPositions.reset();
+      desiredVelocities.reset();
+      feedForwardAccelerations.reset();
+      weightsForSolver.reset();
       gains.clear();
    }
 
