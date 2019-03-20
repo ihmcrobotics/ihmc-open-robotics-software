@@ -32,6 +32,11 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters)
    {
       super(parameters);
+
+      if(parameters.getProjectInsideDistance() > 0.001 + 0.5 * FootstepNode.gridSizeXY)
+      {
+         throw new RuntimeException("Projection distance is too big. Must be smaller than half of the grid size");
+      }
    }
 
    @Override
