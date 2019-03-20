@@ -43,8 +43,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -73,7 +71,6 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -467,9 +464,9 @@ public class WalkingControllerTest
       updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
 
-      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
-                                                                                                    yoTime, gravityZ, omega0, feet, controlDT, null,
-                                                                                                    contactableBodies, yoGraphicsListRegistry);
+      HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, yoTime,
+                                                                                                    gravityZ, omega0, feet, controlDT, null, contactableBodies,
+                                                                                                    yoGraphicsListRegistry);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();

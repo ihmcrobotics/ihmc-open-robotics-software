@@ -55,7 +55,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -158,14 +157,12 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2D centerOfPressure = new FramePoint2D();
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
-   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private WalkingMessageHandler walkingMessageHandler;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<? extends FootSwitchInterface> footSwitches,
-                                             CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ, double omega0,
                                              SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -173,7 +170,6 @@ public class HighLevelHumanoidControllerToolbox
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      this.centerOfMassDataHolder = centerOfMassDataHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, yoGraphicsListRegistry);
@@ -470,15 +466,7 @@ public class HighLevelHumanoidControllerToolbox
    private void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
-
-      if (centerOfMassDataHolder != null)
-      {
-         centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
-      }
-      else
-      {
-         centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
-      }
+      centerOfMassVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
 
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
