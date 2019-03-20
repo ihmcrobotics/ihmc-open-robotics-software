@@ -149,8 +149,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       double epsilon = 1e-6;
       int squareCellHalfWidth = 10;
 
-      // currently the snapper doesn't do a local search around the middle of the node
-      // TODO prevent near misses
       double extraSquareWidth = 0.001;
       double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + extraSquareWidth);
 
@@ -178,6 +176,133 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
       translationVector = snapData.getSnapTransform().getTranslationVector();
       Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-left corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-right corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-left corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-right corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), epsilon));
+   }
+
+   @Test
+   public void testSnapFromOutsideOfRegion()
+   {
+      double epsilon = 1e-6;
+      int squareCellHalfWidth = 10;
+
+      double widthShrinkAmount = - 0.5 * FootstepNode.gridSizeXY + 0.001;
+      double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + widthShrinkAmount);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      double projectionDistance = 0.0;
+      TestParameters parameters = new TestParameters(projectionDistance);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      double expectedTranslation = - widthShrinkAmount;
+
+      // test snapping on front edge
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(squareCellHalfWidth, 2);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on back edge
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, 3);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on left edge
+      snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-left corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-right corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-left corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-right corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), epsilon));
+   }
+
+   @Test
+   public void testSnapAndProjectFromOutsideOfRegion()
+   {
+      double epsilon = 1e-6;
+      int squareCellHalfWidth = 10;
+      double projectionDistance = 0.015;
+
+      // NOTE: this test will likely fail if FootstepNode.gridSizeXY is changed to be smaller than projectionDistance
+      double widthShrinkAmount = - 0.5 * FootstepNode.gridSizeXY + projectionDistance + 0.001;
+      double expectedTranslation = - widthShrinkAmount + projectionDistance;
+      double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + widthShrinkAmount);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      TestParameters parameters = new TestParameters(projectionDistance);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      // test snapping on front edge
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(squareCellHalfWidth, 2);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on back edge
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, 3);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on left edge
+      snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
 
       // test snapping on right edge
       snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
@@ -293,5 +418,21 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       translationVector = snapData.getSnapTransform().getTranslationVector();
       regionHeight = region.getPlaneZGivenXY(x + translationVector.getX(), y + translationVector.getY());
       Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, regionHeight), epsilon));
+   }
+
+   private class TestParameters extends DefaultFootstepPlannerParameters
+   {
+      final double projectionDistance;
+
+      TestParameters(double projectionDistance)
+      {
+         this.projectionDistance = projectionDistance;
+      }
+
+      @Override
+      public double getProjectInsideDistance()
+      {
+         return projectionDistance;
+      }
    }
 }
