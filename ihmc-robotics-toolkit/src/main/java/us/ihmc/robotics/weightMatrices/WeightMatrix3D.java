@@ -393,9 +393,10 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    {
       return "(" + xWeight + ", " + yWeight + ", " + zWeight + ") " + weightFrame;
    }
-   
+
    /**
     * Returns true if any weight equals {@code SolverWeightLevels.HARD_CONSTRAINT}.
+    * 
     * @return
     */
    public boolean containsHardConstraint()
@@ -404,7 +405,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
       {
          return true;
       }
-      
+
       return false;
    }
 
