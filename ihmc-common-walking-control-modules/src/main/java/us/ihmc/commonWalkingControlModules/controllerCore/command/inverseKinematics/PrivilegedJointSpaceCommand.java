@@ -37,8 +37,8 @@ public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<Pri
    {
       enable = false;
       joints.clear();
-      privilegedOneDoFJointCommands.clear();
-      weights.clear();
+      privilegedOneDoFJointCommands.reset();
+      weights.reset();
    }
 
    public void disable()
