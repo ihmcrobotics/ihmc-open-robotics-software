@@ -17,7 +17,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
  */
 public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
 {
-   private final RecyclingArrayList<JointspaceFeedbackControlCommand> jointspaceFeedbackControlCommandBuffer = new RecyclingArrayList<>(JointspaceFeedbackControlCommand.class);
+   private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> oneDoFJointFeedbackControlCommandBuffer = new RecyclingArrayList<>(OneDoFJointFeedbackControlCommand.class);
    private final RecyclingArrayList<OrientationFeedbackControlCommand> orientationFeedbackControlCommandBuffer = new RecyclingArrayList<>(OrientationFeedbackControlCommand.class);
    private final RecyclingArrayList<PointFeedbackControlCommand> pointFeedbackControlCommandBuffer = new RecyclingArrayList<>(PointFeedbackControlCommand.class);
    private final RecyclingArrayList<SpatialFeedbackControlCommand> spatialFeedbackControlCommandBuffer = new RecyclingArrayList<>(SpatialFeedbackControlCommand.class);
@@ -35,7 +35,7 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
    public void clear()
    {
       super.clear();
-      jointspaceFeedbackControlCommandBuffer.clear();
+      oneDoFJointFeedbackControlCommandBuffer.clear();
       orientationFeedbackControlCommandBuffer.clear();
       pointFeedbackControlCommandBuffer.clear();
       spatialFeedbackControlCommandBuffer.clear();
@@ -79,13 +79,13 @@ public class FeedbackControlCommandBuffer extends FeedbackControlCommandList
    }
 
    /**
-    * Gets an available {@link JointspaceFeedbackControlCommand} and registers it to this list.
+    * Gets an available {@link OneDoFJointFeedbackControlCommand} and registers it to this list.
     * 
     * @return the available command ready to be set.
     */
-   public JointspaceFeedbackControlCommand addJointspaceFeedbackControlCommand()
+   public OneDoFJointFeedbackControlCommand addOneDoFJointFeedbackControlCommand()
    {
-      JointspaceFeedbackControlCommand command = jointspaceFeedbackControlCommandBuffer.add();
+      OneDoFJointFeedbackControlCommand command = oneDoFJointFeedbackControlCommandBuffer.add();
       super.addCommand(command);
       return command;
    }
