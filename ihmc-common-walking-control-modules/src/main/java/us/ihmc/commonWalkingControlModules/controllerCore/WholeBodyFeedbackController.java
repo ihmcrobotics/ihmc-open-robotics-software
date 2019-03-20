@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -249,9 +248,9 @@ public class WholeBodyFeedbackController
 
    public void submitFeedbackControlCommandList(WholeBodyControllerCoreMode activeControlMode, FeedbackControlCommandList feedbackControlCommandList)
    {
-      while (feedbackControlCommandList.getNumberOfCommands() > 0)
+      for (int commandIndex = 0; commandIndex < feedbackControlCommandList.getNumberOfCommands(); commandIndex++)
       {
-         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.pollCommand();
+         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.getCommand(commandIndex);
          ControllerCoreCommandType commandType = feedbackControlCommand.getCommandType();
          switch (commandType)
          {
