@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -29,15 +30,8 @@ public class OpenDoorBehavior extends AbstractBehavior
 {
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
-   private PoseReferenceFrame valvePose = null;
-   private double valveRadius = 0;
-   //   private double valveRadiusInitalOffset = 0.125;
-   private double valveRadiusfinalOffset = -0.055;
-   private double valveInitalForwardOffset = 0.125;
-   private double valveFinalForwardOffset = 0.0225;
+   private PoseReferenceFrame doorPoseFrame = null;
 
-   private final double DEGREES_TO_ROTATE = 220;
-   private final double ROTATION_SEGMENTS = 10;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
@@ -64,129 +58,125 @@ public class OpenDoorBehavior extends AbstractBehavior
 
    private void setupPipeline()
    {
-      BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior);
 
-      //CLOSE_HAND
-      HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.CLOSE,
-                                                                                atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
-
-      HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.OPEN,
-                                                                               atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
-      HandDesiredConfigurationTask openFingersOnly = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.OPEN_FINGERS,
-                                                                                      atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
-
-      HandDesiredConfigurationTask closeThumb = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.CLOSE_THUMB,
-                                                                                 atlasPrimitiveActions.leftHandDesiredConfigurationBehavior);
-
-      //    MOVE_HAND_TO_APPROACH_POINT, using joint angles to make sure wrist is in proper turn location
-
-      double[] approachPointLocation = new double[] {0.42441454428847003, -0.5829781169010966, 1.8387098771297432, -2.35619, 0.11468460263836734,
-            1.0402909950400858, 0.9434293109027067};
-
-      ArmTrajectoryMessage rightHandValveApproachMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, approachPointLocation);
-
-      ArmTrajectoryTask moveHandToApproachPoint = new ArmTrajectoryTask(rightHandValveApproachMessage, atlasPrimitiveActions.rightArmTrajectoryBehavior)
+      BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            super.setBehaviorInput();
-            publishTextToSpeack("Moving Hand To Approach Location");
+//            moveHand( 0.797,-0.083,0.912,  1.521 , 0, -1.641 , "Moving Hand Above Door Knob3");
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 0.335, -0.087,  1.124,1.2478615483800362, -0.12618033550878305, 0.3133655061333552,RobotSide.LEFT,"Moving Left Hand To Door"));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.795, -0.06,  1.032 , 1.7318790859631, 0.9163508562370669, -0.2253954188985998,RobotSide.RIGHT, "Moving Right Hand Above Door Knob"));
+
          }
       };
 
-      //      MOVE_HAND_ABOVE_AND_IN_FRONT_OF_VALVE,
-      //      BehaviorAction moveHandToApproachPointViaHandTrajectory = moveHand(-0.05357945674961795, 0.04256176948547363, 0.15017291083938378, Math.toRadians(-86.487420629448),
-      //            Math.toRadians(98.3359137072094), Math.toRadians(0.5464370649115582), "testPose");
-      BehaviorAction moveHandInFrontOfValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveInitalForwardOffset, 1.5708, 1.5708, -3.14159, "Moving Hand In Front Of The Valve");
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.770, -0.092,  0.882,  1.7318790859631, 0.9163508562370669, -0.2253954188985998 , RobotSide.RIGHT,"Moving Hand To Door Knob"));
          }
       };
-
-      BehaviorAction moveHandCloseToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction pushDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveFinalForwardOffset, 1.5708, 1.5708, -3.14159, "Aligning Hand With The Valve");
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.400,  0.096,  0.8,  1.244653857913857, -0.12493851224047543, 0.34615057210000433 , RobotSide.LEFT,"Pushing Door"));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.777, -0.032,  0.882, 1.7318790859631, 0.9163508562370669, -0.2253954188985998 , RobotSide.RIGHT,"Moving Hand To Door Knob"));
+
          }
       };
 
-      BehaviorAction moveHandToValveGraspLocation = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Moving Hand To Grasp Valve");
-         }
-      };
+//      BehaviorAction moveHandCloseToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveFinalForwardOffset, 1.5708, 1.5708, -3.14159, "Aligning Hand With The Valve");
+//         }
+//      };
+//
+//      BehaviorAction moveHandToValveGraspLocation = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Moving Hand To Grasp Valve");
+//         }
+//      };
 
       //    CLOSE_HAND,
-      pipeLine.submitSingleTaskStage(closeHand);
+     // pipeLine.submitSingleTaskStage(closeHand);
 
       //    MOVE_HAND_TO_APPROACH_POINT,
-      pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
-      pipeLine.submitSingleTaskStage(openFingersOnly);
-      pipeLine.submitSingleTaskStage(moveHandInFrontOfValve);
+      //pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
+     // pipeLine.submitSingleTaskStage(openFingersOnly);
+      pipeLine.clearAll();
+      pipeLine.submitSingleTaskStage(moveHandsToDoor);
+      pipeLine.submitSingleTaskStage(moveRightHandToDoorKnob);
+      pipeLine.submitSingleTaskStage(pushDoor);
+
+
+      //pipeLine.submitSingleTaskStage(moveRightHandAboveDoorKnob);
+
       //    MOVE_HAND_ABOVE_VALVE,
-      pipeLine.submitSingleTaskStage(moveHandCloseToValve);
+      //pipeLine.submitSingleTaskStage(moveHandCloseToValve);
 
       //    MOVE_HAND_DOWN_TO_VALVE,
-      pipeLine.submitSingleTaskStage(moveHandToValveGraspLocation);
+     // pipeLine.submitSingleTaskStage(moveHandToValveGraspLocation);
 
       //    CLOSE_FINGERS,
-      pipeLine.submitSingleTaskStage(closeHand);
+      //pipeLine.submitSingleTaskStage(closeHand);
 
       //    ROTATE,
 
-      for (int i = 1; i <= ROTATION_SEGMENTS; i++)
-      {
-         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-(DEGREES_TO_ROTATE / ROTATION_SEGMENTS) * i), 0.0));
+     // for (int i = 1; i <= ROTATION_SEGMENTS; i++)
+      //{
+     //    pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-(DEGREES_TO_ROTATE / ROTATION_SEGMENTS) * i), 0.0));
 
-      }
+     // }
 
       //    OPEN_FINGERS_ONLY,
-      pipeLine.submitSingleTaskStage(openFingersOnly);
+     // pipeLine.submitSingleTaskStage(openFingersOnly);
 
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
-      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveInitalForwardOffset));
+     // pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveInitalForwardOffset));
 
-      pipeLine.submitSingleTaskStage(resetRobot);
+      //pipeLine.submitSingleTaskStage(resetRobot);
 
    }
 
-   private BehaviorAction rotateAroundValve(final double degrees, final double distanceFromValve)
-   {
-      BehaviorAction moveHandAroundToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
-      {
+//   private BehaviorAction rotateAroundValve(final double degrees, final double distanceFromValve)
+//   {
+//      BehaviorAction moveHandAroundToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+//      {
+//
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            publishTextToSpeack("rotate Valve");
+//            FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
+//
+//            GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
+//
+//            uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
+//
+//            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+//                                                                                                           point.getOrientation(),
+//                                                                                                           CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+//            handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+//
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
+//         }
+//      };
+//      return moveHandAroundToValve;
+//   }
 
-         @Override
-         protected void setBehaviorInput()
-         {
-            publishTextToSpeack("rotate Valve");
-            FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
-
-            GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
-
-            uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
-
-            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
-                                                                                                           point.getOrientation(),
-                                                                                                           CommonReferenceFrameIds.CHEST_FRAME.getHashId());
-            handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
-         }
-      };
-      return moveHandAroundToValve;
-   }
-
-   private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
+   private HandTrajectoryMessage moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,final RobotSide side, final String description)
    {
       publishTextToSpeack(description);
 
@@ -194,29 +184,31 @@ public class OpenDoorBehavior extends AbstractBehavior
       //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
 
       //      1.607778783110418,1.442441289823466,-3.1298946145335043`
-      FramePose3D point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
+      FramePose3D point = offsetPointFromDoorInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
       uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, 2, point.getPosition(),
                                                                                                      point.getOrientation(),
                                                                                                      CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-      atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
+     return handTrajectoryMessage;
    }
 
-   public void setGrabLocation(PoseReferenceFrame valvePose, double valveRadius)
+   public void setGrabLocation(Pose3D doorPose3D)
    {
-      this.valvePose = valvePose;
-      this.valveRadius = valveRadius;
+      
+      PoseReferenceFrame doorPose = new PoseReferenceFrame("OpenDoorReferenceFrame", ReferenceFrame.getWorldFrame());
+      doorPose.setPoseAndUpdate(new Pose3D(doorPose3D));
+      this.doorPoseFrame = doorPose;
    }
 
    @Override
    public void onBehaviorExited()
    {
-      valvePose = null;
+      doorPoseFrame = null;
    }
 
    @Override
@@ -232,11 +224,11 @@ public class OpenDoorBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   private FramePose3D offsetPointFromValveInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
+   private FramePose3D offsetPointFromDoorInWorldFrame(double x, double y, double z, double yaw, double pitch, double roll)
    {
-      FramePoint3D point1 = new FramePoint3D(valvePose, x, y, z);
+      FramePoint3D point1 = new FramePoint3D(doorPoseFrame, x, y, z);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameQuaternion orient = new FrameQuaternion(valvePose, yaw, pitch, roll);
+      FrameQuaternion orient = new FrameQuaternion(doorPoseFrame, yaw, pitch, roll);
       orient.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D pose = new FramePose3D(point1, orient);

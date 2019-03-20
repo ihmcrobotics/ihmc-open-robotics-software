@@ -40,6 +40,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       SEARCHING_FOR_DOOR,
       WALKING_TO_DOOR,
       SEARCHING_FOR_DOOR_FINAL,
+      OPEN_DOOR,
       SET_UP_ROBOT_FOR_DOOR_WALK,
       WAITING_FOR_USER_CONFIRMATION,
       WALK_THROUGH_DOOR,
@@ -51,9 +52,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final boolean setUpArms = true;
 
    private Vector3D32 doorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
-   private Vector3D32 doorOffsetPoint2 = new Vector3D32(0.5f, -0.7f, 0f);
+   private Vector3D32 doorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
 
    private final SearchForDoorBehavior searchForDoorBehavior;
+   private final OpenDoorBehavior openDoorBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
 
    private final ResetRobotBehavior resetRobotBehavior;
@@ -75,6 +77,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, ros2Node);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
+      
+      openDoorBehavior = new OpenDoorBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
       setupStateMachine();
@@ -162,6 +166,19 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      
+      BehaviorAction openDoorAction = new BehaviorAction(openDoorBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+         }
+      };
+
+      
+
+
       BehaviorAction setUpForWalk = new BehaviorAction(atlasPrimitiveActions.leftArmTrajectoryBehavior, atlasPrimitiveActions.rightArmTrajectoryBehavior)
       {
          @Override
@@ -217,11 +234,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, t -> isWalkingDone() && hasWalkingSucceded());
       factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.FAILED, t -> isWalkingDone() && !hasWalkingSucceded());
 
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, searchForDoorNear,
-                                 setUpArms ? WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK : WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, searchForDoorNear,WalkThroughDoorBehaviorState.OPEN_DOOR);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, openDoorAction,   setUpArms ? WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK : WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+
+      
+      
+                                      
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.RESET_ROBOT, resetRobot, WalkThroughDoorBehaviorState.DONE);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
@@ -244,7 +265,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       PoseReferenceFrame doorPose = new PoseReferenceFrame("DoorReferenceFrame", ReferenceFrame.getWorldFrame());
-      doorPose.setPoseAndUpdate(new Pose3D(searchForDoorBehavior.getLocation()));
+      
+      Pose3D unrotatedDoor = new Pose3D(searchForDoorBehavior.getLocation());
+      
+      unrotatedDoor.appendYawRotation(Math.toRadians(180));
+      unrotatedDoor.appendTranslation(-0.9144, 0, 0);
+                                        
+      doorPose.setPoseAndUpdate(unrotatedDoor);
+      
 
       RobotSide startStep = RobotSide.LEFT;
 

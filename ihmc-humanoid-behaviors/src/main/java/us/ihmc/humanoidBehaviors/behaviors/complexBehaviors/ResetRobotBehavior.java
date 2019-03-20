@@ -49,6 +49,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
+      if (!isPaused())
       pipeLine.doControl();
    }
 
