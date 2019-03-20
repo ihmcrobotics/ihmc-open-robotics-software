@@ -56,7 +56,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final FrameVector3D referenceAngularVelocityInRootFrame = new FrameVector3D();
    /** The (ID) feed-forward angular acceleration to use in the feedback controller. */
    private final FrameVector3D referenceAngularAccelerationInRootFrame = new FrameVector3D();
-   // FIXME the reference torque is actually not used.
    /** The (VMC) feed-forward torque to use in the feedback controller. */
    private final FrameVector3D referenceTorqueInRootFrame = new FrameVector3D();
 
