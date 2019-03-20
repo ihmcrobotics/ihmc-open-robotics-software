@@ -202,8 +202,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null, previewTime, gravityZ, omega0, feet,
-                                                    integrationDT, Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, previewTime, gravityZ, omega0, feet, integrationDT,
+                                                    Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
    }
 
    private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
