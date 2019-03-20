@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
@@ -43,10 +44,17 @@ import static us.ihmc.robotics.Assert.*;
 public class QuadrupedAStarFootstepPlannerTest
 {
    private static final double epsilon = 1e-3;
-   private static final boolean visualize = true;
-   private static final boolean activelyVisualize = true;
+   private static boolean visualize = true;
+   private static boolean activelyVisualize = true;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+      activelyVisualize = activelyVisualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @Test
    public void testSimpleWalkForward()
