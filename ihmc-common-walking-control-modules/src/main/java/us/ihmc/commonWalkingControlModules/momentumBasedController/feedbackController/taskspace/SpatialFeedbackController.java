@@ -293,22 +293,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getControlFramePoseIncludingFrame(desiredPosition, desiredOrientation);
       controlFrame.setOffsetToParent(desiredPosition, desiredOrientation);
 
-      command.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-      command.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
-      command.getFeedForwardActionIncludingFrame(feedForwardAngularAction, feedForwardLinearAction);
-
-      yoDesiredPose.setMatchingFrame(desiredPosition, desiredOrientation);
+      yoDesiredPose.setMatchingFrame(command.getReferencePosition(), command.getReferenceOrientation());
       yoDesiredPose.getOrientation().getRotationVector(yoDesiredRotationVector);
-      yoDesiredVelocity.setMatchingFrame(desiredAngularVelocity, desiredLinearVelocity);
+      yoDesiredVelocity.setMatchingFrame(command.getReferenceAngularVelocity(), command.getReferenceLinearVelocity());
 
       if (yoFeedForwardVelocity != null)
-         yoFeedForwardVelocity.setMatchingFrame(feedForwardAngularAction, feedForwardLinearAction);
+         yoFeedForwardVelocity.setMatchingFrame(command.getReferenceAngularVelocity(), command.getReferenceLinearVelocity());
 
       if (yoFeedForwardAcceleration != null)
-         yoFeedForwardAcceleration.setMatchingFrame(feedForwardAngularAction, feedForwardLinearAction);
+         yoFeedForwardAcceleration.setMatchingFrame(command.getReferenceAngularAcceleration(), command.getReferenceLinearAcceleration());
 
       if (yoFeedForwardWrench != null)
-         yoFeedForwardWrench.setMatchingFrame(feedForwardAngularAction, feedForwardLinearAction);
+         yoFeedForwardWrench.setMatchingFrame(command.getReferenceTorque(), command.getReferenceForce());
    }
 
    @Override

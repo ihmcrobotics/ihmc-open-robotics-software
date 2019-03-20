@@ -284,9 +284,8 @@ public class MovingBaseRobotArmController implements RobotController
       handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.setControlBaseFrame(trajectory.getCurrentReferenceFrame());
-      handSpatialCommand.set(position, linearVelocity);
-      handSpatialCommand.set(orientation, angularVelocity);
-      handSpatialCommand.setFeedForwardAction(angularAcceleration, linearAcceleration);
+      handSpatialCommand.setInverseDynamics(orientation, position, angularVelocity, linearVelocity, angularAcceleration, linearAcceleration);
+      handSpatialCommand.setControlMode(controllerCoreMode.getValue());
    }
 
    public void updateHandTrajectory()

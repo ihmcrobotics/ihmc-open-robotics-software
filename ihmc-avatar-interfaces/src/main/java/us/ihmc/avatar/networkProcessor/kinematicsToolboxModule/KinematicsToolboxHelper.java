@@ -30,6 +30,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -39,7 +41,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 public class KinematicsToolboxHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final FrameVector3DReadOnly zeroLinearVelocity = new FrameVector3D(worldFrame);
+   public static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
+   public static final SpatialVectorReadOnly zeroVector6D = new SpatialVector(worldFrame);
 
    /**
     * Convenience method to create and setup a {@link CenterOfMassFeedbackControlCommand} from a
@@ -55,7 +58,7 @@ public class KinematicsToolboxHelper
       feedbackControlCommand.setGains(gains);
       feedbackControlCommand.setWeightsForSolver(command.getWeightVector());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommand.setInverseKinematics(command.getDesiredPosition(), zeroLinearVelocity);
+      feedbackControlCommand.setInverseKinematics(command.getDesiredPosition(), zeroVector3D);
       return feedbackControlCommand;
    }
 
@@ -75,7 +78,7 @@ public class KinematicsToolboxHelper
       feedbackControlCommand.setGains(gains);
       feedbackControlCommand.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommand.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommand.set(command.getDesiredPose());
+      feedbackControlCommand.setInverseKinematics(command.getDesiredPose(), zeroVector6D);
       feedbackControlCommand.setControlFrameFixedInEndEffector(command.getControlFramePose());
       return feedbackControlCommand;
    }

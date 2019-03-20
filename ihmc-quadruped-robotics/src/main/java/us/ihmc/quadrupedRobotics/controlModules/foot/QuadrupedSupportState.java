@@ -171,8 +171,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       desiredCoPPosition.setToZero(desiredSoleFrame);
       desiredCoPPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredCoPPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.setFeedForwardLinearAction(desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredCoPPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setLinearWeightsForSolver(parameters.getSupportFootWeights());
       spatialFeedbackControlCommand.setPositionGains(parameters.getHoldPositionGains());
 

@@ -1465,17 +1465,18 @@ class CrossRobotCommandResolverTest
    public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
-      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPIDSE3Gains(random));
       next.setGainsFrames(nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
-      next.getDesiredPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardLinearAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
       return next;
