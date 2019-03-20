@@ -91,7 +91,7 @@ public class BehaviorUI
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
       stepInPlaceBehaviorUIController.init(teleop);
-      patrolBehaviorUIController.init(messager, subScene, teleop);
+      patrolBehaviorUIController.init(messager, subScene, teleop, robotModel);
 
       planarRegionsGraphic = new PlanarRegionsGraphic();
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
@@ -101,7 +101,6 @@ public class BehaviorUI
       view3dFactory.addNodeToView(patrolBehaviorUIController.getRoot());
 
       robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
-      patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       robotVisualizer.start();
 

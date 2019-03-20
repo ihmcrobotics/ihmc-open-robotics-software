@@ -7,18 +7,24 @@ import javafx.scene.control.Spinner;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.*;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIBehavior;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PatrolBehaviorUIController extends FXUIBehavior
@@ -32,23 +38,32 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    private BehaviorTeleop teleop;
    private AtomicReference<FXUIEditor> activeEditor;
 
-   private RobotLowLevelMessenger robotLowLevelMessenger;
-
-   private HumanoidReferenceFrames humanoidReferenceFrames;
-
    private ArrayList<PatrolWaypointGraphic> waypoints = new ArrayList<>();
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private FootstepPlanGraphic footstepPlanGraphic;
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   public void init(JavaFXMessager messager, Node sceneNode, BehaviorTeleop teleop)
+   public void init(JavaFXMessager messager, Node sceneNode, BehaviorTeleop teleop, DRCRobotModel robotModel)
    {
       this.messager = messager;
       this.teleop = teleop;
 
+      footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+      footstepPlanGraphic.start();
+      rootChildren.add(footstepPlanGraphic.getNode());
+
+      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
+         executorService.submit(() -> {
+            LogTools.debug("Received footstep plan containing {} steps", plan.size());
+            footstepPlanGraphic.generateMeshes(plan);
+         });
+      });
+
       activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
       messager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
       {
-         if (value == null)
+         if (value == null) // update the waypoint when any editor exits, may be a better way to do this
          {
             teleopUpdateWaypoints();
          }
@@ -87,7 +102,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private void goToNextWaypointPositionEdit()
    {
-      PatrolWaypointGraphic waypointGraphic = createWaypointGraphic(messager);
+      PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
       messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
       messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
@@ -137,7 +152,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       teleop.setWaypoints(waypointsToSend);
    }
 
-   private PatrolWaypointGraphic createWaypointGraphic(JavaFXMessager messager)
+   private PatrolWaypointGraphic createWaypointGraphic()
    {
       PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic();
       registerGraphic(waypoint);
@@ -160,11 +175,6 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       waypoints.remove(waypoint);
    }
 
-   public void setFullRobotModel(FullHumanoidRobotModel fullHumanoidRobotModel)
-   {
-      this.humanoidReferenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
-   }
-
    @FXML public void placeWaypoints()
    {
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
@@ -177,7 +187,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       teleop.goToWaypoint(waypointIndex.getValue());
    }
 
-   @FXML public void pauseWalking()
+   @FXML public void stopWalking()
    {
       teleop.stopPatrolling();
    }

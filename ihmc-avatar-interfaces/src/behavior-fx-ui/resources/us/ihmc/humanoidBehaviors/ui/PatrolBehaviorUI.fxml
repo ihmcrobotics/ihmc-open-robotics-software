@@ -10,7 +10,7 @@
                 <Button fx:id="placeWaypoints" onAction="#placeWaypoints" prefWidth="130.0" text="Place Waypoints" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <Button fx:id="goToWaypoint" onAction="#goToWaypoint" prefWidth="130.0" text="Go To Waypoint" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <Spinner fx:id="waypointIndex" initialValue="0" editable="true" amountToStepBy="1" min="0" max="500" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <Button fx:id="pauseWalking" onAction="#pauseWalking" prefWidth="130.0" text="Pause Walking" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Button fx:id="stopWalking" onAction="#stopWalking" prefWidth="130.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             </children>
         </GridPane>
     </children>
