@@ -97,7 +97,8 @@ public class RigidBodyControlManagerTest
       // get commands and make sure they are initialized correctly
       {
          FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
-         assertEquals(ControllerCoreCommandType.JOINTSPACE, feedbackControlCommand.getCommandType());
+         assertEquals(ControllerCoreCommandType.COMMAND_LIST, feedbackControlCommand.getCommandType());
+         assertTrue(feedbackControlCommand instanceof JointspaceFeedbackControlCommand);
          JointspaceFeedbackControlCommand jointCommand = (JointspaceFeedbackControlCommand) feedbackControlCommand;
          assertEquals(1, jointCommand.getNumberOfJoints());
          assertEquals(jointCommand.getJointCommand(0).getReferencePosition(), q2_init, epsilon);
@@ -108,7 +109,8 @@ public class RigidBodyControlManagerTest
       manager.compute();
       {
          FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
-         assertEquals(ControllerCoreCommandType.JOINTSPACE, feedbackControlCommand.getCommandType());
+         assertEquals(ControllerCoreCommandType.COMMAND_LIST, feedbackControlCommand.getCommandType());
+         assertTrue(feedbackControlCommand instanceof JointspaceFeedbackControlCommand);
          JointspaceFeedbackControlCommand jointCommand = (JointspaceFeedbackControlCommand) feedbackControlCommand;
          assertEquals(1, jointCommand.getNumberOfJoints());
          assertEquals(jointCommand.getJointCommand(0).getReferencePosition(), q2_home, epsilon);
