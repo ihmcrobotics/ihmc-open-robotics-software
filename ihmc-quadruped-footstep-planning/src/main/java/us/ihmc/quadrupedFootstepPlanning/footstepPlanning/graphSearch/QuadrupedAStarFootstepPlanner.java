@@ -318,8 +318,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          return null;
 
       FootstepPlan plan = new FootstepPlan();
-
-      plan.setStartPose(startPose);
       plan.setLowLevelPlanGoal(goalPose);
 
       List<FootstepNode> path = graph.getPathFromStart(endNode);

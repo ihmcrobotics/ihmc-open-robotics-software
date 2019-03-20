@@ -198,6 +198,8 @@ public class MainTabController
    private FootstepPlanPreviewPlaybackManager footstepPlanPreviewPlaybackManager;
    private QuadrupedReferenceFrames quadrupedReferenceFrames;
    private AtomicReference<FootstepPlan> footstepPlanReference;
+   private AtomicReference<Point3D> startPositionReference;
+   private AtomicReference<Quaternion> startOrientationReference;
 
    private final Point3DProperty startPositionProperty = new Point3DProperty(this, "startPositionProperty", new Point3D());
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
@@ -356,6 +358,9 @@ public class MainTabController
 
       currentPlannerRequestId = messager.createInput(plannerRequestIdTopic, -1);
       footstepPlanReference = messager.createInput(footstepPlanTopic, null);
+
+      startPositionReference = messager.createInput(startPositionTopic);
+      startOrientationReference = messager.createInput(startOrientationTopic);
 
       // control
       messager.bindBidirectional(plannerTypeTopic, plannerType.valueProperty(), true);
@@ -641,7 +646,9 @@ public class MainTabController
 
 
          PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
-         xGaitFrame.setPoseAndUpdate(footstepPlan.getStartPose());
+         xGaitFrame.setPoseAndUpdate(startPositionReference.get(), startOrientationReference.get());
+
+
 
          double xOffset = 0.5 * xGaitSettingsReference.get().getStanceLength();
          double yOffset = 0.5 * xGaitSettingsReference.get().getStanceWidth();
