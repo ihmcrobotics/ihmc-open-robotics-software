@@ -113,8 +113,7 @@ public class OrientationFeedbackControllerTest
 
          orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
          orientationFeedbackControlCommand.setFeedForwardAction(feedForwardAngularAcceleration);
-         spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-         spatialFeedbackControlCommand.setFeedForwardAngularAction(feedForwardAngularAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          orientationFeedbackController.submitFeedbackControlCommand(orientationFeedbackControlCommand);

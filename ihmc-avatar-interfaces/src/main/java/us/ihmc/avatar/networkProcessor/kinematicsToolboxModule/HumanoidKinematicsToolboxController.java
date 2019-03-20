@@ -267,7 +267,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          feedbackControlCommand.set(rootBody, foot);
          feedbackControlCommand.setGains(getDefaultGains());
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
-         feedbackControlCommand.set(poseToHold);
+         feedbackControlCommand.setInverseKinematics(poseToHold, KinematicsToolboxHelper.zeroVector6D);
          inputs.addCommand(feedbackControlCommand);
       }
       return inputs;

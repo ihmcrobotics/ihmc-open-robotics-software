@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -23,8 +24,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityA
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -339,8 +338,7 @@ public final class PointFeedbackControllerTest
 
          pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
          pointFeedbackControlCommand.setFeedForwardAction(feedForwardLinearAcceleration);
-         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-         spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
