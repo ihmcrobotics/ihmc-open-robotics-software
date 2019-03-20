@@ -245,7 +245,6 @@ public class LinearMomentumRateControlModule
       checkAndPackOutputs();
 
       yoDesiredCMP.set(desiredCMP);
-      yoAchievedCMP.set(achievedCMP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
 
       success = success && computeDesiredLinearMomentumRateOfChange();
@@ -409,6 +408,8 @@ public class LinearMomentumRateControlModule
       achievedCMP.set(achievedCoMAcceleration2d);
       achievedCMP.scale(-1.0 / (omega0 * omega0));
       achievedCMP.add(centerOfMass2d);
+
+      yoAchievedCMP.set(achievedCMP);
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
