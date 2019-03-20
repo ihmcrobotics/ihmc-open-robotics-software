@@ -143,7 +143,8 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": constraint " + constraintType + ", contacting body: " + contactingRigidBody.getName() + ", weight: " + weight
+      String bodyName = contactingRigidBody == null ? "null" : contactingRigidBody.getName();
+      return getClass().getSimpleName() + ": constraint " + constraintType + ", contacting body: " + bodyName + ", weight: " + weight
             + ", desired CoP: " + desiredCoP;
    }
 }

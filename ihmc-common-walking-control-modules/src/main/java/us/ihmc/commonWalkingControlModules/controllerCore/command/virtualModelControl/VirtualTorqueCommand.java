@@ -455,8 +455,9 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", angular = "
+      String baseName = base == null ? "null" : base.getName();
+      String endEffectorName = endEffector == null ? "null" : endEffector.getName();
+      return getClass().getSimpleName() + ": base = " + baseName + ", endEffector = " + endEffectorName + ", angular = "
             + desiredAngularTorque;
-      return ret;
    }
 }
