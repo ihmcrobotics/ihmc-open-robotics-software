@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -72,10 +74,13 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      stepTeleopManager.setEndDoubleSupportDuration(0.05);
-//      stepTeleopManager.setStanceLength(1.00);
+      stepTeleopManager.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      stepTeleopManager.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
+
+      stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.AMBLE.getEndPhaseShift(), 0.05);
+      stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.AMBLE.getEndPhaseShift(), 0.35);
+      //      stepTeleopManager.setStanceLength(1.00);
       stepTeleopManager.setStanceWidth(0.30);
-      stepTeleopManager.setStepDuration(0.35);
       stepTeleopManager.setStepGroundClearance(0.1);
       stepTeleopManager.setDesiredBodyHeight(comHeightForRoughTerrain);
 

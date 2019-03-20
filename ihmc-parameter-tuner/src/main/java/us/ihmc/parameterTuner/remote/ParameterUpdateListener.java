@@ -40,6 +40,8 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 
    private boolean isUpdatingYoVariables = false;
 
+   private final List<ConnectionListener> connectionListeners = new ArrayList<>();
+
    @Override
    public void receivedTimestampOnly(long timestamp)
    {
@@ -112,6 +114,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void disconnected()
    {
+      connectionListeners.forEach(l -> l.conectionStatusChanged(false));
    }
 
    @Override
@@ -136,6 +139,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void connected()
    {
+      connectionListeners.forEach(l -> l.conectionStatusChanged(true));
    }
 
    private void createGuiRegistryRecursive(GuiRegistry guiRegistry, YoVariableRegistry yoRegistry)
@@ -307,6 +311,10 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void receivedCommand(DataServerCommand command, int argument)
    {
-      
+   }
+
+   public void addConnectionListener(ConnectionListener connectionListener)
+   {
+      connectionListeners.add(connectionListener);
    }
 }
