@@ -1,12 +1,13 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
@@ -17,8 +18,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -28,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -143,9 +143,9 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    protected FramePoint3D getRandomPelvisPosition(Random random, RigidBodyBasics pelvis)
    {
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ());
       return desiredRandomPelvisPosition;
    }
 
