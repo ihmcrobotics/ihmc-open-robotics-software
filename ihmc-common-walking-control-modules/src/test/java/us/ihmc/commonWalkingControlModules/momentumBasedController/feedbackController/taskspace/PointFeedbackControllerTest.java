@@ -101,8 +101,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(50.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -190,8 +189,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(5.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -336,8 +334,7 @@ public final class PointFeedbackControllerTest
          pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
 
-         pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-         pointFeedbackControlCommand.setFeedForwardAction(feedForwardLinearAcceleration);
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
          spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);

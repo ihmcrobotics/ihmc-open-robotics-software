@@ -1453,10 +1453,12 @@ class CrossRobotCommandResolverTest
    public static PointFeedbackControlCommand nextPointFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       PointFeedbackControlCommand next = new PointFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedPointToControl().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardLinearAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
@@ -1479,6 +1481,7 @@ class CrossRobotCommandResolverTest
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
       next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
       next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));

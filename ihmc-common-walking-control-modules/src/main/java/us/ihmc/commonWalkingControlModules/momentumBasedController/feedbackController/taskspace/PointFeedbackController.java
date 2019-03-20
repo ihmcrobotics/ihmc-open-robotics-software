@@ -249,14 +249,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
       command.getBodyFixedPointIncludingFrame(desiredPosition);
       controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
 
-      command.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-      command.getFeedForwardActionIncludingFrame(feedForwardLinearAcceleration);
-      yoDesiredPosition.setMatchingFrame(desiredPosition);
-      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredPosition.setMatchingFrame(command.getReferencePosition());
+      yoDesiredLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+         yoFeedForwardLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
       if (yoFeedForwardLinearAcceleration != null)
-         yoFeedForwardLinearAcceleration.setMatchingFrame(feedForwardLinearAcceleration);
+         yoFeedForwardLinearAcceleration.setMatchingFrame(command.getReferenceLinearAcceleration());
    }
 
    @Override
