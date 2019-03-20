@@ -112,7 +112,7 @@ public class QuadrupedNetworkProcessor
    }
 
    private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,
-                                LogModelProvider logModelProvider,  QuadrupedNetworkModuleParameters params,
+                                LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
                                 DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
    {
       if (!params.isXBoxModuleEnabled())

@@ -91,16 +91,16 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);
 
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(linearSelectionFrame);
 
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(linearWeightFrame);
    }
 

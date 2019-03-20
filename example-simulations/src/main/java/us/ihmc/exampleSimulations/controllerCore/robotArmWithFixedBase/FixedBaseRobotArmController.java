@@ -280,7 +280,7 @@ public class FixedBaseRobotArmController implements RobotController
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.set(position, linearVelocity);
       handSpatialCommand.set(orientation, angularVelocity);
-      handSpatialCommand.changeFrameAndSetFeedForward(angularAcceleration, linearAcceleration);
+      handSpatialCommand.setFeedForwardAction(angularAcceleration, linearAcceleration);
    }
 
    public void updateTrajectory()

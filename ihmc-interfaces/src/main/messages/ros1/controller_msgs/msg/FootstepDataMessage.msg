@@ -40,6 +40,7 @@ int8 trajectory_type
 # Contains information on how high the robot should swing its foot.
 # This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
 # If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+# Field default value -1.0
 float64 swing_height
 
 # In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
