@@ -18,15 +18,9 @@ public class FootstepPlan
 {
    private final ArrayList<QuadrupedTimedOrientedStep> footsteps = new ArrayList<>();
    private final FramePose3D lowLevelPlanGoal = new FramePose3D();
-   private final FramePose3D startPose = new FramePose3D();
 
    public FootstepPlan()
    {
-   }
-
-   public void setStartPose(FramePose3DReadOnly startPose)
-   {
-      this.startPose.setIncludingFrame(startPose);
    }
 
    public void setLowLevelPlanGoal(FramePose3DReadOnly lowLevelPlanGoal)
@@ -89,12 +83,5 @@ public class FootstepPlan
    {
       lowLevelPlanGoal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       return lowLevelPlanGoal;
-   }
-
-   // ** fixme Remote **/
-
-   public FramePose3DReadOnly getStartPose()
-   {
-      return startPose;
    }
 }
