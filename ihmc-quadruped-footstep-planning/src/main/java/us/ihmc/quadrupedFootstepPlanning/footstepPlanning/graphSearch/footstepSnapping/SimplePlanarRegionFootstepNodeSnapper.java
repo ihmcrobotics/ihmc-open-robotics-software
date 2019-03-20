@@ -60,6 +60,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
    private PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack)
    {
+      tempPolygon.clearAndUpdate();
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, - 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(- 0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
