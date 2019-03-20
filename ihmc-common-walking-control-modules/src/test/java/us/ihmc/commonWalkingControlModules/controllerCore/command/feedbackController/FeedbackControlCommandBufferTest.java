@@ -36,6 +36,8 @@ class FeedbackControlCommandBufferTest
       Set<Class<? extends FeedbackControlCommand>> commandTypes = reflections.getSubTypesOf(FeedbackControlCommand.class);
       commandTypes.remove(FeedbackControlCommandList.class);
       commandTypes.remove(FeedbackControlCommandBuffer.class);
+      // The jointspace command is treated as a list, so no need for an extra buffer.
+      commandTypes.remove(JointspaceFeedbackControlCommand.class);
 
       String errorMessage = "";
 

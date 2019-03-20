@@ -220,6 +220,9 @@ public class CrossRobotCommandResolver
          case TASKSPACE:
             resolveSpatialVelocityCommand((SpatialVelocityCommand) commandToResolve, out.addSpatialVelocityCommand());
             break;
+         case COMMAND_LIST:
+            resolveInverseKinematicsCommandListInternal((InverseKinematicsCommandList) commandToResolve, out);
+            break;
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
@@ -300,6 +303,9 @@ public class CrossRobotCommandResolver
             break;
          case MOMENTUM:
             resolveCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) commandToResolve, out.addCenterOfMassFeedbackControlCommand());
+            break;
+         case COMMAND_LIST:
+            resolveFeedbackControlCommandListInternal((FeedbackControlCommandList) commandToResolve, out);
             break;
          default:
             throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
