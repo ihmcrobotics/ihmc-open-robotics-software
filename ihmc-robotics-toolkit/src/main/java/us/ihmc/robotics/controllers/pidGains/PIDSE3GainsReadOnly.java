@@ -15,4 +15,24 @@ public interface PIDSE3GainsReadOnly
     * @return the orientation PID gains.
     */
    public abstract PID3DGainsReadOnly getOrientationGains();
+
+   public default boolean equals(PIDSE3GainsReadOnly other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
+         return true;
+      }
+      else
+      {
+         if (!getPositionGains().equals(other.getPositionGains()))
+            return false;
+         if (!getOrientationGains().equals(other.getOrientationGains()))
+            return false;
+         return true;
+      }
+   }
 }

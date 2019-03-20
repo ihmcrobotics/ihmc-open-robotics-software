@@ -224,6 +224,15 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof JointDesiredOutputReadOnly)
+         return JointDesiredOutputBasics.super.equals((JointDesiredOutputReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
    public String toString()
    {
       return getRepresentativeString();

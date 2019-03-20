@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedPlanarBodyPathProvider;
@@ -39,8 +40,9 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setStanceLength(1.0);
       xGaitSettings.setStanceWidth(0.25);
       xGaitSettings.setStepGroundClearance(0.1);
-      xGaitSettings.setStepDuration(0.25);
-      xGaitSettings.setEndDoubleSupportDuration(0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.FAST);
+      xGaitSettings.getAmbleFastTimings().setStepDuration(0.25);
+      xGaitSettings.getAmbleFastTimings().setEndDoubleSupportDuration(0.0);
       xGaitSettings.setEndPhaseShift(90);
       QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
 
@@ -104,8 +106,9 @@ public class QuadrupedXGaitPlannerTest
          xGaitSettings.setStanceLength(1.0);
          xGaitSettings.setStanceWidth(0.25);
          xGaitSettings.setStepGroundClearance(0.1);
-         xGaitSettings.setStepDuration(0.25);
-         xGaitSettings.setEndDoubleSupportDuration(0);
+         xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.FAST);
+         xGaitSettings.getAmbleFastTimings().setStepDuration(0.25);
+         xGaitSettings.getAmbleFastTimings().setEndDoubleSupportDuration(0);
          xGaitSettings.setEndPhaseShift(90);
          QuadrupedXGaitPlanner xGaitPlanner = new QuadrupedXGaitPlanner(bodyPathProvider, xGaitSettings);
          xGaitPlanner.setStepSnapper((x, y, minZ) -> new Point3D(x, y, 0.0));

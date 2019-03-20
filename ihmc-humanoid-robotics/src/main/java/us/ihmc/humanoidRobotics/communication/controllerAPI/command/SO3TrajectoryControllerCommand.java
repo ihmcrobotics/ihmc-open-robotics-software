@@ -85,15 +85,15 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);
 
-      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromHashCode(message.getSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame selectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(selectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getWeightMatrix().getWeightFrameId());
+      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(weightSelectionFrame);
    }
 

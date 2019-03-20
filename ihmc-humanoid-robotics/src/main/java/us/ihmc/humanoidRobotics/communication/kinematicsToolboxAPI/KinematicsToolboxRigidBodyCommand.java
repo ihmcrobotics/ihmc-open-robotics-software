@@ -78,11 +78,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularSelection.getSelectionFrameId());
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrame(angularSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrame(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularWeight.getWeightFrameId());
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrame(angularWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrame(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
       }
    }

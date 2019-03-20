@@ -238,4 +238,28 @@ public interface JointDesiredOutputListReadOnly
    {
       throw new RuntimeException("The joint index : " + index + " has not been registered.");
    }
+
+   default boolean equals(JointDesiredOutputListReadOnly other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
+         return true;
+      }
+      else
+      {
+         if (getNumberOfJointsWithDesiredOutput() != other.getNumberOfJointsWithDesiredOutput())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJointsWithDesiredOutput(); jointIndex++)
+         {
+            OneDoFJointBasics joint = getOneDoFJoint(jointIndex);
+            if (!getJointDesiredOutput(jointIndex).equals(other.getJointDesiredOutput(joint)))
+               return false;
+         }
+         return true;
+      }
+   }
 }

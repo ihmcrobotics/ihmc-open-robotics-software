@@ -54,9 +54,8 @@ public interface JointDesiredOutputReadOnly
     * <p>
     * The whole body controller can use this to provide information about desired joint behavior.
     * </p>
-    * Specifies the desired control scheme to be used by the joint controller. It can be used to
-    * switch control laws, the tracked value (e.g. position, torque), or determine the actuator
-    * control mode.
+    * Specifies the desired control scheme to be used by the joint controller. It can be used to switch
+    * control laws, the tracked value (e.g. position, torque), or determine the actuator control mode.
     */
    JointDesiredControlMode getControlMode();
 
@@ -110,9 +109,9 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * <p>
-    * This is intended to specify the desired amount of feedback action in percent used to control
-    * the joint. E.g. if the master gain is set to zero and the control mode is effort the joint
-    * should be controlled using open loop effort.
+    * This is intended to specify the desired amount of feedback action in percent used to control the
+    * joint. E.g. if the master gain is set to zero and the control mode is effort the joint should be
+    * controlled using open loop effort.
     * </p>
     * The gain can be used for other purposes as originally intended to communicate information from
     * the whole body controller to the joint control level.
@@ -131,15 +130,14 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * <p>
-    * This allows to specify a desired velocity scaling for the joint level controller. In the
-    * simplest for the joint control law contains a damping / velocity term that looks like
-    * this:</br>
+    * This allows to specify a desired velocity scaling for the joint level controller. In the simplest
+    * for the joint control law contains a damping / velocity term that looks like this:</br>
     * damping * (velocityScaling * qd_d - qd)
     * </p>
-    * By default this parameter should be set to 1.0 but can be set to a value between 0.0 and 1.0.
-    * If set to zero the velocity tracking of this joint will be deactivated and the joint damping
-    * will simulate viscous friction. If set to one the damping term will attempt to track the
-    * desired velocity.
+    * By default this parameter should be set to 1.0 but can be set to a value between 0.0 and 1.0. If
+    * set to zero the velocity tracking of this joint will be deactivated and the joint damping will
+    * simulate viscous friction. If set to one the damping term will attempt to track the desired
+    * velocity.
     */
    double getVelocityScaling();
 
@@ -156,8 +154,7 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * If the integration of desired accelerations is handled on the joint level this value allows to
-    * specify a break frequency for the integration of the desired acceleration to a desired
-    * velocity.
+    * specify a break frequency for the integration of the desired acceleration to a desired velocity.
     *
     * @return the value of this parameter needs to be between 0.0 and infinity.
     */
@@ -194,9 +191,9 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Gets the maximum position error to consider in the low level control of this joint. How this
-    * value is used is specific to the joint low level control. In some cases it is used to limit
-    * the acceleration integration in other cases it might be used to determine a maximum position
-    * feedback for a joint PD controller.
+    * value is used is specific to the joint low level control. In some cases it is used to limit the
+    * acceleration integration in other cases it might be used to determine a maximum position feedback
+    * for a joint PD controller.
     *
     * @return the maximum position error for the joint.
     */
@@ -214,9 +211,9 @@ public interface JointDesiredOutputReadOnly
 
    /**
     * Gets the maximum velocity error to consider in the low level control of this joint. How this
-    * value is used is specific to the joint low level control. In some cases it is used to limit
-    * the acceleration integration in other cases it might be used to determine a maximum velocity
-    * feedback for a joint PD controller.
+    * value is used is specific to the joint low level control. In some cases it is used to limit the
+    * acceleration integration in other cases it might be used to determine a maximum velocity feedback
+    * for a joint PD controller.
     *
     * @return the maximum velocity error for the joint.
     */
@@ -244,5 +241,49 @@ public interface JointDesiredOutputReadOnly
       if (hasPositionIntegrationBreakFrequency())
          ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
       return ret;
+   }
+
+   default boolean equals(JointDesiredOutputReadOnly other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
+         return true;
+      }
+      else
+      {
+         if (getControlMode() != other.getControlMode())
+            return false;
+         if (Double.compare(getDesiredTorque(), other.getDesiredTorque()) != 0)
+            return false;
+         if (Double.compare(getDesiredPosition(), other.getDesiredPosition()) != 0)
+            return false;
+         if (Double.compare(getDesiredVelocity(), other.getDesiredVelocity()) != 0)
+            return false;
+         if (Double.compare(getDesiredAcceleration(), other.getDesiredAcceleration()) != 0)
+            return false;
+         if (peekResetIntegratorsRequest() != other.peekResetIntegratorsRequest())
+            return false;
+         if (Double.compare(getStiffness(), other.getStiffness()) != 0)
+            return false;
+         if (Double.compare(getDamping(), other.getDamping()) != 0)
+            return false;
+         if (Double.compare(getMasterGain(), other.getMasterGain()) != 0)
+            return false;
+         if (Double.compare(getVelocityScaling(), other.getVelocityScaling()) != 0)
+            return false;
+         if (Double.compare(getVelocityIntegrationBreakFrequency(), other.getVelocityIntegrationBreakFrequency()) != 0)
+            return false;
+         if (Double.compare(getPositionIntegrationBreakFrequency(), other.getPositionIntegrationBreakFrequency()) != 0)
+            return false;
+         if (Double.compare(getMaxVelocityError(), other.getMaxVelocityError()) != 0)
+            return false;
+         if (Double.compare(getMaxPositionError(), other.getMaxPositionError()) != 0)
+            return false;
+         return true;
+      }
    }
 }

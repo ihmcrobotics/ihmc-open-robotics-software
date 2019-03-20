@@ -98,8 +98,8 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);

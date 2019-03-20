@@ -157,7 +157,7 @@ public interface PID3DGains extends PID3DGainsReadOnly
     *
     * @param integralGain the new integral gain for the three dimensions.
     * @param maxIntegralError the new maximum integral error.
-    * @see PID3DGains#setIntegralGains(double, double, double)
+    * @see PID3DGains#setIntegralGains(double, double, double, double)
     */
    public default void setIntegralGains(double integralGain, double maxIntegralError)
    {
@@ -215,5 +215,4 @@ public interface PID3DGains extends PID3DGainsReadOnly
       setMaxDerivativeError(other.getMaximumDerivativeError());
       setMaxProportionalError(other.getMaximumProportionalError());
    }
-
 }
