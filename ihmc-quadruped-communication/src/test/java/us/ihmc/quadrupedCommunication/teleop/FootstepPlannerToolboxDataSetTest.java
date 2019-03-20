@@ -15,6 +15,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -357,13 +359,14 @@ public abstract class FootstepPlannerToolboxDataSetTest
          PrintTools.info("Processed an output from a remote planner.");
 
       plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
-      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
+      plannerPlanReference.set(convertToFootstepPlan(packet));
       plannerReceivedPlan.set(true);
       plannerReceivedResult.set(true);
    }
 
-   private static FootstepPlan convertToFootstepPlan(QuadrupedTimedStepListMessage footstepDataListMessage)
+   private static FootstepPlan convertToFootstepPlan(QuadrupedFootstepPlanningToolboxOutputStatus packet)
    {
+      QuadrupedTimedStepListMessage footstepDataListMessage = packet.getFootstepDataList();
       FootstepPlan footstepPlan = new FootstepPlan();
 
       for (QuadrupedTimedStepMessage footstepMessage : footstepDataListMessage.getQuadrupedStepList())
@@ -376,6 +379,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
          footstepPlan.addFootstep(step);
       }
+      footstepPlan.setLowLevelPlanGoal(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getLowLevelPlannerGoal()));
 
       return footstepPlan;
    }
@@ -525,8 +529,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      Point3DReadOnly goalPosition = plannedSteps.getGoalPose().getPosition();
-      double goalYaw = plannedSteps.getGoalPose().getYaw();
+      Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
+      double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
       if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
