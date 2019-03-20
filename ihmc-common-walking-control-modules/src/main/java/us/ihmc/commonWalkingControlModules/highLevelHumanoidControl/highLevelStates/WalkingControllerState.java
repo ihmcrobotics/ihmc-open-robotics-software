@@ -170,12 +170,12 @@ public class WalkingControllerState extends HighLevelControllerState
    {
       walkingController.doAction();
 
-      linearMomentumRateControlModule.setInput(walkingController.getLinearMomentumRateControlModuleInput());
-      if (!linearMomentumRateControlModule.compute())
+      linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
+      if (!linearMomentumRateControlModule.computeControllerCoreCommands())
       {
          controllerToolbox.reportControllerFailureToListeners(emptyVector);
       }
-      walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutput());
+      walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
       controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
@@ -209,7 +209,7 @@ public class WalkingControllerState extends HighLevelControllerState
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
 
-      linearMomentumRateControlModule.setInput(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.computeAchievedCMP();
    }
 
