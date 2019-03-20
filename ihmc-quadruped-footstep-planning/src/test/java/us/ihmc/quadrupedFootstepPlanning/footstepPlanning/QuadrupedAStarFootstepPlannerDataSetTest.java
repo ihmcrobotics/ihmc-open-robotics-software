@@ -7,6 +7,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.AStarMessagerListener;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
