@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -77,6 +79,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyControllerCore controllerCore;
+   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
@@ -156,6 +159,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
+
+      double controlDT = controllerToolbox.getControlDT();
+      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      YoDouble yoTime = controllerToolbox.getYoTime();
+      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
+                                                                            gravityZ, controlDT, walkingParentRegistry, yoGraphicsListRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -323,12 +333,24 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       taskExecutor.doControl();
 
       walkingController.doAction();
+
+      linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
+      if (!linearMomentumRateControlModule.computeControllerCoreCommands())
+      {
+         controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
+      }
+      walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
+
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       if (!taskExecutor.isDone())
          controllerCoreCommand.addInverseDynamicsCommand(((WalkingPreviewTask) taskExecutor.getCurrentTask()).getOutput());
 
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
+
+      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.computeAchievedCMP();
 
       MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
