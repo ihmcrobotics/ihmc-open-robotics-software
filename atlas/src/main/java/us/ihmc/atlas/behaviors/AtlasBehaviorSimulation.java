@@ -27,7 +27,7 @@ public class AtlasBehaviorSimulation
 {
    public static SimulationConstructionSet createForManualTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, true);
+      return create(robotModel, environment, PubSubImplementation.FAST_RTPS, false);
    }
 
    public static SimulationConstructionSet createForAutomatedTest(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
