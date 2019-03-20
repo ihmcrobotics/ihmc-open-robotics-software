@@ -67,8 +67,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public void clearContactPoints()
    {
       contactPoints.clear();
-      maxContactPointNormalForces.clear();
-      rhoWeights.clear();
+      maxContactPointNormalForces.reset();
+      rhoWeights.reset();
       contactFramePoseInBodyFixedFrame.setToNaN();
    }
 
@@ -218,8 +218,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
       hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
 
-      maxContactPointNormalForces.clear();
-      rhoWeights.clear();
+      maxContactPointNormalForces.reset();
+      rhoWeights.reset();
 
       for (int i = 0; i < other.contactPoints.size(); i++)
       {
