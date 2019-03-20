@@ -264,13 +264,14 @@ public class FixedBaseRobotArmController implements RobotController
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
       handPointCommand.setGains(handPositionGains);
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());
-      handPointCommand.set(position, linearVelocity);
-      handPointCommand.setFeedForwardAction(linearAcceleration);
+      handPointCommand.setInverseDynamics(position, linearVelocity, linearAcceleration);
+      handPointCommand.setControlMode(controllerCoreMode.getValue());
 
       handOrientationCommand.setWeightForSolver(handWeight.getDoubleValue());
       handOrientationCommand.setGains(handOrientationGains);
       handOrientationCommand.setSelectionMatrix(computeAngularSelectionMatrix());
       handOrientationCommand.setInverseDynamics(orientation, angularVelocity, angularAcceleration);
+      handOrientationCommand.setControlMode(controllerCoreMode.getValue());
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());

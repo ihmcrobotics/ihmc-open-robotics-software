@@ -95,8 +95,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       desiredFootVelocity.changeFrame(worldFrame);
       desiredFootAcceleration.changeFrame(worldFrame);
 
-      feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredFootAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredFootPosition, desiredFootVelocity, desiredFootAcceleration);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
       feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
    }

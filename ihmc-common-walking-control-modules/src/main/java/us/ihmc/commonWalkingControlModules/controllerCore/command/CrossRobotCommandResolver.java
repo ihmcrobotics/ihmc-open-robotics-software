@@ -572,6 +572,7 @@ public class CrossRobotCommandResolver
    public void resolveOrientationFeedbackControlCommand(OrientationFeedbackControlCommand in, OrientationFeedbackControlCommand out)
    {
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
+      out.setControlMode(in.getControlMode());
       resolveFrameQuaternion(in.getBodyFixedOrientationToControl(), out.getBodyFixedOrientationToControl());
       resolveFrameQuaternion(in.getReferenceOrientation(), out.getReferenceOrientation());
       resolveFrameTuple3D(in.getReferenceAngularVelocity(), out.getReferenceAngularVelocity());
@@ -585,10 +586,11 @@ public class CrossRobotCommandResolver
    public void resolvePointFeedbackControlCommand(PointFeedbackControlCommand in, PointFeedbackControlCommand out)
    {
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
+      out.setControlMode(in.getControlMode());
       resolveFrameTuple3D(in.getBodyFixedPointToControl(), out.getBodyFixedPointToControl());
-      resolveFrameTuple3D(in.getDesiredPosition(), out.getDesiredPosition());
-      resolveFrameTuple3D(in.getDesiredLinearVelocity(), out.getDesiredLinearVelocity());
-      resolveFrameTuple3D(in.getFeedForwardLinearAction(), out.getFeedForwardLinearAction());
+      resolveFrameTuple3D(in.getReferenceLinearVelocity(), out.getReferenceLinearVelocity());
+      resolveFrameTuple3D(in.getReferenceLinearAcceleration(), out.getReferenceLinearAcceleration());
+      resolveFrameTuple3D(in.getReferenceForce(), out.getReferenceForce());
       out.getGains().set(in.getGains());
       out.setGainsFrame(resolveReferenceFrame(in.getLinearGainsFrame()));
       out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));

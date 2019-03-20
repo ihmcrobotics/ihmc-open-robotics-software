@@ -124,7 +124,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       feedbackControlCommand.setGainsFrames(orientationCommand.getAngularGainsFrame(), positionCommand.getLinearGainsFrame());
 
       // Copy over desired values
-      feedbackControlCommand.setInverseDynamics(positionCommand.getDesiredPosition(), positionCommand.getDesiredLinearVelocity(), positionCommand.getFeedForwardLinearAction());
+      feedbackControlCommand.setInverseDynamics(positionCommand.getReferencePosition(), positionCommand.getReferenceLinearVelocity(), positionCommand.getReferenceLinearAcceleration());
       feedbackControlCommand.setInverseDynamics(orientationCommand.getReferenceOrientation(), orientationCommand.getReferenceAngularVelocity(), orientationCommand.getReferenceAngularAcceleration());
 
       // Copy from the position command since the orientation does not have a control frame.
