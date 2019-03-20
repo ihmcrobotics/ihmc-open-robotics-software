@@ -1,12 +1,22 @@
 #ifndef __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
 #define __controller_msgs__msg__QuadrupedXGaitSettingsPacket__idl__
 
+#include "controller_msgs/msg/./QuadrupedGaitTimingsPacket_.idl"
 module controller_msgs
 {
   module msg
   {
     module dds
     {
+      const octet SLOW =
+      0;
+
+      const octet MEDIUM =
+      1;
+
+      const octet FAST =
+      2;
+
 
       /**
        * This message is part of the IHMC quadruped controller API.
@@ -20,17 +30,23 @@ module controller_msgs
          */
         unsigned long sequence_id;
         @defaultValue(value=-1.0)
+        double end_phase_shift;
+        @defaultValue(value=-1.0)
         double stance_length;
         @defaultValue(value=-1.0)
         double stance_width;
         @defaultValue(value=-1.0)
         double step_ground_clearance;
-        @defaultValue(value=-1.0)
-        double step_duration;
-        @defaultValue(value=-1.0)
-        double end_double_support_duration;
-        @defaultValue(value=-1.0)
-        double end_phase_shift;
+        octet quadruped_speed;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket pace_slow_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket pace_medium_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket pace_fast_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket amble_slow_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket amble_medium_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket amble_fast_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket trot_slow_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket trot_medium_settings_packet;
+        controller_msgs::msg::dds::QuadrupedGaitTimingsPacket trot_fast_settings_packet;
       };
     };
   };

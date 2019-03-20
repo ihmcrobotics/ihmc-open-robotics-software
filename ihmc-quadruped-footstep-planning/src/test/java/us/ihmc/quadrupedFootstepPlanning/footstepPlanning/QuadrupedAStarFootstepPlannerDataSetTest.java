@@ -2,15 +2,13 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.AStarMessagerListener;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,8 +25,10 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
       settings.setStanceLength(1.0);
       settings.setStanceWidth(0.5);
-      settings.setEndDoubleSupportDuration(0.25);
-      settings.setStepDuration(0.5);
+      settings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
+      settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
+      settings.getAmbleMediumTimings().setStepDuration(0.5);
       return settings;
    }
 
