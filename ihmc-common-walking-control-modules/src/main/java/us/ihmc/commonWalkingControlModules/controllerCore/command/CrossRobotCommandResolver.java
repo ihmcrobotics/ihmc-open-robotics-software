@@ -287,7 +287,7 @@ public class CrossRobotCommandResolver
          switch (commandToResolve.getCommandType())
          {
          case JOINTSPACE:
-            resolveJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) commandToResolve, out.addJointspaceFeedbackControlCommand());
+            resolveOneDoFJointFeedbackControlCommand((OneDoFJointFeedbackControlCommand) commandToResolve, out.addOneDoFJointFeedbackControlCommand());
             break;
          case ORIENTATION:
             resolveOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) commandToResolve, out.addOrientationFeedbackControlCommand());
@@ -594,6 +594,7 @@ public class CrossRobotCommandResolver
       resolveSpatialAccelerationCommand(in.getSpatialAccelerationCommand(), out.getSpatialAccelerationCommand());
       out.setControlMode(in.getControlMode());
       resolveFrameTuple3D(in.getBodyFixedPointToControl(), out.getBodyFixedPointToControl());
+      resolveFrameTuple3D(in.getReferencePosition(), out.getReferencePosition());
       resolveFrameTuple3D(in.getReferenceLinearVelocity(), out.getReferenceLinearVelocity());
       resolveFrameTuple3D(in.getReferenceLinearAcceleration(), out.getReferenceLinearAcceleration());
       resolveFrameTuple3D(in.getReferenceForce(), out.getReferenceForce());
