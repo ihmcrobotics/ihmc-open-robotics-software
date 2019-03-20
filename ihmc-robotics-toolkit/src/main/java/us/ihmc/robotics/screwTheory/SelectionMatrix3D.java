@@ -3,9 +3,9 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -329,7 +329,7 @@ public class SelectionMatrix3D
          frameMatrix.setM22(zSelected ? 1.0 : 0.0);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(selectionMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, selectionMatrixToPack);
       }
    }
 
@@ -416,7 +416,7 @@ public class SelectionMatrix3D
          frameMatrix.setM22(zSelected ? 1.0 : 0.0);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(selectionMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, selectionMatrixToPack);
          MatrixTools.removeZeroRows(selectionMatrixToPack, startRow, startRow + 2, 1.0e-7);
       }
    }
