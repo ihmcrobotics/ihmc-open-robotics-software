@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -564,9 +565,14 @@ public class CrossRobotCommandResolver
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
-         out.addJoint(resolveJoint(in.getJoint(jointIndex)), in.getDesiredPosition(jointIndex), in.getDesiredVelocity(jointIndex),
-                      in.getFeedForwardAcceleration(jointIndex), in.getGains(jointIndex), in.getWeightForSolver(jointIndex));
+         resolveOneDoFJointFeedbackControlCommand(in.getJointCommand(jointIndex), out.addEmptyCommand());
       }
+   }
+
+   public void resolveOneDoFJointFeedbackControlCommand(OneDoFJointFeedbackControlCommand in, OneDoFJointFeedbackControlCommand out)
+   {
+      out.set(in);
+      out.setJoint(resolveJoint(in.getJoint()));
    }
 
    public void resolveOrientationFeedbackControlCommand(OrientationFeedbackControlCommand in, OrientationFeedbackControlCommand out)
