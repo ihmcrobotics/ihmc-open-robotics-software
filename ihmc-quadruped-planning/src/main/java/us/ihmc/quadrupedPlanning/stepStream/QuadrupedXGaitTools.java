@@ -3,6 +3,7 @@ package us.ihmc.quadrupedPlanning.stepStream;
 import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotSide;
 

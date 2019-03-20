@@ -9,9 +9,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 /**
  * {@link YoParameter} based implementation of the {@link PIDGainsReadOnly} interface.
  * <p>
- * Each parameter is backed by a {@link DoubleParameter}. This means these gains are only
- * tunable through a parameter tuning application and are not mutable from code. Default
- * values can be specified at construction time.
+ * Each parameter is backed by a {@link DoubleParameter}. This means these gains are only tunable
+ * through a parameter tuning application and are not mutable from code. Default values can be
+ * specified at construction time.
  * </p>
  */
 public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGainsReadOnly
@@ -70,4 +70,12 @@ public class ParameterizedPIDGains extends ParameterizedPDGains implements PIDGa
       return integralLeakRatio.getValue();
    }
 
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PIDGainsReadOnly)
+         return PIDGainsReadOnly.super.equals((PIDGainsReadOnly) object);
+      else
+         return false;
+   }
 }

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -20,7 +21,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * This class computes the input for the optimization based on the desired privileged configuration commands.
+ * This class computes the input for the optimization based on the desired privileged configuration
+ * commands.
  */
 public class JointPrivilegedConfigurationHandler
 {
@@ -136,8 +138,9 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * Computes the desired joint velocity to be submitted to the inverse kinematics control core to achieve the desired privileged configuration.
-    * Uses a simple proportional controller with saturation limits based on the position error.
+    * Computes the desired joint velocity to be submitted to the inverse kinematics control core to
+    * achieve the desired privileged configuration. Uses a simple proportional controller with
+    * saturation limits based on the position error.
     */
    public void computePrivilegedJointVelocities()
    {
@@ -146,9 +149,8 @@ public class JointPrivilegedConfigurationHandler
       for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
       {
          OneDoFJointBasics joint = oneDoFJoints[jointIndex];
-         double qd =
-               2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ()) / jointSquaredRangeOfMotions
-                     .get(jointIndex, 0);
+         double qd = 2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ())
+               / jointSquaredRangeOfMotions.get(jointIndex, 0);
          qd = MathTools.clamp(qd, privilegedMaxVelocities.get(jointIndex, 0));
          privilegedVelocities.set(jointIndex, 0, qd);
          yoJointPrivilegedVelocities[jointIndex].set(qd);
@@ -158,8 +160,9 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * Computes the desired joint accelerations to be submitted to the inverse dynamics control core to achieve the desired privileged configuration.
-    * Uses a simple PD controller with saturation limits based on the position error.
+    * Computes the desired joint accelerations to be submitted to the inverse dynamics control core to
+    * achieve the desired privileged configuration. Uses a simple PD controller with saturation limits
+    * based on the position error.
     */
    public void computePrivilegedJointAccelerations()
    {
@@ -168,9 +171,8 @@ public class JointPrivilegedConfigurationHandler
       for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
       {
          OneDoFJointBasics joint = oneDoFJoints[jointIndex];
-         double qdd =
-               2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ()) / jointSquaredRangeOfMotions
-                     .get(jointIndex, 0);
+         double qdd = 2.0 * privilegedConfigurationGains.get(jointIndex, 0) * (privilegedConfigurations.get(jointIndex, 0) - joint.getQ())
+               / jointSquaredRangeOfMotions.get(jointIndex, 0);
          qdd -= privilegedVelocityGains.get(jointIndex, 0) * joint.getQd();
          qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(jointIndex, 0));
          privilegedAccelerations.set(jointIndex, 0, qdd);
@@ -193,10 +195,11 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * Adds a privileged configuration command to be processed later.
-    * Note that any weight, configuration gain, velocity gain, max velocity, and max acceleration, will be overwritten by the last one added.
-    * Additionally, the last default configuration will be the one used.
-    * The same is applicable for different requested privileged configurations.
+    * Adds a privileged configuration command to be processed later. Note that any weight,
+    * configuration gain, velocity gain, max velocity, and max acceleration, will be overwritten by the
+    * last one added. Additionally, the last default configuration will be the one used. The same is
+    * applicable for different requested privileged configurations.
+    * 
     * @param command command to add to list
     */
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
@@ -205,16 +208,18 @@ public class JointPrivilegedConfigurationHandler
 
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
 
-      if (command.hasNewDefaultWeight())
-         defaultConfigurationWeight.set(command.getDefaultWeight());
-      if (command.hasNewDefaultConfigurationGain())
-         defaultConfigurationGain.set(command.getDefaultConfigurationGain());
-      if (command.hasNewDefaultVelocityGain())
-         defaultVelocityGain.set(command.getDefaultVelocityGain());
-      if (command.hasNewDefaultMaxVelocity())
-         defaultMaxVelocity.set(command.getDefaultMaxVelocity());
-      if (command.hasNewDefaultMaxAcceleration())
-         defaultMaxAcceleration.set(command.getDefaultMaxAcceleration());
+      OneDoFJointPrivilegedConfigurationParameters defaultParameters = command.getDefaultParameters();
+
+      if (defaultParameters.hasWeight())
+         defaultConfigurationWeight.set(defaultParameters.getWeight());
+      if (defaultParameters.hasConfigurationGain())
+         defaultConfigurationGain.set(defaultParameters.getConfigurationGain());
+      if (defaultParameters.hasVelocityGain())
+         defaultVelocityGain.set(defaultParameters.getVelocityGain());
+      if (defaultParameters.hasMaxVelocity())
+         defaultMaxVelocity.set(defaultParameters.getMaxVelocity());
+      if (defaultParameters.hasMaxAcceleration())
+         defaultMaxAcceleration.set(defaultParameters.getMaxAcceleration());
    }
 
    private void processPrivilegedAccelerationCommands()
@@ -307,11 +312,11 @@ public class JointPrivilegedConfigurationHandler
    {
       for (int commandIndex = 0; commandIndex < configurationCommandList.size(); commandIndex++)
       {
-         PrivilegedConfigurationCommand command = configurationCommandList.get(commandIndex);
+         OneDoFJointPrivilegedConfigurationParameters defaultParameters = configurationCommandList.get(commandIndex).getDefaultParameters();
 
-         if (command.hasNewPrivilegedConfigurationDefaultOption())
+         if (defaultParameters.hasPrivilegedConfigurationOption())
          {
-            PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
+            PrivilegedConfigurationOption defaultOption = defaultParameters.getPrivilegedConfigurationOption();
             for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
                setPrivilegedConfigurationFromOption(defaultOption, jointIndex);
          }
@@ -370,10 +375,12 @@ public class JointPrivilegedConfigurationHandler
             if (jointIndex == jointIndices.getNoEntryValue())
                continue;
 
-            if (command.hasNewPrivilegedConfiguration(jointNumber))
+            OneDoFJointPrivilegedConfigurationParameters jointSpecificParameters = command.getJointSpecificParameters(jointNumber);
+
+            if (jointSpecificParameters.hasPrivilegedConfiguration())
             {
                OneDoFJointBasics configuredJoint = oneDoFJoints[jointIndex];
-               double qPrivileged = command.getPrivilegedConfiguration(jointNumber);
+               double qPrivileged = jointSpecificParameters.getPrivilegedConfiguration();
                privilegedConfigurations.set(jointIndex, 0, qPrivileged);
                yoJointPrivilegedConfigurations[jointIndex].set(qPrivileged);
 
@@ -383,10 +390,10 @@ public class JointPrivilegedConfigurationHandler
                   LogTools.warn("Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
             }
 
-            if (command.hasNewPrivilegedConfigurationOption(jointNumber))
+            if (jointSpecificParameters.hasPrivilegedConfigurationOption())
             {
                OneDoFJointBasics configuredJoint = oneDoFJoints[jointIndex];
-               PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(jointNumber);
+               PrivilegedConfigurationOption option = jointSpecificParameters.getPrivilegedConfigurationOption();
                setPrivilegedConfigurationFromOption(option, jointIndex);
 
                if (!jointsWithConfiguration.contains(configuredJoint))
@@ -395,23 +402,23 @@ public class JointPrivilegedConfigurationHandler
                   LogTools.warn("Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
 
-            processConfigurationWeightsAndGains(command, jointIndex, jointNumber);
+            processConfigurationWeightsAndGains(jointSpecificParameters, jointIndex);
          }
       }
    }
 
-   private void processConfigurationWeightsAndGains(PrivilegedConfigurationCommand command, int jointIndex, int commandJointNumber)
+   private void processConfigurationWeightsAndGains(OneDoFJointPrivilegedConfigurationParameters jointSpecificParameters, int jointIndex)
    {
-      if (command.hasWeight(commandJointNumber))
-         privilegedConfigurationWeights.set(jointIndex, jointIndex, command.getWeight(commandJointNumber));
-      if (command.hasConfigurationGain(commandJointNumber))
-         privilegedConfigurationGains.set(jointIndex, 0, command.getConfigurationGain(commandJointNumber));
-      if (command.hasVelocityGain(commandJointNumber))
-         privilegedVelocityGains.set(jointIndex, 0, command.getVelocityGain(commandJointNumber));
-      if (command.hasMaxVelocity(commandJointNumber))
-         privilegedMaxVelocities.set(jointIndex, 0, command.getMaxVelocity(commandJointNumber));
-      if (command.hasMaxAcceleration(commandJointNumber))
-         privilegedMaxAccelerations.set(jointIndex, 0, command.getMaxAcceleration(commandJointNumber));
+      if (jointSpecificParameters.hasWeight())
+         privilegedConfigurationWeights.set(jointIndex, jointIndex, jointSpecificParameters.getWeight());
+      if (jointSpecificParameters.hasConfigurationGain())
+         privilegedConfigurationGains.set(jointIndex, 0, jointSpecificParameters.getConfigurationGain());
+      if (jointSpecificParameters.hasVelocityGain())
+         privilegedVelocityGains.set(jointIndex, 0, jointSpecificParameters.getVelocityGain());
+      if (jointSpecificParameters.hasMaxVelocity())
+         privilegedMaxVelocities.set(jointIndex, 0, jointSpecificParameters.getMaxVelocity());
+      if (jointSpecificParameters.hasMaxAcceleration())
+         privilegedMaxAccelerations.set(jointIndex, 0, jointSpecificParameters.getMaxAcceleration());
    }
 
    private void setPrivilegedConfigurationFromOption(PrivilegedConfigurationOption option, int jointIndex)
@@ -443,7 +450,8 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * @return matrix of privileged joint velocities to be submitted to the inverse kinematics controller core.
+    * @return matrix of privileged joint velocities to be submitted to the inverse kinematics
+    *         controller core.
     */
    public DenseMatrix64F getPrivilegedJointVelocities()
    {
@@ -451,7 +459,8 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * @return matrix of privileged joint accelerations to be submitted ot the inverse dynamics controller core.
+    * @return matrix of privileged joint accelerations to be submitted ot the inverse dynamics
+    *         controller core.
     */
    public DenseMatrix64F getPrivilegedJointAccelerations()
    {
@@ -482,6 +491,7 @@ public class JointPrivilegedConfigurationHandler
 
    /**
     * This weight is the respective priority placed on the privileged command in the optimization.
+    * 
     * @return matrix of weights for the privileged command in the optimization.
     */
    public DenseMatrix64F getWeights()
