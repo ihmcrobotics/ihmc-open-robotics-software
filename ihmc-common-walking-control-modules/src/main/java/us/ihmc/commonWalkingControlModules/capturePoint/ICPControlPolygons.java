@@ -155,7 +155,7 @@ public class ICPControlPolygons
 
             for (int i = 0; i < contactStateCommand.getNumberOfContactPoints(); i++)
             {
-               contactStateCommand.getContactPoint(i, tempContactPosition);
+               tempContactPosition.setIncludingFrame(contactStateCommand.getContactPoint(i));
                icpControlPlane.projectPointOntoControlPlane(worldFrame, tempContactPosition, tempProjectedContactPosition);
                footPolygonInWorldFrame.addVertexMatchingFrame(tempProjectedContactPosition);
                footPolygonInMidFeetZUp.addVertexMatchingFrame(tempProjectedContactPosition);

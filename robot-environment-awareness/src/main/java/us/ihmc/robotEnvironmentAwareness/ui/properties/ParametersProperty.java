@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
 {
    private final Map<InvalidationListener, Field> fieldInvalidationListeners = new HashMap<>();
+   private final Map<InvalidationListener, EnumField> enumFieldInvalidationListeners = new HashMap<>();
 
    public ParametersProperty()
    {
@@ -48,11 +49,19 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       property.addListener(binding);
       field.addListener(binding);
    }
-   
+
    protected void bindFieldBidirectionalToBooleanProperty(Property<Boolean> property, Field field)
    {
       BooleanBidirectionalBind binding = new BooleanBidirectionalBind(property, field);
       setBooleanValue(property, field);
+      property.addListener(binding);
+      field.addListener(binding);
+   }
+
+   protected<E extends Enum<E>> void bindFieldBidirectionalToEnumProperty(Property<E> property, EnumField<E> field)
+   {
+      EnumBidirectionalBind<E> binding = new EnumBidirectionalBind<>(property, field);
+      property.setValue(field.getEnum(getValue()));
       property.addListener(binding);
       field.addListener(binding);
    }
@@ -103,6 +112,16 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
    private interface NumberSetter<T>
    {
       public void setNumber(T parameters, Number value);
+   }
+
+   public interface EnumGetter<E extends Enum<E>, T>
+   {
+      public E getEnum(T parameters);
+   }
+
+   public interface EnumSetter<E extends Enum<E>, T>
+   {
+      public void setEnum(T parameters, E value);
    }
 
    protected class DoubleField extends Field implements Observable, NumberGetter<T>, NumberSetter<T>
@@ -195,6 +214,44 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       }
    }
 
+
+
+   protected class EnumField<E extends Enum<E>> implements Observable, EnumGetter<E, T>, EnumSetter<E, T>
+   {
+      private EnumGetter<E, T> enumGetter;
+      private EnumSetter<E, T> enumSetter;
+
+      public EnumField(EnumGetter<E, T> numberGetter, EnumSetter<E, T> numberSetter)
+      {
+         this.enumGetter = numberGetter;
+         this.enumSetter = numberSetter;
+      }
+
+      @Override
+      public E getEnum(T parameters)
+      {
+         return enumGetter.getEnum(parameters);
+      }
+
+      @Override
+      public void setEnum(T parameters, E value)
+      {
+         enumSetter.setEnum(parameters, value);
+      }
+
+      @Override
+      public void addListener(InvalidationListener listener)
+      {
+         enumFieldInvalidationListeners.put(listener, this);
+      }
+
+      @Override
+      public void removeListener(InvalidationListener listener)
+      {
+         enumFieldInvalidationListeners.remove(listener);
+      }
+   }
+
    protected class BooleanField extends Field implements Observable, NumberGetter<T>, NumberSetter<T>
    {
       public BooleanField(BooleanGetter<T> booleanGetter, BooleanSetter<T> booleanSetter)
@@ -269,6 +326,37 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          else
          {
             setNumberValue(numberProperty, field);
+         }
+      }
+   }
+
+   private class EnumBidirectionalBind<E extends Enum<E>> implements InvalidationListener
+   {
+      private final Property<E> enumProperty;
+      private final ParametersProperty<T>.EnumField<E> field;
+
+      private EnumBidirectionalBind(Property<E> numberProperty, EnumField<E> field)
+      {
+         this.enumProperty = numberProperty;
+         this.field = field;
+      }
+
+      @Override
+      public void invalidated(Observable observable)
+      {
+
+         if (enumProperty.getValue() == field.getEnum(getValue()))
+            return;
+
+         if (observable == enumProperty)
+         {
+            T newParameters = getValueCopy(getValue());
+            field.setEnum(newParameters, enumProperty.getValue());
+            set(newParameters);
+         }
+         else
+         {
+            enumProperty.setValue(field.getEnum(getValue()));
          }
       }
    }
@@ -350,6 +438,11 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       super.fireValueChangedEvent();
 
       for (Entry<InvalidationListener, Field> entry : fieldInvalidationListeners.entrySet())
+      {
+         entry.getKey().invalidated(entry.getValue());
+      }
+
+      for (Entry<InvalidationListener, EnumField> entry : enumFieldInvalidationListeners.entrySet())
       {
          entry.getKey().invalidated(entry.getValue());
       }
