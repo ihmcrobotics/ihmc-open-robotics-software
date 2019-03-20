@@ -9,7 +9,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -50,6 +54,10 @@ public class RemoteInputManager implements ParameterGuiInterface
          {
             return;
          }
+         if (!checkReconnectWithUser())
+         {
+            return;
+         }
          LogTools.info("Reconnecting to server.");
          try
          {
@@ -61,6 +69,17 @@ public class RemoteInputManager implements ParameterGuiInterface
             throw new RuntimeException("Unable to reconnect.");
          }
       });
+   }
+
+   private boolean checkReconnectWithUser()
+   {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Reconnect");
+      alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+      alert.getDialogPane().setMinWidth(Region.USE_PREF_SIZE);
+      alert.setHeaderText("Do you want to reconnect.");
+      alert.setContentText("Previously modified variables will be overwritten by the server and unsubmitted outgoing changes (modifications after disconnect) will be sent.");
+      return alert.showAndWait().get() == ButtonType.OK;
    }
 
    private void waitForConnection()
