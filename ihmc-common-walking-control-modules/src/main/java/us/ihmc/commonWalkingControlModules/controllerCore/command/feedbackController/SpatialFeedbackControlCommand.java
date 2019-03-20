@@ -123,9 +123,9 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
 
-      controlMode = other.controlMode;
-
       controlFramePoseInEndEffectorFrame.setIncludingFrame(other.controlFramePoseInEndEffectorFrame);
+      
+      controlMode = other.controlMode;
 
       referenceOrientationInRootFrame.setIncludingFrame(other.referenceOrientationInRootFrame);
       referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
