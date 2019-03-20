@@ -35,32 +35,28 @@ public class AtlasBehaviorUIDemo extends Application
       Log.DEBUG();
 
       new Thread(() ->
-         AtlasBehaviorSimulation.createForManualTest(new AtlasRobotModel(AtlasBehaviorBackpack.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                     new FlatGroundEnvironment())
-                                .simulate()
+         AtlasBehaviorSimulation.createForManualTest(newRobotModel(), new FlatGroundEnvironment()).simulate()
       ).start();
 
       new Thread(() -> {
-         AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
          LogTools.info("Creating footstep toolbox");
-         new MultiStageFootstepPlanningModule(robotModel, null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+         new MultiStageFootstepPlanningModule(newRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       }).start();
 
       new Thread(() -> {
-         AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
          LogTools.info("Creating behavior backpack");
-         BehaviorBackpack.createForBackpack(robotModel);
+         BehaviorBackpack.createForBackpack(newRobotModel());
       }).start();
 
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-
-      BehaviorTeleop teleop = BehaviorTeleop.createForUI(robotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
-
-      ui = new BehaviorUI(primaryStage,
-                          teleop,
-                          robotModel,
-                          PubSubImplementation.FAST_RTPS);
+      AtlasRobotModel robotModel = newRobotModel();
+      BehaviorTeleop teleop = BehaviorTeleop.createForUI(robotModel, "localhost");
+      ui = new BehaviorUI(primaryStage, teleop, robotModel, PubSubImplementation.FAST_RTPS);
       ui.show();
+   }
+
+   private AtlasRobotModel newRobotModel()
+   {
+      return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
    }
 
    @Override
