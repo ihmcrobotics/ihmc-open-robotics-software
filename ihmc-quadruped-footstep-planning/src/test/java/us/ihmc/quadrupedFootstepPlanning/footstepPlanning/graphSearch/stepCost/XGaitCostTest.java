@@ -4,9 +4,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import static us.ihmc.quadrupedPlanning.QuadrupedSpeed.MEDIUM;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class XGaitCostTest
@@ -19,9 +22,10 @@ public class XGaitCostTest
    public void testComputeTimeDeltaBetweenStepsPace()
    {
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(0);
-      xGaitSettings.setStepDuration(stepDuration);
-      xGaitSettings.setEndDoubleSupportDuration(doubleSupportDuration);
+      xGaitSettings.setEndPhaseShift(QuadrupedGait.PACE.getEndPhaseShift());
+      xGaitSettings.setQuadrupedSpeed(MEDIUM);
+      xGaitSettings.getPaceMediumTimings().setStepDuration(stepDuration);
+      xGaitSettings.getPaceMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
@@ -41,9 +45,10 @@ public class XGaitCostTest
    public void testComputeTimeDeltaBetweenStepsCrawl()
    {
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(90);
-      xGaitSettings.setStepDuration(stepDuration);
-      xGaitSettings.setEndDoubleSupportDuration(doubleSupportDuration);
+      xGaitSettings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
+      xGaitSettings.setQuadrupedSpeed(MEDIUM);
+      xGaitSettings.getAmbleMediumTimings().setStepDuration(stepDuration);
+      xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
@@ -63,9 +68,10 @@ public class XGaitCostTest
    public void testComputeTimeDeltaBetweenStepsTrot()
    {
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
-      xGaitSettings.setEndPhaseShift(180.0);
-      xGaitSettings.setStepDuration(stepDuration);
-      xGaitSettings.setEndDoubleSupportDuration(doubleSupportDuration);
+      xGaitSettings.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
+      xGaitSettings.setQuadrupedSpeed(MEDIUM);
+      xGaitSettings.getTrotMediumTimings().setStepDuration(stepDuration);
+      xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
