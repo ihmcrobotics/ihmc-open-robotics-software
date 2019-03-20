@@ -82,6 +82,8 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
+      conductor.getScs().setCameraTracking(true, true, true, false);
+
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       // forward footstep plan from planner to controller
