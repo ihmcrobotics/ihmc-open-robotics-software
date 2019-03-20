@@ -4,9 +4,8 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.Ros2QueuedSubscription;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.ros2.Ros2Node;
@@ -17,8 +16,7 @@ public class RemoteSyncedRobotModel
    protected final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
-   private final Ros2QueuedSubscription<RobotConfigurationData> robotConfigurationDataQueue;
-   private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
+   private RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, Ros2Node ros2Node)
    {
@@ -28,16 +26,28 @@ public class RemoteSyncedRobotModel
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
 
-      robotConfigurationDataQueue = ROS2Tools.createQueuedSubscription(ros2Node, RobotConfigurationData.class,
-                                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()));
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
+                                           this::ros2UpdateCallback);
+   }
+
+   private void ros2UpdateCallback(Subscriber<RobotConfigurationData> subscriber)
+   {
+      synchronized (this)  // flush and get latest was not working, so sync over a callback
+      {
+         RobotConfigurationData incomingData = subscriber.takeNextData(); // may be 1 or 2 ticks behind, is this okay?
+         if (incomingData != null)
+         {
+            FullRobotModelUtils.checkJointNameHash(jointNameHash, incomingData.getJointNameHash());
+            robotConfigurationData = incomingData;
+         }
+      }
    }
 
    public FullHumanoidRobotModel pollFullRobotModel()
    {
-      if (robotConfigurationDataQueue.flushAndGetLatest(robotConfigurationData))
+      synchronized (this)  // all accessors to robotConfigurationData must copy it's data, it's reference will be changing
       {
-         FullRobotModelUtils.checkJointNameHash(jointNameHash, robotConfigurationData.getJointNameHash());
-
          fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
          fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootTranslation());
 

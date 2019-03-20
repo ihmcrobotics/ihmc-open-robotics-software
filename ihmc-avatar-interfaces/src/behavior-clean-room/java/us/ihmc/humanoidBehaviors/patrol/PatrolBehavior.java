@@ -1,6 +1,10 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -9,9 +13,9 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.tools.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -25,6 +29,7 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
@@ -66,9 +71,6 @@ public class PatrolBehavior
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
 
-   private final Activator walking = new Activator();
-   private final Pose3D currentGoalWaypoint = new Pose3D(); // TODO evaluate if this is a bug
-
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       this.messager = messager;
@@ -102,12 +104,11 @@ public class PatrolBehavior
       transitionTo(STOP);
 
       PeriodicNonRealtimeThreadScheduler patrolThread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      patrolThread.schedule(this::patrolThread, 1, TimeUnit.MILLISECONDS);
+      patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
-      remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames();
       currentState.getValue().run();
    }
 
@@ -124,11 +125,20 @@ public class PatrolBehavior
       {
          FramePose3D midFeetZUpPose = new FramePose3D();
          // prevent frame from continuing to change
-         midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame());
+         midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
          FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(goalWaypointIndex.get()));
 
          new Thread(() -> {  // plan in a thread to catch interruptions during planning
             footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
+            FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
+            ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
+            for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+            {
+               FramePose3D soleFramePoseToPack = new FramePose3D();
+               footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+               footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
+            }
+            messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
             footstepPlanCompleted.set();
          }).start();
       }
@@ -141,7 +151,7 @@ public class PatrolBehavior
          if (walkable)
          {
             walkingCompleted.poll(); // acting to clear the notification
-            LogTools.debug("Tasking {} footstep(s) to the robot!", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());
+            LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());
             footstepDataListPublisher.publish(footstepPlanningOutput.getFootstepDataList());
             transitionTo(WALK_TO_GOAL_WAYPOINT);
          }
@@ -176,7 +186,7 @@ public class PatrolBehavior
 
       if (stopNotification.read())  // favor stop if race condition
       {
-         LogTools.info("Interrupted with PAUSE");
+         LogTools.info("Interrupted with STOP");
          sendPauseWalking();
          transitionTo(STOP);
       }
@@ -204,7 +214,7 @@ public class PatrolBehavior
 
    private void sendPauseWalking()
    {
-      LogTools.error("PAUSE WALKING");
+      LogTools.debug("Sending pause walking to robot");
       PauseWalkingMessage pause = new PauseWalkingMessage();
       pause.setPause(true);
       pausePublisher.publish(pause);
@@ -212,7 +222,7 @@ public class PatrolBehavior
 
    private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
    {
-      LogTools.info("Transitioning to {}", stateToTransitionTo.getKey());
+      LogTools.debug("Transitioning to {}", stateToTransitionTo.getKey());
       currentState = stateToTransitionTo;
       messager.submitMessage(API.CurrentState, currentState.getKey());
    }
@@ -246,7 +256,8 @@ public class PatrolBehavior
       public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
 
       /** Output: to visualize the current robot path plan. */
-      public static final Topic<WaypointFootstepPlan> FootstepPlan = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("FootstepPlan"));
+      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentFootstepPlan"));
 
       /** Output: to visualize the current state. */
       public static final Topic<String> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));

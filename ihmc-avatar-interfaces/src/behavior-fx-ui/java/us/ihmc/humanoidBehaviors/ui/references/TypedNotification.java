@@ -1,12 +1,15 @@
 package us.ihmc.humanoidBehaviors.ui.references;
 
+/**
+ * This class appears to be thread safe.
+ */
 public class TypedNotification<T>
 {
    private T notification = null;
    private T previousValue = null;
 
    /**
-    * Get the atomic value, store it for a later call to read, and return if it was null.
+    * Get the atomic value, store it for a later call to read, and return if new value was present.
     *
     * @return value available
     */
