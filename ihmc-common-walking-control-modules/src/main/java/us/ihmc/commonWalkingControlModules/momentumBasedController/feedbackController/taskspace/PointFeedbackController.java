@@ -71,6 +71,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector3D yoAchievedLinearAcceleration;
 
    private final YoFrameVector3D yoDesiredLinearForce;
+   private final YoFrameVector3D yoFeedForwardLinearForce;
    private final YoFrameVector3D yoFeedbackLinearForce;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearForce;
 
@@ -83,6 +84,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FrameVector3D feedForwardLinearVelocity = new FrameVector3D();
 
    private final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearForce = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
    private final FrameVector3D biasLinearAcceleration = new FrameVector3D();
    private final FrameVector3D achievedLinearAcceleration = new FrameVector3D();
@@ -187,6 +189,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          if (toolbox.isEnableVirtualModelControlModule())
          {
             yoDesiredLinearForce = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_FORCE, isEnabled);
+            yoFeedForwardLinearForce = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, LINEAR_FORCE, isEnabled);
             yoFeedbackLinearForce = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_FORCE, isEnabled);
             rateLimitedFeedbackLinearForce = feedbackControllerToolbox
                   .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_FORCE, dt, maximumRate, isEnabled);
@@ -194,6 +197,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          else
          {
             yoDesiredLinearForce = null;
+            yoFeedForwardLinearForce = null;
             yoFeedbackLinearForce = null;
             rateLimitedFeedbackLinearForce = null;
          }
@@ -211,6 +215,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoAchievedLinearAcceleration = null;
 
          yoDesiredLinearForce = null;
+         yoFeedForwardLinearForce = null;
          yoFeedbackLinearForce = null;
          rateLimitedFeedbackLinearForce = null;
       }
@@ -255,6 +260,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoFeedForwardLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
       if (yoFeedForwardLinearAcceleration != null)
          yoFeedForwardLinearAcceleration.setMatchingFrame(command.getReferenceLinearAcceleration());
+      if (yoFeedForwardLinearForce != null)
+         yoFeedForwardLinearForce.setMatchingFrame(command.getReferenceForce());
    }
 
    @Override
@@ -359,6 +366,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private void computeFeedbackForce()
    {
+      feedForwardLinearForce.setIncludingFrame(yoFeedForwardLinearForce);
+      feedForwardLinearForce.changeFrame(controlFrame);
+
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -372,6 +382,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.setIncludingFrame(rateLimitedFeedbackLinearForce);
 
       desiredLinearForce.changeFrame(controlFrame);
+      desiredLinearForce.add(feedForwardLinearForce);
 
       yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
    }
