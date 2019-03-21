@@ -150,6 +150,7 @@ public class JointAccelerationIntegrationCommand
       for (int i = 0; i < other.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
          jointsToComputeDesiredPositionFor.add(other.jointsToComputeDesiredPositionFor.get(i));
+         jointParameters.add().set(other.getJointParameters(i));
       }
    }
 

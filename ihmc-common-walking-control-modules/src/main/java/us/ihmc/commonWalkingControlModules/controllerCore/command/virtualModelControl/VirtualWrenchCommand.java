@@ -86,13 +86,12 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    @Override
    public void set(VirtualWrenchCommand other)
    {
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearForce.set(other.desiredLinearForce);
+      desiredAngularTorque.set(other.desiredAngularTorque);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularTorque.set(other.desiredAngularTorque);
-      desiredLinearForce.set(other.desiredLinearForce);
    }
 
    /**
