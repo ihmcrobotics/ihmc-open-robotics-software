@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -52,9 +53,9 @@ public class RemoteFootstepPlannerInterface
                                                FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotModel.getSimpleRobotName()));
    }
 
-   public FootstepPlanningToolboxOutputStatus requestPlanBlocking(FramePose3D start, FramePose3D goal)
+   public FootstepPlanningToolboxOutputStatus requestPlanBlocking(FramePose3D start, FramePose3D goal, PlanarRegionsListMessage planarRegionsListMessage)
    {
-      int sentPlannerId = requestPlan(start, goal);
+      int sentPlannerId = requestPlan(start, goal, planarRegionsListMessage);
 
       LogTools.debug("Waiting for footstep plan result id {}...", sentPlannerId);
 
@@ -77,7 +78,7 @@ public class RemoteFootstepPlannerInterface
       return footstepPlanningResult;
    }
 
-   public int requestPlan(FramePose3D start, FramePose3D goal)
+   public int requestPlan(FramePose3D start, FramePose3D goal, PlanarRegionsListMessage planarRegionsListMessage)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
@@ -106,7 +107,10 @@ public class RemoteFootstepPlannerInterface
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
-      packet.setAssumeFlatGround(true);
+      if (planarRegionsListMessage != null)
+         packet.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      else
+         packet.setAssumeFlatGround(true);
 
       footstepPlanningRequestPublisher.publish(packet);
 

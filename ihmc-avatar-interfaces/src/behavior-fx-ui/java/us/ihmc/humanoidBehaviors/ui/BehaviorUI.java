@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
@@ -19,6 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
@@ -47,7 +49,7 @@ public class BehaviorUI
    public static SnappedPositionEditor SNAPPED_POSITION_EDITOR;
    public static OrientationYawEditor ORIENTATION_EDITOR;
 
-   private final PlanarRegionsGraphic planarRegionsGraphic;
+   private final LivePlanarRegionsGraphic planarRegionsGraphic;
    private final JavaFXRemoteRobotVisualizer robotVisualizer;
 
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
@@ -93,7 +95,9 @@ public class BehaviorUI
       stepInPlaceBehaviorUIController.init(teleop);
       patrolBehaviorUIController.init(messager, subScene, teleop, robotModel);
 
-      planarRegionsGraphic = new PlanarRegionsGraphic();
+      planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
+      planarRegionsGraphic.start();
+
       SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
       ORIENTATION_EDITOR = new OrientationYawEditor(messager, subScene);
 
@@ -123,6 +127,8 @@ public class BehaviorUI
 
    public void stop()
    {
+      planarRegionsGraphic.stop();
+
       SNAPPED_POSITION_EDITOR.stop();
       ORIENTATION_EDITOR.stop();
 

@@ -1,26 +1,34 @@
 package us.ihmc.atlas.behaviors;
 
 import com.esotericsoftware.minlog.Log;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.humanoidBehaviors.BehaviorBackpack;
 import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+
+import java.util.concurrent.TimeUnit;
 
 /**
- * Bundles behavior module and footstep planning toolbox.
+ * Runs self contained behavior demo.
  */
 public class AtlasBehaviorUIDemo extends Application
 {
@@ -34,27 +42,69 @@ public class AtlasBehaviorUIDemo extends Application
    {
       Log.DEBUG();
 
-      new Thread(() ->
-         AtlasBehaviorSimulation.createForManualTest(newRobotModel(), new FlatGroundEnvironment()).simulate()
+      new Thread(() -> {
+         LogTools.info("Creating planar region publisher");
+         Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "Fake_REA_module");
+         IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher
+               = ROS2Tools.createPublisher(ros2Node,
+                                           PlanarRegionsListMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(createRobotModel().getSimpleRobotName(),
+                                                                           ROS2Tools.REA_MODULE,
+                                                                           ROS2Tools.ROS2TopicQualifier.OUTPUT));
+         PlanarRegionsList planarRegions = createPlanarRegions();
+         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegions);
+         PeriodicNonRealtimeThreadScheduler patrolThread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
+         patrolThread.schedule(() -> planarRegionPublisher.publish(planarRegionsListMessage), 500, TimeUnit.MILLISECONDS);
+      }).start();
+
+      new Thread(() -> {
+         LogTools.info("Creating simulation");
+         AtlasBehaviorSimulation.createForManualTest(createRobotModel(),
+                                                     new PlanarRegionsListDefinedEnvironment(createPlanarRegions(),
+                                                                                             0.02,
+                                                                                             false))
+                                .simulate();
+      }
       ).start();
 
       new Thread(() -> {
          LogTools.info("Creating footstep toolbox");
-         new MultiStageFootstepPlanningModule(newRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
+         new MultiStageFootstepPlanningModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       }).start();
 
       new Thread(() -> {
          LogTools.info("Creating behavior backpack");
-         BehaviorBackpack.createForBackpack(newRobotModel());
+         BehaviorBackpack.createForBackpack(createRobotModel());
       }).start();
 
-      AtlasRobotModel robotModel = newRobotModel();
+      LogTools.info("Creating behavior user interface");
+      AtlasRobotModel robotModel = createRobotModel();
       BehaviorTeleop teleop = BehaviorTeleop.createForUI(robotModel, "localhost");
       ui = new BehaviorUI(primaryStage, teleop, robotModel, PubSubImplementation.FAST_RTPS);
       ui.show();
    }
 
-   private AtlasRobotModel newRobotModel()
+   private PlanarRegionsList createPlanarRegions()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double startingBlockLength = 1.0;
+      double cinderBlockSize = 0.4;
+      double cinderBlockHeight = 0.10;
+      double courseLength = 2.0;
+      double courseWidth = 1.5;
+      double heightVariation = 0.05;
+      double extrusionLength = -0.05;
+      double percentageAbsent = 0.0;
+      double minTilt = Math.toRadians(0.0);
+      double maxTilt = Math.toRadians(15.0);
+      double randomHeightVariation = 0.0;
+      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
+                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength,
+                                                         startingBlockLength, percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+      return generator.getPlanarRegionsList();
+   }
+
+   private AtlasRobotModel createRobotModel()
    {
       return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
    }
