@@ -78,7 +78,11 @@ import us.ihmc.yoVariables.variable.YoLong;
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
    private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
+
+   /** Set this to true to create and run, but not use the EKF estimator */
    private static final boolean CREATE_EKF_ESTIMATOR = true;
+   /** Set this to true to create and run, and use the EKF estimator */
+   private static final boolean USE_EKF_ESTIMATOR = true;
 
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
@@ -178,7 +182,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
+      }
+      else
+      {
+         forceSensorStateUpdater = null;
+      }
 
+      if (sensorReaderFactory.useStateEstimator() && !USE_EKF_ESTIMATOR)
+      {
          // Create DRC Estimator:
          KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();
          ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
@@ -205,7 +216,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       else
       {
          drcStateEstimator = null;
-         forceSensorStateUpdater = null;
       }
 
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
@@ -265,7 +275,28 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
 
       // Create EKF Estimator:
-      if (sensorReaderFactory.useStateEstimator() && CREATE_EKF_ESTIMATOR)
+      if (sensorReaderFactory.useStateEstimator() && USE_EKF_ESTIMATOR)
+      {
+         reinitializeEKF = null;
+         
+         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
+         SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
+         String primaryImuName = sensorInformation.getPrimaryBodyImu();
+         Collection<String> imuSensorNames = Arrays.asList(sensorInformation.getIMUSensorsToUseInStateEstimator());
+         ekfStateEstimator = new HumanoidRobotEKFWithSimpleJoints(estimatorFullRobotModel, primaryImuName, imuSensorNames, footForceSensorNames,
+                                                                  sensorRawOutputMapReadOnly, estimatorDT, gravity, sensorOutputMapReadOnly,
+                                                                  yoGraphicsListRegistry, estimatorFullRobotModel);
+
+         InputStream ekfParameterStream = LeggedRobotEKF.class.getResourceAsStream("/ekf.xml");
+         if (ekfParameterStream == null)
+         {
+            throw new RuntimeException("Did not find parameter file for EKF.");
+         }
+         ParameterLoaderHelper.loadParameters(this, ekfParameterStream, ekfStateEstimator.getYoVariableRegistry());
+
+         estimatorController.addRobotController(ekfStateEstimator);
+      }
+      else if (sensorReaderFactory.useStateEstimator() && CREATE_EKF_ESTIMATOR)
       {
          reinitializeEKF = new YoBoolean("ReinitializeEKF", estimatorRegistry);
 
@@ -307,7 +338,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
 
-         drcStateEstimator.requestStateEstimatorMode(requestedMode);
+         if (drcStateEstimator != null)
+            drcStateEstimator.requestStateEstimatorMode(requestedMode);
          if (ekfStateEstimator != null)
             ekfStateEstimator.requestStateEstimatorMode(requestedMode);
       });
