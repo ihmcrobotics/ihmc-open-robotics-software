@@ -940,6 +940,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       {
          SpatialVelocityCommand other = (SpatialVelocityCommand) object;
 
+         if (constraintType != other.constraintType)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearVelocity.equals(other.desiredLinearVelocity))
