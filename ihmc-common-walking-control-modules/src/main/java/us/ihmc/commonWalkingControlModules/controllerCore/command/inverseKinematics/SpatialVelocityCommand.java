@@ -126,19 +126,19 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public void set(SpatialVelocityCommand other)
    {
-      setWeightMatrix(other.getWeightMatrix());
-
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearVelocity.set(other.desiredLinearVelocity);
+      desiredAngularVelocity.set(other.desiredAngularVelocity);
+      
+      weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
+      
+      constraintType = other.constraintType;
       base = other.getBase();
       endEffector = other.getEndEffector();
-
       optionalPrimaryBase = other.optionalPrimaryBase;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularVelocity.set(other.desiredAngularVelocity);
-      desiredLinearVelocity.set(other.desiredLinearVelocity);
    }
 
    /**

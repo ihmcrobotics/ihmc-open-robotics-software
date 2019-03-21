@@ -49,6 +49,30 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       clearContactPoints();
    }
 
+   @Override
+   public void set(PlaneContactStateCommand other)
+   {
+      rigidBody = other.rigidBody;
+      coefficientOfFriction = other.coefficientOfFriction;
+      contactPoints.copyFromListAndTrimSize(other.contactPoints);
+      contactNormal.setIncludingFrame(other.contactNormal);
+      useHighCoPDamping = other.useHighCoPDamping;
+      hasContactStateChanged = other.hasContactStateChanged;
+
+      hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
+
+      maxContactPointNormalForces.reset();
+      rhoWeights.reset();
+
+      for (int i = 0; i < other.contactPoints.size(); i++)
+      {
+         maxContactPointNormalForces.add(other.maxContactPointNormalForces.get(i));
+         rhoWeights.add(other.rhoWeights.get(i));
+      }
+
+      contactFramePoseInBodyFixedFrame.set(other.contactFramePoseInBodyFixedFrame);
+   }
+
    public void setHasContactStateChanged(boolean hasContactStateChanged)
    {
       this.hasContactStateChanged = hasContactStateChanged;
@@ -204,28 +228,6 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public RigidBodyTransform getContactFramePoseInBodyFixedFrame()
    {
       return contactFramePoseInBodyFixedFrame;
-   }
-
-   @Override
-   public void set(PlaneContactStateCommand other)
-   {
-      rigidBody = other.rigidBody;
-      coefficientOfFriction = other.coefficientOfFriction;
-      contactPoints.copyFromListAndTrimSize(other.contactPoints);
-      contactNormal.setIncludingFrame(other.contactNormal);
-      useHighCoPDamping = other.useHighCoPDamping;
-      hasContactStateChanged = other.hasContactStateChanged;
-
-      hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
-
-      maxContactPointNormalForces.reset();
-      rhoWeights.reset();
-
-      for (int i = 0; i < other.contactPoints.size(); i++)
-      {
-         maxContactPointNormalForces.add(other.maxContactPointNormalForces.get(i));
-         rhoWeights.add(other.rhoWeights.get(i));
-      }
    }
 
    @Override

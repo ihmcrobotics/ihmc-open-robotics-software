@@ -44,7 +44,27 @@ public class PrivilegedConfigurationCommand
    {
       enable = false;
       defaultParameters.clear();
+      joints.clear();
       jointSpecificParameters.clear();
+   }
+
+   /**
+    * Clears this command and then copies the data from {@code other} into this.
+    *
+    * @param other the other command to copy the data from. Not Modified.
+    */
+   @Override
+   public void set(PrivilegedConfigurationCommand other)
+   {
+      clear();
+      enable = other.enable;
+      defaultParameters.set(other.defaultParameters);
+
+      for (int jointIndex = 0; jointIndex < other.getNumberOfJoints(); jointIndex++)
+      {
+         joints.add(other.joints.get(jointIndex));
+         jointSpecificParameters.add().set(other.jointSpecificParameters.get(jointIndex));
+      }
    }
 
    public void disable()
@@ -229,25 +249,6 @@ public class PrivilegedConfigurationCommand
    {
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          setMaxAcceleration(jointIndex, maxAcceleration);
-   }
-
-   /**
-    * Clears this command and then copies the data from {@code other} into this.
-    *
-    * @param other the other command to copy the data from. Not Modified.
-    */
-   @Override
-   public void set(PrivilegedConfigurationCommand other)
-   {
-      clear();
-      enable = other.enable;
-      defaultParameters.set(other.defaultParameters);
-
-      for (int jointIndex = 0; jointIndex < other.getNumberOfJoints(); jointIndex++)
-      {
-         OneDoFJointPrivilegedConfigurationParameters parameters = jointSpecificParameters.add();
-         parameters.set(other.jointSpecificParameters.get(jointIndex));
-      }
    }
 
    /**
