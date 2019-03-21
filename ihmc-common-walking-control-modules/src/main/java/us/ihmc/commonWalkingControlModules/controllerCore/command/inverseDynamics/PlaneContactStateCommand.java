@@ -247,7 +247,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
          if (rigidBody != other.rigidBody)
             return false;
-         if (coefficientOfFriction != other.coefficientOfFriction)
+         if (Double.compare(coefficientOfFriction, other.coefficientOfFriction) != 0)
             return false;
          if (getNumberOfContactPoints() != other.getNumberOfContactPoints())
             return false;
