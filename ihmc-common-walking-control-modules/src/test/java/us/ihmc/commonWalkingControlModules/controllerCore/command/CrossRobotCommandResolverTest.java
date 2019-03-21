@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-import org.reflections.Reflections;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -45,7 +44,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
@@ -70,26 +68,10 @@ class CrossRobotCommandResolverTest
 {
    private static final int ITERATIONS = 100;
 
-   @SuppressWarnings("rawtypes")
    @Test
    void testResolveControllerCoreCommand() throws Exception
    {
       Random random = new Random(657654);
-
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseDynamicsCommand>> inverseDynamicsCommandsToGenerate = reflections.getSubTypesOf(InverseDynamicsCommand.class);
-      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandList.class);
-      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandBuffer.class);
-      Set<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate = reflections.getSubTypesOf(InverseKinematicsCommand.class);
-      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandList.class);
-      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandBuffer.class);
-      Set<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate = reflections.getSubTypesOf(VirtualModelControlCommand.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandList.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandBuffer.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualEffortCommand.class);
-      Set<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate = reflections.getSubTypesOf(FeedbackControlCommand.class);
-      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandList.class);
-      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandBuffer.class);
 
       TestData testData = new TestData(random, 20, 20);
 
@@ -99,12 +81,9 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         ControllerCoreCommand in = ControllerCoreCommandRandomTools.nextControllerCoreCommand(new Random(seed), inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate,
-                                                              virtualModelControlCommandsToGenerate, feedbackControlCommandsToGenerate, testData.rootBodyA,
-                                                              testData.frameTreeA);
-         ControllerCoreCommand expectedOut = ControllerCoreCommandRandomTools.nextControllerCoreCommand(new Random(seed), inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate,
-                                                                       virtualModelControlCommandsToGenerate, feedbackControlCommandsToGenerate,
-                                                                       testData.rootBodyB, testData.frameTreeB);
+         ControllerCoreCommand in = ControllerCoreCommandRandomTools.nextControllerCoreCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
+         ControllerCoreCommand expectedOut = ControllerCoreCommandRandomTools.nextControllerCoreCommand(new Random(seed), testData.rootBodyB,
+                                                                                                        testData.frameTreeB);
          ControllerCoreCommandBuffer actualOut = new ControllerCoreCommandBuffer();
          crossRobotCommandResolver.resolveControllerCoreCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -117,10 +96,8 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseDynamicsCommand>> commandTypes = reflections.getSubTypesOf(InverseDynamicsCommand.class);
-      commandTypes.remove(InverseDynamicsCommandList.class);
-      commandTypes.remove(InverseDynamicsCommandBuffer.class);
+      Set<Class<? extends InverseDynamicsCommand>> commandTypes = ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class,
+                                                                                                                                  InverseDynamicsCommandBuffer.class);
 
       String errorMessage = "";
 
@@ -145,10 +122,8 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseKinematicsCommand>> commandTypes = reflections.getSubTypesOf(InverseKinematicsCommand.class);
-      commandTypes.remove(InverseKinematicsCommandList.class);
-      commandTypes.remove(InverseKinematicsCommandBuffer.class);
+      Set<Class<? extends InverseKinematicsCommand>> commandTypes = ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class,
+                                                                                                                                      InverseKinematicsCommandBuffer.class);
 
       String errorMessage = "";
 
@@ -173,10 +148,8 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends VirtualModelControlCommand>> commandTypes = reflections.getSubTypesOf(VirtualModelControlCommand.class);
-      commandTypes.remove(VirtualModelControlCommandList.class);
-      commandTypes.remove(VirtualModelControlCommandBuffer.class);
+      Set<Class<? extends VirtualModelControlCommand>> commandTypes = ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
+                                                                                                                                          VirtualModelControlCommandBuffer.class);
 
       String errorMessage = "";
 
@@ -201,10 +174,8 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends FeedbackControlCommand>> commandTypes = reflections.getSubTypesOf(FeedbackControlCommand.class);
-      commandTypes.remove(FeedbackControlCommandList.class);
-      commandTypes.remove(FeedbackControlCommandBuffer.class);
+      Set<Class<? extends FeedbackControlCommand>> commandTypes = ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandList.class,
+                                                                                                                                  FeedbackControlCommandBuffer.class);
 
       String errorMessage = "";
 
@@ -265,7 +236,6 @@ class CrossRobotCommandResolverTest
       }
    }
 
-   @SuppressWarnings("rawtypes")
    @Test
    void testResolveInverseDynamicsCommandList() throws Exception
    {
@@ -273,11 +243,6 @@ class CrossRobotCommandResolverTest
 
       TestData testData = new TestData(random, 20, 20);
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseDynamicsCommand>> commandTypes = reflections.getSubTypesOf(InverseDynamicsCommand.class);
-      commandTypes.remove(InverseDynamicsCommandList.class);
-      commandTypes.remove(InverseDynamicsCommandBuffer.class);
-
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
 
@@ -285,15 +250,16 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseDynamicsCommandList in = ControllerCoreCommandRandomTools.nextInverseDynamicsCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
-         InverseDynamicsCommandList expectedOut = ControllerCoreCommandRandomTools.nextInverseDynamicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         InverseDynamicsCommandList in = ControllerCoreCommandRandomTools.nextInverseDynamicsCommandList(new Random(seed), testData.rootBodyA,
+                                                                                                         testData.frameTreeA);
+         InverseDynamicsCommandList expectedOut = ControllerCoreCommandRandomTools.nextInverseDynamicsCommandList(new Random(seed), testData.rootBodyB,
+                                                                                                                  testData.frameTreeB);
          InverseDynamicsCommandBuffer actualOut = new InverseDynamicsCommandBuffer();
          crossRobotCommandResolver.resolveInverseDynamicsCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
-   @SuppressWarnings("rawtypes")
    @Test
    void testResolveInverseKinematicsCommandList() throws Exception
    {
@@ -301,11 +267,6 @@ class CrossRobotCommandResolverTest
 
       TestData testData = new TestData(random, 20, 20);
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseKinematicsCommand>> commandTypes = reflections.getSubTypesOf(InverseKinematicsCommand.class);
-      commandTypes.remove(InverseKinematicsCommandList.class);
-      commandTypes.remove(InverseKinematicsCommandBuffer.class);
-
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
 
@@ -313,15 +274,16 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseKinematicsCommandList in = ControllerCoreCommandRandomTools.nextInverseKinematicsCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
-         InverseKinematicsCommandList expectedOut = ControllerCoreCommandRandomTools.nextInverseKinematicsCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         InverseKinematicsCommandList in = ControllerCoreCommandRandomTools.nextInverseKinematicsCommandList(new Random(seed), testData.rootBodyA,
+                                                                                                             testData.frameTreeA);
+         InverseKinematicsCommandList expectedOut = ControllerCoreCommandRandomTools.nextInverseKinematicsCommandList(new Random(seed), testData.rootBodyB,
+                                                                                                                      testData.frameTreeB);
          InverseKinematicsCommandBuffer actualOut = new InverseKinematicsCommandBuffer();
          crossRobotCommandResolver.resolveInverseKinematicsCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
-   @SuppressWarnings("rawtypes")
    @Test
    void testResolveVirtualModelControlCommandList() throws Exception
    {
@@ -329,12 +291,6 @@ class CrossRobotCommandResolverTest
 
       TestData testData = new TestData(random, 20, 20);
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends VirtualModelControlCommand>> commandTypes = reflections.getSubTypesOf(VirtualModelControlCommand.class);
-      commandTypes.remove(VirtualModelControlCommandList.class);
-      commandTypes.remove(VirtualModelControlCommandBuffer.class);
-      commandTypes.remove(VirtualEffortCommand.class);
-
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
 
@@ -342,16 +298,16 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         VirtualModelControlCommandList in = ControllerCoreCommandRandomTools.nextVirtualModelControlCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
-         VirtualModelControlCommandList expectedOut = ControllerCoreCommandRandomTools.nextVirtualModelControlCommandList(new Random(seed), commandTypes, testData.rootBodyB,
-                                                                                         testData.frameTreeB);
+         VirtualModelControlCommandList in = ControllerCoreCommandRandomTools.nextVirtualModelControlCommandList(new Random(seed), testData.rootBodyA,
+                                                                                                                 testData.frameTreeA);
+         VirtualModelControlCommandList expectedOut = ControllerCoreCommandRandomTools.nextVirtualModelControlCommandList(new Random(seed), testData.rootBodyB,
+                                                                                                                          testData.frameTreeB);
          VirtualModelControlCommandBuffer actualOut = new VirtualModelControlCommandBuffer();
          crossRobotCommandResolver.resolveVirtualModelControlCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
 
-   @SuppressWarnings("rawtypes")
    @Test
    void testResolveFeedbackControlCommandList() throws Exception
    {
@@ -359,12 +315,6 @@ class CrossRobotCommandResolverTest
 
       TestData testData = new TestData(random, 20, 20);
 
-      Reflections reflections = new Reflections(ControllerCoreCommandRandomTools.CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends FeedbackControlCommand>> commandTypes = reflections.getSubTypesOf(FeedbackControlCommand.class);
-      commandTypes.remove(FeedbackControlCommandList.class);
-      commandTypes.remove(FeedbackControlCommandBuffer.class);
-      commandTypes.remove(VirtualEffortCommand.class);
-
       CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
                                                                                           testData.jointResolverForB);
 
@@ -372,8 +322,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         FeedbackControlCommandList in = ControllerCoreCommandRandomTools.nextFeedbackControlCommandList(new Random(seed), commandTypes, testData.rootBodyA, testData.frameTreeA);
-         FeedbackControlCommandList expectedOut = ControllerCoreCommandRandomTools.nextFeedbackControlCommandList(new Random(seed), commandTypes, testData.rootBodyB, testData.frameTreeB);
+         FeedbackControlCommandList in = ControllerCoreCommandRandomTools.nextFeedbackControlCommandList(new Random(seed), testData.rootBodyA,
+                                                                                                         testData.frameTreeA);
+         FeedbackControlCommandList expectedOut = ControllerCoreCommandRandomTools.nextFeedbackControlCommandList(new Random(seed), testData.rootBodyB,
+                                                                                                                  testData.frameTreeB);
          FeedbackControlCommandBuffer actualOut = new FeedbackControlCommandBuffer();
          crossRobotCommandResolver.resolveFeedbackControlCommandList(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -393,8 +345,12 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         LowLevelOneDoFJointDesiredDataHolder in = ControllerCoreCommandRandomTools.nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         LowLevelOneDoFJointDesiredDataHolder expectedOut = ControllerCoreCommandRandomTools.nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         LowLevelOneDoFJointDesiredDataHolder in = ControllerCoreCommandRandomTools.nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed),
+                                                                                                                             testData.rootBodyA,
+                                                                                                                             testData.frameTreeA);
+         LowLevelOneDoFJointDesiredDataHolder expectedOut = ControllerCoreCommandRandomTools.nextLowLevelOneDoFJointDesiredDataHolder(new Random(seed),
+                                                                                                                                      testData.rootBodyB,
+                                                                                                                                      testData.frameTreeB);
          LowLevelOneDoFJointDesiredDataHolder actualOut = new LowLevelOneDoFJointDesiredDataHolder();
          crossRobotCommandResolver.resolveLowLevelOneDoFJointDesiredDataHolder(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -415,7 +371,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          CenterOfPressureCommand in = ControllerCoreCommandRandomTools.nextCenterOfPressureCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         CenterOfPressureCommand expectedOut = ControllerCoreCommandRandomTools.nextCenterOfPressureCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         CenterOfPressureCommand expectedOut = ControllerCoreCommandRandomTools.nextCenterOfPressureCommand(new Random(seed), testData.rootBodyB,
+                                                                                                            testData.frameTreeB);
          CenterOfPressureCommand actualOut = new CenterOfPressureCommand();
          crossRobotCommandResolver.resolveCenterOfPressureCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -437,7 +394,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          ContactWrenchCommand in = ControllerCoreCommandRandomTools.nextContactWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         ContactWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextContactWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         ContactWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextContactWrenchCommand(new Random(seed), testData.rootBodyB,
+                                                                                                      testData.frameTreeB);
          ContactWrenchCommand actualOut = new ContactWrenchCommand();
          crossRobotCommandResolver.resolveContactWrenchCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -459,7 +417,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          ExternalWrenchCommand in = ControllerCoreCommandRandomTools.nextExternalWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         ExternalWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextExternalWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         ExternalWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextExternalWrenchCommand(new Random(seed), testData.rootBodyB,
+                                                                                                        testData.frameTreeB);
          ExternalWrenchCommand actualOut = new ExternalWrenchCommand();
          crossRobotCommandResolver.resolveExternalWrenchCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -480,10 +439,12 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseDynamicsOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
-                                                                                                        testData.frameTreeA);
-         InverseDynamicsOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextInverseDynamicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
-                                                                                                                 testData.frameTreeB);
+         InverseDynamicsOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextInverseDynamicsOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                         testData.rootBodyA,
+                                                                                                                                         testData.frameTreeA);
+         InverseDynamicsOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextInverseDynamicsOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                                  testData.rootBodyB,
+                                                                                                                                                  testData.frameTreeB);
          InverseDynamicsOptimizationSettingsCommand actualOut = new InverseDynamicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseDynamicsOptimizationSettingsCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -504,8 +465,11 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointAccelerationIntegrationCommand in = ControllerCoreCommandRandomTools.nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointAccelerationIntegrationCommand expectedOut = ControllerCoreCommandRandomTools.nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointAccelerationIntegrationCommand in = ControllerCoreCommandRandomTools.nextJointAccelerationIntegrationCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                           testData.frameTreeA);
+         JointAccelerationIntegrationCommand expectedOut = ControllerCoreCommandRandomTools.nextJointAccelerationIntegrationCommand(new Random(seed),
+                                                                                                                                    testData.rootBodyB,
+                                                                                                                                    testData.frameTreeB);
          JointAccelerationIntegrationCommand actualOut = new JointAccelerationIntegrationCommand();
          crossRobotCommandResolver.resolveJointAccelerationIntegrationCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -526,8 +490,11 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointLimitEnforcementMethodCommand in = ControllerCoreCommandRandomTools.nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointLimitEnforcementMethodCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitEnforcementMethodCommand in = ControllerCoreCommandRandomTools.nextJointLimitEnforcementMethodCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                         testData.frameTreeA);
+         JointLimitEnforcementMethodCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitEnforcementMethodCommand(new Random(seed),
+                                                                                                                                  testData.rootBodyB,
+                                                                                                                                  testData.frameTreeB);
          JointLimitEnforcementMethodCommand actualOut = new JointLimitEnforcementMethodCommand();
          crossRobotCommandResolver.resolveJointLimitEnforcementMethodCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -548,8 +515,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointspaceAccelerationCommand in = ControllerCoreCommandRandomTools.nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointspaceAccelerationCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceAccelerationCommand in = ControllerCoreCommandRandomTools.nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyA,
+                                                                                                               testData.frameTreeA);
+         JointspaceAccelerationCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceAccelerationCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                        testData.frameTreeB);
          JointspaceAccelerationCommand actualOut = new JointspaceAccelerationCommand();
          crossRobotCommandResolver.resolveJointspaceAccelerationCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -593,7 +562,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          PlaneContactStateCommand in = ControllerCoreCommandRandomTools.nextPlaneContactStateCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         PlaneContactStateCommand expectedOut = ControllerCoreCommandRandomTools.nextPlaneContactStateCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PlaneContactStateCommand expectedOut = ControllerCoreCommandRandomTools.nextPlaneContactStateCommand(new Random(seed), testData.rootBodyB,
+                                                                                                              testData.frameTreeB);
          PlaneContactStateCommand actualOut = new PlaneContactStateCommand();
          crossRobotCommandResolver.resolvePlaneContactStateCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -614,8 +584,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         SpatialAccelerationCommand in = ControllerCoreCommandRandomTools.nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         SpatialAccelerationCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialAccelerationCommand in = ControllerCoreCommandRandomTools.nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyA,
+                                                                                                         testData.frameTreeA);
+         SpatialAccelerationCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialAccelerationCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                  testData.frameTreeB);
          SpatialAccelerationCommand actualOut = new SpatialAccelerationCommand();
          crossRobotCommandResolver.resolveSpatialAccelerationCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -636,10 +608,12 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         InverseKinematicsOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
-                                                                                                            testData.frameTreeA);
-         InverseKinematicsOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextInverseKinematicsOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
-                                                                                                                     testData.frameTreeB);
+         InverseKinematicsOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextInverseKinematicsOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                             testData.rootBodyA,
+                                                                                                                                             testData.frameTreeA);
+         InverseKinematicsOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextInverseKinematicsOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                                      testData.rootBodyB,
+                                                                                                                                                      testData.frameTreeB);
          InverseKinematicsOptimizationSettingsCommand actualOut = new InverseKinematicsOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveInverseKinematicsOptimizationSettingsCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -660,8 +634,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointLimitReductionCommand in = ControllerCoreCommandRandomTools.nextJointLimitReductionCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointLimitReductionCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitReductionCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitReductionCommand in = ControllerCoreCommandRandomTools.nextJointLimitReductionCommand(new Random(seed), testData.rootBodyA,
+                                                                                                         testData.frameTreeA);
+         JointLimitReductionCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitReductionCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                  testData.frameTreeB);
          JointLimitReductionCommand actualOut = new JointLimitReductionCommand();
          crossRobotCommandResolver.resolveJointLimitReductionCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -682,8 +658,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointspaceVelocityCommand in = ControllerCoreCommandRandomTools.nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointspaceVelocityCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceVelocityCommand in = ControllerCoreCommandRandomTools.nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyA,
+                                                                                                       testData.frameTreeA);
+         JointspaceVelocityCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceVelocityCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                testData.frameTreeB);
          JointspaceVelocityCommand actualOut = new JointspaceVelocityCommand();
          crossRobotCommandResolver.resolveJointspaceVelocityCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -726,8 +704,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         PrivilegedConfigurationCommand in = ControllerCoreCommandRandomTools.nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         PrivilegedConfigurationCommand expectedOut = ControllerCoreCommandRandomTools.nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PrivilegedConfigurationCommand in = ControllerCoreCommandRandomTools.nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                 testData.frameTreeA);
+         PrivilegedConfigurationCommand expectedOut = ControllerCoreCommandRandomTools.nextPrivilegedConfigurationCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                          testData.frameTreeB);
          PrivilegedConfigurationCommand actualOut = new PrivilegedConfigurationCommand();
          crossRobotCommandResolver.resolvePrivilegedConfigurationCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -748,8 +728,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         PrivilegedJointSpaceCommand in = ControllerCoreCommandRandomTools.nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         PrivilegedJointSpaceCommand expectedOut = ControllerCoreCommandRandomTools.nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PrivilegedJointSpaceCommand in = ControllerCoreCommandRandomTools.nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyA,
+                                                                                                           testData.frameTreeA);
+         PrivilegedJointSpaceCommand expectedOut = ControllerCoreCommandRandomTools.nextPrivilegedJointSpaceCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                    testData.frameTreeB);
          PrivilegedJointSpaceCommand actualOut = new PrivilegedJointSpaceCommand();
          crossRobotCommandResolver.resolvePrivilegedJointSpaceCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -771,7 +753,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          SpatialVelocityCommand in = ControllerCoreCommandRandomTools.nextSpatialVelocityCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         SpatialVelocityCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialVelocityCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialVelocityCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialVelocityCommand(new Random(seed), testData.rootBodyB,
+                                                                                                          testData.frameTreeB);
          SpatialVelocityCommand actualOut = new SpatialVelocityCommand();
          crossRobotCommandResolver.resolveSpatialVelocityCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -792,8 +775,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointLimitEnforcementCommand in = ControllerCoreCommandRandomTools.nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointLimitEnforcementCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointLimitEnforcementCommand in = ControllerCoreCommandRandomTools.nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyA,
+                                                                                                             testData.frameTreeA);
+         JointLimitEnforcementCommand expectedOut = ControllerCoreCommandRandomTools.nextJointLimitEnforcementCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                      testData.frameTreeB);
          JointLimitEnforcementCommand actualOut = new JointLimitEnforcementCommand();
          crossRobotCommandResolver.resolveJointLimitEnforcementCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -858,10 +843,12 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         VirtualModelControlOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyA,
-                                                                                                                testData.frameTreeA);
-         VirtualModelControlOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualModelControlOptimizationSettingsCommand(new Random(seed), testData.rootBodyB,
-                                                                                                                         testData.frameTreeB);
+         VirtualModelControlOptimizationSettingsCommand in = ControllerCoreCommandRandomTools.nextVirtualModelControlOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                                 testData.rootBodyA,
+                                                                                                                                                 testData.frameTreeA);
+         VirtualModelControlOptimizationSettingsCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualModelControlOptimizationSettingsCommand(new Random(seed),
+                                                                                                                                                          testData.rootBodyB,
+                                                                                                                                                          testData.frameTreeB);
          VirtualModelControlOptimizationSettingsCommand actualOut = new VirtualModelControlOptimizationSettingsCommand();
          crossRobotCommandResolver.resolveVirtualModelControlOptimizationSettingsCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -883,7 +870,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          VirtualTorqueCommand in = ControllerCoreCommandRandomTools.nextVirtualTorqueCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         VirtualTorqueCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualTorqueCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         VirtualTorqueCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualTorqueCommand(new Random(seed), testData.rootBodyB,
+                                                                                                      testData.frameTreeB);
          VirtualTorqueCommand actualOut = new VirtualTorqueCommand();
          crossRobotCommandResolver.resolveVirtualTorqueCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -905,7 +893,8 @@ class CrossRobotCommandResolverTest
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
          VirtualWrenchCommand in = ControllerCoreCommandRandomTools.nextVirtualWrenchCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         VirtualWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualWrenchCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         VirtualWrenchCommand expectedOut = ControllerCoreCommandRandomTools.nextVirtualWrenchCommand(new Random(seed), testData.rootBodyB,
+                                                                                                      testData.frameTreeB);
          VirtualWrenchCommand actualOut = new VirtualWrenchCommand();
          crossRobotCommandResolver.resolveVirtualWrenchCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -926,8 +915,11 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         CenterOfMassFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         CenterOfMassFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         CenterOfMassFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextCenterOfMassFeedbackControlCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                         testData.frameTreeA);
+         CenterOfMassFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextCenterOfMassFeedbackControlCommand(new Random(seed),
+                                                                                                                                  testData.rootBodyB,
+                                                                                                                                  testData.frameTreeB);
          CenterOfMassFeedbackControlCommand actualOut = new CenterOfMassFeedbackControlCommand();
          crossRobotCommandResolver.resolveCenterOfMassFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -948,8 +940,11 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         JointspaceFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextJointspaceFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         JointspaceFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         JointspaceFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextJointspaceFeedbackControlCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                     testData.frameTreeA);
+         JointspaceFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextJointspaceFeedbackControlCommand(new Random(seed),
+                                                                                                                              testData.rootBodyB,
+                                                                                                                              testData.frameTreeB);
          JointspaceFeedbackControlCommand actualOut = new JointspaceFeedbackControlCommand();
          crossRobotCommandResolver.resolveJointspaceFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -970,8 +965,11 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         OrientationFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextOrientationFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         OrientationFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextOrientationFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         OrientationFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextOrientationFeedbackControlCommand(new Random(seed), testData.rootBodyA,
+                                                                                                                       testData.frameTreeA);
+         OrientationFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextOrientationFeedbackControlCommand(new Random(seed),
+                                                                                                                                testData.rootBodyB,
+                                                                                                                                testData.frameTreeB);
          OrientationFeedbackControlCommand actualOut = new OrientationFeedbackControlCommand();
          crossRobotCommandResolver.resolveOrientationFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -992,8 +990,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         PointFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextPointFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         PointFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextPointFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         PointFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextPointFeedbackControlCommand(new Random(seed), testData.rootBodyA,
+                                                                                                           testData.frameTreeA);
+         PointFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextPointFeedbackControlCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                    testData.frameTreeB);
          PointFeedbackControlCommand actualOut = new PointFeedbackControlCommand();
          crossRobotCommandResolver.resolvePointFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
@@ -1014,8 +1014,10 @@ class CrossRobotCommandResolverTest
       {
          long seed = random.nextLong();
          // By using the same seed on a fresh random, the two commands will be built the same way.
-         SpatialFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyA, testData.frameTreeA);
-         SpatialFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyB, testData.frameTreeB);
+         SpatialFeedbackControlCommand in = ControllerCoreCommandRandomTools.nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyA,
+                                                                                                               testData.frameTreeA);
+         SpatialFeedbackControlCommand expectedOut = ControllerCoreCommandRandomTools.nextSpatialFeedbackControlCommand(new Random(seed), testData.rootBodyB,
+                                                                                                                        testData.frameTreeB);
          SpatialFeedbackControlCommand actualOut = new SpatialFeedbackControlCommand();
          crossRobotCommandResolver.resolveSpatialFeedbackControlCommand(in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
