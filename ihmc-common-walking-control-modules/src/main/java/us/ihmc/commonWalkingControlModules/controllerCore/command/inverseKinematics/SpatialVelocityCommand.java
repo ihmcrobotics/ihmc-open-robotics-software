@@ -503,8 +503,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsHardEqualityConstraint()
    {
-      this.constraintType = ConstraintType.EQUALITY;
       setWeight(HARD_CONSTRAINT);
+      this.constraintType = ConstraintType.EQUALITY;
    }
 
    /**
@@ -517,8 +517,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsLessOrEqualInequalityConstraint()
    {
-      this.constraintType = ConstraintType.LEQ_INEQUALITY;
       setWeight(HARD_CONSTRAINT);
+      this.constraintType = ConstraintType.LEQ_INEQUALITY;
    }
 
    /**
@@ -531,8 +531,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsGreaterOrEqualInequalityConstraint()
    {
-      this.constraintType = ConstraintType.GEQ_INEQUALITY;
       setWeight(HARD_CONSTRAINT);
+      this.constraintType = ConstraintType.GEQ_INEQUALITY;
    }
 
    /**
