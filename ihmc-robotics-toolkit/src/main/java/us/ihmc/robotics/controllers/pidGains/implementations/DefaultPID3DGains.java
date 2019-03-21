@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 
 import java.util.Arrays;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -17,7 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
  * coupling the getters and setters in this implementation are designed for three dimensions.
  * </p>
  */
-public class DefaultPID3DGains implements PID3DGains
+public class DefaultPID3DGains implements PID3DGains, Settable<DefaultPID3DGains>
 {
    private double[] proportionalGains = new double[3];
    private double[] derivativeGains = new double[3];
@@ -37,6 +38,12 @@ public class DefaultPID3DGains implements PID3DGains
    public DefaultPID3DGains(PID3DGainsReadOnly other)
    {
       set(other);
+   }
+
+   @Override
+   public void set(DefaultPID3DGains other)
+   {
+      PID3DGains.super.set(other);
    }
 
    @Override
