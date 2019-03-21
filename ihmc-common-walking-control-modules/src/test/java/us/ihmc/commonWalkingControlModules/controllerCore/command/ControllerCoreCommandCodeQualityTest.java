@@ -126,6 +126,15 @@ public class ControllerCoreCommandCodeQualityTest
       return "";
    }
 
+   /**
+    * This first test for the equals method asserts that:
+    * <ul>
+    * <li>1 instance of a command is equal to itself.
+    * <li>2 instances of the same command obtained with the empty constructor are equal.
+    * </ul>
+    * 
+    * @throws Exception
+    */
    @SuppressWarnings("rawtypes")
    @Test
    void testEqualsWithEmptyObjects() throws Exception
@@ -156,6 +165,37 @@ public class ControllerCoreCommandCodeQualityTest
          fail("The following issues were detected:\n" + errorMessage);
    }
 
+   private static String testEqualsWithEmptyObject(Class<?> clazz) throws InstantiationException, IllegalAccessException
+   {
+      if (clazz.isInterface())
+         return "";
+
+      Object instance1 = clazz.newInstance();
+      if (instance1.equals(null))
+         return clazz.getSimpleName() + ".equals(null) returned true.\n";
+      if (!instance1.equals(instance1))
+         return "A fresh new instance of: " + clazz.getSimpleName() + " should be equal to itself.\n";
+
+      Object instance2 = clazz.newInstance();
+      if (!instance1.equals(instance2))
+         return "Two fresh new instances of a " + clazz.getSimpleName() + " should be equal.\n";
+      return "";
+   }
+
+   /**
+    * This second test for the equals method works as follows:
+    * <ol>
+    * <li>2 random instances of the same of command type are generated such that we know they are
+    * equal.
+    * <li>A field of one of the 2 commands is randomly modified.
+    * <li>Given a number of attempts, if the two commands are equal, i.e.
+    * {@code commandA.equals(commandB) == true}, then the equals method is assumed to not properly
+    * check the field being modified.
+    * <li>We loop over all controller core commands, and over all of each command's field.
+    * </ol>
+    * 
+    * @throws Exception
+    */
    @Test
    void testEqualsWithRandomObjects() throws Exception
    {
@@ -199,6 +239,7 @@ public class ControllerCoreCommandCodeQualityTest
 
          for (Field field : typeToTest.getDeclaredFields())
          {
+            // A static field is considered as non-representative of the object state.
             if (Modifier.isStatic(field.getModifiers()) || fieldsToIgnore.contains(field))
             {
                if (verbose)
@@ -211,15 +252,17 @@ public class ControllerCoreCommandCodeQualityTest
 
             boolean hasEqualsFailed = false;
 
+            // We give a few tries assuming that sometimes a field's value may not actually change after being randomly regenerated.
             for (int attempt = 0; attempt < 5; attempt++)
             {
                long seed = random.nextLong();
+               // Generating 2 objects that we know are the same because we use a fresh random with the same seed both times.
                Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody, referenceFrames);
                Object typeRandomInstanceDuplicate = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody,
                                                                                                       referenceFrames);
 
                try
-               {
+               { // We randomize the field's value on the first random object.
                   ControllerCoreCommandRandomTools.randomizeField(random, field, typeRandomInstance, rootBody, referenceFrames);
                }
                catch (UnsupportedOperationException e)
@@ -229,16 +272,15 @@ public class ControllerCoreCommandCodeQualityTest
                }
 
                if (!typeRandomInstance.equals(typeRandomInstanceDuplicate))
-               {
+               { // The equals method detected that we changed the field's value => the field is covered.
                   hasEqualsFailed = true;
                   break;
                }
             }
 
+            // The equals method never detected the changed, we make a report that'll be printed at the end of this test.
             if (!hasEqualsFailed)
-            {
                errorMessage += typeToTest.getSimpleName() + ".equals(Object) seems to be missing test for the field: " + field.getName() + "\n";
-            }
          }
       }
 
@@ -246,23 +288,12 @@ public class ControllerCoreCommandCodeQualityTest
          fail("The following issues were detected:\n" + errorMessage);
    }
 
-   private static String testEqualsWithEmptyObject(Class<?> clazz) throws InstantiationException, IllegalAccessException
-   {
-      if (clazz.isInterface())
-         return "";
-
-      Object instance1 = clazz.newInstance();
-      if (instance1.equals(null))
-         return clazz.getSimpleName() + ".equals(null) returned true.\n";
-      if (!instance1.equals(instance1))
-         return "A fresh new instance of: " + clazz.getSimpleName() + " should be equal to itself.\n";
-
-      Object instance2 = clazz.newInstance();
-      if (!instance1.equals(instance2))
-         return "Two fresh new instances of a " + clazz.getSimpleName() + " should be equal.\n";
-      return "";
-   }
-
+   /**
+    * API test to verify that {@link ControllerCoreCommandRandomTools} declares the random generators
+    * we need to generate controller core commands, including their fields.
+    * 
+    * @throws Exception
+    */
    @Test
    void testRandomGeneratorsAPI() throws Exception
    {
@@ -271,7 +302,7 @@ public class ControllerCoreCommandCodeQualityTest
       typesToIgnore.add(JointBasics.class);
       typesToIgnore.add(OneDoFJointBasics.class);
       typesToIgnore.add(RigidBodyBasics.class);
-      // Used in WeightMatrix3D for computation only
+      // Used in WeightMatrix3D & SelectionMatrix3D for computation only
       typesToIgnore.add(FrameMatrix3D.class);
       typesToIgnore.add(double[].class);
 
@@ -311,6 +342,17 @@ public class ControllerCoreCommandCodeQualityTest
          fail("The following issues were detected:\n" + errorMessage);
    }
 
+   /**
+    * This tests asserts that the random generators in {@link ControllerCoreCommandRandomTools}
+    * generate fully random objects, i.e. each field of a random object is generated randomly.
+    * <ol>
+    * <li>2 objects of the same type are generated randomly.
+    * <li>we then verify that each field is has different value in both objects.
+    * <li>as previously, we give the random generator a few shots before declaring it as buggy.
+    * </ol>
+    * 
+    * @throws Exception
+    */
    @Test
    void testRandomGeneratorsQuality() throws Exception
    {
@@ -419,6 +461,23 @@ public class ControllerCoreCommandCodeQualityTest
          fail("The following issues were detected:\n" + errorMessage);
    }
 
+   /**
+    * This test asserts that each command properly implement a copy setter, i.e. each field is copied
+    * from one command to the other.
+    * <p>
+    * Since we now know that the equals method of the commands is good and that our random generators
+    * can generate fully random objects, all we have to do is:
+    * <ul>
+    * <li>Generate 2 random objects of the same type.
+    * <li>Invoke the copy setter on one of them given the other object.
+    * <li>Assert the two objects are equal.
+    * <li>Try a few times for each type to reduce the chance of generating field's with the same value
+    * twice.
+    * </ul>
+    * </p>
+    * 
+    * @throws Exception
+    */
    @Test
    void testCommandCopySetterQuality() throws Exception
    {
@@ -458,16 +517,6 @@ public class ControllerCoreCommandCodeQualityTest
             continue;
          }
 
-         Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
-         Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
-
-         for (int attempt = 0; attempt < 5; attempt++)
-         {
-            if (!typeRandomInstanceA.equals(typeRandomInstanceB))
-               break;
-            typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
-         }
-
          Method copySetter;
          try
          {
@@ -478,9 +527,21 @@ public class ControllerCoreCommandCodeQualityTest
             throw new AssertionFailedError("Could not find a copy setter method for the type: " + typeToTest.getSimpleName());
          }
 
-         copySetter.invoke(typeRandomInstanceA, typeRandomInstanceB);
-         if (!typeRandomInstanceA.equals(typeRandomInstanceB))
-            errorMessage += "It seems that " + typeToTest.getSimpleName() + ".set(" + typeToTest.getSimpleName() + ") is missing to copy some of the fields.\n";
+         Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+
+         for (int attempt = 0; attempt < 10; attempt++)
+         {
+            Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+
+            copySetter.invoke(typeRandomInstanceA, typeRandomInstanceB);
+
+            if (!typeRandomInstanceA.equals(typeRandomInstanceB))
+            {
+               errorMessage += "It seems that " + typeToTest.getSimpleName() + ".set(" + typeToTest.getSimpleName()
+                     + ") is missing to copy some of the fields.\n";
+               break;
+            }
+         }
       }
 
       if (!errorMessage.isEmpty())
