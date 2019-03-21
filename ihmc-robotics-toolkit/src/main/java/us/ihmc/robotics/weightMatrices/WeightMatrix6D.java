@@ -502,30 +502,41 @@ public class WeightMatrix6D
    }
 
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(Object object)
    {
-      if (this == obj)
+      if (this == object)
+      {
          return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      WeightMatrix6D other = (WeightMatrix6D) obj;
-      if (angularWeights == null)
-      {
-         if (other.angularWeights != null)
-            return false;
       }
-      else if (!angularWeights.equals(other.angularWeights))
-         return false;
-      if (linearWeights == null)
+      else if (object instanceof WeightMatrix6D)
       {
-         if (other.angularWeights != null)
-            return false;
-      }
-      else if (!linearWeights.equals(other.linearWeights))
-         return false;
-      return true;
-   }
+         WeightMatrix6D other = (WeightMatrix6D) object;
 
+         if (angularWeights == null)
+         {
+            if (other.angularWeights != null)
+               return false;
+         }
+         else if (!angularWeights.equals(other.angularWeights))
+         {
+            return false;
+         }
+
+         if (linearWeights == null)
+         {
+            if (other.angularWeights != null)
+               return false;
+         }
+         else if (!linearWeights.equals(other.linearWeights))
+         {
+            return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
 }
