@@ -278,7 +278,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (sensorReaderFactory.useStateEstimator() && USE_EKF_ESTIMATOR)
       {
          reinitializeEKF = null;
-         
+
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
          SideDependentList<String> footForceSensorNames = sensorInformation.getFeetForceSensorNames();
          String primaryImuName = sensorInformation.getPrimaryBodyImu();
