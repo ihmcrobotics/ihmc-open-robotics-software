@@ -20,9 +20,9 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
 {
+   private static final int initialSize = 8;
    private RigidBodyBasics rigidBody;
    private double coefficientOfFriction = Double.NaN;
-   private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
