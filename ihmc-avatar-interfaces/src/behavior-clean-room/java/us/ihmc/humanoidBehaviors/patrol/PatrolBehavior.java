@@ -132,7 +132,9 @@ public class PatrolBehavior
          FramePose3D midFeetZUpPose = new FramePose3D();
          // prevent frame from continuing to change
          midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
-         FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(goalWaypointIndex.get()));
+         int index = goalWaypointIndex.get();
+         messager.submitMessage(API.CurrentWaypointIndexStatus, index);
+         FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(index));
 
          new Thread(() -> {  // plan in a thread to catch interruptions during planning
             footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint, latestPlanarRegions.get());
@@ -276,6 +278,10 @@ public class PatrolBehavior
 
       /** Output: to visualize the current state. */
       public static final Topic<String> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
+
+      /** Output: to visualize the current waypoint status. TODO clean me up */
+      public static final Topic<Integer> CurrentWaypointIndexStatus
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
 
       public static final MessagerAPI create()
       {
