@@ -1,9 +1,10 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 
-public class PDGains implements PDGainsReadOnly
+public class PDGains implements PDGainsReadOnly, Settable<PDGains>
 {
    private double kp;
    private double kd;
@@ -39,6 +40,12 @@ public class PDGains implements PDGainsReadOnly
    {
       this.kd = kd;
       zeta = GainCalculator.computeDampingRatio(kp, kd);
+   }
+
+   @Override
+   public void set(PDGains other)
+   {
+      set((PDGainsReadOnly) other);
    }
 
    public void set(PDGainsReadOnly other)
