@@ -37,6 +37,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,6 +45,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -119,7 +121,7 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
-   private final YoDouble capturePointVelocityAlpha = new YoDouble("capturePointVelocityAlpha", registry);
+   private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
@@ -160,7 +162,8 @@ public class LinearMomentumRateControlModule
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, elevator);
-      capturePointVelocityAlpha.set(0.5);
+      DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
+                                                                                                                       controlDT);
       capturePointVelocity = new FilteredVelocityYoFrameVector2d("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
 
       if (yoGraphicsListRegistry != null)
