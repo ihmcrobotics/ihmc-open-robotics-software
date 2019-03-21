@@ -359,19 +359,23 @@ public class VirtualModelControlOptimizationSettingsCommand implements VirtualMo
       else if (object instanceof VirtualModelControlOptimizationSettingsCommand)
       {
          VirtualModelControlOptimizationSettingsCommand other = (VirtualModelControlOptimizationSettingsCommand) object;
-         if (rhoMin != other.rhoMin)
+         if (Double.compare(rhoMin, other.rhoMin) != 0)
             return false;
-         if (rhoWeight != other.rhoWeight)
+         if (Double.compare(rhoWeight, other.rhoWeight) != 0)
             return false;
-         if (rhoRateWeight != other.rhoRateWeight)
+         if (Double.compare(rhoRateWeight, other.rhoRateWeight) != 0)
             return false;
-         if (!centerOfPressureWeight.equals(other.centerOfPressureWeight))
+         if (centerOfPressureWeight.containsNaN() ^ other.centerOfPressureWeight.containsNaN())
             return false;
-         if (!centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+         if (!centerOfPressureWeight.containsNaN() && !centerOfPressureWeight.equals(other.centerOfPressureWeight))
             return false;
-         if (momentumRateWeight != other.momentumRateWeight)
+         if (centerOfPressureRateWeight.containsNaN() ^ other.centerOfPressureRateWeight.containsNaN())
             return false;
-         if (momentumAccelerationWeight != other.momentumAccelerationWeight)
+         if (!centerOfPressureRateWeight.containsNaN() && !centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+            return false;
+         if (Double.compare(momentumRateWeight, other.momentumRateWeight) != 0)
+            return false;
+         if (Double.compare(momentumAccelerationWeight, other.momentumAccelerationWeight) != 0)
             return false;
          return true;
       }
