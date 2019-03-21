@@ -47,6 +47,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * A state estimator implementation for legged robots:</br>
@@ -95,6 +96,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final List<YoDouble> yoJointVelocities = new ArrayList<>();
    private final YoFramePose3D yoRootPose;
    private final YoFixedFrameTwist yoRootTwist;
+   private final YoFrameVector3D linearVelocityInWorld = new YoFrameVector3D("RootLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoseUsingYawPitchRoll pelvisPoseViz = new YoFramePoseUsingYawPitchRoll("PelvisPose", ReferenceFrame.getWorldFrame(), registry);
 
@@ -230,6 +232,7 @@ public class LeggedRobotEKF implements StateEstimatorController
 
       yoRootPose.set(rootTransform);
       yoRootTwist.set(rootTwist);
+      linearVelocityInWorld.setMatchingFrame(rootTwist.getLinearPart());
 
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
