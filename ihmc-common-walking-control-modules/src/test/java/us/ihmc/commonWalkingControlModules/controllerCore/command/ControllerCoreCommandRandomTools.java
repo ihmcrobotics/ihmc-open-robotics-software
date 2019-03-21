@@ -1,19 +1,23 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.RandomMatrices;
 import org.reflections.Reflections;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -63,6 +67,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -72,6 +77,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -85,6 +95,8 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.kinematics.JointLimitData;
+import us.ihmc.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -94,7 +106,97 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 
 public class ControllerCoreCommandRandomTools
 {
-   public static final String CONTROLLER_CORE_COMMANDS_PACKAGE = "us.ihmc.commonWalkingControlModules.controllerCore.command";
+   public static interface ReflectionBuilder
+   {
+      Object get(Class<?> clazz) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException;
+   }
+
+   private static Reflections controllerCoreReflections = null;
+   @SuppressWarnings("rawtypes")
+   private static Set<Class<? extends InverseDynamicsCommand>> allInverseDynamicsCommands = null;
+   @SuppressWarnings("rawtypes")
+   private static Set<Class<? extends InverseKinematicsCommand>> allInverseKinematicsCommands = null;
+   @SuppressWarnings("rawtypes")
+   private static Set<Class<? extends VirtualModelControlCommand>> allVirtualModelControlCommands = null;
+   @SuppressWarnings("rawtypes")
+   private static Set<Class<? extends FeedbackControlCommand>> allFeedbackControlCommands = null;
+
+   public static Reflections getControllerCoreReflectionsInstance()
+   {
+      if (controllerCoreReflections == null)
+      {
+         controllerCoreReflections = new Reflections("us.ihmc.commonWalkingControlModules.controllerCore.command");
+      }
+      return controllerCoreReflections;
+   }
+
+   @SafeVarargs
+   @SuppressWarnings("rawtypes")
+   public static Set<Class<? extends InverseDynamicsCommand>> getInverseDynamicsCommandTypes(Class<? extends InverseDynamicsCommand>... commandTypesToIgnore)
+   {
+      if (allInverseDynamicsCommands == null)
+         allInverseDynamicsCommands = getControllerCoreReflectionsInstance().getSubTypesOf(InverseDynamicsCommand.class);
+
+      Set<Class<? extends InverseDynamicsCommand>> commandTypes = new HashSet<>(allInverseDynamicsCommands);
+
+      if (commandTypesToIgnore != null)
+      {
+         for (Class<? extends InverseDynamicsCommand> commandTypeToIgnore : commandTypesToIgnore)
+            commandTypes.remove(commandTypeToIgnore);
+      }
+      return commandTypes;
+   }
+
+   @SafeVarargs
+   @SuppressWarnings("rawtypes")
+   public static Set<Class<? extends InverseKinematicsCommand>> getInverseKinematicsCommandTypes(Class<? extends InverseKinematicsCommand>... commandTypesToIgnore)
+   {
+      if (allInverseKinematicsCommands == null)
+         allInverseKinematicsCommands = getControllerCoreReflectionsInstance().getSubTypesOf(InverseKinematicsCommand.class);
+
+      Set<Class<? extends InverseKinematicsCommand>> commandTypes = new HashSet<>(allInverseKinematicsCommands);
+
+      if (commandTypesToIgnore != null)
+      {
+         for (Class<? extends InverseKinematicsCommand> commandTypeToIgnore : commandTypesToIgnore)
+            commandTypes.remove(commandTypeToIgnore);
+      }
+      return commandTypes;
+   }
+
+   @SafeVarargs
+   @SuppressWarnings("rawtypes")
+   public static Set<Class<? extends VirtualModelControlCommand>> getVirtualModelControlCommandTypes(Class<? extends VirtualModelControlCommand>... commandTypesToIgnore)
+   {
+      if (allVirtualModelControlCommands == null)
+         allVirtualModelControlCommands = getControllerCoreReflectionsInstance().getSubTypesOf(VirtualModelControlCommand.class);
+
+      Set<Class<? extends VirtualModelControlCommand>> commandTypes = new HashSet<>(allVirtualModelControlCommands);
+
+      if (commandTypesToIgnore != null)
+      {
+         for (Class<? extends VirtualModelControlCommand> commandTypeToIgnore : commandTypesToIgnore)
+            commandTypes.remove(commandTypeToIgnore);
+      }
+      return commandTypes;
+   }
+
+   @SafeVarargs
+   @SuppressWarnings("rawtypes")
+   public static Set<Class<? extends FeedbackControlCommand>> getFeedbackControlCommandTypes(Class<? extends FeedbackControlCommand>... commandTypesToIgnore)
+   {
+      if (allFeedbackControlCommands == null)
+         allFeedbackControlCommands = getControllerCoreReflectionsInstance().getSubTypesOf(FeedbackControlCommand.class);
+
+      Set<Class<? extends FeedbackControlCommand>> commandTypes = new HashSet<>(allFeedbackControlCommands);
+
+      if (commandTypesToIgnore != null)
+      {
+         for (Class<? extends FeedbackControlCommand> commandTypeToIgnore : commandTypesToIgnore)
+            commandTypes.remove(commandTypeToIgnore);
+      }
+      return commandTypes;
+   }
 
    @SafeVarargs
    public static <E> E nextElementIn(Random random, E... elements)
@@ -105,6 +207,39 @@ public class ControllerCoreCommandRandomTools
    public static <E> E nextElementIn(Random random, List<E> list)
    {
       return list.get(random.nextInt(list.size()));
+   }
+
+   public static Point2D nextPoint2D(Random random)
+   {
+      return EuclidCoreRandomTools.nextPoint2D(random);
+   }
+
+   public static Vector2D nextVector2D(Random random)
+   {
+      return EuclidCoreRandomTools.nextVector2D(random);
+   }
+
+   public static Point3D nextPoint3D(Random random)
+   {
+      return EuclidCoreRandomTools.nextPoint3D(random);
+   }
+
+   public static Vector3D nextVector3D(Random random)
+   {
+      return EuclidCoreRandomTools.nextVector3D(random);
+   }
+
+   public static RigidBodyTransform nextRigidBodyTransform(Random random)
+   {
+      return EuclidCoreRandomTools.nextRigidBodyTransform(random);
+   }
+
+   public static FrameTupleArrayList<FramePoint3D> nextFrameTupleArrayList(Random random, int size, ReferenceFrame... possibleFrames)
+   {
+      FrameTupleArrayList<FramePoint3D> next = FrameTupleArrayList.createFramePointArrayList();
+      while (next.size() < size)
+         next.add().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      return next;
    }
 
    public static FramePoint2D nextFramePoint2D(Random random, ReferenceFrame... possibleFrames)
@@ -146,6 +281,27 @@ public class ControllerCoreCommandRandomTools
    {
       return MecanoRandomTools.nextSpatialAcceleration(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames),
                                                        nextElementIn(random, possibleFrames));
+   }
+
+   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numRow, int numCol)
+   {
+      return RandomMatrices.createRandom(numRow, numCol, random);
+   }
+
+   public static DenseMatrixArrayList nextDenseMatrixArrayList(Random random, int numRow, int numCol, int size)
+   {
+      DenseMatrixArrayList next = new DenseMatrixArrayList();
+      while (next.size() < size)
+         next.add().set(nextDenseMatrix64F(random, numRow, numCol));
+      return next;
+   }
+
+   public static TDoubleArrayList nextTDoubleArrayList(Random random, int size)
+   {
+      TDoubleArrayList next = new TDoubleArrayList();
+      while (next.size() < size)
+         next.add(random.nextDouble());
+      return next;
    }
 
    public static WeightMatrix3D nextWeightMatrix3D(Random random, ReferenceFrame... possibleFrames)
@@ -243,11 +399,17 @@ public class ControllerCoreCommandRandomTools
 
    public static PID3DGains nextPID3DGains(Random random)
    {
-      PID3DGains next = new DefaultPID3DGains();
+      return nextDefaultPID3DGains(random);
+   }
+
+   public static DefaultPID3DGains nextDefaultPID3DGains(Random random)
+   {
+      DefaultPID3DGains next = new DefaultPID3DGains();
 
       next.setProportionalGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
       next.setDerivativeGains(random.nextDouble(), random.nextDouble(), random.nextDouble());
       next.setIntegralGains(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setMaxProportionalError(random.nextDouble());
       next.setMaxDerivativeError(random.nextDouble());
       next.setMaxFeedbackAndFeedbackRate(random.nextDouble(), random.nextDouble());
 
@@ -256,9 +418,14 @@ public class ControllerCoreCommandRandomTools
 
    public static PIDSE3Gains nextPIDSE3Gains(Random random)
    {
-      PIDSE3Gains next = new DefaultPIDSE3Gains();
-      next.setPositionGains(nextPID3DGains(random));
-      next.setOrientationGains(nextPID3DGains(random));
+      return nextDefaultPIDSE3Gains(random);
+   }
+
+   public static DefaultPIDSE3Gains nextDefaultPIDSE3Gains(Random random)
+   {
+      DefaultPIDSE3Gains next = new DefaultPIDSE3Gains();
+      next.setPositionGains(nextDefaultPID3DGains(random));
+      next.setOrientationGains(nextDefaultPID3DGains(random));
       return next;
    }
 
@@ -342,10 +509,18 @@ public class ControllerCoreCommandRandomTools
    public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, RigidBodyBasics rootBody,
                                                                                              ReferenceFrame... possibleFrames)
    {
+      return nextJointAccelerationIntegrationCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, boolean ensureNonEmptyCommand,
+                                                                                             RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
       JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -359,10 +534,18 @@ public class ControllerCoreCommandRandomTools
    public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, RigidBodyBasics rootBody,
                                                                                            ReferenceFrame... possibleFrames)
    {
+      return nextJointLimitEnforcementMethodCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, boolean ensureNonEmptyCommand,
+                                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
       JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -375,10 +558,18 @@ public class ControllerCoreCommandRandomTools
 
    public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextJointspaceAccelerationCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                                 ReferenceFrame... possibleFrames)
+   {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -401,6 +592,12 @@ public class ControllerCoreCommandRandomTools
 
    public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextPlaneContactStateCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                       ReferenceFrame... possibleFrames)
+   {
       PlaneContactStateCommand next = new PlaneContactStateCommand();
       next.setContactingRigidBody(nextElementIn(random, rootBody.subtreeList()));
       next.setCoefficientOfFriction(random.nextDouble());
@@ -411,6 +608,8 @@ public class ControllerCoreCommandRandomTools
          next.getContactFramePoseInBodyFixedFrame().set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
       int numberOfContactPoints = random.nextInt(20);
+      if (ensureNonEmptyCommand)
+         numberOfContactPoints = Math.max(numberOfContactPoints, 1);
 
       for (int i = 0; i < numberOfContactPoints; i++)
       {
@@ -451,10 +650,18 @@ public class ControllerCoreCommandRandomTools
 
    public static JointLimitReductionCommand nextJointLimitReductionCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextJointLimitReductionCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointLimitReductionCommand nextJointLimitReductionCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                           ReferenceFrame... possibleFrames)
+   {
       JointLimitReductionCommand next = new JointLimitReductionCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -467,10 +674,18 @@ public class ControllerCoreCommandRandomTools
 
    public static JointspaceVelocityCommand nextJointspaceVelocityCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextJointspaceVelocityCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointspaceVelocityCommand nextJointspaceVelocityCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                         ReferenceFrame... possibleFrames)
+   {
       JointspaceVelocityCommand next = new JointspaceVelocityCommand();
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -492,6 +707,12 @@ public class ControllerCoreCommandRandomTools
 
    public static PrivilegedConfigurationCommand nextPrivilegedConfigurationCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextPrivilegedConfigurationCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static PrivilegedConfigurationCommand nextPrivilegedConfigurationCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                                   ReferenceFrame... possibleFrames)
+   {
       PrivilegedConfigurationCommand next = new PrivilegedConfigurationCommand();
 
       if (random.nextBoolean())
@@ -499,6 +720,8 @@ public class ControllerCoreCommandRandomTools
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -516,10 +739,18 @@ public class ControllerCoreCommandRandomTools
 
    public static PrivilegedJointSpaceCommand nextPrivilegedJointSpaceCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextPrivilegedJointSpaceCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static PrivilegedJointSpaceCommand nextPrivilegedJointSpaceCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                             ReferenceFrame... possibleFrames)
+   {
       PrivilegedJointSpaceCommand next = new PrivilegedJointSpaceCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -545,7 +776,28 @@ public class ControllerCoreCommandRandomTools
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
       next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextPoint3D(random));
       next.getDesiredAngularVelocity().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+
+      if (random.nextBoolean())
+      { // Setup as objective
+         next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      }
+      else
+      {
+         switch (random.nextInt(3))
+         {
+         case 0:
+            next.setAsGreaterOrEqualInequalityConstraint();
+            break;
+         case 1:
+            next.setAsLessOrEqualInequalityConstraint();
+            break;
+         case 2:
+         default:
+            next.setAsHardEqualityConstraint();
+            break;
+         }
+      }
+      
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
       if (random.nextBoolean())
          next.setPrimaryBase(nextElementIn(random, rootBody.subtreeList()));
@@ -556,10 +808,18 @@ public class ControllerCoreCommandRandomTools
 
    public static JointLimitEnforcementCommand nextJointLimitEnforcementCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextJointLimitEnforcementCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointLimitEnforcementCommand nextJointLimitEnforcementCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                               ReferenceFrame... possibleFrames)
+   {
       JointLimitEnforcementCommand next = new JointLimitEnforcementCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -572,10 +832,18 @@ public class ControllerCoreCommandRandomTools
 
    public static JointTorqueCommand nextJointTorqueCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
+      return nextJointTorqueCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointTorqueCommand nextJointTorqueCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                           ReferenceFrame... possibleFrames)
+   {
       JointTorqueCommand next = new JointTorqueCommand();
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -645,7 +913,7 @@ public class ControllerCoreCommandRandomTools
       next.getReferencePosition().set(EuclidCoreRandomTools.nextPoint3D(random));
       next.getReferenceLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
       next.getReferenceLinearAcceleration().set(EuclidCoreRandomTools.nextVector3D(random));
-      next.setGains(nextPID3DGains(random));
+      next.setGains(nextDefaultPID3DGains(random));
       next.getMomentumRateCommand().set(nextMomentumRateCommand(random, rootBody, possibleFrames));
       return next;
    }
@@ -663,7 +931,10 @@ public class ControllerCoreCommandRandomTools
       OneDoFJointFeedbackControlCommand next = new OneDoFJointFeedbackControlCommand();
       next.setJoint(joint);
       next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
-      next.setInverseDynamics(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setReferencePosition(random.nextDouble());
+      next.setReferenceVelocity(random.nextDouble());
+      next.setReferenceAcceleration(random.nextDouble());
+      next.setReferenceEffort(random.nextDouble());
       next.setGains(nextPDGains(random));
       next.setWeightForSolver(random.nextDouble());
       return next;
@@ -672,10 +943,18 @@ public class ControllerCoreCommandRandomTools
    public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
                                                                                        ReferenceFrame... possibleFrames)
    {
+      return nextJointspaceFeedbackControlCommand(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                                       ReferenceFrame... possibleFrames)
+   {
       JointspaceFeedbackControlCommand next = new JointspaceFeedbackControlCommand();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -696,7 +975,7 @@ public class ControllerCoreCommandRandomTools
       next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getGains().set(nextPID3DGains(random));
+      next.getGains().set(nextDefaultPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
@@ -712,7 +991,7 @@ public class ControllerCoreCommandRandomTools
       next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getGains().set(nextPID3DGains(random));
+      next.getGains().set(nextDefaultPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
@@ -728,7 +1007,7 @@ public class ControllerCoreCommandRandomTools
       next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getGains().set(nextPIDSE3Gains(random));
+      next.getGains().set(nextDefaultPIDSE3Gains(random));
       next.setGainsFrames(nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
@@ -741,6 +1020,13 @@ public class ControllerCoreCommandRandomTools
       return next;
    }
 
+   public static InverseDynamicsCommandList nextInverseDynamicsCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      return nextInverseDynamicsCommandList(random, getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
+                                            rootBody, possibleFrames);
+   }
+
    @SuppressWarnings("rawtypes")
    public static InverseDynamicsCommandList nextInverseDynamicsCommandList(Random random,
                                                                            Collection<Class<? extends InverseDynamicsCommand>> commandsToGenerate,
@@ -750,6 +1036,7 @@ public class ControllerCoreCommandRandomTools
       InverseDynamicsCommandList next = new InverseDynamicsCommandList();
 
       List<Class<? extends InverseDynamicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      commandTypes.removeIf(Class::isInterface);
       List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
       commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
 
@@ -763,12 +1050,20 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
          InverseDynamicsCommand<?> command = (InverseDynamicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
       return next;
+   }
+
+   public static InverseKinematicsCommandList nextInverseKinematicsCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      return nextInverseKinematicsCommandList(random,
+                                              getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class, InverseKinematicsCommandBuffer.class),
+                                              rootBody, possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -780,6 +1075,7 @@ public class ControllerCoreCommandRandomTools
       InverseKinematicsCommandList next = new InverseKinematicsCommandList();
 
       List<Class<? extends InverseKinematicsCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      commandTypes.removeIf(Class::isInterface);
       List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
       commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
 
@@ -793,12 +1089,20 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
          InverseKinematicsCommand<?> command = (InverseKinematicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
       return next;
+   }
+
+   public static VirtualModelControlCommandList nextVirtualModelControlCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      return nextVirtualModelControlCommandList(random, getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
+                                                                                           VirtualModelControlCommandBuffer.class),
+                                                rootBody, possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -810,6 +1114,7 @@ public class ControllerCoreCommandRandomTools
       VirtualModelControlCommandList next = new VirtualModelControlCommandList();
 
       List<Class<? extends VirtualModelControlCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      commandTypes.removeIf(Class::isInterface);
       List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
       commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
 
@@ -823,12 +1128,19 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
          VirtualModelControlCommand<?> command = (VirtualModelControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
       return next;
+   }
+
+   public static FeedbackControlCommandList nextFeedbackControlCommandList(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
+   {
+      return nextFeedbackControlCommandList(random, getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class),
+                                            rootBody, possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -840,6 +1152,7 @@ public class ControllerCoreCommandRandomTools
       FeedbackControlCommandList next = new FeedbackControlCommandList();
 
       List<Class<? extends FeedbackControlCommand>> commandTypes = new ArrayList<>(commandsToGenerate);
+      commandTypes.removeIf(Class::isInterface);
       List<MutableInt> numberOfCommandsToGenerate = new ArrayList<>();
       commandTypes.forEach(c -> numberOfCommandsToGenerate.add(new MutableInt(random.nextInt(10))));
 
@@ -853,8 +1166,8 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = CrossRobotCommandResolverTest.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
-                                                                                        RigidBodyBasics.class, ReferenceFrame[].class);
+         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+                                                                                           RigidBodyBasics.class, ReferenceFrame[].class);
          FeedbackControlCommand<?> command = (FeedbackControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
       }
@@ -864,10 +1177,18 @@ public class ControllerCoreCommandRandomTools
    public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, RigidBodyBasics rootBody,
                                                                                                ReferenceFrame... possibleFrames)
    {
+      return nextLowLevelOneDoFJointDesiredDataHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, boolean ensureNonEmptyCommand,
+                                                                                               RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
       LowLevelOneDoFJointDesiredDataHolder next = new LowLevelOneDoFJointDesiredDataHolder();
 
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -878,27 +1199,15 @@ public class ControllerCoreCommandRandomTools
       return next;
    }
 
-   @SuppressWarnings("rawtypes")
    public static ControllerCoreCommand nextControllerCoreCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
-      Reflections reflections = new Reflections(CONTROLLER_CORE_COMMANDS_PACKAGE);
-      Set<Class<? extends InverseDynamicsCommand>> inverseDynamicsCommandsToGenerate = reflections.getSubTypesOf(InverseDynamicsCommand.class);
-      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandList.class);
-      inverseDynamicsCommandsToGenerate.remove(InverseDynamicsCommandBuffer.class);
-      Set<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate = reflections.getSubTypesOf(InverseKinematicsCommand.class);
-      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandList.class);
-      inverseKinematicsCommandsToGenerate.remove(InverseKinematicsCommandBuffer.class);
-      Set<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate = reflections.getSubTypesOf(VirtualModelControlCommand.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandList.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualModelControlCommandBuffer.class);
-      virtualModelControlCommandsToGenerate.remove(VirtualEffortCommand.class);
-      Set<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate = reflections.getSubTypesOf(FeedbackControlCommand.class);
-      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandList.class);
-      feedbackControlCommandsToGenerate.remove(FeedbackControlCommandBuffer.class);
-
-      return nextControllerCoreCommand(random, inverseDynamicsCommandsToGenerate, inverseKinematicsCommandsToGenerate, virtualModelControlCommandsToGenerate,
-                                       feedbackControlCommandsToGenerate, rootBody, possibleFrames);
+      return nextControllerCoreCommand(random, getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class, InverseDynamicsCommandBuffer.class),
+                                       getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class, InverseKinematicsCommandBuffer.class),
+                                       getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class, VirtualModelControlCommandBuffer.class,
+                                                                          VirtualEffortCommand.class),
+                                       getFeedbackControlCommandTypes(FeedbackControlCommandList.class, FeedbackControlCommandBuffer.class), rootBody,
+                                       possibleFrames);
    }
 
    @SuppressWarnings("rawtypes")
@@ -920,5 +1229,215 @@ public class ControllerCoreCommandRandomTools
       if (random.nextBoolean())
          next.requestReinitialization();
       return next;
+   }
+
+   public static void randomizeDoubleArray(Random random, double[] array)
+   {
+      for (int i = 0; i < array.length; i++)
+      {
+         array[i] = random.nextDouble();
+      }
+   }
+
+   public static void randomizeTDoubleArrayList(Random random, TDoubleArrayList listToRandomize)
+   {
+      for (int i = 0; i < listToRandomize.size(); i++)
+      {
+         listToRandomize.set(i, random.nextDouble());
+      }
+   }
+
+   public static void randomizeFrameTupleArrayList(Random random, FrameTupleArrayList<?> listToRandomize, ReferenceFrame... possibleFrames)
+   {
+      for (int i = 0; i < listToRandomize.size(); i++)
+      {
+         listToRandomize.get(i).setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      }
+   }
+
+   public static void randomizeDenseMatrixArrayList(Random random, DenseMatrixArrayList listToRandomize)
+   {
+      for (int i = 0; i < listToRandomize.size(); i++)
+      {
+         listToRandomize.get(i).set(RandomMatrices.createRandom(random.nextInt(15) + 1, random.nextInt(15) + 1, random));
+      }
+   }
+
+   public static void randomizeRecyclingArrayList(RecyclingArrayList<?> listToRandomize, ReflectionBuilder randomElementSupplier) throws Exception
+   {
+      if (listToRandomize.isEmpty())
+         return;
+
+      Field internalArrayField = RecyclingArrayList.class.getDeclaredField("values");
+      internalArrayField.setAccessible(true);
+      Object[] values = (Object[]) internalArrayField.get(listToRandomize);
+
+      for (int i = 0; i < values.length; i++)
+      {
+         values[i] = randomElementSupplier.get(values[i].getClass());
+      }
+   }
+
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   public static void randomizeList(List listToRandomize, ReflectionBuilder randomElementSupplier) throws Exception
+   {
+      if (listToRandomize.isEmpty())
+         return;
+
+      if (listToRandomize instanceof RecyclingArrayList)
+      {
+         randomizeRecyclingArrayList((RecyclingArrayList<?>) listToRandomize, randomElementSupplier);
+         return;
+      }
+
+      for (int i = 0; i < listToRandomize.size(); i++)
+      {
+         listToRandomize.set(i, randomElementSupplier.get(listToRandomize.get(i).getClass()));
+      }
+   }
+
+   @SuppressWarnings("rawtypes")
+   public static void randomizeField(Random random, Field field, Object fieldOwnerInstance, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws Exception
+   {
+      field.setAccessible(true);
+      Class<?> fieldType = field.getType();
+      Object fieldInstance = field.get(fieldOwnerInstance);
+
+      if (fieldType == DenseMatrixArrayList.class)
+      {
+         randomizeDenseMatrixArrayList(random, (DenseMatrixArrayList) fieldInstance);
+      }
+      else if (fieldType == FrameTupleArrayList.class)
+      {
+         randomizeFrameTupleArrayList(random, (FrameTupleArrayList<?>) fieldInstance, possibleFrames);
+      }
+      else if (fieldType == RecyclingArrayList.class)
+      {
+         randomizeRecyclingArrayList((RecyclingArrayList<?>) fieldInstance,
+                                     (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
+      }
+      else if (fieldType == List.class)
+      {
+         randomizeList((List) fieldInstance, (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
+      }
+      else if (fieldType == TDoubleArrayList.class)
+      {
+         randomizeTDoubleArrayList(random, (TDoubleArrayList) fieldInstance);
+      }
+      else if (fieldType == double[].class)
+      {
+         randomizeDoubleArray(random, (double[]) fieldInstance);
+      }
+      else if (fieldType.isPrimitive())
+      {
+         randomizePrimitiveField(random, field, fieldOwnerInstance);
+      }
+      else if (fieldType == DenseMatrix64F.class)
+      {
+         field.set(fieldOwnerInstance, RandomMatrices.createRandom(10, 10, random));
+      }
+      else
+      {
+         field.set(fieldOwnerInstance, nextTypeInstance(fieldType, random, true, rootBody, possibleFrames));
+      }
+   }
+
+   public static void randomizePrimitiveField(Random random, Field field, Object fieldOwnerInstance) throws Exception
+   {
+      field.setAccessible(true);
+      Class<?> fieldType = field.getType();
+
+      if (fieldType == double.class)
+         field.set(fieldOwnerInstance, random.nextDouble());
+      else if (fieldType == int.class)
+         field.set(fieldOwnerInstance, random.nextInt(20));
+      else if (fieldType == boolean.class)
+         field.set(fieldOwnerInstance, random.nextBoolean());
+      else if (fieldType == long.class)
+         field.set(fieldOwnerInstance, random.nextLong());
+      else
+         throw new RuntimeException("Unhandled primitive: " + fieldType.getSimpleName());
+   }
+
+   public static Object nextTypeInstance(Class<?> typeToInstantiateRandomly, Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                         ReferenceFrame... possibleFrames)
+         throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
+   {
+      if (typeToInstantiateRandomly.isEnum())
+      {
+         return nextElementIn(random, typeToInstantiateRandomly.getEnumConstants());
+      }
+      else if (typeToInstantiateRandomly == RigidBodyBasics.class)
+      {
+         return nextElementIn(random, rootBody.subtreeArray());
+      }
+      else if (typeToInstantiateRandomly == ReferenceFrame.class)
+      {
+         return nextElementIn(random, possibleFrames);
+      }
+      else if (OneDoFJointBasics.class.isAssignableFrom(typeToInstantiateRandomly))
+      {
+         return nextElementIn(random, SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList()));
+      }
+      else if (JointBasics.class.isAssignableFrom(typeToInstantiateRandomly))
+      {
+         List<JointBasics> allJoints = SubtreeStreams.fromChildren(JointBasics.class, rootBody).collect(Collectors.toList());
+         return nextElementIn(random, allJoints);
+      }
+
+      String methodName = "next" + typeToInstantiateRandomly.getSimpleName();
+      List<Method> potentialGenerators = Stream.of(ControllerCoreCommandRandomTools.class.getDeclaredMethods()).filter(m -> m.getName().equals(methodName))
+                                               .collect(Collectors.toList());
+
+      if (potentialGenerators.size() > 1)
+      {
+         potentialGenerators.sort((m1, m2) -> Integer.compare(m1.getParameterCount(), m2.getParameterCount()));
+      }
+      else if (potentialGenerators.isEmpty())
+      {
+         throw new UnsupportedOperationException("Encountered problem finding random generator for: " + typeToInstantiateRandomly.getSimpleName());
+      }
+
+      Method generator = potentialGenerators.get(0);
+
+      for (int i = 0; i < potentialGenerators.size(); i++)
+      {
+         if (Stream.of(potentialGenerators.get(i).getParameterTypes()).anyMatch(type -> type == boolean.class))
+         {
+            generator = potentialGenerators.get(i);
+            break;
+         }
+      }
+
+      Object[] arguments = new Object[generator.getParameterCount()];
+      arguments[0] = random;
+
+      for (int argIndex = 1; argIndex < generator.getParameterCount(); argIndex++)
+      {
+         Class<?> parameterType = generator.getParameterTypes()[argIndex];
+         if (parameterType == RigidBodyBasics.class)
+         {
+            arguments[argIndex] = rootBody;
+         }
+         else if (parameterType == ReferenceFrame[].class)
+         {
+            arguments[argIndex] = possibleFrames;
+         }
+         else if (parameterType == OneDoFJointBasics.class)
+         {
+            arguments[argIndex] = nextElementIn(random, SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList()));
+         }
+         else if (parameterType == boolean.class)
+         {
+            arguments[argIndex] = ensureNonEmptyCommand;
+         }
+         else
+         {
+            throw new RuntimeException("Unexpected type: " + parameterType.getSimpleName());
+         }
+      }
+
+      return generator.invoke(null, arguments);
    }
 }
