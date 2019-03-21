@@ -30,7 +30,7 @@ import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
 {
    /** Initial capacity of the internal memory. */
-   private final int initialCapacity = 15;
+   private static final int initialCapacity = 15;
    /** Gains to used by the PD controllers for the next control tick. */
    private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> jointCommands = new RecyclingArrayList<>(initialCapacity,
                                                                                                                 OneDoFJointFeedbackControlCommand.class);

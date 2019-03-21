@@ -33,7 +33,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class JointAccelerationIntegrationCommand
       implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>, VirtualModelControlCommand<JointAccelerationIntegrationCommand>
 {
-   private final int initialCapacity = 15;
+   private static final int initialCapacity = 15;
    private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                        JointAccelerationIntegrationParameters.class);

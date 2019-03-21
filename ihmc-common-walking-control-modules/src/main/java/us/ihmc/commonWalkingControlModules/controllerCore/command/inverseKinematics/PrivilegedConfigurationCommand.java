@@ -12,6 +12,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class PrivilegedConfigurationCommand
       implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
 {
+   /** Initial capacity of the internal memory. */
+   private static final int initialCapacity = 40;
+
    /** different options for the desired privileged configurations. Made for ease of access. */
    public enum PrivilegedConfigurationOption
    {
@@ -21,8 +24,6 @@ public class PrivilegedConfigurationCommand
    /** sets whether or not to utilize the privileged configuration calculator */
    private boolean enable = false;
    private final OneDoFJointPrivilegedConfigurationParameters defaultParameters = new OneDoFJointPrivilegedConfigurationParameters();
-   /** Initial capacity of the internal memory. */
-   private final int initialCapacity = 40;
    /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<OneDoFJointPrivilegedConfigurationParameters> jointSpecificParameters = new RecyclingArrayList<>(initialCapacity,

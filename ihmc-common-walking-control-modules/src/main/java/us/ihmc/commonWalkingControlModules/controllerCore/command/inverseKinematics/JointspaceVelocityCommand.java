@@ -40,7 +40,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * Initial capacity for the lists used in this command. It is to prevent memory allocation at the
     * beginning of the control.
     */
-   private final int initialCapacity = 15;
+   private static final int initialCapacity = 15;
    /** The list of joints for which desired velocities are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**

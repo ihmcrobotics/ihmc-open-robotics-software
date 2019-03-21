@@ -11,7 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<PrivilegedJointSpaceCommand>, InverseDynamicsCommand<PrivilegedJointSpaceCommand>
 {
    /** Initial capacity of the internal memory. */
-   private final int initialCapacity = 40;
+   private static final int initialCapacity = 40;
 
    /** sets whether or not to utilize the privileged acceleration calculator */
    private boolean enable = false;
