@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
@@ -33,6 +34,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    @FXML private Button goToWaypoint;
    @FXML private Spinner<Integer> waypointIndex;
    @FXML private Button pauseWalking;
+   @FXML private TextField remoteCurrentWaypointIndex;
+   @FXML private TextField remoteCurrentState;
 
    private JavaFXMessager messager;
    private BehaviorTeleop teleop;
@@ -59,6 +62,10 @@ public class PatrolBehaviorUIController extends FXUIBehavior
             footstepPlanGraphic.generateMeshes(plan);
          });
       });
+
+      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentState, state -> remoteCurrentState.setText(state));
+      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
+                                                       index -> remoteCurrentWaypointIndex.setText(index.toString()));
 
       activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
       messager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->

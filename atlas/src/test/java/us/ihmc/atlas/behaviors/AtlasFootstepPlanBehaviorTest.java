@@ -109,7 +109,7 @@ public class AtlasFootstepPlanBehaviorTest
       LogTools.info("Planning from {}, {}, yaw: {}", lastX, lastY, lastYaw);
       LogTools.info("to {}, {}, yaw: {}", x, y, yaw);
 
-      FootstepPlanningToolboxOutputStatus output1 = remoteFootstepPlannerInterface.requestPlanBlocking(startPose, goalPose);
+      FootstepPlanningToolboxOutputStatus output1 = remoteFootstepPlannerInterface.requestPlanBlocking(startPose, goalPose, null);
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(output1.getFootstepPlanningResult()));
       LogTools.info("Received footstep plan took: {} s", output1.getTimeTaken());
@@ -171,7 +171,9 @@ public class AtlasFootstepPlanBehaviorTest
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
       currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
-      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint);
+      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose,
+                                                                                                      currentGoalWaypoint,
+                                                                                                      null);
 
       LogTools.info("Received footstep planning status: {}", output);
 
