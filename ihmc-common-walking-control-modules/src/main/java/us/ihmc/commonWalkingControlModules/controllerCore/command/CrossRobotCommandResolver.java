@@ -506,6 +506,7 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearVelocity().set(in.getDesiredLinearVelocity());
       out.getDesiredAngularVelocity().set(in.getDesiredAngularVelocity());
+      out.setConstraintType(in.getConstraintType());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
