@@ -1,11 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,11 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
@@ -65,9 +59,12 @@ public class OpenDoorBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 //            moveHand( 0.797,-0.083,0.912,  1.521 , 0, -1.641 , "Moving Hand Above Door Knob3");
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 0.335, -0.087,  1.124,1.2478615483800362, -0.12618033550878305, 0.3133655061333552,RobotSide.LEFT,"Moving Left Hand To Door"));
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.795, -0.06,  1.032 , 1.7318790859631, 0.9163508562370669, -0.2253954188985998,RobotSide.RIGHT, "Moving Right Hand Above Door Knob"));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 0.298, -0.147,  1.097,1.2554068994570775, 0.03416782147174632, 0.26586161890007015,RobotSide.LEFT,"Moving Left Hand To Door"));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.102,  1.079 , 1.551252338779563, 0.048351007951384285, 0.007252343575301105,RobotSide.RIGHT, "Moving Right Hand Above Door Knob"));
+//LEFT hand in MultiClickdoor_0_objID639 ( 0.298, -0.147,  1.097 ) orientation 1.2554068994570775, 0.03416782147174632, 0.26586161890007015
+//RIGHT hand in MultiClickdoor_0_objID639 ( 0.833, -0.102,  1.079 ) orientation 1.551252338779563, 0.048351007951384285, 0.007252343575301105
 
+            
          }
       };
 
@@ -76,7 +73,9 @@ public class OpenDoorBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.770, -0.092,  0.882,  1.7318790859631, 0.9163508562370669, -0.2253954188985998 , RobotSide.RIGHT,"Moving Hand To Door Knob"));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.101,  0.879,  1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT,"Moving Hand To Door Knob"));
+            //RIGHT hand in MultiClickdoor_0_objID639 ( 0.780, -0.101,  0.879 ) orientation 1.551252338779563, 0.048351007951384285, 0.007252343575301105
+
          }
       };
       BehaviorAction pushDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
@@ -84,11 +83,31 @@ public class OpenDoorBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.400,  0.096,  0.8,  1.244653857913857, -0.12493851224047543, 0.34615057210000433 , RobotSide.LEFT,"Pushing Door"));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455,  0.218,  1.154,  1.7318790859631, 0.9163508562370669, -0.2253954188985998  , RobotSide.LEFT,"Pushing Door"));
 //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.777, -0.032,  0.882, 1.7318790859631, 0.9163508562370669, -0.2253954188985998 , RobotSide.RIGHT,"Moving Hand To Door Knob"));
+            //LEFT hand in MultiClickdoor_0_objID639 ( 0.455,  0.218,  1.154 ) orientation 1.2609443582725661, 0.02096196100421688, 0.27326972080173334
+
+            //Pull Hand back LEFT hand in MultiClickdoor_0_objID639 ( 0.274, -0.208,  0.798 ) orientation 1.2609443582725661, 0.02096196100421688, 0.27326972080173334
+
 
          }
       };
+      
+      BehaviorAction pullHandsBack = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.274, -0.208,  0.798 ,  1.2609443582725661, 0.02096196100421688, 0.27326972080173334, RobotSide.LEFT,"Pushing Door"));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.777, -0.032,  0.882, 1.7318790859631, 0.9163508562370669, -0.2253954188985998 , RobotSide.RIGHT,"Moving Hand To Door Knob"));
+            //LEFT hand in MultiClickdoor_0_objID639 ( 0.455,  0.218,  1.154 ) orientation 1.2609443582725661, 0.02096196100421688, 0.27326972080173334
+
+            //Pull Hand back LEFT hand in MultiClickdoor_0_objID639 ( 0.274, -0.208,  0.798 ) orientation 1.2609443582725661, 0.02096196100421688, 0.27326972080173334
+
+
+         }
+      };
+
 
 //      BehaviorAction moveHandCloseToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
 //      {
@@ -118,6 +137,7 @@ public class OpenDoorBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(moveHandsToDoor);
       pipeLine.submitSingleTaskStage(moveRightHandToDoorKnob);
       pipeLine.submitSingleTaskStage(pushDoor);
+      pipeLine.submitSingleTaskStage(pullHandsBack);
 
 
       //pipeLine.submitSingleTaskStage(moveRightHandAboveDoorKnob);
@@ -189,7 +209,7 @@ public class OpenDoorBehavior extends AbstractBehavior
 
       uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, 2, point.getPosition(),
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, 10, point.getPosition(),
                                                                                                      point.getOrientation(),
                                                                                                      CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
