@@ -10,6 +10,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand, PelvisTrajectoryMessage>, FrameBasedCommand<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryCommand>
 {
+   private long sequenceId;
    private boolean enableUserPelvisControl = false;
    private boolean enableUserPelvisControlDuringWalking = false;
    private final SE3TrajectoryControllerCommand se3Trajectory;
@@ -27,12 +28,14 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    @Override
    public void clear()
    {
+      sequenceId = 0;
       se3Trajectory.clear();
    }
 
    @Override
    public void set(PelvisTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(other.isEnableUserPelvisControl());
       se3Trajectory.set(other.se3Trajectory);
@@ -41,6 +44,7 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(message.getEnableUserPelvisControl());
       se3Trajectory.set(resolver, message.getSe3Trajectory());
@@ -49,6 +53,7 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    @Override
    public void setFromMessage(PelvisTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       setEnableUserPelvisControl(message.getEnableUserPelvisControl());
       se3Trajectory.setFromMessage(message.getSe3Trajectory());
@@ -125,5 +130,11 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    public double getExecutionTime()
    {
       return se3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

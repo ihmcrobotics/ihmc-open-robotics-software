@@ -26,6 +26,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3TrajectoryControllerCommand, SE3TrajectoryMessage>
       implements FrameBasedCommand<SE3TrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
@@ -47,6 +48,8 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
 
    public SE3TrajectoryControllerCommand(Random random)
    {
+      sequenceId = random.nextInt();
+
       int randomNumberOfPoints = random.nextInt(16) + 1;
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
@@ -63,6 +66,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -71,6 +75,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
 
    public void clear(ReferenceFrame referenceFrame)
    {
+      sequenceId = 0;
       trajectoryPointList.clear(referenceFrame);
       clearQueuableCommandVariables();
       selectionMatrix.resetSelection();
@@ -111,6 +116,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    @Override
    public void setFromMessage(SE3TrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -147,6 +153,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
     */
    public void setPropertiesOnly(SE3TrajectoryControllerCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
@@ -317,5 +324,11 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    public Class<SE3TrajectoryMessage> getMessageClass()
    {
       return SE3TrajectoryMessage.class;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

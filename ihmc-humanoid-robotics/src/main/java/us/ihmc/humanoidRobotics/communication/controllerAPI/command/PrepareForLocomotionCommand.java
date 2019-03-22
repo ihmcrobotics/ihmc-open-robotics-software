@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class PrepareForLocomotionCommand implements Command<PrepareForLocomotionCommand, PrepareForLocomotionMessage>
 {
+   private long sequenceId;
    private boolean prepareManipulation = true;
    private boolean preparePelvis = true;
 
@@ -15,6 +16,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    @Override
    public void clear()
    {
+      sequenceId = 0;
       prepareManipulation = true;
       preparePelvis = true;
    }
@@ -22,6 +24,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    @Override
    public void set(PrepareForLocomotionCommand other)
    {
+      sequenceId = other.sequenceId;
       prepareManipulation = other.prepareManipulation;
       preparePelvis = other.preparePelvis;
    }
@@ -29,6 +32,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    @Override
    public void setFromMessage(PrepareForLocomotionMessage message)
    {
+      sequenceId = message.getSequenceId();
       prepareManipulation = message.getPrepareManipulation();
       preparePelvis = message.getPreparePelvis();
 
@@ -78,5 +82,11 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

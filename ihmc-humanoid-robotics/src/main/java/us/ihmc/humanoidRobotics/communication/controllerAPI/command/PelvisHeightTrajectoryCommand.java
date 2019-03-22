@@ -14,6 +14,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajectoryCommand, PelvisHeightTrajectoryMessage>,
       FrameBasedCommand<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryCommand>
 {
+   private long sequenceId;
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the
     * leg kinematics
@@ -43,6 +44,7 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
     */
    public void clear()
    {
+      sequenceId = 0;
       euclideanTrajectory.clear();
       enableUserPelvisControl = false;
       enableUserPelvisControlDuringWalking = false;
@@ -56,6 +58,7 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
     */
    public void clear(ReferenceFrame referenceFrame)
    {
+      sequenceId = 0;
       euclideanTrajectory.clear(referenceFrame);
       enableUserPelvisControl = false;
       enableUserPelvisControlDuringWalking = false;
@@ -69,6 +72,7 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    @Override
    public void set(PelvisHeightTrajectoryCommand command)
    {
+      sequenceId = command.sequenceId;
       euclideanTrajectory.set(command.euclideanTrajectory);
       enableUserPelvisControl = command.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = command.enableUserPelvisControlDuringWalking;
@@ -82,6 +86,7 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    @Override
    public void setFromMessage(PelvisHeightTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
       enableUserPelvisControl = message.getEnableUserPelvisControl();
       enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
@@ -257,5 +262,11 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    public double getExecutionTime()
    {
       return euclideanTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

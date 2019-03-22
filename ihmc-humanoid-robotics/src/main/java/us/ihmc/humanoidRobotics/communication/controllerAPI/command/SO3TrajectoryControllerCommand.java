@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3TrajectoryControllerCommand, SO3TrajectoryMessage>
       implements FrameBasedCommand<SO3TrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -40,6 +41,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
 
    public SO3TrajectoryControllerCommand(Random random)
    {
+      sequenceId = random.nextInt();
       int randomNumberOfPoints = random.nextInt(16) + 1;
       for (int i = 0; i < randomNumberOfPoints; i++)
       {
@@ -55,6 +57,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -63,6 +66,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
 
    public void clear(ReferenceFrame referenceFrame)
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear(referenceFrame);
       selectionMatrix.resetSelection();
@@ -100,6 +104,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    @Override
    public void setFromMessage(SO3TrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
       List<SO3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -128,6 +133,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
     */
    public void setPropertiesOnly(SO3TrajectoryControllerCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
@@ -292,5 +298,11 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    public Class<SO3TrajectoryMessage> getMessageClass()
    {
       return SO3TrajectoryMessage.class;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

@@ -11,6 +11,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class ChestTrajectoryCommand
       implements Command<ChestTrajectoryCommand, ChestTrajectoryMessage>, FrameBasedCommand<ChestTrajectoryMessage>, EpsilonComparable<ChestTrajectoryCommand>
 {
+   private long sequenceId;
    private final SO3TrajectoryControllerCommand so3Trajectory;
 
    public ChestTrajectoryCommand()
@@ -26,18 +27,21 @@ public class ChestTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       so3Trajectory.clear();
    }
 
    @Override
    public void set(ChestTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       so3Trajectory.set(other.so3Trajectory);
    }
 
    @Override
    public void setFromMessage(ChestTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       so3Trajectory.setFromMessage(message.getSo3Trajectory());
    }
 
@@ -98,5 +102,11 @@ public class ChestTrajectoryCommand
    public double getExecutionTime()
    {
       return so3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

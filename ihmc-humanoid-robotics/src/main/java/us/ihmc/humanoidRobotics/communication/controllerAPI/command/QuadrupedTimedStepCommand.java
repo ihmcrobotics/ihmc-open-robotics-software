@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.TimeIntervalMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepCommand, QuadrupedTimedStepMessage>
 {
+   private long sequenceId;
    private final QuadrupedStepCommand stepCommand = new QuadrupedStepCommand();
    private final TimeIntervalCommand timeIntervalCommand = new TimeIntervalCommand();
 
@@ -19,6 +19,7 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    @Override
    public void clear()
    {
+      sequenceId = 0;
       stepCommand.clear();
       timeIntervalCommand.clear();
    }
@@ -26,6 +27,7 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    @Override
    public void setFromMessage(QuadrupedTimedStepMessage message)
    {
+      sequenceId = message.getSequenceId();
       stepCommand.setFromMessage(message.getQuadrupedStepMessage());
       timeIntervalCommand.setFromMessage(message.getTimeInterval());
    }
@@ -33,6 +35,7 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    @Override
    public void set(QuadrupedTimedStepCommand other)
    {
+      sequenceId = other.sequenceId;
       stepCommand.set(other.stepCommand);
       timeIntervalCommand.set(other.timeIntervalCommand);
    }
@@ -82,5 +85,11 @@ public class QuadrupedTimedStepCommand implements Command<QuadrupedTimedStepComm
    public boolean isCommandValid()
    {
       return stepCommand.isCommandValid() && timeIntervalCommand.isCommandValid();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

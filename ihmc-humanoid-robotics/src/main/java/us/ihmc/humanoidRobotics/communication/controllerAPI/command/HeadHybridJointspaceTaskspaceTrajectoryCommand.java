@@ -11,6 +11,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       implements Command<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceTrajectoryMessage>,
       FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
+   private long sequenceId;
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
 
@@ -39,6 +40,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
    }
@@ -46,6 +48,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void setFromMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
    }
@@ -53,6 +56,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
@@ -66,6 +70,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    @Override
    public void set(HeadHybridJointspaceTaskspaceTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
    }
@@ -108,5 +113,11 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public double getExecutionTime()
    {
       return taskspaceTrajectoryCommand.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }
