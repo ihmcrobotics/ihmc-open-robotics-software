@@ -1075,8 +1075,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
-      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
+      ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
       ret += "position = " + referencePositionInRootFrame + ", orientation = " + referenceOrientationInRootFrame.toStringAsYawPitchRoll();
       return ret;
    }
