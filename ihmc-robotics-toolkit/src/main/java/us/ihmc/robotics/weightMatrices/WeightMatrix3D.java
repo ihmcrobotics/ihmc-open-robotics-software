@@ -3,9 +3,9 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 /**
@@ -241,7 +241,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
          frameMatrix.setM22(zWeight);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(weightMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, weightMatrixToPack);
       }
    }
 
@@ -318,7 +318,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
          frameMatrix.setM22(zWeight);
          frameMatrix.changeFrame(destinationFrame);
 
-         frameMatrix.getDenseMatrix(weightMatrixToPack, startRow, startColumn);
+         frameMatrix.get(startRow, startColumn, weightMatrixToPack);
          MatrixTools.removeZeroRows(weightMatrixToPack, startRow, startRow + 2, EPSILON);
       }
    }
