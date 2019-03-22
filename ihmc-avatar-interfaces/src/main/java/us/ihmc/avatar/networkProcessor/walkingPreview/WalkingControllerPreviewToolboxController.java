@@ -46,6 +46,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -161,10 +162,10 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       double controlDT = controllerToolbox.getControlDT();
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, walkingParentRegistry, yoGraphicsListRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,8 +203,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null, previewTime, gravityZ, omega0, feet,
-                                                    integrationDT, Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, previewTime, gravityZ, omega0, feet, integrationDT,
+                                                    Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
    }
 
    private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
