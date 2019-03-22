@@ -121,8 +121,8 @@ public class LeggedRobotEKF implements StateEstimatorController
       RobotState robotState = new RobotState(rootState, jointStates);
       stateEstimator = new StateEstimator(sensors, robotState, registry);
 
-      yoRootPose = new YoFramePose3D("RootPose", ReferenceFrame.getWorldFrame(), registry);
-      yoRootTwist = new YoFixedFrameTwist("RootTwist", rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
+      yoRootPose = new YoFramePose3D("RootPoseEKF", ReferenceFrame.getWorldFrame(), registry);
+      yoRootTwist = new YoFixedFrameTwist("RootTwistEKF", rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
                                           registry);
 
       if (graphicsListRegistry != null)
@@ -193,8 +193,8 @@ public class LeggedRobotEKF implements StateEstimatorController
       for (OneDoFJointBasics oneDoFJoint : oneDoFJoints)
       {
          String jointName = oneDoFJoint.getName();
-         LogTools.info("Creating joint state for " + jointName);
          String parameterGroup = FilterTools.stringToPrefix(jointGroups.containsKey(jointName) ? jointGroups.get(jointName) : jointName);
+         LogTools.info("Creating joint state for " + jointName + " in group " + parameterGroup);
          JointState jointState = new JointState(jointName, parameterGroup, dt, registry);
          jointStates.add(jointState);
          JointPositionSensor jointPositionSensor = new JointPositionSensor(jointName, parameterGroup, dt, registry);

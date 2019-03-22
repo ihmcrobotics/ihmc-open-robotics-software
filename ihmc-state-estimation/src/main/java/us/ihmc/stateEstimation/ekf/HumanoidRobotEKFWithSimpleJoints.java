@@ -110,34 +110,13 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    {
       Map<String, String> ret = new HashMap<>();
 
-      RigidBodyBasics leftBody = fullRobotModel.getFoot(RobotSide.LEFT);
-      RigidBodyBasics rightBody = fullRobotModel.getFoot(RobotSide.RIGHT);
-      while (leftBody != rightBody)
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+      OneDoFJointBasics[] spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, fullRobotModel.getChest());
+      Arrays.asList(spineJoints).forEach(joint -> ret.put(joint.getName(), "Spine"));
+      for (RobotSide robotSide : RobotSide.values)
       {
-         String leftName = leftBody.getParentJoint().getName();
-         String rightName = rightBody.getParentJoint().getName();
-         String name = "";
-         int leftIdx = leftName.length() - 1;
-         for (int rightIdx = rightName.length() - 1; rightIdx >= 0; rightIdx--)
-         {
-            if (leftIdx < 0)
-            {
-               break;
-            }
-            if (rightName.charAt(rightIdx) == leftName.charAt(leftIdx))
-            {
-               name = rightName.charAt(rightIdx) + name;
-            }
-            else
-            {
-               break;
-            }
-            leftIdx--;
-         }
-         ret.put(leftName, name);
-         ret.put(rightName, name);
-         leftBody = leftBody.getParentJoint().getPredecessor();
-         rightBody = rightBody.getParentJoint().getPredecessor();
+         OneDoFJointBasics[] legJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, fullRobotModel.getFoot(robotSide));
+         Arrays.asList(legJoints).forEach(joint -> ret.put(joint.getName(), "Leg"));
       }
 
       return ret;
