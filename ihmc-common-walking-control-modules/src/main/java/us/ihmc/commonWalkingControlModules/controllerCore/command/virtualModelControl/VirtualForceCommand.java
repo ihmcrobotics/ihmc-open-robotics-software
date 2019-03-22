@@ -458,13 +458,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       }
    }
 
-
    @Override
    public String toString()
    {
-      String baseName = base == null ? "null" : base.getName();
-      String endEffectorName = endEffector == null ? "null" : endEffector.getName();
-      return getClass().getSimpleName() + ": base = " + baseName + ", endEffector = " + endEffectorName + ", linear = "
-            + desiredLinearForce;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearForce;
    }
 }

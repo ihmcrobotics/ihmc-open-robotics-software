@@ -122,7 +122,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearAcceleration.set(other.desiredLinearAcceleration);
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
-      
+
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
@@ -980,11 +980,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public String toString()
    {
-      String baseName = base == null ? "null" : base.getName();
-      String endEffectorName = endEffector == null ? "null" : endEffector.getName();
-      
-      String ret = getClass().getSimpleName() + ": base = " + baseName + ", endEffector = " + endEffectorName + ", linear = "
-            + desiredLinearAcceleration + ", angular = " + desiredAngularAcceleration;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearAcceleration + ", angular = "
+            + desiredAngularAcceleration;
    }
 }
