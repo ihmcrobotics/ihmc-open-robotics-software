@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 import us.ihmc.robotics.sliderboard.Sliderboard;
@@ -98,7 +99,16 @@ public class TuningTabManager
       this.tunerMap = tunerMap;
       tabPane.getTabs().clear();
       tabSaver.loadDefaultTabs(tabPane, tunerMap);
-      tabPane.getTabs().forEach(tab -> ((TuningTab) tab).setSliderboard(sliderboard));
+      tabPane.getTabs().forEach(tab -> {
+         ((TuningTab) tab).setSliderboard(sliderboard);
+         ((TuningTab) tab).hide();
+      });
+      tabPane.getSelectionModel().select(0);
+      Tab tuningTab = tabPane.getSelectionModel().getSelectedItem();
+      if (tuningTab != null)
+      {
+         ((TuningTab) tuningTab).updateView();
+      }
       updateMenuItems();
    }
 
