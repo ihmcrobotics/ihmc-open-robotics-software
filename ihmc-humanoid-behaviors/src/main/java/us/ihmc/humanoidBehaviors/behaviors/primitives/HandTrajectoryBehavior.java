@@ -60,6 +60,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
+   
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)
    {
       outgoingMessage = armTrajectoryMessage;

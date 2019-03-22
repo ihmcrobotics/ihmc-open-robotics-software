@@ -190,9 +190,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
                   -0.8771109242461594, -1.336089159719967};
 
-            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightArmPose);
+            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 10, rightArmPose);
 
-            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftArmPose);
+            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 10, leftArmPose);
 
             atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
             atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
@@ -242,7 +242,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                       
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.RESET_ROBOT, resetRobot, WalkThroughDoorBehaviorState.DONE);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
