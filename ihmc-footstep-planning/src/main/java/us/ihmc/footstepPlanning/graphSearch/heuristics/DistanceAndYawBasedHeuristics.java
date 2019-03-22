@@ -28,7 +28,9 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       Point2D nodeMidFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), goalNode.getYaw());
-      double minSteps = euclideanDistance / parameters.getMaximumStepReach();
+
+      double idealStepYaw = 0.5 * parameters.getMaximumStepYaw();
+      double minSteps = euclideanDistance / parameters.getMaximumStepReach() + Math.abs(yaw) / idealStepYaw;
 
       return euclideanDistance + costParameters.getYawWeight() * Math.abs(yaw) + costParameters.getCostPerStep() * minSteps;
    }
