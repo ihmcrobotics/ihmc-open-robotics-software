@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -45,9 +46,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 {
    private final FramePoint3D bodyFixedPointInEndEffectorFrame = new FramePoint3D();
 
-   private final FramePoint3D desiredPositionInRootFrame = new FramePoint3D();
-   private final FrameVector3D desiredLinearVelocityInRootFrame = new FrameVector3D();
-   private final FrameVector3D feedForwardLinearActionInRootFrame = new FrameVector3D();
+   /** Represents the expected control mode to execute this command. */
+   private WholeBodyControllerCoreMode controlMode = null;
+   /** The desired position to use in the feedback controller. */
+   private final FramePoint3D referencePositionInRootFrame = new FramePoint3D();
+   /** The desired or (IK) feed-forward linear velocity to use in the feedback controller. */
+   private final FrameVector3D referenceLinearVelocityInRootFrame = new FrameVector3D();
+   /** The (ID) feed-forward linear acceleration to use in the feedback controller. */
+   private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
+   /** The (VMC) feed-forward force to use in the feedback controller. */
+   private final FrameVector3D referenceForceInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -88,9 +96,13 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    @Override
    public void set(PointFeedbackControlCommand other)
    {
-      desiredPositionInRootFrame.setIncludingFrame(other.desiredPositionInRootFrame);
-      desiredLinearVelocityInRootFrame.setIncludingFrame(other.desiredLinearVelocityInRootFrame);
-      feedForwardLinearActionInRootFrame.setIncludingFrame(other.feedForwardLinearActionInRootFrame);
+      controlMode = other.controlMode;
+
+      referencePositionInRootFrame.setIncludingFrame(other.referencePositionInRootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(other.referenceLinearVelocityInRootFrame);
+      referenceLinearAccelerationInRootFrame.setIncludingFrame(other.referenceLinearAccelerationInRootFrame);
+      referenceForceInRootFrame.setIncludingFrame(other.referenceForceInRootFrame);
+
       setGains(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
@@ -193,66 +205,106 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    }
 
    /**
-    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * Sets the expected control mode that the controller core should be using to execute this command.
     * <p>
-    * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
+    * Note that the control mode is updated when calling either the main input setters, i.e.
+    * {@code this.setInverseKinematics(...)}, {@code this.setInverseDynamics(...)}, or
+    * {@code this.setVirtualControlMode(...)}.
     * </p>
     * <p>
-    * The desired linear velocity and feed-forward linear acceleration are set to zero.
+    * This is a safety feature, the controller core will throw an exception in the case the control
+    * mode mismatches the active mode of the controller core.
     * </p>
-    *
-    * @param desiredPosition describes the position that the {@code bodyFixedPoint} should reach. It
-    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}. Not
-    *           modified.
+    * 
+    * @param controlMode the expected control mode.
     */
-   public void set(FramePoint3DReadOnly desiredPosition)
+   public void setControlMode(WholeBodyControllerCoreMode controlMode)
    {
-      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
-      desiredPositionInRootFrame.changeFrame(rootFrame);
-      desiredLinearVelocityInRootFrame.setToZero(rootFrame);
-      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
+      this.controlMode = controlMode;
    }
 
    /**
-    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse kinematics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for inverse kinematics.
+    * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param desiredPosition describes the position that the {@code bodyFixedPoint} should reach. It
-    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}. Not
-    *           modified.
-    * @param desiredLinearVelocity describes the desired linear velocity of the {@code bodyFixedPoint}
-    *           with respect to the {@code base}. It does NOT describe the desired linear velocity of
-    *           {@code endEffector.getBodyFixedFrame()}'s origin. Not modified.
+    * @param desiredPosition the position the {@code bodyFixedPoint} should reach. Not modified.
+    * @param feedForwardLinearVelocity the feed-forward linear velocity of the {@code bodyFixedPoint}
+    *           with respect to the {@code base}. Not modified.
     */
-   public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity)
+   public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
-      desiredPositionInRootFrame.setIncludingFrame(desiredPosition);
-      desiredPositionInRootFrame.changeFrame(rootFrame);
-      desiredLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      desiredLinearVelocityInRootFrame.changeFrame(rootFrame);
-      feedForwardLinearActionInRootFrame.setToZero(rootFrame);
+      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
+      referencePositionInRootFrame.changeFrame(rootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(feedForwardLinearVelocity);
+      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
+      referenceForceInRootFrame.setToZero(rootFrame);
    }
 
    /**
-    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse dynamics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for inverse dynamics.
+    * </p>
     * <p>
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param feedForwardLinearAction describes the desired linear action of the
-    *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
-    *           desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin. Not
-    *           modified.
+    * @param desiredPosition the position that the {@code bodyFixedPoint} should reach. Not modified.
+    * @param desiredLinearVelocity the desired linear velocity of the {@code bodyFixedPoint} with
+    *           respect to the {@code base}. Not modified.
+    * @param feedForwardLinearAcceleration the feed-forward linear acceleration of the
+    *           {@code bodyFixedPoint} with respect to the {@code base}. Not modified.
     */
-   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardLinearAction)
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+                                  FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
-      ReferenceFrame rootFrame = feedForwardLinearAction.getReferenceFrame().getRootFrame();
-      feedForwardLinearActionInRootFrame.setIncludingFrame(feedForwardLinearAction);
-      feedForwardLinearActionInRootFrame.changeFrame(rootFrame);
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
+      referencePositionInRootFrame.changeFrame(rootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+      referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
+      referenceForceInRootFrame.setToZero(rootFrame);
+   }
+
+   /**
+    * Configures this feedback command's inputs for virtual model control.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for virtual model control.
+    * </p>
+    * <p>
+    * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
+    * </p>
+    *
+    * @param desiredPosition the position that the {@code bodyFixedPoint} should reach. Not modified.
+    * @param desiredLinearVelocity the desired linear velocity of the {@code bodyFixedPoint} with
+    *           respect to the {@code base}. Not modified.
+    * @param feedForwardForce the feed-forward force to exert at {@code bodyFixedPoint}. Not modified.
+    */
+   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardForce)
+   {
+      setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+      ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
+      referencePositionInRootFrame.setIncludingFrame(desiredPosition);
+      referencePositionInRootFrame.changeFrame(rootFrame);
+      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      referenceForceInRootFrame.setIncludingFrame(feedForwardForce);
+      referenceForceInRootFrame.changeFrame(rootFrame);
+      referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -359,22 +411,6 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
-   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack)
-   {
-      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
-   }
-
-   public void getIncludingFrame(FramePoint3DBasics desiredPositionToPack, FrameVector3DBasics desiredLinearVelocityToPack)
-   {
-      desiredPositionToPack.setIncludingFrame(desiredPositionInRootFrame);
-      desiredLinearVelocityToPack.setIncludingFrame(desiredLinearVelocityInRootFrame);
-   }
-
-   public void getFeedForwardActionIncludingFrame(FrameVector3DBasics feedForwardLinearActionToPack)
-   {
-      feedForwardLinearActionToPack.setIncludingFrame(feedForwardLinearActionInRootFrame);
-   }
-
    public void getBodyFixedPointIncludingFrame(FramePoint3D bodyFixedPointToControlToPack)
    {
       bodyFixedPointToControlToPack.setIncludingFrame(bodyFixedPointInEndEffectorFrame);
@@ -385,19 +421,67 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       return bodyFixedPointInEndEffectorFrame;
    }
 
-   public FramePoint3DBasics getDesiredPosition()
+   /**
+    * Gets the expected control mode to execute this command with.
+    * 
+    * @return the expected active controller core control mode.
+    */
+   public WholeBodyControllerCoreMode getControlMode()
    {
-      return desiredPositionInRootFrame;
+      return controlMode;
    }
 
-   public FrameVector3DBasics getDesiredLinearVelocity()
+   /**
+    * Gets the reference position to use in the feedback controller.
+    * <p>
+    * The reference position typically represents the desired position.
+    * </p>
+    * 
+    * @return the reference position.
+    */
+   public FramePoint3DBasics getReferencePosition()
    {
-      return desiredLinearVelocityInRootFrame;
+      return referencePositionInRootFrame;
    }
 
-   public FrameVector3DBasics getFeedForwardLinearAction()
+   /**
+    * Gets the reference linear velocity to use in the feedback controller.
+    * <p>
+    * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
+    * term (IK).
+    * </p>
+    * 
+    * @return the reference linear velocity.
+    */
+   public FrameVector3DBasics getReferenceLinearVelocity()
    {
-      return feedForwardLinearActionInRootFrame;
+      return referenceLinearVelocityInRootFrame;
+   }
+
+   /**
+    * Gets the reference linear acceleration to use in the feedback controller.
+    * <p>
+    * It is used in the inverse dynamics mode as a feed-forward term.
+    * </p>
+    * 
+    * @return the reference linear acceleration.
+    */
+   public FrameVector3DBasics getReferenceLinearAcceleration()
+   {
+      return referenceLinearAccelerationInRootFrame;
+   }
+
+   /**
+    * Gets the reference force to use in the feedback controller.
+    * <p>
+    * It is used in the virtual control mode as a feed-forward term.
+    * </p>
+    * 
+    * @return the reference force.
+    */
+   public FrameVector3D getReferenceForce()
+   {
+      return referenceForceInRootFrame;
    }
 
    public RigidBodyBasics getBase()
@@ -450,13 +534,17 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       {
          PointFeedbackControlCommand other = (PointFeedbackControlCommand) object;
 
+         if (controlMode != other.controlMode)
+            return false;
          if (!bodyFixedPointInEndEffectorFrame.equals(other.bodyFixedPointInEndEffectorFrame))
             return false;
-         if (!desiredPositionInRootFrame.equals(other.desiredPositionInRootFrame))
+         if (!referencePositionInRootFrame.equals(other.referencePositionInRootFrame))
             return false;
-         if (!desiredLinearVelocityInRootFrame.equals(other.desiredLinearVelocityInRootFrame))
+         if (!referenceLinearVelocityInRootFrame.equals(other.referenceLinearVelocityInRootFrame))
             return false;
-         if (!feedForwardLinearActionInRootFrame.equals(other.feedForwardLinearActionInRootFrame))
+         if (!referenceLinearAccelerationInRootFrame.equals(other.referenceLinearAccelerationInRootFrame))
+            return false;
+         if (!referenceForceInRootFrame.equals(other.referenceForceInRootFrame))
             return false;
          if (!gains.equals(other.gains))
             return false;
@@ -481,7 +569,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       String ret = getClass().getSimpleName() + ": ";
       ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
       ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
-      ret += "position = " + desiredPositionInRootFrame;
+      ret += "position = " + referencePositionInRootFrame;
       return ret;
    }
 }

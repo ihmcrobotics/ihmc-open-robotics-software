@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -80,7 +80,7 @@ public class WholeBodyFeedbackController
             registerOrientationControllers((OrientationFeedbackControlCommand) commandExample);
             break;
          case JOINTSPACE:
-            registerJointspaceControllers((JointspaceFeedbackControlCommand) commandExample);
+            registerOneDoFJointControllers((OneDoFJointFeedbackControlCommand) commandExample);
             break;
          case MOMENTUM:
             registerCenterOfMassController((CenterOfMassFeedbackControlCommand) commandExample);
@@ -130,18 +130,15 @@ public class WholeBodyFeedbackController
       allControllers.add(controller);
    }
 
-   private void registerJointspaceControllers(JointspaceFeedbackControlCommand commandExample)
+   private void registerOneDoFJointControllers(OneDoFJointFeedbackControlCommand commandExample)
    {
-      for (int i = 0; i < commandExample.getNumberOfJoints(); i++)
-      {
-         OneDoFJointBasics joint = commandExample.getJoint(i);
-         if (oneDoFJointFeedbackControllerMap.containsKey(joint))
-            continue;
+      OneDoFJointBasics joint = commandExample.getJoint();
+      if (oneDoFJointFeedbackControllerMap.containsKey(joint))
+         return;
 
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
-         oneDoFJointFeedbackControllerMap.put(joint, controller);
-         allControllers.add(controller);
-      }
+      OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
+      oneDoFJointFeedbackControllerMap.put(joint, controller);
+      allControllers.add(controller);
    }
 
    private void registerCenterOfMassController(CenterOfMassFeedbackControlCommand commandExample)
@@ -249,31 +246,31 @@ public class WholeBodyFeedbackController
       achievedComputationTimer.stopMeasurement();
    }
 
-   public void submitFeedbackControlCommandList(FeedbackControlCommandList feedbackControlCommandList)
+   public void submitFeedbackControlCommandList(WholeBodyControllerCoreMode activeControlMode, FeedbackControlCommandList feedbackControlCommandList)
    {
-      while (feedbackControlCommandList.getNumberOfCommands() > 0)
+      for (int commandIndex = 0; commandIndex < feedbackControlCommandList.getNumberOfCommands(); commandIndex++)
       {
-         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.pollCommand();
+         FeedbackControlCommand<?> feedbackControlCommand = feedbackControlCommandList.getCommand(commandIndex);
          ControllerCoreCommandType commandType = feedbackControlCommand.getCommandType();
          switch (commandType)
          {
          case TASKSPACE:
-            submitSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) feedbackControlCommand);
+            submitSpatialFeedbackControlCommand(activeControlMode, (SpatialFeedbackControlCommand) feedbackControlCommand);
             break;
          case POINT:
-            submitPointFeedbackControlCommand((PointFeedbackControlCommand) feedbackControlCommand);
+            submitPointFeedbackControlCommand(activeControlMode, (PointFeedbackControlCommand) feedbackControlCommand);
             break;
          case ORIENTATION:
-            submitOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) feedbackControlCommand);
+            submitOrientationFeedbackControlCommand(activeControlMode, (OrientationFeedbackControlCommand) feedbackControlCommand);
             break;
          case JOINTSPACE:
-            submitJointspaceFeedbackControlCommand((JointspaceFeedbackControlCommand) feedbackControlCommand);
+            submitOneDoFJointFeedbackControlCommand(activeControlMode, (OneDoFJointFeedbackControlCommand) feedbackControlCommand);
             break;
          case MOMENTUM:
-            submitCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) feedbackControlCommand);
+            submitCenterOfMassFeedbackControlCommand(activeControlMode, (CenterOfMassFeedbackControlCommand) feedbackControlCommand);
             break;
          case COMMAND_LIST:
-            submitFeedbackControlCommandList((FeedbackControlCommandList) feedbackControlCommand);
+            submitFeedbackControlCommandList(activeControlMode, (FeedbackControlCommandList) feedbackControlCommand);
             break;
          default:
             throw new RuntimeException("The command type: " + commandType + " is not handled.");
@@ -281,8 +278,9 @@ public class WholeBodyFeedbackController
       }
    }
 
-   private void submitSpatialFeedbackControlCommand(SpatialFeedbackControlCommand feedbackControlCommand)
+   private void submitSpatialFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, SpatialFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -291,8 +289,9 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitPointFeedbackControlCommand(PointFeedbackControlCommand feedbackControlCommand)
+   private void submitPointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, PointFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -301,8 +300,9 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitOrientationFeedbackControlCommand(OrientationFeedbackControlCommand feedbackControlCommand)
+   private void submitOrientationFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OrientationFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       RigidBodyBasics endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
       if (controller.isEnabled())
@@ -311,29 +311,30 @@ public class WholeBodyFeedbackController
       controller.setEnabled(true);
    }
 
-   private void submitJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand feedbackControlCommand)
+   private void submitOneDoFJointFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode, OneDoFJointFeedbackControlCommand feedbackControlCommand)
    {
-      for (int i = 0; i < feedbackControlCommand.getNumberOfJoints(); i++)
-      {
-         OneDoFJointBasics joint = feedbackControlCommand.getJoint(i);
-         double desiredPosition = feedbackControlCommand.getDesiredPosition(i);
-         double desiredVelocity = feedbackControlCommand.getDesiredVelocity(i);
-         double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);
-
-         OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
-         if (controller.isEnabled())
-            throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller joint: " + joint.getName());
-         controller.setGains(feedbackControlCommand.getGains(i));
-         controller.setDesireds(desiredPosition, desiredVelocity, feedForwardAcceleration);
-         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver(i));
-         controller.setEnabled(true);
-      }
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
+      OneDoFJointBasics joint = feedbackControlCommand.getJoint();
+      OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
+      if (controller.isEnabled())
+         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller joint: " + joint.getName());
+      controller.submitFeedbackControlCommand(feedbackControlCommand);
+      controller.setEnabled(true);
    }
 
-   private void submitCenterOfMassFeedbackControlCommand(CenterOfMassFeedbackControlCommand feedbackControlCommand)
+   private void submitCenterOfMassFeedbackControlCommand(WholeBodyControllerCoreMode activeControlMode,
+                                                         CenterOfMassFeedbackControlCommand feedbackControlCommand)
    {
+      checkRequestedControlMode(activeControlMode, feedbackControlCommand.getControlMode());
       centerOfMassFeedbackController.submitFeedbackControlCommand(feedbackControlCommand);
       centerOfMassFeedbackController.setEnabled(true);
+   }
+
+   private static void checkRequestedControlMode(WholeBodyControllerCoreMode activeControlMode, WholeBodyControllerCoreMode requestedControlMode)
+   {
+      if (activeControlMode != requestedControlMode)
+         throw new IllegalArgumentException("Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: "
+               + activeControlMode);
    }
 
    public InverseDynamicsCommandList getInverseDynamicsOutput()

@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -1407,11 +1408,31 @@ class CrossRobotCommandResolverTest
                                                                                            ReferenceFrame... possibleFrames)
    {
       CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
-      next.getDesiredPosition().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getDesiredLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
-      next.getFeedForwardLinearAction().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
+      next.getReferencePosition().set(EuclidCoreRandomTools.nextPoint3D(random));
+      next.getReferenceLinearVelocity().set(EuclidCoreRandomTools.nextVector3D(random));
+      next.getReferenceLinearAcceleration().set(EuclidCoreRandomTools.nextVector3D(random));
       next.setGains(nextPID3DGains(random));
       next.getMomentumRateCommand().set(nextMomentumRateCommand(random, rootBody, possibleFrames));
+      return next;
+   }
+
+   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+                                                                                         ReferenceFrame... possibleFrames)
+   {
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      OneDoFJointBasics joint = allJoints.get(random.nextInt(allJoints.size()));
+      return nextOneDoFJointFeedbackControlCommand(random, joint);
+   }
+
+   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, OneDoFJointBasics joint)
+   {
+      OneDoFJointFeedbackControlCommand next = new OneDoFJointFeedbackControlCommand();
+      next.setJoint(joint);
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
+      next.setInverseDynamics(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      next.setGains(nextPDGains(random));
+      next.setWeightForSolver(random.nextDouble());
       return next;
    }
 
@@ -1426,7 +1447,7 @@ class CrossRobotCommandResolverTest
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, random.nextDouble(), random.nextDouble(), random.nextDouble(), nextPDGains(random), random.nextDouble());
+         next.addCommand(nextOneDoFJointFeedbackControlCommand(random, joint));
       }
 
       return next;
@@ -1436,10 +1457,12 @@ class CrossRobotCommandResolverTest
                                                                                          ReferenceFrame... possibleFrames)
    {
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedOrientationToControl().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
@@ -1450,10 +1473,12 @@ class CrossRobotCommandResolverTest
    public static PointFeedbackControlCommand nextPointFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       PointFeedbackControlCommand next = new PointFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getBodyFixedPointToControl().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardLinearAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPID3DGains(random));
       next.setGainsFrame(nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
@@ -1464,17 +1489,20 @@ class CrossRobotCommandResolverTest
    public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
+      next.setControlMode(nextElementIn(random, WholeBodyControllerCoreMode.values()));
       next.getControlFramePose().setIncludingFrame(nextFramePose3D(random, possibleFrames));
-      next.getDesiredOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
-      next.getDesiredAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardAngularAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceOrientation().setIncludingFrame(nextFrameQuaternion(random, possibleFrames));
+      next.getReferenceAngularVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceAngularAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceTorque().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getGains().set(nextPIDSE3Gains(random));
       next.setGainsFrames(nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
-      next.getDesiredPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
-      next.getDesiredLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
-      next.getFeedForwardLinearAction().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferencePosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+      next.getReferenceLinearVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceLinearAcceleration().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+      next.getReferenceForce().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       next.getSpatialAccelerationCommand().set(nextSpatialAccelerationCommand(random, rootBody, possibleFrames));
       next.setControlBaseFrame(nextElementIn(random, possibleFrames));
       return next;

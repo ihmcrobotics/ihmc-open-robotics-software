@@ -170,13 +170,12 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       gains.set(command.getGains());
       command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
 
-      command.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      yoDesiredPosition.setMatchingFrame(desiredPosition);
-      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredPosition.setMatchingFrame(command.getReferencePosition());
+      yoDesiredLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+         yoFeedForwardLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
       if (yoFeedForwardLinearAcceleration != null)
-         yoFeedForwardLinearAcceleration.setMatchingFrame(feedForwardLinearAcceleration);
+         yoFeedForwardLinearAcceleration.setMatchingFrame(command.getReferenceLinearAcceleration());
    }
 
    @Override
