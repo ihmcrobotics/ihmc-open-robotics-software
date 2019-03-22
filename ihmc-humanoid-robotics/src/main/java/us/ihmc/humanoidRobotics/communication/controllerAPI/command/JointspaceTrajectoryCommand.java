@@ -11,6 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 
 public final class JointspaceTrajectoryCommand extends QueueableCommand<JointspaceTrajectoryCommand, JointspaceTrajectoryMessage>
 {
+   private long sequenceId;
    private final RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryInputs = new RecyclingArrayList<>(10, OneDoFJointTrajectoryCommand.class);
 
    public JointspaceTrajectoryCommand()
@@ -32,6 +33,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       jointTrajectoryInputs.clear();
    }
@@ -39,6 +41,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    @Override
    public void set(JointspaceTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       setQueueableCommandVariables(other);
       set(other.getTrajectoryPointLists());
    }
@@ -46,6 +49,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    @Override
    public void setFromMessage(JointspaceTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       setQueueableCommandVariables(message.getQueueingProperties());
       set(message.getJointTrajectoryMessages());
    }
@@ -134,5 +138,11 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    public Class<JointspaceTrajectoryMessage> getMessageClass()
    {
       return JointspaceTrajectoryMessage.class;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

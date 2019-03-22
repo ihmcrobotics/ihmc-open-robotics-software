@@ -25,6 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public final class EuclideanTrajectoryControllerCommand extends QueueableCommand<EuclideanTrajectoryControllerCommand, EuclideanTrajectoryMessage>
       implements FrameBasedCommand<EuclideanTrajectoryMessage>
 {
+   private long sequenceId;
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
@@ -61,6 +62,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       clearQueuableCommandVariables();
       trajectoryPointList.clear();
       selectionMatrix.resetSelection();
@@ -107,6 +109,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    @Override
    public void setFromMessage(EuclideanTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -142,6 +145,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void setPropertiesOnly(EuclideanTrajectoryControllerCommand other)
    {
       setQueueableCommandVariables(other);
+      sequenceId = other.sequenceId;
       selectionMatrix.set(other.getSelectionMatrix());
       weightMatrix.set(other.getWeightMatrix());
       trajectoryFrame = other.getTrajectoryFrame();
@@ -310,5 +314,11 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public Class<EuclideanTrajectoryMessage> getMessageClass()
    {
       return EuclideanTrajectoryMessage.class;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

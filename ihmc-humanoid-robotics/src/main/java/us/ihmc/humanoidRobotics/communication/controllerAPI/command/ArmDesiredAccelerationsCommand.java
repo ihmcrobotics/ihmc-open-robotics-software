@@ -6,6 +6,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAccelerationsCommand, ArmDesiredAccelerationsMessage>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
@@ -17,6 +18,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       desiredAccelerations.clear();
    }
@@ -24,6 +26,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    @Override
    public void setFromMessage(ArmDesiredAccelerationsMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       desiredAccelerations.setFromMessage(message.getDesiredAccelerations());
    }
@@ -31,6 +34,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    @Override
    public void set(ArmDesiredAccelerationsCommand other)
    {
+      sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       desiredAccelerations.set(other.desiredAccelerations);
    }
@@ -90,5 +94,11 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    public double getExecutionTime()
    {
       return desiredAccelerations.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

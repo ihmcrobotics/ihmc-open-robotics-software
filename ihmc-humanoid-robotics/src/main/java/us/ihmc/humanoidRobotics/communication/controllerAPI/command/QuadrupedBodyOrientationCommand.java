@@ -12,6 +12,7 @@ import java.util.Random;
 public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOrientationCommand, QuadrupedBodyOrientationMessage>,
       FrameBasedCommand<QuadrupedBodyOrientationMessage>, EpsilonComparable<QuadrupedBodyOrientationCommand>
 {
+   private long sequenceId;
    private boolean isExpressedInAbsoluteTime;
 
    /**
@@ -26,11 +27,13 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
 
    public QuadrupedBodyOrientationCommand()
    {
+      sequenceId = 0;
       so3Trajectory = new SO3TrajectoryControllerCommand();
    }
 
    public QuadrupedBodyOrientationCommand(Random random)
    {
+      sequenceId = random.nextInt();
       so3Trajectory = new SO3TrajectoryControllerCommand(random);
       isExpressedInAbsoluteTime = random.nextBoolean();
       isAnOffsetOrientation = random.nextBoolean();
@@ -39,6 +42,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public void clear()
    {
+      sequenceId = 0;
       isExpressedInAbsoluteTime = true;
       isAnOffsetOrientation = true;
       so3Trajectory.clear();
@@ -47,6 +51,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public void set(QuadrupedBodyOrientationCommand other)
    {
+      sequenceId = other.sequenceId;
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
       isAnOffsetOrientation = other.isAnOffsetOrientation;
       so3Trajectory.set(other.so3Trajectory);
@@ -55,6 +60,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyOrientationMessage message)
    {
+      sequenceId = message.getSequenceId();
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
       isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       so3Trajectory.set(resolver, message.getSo3Trajectory());
@@ -63,6 +69,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public void setFromMessage(QuadrupedBodyOrientationMessage message)
    {
+      sequenceId = message.getSequenceId();
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
       isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       so3Trajectory.setFromMessage(message.getSo3Trajectory());
@@ -137,5 +144,11 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public double getExecutionTime()
    {
       return so3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

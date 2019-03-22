@@ -11,6 +11,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajector
 
 public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList implements Command<OneDoFJointTrajectoryCommand, OneDoFJointTrajectoryMessage>
 {
+   private long sequenceId;
    private double weight;
 
    public OneDoFJointTrajectoryCommand()
@@ -30,6 +31,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
    public void clear()
    {
       super.clear();
+      sequenceId = 0;
       setWeight(Double.NaN);
 
    }
@@ -38,6 +40,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
    public void set(OneDoFJointTrajectoryCommand other)
    {
       super.set(other);
+      sequenceId = other.sequenceId;
       setWeight(other.getWeight());
    }
 
@@ -45,6 +48,7 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
    public void setFromMessage(OneDoFJointTrajectoryMessage message)
    {
       this.clear();
+      sequenceId = message.getSequenceId();
 
       List<TrajectoryPoint1DMessage> trajectoryPointMessages = message.getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -92,5 +96,11 @@ public class OneDoFJointTrajectoryCommand extends OneDoFTrajectoryPointList impl
          return false;
       }
       return super.epsilonEquals(other, epsilon);
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

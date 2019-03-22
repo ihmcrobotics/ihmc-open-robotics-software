@@ -11,6 +11,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, FootTrajectoryMessage>, FrameBasedCommand<FootTrajectoryMessage>, EpsilonComparable<FootTrajectoryCommand>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final SE3TrajectoryControllerCommand se3Trajectory;
 
@@ -28,6 +29,7 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    @Override
    public void clear()
    {
+      sequenceId = 0;
       se3Trajectory.clear();
       robotSide = null;
    }
@@ -35,6 +37,7 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    @Override
    public void setFromMessage(FootTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       se3Trajectory.setFromMessage(message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
@@ -42,6 +45,7 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       se3Trajectory.set(resolver, message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
@@ -60,6 +64,7 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
     */
    public void setPropertiesOnly(FootTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       se3Trajectory.setPropertiesOnly(other.se3Trajectory);
       robotSide = other.robotSide;
    }
@@ -125,5 +130,11 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    public double getExecutionTime()
    {
       return se3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

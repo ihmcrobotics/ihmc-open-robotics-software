@@ -11,6 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCommand, FootstepDataListMessage>
 {
+   private long sequenceId;
    private double defaultSwingDuration;
    private double defaultTransferDuration;
    private double finalTransferDuration;
@@ -34,6 +35,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    @Override
    public void clear()
    {
+      sequenceId = 0;
       defaultSwingDuration = 0.0;
       defaultTransferDuration = 0.0;
       finalTransferDuration = 0.0;
@@ -46,6 +48,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    {
       clear();
 
+      sequenceId = message.getSequenceId();
       defaultSwingDuration = message.getDefaultSwingDuration();
       defaultTransferDuration = message.getDefaultTransferDuration();
       finalTransferDuration = message.getFinalTransferDuration();
@@ -69,6 +72,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
    {
       clear();
 
+      sequenceId = other.sequenceId;
       defaultSwingDuration = other.defaultSwingDuration;
       defaultTransferDuration = other.defaultTransferDuration;
       finalTransferDuration = other.finalTransferDuration;
@@ -185,5 +189,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       // Not needed for footsteps since timing is defined in durations inside the command rather then
       // absolute trajectory point times.
       throw new RuntimeException("This method should not be used with footstep lists.");
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }
