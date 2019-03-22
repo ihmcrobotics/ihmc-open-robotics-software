@@ -14,7 +14,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -32,14 +31,14 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    private final YoFramePoint3D capturePointUpdatedFromSCS;
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime,
-         double gravityZ, double omega0, SideDependentList<ContactableFoot> feet, double controlDT,
-         ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
-         JointBasics... jointsToIgnore)
+                                                      CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+                                                      SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ,
+                                                      double omega0, SideDependentList<ContactableFoot> feet, double controlDT, ArrayList<Updatable> updatables,
+                                                      List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                      JointBasics... jointsToIgnore)
    {
-      super(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
-            feet, controlDT, updatables, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      super(fullRobotModel, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0, feet, controlDT, updatables, contactableBodies,
+            yoGraphicsListRegistry, jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)
       {
