@@ -1,5 +1,7 @@
 package us.ihmc.robotDataLogger.example;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.example.ExampleServer.SomeEnum;
@@ -20,6 +22,8 @@ public class ExampleParameterServer
    private final YoVariableServer yoVariableServer;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private long timestamp = 0;
+
    public ExampleParameterServer()
    {
       createVariables(5, registry);
@@ -33,6 +37,12 @@ public class ExampleParameterServer
    public void start()
    {
       yoVariableServer.start();
+      while (true)
+      {
+         timestamp += Conversions.secondsToNanoseconds(dt);
+         yoVariableServer.update(timestamp);
+         ThreadTools.sleepSeconds(dt);
+      }
    }
 
    private void createVariables(int variablesPerType, YoVariableRegistry registry)
