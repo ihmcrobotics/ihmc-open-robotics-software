@@ -412,7 +412,7 @@ public class ControllerCoreCommandCodeQualityTest
             Object fieldTypeDefaultInstance = field.get(typeDefaultInstance);
 
             // We first assert that the random object is different from the instance created with empty constructor.
-            for (int attempt = 0; attempt < 5; attempt++)
+            for (int attempt = 0; attempt < 10; attempt++)
             {
                Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstance = field.get(typeRandomInstance);
@@ -432,7 +432,7 @@ public class ControllerCoreCommandCodeQualityTest
             // We now assert that 2 successive random objects have different values for each field.
             wasFieldDifferent = false;
 
-            for (int attempt = 0; attempt < 10; attempt++)
+            for (int attempt = 0; attempt < 20; attempt++)
             {
                Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceA = field.get(typeRandomInstanceA);

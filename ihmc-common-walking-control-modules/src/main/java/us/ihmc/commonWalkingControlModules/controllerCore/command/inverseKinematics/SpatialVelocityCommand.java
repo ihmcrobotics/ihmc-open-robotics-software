@@ -129,16 +129,33 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearVelocity.set(other.desiredLinearVelocity);
       desiredAngularVelocity.set(other.desiredAngularVelocity);
-      
+
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
-      
+
       constraintType = other.constraintType;
       base = other.getBase();
       endEffector = other.getEndEffector();
       optionalPrimaryBase = other.optionalPrimaryBase;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
+   }
+
+   /**
+    * Specifies how this command is to be handled in the optimization: objective, equality constraint,
+    * or inequality constraint.
+    * <p>
+    * Note that in the case this command is an objective, the weight has to be provided.
+    * </p>
+    * <p>
+    * Note that
+    * </p>
+    * 
+    * @param constraintType the type of constraint for this command.
+    */
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
    }
 
    /**
@@ -503,8 +520,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsHardEqualityConstraint()
    {
-      setWeight(HARD_CONSTRAINT);
-      this.constraintType = ConstraintType.EQUALITY;
+      constraintType = ConstraintType.EQUALITY;
+      weightMatrix.setLinearWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
+      weightMatrix.setAngularWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
    }
 
    /**
@@ -517,8 +535,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsLessOrEqualInequalityConstraint()
    {
-      setWeight(HARD_CONSTRAINT);
-      this.constraintType = ConstraintType.LEQ_INEQUALITY;
+      constraintType = ConstraintType.LEQ_INEQUALITY;
+      weightMatrix.setLinearWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
+      weightMatrix.setAngularWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
    }
 
    /**
@@ -531,8 +550,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAsGreaterOrEqualInequalityConstraint()
    {
-      setWeight(HARD_CONSTRAINT);
-      this.constraintType = ConstraintType.GEQ_INEQUALITY;
+      constraintType = ConstraintType.GEQ_INEQUALITY;
+      weightMatrix.setLinearWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
+      weightMatrix.setAngularWeights(HARD_CONSTRAINT, HARD_CONSTRAINT, HARD_CONSTRAINT);
    }
 
    /**
@@ -547,9 +567,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double weight)
    {
-      this.constraintType = ConstraintType.OBJECTIVE;
-      weightMatrix.setLinearWeights(weight, weight, weight);
-      weightMatrix.setAngularWeights(weight, weight, weight);
+      setWeight(weight, weight);
    }
 
    /**
@@ -565,9 +583,16 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double angular, double linear)
    {
-      this.constraintType = ConstraintType.OBJECTIVE;
-      weightMatrix.setLinearWeights(linear, linear, linear);
-      weightMatrix.setAngularWeights(angular, angular, angular);
+      if (angular == HARD_CONSTRAINT || linear == HARD_CONSTRAINT)
+      {
+         setAsHardEqualityConstraint();
+      }
+      else
+      {
+         constraintType = ConstraintType.OBJECTIVE;
+         weightMatrix.setLinearWeights(linear, linear, linear);
+         weightMatrix.setAngularWeights(angular, angular, angular);
+      }
    }
 
    /**
@@ -583,8 +608,15 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
-      this.constraintType = ConstraintType.OBJECTIVE;
-      this.weightMatrix.set(weightMatrix);
+      if (weightMatrix.containsHardConstraint())
+      {
+         setAsHardEqualityConstraint();
+      }
+      else
+      {
+         constraintType = ConstraintType.OBJECTIVE;
+         this.weightMatrix.set(weightMatrix);
+      }
    }
 
    /**
@@ -599,7 +631,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setAngularWeights(Tuple3DReadOnly angular)
    {
+      constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
+      if (weightMatrix.getAngularPart().containsHardConstraint())
+         setAsHardEqualityConstraint();
    }
 
    /**
@@ -614,8 +649,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
-      this.constraintType = ConstraintType.OBJECTIVE;
+      constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
+      if (weightMatrix.getLinearPart().containsHardConstraint())
+         setAsHardEqualityConstraint();
    }
 
    /**
@@ -631,9 +668,11 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
-      this.constraintType = ConstraintType.OBJECTIVE;
+      constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
       weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
+      if (weightMatrix.containsHardConstraint())
+         setAsHardEqualityConstraint();
    }
 
    /**
