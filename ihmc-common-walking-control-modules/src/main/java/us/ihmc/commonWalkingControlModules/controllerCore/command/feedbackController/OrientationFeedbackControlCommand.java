@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -47,12 +48,16 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    // TODO: This is not used by the controller core. The control point orientation is only used with the spatial control command.
    private final FrameQuaternion bodyFixedOrientationInEndEffectorFrame = new FrameQuaternion();
 
-   /** The end-effector's desired orientation expressed in root frame. */
-   private final FrameQuaternion desiredOrientationInRootFrame = new FrameQuaternion();
-   /** The end-effector's desired angular velocity expressed in root frame. */
-   private final FrameVector3D desiredAngularVelocityInRootFrame = new FrameVector3D();
-   /** The feed-forward to be used for the end-effector. Useful to improve tracking performance. */
-   private final FrameVector3D feedForwardAngularActionInRootFrame = new FrameVector3D();
+   /** Represents the expected control mode to execute this command. */
+   private WholeBodyControllerCoreMode controlMode = null;
+   /** The desired orientation to use in the feedback controller. */
+   private final FrameQuaternion referenceOrientationInRootFrame = new FrameQuaternion();
+   /** The desired or (IK) feed-forward angular velocity to use in the feedback controller. */
+   private final FrameVector3D referenceAngularVelocityInRootFrame = new FrameVector3D();
+   /** The (ID) feed-forward angular acceleration to use in the feedback controller. */
+   private final FrameVector3D referenceAngularAccelerationInRootFrame = new FrameVector3D();
+   /** The (VMC) feed-forward torque to use in the feedback controller. */
+   private final FrameVector3D referenceTorqueInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
    private final PID3DGains gains = new DefaultPID3DGains();
@@ -94,9 +99,13 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    @Override
    public void set(OrientationFeedbackControlCommand other)
    {
-      desiredOrientationInRootFrame.setIncludingFrame(other.desiredOrientationInRootFrame);
-      desiredAngularVelocityInRootFrame.setIncludingFrame(other.desiredAngularVelocityInRootFrame);
-      feedForwardAngularActionInRootFrame.setIncludingFrame(other.feedForwardAngularActionInRootFrame);
+      controlMode = other.controlMode;
+
+      referenceOrientationInRootFrame.setIncludingFrame(other.referenceOrientationInRootFrame);
+      referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
+      referenceAngularAccelerationInRootFrame.setIncludingFrame(other.referenceAngularAccelerationInRootFrame);
+      referenceTorqueInRootFrame.setIncludingFrame(other.referenceTorqueInRootFrame);
+
       gains.set(other.gains);
 
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
@@ -199,53 +208,102 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
-    * Sets the desired data expressed in root frame to be used during the next control tick.
+    * Sets the expected control mode that the controller core should be using to execute this command.
     * <p>
-    * The desired angular velocity and feed-forward angular acceleration are set to zero.
+    * Note that the control mode is updated when calling either the main input setters, i.e.
+    * {@code this.setInverseKinematics(...)}, {@code this.setInverseDynamics(...)}, or
+    * {@code this.setVirtualControlMode(...)}.
+    * </p>
+    * <p>
+    * This is a safety feature, the controller core will throw an exception in the case the control
+    * mode mismatches the active mode of the controller core.
+    * </p>
+    * 
+    * @param controlMode the expected control mode.
+    */
+   public void setControlMode(WholeBodyControllerCoreMode controlMode)
+   {
+      this.controlMode = controlMode;
+   }
+
+   /**
+    * Configures this feedback command's inputs for inverse kinematics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for inverse kinematics.
     * </p>
     *
-    * @param desiredOrientation describes the orientation that the
-    *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
+    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
+    *           reach. Not modified.
+    * @param feedForwardAngularVelocity the feed-forward angular velocity of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
     */
-   public void set(FrameQuaternionReadOnly desiredOrientation)
+   public void setInverseKinematics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly feedForwardAngularVelocity)
    {
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_KINEMATICS);
       ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredOrientationInRootFrame.changeFrame(rootFrame);
-      desiredAngularVelocityInRootFrame.setToZero(rootFrame);
-      feedForwardAngularActionInRootFrame.setToZero(rootFrame);
+      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
+      referenceOrientationInRootFrame.changeFrame(rootFrame);
+      referenceAngularVelocityInRootFrame.setIncludingFrame(feedForwardAngularVelocity);
+      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
+      referenceAngularAccelerationInRootFrame.setToZero(rootFrame);
+      referenceTorqueInRootFrame.setToZero(rootFrame);
    }
 
    /**
-    * Sets the desired data expressed in root frame to be used during the next control tick.
+    * Configures this feedback command's inputs for inverse dynamics.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for inverse dynamics.
+    * </p>
     *
-    * @param desiredOrientation describes the orientation that the
-    *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
-    * @param desiredAngularVelocity describes the desired linear velocity of
+    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
+    *           reach. Not modified.
+    * @param desiredAngularVelocity the desired angular velocity of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
+    * @param feedForwardAngularAcceleration the feed-forward angular acceleration of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
     */
-   public void set(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity)
+   public void setInverseDynamics(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+                                  FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
+      setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
-      desiredOrientationInRootFrame.setIncludingFrame(desiredOrientation);
-      desiredOrientationInRootFrame.changeFrame(rootFrame);
-      desiredAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
-      desiredAngularVelocityInRootFrame.changeFrame(rootFrame);
-      feedForwardAngularActionInRootFrame.setToZero(rootFrame);
+      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
+      referenceOrientationInRootFrame.changeFrame(rootFrame);
+      referenceAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
+      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
+      referenceAngularAccelerationInRootFrame.setIncludingFrame(feedForwardAngularAcceleration);
+      referenceAngularAccelerationInRootFrame.changeFrame(rootFrame);
+      referenceTorqueInRootFrame.setToZero(rootFrame);
    }
 
    /**
-    * Sets the desired feed forward data expressed in root frame to be used during the next control
-    * tick.
+    * Configures this feedback command's inputs for virtual model control.
+    * <p>
+    * Sets the desired data expressed in root frame to be used during the next control tick and sets
+    * the control mode for virtual model control.
+    * </p>
     *
-    * @param feedForwardAngularAction describes the desired linear action of
+    * @param desiredOrientation the orientation the {@code endEffector.getBodyFixedFrame()} should
+    *           reach. Not modified.
+    * @param desiredAngularVelocity the desired angular velocity of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not modified.
+    * @param feedForwardTorque the feed-forward torque to exert at
+    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setFeedForwardAction(FrameVector3DReadOnly feedForwardAngularAction)
+   public void setVirtualModelControl(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity,
+                                      FrameVector3DReadOnly feedForwardTorque)
    {
-      ReferenceFrame rootFrame = feedForwardAngularAction.getReferenceFrame().getRootFrame();
-      feedForwardAngularActionInRootFrame.setIncludingFrame(feedForwardAngularAction);
-      feedForwardAngularActionInRootFrame.changeFrame(rootFrame);
+      setControlMode(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+      ReferenceFrame rootFrame = desiredOrientation.getReferenceFrame().getRootFrame();
+      referenceOrientationInRootFrame.setIncludingFrame(desiredOrientation);
+      referenceOrientationInRootFrame.changeFrame(rootFrame);
+      referenceAngularVelocityInRootFrame.setIncludingFrame(desiredAngularVelocity);
+      referenceAngularVelocityInRootFrame.changeFrame(rootFrame);
+      referenceTorqueInRootFrame.setIncludingFrame(feedForwardTorque);
+      referenceTorqueInRootFrame.changeFrame(rootFrame);
+      referenceAngularAccelerationInRootFrame.setToZero(rootFrame);
    }
 
    /**
@@ -353,22 +411,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
-   public void getIncludingFrame(FrameQuaternion desiredOrientationToPack)
-   {
-      desiredOrientationToPack.setIncludingFrame(desiredOrientationInRootFrame);
-   }
-
-   public void getIncludingFrame(FrameQuaternion desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
-   {
-      desiredOrientationToPack.setIncludingFrame(desiredOrientationInRootFrame);
-      desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocityInRootFrame);
-   }
-
-   public void getFeedForwardActionIncludingFrame(FrameVector3D feedForwardAngularActionToPack)
-   {
-      feedForwardAngularActionToPack.setIncludingFrame(feedForwardAngularActionInRootFrame);
-   }
-
    public void getBodyFixedOrientationIncludingFrame(FrameQuaternion bodyFixedOrientationToControlToPack)
    {
       bodyFixedOrientationToControlToPack.setIncludingFrame(bodyFixedOrientationInEndEffectorFrame);
@@ -379,19 +421,67 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return bodyFixedOrientationInEndEffectorFrame;
    }
 
-   public FrameQuaternionBasics getDesiredOrientation()
+   /**
+    * Gets the expected control mode to execute this command with.
+    * 
+    * @return the expected active controller core control mode.
+    */
+   public WholeBodyControllerCoreMode getControlMode()
    {
-      return desiredOrientationInRootFrame;
+      return controlMode;
    }
 
-   public FrameVector3DBasics getDesiredAngularVelocity()
+   /**
+    * Gets the reference orientation to use in the feedback controller.
+    * <p>
+    * The reference orientation typically represents the desired orientation.
+    * </p>
+    * 
+    * @return the reference orientation.
+    */
+   public FrameQuaternionBasics getReferenceOrientation()
    {
-      return desiredAngularVelocityInRootFrame;
+      return referenceOrientationInRootFrame;
    }
 
-   public FrameVector3DBasics getFeedForwardAngularAction()
+   /**
+    * Gets the reference angular velocity to use in the feedback controller.
+    * <p>
+    * Depending on the active control mode, it can be used as a desired (ID & WMC) or a feed-forward
+    * term (IK).
+    * </p>
+    * 
+    * @return the reference angular velocity.
+    */
+   public FrameVector3DBasics getReferenceAngularVelocity()
    {
-      return feedForwardAngularActionInRootFrame;
+      return referenceAngularVelocityInRootFrame;
+   }
+
+   /**
+    * Gets the reference angular acceleration to use in the feedback controller.
+    * <p>
+    * It is used in the inverse dynamics mode as a feed-forward term.
+    * </p>
+    * 
+    * @return the reference angular acceleration.
+    */
+   public FrameVector3DBasics getReferenceAngularAcceleration()
+   {
+      return referenceAngularAccelerationInRootFrame;
+   }
+
+   /**
+    * Gets the reference torque to use in the feedback controller.
+    * <p>
+    * It is used in the virtual control mode as a feed-forward term.
+    * </p>
+    * 
+    * @return the reference torque.
+    */
+   public FrameVector3DBasics getReferenceTorque()
+   {
+      return referenceTorqueInRootFrame;
    }
 
    public RigidBodyBasics getBase()
@@ -444,13 +534,17 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       {
          OrientationFeedbackControlCommand other = (OrientationFeedbackControlCommand) object;
 
+         if (controlMode != other.controlMode)
+            return false;
          if (!bodyFixedOrientationInEndEffectorFrame.equals(other.bodyFixedOrientationInEndEffectorFrame))
             return false;
-         if (!desiredOrientationInRootFrame.equals(other.desiredOrientationInRootFrame))
+         if (!referenceOrientationInRootFrame.equals(other.referenceOrientationInRootFrame))
             return false;
-         if (!desiredAngularVelocityInRootFrame.equals(other.desiredAngularVelocityInRootFrame))
+         if (!referenceAngularVelocityInRootFrame.equals(other.referenceAngularVelocityInRootFrame))
             return false;
-         if (!feedForwardAngularActionInRootFrame.equals(other.feedForwardAngularActionInRootFrame))
+         if (!referenceAngularAccelerationInRootFrame.equals(other.referenceAngularAccelerationInRootFrame))
+            return false;
+         if (!referenceTorqueInRootFrame.equals(other.referenceTorqueInRootFrame))
             return false;
          if (!gains.equals(other.gains))
             return false;
@@ -475,7 +569,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       String ret = getClass().getSimpleName() + ": ";
       ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
       ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
-      ret += "orientation = " + desiredOrientationInRootFrame.toStringAsYawPitchRoll();
+      ret += "orientation = " + referenceOrientationInRootFrame.toStringAsYawPitchRoll();
       return ret;
    }
 }

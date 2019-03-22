@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,11 +38,10 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-import java.util.List;
-
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
 
    private static final double[] defaultWaypointProportions = new double[] {0.33, 0.66};
@@ -98,6 +97,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -195,6 +195,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    @Override
@@ -311,8 +317,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
       desiredSoleLinearAcceleration.setMatchingFrame(desiredAcceleration);
 
-      feedbackControlCommand.set(desiredPosition, desiredVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredPosition, desiredVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
       feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 

@@ -163,8 +163,7 @@ public class TouchDownState extends AbstractFootControlState
 
       orientationTrajectory.compute(timeInState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      feedbackControlCommand.setFeedForwardAngularAction(desiredAngularAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       feedbackControlCommand.setGains(gains);
    }
