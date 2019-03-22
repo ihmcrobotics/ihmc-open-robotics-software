@@ -167,7 +167,7 @@ public class WholeBodyControllerCore
          {
             if (reinitializationRequested)
                inverseDynamicsSolver.initialize();
-            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+            feedbackController.submitFeedbackControlCommandList(currentMode.getValue(), controllerCoreCommand.getFeedbackControlCommandList());
             inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          }
          else
@@ -178,7 +178,7 @@ public class WholeBodyControllerCore
       case INVERSE_KINEMATICS:
          if (inverseKinematicsSolver != null)
          {
-            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+            feedbackController.submitFeedbackControlCommandList(currentMode.getValue(), controllerCoreCommand.getFeedbackControlCommandList());
             inverseKinematicsSolver.submitInverseKinematicsCommandList(controllerCoreCommand.getInverseKinematicsCommandList());
          }
          else
@@ -189,7 +189,7 @@ public class WholeBodyControllerCore
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
          {
-            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
+            feedbackController.submitFeedbackControlCommandList(currentMode.getValue(), controllerCoreCommand.getFeedbackControlCommandList());
             virtualModelControlSolver.submitVirtualModelControlCommandList(controllerCoreCommand.getVirtualModelControlCommandList());
          }
          else

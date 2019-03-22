@@ -208,8 +208,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
       desiredPelvisAngularAcceleration.add(tempAngularAcceleration);
 
-      orientationFeedbackControlCommand.set(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity);
-      orientationFeedbackControlCommand.setFeedForwardAction(desiredPelvisAngularAcceleration);
+      orientationFeedbackControlCommand.setInverseDynamics(desiredPelvisOrientationWithOffset, desiredPelvisAngularVelocity, desiredPelvisAngularAcceleration);
       orientationFeedbackControlCommand.setWeightsForSolver(tempWeight);
       orientationFeedbackControlCommand.setGains(gains);
       orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);

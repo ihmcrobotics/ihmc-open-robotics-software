@@ -151,9 +151,8 @@ public class OnToesState extends AbstractFootControlState
       desiredLinearVelocity.setToZero(worldFrame);
       desiredLinearAcceleration.setToZero(worldFrame);
 
-      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      feedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration,
+                                                desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
       feedbackControlCommand.setGains(gains);
