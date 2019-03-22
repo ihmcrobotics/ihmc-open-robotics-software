@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
@@ -13,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -33,12 +35,17 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -71,7 +78,8 @@ public class LinearMomentumRateControlModule
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
    private final FramePoint2D capturePoint = new FramePoint2D();
-   private final FrameVector2D capturePointVelocity = new FrameVector2D();
+   private final CapturePointCalculator capturePointCalculator;
+
    private final FramePoint2D desiredCapturePoint = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
 
@@ -110,6 +118,10 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+   private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+
+   private final FilteredVelocityYoFrameVector2d capturePointVelocity;
+   private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
@@ -132,10 +144,10 @@ public class LinearMomentumRateControlModule
    private PlanarRegionsListHandler planarRegionsListHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<ContactableFoot> contactableFeet,
-                                          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double totalMass, double gravityZ,
+                                          RigidBodyBasics elevator, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double gravityZ,
                                           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.totalMass = totalMass;
+      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
       this.yoTime = yoTime;
 
@@ -149,18 +161,26 @@ public class LinearMomentumRateControlModule
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
+      capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, elevator);
+      DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
+                                                                                                                       controlDT);
+      capturePointVelocity = new FilteredVelocityYoFrameVector2d("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);
+
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", capturePointViz.createArtifact());
       }
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
+      yoCapturePoint.setToNaN();
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
@@ -188,8 +208,6 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
-      this.capturePoint.setIncludingFrame(input.getCapturePoint());
-      this.capturePointVelocity.setIncludingFrame(input.getCapturePointVelocity());
       this.desiredCapturePoint.setIncludingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setIncludingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
@@ -275,6 +293,9 @@ public class LinearMomentumRateControlModule
     */
    public boolean computeControllerCoreCommands()
    {
+      capturePointCalculator.compute(capturePoint, omega0);
+      capturePointVelocity.update(capturePoint);
+
       boolean success = checkInputs(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMP);
 
       updatePolygons();
@@ -285,6 +306,7 @@ public class LinearMomentumRateControlModule
 
       yoDesiredCMP.set(desiredCMP);
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
+      yoCapturePoint.set(capturePoint);
 
       success = success && computeDesiredLinearMomentumRateOfChange();
 
@@ -386,8 +408,8 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, capturePointVelocity,
-                                           omega0);
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
+                                           capturePointVelocity, omega0);
       }
       else
       {

@@ -28,12 +28,6 @@ public class LinearMomentumRateControlModuleInput
     */
    private double omega0;
 
-   @Deprecated // Should be computed in the fast thread
-   private final FramePoint2D capturePoint = new FramePoint2D();
-
-   @Deprecated // Should be computed in the fast thread
-   private final FrameVector2D capturePointVelocity = new FrameVector2D();
-
    /**
     * The desired capture point that the ICP controller should track.
     */
@@ -167,28 +161,6 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
-   }
-
-   @Deprecated // TODO: this should be computed inside the module and be an output rather then an input.
-   public void setCapturePoint(FramePoint2DReadOnly capturePoint)
-   {
-      this.capturePoint.setIncludingFrame(capturePoint);
-   }
-
-   public FramePoint2DReadOnly getCapturePoint()
-   {
-      return capturePoint;
-   }
-
-   @Deprecated // TODO: this should be computed inside the module and be an output rather then an input.
-   public void setCapturePointVelocity(FrameVector2DReadOnly capturePointVelocity)
-   {
-      this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
-   }
-
-   public FrameVector2DReadOnly getCapturePointVelocity()
-   {
-      return capturePointVelocity;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)

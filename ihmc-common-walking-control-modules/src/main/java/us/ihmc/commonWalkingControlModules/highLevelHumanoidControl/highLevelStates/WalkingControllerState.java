@@ -24,10 +24,10 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -36,6 +36,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
@@ -102,13 +103,13 @@ public class WalkingControllerState extends HighLevelControllerState
 
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry);
       PlanarRegionsListHandler planarRegionsListHandler = controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler();
       linearMomentumRateControlModule.setPlanarRegionsListHandler(planarRegionsListHandler);
