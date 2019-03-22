@@ -74,6 +74,7 @@ import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -298,9 +299,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return new TestRobotModel();
    }
 
-   public void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
+   public void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, DataSetName dataSetName)
    {
-      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
+      DataSet dataset = DataSetIOTools.loadDataSet(dataSetName);
 
       resetAllAtomics();
       String errorMessages = dataSetTester.apply(dataset);
