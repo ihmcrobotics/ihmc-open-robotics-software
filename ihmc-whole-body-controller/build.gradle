@@ -47,9 +47,9 @@ testDependencies {
 
 remotes {
    rtComputer {
-      host = "10.100.3.160"
-      user = "shadylady"
-      password = "ShadyLady"
+      host = "<ip address>"
+      user = "<username>"
+      password = "<password>"
       fileTransfer = "scp"
    }
 }
