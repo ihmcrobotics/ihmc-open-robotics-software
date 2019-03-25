@@ -12,7 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class JointLimitEnforcementMethodCommand
       implements InverseKinematicsCommand<JointLimitEnforcementMethodCommand>, InverseDynamicsCommand<JointLimitEnforcementMethodCommand>
 {
-   private final int initialCapacity = 40;
+   private static final int initialCapacity = 40;
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final List<JointLimitEnforcement> methods = new ArrayList<>(initialCapacity);
    private final List<JointLimitParameters> parameters = new ArrayList<>(initialCapacity);

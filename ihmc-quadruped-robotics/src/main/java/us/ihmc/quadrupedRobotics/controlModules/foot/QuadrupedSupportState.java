@@ -1,12 +1,14 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -24,6 +26,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 public class QuadrupedSupportState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final int dofs = 3;
 
    private final RobotQuadrant robotQuadrant;
@@ -47,6 +50,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final SpatialAcceleration footAcceleration = new SpatialAcceleration();
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
 
@@ -113,6 +117,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
    }
 
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      spatialFeedbackControlCommand.setControlMode(controllerCoreMode);
+   }
+
    @Override
    public void onEntry()
    {
@@ -171,8 +181,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
       desiredCoPPosition.setToZero(desiredSoleFrame);
       desiredCoPPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredCoPPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.setFeedForwardLinearAction(desiredLinearAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         spatialFeedbackControlCommand.setInverseDynamics(desiredCoPPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         spatialFeedbackControlCommand.setVirtualModelControl(desiredPosition, desiredLinearVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       spatialFeedbackControlCommand.setLinearWeightsForSolver(parameters.getSupportFootWeights());
       spatialFeedbackControlCommand.setPositionGains(parameters.getHoldPositionGains());
 

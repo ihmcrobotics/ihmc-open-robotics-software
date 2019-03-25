@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
@@ -34,6 +35,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble qDFeedforward;
    private final YoDouble qDDFeedforward;
+   private final YoDouble tauFeedforward;
 
    private final YoDouble qError;
    private final YoDouble qDError;
@@ -140,6 +142,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       if (toolbox.isEnableVirtualModelControlModule())
       {
          tauFeedback = new YoDouble("tau_fb_" + jointName, registry);
+         tauFeedforward = new YoDouble("tau_ff_" + jointName, registry);
          tauFeedbackRateLimited = new RateLimitedYoVariable("tau_fb_rl_" + jointName, registry, maxFeedbackRate, tauFeedback, dt);
 
          tauDesired = new YoDouble("tau_d_" + jointName, registry);
@@ -147,6 +150,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       else
       {
          tauFeedback = null;
+         tauFeedforward = null;
          tauFeedbackRateLimited = null;
 
          tauDesired = null;
@@ -177,27 +181,26 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       this.isEnabled.set(isEnabled);
    }
 
-   public void setDesireds(double q_d, double qd_d, double qdd_feedforward)
+   public void submitFeedbackControlCommand(OneDoFJointFeedbackControlCommand command)
    {
-      qDesired.set(q_d);
-      qDDesired.set(qd_d);
-      if (qDFeedforward != null)
-         qDFeedforward.set(qd_d);
-      if (qDDFeedforward != null)
-         qDDFeedforward.set(qdd_feedforward);
-   }
 
-   public void setGains(PDGainsReadOnly gains)
-   {
+      weightForSolver.set(command.getWeightForSolver());
+
+      PDGainsReadOnly gains = command.getGains();
       kp.set(gains.getKp());
       kd.set(gains.getKd());
       maxFeedback.set(gains.getMaximumFeedback());
       maxFeedbackRate.set(gains.getMaximumFeedbackRate());
-   }
 
-   public void setWeightForSolver(double weightForSolver)
-   {
-      this.weightForSolver.set(weightForSolver);
+      qDesired.set(command.getReferencePosition());
+      qDDesired.set(command.getReferenceVelocity());
+
+      if (qDFeedforward != null)
+         qDFeedforward.set(command.getReferenceVelocity());
+      if (qDDFeedforward != null)
+         qDDFeedforward.set(command.getReferenceAcceleration());
+      if (tauFeedforward != null)
+         tauFeedforward.set(command.getReferenceEffort());
    }
 
    @Override
@@ -271,7 +274,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       tauFeedback.set(tau_fb);
       tauFeedbackRateLimited.update();
 
-      tauDesired.set(tauFeedbackRateLimited.getDoubleValue());
+      tauDesired.set(tauFeedforward.getValue() + tauFeedbackRateLimited.getDoubleValue());
 
       virtualModelControlOutput.setOneDoFJointDesiredTorque(0, tauDesired.getDoubleValue());
    }
