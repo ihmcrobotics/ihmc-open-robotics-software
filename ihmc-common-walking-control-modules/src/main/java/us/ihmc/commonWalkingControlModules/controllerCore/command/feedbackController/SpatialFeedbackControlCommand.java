@@ -121,25 +121,23 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    @Override
    public void set(SpatialFeedbackControlCommand other)
    {
-      spatialAccelerationCommand.set(other.spatialAccelerationCommand);
-
       controlFramePoseInEndEffectorFrame.setIncludingFrame(other.controlFramePoseInEndEffectorFrame);
-      
       controlMode = other.controlMode;
-
       referenceOrientationInRootFrame.setIncludingFrame(other.referenceOrientationInRootFrame);
-      referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
-      referenceAngularAccelerationInRootFrame.setIncludingFrame(other.referenceAngularAccelerationInRootFrame);
-      referenceTorqueInRootFrame.setIncludingFrame(other.referenceTorqueInRootFrame);
-
       referencePositionInRootFrame.setIncludingFrame(other.referencePositionInRootFrame);
+      referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
       referenceLinearVelocityInRootFrame.setIncludingFrame(other.referenceLinearVelocityInRootFrame);
+      referenceAngularAccelerationInRootFrame.setIncludingFrame(other.referenceAngularAccelerationInRootFrame);
       referenceLinearAccelerationInRootFrame.setIncludingFrame(other.referenceLinearAccelerationInRootFrame);
+      referenceTorqueInRootFrame.setIncludingFrame(other.referenceTorqueInRootFrame);
       referenceForceInRootFrame.setIncludingFrame(other.referenceForceInRootFrame);
 
+      gains.set(other.gains);
+      angularGainsFrame = other.angularGainsFrame;
+      linearGainsFrame = other.linearGainsFrame;
+      spatialAccelerationCommand.set(other.spatialAccelerationCommand);
       controlBaseFrame = other.controlBaseFrame;
 
-      gains.set(other.gains);
    }
 
    /**
@@ -1077,8 +1075,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
-      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
+      ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
       ret += "position = " + referencePositionInRootFrame + ", orientation = " + referenceOrientationInRootFrame.toStringAsYawPitchRoll();
       return ret;
    }

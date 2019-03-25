@@ -143,7 +143,7 @@ public class ContactWrenchCommand implements InverseDynamicsCommand<ContactWrenc
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": constraint: " + constraintType + ", body: " + rigidBody.getName() + ", wrench: " + wrench + ", weight: "
-            + weightMatrix + ", selection: " + selectionMatrix;
+      return getClass().getSimpleName() + ": constraint: " + constraintType + ", body: " + rigidBody + ", wrench: " + wrench + ", weight: " + weightMatrix
+            + ", selection: " + selectionMatrix;
    }
 }
