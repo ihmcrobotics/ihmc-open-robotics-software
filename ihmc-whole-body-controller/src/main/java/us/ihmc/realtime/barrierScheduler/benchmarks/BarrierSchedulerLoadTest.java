@@ -1,4 +1,4 @@
-package us.ihmc.realtime;
+package us.ihmc.realtime.barrierScheduler.benchmarks;
 
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.affinity.CPUTopology;
@@ -6,7 +6,8 @@ import us.ihmc.affinity.Package;
 import us.ihmc.commons.Conversions;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.BindingContext;
-import us.ihmc.realtime.helperClasses.*;
+import us.ihmc.realtime.*;
+import us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses.*;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

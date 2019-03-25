@@ -1,4 +1,4 @@
-package us.ihmc.realtime.helperClasses;
+package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.BindingContext;
