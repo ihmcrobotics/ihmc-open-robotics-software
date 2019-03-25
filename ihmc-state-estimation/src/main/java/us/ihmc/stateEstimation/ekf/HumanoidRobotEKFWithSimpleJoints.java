@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -17,9 +18,9 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,15 +61,8 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    {
       this.processedSensorOutput = processedSensorOutput;
 
-      JointBasics[] chestSubtreeJoints = MultiBodySystemTools.collectSubtreeJoints(estimatorFullRobotModel.getChest());
-      simpleJoints = Arrays.asList(MultiBodySystemTools.filterJoints(chestSubtreeJoints, OneDoFJoint.class));
-      if (simpleJoints.size() != chestSubtreeJoints.length)
-      {
-         throw new RuntimeException("Can only handle OneDoFJoints in a robot.");
-      }
-
-      JointBasics[] referenceChestSubtreeJoints = MultiBodySystemTools.collectSubtreeJoints(referenceModel.getChest());
-      referenceJoints = Arrays.asList(MultiBodySystemTools.filterJoints(referenceChestSubtreeJoints, OneDoFJoint.class));
+      simpleJoints = SubtreeStreams.fromChildren(OneDoFJoint.class, estimatorFullRobotModel.getChest()).collect(Collectors.toList());
+      referenceJoints = SubtreeStreams.fromChildren(OneDoFJoint.class, referenceModel.getChest()).collect(Collectors.toList());
 
       List<OneDoFJointBasics> jointsForEKF = new ArrayList<>();
       List<OneDoFJointBasics> referenceJointsForEKF = new ArrayList<>();
