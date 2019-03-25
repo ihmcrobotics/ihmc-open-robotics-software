@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+import static us.ihmc.communication.packets.Packet.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
@@ -23,10 +22,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
@@ -373,12 +374,18 @@ public class LookAheadCoMHeightTrajectoryGenerator
       Footstep nextFootstep = null;
 
       if (CONSIDER_NEXT_FOOTSTEP)
+      {
          nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-
-      if (nextFootstep != null)
-         hasBeenInitializedWithNextStep.set(true);
+         if (nextFootstep != null)
+            hasBeenInitializedWithNextStep.set(true);
+         else
+            hasBeenInitializedWithNextStep.set(false);
+      }
       else
+      {
          hasBeenInitializedWithNextStep.set(false);
+      }
+
 
       transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
       transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
@@ -411,18 +418,22 @@ public class LookAheadCoMHeightTrajectoryGenerator
       transferToContactFramePosition.changeFrame(worldFrame);
 
       FramePoint3D nextContactFramePosition = null;
-      if (nextFootstep != null)
+
+      if (CONSIDER_NEXT_FOOTSTEP)
       {
-         nextContactFramePosition = new FramePoint3D();
-         nextFootstep.getAnklePosition(nextContactFramePosition, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
-
-         if (frameDrifted)
+         if (nextFootstep != null)
          {
-            fromContactFrameDrift.changeFrame(nextContactFramePosition.getReferenceFrame());
-            nextContactFramePosition.setZ(nextContactFramePosition.getZ() + fromContactFrameDrift.getZ());
+            nextContactFramePosition = new FramePoint3D();
+            nextFootstep.getAnklePosition(nextContactFramePosition, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
+            
+            if (frameDrifted)
+            {
+               fromContactFrameDrift.changeFrame(nextContactFramePosition.getReferenceFrame());
+               nextContactFramePosition.setZ(nextContactFramePosition.getZ() + fromContactFrameDrift.getZ());
+            }
+            
+            nextContactFramePosition.changeFrame(worldFrame);
          }
-
-         nextContactFramePosition.changeFrame(worldFrame);
       }
 
       contactFrameZeroPosition.set(transferFromContactFramePosition);
@@ -441,10 +452,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double footHeight1 = transferToContactFramePosition.getZ();
 
       double nextFootHeight = Double.NaN;
-      if (nextContactFramePosition != null)
+
+      if (CONSIDER_NEXT_FOOTSTEP)
       {
-         nextContactFramePosition.changeFrame(frameOfLastFoostep);
-         nextFootHeight = nextContactFramePosition.getZ();
+         if (nextContactFramePosition != null)
+         {
+            nextContactFramePosition.changeFrame(frameOfLastFoostep);
+            nextFootHeight = nextContactFramePosition.getZ();
+         }
       }
 
       s0Min.setY(footHeight0 + minimumHeightAboveGround.getDoubleValue());
@@ -536,22 +551,31 @@ public class LookAheadCoMHeightTrajectoryGenerator
          framePointSF.changeFrame(worldFrame);
          pointSFMaxViz.setPosition(framePointSF);
 
-         if (nextContactFramePosition != null)
+         if (CONSIDER_NEXT_FOOTSTEP)
          {
-            framePointSNext.setIncludingFrame(nextContactFramePosition);
-            framePointSNext.setZ(sNext.getY() + offsetHeightAboveGround.getDoubleValue());
-            framePointSNext.changeFrame(worldFrame);
-            pointSNextViz.setPosition(framePointSNext);
-
-            framePointSNext.changeFrame(frameOfLastFoostep);
-            framePointSNext.setZ(sNextMin.getY() + offsetHeightAboveGround.getDoubleValue());
-            framePointSNext.changeFrame(worldFrame);
-            pointSNextMinViz.setPosition(framePointSNext);
-
-            framePointSNext.changeFrame(frameOfLastFoostep);
-            framePointSNext.setZ(sNextMax.getY() + offsetHeightAboveGround.getDoubleValue());
-            framePointSNext.changeFrame(worldFrame);
-            pointSNextMaxViz.setPosition(framePointSNext);
+            if (nextContactFramePosition != null)
+            {
+               framePointSNext.setIncludingFrame(nextContactFramePosition);
+               framePointSNext.setZ(sNext.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.changeFrame(worldFrame);
+               pointSNextViz.setPosition(framePointSNext);
+               
+               framePointSNext.changeFrame(frameOfLastFoostep);
+               framePointSNext.setZ(sNextMin.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.changeFrame(worldFrame);
+               pointSNextMinViz.setPosition(framePointSNext);
+               
+               framePointSNext.changeFrame(frameOfLastFoostep);
+               framePointSNext.setZ(sNextMax.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.changeFrame(worldFrame);
+               pointSNextMaxViz.setPosition(framePointSNext);
+            }
+            else
+            {
+               pointSNextViz.setPositionToNaN();
+               pointSNextMinViz.setPositionToNaN();
+               pointSNextMaxViz.setPositionToNaN();
+            }
          }
          else
          {
@@ -846,15 +870,17 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      if (command.getEuclideanTrajectory().getExecutionMode() == ExecutionMode.OVERRIDE)
+      EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+
+      if (euclideanTrajectory.getExecutionMode() == ExecutionMode.OVERRIDE)
       {
          isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(command.getEuclideanTrajectory().getCommandId());
+         clearCommandQueue(euclideanTrajectory.getCommandId());
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
          initializeOffsetTrajectoryGenerator(command, 0.0);
          return;
       }
-      else if (command.getEuclideanTrajectory().getExecutionMode() == ExecutionMode.QUEUE)
+      else if (euclideanTrajectory.getExecutionMode() == ExecutionMode.QUEUE)
       {
          boolean success = queuePelvisHeightTrajectoryCommand(command);
          if (!success)
@@ -869,7 +895,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
       else
       {
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getEuclideanTrajectory().getExecutionMode() + ". Command ignored.");
+         LogTools.warn("Unknown {} value: {}. Command ignored.", ExecutionMode.class.getSimpleName(), euclideanTrajectory.getExecutionMode());
          return;
       }
    }
@@ -878,7 +904,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       if (!isReadyToHandleQueuedCommands.getBooleanValue())
       {
-         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         LogTools.warn("The very first {} of a series must be {}. Aborting motion.", command.getClass().getSimpleName(), ExecutionMode.OVERRIDE);
          return false;
       }
 
@@ -886,14 +912,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
-         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
-               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         LogTools.warn("Previous command ID mismatch: previous ID from command = {}, last message ID received by the controller = {}. Aborting motion.",
+                       previousCommandId, lastCommandId.getLongValue());
          return false;
       }
 
       if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
       {
-         PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+         LogTools.warn("Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
          return false;
       }
 
