@@ -10,13 +10,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -197,7 +197,7 @@ public class CenterOfMassHeightManager
                return;
             }
 
-            PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
+            LogTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
             return;
          }
 
@@ -228,7 +228,7 @@ public class CenterOfMassHeightManager
                requestState(PelvisHeightControlMode.USER);
                return;
             }
-            PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
+            LogTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
             return;
          }
 
