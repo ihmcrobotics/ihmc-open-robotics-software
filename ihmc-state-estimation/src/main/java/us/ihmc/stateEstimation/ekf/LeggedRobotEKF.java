@@ -307,6 +307,14 @@ public class LeggedRobotEKF implements StateEstimatorController
       rootState.initialize(rootJointTransform, rootTwist);
 
       stateEstimator.reset();
+      for (int i = 0; i < linearAccelerationSensors.size(); i++)
+      {
+         linearAccelerationSensors.get(i).resetBias();
+      }
+      for (int i = 0; i < angularVelocitySensors.size(); i++)
+      {
+         angularVelocitySensors.get(i).resetBias();
+      }
    }
 
    @Override
