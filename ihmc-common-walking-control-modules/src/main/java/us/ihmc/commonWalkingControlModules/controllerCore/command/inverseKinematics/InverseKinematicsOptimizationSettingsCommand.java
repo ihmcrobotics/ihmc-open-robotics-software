@@ -112,9 +112,9 @@ public class InverseKinematicsOptimizationSettingsCommand implements InverseKine
       {
          InverseKinematicsOptimizationSettingsCommand other = (InverseKinematicsOptimizationSettingsCommand) object;
 
-         if (jointVelocityWeight != other.jointVelocityWeight)
+         if (Double.compare(jointVelocityWeight, other.jointVelocityWeight) != 0)
             return false;
-         if (jointAccelerationWeight != other.jointAccelerationWeight)
+         if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
             return false;
 
          return true;

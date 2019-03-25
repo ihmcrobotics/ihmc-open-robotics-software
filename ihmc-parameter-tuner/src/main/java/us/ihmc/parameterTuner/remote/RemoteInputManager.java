@@ -77,8 +77,8 @@ public class RemoteInputManager implements ParameterGuiInterface
       alert.setTitle("Reconnect");
       alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
       alert.getDialogPane().setMinWidth(Region.USE_PREF_SIZE);
-      alert.setHeaderText("Do you want to reconnect.");
-      alert.setContentText("Previously modified variables will be overwritten by the server and unsubmitted outgoing changes (modifications after disconnect) will be sent.");
+      alert.setHeaderText("Do you want to reconnect?");
+      alert.setContentText("Previously modified variables will be overwritten by the server.");
       return alert.showAndWait().get() == ButtonType.OK;
    }
 

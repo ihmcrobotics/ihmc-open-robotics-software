@@ -16,7 +16,9 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -71,6 +73,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
+
+   private final FloatingJointBasics rootJoint;
+   private final YoFixedFrameTwist yoRootTwist;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
                                            SensorOutputMapReadOnly sensorOutputMapReadOnly, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
@@ -186,6 +191,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          estimatedWrenchVisualizer = null;
       }
+
+      rootJoint = inverseDynamicsStructure.getRootJoint();
+      yoRootTwist = new YoFixedFrameTwist("RootTwist", rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(),
+                                          registry);
    }
 
    private void setupYoGraphics(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
@@ -248,6 +257,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
          break;
       }
+
+      yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
       imuBiasStateEstimator.compute(trustedFeet);

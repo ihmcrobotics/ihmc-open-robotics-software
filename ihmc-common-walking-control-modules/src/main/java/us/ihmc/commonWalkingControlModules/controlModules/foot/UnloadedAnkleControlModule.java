@@ -89,8 +89,7 @@ public class UnloadedAnkleControlModule
          throw new RuntimeException("The foot control frame can not be rotated with respect to the ankle when using this module.");
       }
 
-      feedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
-      feedbackControlCommand.getFeedForwardAngularActionIncludingFrame(feedForwardAngularAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       desiredOrientation.changeFrame(shinFrame);
       desiredAngularVelocity.changeFrame(shinFrame);
 
