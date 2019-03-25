@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class BarrierSchedulerLoadTest
+public class BarrierSchedulerMatrixMultiplyBenchmark
 {
    private static final long SCHEDULER_PERIOD_NANOSECONDS = 1000000; // 1KHz
    private static final int NUM_ITERATIONS_OF_SCHEDULER = 60000; // 60 seconds @ 1KHz
@@ -150,9 +150,9 @@ public class BarrierSchedulerLoadTest
       boolean useNativeCommonOps = Boolean.parseBoolean(args[1]);
 
       BarrierSchedulerLoadTestHelper.setNumberOfOperations(numberOfIterations);
-      BarrierSchedulerLoadTest barrierSchedulerLoadTest = new BarrierSchedulerLoadTest();
+      BarrierSchedulerMatrixMultiplyBenchmark barrierSchedulerMatrixMultiplyBenchmark = new BarrierSchedulerMatrixMultiplyBenchmark();
 
-      //      barrierSchedulerLoadTest.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiplyNativeCommonOps();
-      barrierSchedulerLoadTest.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(useNativeCommonOps);
+      //      barrierSchedulerMatrixMultiplyBenchmark.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiplyNativeCommonOps();
+      barrierSchedulerMatrixMultiplyBenchmark.testBarrierSchedulerThreeThreadTwoTaskMatrixMultiply(useNativeCommonOps);
    }
 }

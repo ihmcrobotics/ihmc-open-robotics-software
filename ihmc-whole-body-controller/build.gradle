@@ -54,7 +54,7 @@ remotes {
    }
 }
 
-mainClassName = 'us.ihmc.realtime.barrierScheduler.benchmarks.BarrierSchedulerLoadTest'
+mainClassName = 'us.ihmc.realtime.barrierScheduler.benchmarks.BarrierSchedulerMatrixMultiplyBenchmark'
 task deploy(dependsOn: ['installDist']) {
    doLast {
       ssh.run {
