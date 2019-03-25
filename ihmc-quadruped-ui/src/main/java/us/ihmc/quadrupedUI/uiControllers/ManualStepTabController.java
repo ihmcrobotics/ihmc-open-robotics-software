@@ -105,7 +105,6 @@ public class ManualStepTabController
    public void attachMessager(JavaFXMessager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings)
    {
       this.messager = messager;
-
       xGaitSettingsReference = messager.createInput(QuadrupedUIMessagerAPI.XGaitSettingsTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::handleRobotConfigurationData);
 
@@ -114,11 +113,13 @@ public class ManualStepTabController
 
    public void handleRobotConfigurationData(RobotConfigurationData robotConfigurationData)
    {
-      if (robotConfigurationData.getJointNameHash() != jointNameHash)
+      if (referenceFrames == null || fullRobotModel == null)
+         return;
+
+      if (robotConfigurationData.getJointNameHash() != jointNameHash )
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(),
-                                                                   robotConfigurationData.getRootTranslation());
+      RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
       fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
 
       float[] newJointConfiguration = robotConfigurationData.getJointAngles().toArray();
