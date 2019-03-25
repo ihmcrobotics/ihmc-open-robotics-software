@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalki
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -256,6 +257,12 @@ public class PelvisOrientationManager
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       walkingManager.setSelectionMatrix(selectionMatrix);
+   }
+
+   public <M extends Settable<M>> M pollStatusToReport()
+   {
+      // TODO Implement me
+      return null;
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
