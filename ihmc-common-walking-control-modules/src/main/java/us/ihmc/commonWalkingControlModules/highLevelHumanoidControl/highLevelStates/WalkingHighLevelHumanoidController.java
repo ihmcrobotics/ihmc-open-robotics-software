@@ -566,6 +566,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       currentState = stateMachine.getCurrentState();
 
       updateManagers(currentState);
+      reportStatusMessages();
 
       handleChangeInContactState();
 
@@ -677,17 +678,38 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private <M extends Settable<M>> void reportStatusMessages()
    {
+      M statusMessage;
+
+      statusMessage = feetManager.pollStatusToReport();
+      if (statusMessage != null)
+         statusOutputManager.reportStatusMessage(statusMessage);
+
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
          if (bodyManager != null)
          {
-            M statusMessage = bodyManager.pollStatusToReport();
+            statusMessage = bodyManager.pollStatusToReport();
             if (statusMessage != null)
                statusOutputManager.reportStatusMessage(statusMessage);
          }
       }
-      
+
+      if (pelvisOrientationManager != null)
+      {
+         statusMessage = pelvisOrientationManager.pollStatusToReport();
+         if (statusMessage != null)
+            statusOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      statusMessage = comHeightManager.pollStatusToReport();
+      if (statusMessage != null)
+         statusOutputManager.reportStatusMessage(statusMessage);
+
+      statusMessage = balanceManager.pollStatusToReport();
+      if (statusMessage != null)
+         statusOutputManager.reportStatusMessage(statusMessage);
+
    }
 
    private void submitControllerCoreCommands()
