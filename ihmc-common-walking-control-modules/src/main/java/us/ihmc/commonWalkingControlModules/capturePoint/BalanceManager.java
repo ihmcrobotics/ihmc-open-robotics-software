@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -835,5 +836,11 @@ public class BalanceManager
       footstepSolution.set(output.getFootstepSolution());
       footstepWasAdjusted = output.getFootstepWasAdjusted();
       usingStepAdjustment = output.getUsingStepAdjustment();
+   }
+
+   public <M extends Settable<M>> M pollStatusToReport()
+   {
+      // TODO Implement me
+      return null;
    }
 }
