@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
@@ -22,6 +21,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -37,8 +37,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    @FXML private TextField remoteCurrentWaypointIndex;
    @FXML private TextField remoteCurrentState;
 
-   private JavaFXMessager messager;
-   private BehaviorTeleop teleop;
+   private JavaFXMessager uiMessager;
+   private Messager behaviorMessager;
    private AtomicReference<FXUIEditor> activeEditor;
 
    private ArrayList<PatrolWaypointGraphic> waypoints = new ArrayList<>();
@@ -47,28 +47,28 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   public void init(JavaFXMessager messager, Node sceneNode, BehaviorTeleop teleop, DRCRobotModel robotModel)
+   public void init(JavaFXMessager uiMessager, Node sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.messager = messager;
-      this.teleop = teleop;
+      this.uiMessager = uiMessager;
+      this.behaviorMessager = behaviorMessager;
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       footstepPlanGraphic.start();
       rootChildren.add(footstepPlanGraphic.getNode());
 
-      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
          executorService.submit(() -> {
             LogTools.debug("Received footstep plan containing {} steps", plan.size());
             footstepPlanGraphic.generateMeshes(plan);
          });
       });
 
-      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentState, state -> remoteCurrentState.setText(state));
-      teleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> remoteCurrentState.setText(state));
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
                                                        index -> remoteCurrentWaypointIndex.setText(index.toString()));
 
-      activeEditor = messager.createInput(BehaviorUI.API.ActiveEditor, null);
-      messager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
+      activeEditor = uiMessager.createInput(BehaviorUI.API.ActiveEditor, null);
+      uiMessager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
       {
          if (value == null) // update the waypoint when any editor exits, may be a better way to do this
          {
@@ -76,7 +76,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
          }
       });
 
-      waypointPlacementStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      waypointPlacementStateMachine = new FXUIStateMachine(uiMessager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
       {
          removeAllWaypointGraphics();
          goToNextWaypointPositionEdit();
@@ -85,8 +85,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
       {
          PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-         messager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
+         uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
+         uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
@@ -100,8 +100,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
          teleopUpdateWaypoints();
 
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
+         uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+         uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
@@ -111,8 +111,8 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    {
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
-      messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
+      uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
+      uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
    }
 
    private final void mouseClicked(MouseEvent event)
@@ -132,13 +132,13 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                   if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint position: {}", i);
-                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
+                     uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.SNAPPED_POSITION_EDITOR.activate();
                   }
                   else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint orientation: {}", i);
-                     messager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
+                     uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.ORIENTATION_EDITOR.activate();
                   }
                }
@@ -156,7 +156,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
                            double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
                            waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), yaw, 0.0, 0.0));
                         });
-      teleop.setWaypoints(waypointsToSend);
+      behaviorMessager.submitMessage(PatrolBehavior.API.Waypoints, waypointsToSend);
    }
 
    private PatrolWaypointGraphic createWaypointGraphic()
@@ -184,18 +184,18 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    @FXML public void placeWaypoints()
    {
-      messager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
+      uiMessager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
 
       waypointPlacementStateMachine.start();
    }
 
    @FXML public void goToWaypoint()
    {
-      teleop.goToWaypoint(waypointIndex.getValue());
+      behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, waypointIndex.getValue());
    }
 
    @FXML public void stopWalking()
    {
-      teleop.stopPatrolling();
+      behaviorMessager.submitMessage(PatrolBehavior.API.Stop, new Object());
    }
 }
