@@ -39,13 +39,6 @@ public class HeadTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(HeadTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      so3Trajectory.setFromMessage(message.getSo3Trajectory());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

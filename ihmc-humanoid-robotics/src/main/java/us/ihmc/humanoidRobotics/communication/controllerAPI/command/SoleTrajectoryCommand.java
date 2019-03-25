@@ -37,14 +37,6 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    }
 
    @Override
-   public void setFromMessage(SoleTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      positionTrajectory.setFromMessage(message.getPositionTrajectory());
-      robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SoleTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

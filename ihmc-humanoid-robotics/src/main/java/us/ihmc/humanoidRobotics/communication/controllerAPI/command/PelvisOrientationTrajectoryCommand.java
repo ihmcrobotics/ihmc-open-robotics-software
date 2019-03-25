@@ -49,14 +49,6 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
-   @Override
-   public void setFromMessage(PelvisOrientationTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      so3Trajectory.setFromMessage(message.getSo3Trajectory());
-   }
-
    /**
     * Allows setting this orientation {@link #SO3TrajectoryControllerCommand} trajectory command
     * from a pelvis pose {@link #SE3TrajectoryControllerCommand} trajectory command.

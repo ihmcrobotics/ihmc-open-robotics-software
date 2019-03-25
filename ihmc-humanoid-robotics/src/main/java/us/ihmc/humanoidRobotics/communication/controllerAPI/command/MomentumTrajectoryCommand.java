@@ -21,13 +21,6 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    }
 
    @Override
-   public void setFromMessage(MomentumTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      angularMomentumTrajectory.setFromMessage(message.getAngularMomentumTrajectory());
-   }
-   
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, MomentumTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

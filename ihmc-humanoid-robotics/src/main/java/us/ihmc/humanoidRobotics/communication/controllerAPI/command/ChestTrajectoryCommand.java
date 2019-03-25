@@ -39,15 +39,9 @@ public class ChestTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(ChestTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      so3Trajectory.setFromMessage(message.getSo3Trajectory());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 

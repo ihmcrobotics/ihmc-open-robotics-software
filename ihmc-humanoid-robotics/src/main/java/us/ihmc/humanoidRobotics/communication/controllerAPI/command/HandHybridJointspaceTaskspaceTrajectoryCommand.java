@@ -50,15 +50,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(HandHybridJointspaceTaskspaceTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      robotSide = RobotSide.fromByte(message.getRobotSide());
-      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

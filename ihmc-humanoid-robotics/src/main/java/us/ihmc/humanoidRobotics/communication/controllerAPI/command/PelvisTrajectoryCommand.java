@@ -50,15 +50,6 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
       se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
 
-   @Override
-   public void setFromMessage(PelvisTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      setEnableUserPelvisControl(message.getEnableUserPelvisControl());
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
-   }
-
    public boolean isEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;

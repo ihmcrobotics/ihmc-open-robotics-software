@@ -55,15 +55,6 @@ public class QuadrupedBodyTrajectoryCommand
       se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
 
-   @Override
-   public void setFromMessage(QuadrupedBodyTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
-   }
-
-
    public boolean isExpressedInAbsoluteTime()
    {
       return isExpressedInAbsoluteTime;

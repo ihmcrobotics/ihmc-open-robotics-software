@@ -54,15 +54,6 @@ public class QuadrupedBodyHeightCommand
    }
 
    @Override
-   public void setFromMessage(QuadrupedBodyHeightMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
-      controlBodyHeight = message.getControlBodyHeight();
-      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyHeightMessage message)
    {
       sequenceId = message.getSequenceId();

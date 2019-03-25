@@ -90,25 +90,21 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
 
-      clear(dataFrame);
-      setFromMessage(message);
-
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrame(linearSelectionFrame);
-
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrame(linearWeightFrame);
-   }
-
-   @Override
-   public void setFromMessage(EuclideanTrajectoryMessage message)
-   {
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
@@ -127,13 +123,15 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
-   }
 
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, EuclideanTrajectoryMessage message)
-   {
-      this.trajectoryFrame = trajectoryFrame;
-      clear(dataFrame);
-      setFromMessage(message);
+      if (resolver != null)
+      {
+         ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
+         selectionMatrix.setSelectionFrame(linearSelectionFrame);
+         
+         ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
+         weightMatrix.setWeightFrame(linearWeightFrame);
+      }
    }
 
    /**

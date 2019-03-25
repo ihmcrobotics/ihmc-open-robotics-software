@@ -86,24 +86,21 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
 
-      clear(dataFrame);
-      setFromMessage(message);
-
-      ReferenceFrame selectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
-      selectionMatrix.setSelectionFrame(selectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
-      weightMatrix.setWeightFrame(weightSelectionFrame);
-   }
-
-   @Override
-   public void setFromMessage(SO3TrajectoryMessage message)
-   {
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
@@ -123,6 +120,14 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
+
+      if (resolver != null)
+      {
+         ReferenceFrame selectionFrame = resolver.getReferenceFrame(message.getSelectionMatrix().getSelectionFrameId());
+         selectionMatrix.setSelectionFrame(selectionFrame);
+         ReferenceFrame weightSelectionFrame = resolver.getReferenceFrame(message.getWeightMatrix().getWeightFrameId());
+         weightMatrix.setWeightFrame(weightSelectionFrame);
+      }
    }
 
    /**

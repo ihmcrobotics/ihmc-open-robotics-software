@@ -78,38 +78,10 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
       enableUserPelvisControlDuringWalking = command.enableUserPelvisControlDuringWalking;
    }
 
-   /**
-    * set this command to the contents of the message
-    * 
-    * @param message the message that has trajectory data
-    */
-   @Override
-   public void setFromMessage(PelvisHeightTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
-      enableUserPelvisControl = message.getEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
-   }
-
-   /**
-    * set this command to the contents of the message
-    * 
-    * @param dataFrame the frame the data is expressed in
-    * @param trajectoryFrame the frame the trajectory will be executed in
-    * @param message the message that has trajectory data
-    */
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, PelvisHeightTrajectoryMessage message)
-   {
-      clear(dataFrame);
-      setFromMessage(message);
-      enableUserPelvisControl = message.getEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
-   }
-
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisHeightTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       euclideanTrajectory.set(resolver, message.getEuclideanTrajectory());
       enableUserPelvisControl = message.getEnableUserPelvisControl();
       enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
