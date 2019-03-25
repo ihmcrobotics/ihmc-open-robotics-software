@@ -324,6 +324,11 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       return SE3TrajectoryMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {

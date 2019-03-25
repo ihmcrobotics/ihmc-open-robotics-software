@@ -314,6 +314,11 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       return EuclideanTrajectoryMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {

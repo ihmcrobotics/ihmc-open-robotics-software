@@ -140,6 +140,11 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
       return JointspaceTrajectoryMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {

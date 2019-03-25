@@ -239,6 +239,11 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       return WrenchTrajectoryMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {

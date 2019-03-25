@@ -74,6 +74,11 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
       return DesiredAccelerationsMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {
