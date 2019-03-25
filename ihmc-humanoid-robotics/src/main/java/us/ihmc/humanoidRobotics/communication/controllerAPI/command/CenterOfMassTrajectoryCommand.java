@@ -21,12 +21,6 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    }
 
    @Override
-   public void setFromMessage(CenterOfMassTrajectoryMessage message)
-   {
-      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
-   }
-
-   @Override
    public void set(CenterOfMassTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;

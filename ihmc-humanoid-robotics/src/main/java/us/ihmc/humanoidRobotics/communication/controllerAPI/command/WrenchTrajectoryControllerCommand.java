@@ -100,19 +100,20 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, WrenchTrajectoryMessage message)
    {
-      FrameInformation frameInformation = message.getFrameInformation();
-      long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
-      long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+      if (resolver != null)
+      {
+         FrameInformation frameInformation = message.getFrameInformation();
+         long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
+         long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+         this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+         ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
+         clear(dataFrame);
+      }
+      else
+      {
+         clear();
+      }
 
-      clear(dataFrame);
-      setFromMessage(message);
-   }
-
-   @Override
-   public void setFromMessage(WrenchTrajectoryMessage message)
-   {
       sequenceId = message.getSequenceId();
       HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), dataFrame);
       List<WrenchTrajectoryPointMessage> trajectoryPointMessages = message.getWrenchTrajectoryPoints();
@@ -127,13 +128,6 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
       setQueueableCommandVariables(message.getQueueingProperties());
       useCustomControlFrame = message.getUseCustomControlFrame();
       message.getControlFramePose().get(controlFramePoseInBodyFrame);
-   }
-
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, WrenchTrajectoryMessage message)
-   {
-      this.trajectoryFrame = trajectoryFrame;
-      clear(dataFrame);
-      setFromMessage(message);
    }
 
    /**

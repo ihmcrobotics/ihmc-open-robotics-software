@@ -77,15 +77,6 @@ public class HandTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(HandTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
-      wrenchTrajectory.setFromMessage(message.getWrenchTrajectory());
-      robotSide = RobotSide.fromByte(message.getRobotSide());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

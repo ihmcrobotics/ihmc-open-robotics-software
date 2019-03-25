@@ -46,14 +46,6 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setFromMessage(message.getTaskspaceTrajectoryMessage());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

@@ -35,14 +35,6 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    }
 
    @Override
-   public void setFromMessage(FootTrajectoryMessage message)
-   {
-      sequenceId = message.getSequenceId();
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
-      robotSide = RobotSide.fromByte(message.getRobotSide());
-   }
-
-   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
