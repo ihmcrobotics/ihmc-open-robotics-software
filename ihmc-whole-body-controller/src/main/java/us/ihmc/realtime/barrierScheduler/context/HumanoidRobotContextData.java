@@ -1,17 +1,16 @@
 package us.ihmc.realtime.barrierScheduler.context;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -29,7 +28,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private final ArrayList<RigidBodyBasics> robotFeet;
    private final Map<String, Point2D> copPoints = new HashMap<>();
 
-   HumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel, HumanoidRobotContextJointData rawJointData, HumanoidRobotContextJointData processedJointData,
+   HumanoidRobotContextData(HumanoidRobotContextJointData rawJointData, HumanoidRobotContextJointData processedJointData,
                             ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
                             JointDesiredOutputList jointDesiredOutputList)
    {

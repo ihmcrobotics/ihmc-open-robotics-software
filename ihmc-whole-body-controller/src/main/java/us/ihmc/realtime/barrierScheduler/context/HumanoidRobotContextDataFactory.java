@@ -24,18 +24,11 @@ public class HumanoidRobotContextDataFactory
    private final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
 
-   private final FullHumanoidRobotModelFactory modelFactory;
-
-   public HumanoidRobotContextDataFactory(FullHumanoidRobotModelFactory modelFactory)
-   {
-      this.modelFactory = modelFactory;
-   }
-
    public HumanoidRobotContextData createHumanoidRobotContextData()
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      return new HumanoidRobotContextData(modelFactory.createFullRobotModel(), rawJointData.get(), processedJointData.get(), forceSensorDataHolder.get(),
+      return new HumanoidRobotContextData(rawJointData.get(), processedJointData.get(), forceSensorDataHolder.get(),
                                           centerOfPressureDataHolder.get(), robotMotionStatusHolder.get(), jointDesiredOutputList.get());
    }
 
