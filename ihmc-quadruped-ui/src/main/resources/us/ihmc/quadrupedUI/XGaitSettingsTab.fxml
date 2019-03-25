@@ -35,9 +35,9 @@
                 <Spinner fx:id="endPhaseShift" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="4" editable="true"/>
                 <ComboBox fx:id="quadrupedSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="5" editable="true"/>
 
-                <Label text="Step duration" GridPane.halignment="RIGHT" GridPane.columnIndex="4"  GridPane.rowIndex="1" />
-                <Label text="End double support duration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
-                <Label text="End phase shift" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                <Label text="Step duration" GridPane.columnIndex="4"  GridPane.rowIndex="1" />
+                <Label text="End double support duration" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+                <Label text="Max Speed" GridPane.columnIndex="6" GridPane.rowIndex="1" />
 
                 <Label text="Amble Slow" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                 <Label text="Amble Medium" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3" />
