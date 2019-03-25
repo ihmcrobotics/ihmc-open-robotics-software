@@ -87,10 +87,8 @@ public class MultiStageFootstepPlanningModule
 
       commandInputManager.registerHasReceivedInputListener(command -> receivedInput.set(true));
 
-      footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel.getContactPointParameters(),
-                                                                            drcRobotModel.getFootstepPlannerParameters(),
-                                                                            drcRobotModel.getVisibilityGraphsParameters(), commandInputManager,
-                                                                            statusOutputManager, executorService, registry, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
+      footstepPlanningController = new MultiStageFootstepPlanningController(drcRobotModel, commandInputManager, statusOutputManager, executorService, registry,
+                                                                            DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class,
                                            FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName),

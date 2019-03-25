@@ -76,4 +76,13 @@ public class ParameterizedPDGains implements PDGainsReadOnly
    {
       return positionDeadband.getValue();
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PDGainsReadOnly)
+         return PDGainsReadOnly.super.equals((PDGainsReadOnly) object);
+      else
+         return false;
+   }
 }

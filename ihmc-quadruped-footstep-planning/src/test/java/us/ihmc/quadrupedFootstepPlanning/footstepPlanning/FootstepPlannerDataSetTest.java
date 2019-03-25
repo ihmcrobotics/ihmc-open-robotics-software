@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -33,6 +32,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -46,7 +46,6 @@ import java.util.function.Function;
 public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
-   private static final double epsilon = 1e-3;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(),
                                                                                                                    YoAppearance.DarkRed(),
@@ -55,8 +54,8 @@ public abstract class FootstepPlannerDataSetTest
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
-   protected static boolean DEBUG = true;
-   protected static boolean VERBOSE = true;
+   protected static boolean DEBUG = false;
+   protected static boolean VERBOSE = false;
 
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
@@ -189,6 +188,7 @@ public abstract class FootstepPlannerDataSetTest
 
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
+      List<String> failingMessages = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -202,6 +202,7 @@ public abstract class FootstepPlannerDataSetTest
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+            failingMessages.add(errorMessagesForCurrentFile);
          }
 
          if (DEBUG || VERBOSE)
@@ -217,7 +218,7 @@ public abstract class FootstepPlannerDataSetTest
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
-         message += "\n" + failingDatasets.get(i);
+         message += "\n" + failingDatasets.get(i) + " : " + failingMessages.get(i);
       }
       if (VISUALIZE)
       {
@@ -236,9 +237,9 @@ public abstract class FootstepPlannerDataSetTest
       packPlanningRequest(dataset);
       String errorMessage = findPlanAndAssertGoodResult(dataset);
 
-      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
-                    dataset.getPlannerInput().getQuadrupedGoalPosition());
-
+//      visualizePlan(planner.getPlan(), dataset.getPlanarRegionsList(), dataset.getPlannerInput().getQuadrupedStartPosition(),
+//                    dataset.getPlannerInput().getQuadrupedGoalPosition());
+//
       return errorMessage;
    }
 
@@ -248,8 +249,8 @@ public abstract class FootstepPlannerDataSetTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
 
-      startPose.setPosition(plannerInput.getStartPosition());
-      goalPose.setPosition(plannerInput.getGoalPosition());
+      startPose.setPosition(plannerInput.getQuadrupedStartPosition());
+      goalPose.setPosition(plannerInput.getQuadrupedGoalPosition());
 
       if(plannerInput.getHasQuadrupedStartYaw())
          startPose.setOrientation(new Quaternion(plannerInput.getQuadrupedStartYaw(), 0.0, 0.0));
@@ -320,11 +321,12 @@ public abstract class FootstepPlannerDataSetTest
       centerPoint.scale(0.25);
 
       String errorMessage = "";
-      if (!goalPosition.epsilonEquals(centerPoint, epsilon))
+      if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (!Double.isNaN(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, 0.02))
+         double yawError = AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw);
+         if (yawError > FootstepNode.gridSizeYaw)
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 

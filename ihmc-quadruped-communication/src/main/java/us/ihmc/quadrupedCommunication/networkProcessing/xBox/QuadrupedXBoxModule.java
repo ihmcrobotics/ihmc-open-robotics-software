@@ -7,10 +7,9 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -25,7 +24,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedXBoxModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 10;
+   private static final int updatePeriodMilliseconds = 75;
 
    private final QuadrupedXBoxController xBoxController;
 
@@ -33,7 +32,7 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
                               LogModelProvider modelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, null, updatePeriodMilliseconds,
             pubSubImplementation);
 
       xBoxController = new QuadrupedXBoxController(robotDataReceiver, defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);
@@ -47,14 +46,38 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
       // status messages from the controller
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools
-            .createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> xBoxController.setPaused(true));
+            .createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> xBoxController.processHighLevelStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
-                                           s -> xBoxController.processSteppingStateChangeMessage(s.takeNextData()));
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
-                                           s -> xBoxController.processXGaitSettingsPacket(s.takeNextData()));
+                                           s -> processXGaitSettingsPacket(s.takeNextData()));
+   }
+
+   private void setPaused(boolean paused)
+   {
+      if (xBoxController != null)
+         xBoxController.setPaused(paused);
+   }
+
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage message)
+   {
+      if (xBoxController != null)
+         xBoxController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (xBoxController != null)
+         xBoxController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
+   {
+      if (xBoxController != null)
+         xBoxController.processXGaitSettingsPacket(packet);
    }
 
    @Override

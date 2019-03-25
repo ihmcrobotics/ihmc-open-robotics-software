@@ -1,16 +1,23 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -24,18 +31,12 @@ import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ICPOptimizationReachabilityConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfVertices = 5;
    private static final double SUFFICIENTLY_LARGE = 5.0;
-
-   private final List<Footstep> upcomingFootsteps;
 
    private final SideDependentList<List<YoFramePoint2D>> reachabilityVertices = new SideDependentList<>();
    private final SideDependentList<YoFrameConvexPolygon2D> reachabilityPolygons = new SideDependentList<>();
@@ -63,13 +64,10 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
-   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
+   public ICPOptimizationReachabilityConstraintHandler(SideDependentList<ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
                                                        SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
-                                                       List<Footstep> upcomingFootsteps, YoVariableRegistry registry,
-                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                       YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.upcomingFootsteps = upcomingFootsteps;
-
       lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
       lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
       innerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMinStepWidth());
@@ -86,7 +84,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame supportSoleFrame = bipedSupportPolygons.getSoleZUpFrames().get(robotSide);
+         ReferenceFrame supportSoleFrame = soleZUpFrames.get(robotSide);
 
          YoInteger yoNumberOfReachabilityVertices = new YoInteger(robotSide.getLowerCaseName() + "NumberOfReachabilityVertices", registry);
          yoNumberOfReachabilityVertices.set(numberOfVertices);
@@ -165,10 +163,10 @@ public class ICPOptimizationReachabilityConstraintHandler
     *
     * @param  supportSide the current support side of the robot
     */
-   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForSingleSupport(RobotSide supportSide)
+   public FrameConvexPolygon2DReadOnly initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, FramePose3DReadOnly footstepPose)
    {
       FrameConvexPolygon2DReadOnly reachabilityPolygon = getReachabilityPolygon(supportSide);
-      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide());
+      FrameConvexPolygon2DReadOnly adjustmentPolygon = getAdjustmentPolygon(supportSide.getOppositeSide(), footstepPose);
 
       contractedReachabilityPolygon.checkReferenceFrameMatch(reachabilityPolygon);
       contractedReachabilityPolygon.checkReferenceFrameMatch(adjustmentPolygon);
@@ -177,7 +175,6 @@ public class ICPOptimizationReachabilityConstraintHandler
          return contractedReachabilityPolygon;
 
       // there is no intersection, make the reachability only a single point.
-      upcomingFootsteps.get(0).getPose(footstepPose);
       contractedReachabilityPolygon.clear();
       contractedReachabilityPolygon.addVertex(footstepPose.getPosition());
       contractedReachabilityPolygon.update();
@@ -212,16 +209,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       return reachabilityPolygon;
    }
 
-   private final FramePose3D footstepPose = new FramePose3D();
-
-   private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide)
+   private FrameConvexPolygon2DReadOnly getAdjustmentPolygon(RobotSide swingSide, FramePose3DReadOnly footstepPose)
    {
-      Footstep footstep = upcomingFootsteps.get(0);
-      if (!footstep.getRobotSide().equals(swingSide))
-         throw new RuntimeException("Somehow initializing the wrong side!");
-
-      footstep.getPose(footstepPose);
-      footstepPose.changeFrame(worldFrame);
       stepFrames.get(swingSide).setPoseAndUpdate(footstepPose);
 
       List<YoFramePoint2D> vertices = adjustmentVertices.get(swingSide);
@@ -246,12 +235,12 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, FixedFramePoint2DBasics footstepSolution, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(FramePose3DReadOnly upcomingFootstep, FixedFramePoint2DBasics footstepSolution, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
 
-      upcomingFootstep.getPosition2d(referenceLocation);
+      referenceLocation.setIncludingFrame(upcomingFootstep.getPosition());
       adjustedLocation.setIncludingFrame(footstepSolution);
       referenceLocation.changeFrame(worldFrame);
       adjustedLocation.changeFrame(worldFrame);

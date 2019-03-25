@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -9,7 +8,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedFootControlModuleParameters
@@ -21,9 +19,9 @@ public class QuadrupedFootControlModuleParameters
 
    // final parameters
    private final ParameterizedPID3DGains solePositionGains;
+   private final ParameterizedPID3DGains holdPositionGains;
    private final Vector3DReadOnly solePositionWeights = new ParameterVector3D("solePositionWeights", new Vector3D(30.0, 30.0, 30.0), finalRegistry);
-   private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", finalRegistry, 50);
-   private final IntegerParameter touchdownTriggerWindowParameter = new IntegerParameter("touchdownTriggerWindow", finalRegistry, defaultTouchdownTriggerWindow);
+   private final Vector3DReadOnly supportFootWeights = new ParameterVector3D("supportFootWeights", new Vector3D(10.0, 10.0, 10.0), finalRegistry);
    private final DoubleParameter minimumStepAdjustmentTimeParameter = new DoubleParameter("minimumStepAdjustmentTime", finalRegistry, 0.1);
    private final DoubleParameter stepGoalOffsetZParameter = new DoubleParameter("stepGoalOffsetZ", finalRegistry, 0.0);
 
@@ -34,6 +32,12 @@ public class QuadrupedFootControlModuleParameters
       solePositionDefaultGains.setDerivativeGains(200.0, 200.0, 200.0);
       solePositionDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
       solePositionGains = new ParameterizedPID3DGains("_solePosition", GainCoupling.NONE, false, solePositionDefaultGains, finalRegistry);
+
+      DefaultPID3DGains holdPositionDefaultGains = new DefaultPID3DGains();
+      holdPositionDefaultGains.setProportionalGains(10000.0, 10000.0, 5000.0);
+      holdPositionDefaultGains.setDerivativeGains(200.0, 200.0, 200.0);
+      holdPositionDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
+      holdPositionGains = new ParameterizedPID3DGains("_holdPosition", GainCoupling.NONE, false, holdPositionDefaultGains, finalRegistry);
    }
    
    
@@ -47,22 +51,20 @@ public class QuadrupedFootControlModuleParameters
       return solePositionGains;
    }
 
+   public PID3DGainsReadOnly getHoldPositionGains()
+   {
+      return holdPositionGains;
+   }
+
    public Vector3DReadOnly getSolePositionWeights()
    {
       return solePositionWeights;
    }
 
-   public double getTouchdownPressureLimitParameter()
+   public Vector3DReadOnly getSupportFootWeights()
    {
-      return touchdownPressureLimitParameter.getValue();
+      return supportFootWeights;
    }
-
-
-   public int getTouchdownTriggerWindowParameter()
-   {
-      return touchdownTriggerWindowParameter.getValue();
-   }
-
 
    public double getMinimumStepAdjustmentTimeParameter()
    {

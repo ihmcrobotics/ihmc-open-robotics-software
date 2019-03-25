@@ -2,12 +2,19 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
+
+import java.util.List;
+
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -58,23 +65,28 @@ public interface ICPOptimizationControllerInterface
    void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0);
 
    /**
-    * Gets the desired CMP location computed by the ICP controller.
+    * Packs the desired CMP location computed by the ICP controller. The CMP to pack is
+    * expected to be in world frame.
+    *
     * @param desiredCMPToPack where the CMP location is stored. Modified.
+    * @throws ReferenceFrameMismatchException if the desiredCMPToPack is not in world frame.
     */
-   void getDesiredCMP(FramePoint2D desiredCMPToPack);
+   void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack);
 
    /**
-    * Gets the desired CoP location computed by the ICP controller.
+    * Packs the desired CoP location computed by the ICP controller. The CoP to pack is
+    * expected to be in world frame.
+    *
     * @param desiredCoPToPack where the CoP location is stored. Modified.
+    * @throws ReferenceFrameMismatchException if the desiredCMPToPack is not in world frame.
     */
-   void getDesiredCoP(FramePoint2D desiredCoPToPack);
+   void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack);
 
    /**
-    * Gets the desired Footstep location computed by the ICP controller.
-    * Only modifies {@param footstepSolutionToPack} if {@link #useStepAdjustment()} is true.
-    * @param footstepSolutionToPack desired footstep solution. Modified.
+    * Gets the desired Footstep pose computed by the ICP controller.
+    * @return pose of the footstep solution.
     */
-   void getFootstepSolution(Footstep footstepSolutionToPack);
+   FramePose3DReadOnly getFootstepSolution();
 
    /**
     * Returns whether or not the controller adjusted the footstep this tick.
@@ -143,7 +155,7 @@ public interface ICPOptimizationControllerInterface
     *
     * @param planarRegions list of the current planar regions that describe the environment.
     */
-   void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
+   void submitCurrentPlanarRegions(List<PlanarRegion> planarRegions);
 
    /**
     * This controller combines both ICP error feedback and step adjustment. Step adjustment can be though

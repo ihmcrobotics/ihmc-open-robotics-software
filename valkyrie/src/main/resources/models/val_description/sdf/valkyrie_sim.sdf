@@ -1168,7 +1168,7 @@
           <lower>-2.85</lower>
           <upper>2</upper>
           <effort>190</effort>
-          <velocity>5.89</velocity>
+          <velocity>3.0</velocity>			<!-- it used to be 5.89. Shoulder pitch was tested within -2.18 ~ 3.82 (rad/sec)--> 
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -1233,7 +1233,7 @@
           <lower>-1.519</lower>
           <upper>1.266</upper>
           <effort>190</effort>
-          <velocity>5.89</velocity>
+          <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -1.47 ~ 5.31 (rad/sec)-->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -1298,7 +1298,7 @@
           <lower>-3.1</lower>
           <upper>2.18</upper>
           <effort>65</effort>
-          <velocity>11.5</velocity>
+          <velocity>1.5</velocity>			<!-- it used to be 11.5.-->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -1363,7 +1363,7 @@
           <lower>-2.174</lower>
           <upper>0.12</upper>
           <effort>65</effort>
-          <velocity>11.5</velocity>
+          <velocity>3.5</velocity>			<!-- it used to be 11.5. -->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -1428,7 +1428,7 @@
           <lower>-2.019</lower>
           <upper>3.14</upper>
           <effort>26</effort>
-          <velocity>5</velocity>
+          <velocity>0.8</velocity>			<!-- it used to be 5.0.-->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -2873,7 +2873,7 @@
           <lower>-2.85</lower>
           <upper>2</upper>
           <effort>190</effort>
-          <velocity>5.89</velocity>
+          <velocity>3.0</velocity>			<!-- it used to be 5.89. Shoulder pitch was tested within -2.18 ~ 3.82 (rad/sec)-->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -2938,7 +2938,7 @@
           <lower>-1.266</lower>
           <upper>1.519</upper>
           <effort>190</effort>
-          <velocity>5.89</velocity>
+          <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -5.31 ~ 1.47 (rad/sec)-->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -3003,7 +3003,7 @@
           <lower>-3.1</lower>
           <upper>2.18</upper>
           <effort>65</effort>
-          <velocity>11.5</velocity>
+          <velocity>1.5</velocity>			<!-- it used to be 11.5. -->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -3068,7 +3068,7 @@
           <lower>-0.12</lower>
           <upper>2.174</upper>
           <effort>65</effort>
-          <velocity>11.5</velocity>
+          <velocity>3.5</velocity>			<!-- it used to be 11.5. -->
         </limit>
         <dynamics>
           <damping>0.1</damping>
@@ -3133,7 +3133,7 @@
           <lower>-2.019</lower>
           <upper>3.14</upper>
           <effort>26</effort>
-          <velocity>5</velocity>
+          <velocity>0.8</velocity>			<!-- it used to be 5. -->
         </limit>
         <dynamics>
           <damping>0.1</damping>

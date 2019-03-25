@@ -77,6 +77,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoFrameVector3D yoAchievedAngularAcceleration;
 
    private final YoFrameVector3D yoDesiredAngularTorque;
+   private final YoFrameVector3D yoFeedForwardAngularTorque;
    private final YoFrameVector3D yoFeedbackAngularTorque;
    private final RateLimitedYoFrameVector rateLimitedFeedbackAngularTorque;
 
@@ -89,6 +90,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
 
    private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
    private final FrameVector3D achievedAngularAcceleration = new FrameVector3D();
 
@@ -200,6 +202,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          if (toolbox.isEnableVirtualModelControlModule())
          {
             yoDesiredAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, ANGULAR_TORQUE, isEnabled);
+            yoFeedForwardAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, FEEDFORWARD, ANGULAR_TORQUE, isEnabled);
             yoFeedbackAngularTorque = feedbackControllerToolbox.getDataVector(endEffector, FEEDBACK, ANGULAR_TORQUE, isEnabled);
             rateLimitedFeedbackAngularTorque = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, FEEDBACK, ANGULAR_TORQUE, dt, maximumRate,
                                                                                                   isEnabled);
@@ -207,6 +210,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          else
          {
             yoDesiredAngularTorque = null;
+            yoFeedForwardAngularTorque = null;
             yoFeedbackAngularTorque = null;
             rateLimitedFeedbackAngularTorque = null;
          }
@@ -224,6 +228,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          yoAchievedAngularAcceleration = null;
 
          yoDesiredAngularTorque = null;
+         yoFeedForwardAngularTorque = null;
          yoFeedbackAngularTorque = null;
          rateLimitedFeedbackAngularTorque = null;
       }
@@ -260,19 +265,20 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       gains.set(command.getGains());
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
-      command.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
-      command.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration);
 
-      yoDesiredOrientation.setMatchingFrame(desiredOrientation);
-      desiredOrientation.getRotationVector(yoDesiredRotationVector);
+      yoDesiredOrientation.setMatchingFrame(command.getReferenceOrientation());
+      yoDesiredOrientation.getRotationVector(yoDesiredRotationVector);
 
-      yoDesiredAngularVelocity.setMatchingFrame(desiredAngularVelocity);
+      yoDesiredAngularVelocity.setMatchingFrame(command.getReferenceAngularVelocity());
 
       if (yoFeedForwardAngularVelocity != null)
-         yoFeedForwardAngularVelocity.setMatchingFrame(desiredAngularVelocity);
+         yoFeedForwardAngularVelocity.setMatchingFrame(command.getReferenceAngularVelocity());
 
       if (yoFeedForwardAngularAcceleration != null)
-         yoFeedForwardAngularAcceleration.setMatchingFrame(feedForwardAngularAcceleration);
+         yoFeedForwardAngularAcceleration.setMatchingFrame(command.getReferenceAngularAcceleration());
+
+      if (yoFeedForwardAngularTorque != null)
+         yoFeedForwardAngularTorque.setMatchingFrame(command.getReferenceTorque());
    }
 
    @Override
@@ -375,6 +381,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private void computeFeedbackTorque()
    {
+      feedForwardAngularAction.setIncludingFrame(yoFeedForwardAngularTorque);
+      feedForwardAngularAction.changeFrame(endEffectorFrame);
+
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -388,6 +397,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackAngularTorque);
 
       desiredAngularTorque.changeFrame(endEffectorFrame);
+      desiredAngularTorque.add(feedForwardAngularAction);
       yoDesiredAngularTorque.setMatchingFrame(desiredAngularTorque);
    }
 

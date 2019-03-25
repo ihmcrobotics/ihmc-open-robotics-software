@@ -3,7 +3,6 @@ package us.ihmc.quadrupedBasics.referenceFrames;
 import java.util.EnumMap;
 import java.util.Map;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -259,8 +258,9 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
    private void updateCenterOfFeetUsingNominalsForRotationPart()
    {
       updateSupportPolygon(null, supportPolygonForCentroids);
-      supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(supportPolygonCentroidWithNominalRotation);
-      supportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(supportPolygonCentroidWithNominalRotation);
+      // only update if getting the centroid was successful.
+      if (supportPolygonForCentroids.getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(supportPolygonCentroidWithNominalRotation))
+         supportPolygonCentroidFrameWithNominalRotation.setPoseAndUpdate(supportPolygonCentroidWithNominalRotation);
       supportPolygonCentroidZUpFrame.update();
    }
 
@@ -421,12 +421,6 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
    public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
    {
       return supportPolygonCentroidZUpFrame;
-   }
-
-   @Override
-   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
-   {
-      return null;
    }
 
    @Override

@@ -12,9 +12,11 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,7 +30,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 public class RemoteQuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoQuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final YoBoolean walking = new YoBoolean("walking", registry);
    private final Ros2Node ros2Node;
 
@@ -40,6 +42,7 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<HighLevelStateMessage> controllerStatePublisher;
    private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
    private final IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
+   private final IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredHeight> desiredHeightPublisher;
@@ -58,10 +61,12 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedFootstepPlanningRequestPacket> planningRequestPublisher;
 
    private final QuadrupedNetworkProcessor networkProcessor;
+   private final String robotName;
 
    public RemoteQuadrupedTeleopManager(String robotName, Ros2Node ros2Node, QuadrupedNetworkProcessor networkProcessor,
                                        QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, YoVariableRegistry parentRegistry)
    {
+      this.robotName = robotName;
       this.ros2Node = ros2Node;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       this.networkProcessor = networkProcessor;
@@ -84,6 +89,7 @@ public class RemoteQuadrupedTeleopManager
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       timedStepListPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
+      bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
       desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
@@ -107,12 +113,22 @@ public class RemoteQuadrupedTeleopManager
       initialize();
    }
 
+   public String getRobotName()
+   {
+      return robotName;
+   }
+
    public void publishTimedStepListToController(QuadrupedTimedStepListMessage message)
    {
       timedStepListPublisher.publish(message);
    }
 
-   public void publishXGaitSettings(YoQuadrupedXGaitSettings xGaitSettings)
+   public void publishBodyOrientationMessage(QuadrupedBodyOrientationMessage message)
+   {
+      bodyOrientationPublisher.publish(message);
+   }
+
+   public void publishXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       stepXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
       plannerXGaitSettingsPublisher.publish(xGaitSettings.getAsPacket());
@@ -150,6 +166,11 @@ public class RemoteQuadrupedTeleopManager
       QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
       steppingMessage.setQuadrupedSteppingRequestedEvent(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
       steppingStatePublisher.publish(steppingMessage);
+   }
+
+   public void requestBodyTeleop()
+   {
+      bodyTeleopStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
    }
 
    public void requestXGait()
@@ -194,15 +215,64 @@ public class RemoteQuadrupedTeleopManager
       bodyPathPublisher.publish(message);
    }
 
-   public void setEndDoubleSupportDuration(double endDoubleSupportDuration)
+   public void setEndDoubleSupportDuration(QuadrupedSpeed speed, double endPhaseShift, double endDoubleSupportDuration)
    {
-      xGaitSettings.setEndDoubleSupportDuration(endDoubleSupportDuration);
-      publishXGaitSettings(xGaitSettings);
+      if (endPhaseShift < 90.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getPaceSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getPaceMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getPaceFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }
+      else if (endPhaseShift < 180.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getAmbleSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getAmbleFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }
+      else
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getTrotSlowTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         default:
+            xGaitSettings.getTrotFastTimings().setEndDoubleSupportDuration(endDoubleSupportDuration);
+            break;
+         }
+      }      publishXGaitSettings(xGaitSettings);
    }
 
    public void setEndPhaseShift(double endPhaseShift)
    {
       xGaitSettings.setEndPhaseShift(endPhaseShift);
+      publishXGaitSettings(xGaitSettings);
+   }
+
+   public void setQuadrupedSpeed(QuadrupedSpeed speed)
+   {
+      xGaitSettings.setQuadrupedSpeed(speed);
       publishXGaitSettings(xGaitSettings);
    }
 
@@ -224,9 +294,53 @@ public class RemoteQuadrupedTeleopManager
       publishXGaitSettings(xGaitSettings);
    }
 
-   public void setStepDuration(double stepDuration)
+   public void setStepDuration(QuadrupedSpeed speed, double endPhaseShift, double stepDuration)
    {
-      xGaitSettings.setStepDuration(stepDuration);
+      if (endPhaseShift < 90.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getPaceSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getPaceMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getPaceFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
+      else if (endPhaseShift < 180.0)
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getAmbleSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getAmbleMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getAmbleFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
+      else
+      {
+         switch (speed)
+         {
+         case SLOW:
+            xGaitSettings.getTrotSlowTimings().setStepDuration(stepDuration);
+            break;
+         case MEDIUM:
+            xGaitSettings.getTrotMediumTimings().setStepDuration(stepDuration);
+            break;
+         default:
+            xGaitSettings.getTrotFastTimings().setStepDuration(stepDuration);
+            break;
+         }
+      }
       publishXGaitSettings(xGaitSettings);
    }
 

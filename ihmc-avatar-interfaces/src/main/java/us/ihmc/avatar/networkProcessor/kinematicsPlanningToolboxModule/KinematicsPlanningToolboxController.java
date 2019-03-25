@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.fest.swing.util.Pair;
+
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
@@ -13,6 +15,7 @@ import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
@@ -26,23 +29,28 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,6 +58,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final boolean DEBUG = true;
 
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
@@ -58,7 +68,14 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager commandInputManager;
 
+   private final List<String> armJointNames = new ArrayList<String>();
+   private final Map<String, Pair<Double, Double>> armJointVelocityLimitMap;
+   private final WholeBodyTrajectoryPointCalculator fullRobotModelTrajectoryCalculator;
+   private static final double searchingTimeTickForVelocityBound = 0.002;
+   private static final boolean useKeyFrameTimeOptimizerIfJointVelocityExceedLimits = true;
+
    private final KinematicsPlanningToolboxOutputStatus solution;
+   private final KinematicsPlanningToolboxOutputConverter outputConverter;
 
    private final YoBoolean isDone;
 
@@ -71,10 +88,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private final List<KinematicsToolboxCenterOfMassMessage> ikCenterOfMassMessages;
    private final AtomicReference<KinematicsToolboxConfigurationMessage> ikConfigurationMessage;
 
-   private final static double keyFrameTimeEpsilon = 0.01;
+   private static final double keyFrameTimeEpsilon = 0.01;
    private final TDoubleArrayList keyFrameTimes;
 
    private final HumanoidKinematicsToolboxController ikController;
+   private final KinematicsToolboxOutputStatus initialRobotConfiguration;
    private final CommandInputManager ikCommandInputManager = new CommandInputManager(getClass().getSimpleName(), KinematicsToolboxModule.supportedCommands());
 
    private final YoInteger indexOfCurrentKeyFrame;
@@ -90,8 +108,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       this.desiredFullRobotModel = fullRobotModel;
 
+      armJointVelocityLimitMap = new HashMap<>();
+      fullRobotModelTrajectoryCalculator = new WholeBodyTrajectoryPointCalculator(drcRobotModel);
+
       solution = HumanoidMessageTools.createKinematicsPlanningToolboxOutputStatus();
       solution.setDestination(-1);
+      outputConverter = new KinematicsPlanningToolboxOutputConverter(drcRobotModel);
 
       this.commandInputManager = commandInputManager;
 
@@ -111,6 +133,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry,
                                                              parentRegistry);
+      initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);
       totalComputationTime = new YoDouble("totalComputationTime", parentRegistry);
@@ -182,10 +205,32 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       if (!updateToolboxConfiguration())
          return false;
 
+      if (!updateIKMessages())
+         return false;
+
       ikController.updateFootSupportState(true, true);
       boolean initialized = ikController.initialize();
       if (!initialized)
          throw new RuntimeException("Could not initialize the " + KinematicsToolboxController.class.getSimpleName());
+
+      armJointVelocityLimitMap.clear();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         JointBasics armJoint = desiredFullRobotModel.getHand(robotSide).getParentJoint();
+         while (armJoint.getPredecessor() != desiredFullRobotModel.getElevator())
+         {
+            String armJointName = armJoint.getName();
+            if (armJointName.contains(robotSide.getLowerCaseName()))
+            {
+               armJointNames.add(armJointName);
+               OneDoFJointBasics oneDoFJointByName = desiredFullRobotModel.getOneDoFJointByName(armJointName);
+               Pair<Double, Double> velocityLimit = new Pair<Double, Double>(oneDoFJointByName.getVelocityLimitLower(),
+                                                                             oneDoFJointByName.getVelocityLimitUpper());
+               armJointVelocityLimitMap.put(armJointName, velocityLimit);
+            }
+            armJoint = armJoint.getPredecessor().getParentJoint();
+         }
+      }
 
       solution.getKeyFrameTimes().clear();
       solution.getRobotConfigurations().clear();
@@ -202,6 +247,104 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
+   private boolean updateIKMessages()
+   {
+      int numberOfKeyFrames = keyFrameTimes.size();
+      int numberOfInterpolatedPoints;
+      if (numberOfKeyFrames == 1)
+         numberOfInterpolatedPoints = 2;
+      else if (numberOfKeyFrames == 2)
+         numberOfInterpolatedPoints = 1;
+      else
+         return true;
+
+      // re-create key frame times with interpolated times.
+      TDoubleArrayList keyFrameTimesBuffer = new TDoubleArrayList();
+      keyFrameTimesBuffer.addAll(keyFrameTimes);
+      keyFrameTimes.clear();
+      double t1 = 0.0;
+      for (int i = 0; i < numberOfKeyFrames; i++)
+      {
+         for (int j = 0; j < numberOfInterpolatedPoints; j++)
+         {
+            double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
+            double t2 = keyFrameTimesBuffer.get(i);
+            double keyFrameTime = EuclidCoreTools.interpolate(t1, t2, alpha);
+
+            keyFrameTimes.add(keyFrameTime);
+         }
+         t1 = keyFrameTimesBuffer.get(i);
+         keyFrameTimes.add(t1);
+      }
+
+      // create interpolated way point poses for each rigid bodies.
+      for (int i = 0; i < ikRigidBodies.size(); i++)
+      {
+         RigidBodyBasics rigidBody = ikRigidBodies.get(i);
+         List<KinematicsToolboxRigidBodyMessage> ikRigidBodyMessages = ikRigidBodyMessageMap.get(rigidBody);
+         List<Pose3D> ikRigidBodyPoses = new ArrayList<Pose3D>();
+         Pose3D currentPose = new Pose3D(rigidBody.getBodyFixedFrame().getTransformToDesiredFrame(worldFrame));
+         for (int j = 0; j < numberOfKeyFrames; j++)
+         {
+            KinematicsToolboxRigidBodyMessage nextMessage = ikRigidBodyMessages.get(j);
+            Pose3D nextDesiredPose = new Pose3D(nextMessage.getDesiredPositionInWorld(), nextMessage.getDesiredOrientationInWorld());
+            for (int k = 0; k < numberOfInterpolatedPoints; k++)
+            {
+               double alpha = ((double) k + 1) / (numberOfInterpolatedPoints + 1);
+               Pose3D interpolatedPose = new Pose3D(currentPose);
+               interpolatedPose.interpolate(nextDesiredPose, alpha);
+               ikRigidBodyPoses.add(interpolatedPose);
+            }
+            currentPose.set(nextDesiredPose);
+            ikRigidBodyPoses.add(nextDesiredPose);
+         }
+
+         // re-create ik rigid body messages with the interpolated way points.
+         KinematicsToolboxRigidBodyMessage rigidBodyMessageBuffer = new KinematicsToolboxRigidBodyMessage();
+         rigidBodyMessageBuffer.set(ikRigidBodyMessages.get(0));
+         ikRigidBodyMessages.clear();
+         for (int j = 0; j < ikRigidBodyPoses.size(); j++)
+         {
+            KinematicsToolboxRigidBodyMessage messageToAdd = new KinematicsToolboxRigidBodyMessage(rigidBodyMessageBuffer);
+            messageToAdd.getDesiredPositionInWorld().set(ikRigidBodyPoses.get(j).getPosition());
+            messageToAdd.getDesiredOrientationInWorld().set(ikRigidBodyPoses.get(j).getOrientation());
+            ikRigidBodyMessages.add(messageToAdd);
+         }
+      }
+
+      // create interpolated way points for com.
+      List<Point3D> comPoints = new ArrayList<Point3D>();
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(getDesiredFullRobotModel().getRootBody(), worldFrame);
+      calculator.reset();
+      Point3D currentPoint = new Point3D(calculator.getCenterOfMass());
+      for (int i = 0; i < ikCenterOfMassMessages.size(); i++)
+      {
+         Point3D nextDesiredPoint = new Point3D(ikCenterOfMassMessages.get(i).getDesiredPositionInWorld());
+         for (int j = 0; j < numberOfInterpolatedPoints; j++)
+         {
+            double alpha = ((double) j + 1) / (numberOfInterpolatedPoints + 1);
+            Point3D interpolatedPoint = new Point3D(currentPoint);
+            interpolatedPoint.interpolate(nextDesiredPoint, alpha);
+            comPoints.add(interpolatedPoint);
+         }
+         currentPoint.set(nextDesiredPoint);
+         comPoints.add(nextDesiredPoint);
+      }
+
+      // re-create ik rigid body messages with the interpolated way points.
+      KinematicsToolboxCenterOfMassMessage comMessageBuffer = new KinematicsToolboxCenterOfMassMessage();
+      comMessageBuffer.set(ikCenterOfMassMessages.get(0));
+      ikCenterOfMassMessages.clear();
+      for (int j = 0; j < comPoints.size(); j++)
+      {
+         KinematicsToolboxCenterOfMassMessage messageToAdd = new KinematicsToolboxCenterOfMassMessage(comMessageBuffer);
+         messageToAdd.getDesiredPositionInWorld().set(comPoints.get(j));
+         ikCenterOfMassMessages.add(messageToAdd);
+      }
+
+      return true;
+   }
+
    private boolean updateToolboxConfiguration()
    {
       if (rigidBodyCommands.size() == 0)
@@ -212,10 +355,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikCenterOfMassMessages.clear();
       keyFrameTimes.clear();
 
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getDesiredFullRobotModel());
-      referenceFrames.updateFrames();
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
-
       for (int i = 0; i < rigidBodyCommands.size(); i++)
       {
          KinematicsPlanningToolboxRigidBodyCommand command = rigidBodyCommands.get(i);
@@ -224,11 +363,13 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          ikRigidBodies.add(endEffector);
 
          List<KinematicsToolboxRigidBodyMessage> rigidBodyMessages = new ArrayList<KinematicsToolboxRigidBodyMessage>();
-         for (int j = 0; j < command.getNumberOfWayPoints(); j++)
+         int numberOfWayPoints = command.getNumberOfWayPoints();
+         for (int j = 0; j < numberOfWayPoints; j++)
          {
+            // when the number of way point is less than 3, create and add mid point before the message for each way point is created.
             Pose3D wayPoint = command.getWayPoint(j);
 
-            FramePose3D wayPointFramePose = new FramePose3D(midFeetZUpFrame, wayPoint);
+            FramePose3D wayPointFramePose = new FramePose3D(worldFrame, wayPoint);
 
             KinematicsToolboxRigidBodyMessage rigidBodyMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(endEffector,
                                                                                                                       wayPointFramePose.getPosition(),
@@ -247,10 +388,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
          if (i == 0) // save key frame times for the first rigid body message.
          {
-            for (int j = 0; j < command.getNumberOfWayPoints(); j++)
+            for (int j = 0; j < numberOfWayPoints; j++)
                keyFrameTimes.add(command.getWayPointTime(j));
          }
-         else if (!checkKeyFrameTimes(command))
+         else if (!checkKeyFrameTimes(command.getWayPointTimes()))
          {
             throw new RuntimeException(command.getClass().getSimpleName()
                   + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
@@ -258,20 +399,20 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       }
 
       if (centerOfMassCommand.get() != null && centerOfMassCommand.get().getNumberOfWayPoints() != 0)
-
       {
-         if (!checkKeyFrameTimes(centerOfMassCommand.get()))
-            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
-                  + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
-
          for (int i = 0; i < centerOfMassCommand.get().getNumberOfWayPoints(); i++)
          {
-            KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(centerOfMassCommand.get().getWayPoint(i));
+            FramePoint3D wayPointFramePoint = new FramePoint3D(worldFrame, centerOfMassCommand.get().getWayPoint(i));
+            KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(wayPointFramePoint);
             comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(centerOfMassCommand.get().getWeightMatrix()));
             comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(centerOfMassCommand.get().getSelectionMatrix()));
 
             ikCenterOfMassMessages.add(comMessage);
          }
+
+         if (!checkKeyFrameTimes(centerOfMassCommand.get().getWayPointTimes()))
+            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
+                  + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
       }
       else
       {
@@ -298,12 +439,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   private FramePoint3DReadOnly computeCenterOfMass3D(FullHumanoidRobotModel fullHumanoidRobotModel)
-   {
-      CenterOfMassCalculator calculator = new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
-      return calculator.getCenterOfMass();
-   }
-
    @Override
    public void updateInternal() throws RuntimeException
    {
@@ -311,13 +446,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       {
          if (DEBUG)
             System.out.println("solved " + solutionQualityConvergenceDetector.isValid() + " " + solutionQualityConvergenceDetector.getNumberOfIteration());
+
          if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
-            isDone.set(true);
-            solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
-            if (DEBUG)
-               System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime());
-            reportMessage(solution);
+            packSolution();
          }
          else
          {
@@ -341,17 +473,93 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return isDone.getBooleanValue();
    }
 
+   private void packSolution()
+   {
+      isDone.set(true);
+      if (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME)
+      {
+         reportMessage(solution);
+         return;
+      }
+
+      generateTrajectoriesToPreview(false);
+
+      if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
+      {
+         System.out.println("re planning for velocity optimization");
+         generateTrajectoriesToPreview(true);
+      }
+
+      if (isVelocityLimitExceeded())
+      {
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
+         reportMessage(solution);
+         return;
+      }
+
+      fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
+      solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
+      solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
+
+      convertWholeBodyTrajectoryMessage();
+
+      if (DEBUG)
+         System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime() + ", PlanId = " + solution.getPlanId());
+      reportMessage(solution);
+   }
+
+   private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
+   {
+      fullRobotModelTrajectoryCalculator.addInitialConfiguration(initialRobotConfiguration);
+      fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
+      fullRobotModelTrajectoryCalculator.initializeCalculator();
+      if (useKeyFrameOptimizer)
+         fullRobotModelTrajectoryCalculator.computeOptimizingKeyFrameTimes();
+      else
+         fullRobotModelTrajectoryCalculator.computeForFixedKeyFrameTimes();
+      fullRobotModelTrajectoryCalculator.computeVelocityBounds(searchingTimeTickForVelocityBound);
+   }
+
+   private boolean isVelocityLimitExceeded()
+   {
+      for (String armJointName : armJointNames)
+      {
+         double jointVelocityLowerBound = fullRobotModelTrajectoryCalculator.getJointVelocityLowerBound(armJointName);
+         double jointVelocityUpperBound = fullRobotModelTrajectoryCalculator.getJointVelocityUpperBound(armJointName);
+
+         Pair<Double, Double> velocityLimit = armJointVelocityLimitMap.get(armJointName);
+         if (velocityLimit.i > jointVelocityLowerBound || velocityLimit.ii < jointVelocityUpperBound)
+         {
+            System.out.println(armJointName + " trajectory exceeds joint velocity limit." + " " + jointVelocityLowerBound + " " + jointVelocityUpperBound);
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   private void convertWholeBodyTrajectoryMessage()
+   {
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      wholeBodyTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
+      outputConverter.computeWholeBodyTrajectoryMessage(solution);
+      solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
+   }
+
    private boolean appendRobotConfigurationOnToolboxSolution()
    {
       if (solutionQualityConvergenceDetector.isValid())
       {
+         KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
+         solution.getRobotConfigurations().add().set(keyFrame);
          solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
-         solution.getRobotConfigurations().add().set(new KinematicsToolboxOutputStatus(ikController.getSolution()));
 
          return true;
       }
       else
       {
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME);
          solution.setSolutionQuality(-1);
          return false;
       }
@@ -384,8 +592,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          return false;
       }
 
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, getDesiredFullRobotModel().getRootJoint(),
-                                                                      FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel()));
+      FloatingJointBasics rootJoint = getDesiredFullRobotModel().getRootJoint();
+      OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(getDesiredFullRobotModel());
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, rootJoint, allJointsExcludingHands);
+      MessageTools.packDesiredJointState(initialRobotConfiguration, rootJoint, allJointsExcludingHands);
 
       ikController.updateRobotConfigurationData(currentRobotConfiguration);
 
@@ -401,23 +611,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       return true;
    }
 
-   private boolean checkKeyFrameTimes(KinematicsPlanningToolboxRigidBodyCommand command)
+   private boolean checkKeyFrameTimes(TDoubleArrayList wayPointTimes)
    {
-      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
+      if (wayPointTimes.size() != getNumberOfKeyFrames())
          return false;
       for (int i = 0; i < getNumberOfKeyFrames(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
-            return false;
-
-      return true;
-   }
-
-   private boolean checkKeyFrameTimes(KinematicsPlanningToolboxCenterOfMassCommand command)
-   {
-      if (command.getNumberOfWayPoints() != getNumberOfKeyFrames())
-         return false;
-      for (int i = 0; i < getNumberOfKeyFrames(); i++)
-         if (!EuclidCoreTools.epsilonEquals(command.getWayPointTime(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
+         if (!EuclidCoreTools.epsilonEquals(wayPointTimes.get(i), keyFrameTimes.get(i), keyFrameTimeEpsilon))
             return false;
 
       return true;

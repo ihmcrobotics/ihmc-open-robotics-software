@@ -37,6 +37,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
    private static final double ignoreDistanceFromFloor = 0.02;
+   private static final double[] swingWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
 
@@ -100,10 +101,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
-      SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
-      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix, swingTrajectoryParameters.getSwingWaypointProportions(),
-            swingTrajectoryParameters.getObstacleClearanceProportions(), walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
-            walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
+      twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
+                                                                walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
+                                                                walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(),
+                                                                walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot(),
+                                                                parentRegistry, graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       collisionSphereRadius = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
@@ -179,14 +181,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
 
-      double[] defaultWaypointProportions = TwoWaypointSwingGenerator.getDefaultWaypointProportions();
       originalWaypoints.get(0).setToZero();
-      originalWaypoints.get(0).interpolate(swingStartPosition, swingEndPosition, defaultWaypointProportions[0]);
+      originalWaypoints.get(0).interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[0]);
       midGroundPoint.set(originalWaypoints.get(0));
       originalWaypoints.get(0).add(0.0, 0.0, minimumSwingHeight);
       adjustedWaypoints.get(0).set(originalWaypoints.get(0));
       originalWaypoints.get(1).setToZero();
-      originalWaypoints.get(1).interpolate(swingStartPosition, swingEndPosition, defaultWaypointProportions[1]);
+      originalWaypoints.get(1).interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[1]);
       midGroundPoint.add(originalWaypoints.get(1));
       originalWaypoints.get(1).add(0.0, 0.0, minimumSwingHeight);
       adjustedWaypoints.get(1).set(originalWaypoints.get(1));

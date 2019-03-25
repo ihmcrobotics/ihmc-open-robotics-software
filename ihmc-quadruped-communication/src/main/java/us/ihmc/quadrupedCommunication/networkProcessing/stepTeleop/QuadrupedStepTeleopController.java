@@ -103,6 +103,9 @@ public class QuadrupedStepTeleopController extends QuadrupedToolboxController
    @Override
    public boolean isDone()
    {
+      if (controllerStateChangeMessage.get() == null)
+         return false;
+
       return controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING;
    }
 }

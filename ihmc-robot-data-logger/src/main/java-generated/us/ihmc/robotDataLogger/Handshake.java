@@ -15,6 +15,7 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_;
+   public us.ihmc.robotDataLogger.ReferenceFrameInformation referenceFrameInformation_;
    public us.ihmc.robotDataLogger.Summary summary_;
 
    public Handshake()
@@ -25,6 +26,7 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
       artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
       enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, new us.ihmc.robotDataLogger.EnumTypePubSubType());
+      referenceFrameInformation_ = new us.ihmc.robotDataLogger.ReferenceFrameInformation();
       summary_ = new us.ihmc.robotDataLogger.Summary();
 
    }
@@ -45,6 +47,7 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       graphicObjects_.set(other.graphicObjects_);
       artifacts_.set(other.artifacts_);
       enumTypes_.set(other.enumTypes_);
+      us.ihmc.robotDataLogger.ReferenceFrameInformationPubSubType.staticCopy(other.referenceFrameInformation_, referenceFrameInformation_);
       us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(other.summary_, summary_);
    }
 
@@ -91,6 +94,12 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  getEnumTypes()
    {
       return enumTypes_;
+   }
+
+
+   public us.ihmc.robotDataLogger.ReferenceFrameInformation getReferenceFrameInformation()
+   {
+      return referenceFrameInformation_;
    }
 
 
@@ -161,6 +170,7 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
          {  if (!this.enumTypes_.get(i).epsilonEquals(other.enumTypes_.get(i), epsilon)) return false; }
       }
 
+      if (!this.referenceFrameInformation_.epsilonEquals(other.referenceFrameInformation_, epsilon)) return false;
       if (!this.summary_.epsilonEquals(other.summary_, epsilon)) return false;
 
       return true;
@@ -183,6 +193,7 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       if (!this.graphicObjects_.equals(otherMyClass.graphicObjects_)) return false;
       if (!this.artifacts_.equals(otherMyClass.artifacts_)) return false;
       if (!this.enumTypes_.equals(otherMyClass.enumTypes_)) return false;
+      if (!this.referenceFrameInformation_.equals(otherMyClass.referenceFrameInformation_)) return false;
       if (!this.summary_.equals(otherMyClass.summary_)) return false;
 
       return true;
@@ -208,6 +219,8 @@ public class Handshake extends Packet<Handshake> implements Settable<Handshake>,
       builder.append(this.artifacts_);      builder.append(", ");
       builder.append("enumTypes=");
       builder.append(this.enumTypes_);      builder.append(", ");
+      builder.append("referenceFrameInformation=");
+      builder.append(this.referenceFrameInformation_);      builder.append(", ");
       builder.append("summary=");
       builder.append(this.summary_);
       builder.append("}");

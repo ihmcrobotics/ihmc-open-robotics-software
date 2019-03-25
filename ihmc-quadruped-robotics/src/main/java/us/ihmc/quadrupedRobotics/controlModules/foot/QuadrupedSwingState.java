@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -40,7 +41,11 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
+
+   private static final double[] defaultWaypointProportions = new double[] {0.33, 0.66};
+   private static final double[] defaultObstacleClearanceWaypointProportions = new double[] {0.25, 0.75};
 
    //   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
    private final TwoWaypointSwingGenerator swingTrajectoryWaypointCalculator;
@@ -92,6 +97,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -157,7 +163,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
       //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, new double[] {0.33, 0.66}, new double[] {0.25, 0.75}, 0.04, 0.3, registry,
+
+      double minSwingHeight = 0.04;
+      double maxSwingHeight = 0.3;
+      double defaultSwingHeight = 0.04;
+
+      swingTrajectoryWaypointCalculator = new TwoWaypointSwingGenerator(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                         graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
@@ -184,6 +195,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    @Override
@@ -300,8 +317,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
       desiredSoleLinearAcceleration.setMatchingFrame(desiredAcceleration);
 
-      feedbackControlCommand.set(desiredPosition, desiredVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredPosition, desiredVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
       feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 
@@ -349,6 +370,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
          swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
          swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
          swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         double[] waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ? defaultObstacleClearanceWaypointProportions : defaultWaypointProportions;
+         swingTrajectoryWaypointCalculator.setWaypointProportions(waypointProportions);
          swingTrajectoryWaypointCalculator.initialize();
       }
 

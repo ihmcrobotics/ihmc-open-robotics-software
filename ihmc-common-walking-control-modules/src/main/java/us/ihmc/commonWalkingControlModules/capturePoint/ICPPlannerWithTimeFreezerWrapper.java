@@ -7,6 +7,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -171,7 +173,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly actualCapturePointPosition)
    {
       return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(actualCapturePointPosition);
    }
@@ -527,7 +529,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void compute(FramePoint2D currentCapturePointPosition, double time)
+   public void compute(FramePoint2DReadOnly currentCapturePointPosition, double time)
    {
       icpPlanner.compute(time - timeDelay.getDoubleValue());
 
@@ -543,7 +545,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
 
 
-   private void doTimeFreezeIfNeeded(FramePoint2D currentCapturePointPosition, double time)
+   private void doTimeFreezeIfNeeded(FramePoint2DReadOnly currentCapturePointPosition, double time)
    {
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, tmpCapturePointPosition, tmpCapturePointVelocity);
 
@@ -579,8 +581,8 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
       timeDelay.add(time - previousTime.getDoubleValue());
    }
 
-   private void computeCapturePointDistantToFreezeLine(FramePoint2D currentCapturePointPosition, FramePoint2D desiredCapturePointPosition,
-                                                       FrameVector2D desiredCapturePointVelocity)
+   private void computeCapturePointDistantToFreezeLine(FramePoint2DReadOnly currentCapturePointPosition, FramePoint2DReadOnly desiredCapturePointPosition,
+                                                       FrameVector2DReadOnly desiredCapturePointVelocity)
    {
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
                                                                                              desiredCapturePointVelocity));

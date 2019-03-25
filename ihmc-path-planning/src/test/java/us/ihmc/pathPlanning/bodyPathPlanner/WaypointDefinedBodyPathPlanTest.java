@@ -10,9 +10,8 @@ import javax.swing.JFrame;
 
 import org.junit.jupiter.api.AfterEach;
 import us.ihmc.robotics.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
@@ -39,9 +38,6 @@ public class WaypointDefinedBodyPathPlanTest
    private static final boolean showPlotter = false;
    private static final double epsilon = 1.0e-15;
 
-   @Rule
-   public TestName name = new TestName();
-
    @AfterEach
    public void tearDown()
    {
@@ -49,7 +45,7 @@ public class WaypointDefinedBodyPathPlanTest
    }
 
    @Test
-   public void testSimpleBodyPath()
+   public void testSimpleBodyPath(TestInfo testInfo)
    {
       WaypointDefinedBodyPathPlanner plan = new WaypointDefinedBodyPathPlanner();
       List<Point3D> waypoints = new ArrayList<Point3D>();
@@ -98,7 +94,7 @@ public class WaypointDefinedBodyPathPlanTest
 
       if (showPlotter)
       {
-         showPlotter(plan, name.getMethodName());
+         showPlotter(plan, testInfo.getTestMethod().get().getName());
       }
    }
 

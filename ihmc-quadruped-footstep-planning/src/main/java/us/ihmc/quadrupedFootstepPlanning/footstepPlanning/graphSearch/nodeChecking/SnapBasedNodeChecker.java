@@ -76,12 +76,13 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       double previousYaw = previousNode.getNominalYaw();
       double currentYaw = node.getNominalYaw();
 
-      Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
-      AxisAngle previousOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
-      previousOrientation.transform(clearanceVector);
+      Vector2D offsetVector = new Vector2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
+      offsetVector.sub(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant));
 
-      if (MathTools.epsilonEquals(node.getX(movingQuadrant), previousNode.getX(movingQuadrant), Math.abs(clearanceVector.getX())) && MathTools
-            .epsilonEquals(node.getY(movingQuadrant), previousNode.getY(movingQuadrant), Math.abs(clearanceVector.getY())))
+      AxisAngle previousOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
+      previousOrientation.transform(offsetVector);
+
+      if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
       {
          if (DEBUG)
          {
@@ -96,8 +97,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          if (robotQuadrant == movingQuadrant)
             continue;
 
-         if (MathTools.epsilonEquals(node.getX(movingQuadrant), previousNode.getX(robotQuadrant), Math.abs(clearanceVector.getX())) && MathTools
-               .epsilonEquals(node.getY(movingQuadrant), previousNode.getY(robotQuadrant), Math.abs(clearanceVector.getY())))
+         offsetVector.set(node.getX(movingQuadrant), node.getY(movingQuadrant));
+         offsetVector.sub(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant));
+         previousOrientation.transform(offsetVector);
+
+         if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
          {
             if (DEBUG)
             {

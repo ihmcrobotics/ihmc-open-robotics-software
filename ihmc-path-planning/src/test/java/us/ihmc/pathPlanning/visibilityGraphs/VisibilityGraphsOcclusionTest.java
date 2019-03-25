@@ -6,18 +6,15 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TestName;
+import org.junit.jupiter.api.TestInfo;
 
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -39,6 +36,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -90,9 +88,6 @@ public class VisibilityGraphsOcclusionTest
       visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
-   @Rule
-   public TestName name = new TestName();
-
    @AfterEach
    public void tearDown()
    {
@@ -101,17 +96,17 @@ public class VisibilityGraphsOcclusionTest
 
    @Test
    @Disabled
-   public void testFlatGround()
+   public void testFlatGround(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createFlatGround(startPose, goalPose);
-      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
+      runTest(testInfo, startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime, 3.0);
    }
 
    @Test
    @Disabled
-   public void testFlatGroundWithWall()
+   public void testFlatGroundWithWall(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(-4.805, 0.001, 0.0);
       Point3D goalPose = new Point3D(4.805, 0.001, 0.0);
@@ -125,48 +120,48 @@ public class VisibilityGraphsOcclusionTest
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
 
-      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, OcclusionMethod.OCCLUSION, defaultMaxAllowedSolveTime);
    }
 
    @Test
    @Disabled
-   public void testSimpleOcclusions()
+   public void testSimpleOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
    @Test
    @Disabled
-   public void testMazeWithOcclusions()
+   public void testMazeWithOcclusions(TestInfo testInfo)
    {
       Point3D startPose = new Point3D();
       Point3D goalPose = new Point3D();
       PlanarRegionsList regions = createMazeOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
+      runTest(testInfo, startPose, goalPose, regions, OcclusionMethod.OCCLUSION_PLUS_GROUND, defaultMaxAllowedSolveTime);
    }
 
    @Test
    @Disabled
-   public void testCrazyBridgeEnvironment()
+   public void testCrazyBridgeEnvironment(TestInfo testInfo)
    {
       Point3D startPose = new Point3D(0.4, 0.5, 0.001);
       Point3D goalPose = new Point3D(8.5, -3.5, 0.010);
       PlanarRegionsList regions = createBodyPathPlannerTestEnvironment();
-      runTest(startPose, goalPose, regions, OcclusionMethod.NO_OCCLUSION, defaultMaxAllowedSolveTime, 0.2);
+      runTest(testInfo, startPose, goalPose, regions, OcclusionMethod.NO_OCCLUSION, defaultMaxAllowedSolveTime, 0.2);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime)
+   private void runTest(TestInfo testInfo, Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime)
    {
-      runTest(start, goal, regions, occlusionMethod, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
+      runTest(testInfo, start, goal, regions, occlusionMethod, maxAllowedSolveTime, defaultMarchingSpeedInMetersPerTick);
    }
 
-   private void runTest(Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime,
+   private void runTest(TestInfo testInfo, Point3D start, Point3D goal, PlanarRegionsList regions, OcclusionMethod occlusionMethod, double maxAllowedSolveTime,
                         double marchingSpeedInMetersPerTick)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      YoVariableRegistry registry = new YoVariableRegistry(testInfo.getTestMethod().get().getName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       NavigableRegionsManager vizGraphs = new NavigableRegionsManager(VISIBILITY_GRAPH_PARAMETERS);
@@ -236,7 +231,7 @@ public class VisibilityGraphsOcclusionTest
          bodyPathViz = new BagOfBalls(bodyPathVisualizationResolution, 0.01, "bodyPath", registry, graphicsListRegistry);
          bodyPathWaypointsViz = new BagOfBalls(100, 0.025, YoAppearance.Yellow(), registry, graphicsListRegistry);
 
-         scs = setupSCS(name.getMethodName(), registry, regions, start, goal);
+         scs = setupSCS(testInfo.getTestMethod().get().getName(), registry, regions, start, goal);
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.setInPoint();
          scs.startOnAThread();

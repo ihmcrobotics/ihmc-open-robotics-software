@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends VirtualModelControlCommand<T>
+public interface VirtualEffortCommand<T extends VirtualEffortCommand<T>> extends VirtualModelControlCommand<T>
 {
    /**
     * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this
@@ -51,13 +51,6 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends Vi
    RigidBodyBasics getBase();
 
    /**
-    * Gets the name of the base rigid-body.
-    *
-    * @return the base's name.
-    */
-   String getBaseName();
-
-   /**
     * Gets the reference to the end-effector of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
@@ -67,13 +60,6 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand> extends Vi
     * @return the rigid-body to be controlled.
     */
    RigidBodyBasics getEndEffector();
-
-   /**
-    * Gets the name of the end-effector rigid-body.
-    *
-    * @return the end-effector's name.
-    */
-   String getEndEffectorName();
 
    /**
     * Gets the N-by-6 selection matrix expressed in the given {@code destinationFrame} to use with

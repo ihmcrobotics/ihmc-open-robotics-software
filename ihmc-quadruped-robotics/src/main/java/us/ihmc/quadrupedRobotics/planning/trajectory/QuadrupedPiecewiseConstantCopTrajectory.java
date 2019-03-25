@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
+import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -35,8 +36,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
 
-   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, YoVariableRegistry registry)
+   private final WeightDistributionCalculator weightDistributionCalculator;
+
+   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, WeightDistributionCalculator weightDistributionCalculator, YoVariableRegistry registry)
    {
+      this.weightDistributionCalculator = weightDistributionCalculator;
+
       initialContactState = new QuadrantDependentList<>();
       isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -66,7 +71,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
             normalizedPressureAtStartOfInterval.get(i).set(robotQuadrant, new MutableDouble(0.0));
          }
       }
-
       resetVariables();
    }
 
@@ -114,7 +118,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          QuadrantDependentList<FramePoint3D> solePosition = timedContactSequence.get(interval).getSolePosition();
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
-         QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
+         QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition, weightDistributionCalculator);
          QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
          normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
          normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);

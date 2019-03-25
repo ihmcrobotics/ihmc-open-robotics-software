@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static org.junit.Assert.*;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -23,8 +23,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -184,9 +182,8 @@ public class KinematicsToolboxControllerTest
 
       runKinematicsToolboxController(numberOfIterations);
 
-      assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
-      assertTrue("Poor solution quality: " + toolboxController.getSolution().getSolutionQuality(),
-                 toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
+      assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
+      assertTrue(toolboxController.getSolution().getSolutionQuality() < 1.0e-4, "Poor solution quality: " + toolboxController.getSolution().getSolutionQuality());
    }
 
    @Test
@@ -218,11 +215,11 @@ public class KinematicsToolboxControllerTest
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             PrintTools.info(this, "Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-3);
+         assertTrue(solutionQuality < 1.0e-3, "Poor solution quality: " + solutionQuality);
       }
    }
 
@@ -258,7 +255,7 @@ public class KinematicsToolboxControllerTest
 
          runKinematicsToolboxController(numberOfIterations);
 
-         assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+         assertTrue(initializationSucceeded.getBooleanValue(), KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             PrintTools.info(this, "Solution quality: " + solutionQuality);
@@ -270,8 +267,8 @@ public class KinematicsToolboxControllerTest
       {
          PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 5.0e-4);
-      assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
+      assertTrue(worstSolutionQuality < 5.0e-4, "Poor worst solution quality: " + worstSolutionQuality);
+      assertTrue(averageSolutionQuality < 5.0e-5, "Poor average solution quality: " + averageSolutionQuality);
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
