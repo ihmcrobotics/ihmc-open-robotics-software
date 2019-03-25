@@ -88,6 +88,11 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
       return LoadBearingMessage.class;
    }
 
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
    @Override
    public long getSequenceId()
    {
