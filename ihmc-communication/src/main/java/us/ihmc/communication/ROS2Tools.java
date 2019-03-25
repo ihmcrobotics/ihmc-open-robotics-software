@@ -211,11 +211,7 @@ public class ROS2Tools
       {
          TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
          Ros2QueuedSubscription<T> ros2QueuedSubscription = new Ros2QueuedSubscription<>(topicDataType, 10);
-         NewMessageListener<T> newMessageListener = (Subscriber<T> subscriber) -> {
-
-         };
-         ros2QueuedSubscription.setRos2Subscription(
-               ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
+         ros2QueuedSubscription.setRos2Subscription(ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
          return ros2QueuedSubscription;
       }
       catch (IOException e)

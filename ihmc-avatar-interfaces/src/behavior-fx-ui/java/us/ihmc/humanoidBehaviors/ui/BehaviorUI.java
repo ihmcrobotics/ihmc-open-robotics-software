@@ -9,27 +9,30 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
+import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.Ros2Node;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -45,14 +48,22 @@ public class BehaviorUI
    public static OrientationYawEditor ORIENTATION_EDITOR;
 
    private final PlanarRegionsGraphic planarRegionsGraphic;
-   private final JavaFXRobotVisualizer robotVisualizer;
+   private final JavaFXRemoteRobotVisualizer robotVisualizer;
 
+   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
 
-   public BehaviorUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParameters plannerParameters, VisibilityGraphsParameters visibilityGraphsParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+   public BehaviorUI(Stage primaryStage,
+                     BehaviorTeleop teleop,
+                     DRCRobotModel robotModel,
+                     PubSubImplementation pubSubImplementation) throws Exception
    {
       this.primaryStage = primaryStage;
-      this.messager = messager;
+
+      messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
+      messager.startMessager();
+      
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -79,6 +90,7 @@ public class BehaviorUI
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
+      stepInPlaceBehaviorUIController.init(teleop);
       patrolBehaviorUIController.init(messager, subScene);
 
       planarRegionsGraphic = new PlanarRegionsGraphic();
@@ -88,17 +100,10 @@ public class BehaviorUI
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
       view3dFactory.addNodeToView(patrolBehaviorUIController.getRoot());
 
-      if(fullHumanoidRobotModelFactory == null)
-      {
-         robotVisualizer = null;
-      }
-      else
-      {
-         robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
-         patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
-         view3dFactory.addNodeToView(robotVisualizer.getRootNode());
-         robotVisualizer.start();
-      }
+      robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
+      patrolBehaviorUIController.setFullRobotModel(robotVisualizer.getFullRobotModel());
+      view3dFactory.addNodeToView(robotVisualizer.getRootNode());
+      robotVisualizer.start();
 
       SNAPPED_POSITION_EDITOR.start();
       ORIENTATION_EDITOR.start();
@@ -124,18 +129,8 @@ public class BehaviorUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
-   }
 
-   public static BehaviorUI createMessagerUI(Stage primaryStage, JavaFXMessager messager,
-                                             FootstepPlannerParameters plannerParameters,
-                                             VisibilityGraphsParameters visibilityGraphsParameters,
-                                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                                             RobotContactPointParameters<RobotSide> contactPointParameters,
-                                             WalkingControllerParameters walkingControllerParameters)
-         throws Exception
-   {
-      return new BehaviorUI(primaryStage, messager, plannerParameters, visibilityGraphsParameters, fullHumanoidRobotModelFactory,
-                                   contactPointParameters, walkingControllerParameters);
+      ExceptionTools.handle(() -> messager.closeMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public static class API
