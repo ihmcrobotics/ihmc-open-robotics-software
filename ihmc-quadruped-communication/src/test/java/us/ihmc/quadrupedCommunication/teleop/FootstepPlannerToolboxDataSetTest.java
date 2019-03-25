@@ -25,6 +25,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
@@ -50,6 +51,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public abstract class FootstepPlannerToolboxDataSetTest
@@ -226,7 +228,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -234,12 +236,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
    @Disabled
    @Test
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void runInDevelopmentTests()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -247,17 +249,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsInDevelopment();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
-   protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
-   {
-      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
-      String errorMessages = dataSetTester.apply(dataset);
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
-   }
-
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
+   private void runAssertionsOnAllDatasets(List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -277,7 +272,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
          numbberOfTestedSets++;
          resetAllAtomics();
-         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
+         String errorMessagesForCurrentFile = runAssertions(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
             numberOfFailingTests++;
@@ -311,6 +306,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
    }
 
+   protected String runAssertions(DataSetName dataSetName)
+   {
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
+      return runAssertions(dataSet);
+   }
+
    protected String runAssertions(DataSet dataset)
    {
       resetAllAtomics();
@@ -330,10 +331,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
          goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
 
-      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
-
       PlannerInput plannerInput = dataset.getPlannerInput();
+
+      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
+      double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
@@ -382,12 +383,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       return footstepPlan;
-   }
-
-   private String getTimeoutFlag()
-   {
-//      return getPlannerType().toString().toLowerCase() + "_timeout";
-      return "quadruped_timeout";
    }
 
    private String findPlanAndAssertGoodResult(DataSet dataset)
@@ -439,11 +434,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private double totalTimeTaken;
 
-   private String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForResult(BooleanSupplier waitCondition, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
       long waitTime = 10;
-      while (conditionChecker.checkCondition())
+      while (waitCondition.getAsBoolean())
       {
          if (totalTimeTaken > maxTimeToWait)
          {
@@ -459,11 +454,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return errorMessage;
    }
 
-   private String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
+   private String validateResult(BooleanSupplier waitCondition, FootstepPlanningResult result, String prefix)
    {
       String errorMessage = "";
 
-      if (!conditionChecker.checkCondition())
+      if (!waitCondition.getAsBoolean())
       {
          errorMessage += prefix + " failed to find a valid result. Result : " + result + "\n";
       }
@@ -471,11 +466,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return errorMessage;
    }
 
-   private String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForPlan(BooleanSupplier waitCondition, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
 
-      while (conditionChecker.checkCondition())
+      while (waitCondition.getAsBoolean())
       {
          long waitTime = 10;
 
@@ -564,10 +559,5 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       return finalSteps;
-   }
-
-   private static interface ConditionChecker
-   {
-      boolean checkCondition();
    }
 }

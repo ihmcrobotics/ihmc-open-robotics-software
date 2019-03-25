@@ -45,6 +45,12 @@ public interface FootstepPlannerParameters
    double getMinYClearanceFromFoot();
 
    /**
+    * Distance which a foothold is projected into planar region. Should be a positive value,
+    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
+    */
+   double getProjectInsideDistance();
+
+   /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
     * then the value specified here.
     *
