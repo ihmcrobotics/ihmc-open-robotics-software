@@ -80,7 +80,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
 
    /** Set this to true to create and run, but not use the EKF estimator */
-   private static final boolean CREATE_EKF_ESTIMATOR = false;
+   private static final boolean CREATE_EKF_ESTIMATOR = true;
    /** Set this to true to use the EKF estimator */
    private static final boolean USE_EKF_ESTIMATOR = false;
 
