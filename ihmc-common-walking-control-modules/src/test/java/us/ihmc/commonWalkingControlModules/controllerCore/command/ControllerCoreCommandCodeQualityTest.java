@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,8 @@ import java.util.stream.Stream;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
+
+import com.google.common.base.CaseFormat;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -56,8 +59,6 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -65,6 +66,14 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class ControllerCoreCommandCodeQualityTest
 {
+   /**
+    * Number of attempts used when comparing 2 random objects before failing.
+    * <p>
+    * Crank this up when in case this test is flaky.
+    * </p>
+    */
+   private static final int NUMBER_OF_ATTEMPTS = 50;
+
    /**
     * Assert that all the commands have an empty constructor.
     * 
@@ -209,13 +218,6 @@ public class ControllerCoreCommandCodeQualityTest
       SubtreeStreams.fromChildren(rootBody).map(JointBasics::getFrameAfterJoint).forEach(referenceFramesList::add);
       ReferenceFrame[] referenceFrames = referenceFramesList.toArray(new ReferenceFrame[0]);
 
-      Set<Field> fieldsToIgnore = new HashSet<>();
-      // The following are fields used for internal computation but do not reflect the state of the object.
-      fieldsToIgnore.add(DefaultPID3DGains.class.getDeclaredField("dampingRatios"));
-      fieldsToIgnore.add(PDGains.class.getDeclaredField("zeta"));
-      fieldsToIgnore.add(SelectionMatrix3D.class.getDeclaredField("frameMatrix"));
-      fieldsToIgnore.add(WeightMatrix3D.class.getDeclaredField("frameMatrix"));
-
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
 
@@ -230,7 +232,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
       {
-         if (typeToTest.isInterface() || safeTypes.contains(typeToTest))
+         if (safeTypes.contains(typeToTest))
          {
             if (verbose)
                LogTools.info("Skipping: " + typeToTest.getSimpleName());
@@ -240,7 +242,7 @@ public class ControllerCoreCommandCodeQualityTest
          for (Field field : typeToTest.getDeclaredFields())
          {
             // A static field is considered as non-representative of the object state.
-            if (Modifier.isStatic(field.getModifiers()) || fieldsToIgnore.contains(field))
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))
             {
                if (verbose)
                   LogTools.info("Skipping: " + typeToTest.getSimpleName() + "." + field.getName());
@@ -253,7 +255,7 @@ public class ControllerCoreCommandCodeQualityTest
             boolean hasEqualsFailed = false;
 
             // We give a few tries assuming that sometimes a field's value may not actually change after being randomly regenerated.
-            for (int attempt = 0; attempt < 5; attempt++)
+            for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
                long seed = random.nextLong();
                // Generating 2 objects that we know are the same because we use a fresh random with the same seed both times.
@@ -302,9 +304,6 @@ public class ControllerCoreCommandCodeQualityTest
       typesToIgnore.add(JointBasics.class);
       typesToIgnore.add(OneDoFJointBasics.class);
       typesToIgnore.add(RigidBodyBasics.class);
-      // Used in WeightMatrix3D & SelectionMatrix3D for computation only
-      typesToIgnore.add(FrameMatrix3D.class);
-      typesToIgnore.add(double[].class);
 
       Set<Class<?>> allCommandTypes = new HashSet<>();
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
@@ -323,17 +322,26 @@ public class ControllerCoreCommandCodeQualityTest
       Set<String> randomGeneratorNames = Stream.of(ControllerCoreCommandRandomTools.class.getDeclaredMethods()).map(Method::getName)
                                                .collect(Collectors.toSet());
 
-      for (Entry<Class<?>, Class<?>> typeToVerify : typesToVerify.entrySet())
+      for (Entry<Class<?>, Class<?>> typeToVerifyAndOwnerEntry : typesToVerify.entrySet())
       {
-         if (typeToVerify.getKey().isInterface() || typesToIgnore.contains(typeToVerify.getKey()))
+         Class<?> typeToVerify = typeToVerifyAndOwnerEntry.getKey();
+         Class<?> owner = typeToVerifyAndOwnerEntry.getValue();
+
+         if (typesToIgnore.contains(typeToVerify))
             continue;
 
-         if (!randomGeneratorNames.remove("next" + typeToVerify.getKey().getSimpleName())
-               && !randomGeneratorNames.remove("randomize" + typeToVerify.getKey().getSimpleName()))
+         String typeName = typeToVerify.getSimpleName();
+         if (typeToVerify.isArray())
+         {// This allows to properly retrieve the expected generator name for types such as "double[]".
+            typeName = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, typeToVerify.getComponentType().getSimpleName()) + "Array";
+         }
+         List<String> expectedGeneratorNames = Arrays.asList("next" + typeName, "randomize" + typeName);
+
+         if (!randomGeneratorNames.removeAll(expectedGeneratorNames))
          {
-            errorMessage += "Missing random generator for: " + typeToVerify.getKey().getSimpleName();
-            if (typeToVerify.getValue() != null)
-               errorMessage += " (discovered in type: " + typeToVerify.getValue().getSimpleName() + ")";
+            errorMessage += "Missing random generator for: " + typeName;
+            if (owner != null)
+               errorMessage += " (discovered in type: " + owner.getSimpleName() + ")";
             errorMessage += "\n";
          }
       }
@@ -412,7 +420,7 @@ public class ControllerCoreCommandCodeQualityTest
             Object fieldTypeDefaultInstance = field.get(typeDefaultInstance);
 
             // We first assert that the random object is different from the instance created with empty constructor.
-            for (int attempt = 0; attempt < 10; attempt++)
+            for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
                Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstance = field.get(typeRandomInstance);
@@ -432,7 +440,7 @@ public class ControllerCoreCommandCodeQualityTest
             // We now assert that 2 successive random objects have different values for each field.
             wasFieldDifferent = false;
 
-            for (int attempt = 0; attempt < 20; attempt++)
+            for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
                Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceA = field.get(typeRandomInstanceA);
@@ -529,7 +537,7 @@ public class ControllerCoreCommandCodeQualityTest
 
          Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
-         for (int attempt = 0; attempt < 10; attempt++)
+         for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
          {
             Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
@@ -555,6 +563,10 @@ public class ControllerCoreCommandCodeQualityTest
          Class<?> fieldType = field.getType();
 
          if (fieldType.isPrimitive() || fieldType.isEnum())
+            continue;
+         if (Modifier.isStatic(field.getModifiers()))
+            continue;
+         if (Modifier.isTransient(field.getModifiers()))
             continue;
          if (subTypeToOwnerTypeMapToPack.containsKey(fieldType))
             continue;
@@ -585,6 +597,10 @@ public class ControllerCoreCommandCodeQualityTest
 
       for (Field field : type.getDeclaredFields())
       {
+         if (Modifier.isStatic(field.getModifiers()))
+            continue;
+         if (Modifier.isTransient(field.getModifiers()))
+            continue;
          collectTypeAndSubTypes(field.getType(), typesAndSubTypesToPack, typesToStopRecursionAt);
       }
    }
