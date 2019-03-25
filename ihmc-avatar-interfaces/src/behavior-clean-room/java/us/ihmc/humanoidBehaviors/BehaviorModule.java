@@ -9,33 +9,32 @@ import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.Category;
-import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 
-public class BehaviorBackpack
+public class BehaviorModule
 {
    private final Messager messager;
 
-   public static BehaviorBackpack createForBackpack(DRCRobotModel robotModel)
+   public static BehaviorModule createForBackpack(DRCRobotModel robotModel)
    {
       KryoMessager messager = KryoMessager.createServer(getBehaviorAPI(),
-                                                        NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(), BehaviorBackpack.class.getSimpleName(), 5);
+                                                        NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                                        BehaviorModule.class.getSimpleName(),
+                                                        5);
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
-      return new BehaviorBackpack(robotModel, messager);
+      return new BehaviorModule(robotModel, messager);
    }
 
-   public static BehaviorBackpack createForTest(DRCRobotModel robotModel, Messager messager)
+   public static BehaviorModule createForTest(DRCRobotModel robotModel, Messager messager)
    {
-      return new BehaviorBackpack(robotModel, messager);
+      return new BehaviorModule(robotModel, messager);
    }
 
-   private BehaviorBackpack(DRCRobotModel robotModel, Messager messager)
+   private BehaviorModule(DRCRobotModel robotModel, Messager messager)
    {
       this.messager = messager;
 

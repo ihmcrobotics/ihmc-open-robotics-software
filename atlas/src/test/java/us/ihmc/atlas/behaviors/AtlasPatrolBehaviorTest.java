@@ -2,27 +2,20 @@ package us.ihmc.atlas.behaviors;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidBehaviors.BehaviorBackpack;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
@@ -54,15 +47,15 @@ public class AtlasPatrolBehaviorTest
    {
       new MultiStageFootstepPlanningModule(robotModel, null, false, PubSubImplementation.INTRAPROCESS);
 
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorBackpack.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");
-      BehaviorBackpack.createForTest(robotModel, messager);
+      BehaviorModule.createForTest(robotModel, messager);
 
-      LogTools.info("Creating behavior teleop");
-      BehaviorTeleop behaviorTeleop = BehaviorTeleop.createForTest(robotModel, messager);
-      behaviorTeleop.getModuleMessager().registerTopicListener(PatrolBehavior.API.CurrentState, state -> LogTools.info("Patrol state: {}", state));
+      LogTools.info("Creating behavior messager");
+      Messager behaviorMessager = RemoteBehaviorInterface.createForTest(messager);
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> LogTools.info("Patrol state: {}", state));
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 
@@ -71,9 +64,9 @@ public class AtlasPatrolBehaviorTest
       waypoints.add(new Pose3D(1.0, -0.2, 0.0, 20.0, 0.0, 0.0));
       waypoints.add(new Pose3D(1.0, -1.0, 0.0, 180.0, 0.0, 0.0));
 
-      behaviorTeleop.setWaypoints(waypoints);
+      behaviorMessager.submitMessage(PatrolBehavior.API.Waypoints, waypoints);
 
-      behaviorTeleop.goToWaypoint(0);
+      behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, 0);
 
 
 //      FramePose3D currentGoalWaypoint = new FramePose3D();

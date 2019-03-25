@@ -7,9 +7,11 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.humanoidBehaviors.BehaviorBackpack;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -30,22 +32,22 @@ public class AtlasStepInPlaceBehaviorTest
    @Test
    public void testStepInPlaceBehavior()
    {
-      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorBackpack.getBehaviorAPI());
+      SharedMemoryMessager messager = new SharedMemoryMessager(BehaviorModule.getBehaviorAPI());
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
       LogTools.info("Creating behavior module");
-      BehaviorBackpack.createForTest(robotModel, messager);
+      BehaviorModule.createForTest(robotModel, messager);
 
-      LogTools.info("Creating behavior teleop");
-      BehaviorTeleop behaviorTeleop = BehaviorTeleop.createForTest(robotModel, messager);
+      LogTools.info("Creating behavior messager");
+      Messager behaviorMessager = RemoteBehaviorInterface.createForTest(messager);
 
       LogTools.info("Set stepping true");
-      behaviorTeleop.setStepping(true);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
 
       AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
 
-      behaviorTeleop.setStepping(false);
-      behaviorTeleop.abort();
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
+      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Abort, true);
 
       AtlasTestScripts.wait(conductor, variables, 3.0);
 

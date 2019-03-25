@@ -12,10 +12,11 @@ import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.humanoidBehaviors.BehaviorBackpack;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -82,13 +83,13 @@ public class AtlasBehaviorUIDemo extends Application
 
       new Thread(() -> {
          LogTools.info("Creating behavior backpack");
-         BehaviorBackpack.createForBackpack(createRobotModel());
+         BehaviorModule.createForBackpack(createRobotModel());
       }).start();
 
       LogTools.info("Creating behavior user interface");
       AtlasRobotModel robotModel = createRobotModel();
-      BehaviorTeleop teleop = BehaviorTeleop.createForUI(robotModel, "localhost");
-      ui = new BehaviorUI(primaryStage, teleop, robotModel, PubSubImplementation.FAST_RTPS);
+      Messager behaviorMessager = RemoteBehaviorInterface.createForUI("localhost");
+      ui = new BehaviorUI(primaryStage, behaviorMessager, robotModel, PubSubImplementation.FAST_RTPS);
       ui.show();
    }
 

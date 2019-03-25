@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
@@ -14,12 +13,11 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorTeleop;
+import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
-import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
@@ -28,6 +26,7 @@ import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -56,7 +55,7 @@ public class BehaviorUI
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
 
    public BehaviorUI(Stage primaryStage,
-                     BehaviorTeleop teleop,
+                     Messager behaviorMessager,
                      DRCRobotModel robotModel,
                      PubSubImplementation pubSubImplementation) throws Exception
    {
@@ -92,8 +91,8 @@ public class BehaviorUI
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-      stepInPlaceBehaviorUIController.init(teleop);
-      patrolBehaviorUIController.init(messager, subScene, teleop, robotModel);
+      stepInPlaceBehaviorUIController.init(behaviorMessager);
+      patrolBehaviorUIController.init(messager, subScene, behaviorMessager, robotModel);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
       planarRegionsGraphic.start();

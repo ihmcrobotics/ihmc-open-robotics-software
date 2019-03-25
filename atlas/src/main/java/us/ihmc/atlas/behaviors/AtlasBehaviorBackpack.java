@@ -3,7 +3,7 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.humanoidBehaviors.BehaviorBackpack;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 
 public class AtlasBehaviorBackpack
@@ -16,7 +16,7 @@ public class AtlasBehaviorBackpack
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
 
       LogTools.info("Creating behavior module");
-      BehaviorBackpack.createForBackpack(robotModel);
+      BehaviorModule.createForBackpack(robotModel);
    }
 
    /** To run remotely */
