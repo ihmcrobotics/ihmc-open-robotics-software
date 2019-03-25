@@ -2,6 +2,7 @@ package us.ihmc.quadrupedCommunication.teleop;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
@@ -18,7 +19,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
    {
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
-      settings.setStanceLength(1.0);
+      settings.setStanceLength(0.9);
       settings.setStanceWidth(0.5);
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
@@ -29,20 +30,19 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    public static void main(String[] args) throws Exception
    {
       QuadrupedAStarToolboxDataSetTest test = new QuadrupedAStarToolboxDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
+
+      test.runAssertions(DataSetName._20190313_114517_QuadrupedEnvironment0);
       ThreadTools.sleepForever();
       test.tearDown();
-
    }
 }
