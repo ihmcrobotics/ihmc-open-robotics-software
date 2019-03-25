@@ -1,4 +1,4 @@
-package us.ihmc.realtime.helperClasses;
+package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.yoVariables.variable.YoDouble;

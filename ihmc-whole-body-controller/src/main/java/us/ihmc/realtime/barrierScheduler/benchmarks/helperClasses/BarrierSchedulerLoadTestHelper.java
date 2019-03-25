@@ -1,4 +1,4 @@
-package us.ihmc.realtime.helperClasses;
+package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
