@@ -8,12 +8,13 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class XGaitCost implements FootstepCost
 {
    private final FootstepPlannerParameters plannerParameters;
-   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
@@ -35,7 +36,7 @@ public class XGaitCost implements FootstepCost
 
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
 
-      double durationBetweenSteps = computeTimeDeltaBetweenSteps(previousQuadrant);
+      double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
       double desiredSpeed = plannerParameters.getDesiredWalkingSpeed(phaseShift);
 
       Vector2D desiredDistance = new Vector2D(durationBetweenSteps * desiredSpeed, 0.0);
@@ -60,7 +61,7 @@ public class XGaitCost implements FootstepCost
       return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }
 
-   double computeTimeDeltaBetweenSteps(RobotQuadrant previousQuadrant)
+   static double computeTimeDeltaBetweenSteps(RobotQuadrant previousQuadrant, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       double endPhaseShift = previousQuadrant.isQuadrantInFront() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
       double endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
