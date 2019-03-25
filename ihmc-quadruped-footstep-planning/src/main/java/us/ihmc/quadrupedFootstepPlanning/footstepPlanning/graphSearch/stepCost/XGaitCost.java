@@ -28,7 +28,7 @@ public class XGaitCost implements FootstepCost
       RobotQuadrant movingQuadrant = endNode.getMovingQuadrant();
       RobotQuadrant previousQuadrant = startNode.getMovingQuadrant();
       if (movingQuadrant.getNextReversedRegularGaitSwingQuadrant() != previousQuadrant)
-      {
+      { // fixme this should account for different phases.
          throw new RuntimeException("For some reason the feet movement is out of order.");
       }
 
@@ -59,14 +59,5 @@ public class XGaitCost implements FootstepCost
       endFoot.add(side);
 
       return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
-   }
-
-   static double computeTimeDeltaBetweenSteps(RobotQuadrant previousQuadrant, QuadrupedXGaitSettingsReadOnly xGaitSettings)
-   {
-      double endPhaseShift = previousQuadrant.isQuadrantInFront() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
-      double endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
-      endTimeShift *= Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
-
-      return endTimeShift;
    }
 }
