@@ -232,6 +232,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          }
       }
 
+      solution.setPlanId(-1);
       solution.getKeyFrameTimes().clear();
       solution.getRobotConfigurations().clear();
       solution.setSolutionQuality(0.0);
@@ -447,7 +448,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          if (DEBUG)
             System.out.println("solved " + solutionQualityConvergenceDetector.isValid() + " " + solutionQualityConvergenceDetector.getNumberOfIteration());
 
-         if (!appendRobotConfigurationOnToolboxSolution() || indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
+         appendRobotConfigurationOnToolboxSolution();
+
+         if (indexOfCurrentKeyFrame.getIntegerValue() == getNumberOfKeyFrames())
          {
             packSolution();
          }
@@ -476,32 +479,27 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    private void packSolution()
    {
       isDone.set(true);
-      if (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME)
-      {
-         reportMessage(solution);
-         return;
-      }
+
+      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false : true;
 
       generateTrajectoriesToPreview(false);
-
       if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
       {
          System.out.println("re planning for velocity optimization");
          generateTrajectoriesToPreview(true);
       }
 
-      if (isVelocityLimitExceeded())
+      if (isVelocityLimitExceeded() && isOptimalSolution)
       {
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
-         reportMessage(solution);
-         return;
+         isOptimalSolution = false;
       }
 
       fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
-      solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
-      solution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
-
       convertWholeBodyTrajectoryMessage();
+
+      if (isOptimalSolution)
+         solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION);
 
       if (DEBUG)
          System.out.println("total computation time is " + solutionQualityConvergenceDetector.getComputationTime() + ", PlanId = " + solution.getPlanId());
@@ -547,22 +545,15 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       solution.getSuggestedControllerMessage().set(wholeBodyTrajectoryMessage);
    }
 
-   private boolean appendRobotConfigurationOnToolboxSolution()
+   private void appendRobotConfigurationOnToolboxSolution()
    {
-      if (solutionQualityConvergenceDetector.isValid())
-      {
-         KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
-         solution.getRobotConfigurations().add().set(keyFrame);
-         solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
+      KinematicsToolboxOutputStatus keyFrame = new KinematicsToolboxOutputStatus(ikController.getSolution());
+      solution.getRobotConfigurations().add().set(keyFrame);
 
-         return true;
-      }
-      else
-      {
+      solution.setSolutionQuality(solution.getSolutionQuality() + ikController.getSolution().getSolutionQuality());
+
+      if (!solutionQualityConvergenceDetector.isValid())
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME);
-         solution.setSolutionQuality(-1);
-         return false;
-      }
    }
 
    private boolean submitKeyFrameMessages()
