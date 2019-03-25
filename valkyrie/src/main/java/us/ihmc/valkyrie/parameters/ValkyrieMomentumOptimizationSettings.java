@@ -17,7 +17,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
    private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
-   private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
    private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
@@ -116,13 +115,6 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    public Vector3D getLinearMomentumWeight()
    {
       return linearMomentumWeight;
-   }
-
-   /** @inheritDoc */
-   @Override
-   public Vector3D getHighLinearMomentumWeightForRecovery()
-   {
-      return highLinearMomentumWeightForRecovery;
    }
 
    /** @inheritDoc */

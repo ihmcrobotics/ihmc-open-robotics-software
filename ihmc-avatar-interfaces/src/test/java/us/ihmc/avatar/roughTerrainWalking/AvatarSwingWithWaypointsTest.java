@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -19,8 +19,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -34,6 +32,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -54,6 +53,61 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   @Test
+   public void testCrazySwingIsRejected() throws SimulationExceededMaximumTimeException
+   {
+      DRCRobotModel robotModel = getRobotModel();
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, new FlatGroundEnvironment());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, -0.2, 0.3), new Point3D(0.0, 3.8, 0.15));
+      ThreadTools.sleep(1000);
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+
+      drcSimulationTestHelper.getYoVariable("MaxStepDistance").setValueFromDouble(1.0);
+      drcSimulationTestHelper.getYoVariable("MaxSwingDistance").setValueFromDouble(0.5);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      MovingReferenceFrame soleFrame = drcSimulationTestHelper.getReferenceFrames().getSoleFrame(robotSide);
+      FramePose3D initialPose = new FramePose3D(soleFrame);
+      initialPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      // Test long step is rejected.
+      {
+         FramePose3D footstepPose = new FramePose3D(initialPose);
+         footstepPose.getPosition().addX(2.0);
+         FootstepDataListMessage footsteps = new FootstepDataListMessage();
+         FootstepDataMessage footstepData = footsteps.getFootstepDataList().add();
+         footstepData.setRobotSide(robotSide.toByte());
+         footstepData.getLocation().set(footstepPose.getPosition());
+         footstepData.getOrientation().set(footstepPose.getOrientation());
+
+         drcSimulationTestHelper.publishToController(footsteps);
+         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+         Assert.assertEquals(0, drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsLongBits());
+      }
+
+      // Test weird swing is rejected.
+      {
+         FramePose3D footstepPose = new FramePose3D(initialPose);
+         FootstepDataListMessage footsteps = new FootstepDataListMessage();
+         FootstepDataMessage footstepData = footsteps.getFootstepDataList().add();
+         footstepData.setRobotSide(robotSide.toByte());
+         footstepData.getLocation().set(footstepPose.getPosition());
+         footstepData.getOrientation().set(footstepPose.getOrientation());
+
+         footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
+         footstepData.getCustomPositionWaypoints().add().set(footstepPose.getPosition());
+         footstepData.getCustomPositionWaypoints().add().set(footstepPose.getPosition());
+
+         footstepData.getCustomPositionWaypoints().get(0).addY(1.0);
+
+         drcSimulationTestHelper.publishToController(footsteps);
+         Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+         Assert.assertEquals(0, drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsLongBits());
+      }
+   }
 
    @Test
    public void testSwingWithWaypointsAndNotTrustingHeight() throws SimulationExceededMaximumTimeException

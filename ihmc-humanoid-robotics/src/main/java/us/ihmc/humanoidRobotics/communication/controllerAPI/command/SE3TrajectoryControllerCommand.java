@@ -93,18 +93,18 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       FrameInformation frameInformation = message.getFrameInformation();
       long trajectoryFrameId = frameInformation.getTrajectoryReferenceFrameId();
       long dataFrameId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
-      this.trajectoryFrame = resolver.getReferenceFrameFromHashCode(trajectoryFrameId);
-      ReferenceFrame dataFrame = resolver.getReferenceFrameFromHashCode(dataFrameId);
+      this.trajectoryFrame = resolver.getReferenceFrame(trajectoryFrameId);
+      ReferenceFrame dataFrame = resolver.getReferenceFrame(dataFrameId);
 
       clear(dataFrame);
       setFromMessage(message);
 
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrame(message.getAngularSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrame(message.getLinearSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
 
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromHashCode(message.getAngularWeightMatrix().getWeightFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromHashCode(message.getLinearWeightMatrix().getWeightFrameId());
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrame(message.getAngularWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrame(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 

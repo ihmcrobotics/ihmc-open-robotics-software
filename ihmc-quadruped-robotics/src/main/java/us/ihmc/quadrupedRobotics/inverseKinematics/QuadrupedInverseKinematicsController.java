@@ -144,7 +144,7 @@ public class QuadrupedInverseKinematicsController implements RobotController
          desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          PointFeedbackControlCommand feedbackControlCommand = feedbackControlCommands.get(robotQuadrant);
-         feedbackControlCommand.set(desiredPosition, desiredVelocity);
+         feedbackControlCommand.setInverseKinematics(desiredPosition, desiredVelocity);
          feedbackControlCommand.setGains(gains);
          feedbackControlCommand.setWeightForSolver(weight.getDoubleValue());
 

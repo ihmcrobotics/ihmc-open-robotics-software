@@ -175,4 +175,12 @@ public class YoPDGains implements PDGainsReadOnly
       setPositionDeadband(pdGains.getPositionDeadband());
    }
 
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PDGainsReadOnly)
+         return PDGainsReadOnly.super.equals((PDGainsReadOnly) object);
+      else
+         return false;
+   }
 }

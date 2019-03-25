@@ -1,29 +1,28 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.sensorProcessing.simulatedSensors.Vector3DProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,6 +32,7 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 public class QuadrupedBodyOrientationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
@@ -61,6 +61,7 @@ public class QuadrupedBodyOrientationManager
 
    private final YoDouble robotTimestamp;
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
    private final Vector3DReadOnly bodyAngularWeight;
 
@@ -98,6 +99,12 @@ public class QuadrupedBodyOrientationManager
 
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    public void initialize()
@@ -228,8 +235,12 @@ public class QuadrupedBodyOrientationManager
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredBodyOrientation, desiredBodyAngularVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);

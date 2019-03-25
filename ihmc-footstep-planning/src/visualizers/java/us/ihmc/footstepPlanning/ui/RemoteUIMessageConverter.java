@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -207,6 +208,11 @@ public class RemoteUIMessageConverter
 
          footstepDataListPublisher.publish(footstepDataListMessage);
       });
+
+      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
+            .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
+                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParametersTopic, supportRegionsParametersPublisher::publish);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)

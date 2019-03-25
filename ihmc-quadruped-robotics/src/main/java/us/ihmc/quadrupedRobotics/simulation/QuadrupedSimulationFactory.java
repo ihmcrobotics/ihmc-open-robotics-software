@@ -25,7 +25,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
-import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
@@ -54,6 +54,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -244,9 +245,10 @@ public class QuadrupedSimulationFactory
 
    private void createFootSwitches()
    {
-      SimulatedQuadrupedFootSwitchFactory footSwitchFactory = new SimulatedQuadrupedFootSwitchFactory();
+      QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
       footSwitchFactory.setFootContactableBodies(contactableFeet);
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
+      footSwitchFactory.setJointDesiredOutputList(jointDesiredOutputList.get());
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(factoryRegistry);

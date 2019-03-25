@@ -53,16 +53,18 @@ public class QuadrupedStepController implements EventState
       // initialize state
       stepMessageHandler.initialize();
 
-      // update task space estimates
       controllerToolbox.update();
-
-      bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
-      bodyOrientationManager.initialize();
 
       feetManager.reset();
       feetManager.requestFullContact();
 
+      controllerToolbox.updateSupportPolygon();
+
+      bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+      bodyOrientationManager.initialize();
+
       stepMessageHandler.process();
+
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -79,6 +81,8 @@ public class QuadrupedStepController implements EventState
 
       // update desired contact state and sole forces
       feetManager.compute();
+
+      controllerToolbox.updateSupportPolygon();
 
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());

@@ -55,7 +55,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
             * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
             */
-   public double swing_height_;
+   public double swing_height_ = -1.0;
+   /**
+            * In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
+            * can be requested. These proportions encode the xy positions of the swing trajectory's two waypoints. A proportion of 0.0 and 1.0 will
+            * place a waypoint's xy-position at the start and end of the trajectory, respectively. If this value is empty, the default proportions are used.
+            */
+   public us.ihmc.idl.IDLSequence.Double  custom_waypoint_proportions_;
    /**
             * In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be specified here.
             * The waypoints define sole positions.
@@ -106,6 +112,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
+      custom_waypoint_proportions_ = new us.ihmc.idl.IDLSequence.Double (2, "type_6");
+
       custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
       swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (10, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
 
@@ -130,6 +138,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       swing_height_ = other.swing_height_;
 
+      custom_waypoint_proportions_.set(other.custom_waypoint_proportions_);
       custom_position_waypoints_.set(other.custom_position_waypoints_);
       swing_trajectory_.set(other.swing_trajectory_);
       swing_trajectory_blend_duration_ = other.swing_trajectory_blend_duration_;
@@ -241,6 +250,17 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double getSwingHeight()
    {
       return swing_height_;
+   }
+
+
+   /**
+            * In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
+            * can be requested. These proportions encode the xy positions of the swing trajectory's two waypoints. A proportion of 0.0 and 1.0 will
+            * place a waypoint's xy-position at the start and end of the trajectory, respectively. If this value is empty, the default proportions are used.
+            */
+   public us.ihmc.idl.IDLSequence.Double  getCustomWaypointProportions()
+   {
+      return custom_waypoint_proportions_;
    }
 
 
@@ -394,6 +414,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.custom_waypoint_proportions_, other.custom_waypoint_proportions_, epsilon)) return false;
+
       if (this.custom_position_waypoints_.size() != other.custom_position_waypoints_.size()) { return false; }
       else
       {
@@ -442,6 +464,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if(this.swing_height_ != otherMyClass.swing_height_) return false;
 
+      if (!this.custom_waypoint_proportions_.equals(otherMyClass.custom_waypoint_proportions_)) return false;
       if (!this.custom_position_waypoints_.equals(otherMyClass.custom_position_waypoints_)) return false;
       if (!this.swing_trajectory_.equals(otherMyClass.swing_trajectory_)) return false;
       if(this.swing_trajectory_blend_duration_ != otherMyClass.swing_trajectory_blend_duration_) return false;
@@ -478,6 +501,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append(this.trajectory_type_);      builder.append(", ");
       builder.append("swing_height=");
       builder.append(this.swing_height_);      builder.append(", ");
+      builder.append("custom_waypoint_proportions=");
+      builder.append(this.custom_waypoint_proportions_);      builder.append(", ");
       builder.append("custom_position_waypoints=");
       builder.append(this.custom_position_waypoints_);      builder.append(", ");
       builder.append("swing_trajectory=");

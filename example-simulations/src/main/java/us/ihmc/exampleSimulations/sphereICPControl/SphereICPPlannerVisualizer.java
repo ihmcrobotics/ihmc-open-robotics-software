@@ -98,8 +98,7 @@ public class SphereICPPlannerVisualizer
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    private ReferenceFrame midFeetZUpFrame;
 
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
@@ -208,7 +207,7 @@ public class SphereICPPlannerVisualizer
             for (RobotSide robotSide : RobotSide.values)
             {
                soleFrames.get(robotSide).update();
-               ankleZUpFrames.get(robotSide).update();
+               soleZUpFrames.get(robotSide).update();
             }
             midFeetZUpFrame.update();
          }
@@ -628,7 +627,7 @@ public class SphereICPPlannerVisualizer
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          double xToAnkle = 0.0;
          double yToAnkle = 0.0;
-         double zToAnkle = 0.084;
+         double zToAnkle = 0.0;
          List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
@@ -667,22 +666,21 @@ public class SphereICPPlannerVisualizer
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
-         ankleFrames.put(robotSide, ankleFrame);
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
       ContinuousCMPICPPlannerParameters capturePointPlannerParameters = createICPPlannerParameters();
 
-      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters.getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
-//      CapturePointPlannerAdapter icpPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry, yoGraphicsListRegistry, dt, soleFrames, bipedSupportPolygons);
+      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet,
+                                                                                 capturePointPlannerParameters.getNumberOfFootstepsToConsider(),
+                                                                                 midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0);
       icpPlanner.initializeParameters(capturePointPlannerParameters);
       return icpPlanner;

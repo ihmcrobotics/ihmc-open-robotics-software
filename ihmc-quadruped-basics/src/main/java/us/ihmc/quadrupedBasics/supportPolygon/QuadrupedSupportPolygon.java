@@ -1,8 +1,11 @@
 package us.ihmc.quadrupedBasics.supportPolygon;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -446,11 +449,11 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
    }
 
    /**
-    * gets the Centroid of the supplied quadrants and sets the z value to the average between the lowest foot in 
+    * gets the Centroid of the supplied quadrants and sets the z value to the average between the lowest foot in
     * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
     * If no quadrants are supplied the result will be Zeros in world.
     */
-   public void getCentroidAveragingLowestZHeightsAcrossEnds(FramePoint3D centroidToPack)
+   public boolean getCentroidAveragingLowestZHeightsAcrossEnds(FramePoint3DBasics centroidToPack)
    {
       centroidToPack.setToZero(ReferenceFrame.getWorldFrame());
       double frontZ = Double.MAX_VALUE;
@@ -474,6 +477,16 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
       centroidToPack.scale(1.0 / getNumberOfVertices());
 
+      if (centroidToPack.containsNaN())
+      {
+         String message = "Centroid position is incorrect. \n\tSupporting quadrants are : ";
+         for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
+            message += "\n\t" + robotQuadrant.name() + " = " + getFootstep(robotQuadrant);
+         message += "\nCentroid = " + centroidToPack;
+         PrintTools.warn(message);
+         return false;
+      }
+
       double averageZ = 0.0;
       if (hindZ < Double.MAX_VALUE)
       {
@@ -484,11 +497,20 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          averageZ += frontZ;
       }
       averageZ /= 2.0;
+
+      if (!Double.isFinite(averageZ))
+      {
+         PrintTools.warn("Average Z of the centroid is incorrect. hindZ = " + hindZ + ", frontZ = " + frontZ + ", averageZ = " + averageZ);
+         return false;
+      }
+
       centroidToPack.setZ(averageZ);
+
+      return true;
    }
 
    /**
-    * gets the weighted Centroid of support polyon and sets the z value to the average between the lowest foot in 
+    * gets the weighted Centroid of support polyon and sets the z value to the average between the lowest foot in
     * the front and hind in world frame. If no Hinds or no Fronts are supplied it will use the lowest foot given.
     * If no quadrants are available the result will be Zeros in world.
     */
@@ -529,15 +551,41 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
    private final FramePoint3D tempFramePointForCentroids = new FramePoint3D();
 
-   public void getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
+   /** returns success **/
+   public boolean getCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3DBasics framePose)
    {
       double nominalPitch = getNominalPitch();
       double nominalRoll = getNominalRoll();
       double nominalYaw = getNominalYaw();
 
-      getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
+      if (!Double.isFinite(nominalPitch))
+      {
+         PrintTools.warn("Nominal pitch is not finite " + nominalPitch + ", not updating the pose.");
+         return false;
+      }
+
+      if (!Double.isFinite(nominalRoll))
+      {
+         PrintTools.warn("Nominal roll is not finite " + nominalRoll + ", not updating the pose.");
+         return false;
+      }
+
+      if (!Double.isFinite(nominalYaw))
+      {
+         PrintTools.warn("Nominal yaw is not finite " + nominalYaw + ", not updating the pose.");
+         return false;
+      }
+
+      if (!getCentroidAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids))
+      {
+         PrintTools.warn("Centroid contains NaN, not updating the pose.");
+         return false;
+      }
+
       framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
+
+      return true;
    }
 
    public void getWeightedCentroidFramePoseAveragingLowestZHeightsAcrossEnds(FramePose3D framePose)
@@ -637,7 +685,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
    }
 
    /**
-    * Get the radius and center point of the largest 
+    * Get the radius and center point of the largest
     * circle that can be drawn in the polygon.
     *
     * @param center of circle point to pack
@@ -669,11 +717,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
     * This method assumes the points are in a specific order (U-shape).
     * It returns the InCircle Point based on the two angles formed by the three line segments
     *
-    * @param p1 Point2d point defining the three line segments (must be in order)
-    * @param p2 Point2d point defining the three line segments (must be in order)
-    * @param p3 Point2d point defining the three line segments (must be in order)
-    * @param p4 Point2d point defining the three line segments (must be in order)
-    * @return Point2d incirlce point
+    * @return Point2d in circle point
     */
    public void getInCirclePoint2d(FramePoint3D intersectionToPack)
    {
@@ -756,11 +800,16 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
             deltaY += getFootstep(FRONT_RIGHT).getY() - getFootstep(HIND_RIGHT).getY();
          }
 
+         if (!Double.isFinite(deltaX))
+            throw new IllegalArgumentException("deltaX is invalid = " + deltaX);
+         if (!Double.isFinite(deltaY))
+            throw new IllegalArgumentException("deltaY is invalid = " + deltaY);
+
          return Math.atan2(deltaY, deltaX);
       }
       else
       {
-         throw new UndefinedOperationException("Undefined for less than 3 getNumberOfVertices. getNumberOfVertices = " + getNumberOfVertices());
+         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + getNumberOfVertices());
       }
    }
 
@@ -812,11 +861,14 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
 
+         if (deltaZ > length)
+            throw new IllegalArgumentException("Somehow ended up with a delta Z bigger than the length. deltaZ = " + deltaZ + ", length = " + length);
+
          return -Math.asin(deltaZ / length);
       }
       else
       {
-         throw new UndefinedOperationException("Undefined for less than 3 getNumberOfVertices. getNumberOfVertices = " + getNumberOfVertices());
+         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + getNumberOfVertices());
       }
    }
 
@@ -851,11 +903,14 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          if (length < 1e-3)
             throw new UndefinedOperationException("Polygon is too small");
 
+         if (deltaZ > length)
+            throw new IllegalArgumentException("Somehow ended up with a delta Z bigger than the length. deltaZ = " + deltaZ + ", length = " + length);
+
          return Math.asin(deltaZ / length);
       }
       else
       {
-         throw new UndefinedOperationException("Undefined for less than 3 getNumberOfVertices. getNumberOfVertices = " + getNumberOfVertices());
+         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + getNumberOfVertices());
       }
    }
 
@@ -884,7 +939,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
    /**
     *  This method returns the common support polygon bewteen this and the supplied supportPolygon
     *
-    *  *** Assumes regular gait 
+    *  *** Assumes regular gait
     *
     * @param polygonToCompare SupportPolygon
     *        1) must contain only three kegs

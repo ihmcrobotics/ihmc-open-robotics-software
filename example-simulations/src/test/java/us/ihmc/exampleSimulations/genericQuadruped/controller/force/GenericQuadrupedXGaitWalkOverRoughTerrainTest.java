@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
@@ -23,21 +22,21 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
    }
 
    @Test
-   public void testWalkingOverTiledGround() throws IOException, AssertionFailedError
+   public void testWalkingOverTiledGround() throws IOException
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverTiledGround();
    }
 
    @Test
-   public void testWalkingOverSingleStepUp() throws IOException, AssertionFailedError
+   public void testWalkingOverSingleStepUp() throws IOException
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverSingleStepUp(Double.NaN);
    }
 
    @Test
-   public void testWalkingOverConsecutiveRamps() throws IOException, AssertionFailedError
+   public void testWalkingOverConsecutiveRamps() throws IOException
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverConsecutiveRamps();
@@ -45,7 +44,7 @@ public class GenericQuadrupedXGaitWalkOverRoughTerrainTest extends QuadrupedXGai
 
    @Disabled
    @Test
-   public void testWalkingOverCinderBlockField() throws IOException, AssertionFailedError
+   public void testWalkingOverCinderBlockField() throws IOException
    {
       xGaitSettings = new GenericQuadrupedXGaitSettings();
       super.testWalkingOverCinderBlockField();

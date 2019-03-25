@@ -7,21 +7,13 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotEnvironmentAwareness.tools.ConstantPlanarRegionsPublisher;
-import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
-import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 
 public class ValkyrieCTTSOSimulation
 {
-   private static final String IHMC_JERSEY_BARRIERS_NARROW  = "20190220_172417_Jersey_Barriers_IHMC_55cm";
-   private static final String IHMC_JERSEY_BARRIERS_WIDE    = "20190220_172417_Jersey_Barriers_IHMC_65cm";
-   private static final String JSC_JERSEY_BARRIERS_NARROW   = "20190220_172417_Jersey_Barriers_JSC_60cm";
-   private static final String JSC_JERSEY_BARRIERS_WIDE     = "20190220_172417_Jersey_Barriers_JSC_78cm";
-   private static final String JSC_CINDERS                  = "20190220_172417_EOD_Cinders";
-
-   private static final String DATA_SET_TO_USE = JSC_CINDERS;
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190220_172417_EOD_Cinders;
 
    public static void main(String[] args)
    {
@@ -41,6 +33,7 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableControllerCommunicator(true);
       networkProcessorParameters.enableFootstepPlanningToolbox(true);
       networkProcessorParameters.enableWalkingPreviewToolbox(true);
+      networkProcessorParameters.enableBipedalSupportPlanarRegionPublisher(true);
 
       networkProcessorParameters.enablePerceptionModule(true);
 
@@ -58,6 +51,7 @@ public class ValkyrieCTTSOSimulation
       networkProcessorParameters.enableKinematicsPlanningToolbox(false);
       networkProcessorParameters.enableRobotEnvironmentAwerenessModule(false);
       networkProcessorParameters.enableMocapModule(false);
+      networkProcessorParameters.enableAutoREAStateUpdater(true);
 
       // start sim
       simulationStarter.startSimulation(networkProcessorParameters, false);

@@ -25,6 +25,15 @@ module controller_msgs
         sequence<float> desired_joint_angles;
         geometry_msgs::msg::dds::Vector3 desired_root_translation;
         geometry_msgs::msg::dds::Quaternion desired_root_orientation;
+        /**
+         * Desired joint velocities might be empty.
+         */
+        sequence<float> desired_joint_velocities;
+        /**
+         * Desired twist of root might be empty.
+         */
+        geometry_msgs::msg::dds::Vector3 desired_root_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 desired_root_angular_velocity;
         @defaultValue(value=-1.0)
         double solution_quality;
       };

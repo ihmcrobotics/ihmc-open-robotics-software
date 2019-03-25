@@ -2,7 +2,6 @@ package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Slider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
@@ -56,7 +55,7 @@ public class VisualizationController
 
    public void bindControls()
    {
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyPathTopic, showBodyPathToggleButton.selectedProperty(), true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowPlanarRegionsTopic, showPlanarRegionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);

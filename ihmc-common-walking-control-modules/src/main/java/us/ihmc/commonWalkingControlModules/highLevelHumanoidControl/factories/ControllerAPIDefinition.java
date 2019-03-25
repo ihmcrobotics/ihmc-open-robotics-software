@@ -155,7 +155,6 @@ public class ControllerAPIDefinition
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
       statusMessages.add(TextToSpeechPacket.class);
-      statusMessages.add(RequestPlanarRegionsListMessage.class);
       statusMessages.add(ControllerCrashNotificationPacket.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);

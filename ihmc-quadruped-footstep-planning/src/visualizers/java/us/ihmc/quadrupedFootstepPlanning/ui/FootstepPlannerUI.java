@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -19,11 +20,9 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.tools.FootstepPlannerDataExporter;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeCheckerEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
 import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.*;
-import us.ihmc.quadrupedUI.JavaFXQuadrupedVisualizer;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
 import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
@@ -115,6 +114,10 @@ public class FootstepPlannerUI
       footstepPlannerVizController.attachMessager(messager);
       visibilityGraphsVizController.attachMessager(messager);
 
+      setMainTabTopics();
+      footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
+
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       mainTabController.bindControls();
@@ -135,16 +138,20 @@ public class FootstepPlannerUI
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
                                                                  GoalOrientationTopic, XGaitSettingsTopic);
-      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
+      this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
+                                                                       StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
+                                                                       LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                          StartPositionTopic, GoalPositionTopic, PlanarRegionDataTopic, SelectedRegionTopic,
                                                          StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic);
+      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene(), EditModeEnabledTopic, StartOrientationEditModeEnabledTopic,
+                                                              GoalOrientationEditModeEnabledTopic, StartPositionTopic, StartOrientationTopic,
+                                                              GoalPositionTopic, GoalOrientationTopic, SelectedRegionTopic);
       this.nodeCheckerEditor = new NodeCheckerEditor(messager, subScene);
-      this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
-      this.pathViewer = new FootstepPathMeshViewer(messager);
+      this.pathViewer = new FootstepPathMeshViewer(messager, FootstepPlanTopic, ComputePathTopic, ShowFootstepPlanTopic, ShowFootstepPreviewTopic);
       this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
       this.dataExporter = new FootstepPlannerDataExporter(messager);
-      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
+      this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, ShowBodyPathTopic, ComputePathTopic, BodyPathDataTopic);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
 //      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
       this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);
@@ -211,6 +218,8 @@ public class FootstepPlannerUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
+
+
    public JavaFXMessager getMessager()
    {
       return messager;
@@ -237,6 +246,33 @@ public class FootstepPlannerUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
+   }
+
+   private void setMainTabTopics()
+   {
+      mainTabController.setPlannerTypeTopic(FootstepPlannerMessagerAPI.PlannerTypeTopic);
+      mainTabController.setPlannerRequestIdTopic(FootstepPlannerMessagerAPI.PlannerRequestIdTopic);
+      mainTabController.setReceivedPlanIdTopic(FootstepPlannerMessagerAPI.ReceivedPlanIdTopic);
+      mainTabController.setFootstepPlanTopic(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, FootstepPlannerMessagerAPI.FootstepPlanTopic);
+      mainTabController.setPlanarRegionDataTopic(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+      mainTabController.setPlannerTimeTakenTopic(FootstepPlannerMessagerAPI.PlannerTimeTakenTopic);
+      mainTabController.setPlannerTimeoutTopic(FootstepPlannerMessagerAPI.PlannerTimeoutTopic);
+      mainTabController.setComputePathTopic(FootstepPlannerMessagerAPI.ComputePathTopic);
+      mainTabController.setAbortPlanningTopic(FootstepPlannerMessagerAPI.AbortPlanningTopic);
+      mainTabController.setAcceptNewPlanarRegionsTopic(FootstepPlannerMessagerAPI.AcceptNewPlanarRegionsTopic);
+      mainTabController.setPlanningResultTopic(FootstepPlannerMessagerAPI.PlanningResultTopic);
+      mainTabController.setPlannerStatusTopic(FootstepPlannerMessagerAPI.PlannerStatusTopic);
+      mainTabController.setPlannerHorizonLengthTopic(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic);
+      mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
+                                           FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
+                                           FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
+                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic);
+      mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
+      mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
+      mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
+      mainTabController.setXGaitSettingsTopic(FootstepPlannerMessagerAPI.XGaitSettingsTopic);
+      mainTabController.setShowFootstepPreviewTopic(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic);
+      mainTabController.setStepListMessageTopic(FootstepPlannerMessagerAPI.FootstepDataListTopic);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception

@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -56,9 +55,9 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrame(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrame(linearSelectionFrame);
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrame(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrame(linearWeightFrame);
       }
    }
@@ -89,27 +88,32 @@ public class KinematicsPlanningToolboxCenterOfMassCommand
    {
       return waypointTimes.size() == waypoints.size();
    }
-   
+
    public int getNumberOfWayPoints()
    {
       return waypoints.size();
    }
-   
+
    public Point3D getWayPoint(int i)
    {
       return waypoints.get(i);
    }
-   
+
+   public TDoubleArrayList getWayPointTimes()
+   {
+      return waypointTimes;
+   }
+
    public double getWayPointTime(int i)
    {
       return waypointTimes.get(i);
    }
-   
+
    public SelectionMatrix3D getSelectionMatrix()
    {
       return selectionMatrix;
    }
-   
+
    public WeightMatrix3D getWeightMatrix()
    {
       return weightMatrix;

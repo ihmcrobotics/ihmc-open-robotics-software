@@ -181,7 +181,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
 
    public FrameQuaternionReadOnly getDesiredOrientation()
    {
-      return orientationHelper.getFeedbackControlCommand().getDesiredOrientation();
+      return orientationHelper.getFeedbackControlCommand().getReferenceOrientation();
    }
 
    @Override

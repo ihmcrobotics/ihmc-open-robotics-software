@@ -127,9 +127,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void packCommandForTouchdown()
    {
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                       desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(gains);
    }
@@ -157,9 +156,12 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    {
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
-         spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
-         spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
-         spatialFeedbackControlCommand.getFeedForwardActionIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
+         desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
+         desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
+         desiredLinearVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearVelocity());
+         desiredAngularVelocity.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularVelocity());
+         desiredLinearAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceLinearAcceleration());
+         desiredAngularAcceleration.setIncludingFrame(spatialFeedbackControlCommand.getReferenceAngularAcceleration());
 
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
@@ -172,9 +174,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
 
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity,
+                                                       desiredAngularAcceleration, desiredLinearAcceleration);
    }
 
    private final RigidBodyTransform oldBodyFrameDesiredTransform = new RigidBodyTransform();

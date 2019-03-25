@@ -40,6 +40,7 @@ public class DRCNetworkModuleParameters
    private boolean enableJoystickBasedStepping;
    private boolean useBipedalSupportPlanarRegionPublisher;
    private boolean useWalkingPreviewToolbox;
+   private boolean useAutoREAStateUpdater;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -137,6 +138,11 @@ public class DRCNetworkModuleParameters
       return useWalkingPreviewToolbox;
    }
 
+   public boolean isAutoREAStateUpdaterEnabled()
+   {
+      return useAutoREAStateUpdater;
+   }
+
    public boolean isHeightQuadTreeToolboxEnabled()
    {
       return useHeightQuadTreeToolbox;
@@ -219,6 +225,11 @@ public class DRCNetworkModuleParameters
    public void enableWalkingPreviewToolbox(boolean useWalkingPreviewToolbox)
    {
       this.useWalkingPreviewToolbox = useWalkingPreviewToolbox;
+   }
+
+   public void enableAutoREAStateUpdater(boolean useAutoREAStateUpdater)
+   {
+      this.useAutoREAStateUpdater = useAutoREAStateUpdater;
    }
 
    public void enableHandModule(boolean b)

@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
@@ -7,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -18,6 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
 
    // Yo variables
    private final YoDouble robotTime;
@@ -37,6 +40,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final FrameVector3D desiredFootVelocity = new FrameVector3D();
    private final FrameVector3D desiredFootAcceleration = new FrameVector3D();
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private double taskStartTime;
@@ -60,6 +64,12 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    public void handleWaypointList(FrameEuclideanTrajectoryPointList trajectoryPointList)
@@ -95,8 +105,12 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       desiredFootVelocity.changeFrame(worldFrame);
       desiredFootAcceleration.changeFrame(worldFrame);
 
-      feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredFootAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredFootPosition, desiredFootVelocity, desiredFootAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredFootPosition, desiredFootVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
       feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
    }

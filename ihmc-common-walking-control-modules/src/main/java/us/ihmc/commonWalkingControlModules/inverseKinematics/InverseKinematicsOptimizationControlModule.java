@@ -6,6 +6,8 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -18,9 +20,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
@@ -116,7 +118,7 @@ public class InverseKinematicsOptimizationControlModule
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            LogTools.warn("Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
          }
 
          hasNotConvergedInPast.set(true);
@@ -193,5 +195,18 @@ public class InverseKinematicsOptimizationControlModule
    public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
       boundCalculator.submitJointLimitReductionCommand(command);
+   }
+
+   public void submitJointLimitEnforcementMethodCommand(JointLimitEnforcementMethodCommand command)
+   {
+      boundCalculator.submitJointLimitEnforcementMethodCommand(command);
+   }
+
+   public void submitOptimizationSettingsCommand(InverseKinematicsOptimizationSettingsCommand command)
+   {
+      if (command.hasJointVelocityWeight())
+         qpSolver.setVelocityRegularizationWeight(command.getJointVelocityWeight());
+      if (command.hasJointAccelerationWeight())
+         qpSolver.setAccelerationRegularizationWeight(command.getJointAccelerationWeight());
    }
 }

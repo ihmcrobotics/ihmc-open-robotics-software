@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -44,6 +46,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -77,6 +80,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyControllerCore controllerCore;
+   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final HighLevelControlManagerFactory managerFactory;
    private final WalkingHighLevelHumanoidController walkingController;
 
@@ -157,6 +161,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackControlTemplate, jointDesiredOutputList, walkingParentRegistry);
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
+      double controlDT = controllerToolbox.getControlDT();
+      RigidBodyBasics elevator = fullRobotModel.getElevator();
+      YoDouble yoTime = controllerToolbox.getYoTime();
+      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
+                                                                            gravityZ, controlDT, walkingParentRegistry, yoGraphicsListRegistry);
+
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThread);
@@ -192,8 +203,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null, previewTime, gravityZ, omega0, feet,
-                                                    integrationDT, Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, previewTime, gravityZ, omega0, feet, integrationDT,
+                                                    Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
    }
 
    private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -323,12 +334,24 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       taskExecutor.doControl();
 
       walkingController.doAction();
+
+      linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
+      if (!linearMomentumRateControlModule.computeControllerCoreCommands())
+      {
+         controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
+      }
+      walkingController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
+
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
       if (!taskExecutor.isDone())
          controllerCoreCommand.addInverseDynamicsCommand(((WalkingPreviewTask) taskExecutor.getCurrentTask()).getOutput());
 
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
+
+      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
+      linearMomentumRateControlModule.computeAchievedCMP();
 
       MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));

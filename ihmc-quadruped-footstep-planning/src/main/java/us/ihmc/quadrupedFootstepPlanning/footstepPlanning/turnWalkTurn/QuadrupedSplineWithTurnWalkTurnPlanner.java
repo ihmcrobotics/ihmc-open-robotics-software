@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.SplinePathPlanner;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -12,7 +12,7 @@ public class QuadrupedSplineWithTurnWalkTurnPlanner extends QuadrupedPathWithTur
 {
    private static final String prefix = "splineBased";
 
-   public QuadrupedSplineWithTurnWalkTurnPlanner(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
+   public QuadrupedSplineWithTurnWalkTurnPlanner(QuadrupedXGaitSettingsBasics xGaitSettings, YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                  QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
                                                  YoVariableRegistry parentRegistry)
    {
