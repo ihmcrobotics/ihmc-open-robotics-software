@@ -48,7 +48,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * Internal object used for frame changes and to store the weights into an actual 3-by-3 weight
     * matrix.
     */
-   private final FrameMatrix3D frameMatrix = new FrameMatrix3D();
+   private final transient FrameMatrix3D frameMatrix = new FrameMatrix3D();
 
    /**
     * Creates a new weight matrix. This weight matrix is initialized with all the weights

@@ -113,9 +113,22 @@ public class PDGains implements PDGainsReadOnly, Settable<PDGains>
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof PDGainsReadOnly)
+      if (object instanceof PDGains)
+      {
+         PDGains other = (PDGains) object;
+         if (Double.compare(zeta, other.zeta) != 0)
+            return false;
+         if (!PDGainsReadOnly.super.equals(other))
+            return false;
+         return true;
+      }
+      else if (object instanceof PDGainsReadOnly)
+      {
          return PDGainsReadOnly.super.equals((PDGainsReadOnly) object);
+      }
       else
+      {
          return false;
+      }
    }
 }

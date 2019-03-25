@@ -172,10 +172,23 @@ public class DefaultPID3DGains implements PID3DGains, Settable<DefaultPID3DGains
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof PID3DGainsReadOnly)
+      if (object instanceof DefaultPID3DGains)
+      {
+         DefaultPID3DGains other = (DefaultPID3DGains) object;
+         if (!Arrays.equals(dampingRatios, other.dampingRatios))
+            return false;
+         if (!PID3DGains.super.equals(other))
+            return false;
+         return true;
+      }
+      else if (object instanceof PID3DGainsReadOnly)
+      {
          return PID3DGains.super.equals((PID3DGainsReadOnly) object);
+      }
       else
+      {
          return false;
+      }
    }
 
    @Override
