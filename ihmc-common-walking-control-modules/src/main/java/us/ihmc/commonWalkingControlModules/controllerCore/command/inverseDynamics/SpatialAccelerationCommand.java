@@ -119,8 +119,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public void set(SpatialAccelerationCommand other)
    {
-      setWeightMatrix(other.weightMatrix);
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearAcceleration.set(other.desiredLinearAcceleration);
+      desiredAngularAcceleration.set(other.desiredAngularAcceleration);
 
+      weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
@@ -128,10 +131,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       optionalPrimaryBase = other.optionalPrimaryBase;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularAcceleration.set(other.desiredAngularAcceleration);
-      desiredLinearAcceleration.set(other.desiredLinearAcceleration);
    }
 
    /**
@@ -981,8 +980,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + desiredLinearAcceleration + ", angular = " + desiredAngularAcceleration;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearAcceleration + ", angular = "
+            + desiredAngularAcceleration;
    }
 }

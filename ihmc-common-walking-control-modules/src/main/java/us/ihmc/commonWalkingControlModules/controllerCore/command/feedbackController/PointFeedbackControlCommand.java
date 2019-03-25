@@ -96,20 +96,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    @Override
    public void set(PointFeedbackControlCommand other)
    {
+      bodyFixedPointInEndEffectorFrame.setIncludingFrame(other.bodyFixedPointInEndEffectorFrame);
       controlMode = other.controlMode;
-
       referencePositionInRootFrame.setIncludingFrame(other.referencePositionInRootFrame);
       referenceLinearVelocityInRootFrame.setIncludingFrame(other.referenceLinearVelocityInRootFrame);
       referenceLinearAccelerationInRootFrame.setIncludingFrame(other.referenceLinearAccelerationInRootFrame);
       referenceForceInRootFrame.setIncludingFrame(other.referenceForceInRootFrame);
 
-      setGains(other.gains);
-
+      gains.set(other.gains);
+      linearGainsFrame = other.linearGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
-
-      resetBodyFixedPoint();
-      setBodyFixedPointToControl(other.getBodyFixedPointToControl());
-
       controlBaseFrame = other.controlBaseFrame;
    }
 
@@ -567,8 +563,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
-      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
+      ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
       ret += "position = " + referencePositionInRootFrame;
       return ret;
    }

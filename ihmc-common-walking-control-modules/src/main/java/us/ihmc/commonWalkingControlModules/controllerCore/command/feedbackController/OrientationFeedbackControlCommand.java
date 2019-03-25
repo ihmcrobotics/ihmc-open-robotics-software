@@ -99,20 +99,16 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    @Override
    public void set(OrientationFeedbackControlCommand other)
    {
+      bodyFixedOrientationInEndEffectorFrame.setIncludingFrame(other.bodyFixedOrientationInEndEffectorFrame);
       controlMode = other.controlMode;
-
       referenceOrientationInRootFrame.setIncludingFrame(other.referenceOrientationInRootFrame);
       referenceAngularVelocityInRootFrame.setIncludingFrame(other.referenceAngularVelocityInRootFrame);
       referenceAngularAccelerationInRootFrame.setIncludingFrame(other.referenceAngularAccelerationInRootFrame);
       referenceTorqueInRootFrame.setIncludingFrame(other.referenceTorqueInRootFrame);
 
       gains.set(other.gains);
-
+      angularGainsFrame = other.angularGainsFrame;
       spatialAccelerationCommand.set(other.spatialAccelerationCommand);
-
-      resetBodyFixedOrientation();
-      setBodyFixedOrientationToControl(other.getBodyFixedOrientationToControl());
-
       controlBaseFrame = other.controlBaseFrame;
    }
 
@@ -567,8 +563,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + spatialAccelerationCommand.getBase().getName() + ", ";
-      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector().getName() + ", ";
+      ret += "base = " + spatialAccelerationCommand.getBase() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffector() + ", ";
       ret += "orientation = " + referenceOrientationInRootFrame.toStringAsYawPitchRoll();
       return ret;
    }
