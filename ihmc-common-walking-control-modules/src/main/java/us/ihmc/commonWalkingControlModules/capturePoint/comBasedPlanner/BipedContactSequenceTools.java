@@ -35,6 +35,11 @@ public class BipedContactSequenceTools
       }
    }
 
+   /**
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    */
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
                                                       List<? extends BipedTimedStep> stepSequence)
    {

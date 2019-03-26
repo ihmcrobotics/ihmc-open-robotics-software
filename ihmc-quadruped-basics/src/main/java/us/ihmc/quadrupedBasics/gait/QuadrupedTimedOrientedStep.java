@@ -32,7 +32,7 @@ public class QuadrupedTimedOrientedStep extends QuadrupedTimedStep
 
    public QuadrupedTimedOrientedStep(QuadrupedTimedOrientedStep other)
    {
-      this(other.getRobotQuadrant(), other.getGoalPositionProvider(), other.getGroundClearance(), other.getTimeInterval(), other.getStepYaw());
+      this(other.getRobotQuadrant(), other.getGoalPositionInternal(), other.getGroundClearance(), other.getTimeInterval(), other.getStepYaw());
    }
 
    public void setStepYaw(double stepYaw)

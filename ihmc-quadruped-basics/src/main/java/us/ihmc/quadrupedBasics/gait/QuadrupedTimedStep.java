@@ -34,7 +34,7 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
 
    public QuadrupedTimedStep(QuadrupedTimedStep other)
    {
-      this(other.getRobotQuadrant(), other.getGoalPositionProvider(), other.getGroundClearance(), other.getTimeInterval());
+      this(other.getRobotQuadrant(), other.getGoalPositionInternal(), other.getGroundClearance(), other.getTimeInterval());
    }
 
    @Override
