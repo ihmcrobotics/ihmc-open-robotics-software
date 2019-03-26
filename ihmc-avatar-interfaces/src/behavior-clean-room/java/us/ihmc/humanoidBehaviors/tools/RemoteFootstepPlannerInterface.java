@@ -1,11 +1,9 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.Ros2QueuedSubscription;
 import us.ihmc.communication.packets.MessageTools;
@@ -20,6 +18,8 @@ import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static us.ihmc.communication.ROS2Tools.*;
+
 /**
  * Taken mostly from us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter
  */
@@ -31,7 +31,7 @@ public class RemoteFootstepPlannerInterface
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private final Ros2QueuedSubscription<FootstepPlanningToolboxOutputStatus> footstepPlannerResultQueue;
+   private final ROS2Input<FootstepPlanningToolboxOutputStatus> footstepPlanningStatus;
 
    private final AtomicInteger requestCounter = new AtomicInteger(1739);
 
@@ -47,10 +47,11 @@ public class RemoteFootstepPlannerInterface
             ROS2Tools.createPublisher(ros2Node,
                                       FootstepPlanningRequestPacket.class,
                                       FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      footstepPlannerResultQueue =
-            ROS2Tools.createQueuedSubscription(ros2Node,
+
+      footstepPlanningStatus = new ROS2Input<>(ros2Node,
                                                FootstepPlanningToolboxOutputStatus.class,
-                                               FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotModel.getSimpleRobotName()));
+                                               robotModel.getSimpleRobotName(),
+                                               FOOTSTEP_PLANNER_TOOLBOX);
    }
 
    public FootstepPlanningToolboxOutputStatus requestPlanBlocking(FramePose3D start, FramePose3D goal, PlanarRegionsListMessage planarRegionsListMessage)
@@ -59,12 +60,12 @@ public class RemoteFootstepPlannerInterface
 
       LogTools.debug("Waiting for footstep plan result id {}...", sentPlannerId);
 
-      FootstepPlanningToolboxOutputStatus footstepPlanningResult = new FootstepPlanningToolboxOutputStatus();
+      FootstepPlanningToolboxOutputStatus footstepPlanningResult = null;
       boolean resultIdMatchesLastSent = false;
-      while (!resultIdMatchesLastSent)           // wait for our result to arrive
+      while (!resultIdMatchesLastSent)           // wait for our result to arrive TODO use thread scheduler?
       {
-         boolean messageWasAvailable = footstepPlannerResultQueue.poll(footstepPlanningResult);
-         if (messageWasAvailable && footstepPlanningResult.getPlanId() == sentPlannerId)
+         footstepPlanningResult = footstepPlanningStatus.getLatest();
+         if (footstepPlanningResult.getPlanId() == sentPlannerId)
          {
             LogTools.debug("Received footstep plan result id {}", sentPlannerId);
             resultIdMatchesLastSent = true;
@@ -103,7 +104,7 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
       packet.getGoalOrientationInWorld().set(goal.getOrientation());
 
-      packet.setTimeout(120);
+      packet.setTimeout(15);
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
@@ -115,5 +116,11 @@ public class RemoteFootstepPlannerInterface
       footstepPlanningRequestPublisher.publish(packet);
 
       return sentPlannerId;
+   }
+
+   public void abortPlanning()
+   {
+      LogTools.debug("Sending SLEEP to footstep planner");
+      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 }
