@@ -2,6 +2,7 @@ package us.ihmc.quadrupedCommunication.teleop;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
@@ -31,12 +32,12 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
       return settings;
    }
 
-//   @Override
-//   @Test
-//   public void testDatasetsWithoutOcclusion()
-//   {
-//      super.testDatasetsWithoutOcclusion();
-//   }
+   @Override
+   @Test
+   public void testDataSets()
+   {
+      super.testDataSets();
+   }
 
    public static void main(String[] args) throws Exception
    {
@@ -44,8 +45,8 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
       String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
+      test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+//      test.runAssertions(DataSetName._20171216_111326_CrossoverPlatforms);
       ThreadTools.sleepForever();
       test.tearDown();
 
