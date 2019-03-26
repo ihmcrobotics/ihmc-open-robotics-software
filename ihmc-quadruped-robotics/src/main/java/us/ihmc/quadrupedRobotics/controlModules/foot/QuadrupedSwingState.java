@@ -231,7 +231,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (debug)
       {
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + touchdown + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
+         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
                .getTimeInterval());
       }
    }
