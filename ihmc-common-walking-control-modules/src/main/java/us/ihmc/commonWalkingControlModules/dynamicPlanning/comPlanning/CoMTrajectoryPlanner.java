@@ -28,6 +28,9 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools
 
 /**
  * <p>
+ *    This is the main class of the trajectory-based CoM Trajectory Planner.
+ * </p>
+ * <p>
  *    This class assumes that the final phase is always the "stopping" phase, where the CoM is supposed to come to rest.
  *    This means that the final VRP is the terminal DCM location
  *  </p>
@@ -84,7 +87,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final double gravityZ;
    private double nominalCoMHeight;
 
-   private final ThirdOrderCoMTrajectoryPlannerIndexHandler indexHandler = new ThirdOrderCoMTrajectoryPlannerIndexHandler();
+   private final CoMTrajectoryPlannerIndexHandler indexHandler = new CoMTrajectoryPlannerIndexHandler();
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
