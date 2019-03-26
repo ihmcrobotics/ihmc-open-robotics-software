@@ -91,7 +91,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, Announcement request, YoVariableLoggerOptions options,
                                    Consumer<Announcement> doneListener)
    {
-      LogTools.info(request.toString());
+      LogTools.info(toString(request));
       this.flushAggressivelyToDisk = options.isFlushAggressivelyToDisk();
       this.tempDirectory = tempDirectory;
       this.finalDirectory = finalDirectory;
@@ -112,12 +112,16 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       if (!options.getDisableVideo())
       {
          IDLSequence.Object<CameraAnnouncement> cameras = request.getCameras();
-         LogTools.info("Cameras: " + cameras);
-
+         
+         StringBuilder builder = new StringBuilder();
+         builder.append("Cameras:");
          for (int i = 0; i < cameras.size(); i++)
          {
             this.cameras.add(cameras.get(i));
+            builder.append("\n" + toString(cameras.get(i)));
          }
+
+         LogTools.info(builder.toString());
       }
       else
       {
@@ -538,5 +542,39 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          clearLog();
       }
+   }
+
+   private static String toString(Announcement announcement)
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Announcement {");
+      builder.append("\n  identifier = ");
+      builder.append(announcement.identifier_);
+      builder.append("\n  name = ");
+      builder.append(announcement.name_);
+      builder.append("\n  hostName = ");
+      builder.append(announcement.hostName_);
+      builder.append("\n  log = ");
+      builder.append(announcement.log_);
+      builder.append("\n}");
+
+      return builder.toString();
+   }
+
+   private static String toString(CameraAnnouncement camera)
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("CameraAnnouncement {");
+      builder.append("\n  type = ");
+      builder.append(camera.type_);
+      builder.append("\n  name = ");
+      builder.append(camera.name_);
+      builder.append("\n  identifier = ");
+      builder.append(camera.identifier_);
+      builder.append("\n}");
+
+      return builder.toString();
    }
 }
