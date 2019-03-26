@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.icp;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerInterface;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -46,8 +47,7 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
       this.timestamp = timestamp;
       contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 10, registry, graphicsListRegistry);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(contactSequenceUpdater.getContactSequence(), omega, gravity, nominalHeight, registry,
-                                                      graphicsListRegistry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -99,7 +99,7 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
       double timeInPhase = currentTime - contactSequenceUpdater.getContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
-      comTrajectoryPlanner.solveForTrajectory();
+      comTrajectoryPlanner.solveForTrajectory(contactSequenceUpdater.getContactSequence());
       comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
    }
 
@@ -114,9 +114,9 @@ public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterf
    }
 
    @Override
-   public void solveForTrajectory()
+   public void solveForTrajectory(List<? extends ContactStateProvider> contactSequence)
    {
-      comTrajectoryPlanner.solveForTrajectory();
+      comTrajectoryPlanner.solveForTrajectory(contactSequenceUpdater.getContactSequence());
    }
 
    @Override

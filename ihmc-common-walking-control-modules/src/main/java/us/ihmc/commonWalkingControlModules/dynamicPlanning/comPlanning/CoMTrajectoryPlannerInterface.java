@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
+import java.util.List;
+
 public interface CoMTrajectoryPlannerInterface
 {
    /**
@@ -15,7 +17,7 @@ public interface CoMTrajectoryPlannerInterface
    /**
     * Solves for the desired center of mass trajectory.
     */
-   void solveForTrajectory();
+   void solveForTrajectory(List<? extends ContactStateProvider> contactSequence);
 
    /**
     * Computes the desired values for the current segment at time {@param timeInPhase}.

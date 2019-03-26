@@ -30,7 +30,7 @@ public class BipedCoMTrajectoryPlanner
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       sequenceUpdater = new BipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(sequenceUpdater.getContactSequence(), omega, gravityZ, nominalCoMHeight, registry, yoGraphicsListRegistry);
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(omega, gravityZ, nominalCoMHeight, registry, yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -63,7 +63,7 @@ public class BipedCoMTrajectoryPlanner
       double timeInPhase = currentTime - sequenceUpdater.getAbsoluteContactSequence().get(0).getTimeInterval().getStartTime();
       timeInContactPhase.set(timeInPhase);
 
-      comTrajectoryPlanner.solveForTrajectory();
+      comTrajectoryPlanner.solveForTrajectory(sequenceUpdater.getContactSequence());
       comTrajectoryPlanner.compute(timeInContactPhase.getDoubleValue());
    }
 

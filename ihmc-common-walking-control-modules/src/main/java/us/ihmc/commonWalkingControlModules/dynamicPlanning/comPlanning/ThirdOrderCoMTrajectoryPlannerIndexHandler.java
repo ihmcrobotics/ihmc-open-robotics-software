@@ -10,19 +10,12 @@ public class ThirdOrderCoMTrajectoryPlannerIndexHandler
    private static final int sequenceSize = 6;
    private static final int vrpWaypointSize = 4;
 
-   private final List< ? extends ContactStateProvider> contactSequence;
-
    private int size;
    private int numberOfVRPWaypoints;
    private final TIntArrayList startIndices = new TIntArrayList();
    private final TIntIntHashMap vrpWaypointIndices = new TIntIntHashMap();
 
-   public ThirdOrderCoMTrajectoryPlannerIndexHandler(List<? extends ContactStateProvider> contactSequence)
-   {
-      this.contactSequence = contactSequence;
-   }
-
-   public void update()
+   public void update(List<? extends ContactStateProvider> contactSequence)
    {
       startIndices.clear();
       vrpWaypointIndices.clear();

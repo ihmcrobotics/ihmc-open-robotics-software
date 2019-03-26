@@ -38,7 +38,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
 
@@ -53,7 +53,7 @@ public class CoMTrajectoryPlannerTest
       comPosition.setZ(nominalHeight);
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -131,7 +131,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -154,7 +154,7 @@ public class CoMTrajectoryPlannerTest
       comPosition.setZ(nominalHeight);
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -210,7 +210,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -229,7 +229,7 @@ public class CoMTrajectoryPlannerTest
       FrameVector3D comVelocity = new FrameVector3D();
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -282,7 +282,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -307,7 +307,7 @@ public class CoMTrajectoryPlannerTest
       comPosition.setZ(nominalHeight);
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -370,7 +370,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       Random random = new Random(1738L);
 
@@ -423,7 +423,7 @@ public class CoMTrajectoryPlannerTest
          comPosition.setZ(nominalHeight);
          planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-         planner.solveForTrajectory();
+         planner.solveForTrajectory(contactSequence);
          planner.compute(0.0);
          checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -467,7 +467,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -491,7 +491,7 @@ public class CoMTrajectoryPlannerTest
       comPosition.setZ(nominalHeight);
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
@@ -527,7 +527,7 @@ public class CoMTrajectoryPlannerTest
       double nominalHeight = 0.7;
 
       List<ContactStateProvider> contactSequence = new ArrayList<>();
-      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(contactSequence, omega, gravityZ, nominalHeight, registry);
+      CoMTrajectoryPlanner planner = new CoMTrajectoryPlanner(omega, gravityZ, nominalHeight, registry);
 
       SettableContactStateProvider firstContact = new SettableContactStateProvider();
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
@@ -545,7 +545,7 @@ public class CoMTrajectoryPlannerTest
       FrameVector3D comVelocity = new FrameVector3D();
       planner.setInitialCenterOfMassState(comPosition, comVelocity);
 
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactSequence);
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
 
