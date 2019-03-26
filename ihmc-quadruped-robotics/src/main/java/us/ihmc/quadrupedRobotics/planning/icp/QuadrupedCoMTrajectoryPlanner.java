@@ -21,6 +21,11 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is a base class for quadrupeds for dynamic trajectory planning. It is used to generate feasible DCM, CoM, and VRP trajectories. The inputs to this class
+ * are a list of {@link QuadrupedTimedStep}, which are converted to a list of {@link ContactStateProvider}, which is then used by the {@link CoMTrajectoryPlanner}.
+ * This is done using {@link QuadrupedContactSequenceUpdater} class.
+ */
 public class QuadrupedCoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
