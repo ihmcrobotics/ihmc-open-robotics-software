@@ -148,7 +148,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
          if (frame % 600 == 0)
          {
             double delayInS = Conversions.nanosecondsToSeconds(circularLongMap.getLatestKey() - hardwareTime);
-            LogTools.info("[Decklink " + decklink + "] Received frame " + frame + ". Delay: " + delayInS + "s. pts: " + pts);
+            System.out.println("[Decklink " + decklink + "] Received frame " + frame + ". Delay: " + delayInS + "s. pts: " + pts);
          }
 
          long robotTimestamp = circularLongMap.getValue(true, hardwareTime);

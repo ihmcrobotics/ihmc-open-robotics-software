@@ -29,8 +29,6 @@ public abstract class VideoDataLoggerInterface
 
       timestampData = logPath.getAbsolutePath() + File.separator + timestampDataFilename;
       videoFile = logPath.getAbsolutePath() + File.separator + videoFilename;
-
-      LogTools.info("Created " + getClass().getSimpleName() + " for " + description + ".");
    }
 
    public abstract void restart() throws IOException;
