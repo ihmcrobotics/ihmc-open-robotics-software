@@ -354,6 +354,7 @@ public class MainTabController
          return;
       
       requestMessage.getFootsteps().set(footstepDataListMessage);
+      requestMessage.getFootsteps().setOffsetFootstepsWithExecutionError(false);
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 
