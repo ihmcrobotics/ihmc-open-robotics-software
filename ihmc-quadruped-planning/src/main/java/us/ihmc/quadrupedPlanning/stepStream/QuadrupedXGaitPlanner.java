@@ -78,9 +78,7 @@ public class QuadrupedXGaitPlanner
          }
          else
          {
-            double endPhaseShift = thisStepQuadrant.isQuadrantInHind() ? 180.0 - xGaitSettings.getEndPhaseShift() : xGaitSettings.getEndPhaseShift();
-            endTimeShift = xGaitSettings.getEndDoubleSupportDuration() + xGaitSettings.getStepDuration();
-            endTimeShift *= Math.max(Math.min(endPhaseShift, 180.0), 0.0) / 180.0;
+            endTimeShift = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(lastStepQuadrant, xGaitSettings);
          }
          double thisStepStartTime = lastStepStartTime + endTimeShift;
          double thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();

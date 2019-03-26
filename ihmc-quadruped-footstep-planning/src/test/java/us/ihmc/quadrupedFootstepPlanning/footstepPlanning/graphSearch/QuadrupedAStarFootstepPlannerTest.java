@@ -28,6 +28,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualization.QuadrupedAStarFootstepPlannerVisualizer;
+import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -133,6 +134,7 @@ public class QuadrupedAStarFootstepPlannerTest
       double stanceLength = 0.8;
       double stanceWidth = 0.4;
 
+
       DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115758_QuadrupedEnvironment1);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
@@ -204,6 +206,8 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.setStanceWidth(stanceWidth);
       xGaitSettings.setEndPhaseShift(90.0);
       xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.getAmbleMediumTimings().setStepDuration(0.4);
+      xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.35);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
