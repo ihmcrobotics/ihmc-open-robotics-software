@@ -35,7 +35,6 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
       return this;
    }
 
-
    default boolean epsilonEquals(TimeInterval other, double epsilon)
    {
       return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);

@@ -27,8 +27,9 @@ public class DCMTrajectoryTools
       CapturePointTools.computeDesiredCapturePointPosition(omega0, time, initialDCMPosition, constantVRPPosition, desiredDCMPosition);
    }
 
-   public static void computeDCMUsingLinearVRP(double omega0, double time, double timeAtFinalVRP, FramePoint3DReadOnly initialDCMPosition, FramePoint3DReadOnly initialVRPPosition,
-                                               FramePoint3DReadOnly finalVRPPosition, FixedFramePoint3DBasics desiredDCMPosition)
+   public static void computeDCMUsingLinearVRP(double omega0, double time, double timeAtFinalVRP, FramePoint3DReadOnly initialDCMPosition,
+                                               FramePoint3DReadOnly initialVRPPosition, FramePoint3DReadOnly finalVRPPosition,
+                                               FixedFramePoint3DBasics desiredDCMPosition)
    {
       if (initialDCMPosition == desiredDCMPosition)
          throw new IllegalArgumentException("The initial DCM object must be different from the desired DCM object.");

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeDesiredCapturePointPosition;
 import static us.ihmc.robotics.Assert.assertEquals;
 
 public class CoMTrajectoryPlannerTest
@@ -120,7 +119,6 @@ public class CoMTrajectoryPlannerTest
       }
    }
 
-
    @Test
    public void testOneSimpleMovingSegmentInContact()
    {
@@ -137,7 +135,6 @@ public class CoMTrajectoryPlannerTest
       SettableContactStateProvider secondContact = new SettableContactStateProvider();
 
       double duration = 1.0;
-
 
       firstContact.setTimeInterval(new TimeInterval(0.0, duration));
       firstContact.setStartCopPosition(new FramePoint3D());
@@ -169,9 +166,10 @@ public class CoMTrajectoryPlannerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalDCM, planner.getDesiredDCMPosition(), epsilon);
 
       FramePoint3D initialDCM = new FramePoint3D();
-      DCMTrajectoryTools.computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(), firstContact.getCopStartPosition(), initialDCM);
+      DCMTrajectoryTools
+            .computeDCMUsingLinearVRP(omega.getDoubleValue(), -duration, -duration, secondContact.getCopStartPosition(), secondContact.getCopStartPosition(),
+                                      firstContact.getCopStartPosition(), initialDCM);
       initialDCM.addZ(nominalHeight);
-
 
       planner.compute(0.0);
       checkPlannerDynamics(planner, omega.getDoubleValue());
@@ -198,7 +196,6 @@ public class CoMTrajectoryPlannerTest
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("time : " + time, expectedDCM, planner.getDesiredDCMPosition(), epsilon);
       }
    }
-
 
    @Test
    public void testOneMovingSegmentInContact()
@@ -433,7 +430,8 @@ public class CoMTrajectoryPlannerTest
          FramePoint3DReadOnly desiredInitialDCM = planner.getDesiredDCMPosition();
 
          FramePoint3DReadOnly initialDCM = recursivelyComputeInitialDCMLinear(contactSequence, nominalHeight, omega.getDoubleValue());
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM, initialDCM.distance(new Point3D()) * epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals("iter = " + iter + ", Initial DCM is wrong.", initialDCM, desiredInitialDCM,
+                                                              initialDCM.distance(new Point3D()) * epsilon);
 
          FramePoint3D initialVRP = new FramePoint3D(contactSequence.get(0).getCopStartPosition());
          FramePoint3D finalVRP = new FramePoint3D(contactSequence.get(0).getCopEndPosition());
@@ -455,7 +453,6 @@ public class CoMTrajectoryPlannerTest
          }
       }
    }
-
 
    @Test
    public void testTwoMovingSegmentsOneFlight()
@@ -601,13 +598,17 @@ public class CoMTrajectoryPlannerTest
          double c3_dot = 2.0 * time;
          double c4_dot = 1.0;
          double c5_dot = 0.0;
-         double c0_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner
-               .getCoMPositionFirstCoefficient(omega, time)) / dt;
-         double c1_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
-               .getCoMPositionSecondCoefficient(omega, time)) / dt;
-         double c2_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time)) / dt;
-         double c3_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time)) / dt;
-         double c4_dot_numerical = (CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time)) / dt;
+         double c0_dot_numerical =
+               (CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner.getCoMPositionFirstCoefficient(omega, time)) / dt;
+         double c1_dot_numerical =
+               (CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner.getCoMPositionSecondCoefficient(omega, time))
+                     / dt;
+         double c2_dot_numerical =
+               (CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionThirdCoefficient(time)) / dt;
+         double c3_dot_numerical =
+               (CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFourthCoefficient(time)) / dt;
+         double c4_dot_numerical =
+               (CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMPositionFifthCoefficient(time)) / dt;
 
          assertEquals(c0_dot, CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time), epsilon);
          assertEquals(c1_dot, CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time), epsilon);
@@ -627,12 +628,15 @@ public class CoMTrajectoryPlannerTest
          double c3_ddot = 2.0;
          double c4_ddot = 0.0;
          double c5_ddot = 0.0;
-         double c0_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner
-               .getCoMVelocityFirstCoefficient(omega, time)) / dt;
-         double c1_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
-               .getCoMVelocitySecondCoefficient(omega, time)) / dt;
-         double c2_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time)) / dt;
-         double c3_ddot_numerical = (CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time)) / dt;
+         double c0_ddot_numerical =
+               (CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time + dt) - CoMTrajectoryPlanner.getCoMVelocityFirstCoefficient(omega, time)) / dt;
+         double c1_ddot_numerical =
+               (CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner.getCoMVelocitySecondCoefficient(omega, time))
+                     / dt;
+         double c2_ddot_numerical =
+               (CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityThirdCoefficient(time)) / dt;
+         double c3_ddot_numerical =
+               (CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMVelocityFourthCoefficient(time)) / dt;
 
          assertEquals(c0_ddot, CoMTrajectoryPlanner.getCoMAccelerationFirstCoefficient(omega, time), epsilon);
          assertEquals(c1_ddot, CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time), epsilon);
@@ -655,9 +659,8 @@ public class CoMTrajectoryPlannerTest
                .getCoMAccelerationFirstCoefficient(omega, time)) / dt;
          double c1_dddot_numerical = (CoMTrajectoryPlanner.getCoMAccelerationSecondCoefficient(omega, time + dt) - CoMTrajectoryPlanner
                .getCoMAccelerationSecondCoefficient(omega, time)) / dt;
-         double c2_dddot_numerical = (CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time + dt) - CoMTrajectoryPlanner
-               .getCoMAccelerationThirdCoefficient(time)) / dt;
-
+         double c2_dddot_numerical =
+               (CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time + dt) - CoMTrajectoryPlanner.getCoMAccelerationThirdCoefficient(time)) / dt;
 
          assertEquals(c0_dddot, CoMTrajectoryPlanner.getCoMJerkFirstCoefficient(omega, time), epsilon);
          assertEquals(c1_dddot, CoMTrajectoryPlanner.getCoMJerkSecondCoefficient(omega, time), epsilon);
@@ -712,13 +715,12 @@ public class CoMTrajectoryPlannerTest
          FramePoint3D desiredCoMPosition = new FramePoint3D();
          FramePoint3D desiredDCMPosition = new FramePoint3D();
          FrameVector3D desiredCoMVelocity = new FrameVector3D();
-         FrameVector3D desiredCoMAcceleration= new FrameVector3D();
+         FrameVector3D desiredCoMAcceleration = new FrameVector3D();
 
          CoMTrajectoryPlanner.constructDesiredCoMPosition(desiredCoMPosition, c0, c1, c2, c3, c4, c5, time, omega);
          CoMTrajectoryPlanner.constructDesiredCoMVelocity(desiredCoMVelocity, c0, c1, c2, c3, c4, c5, time, omega);
          CoMTrajectoryPlanner.constructDesiredCoMAcceleration(desiredCoMAcceleration, c0, c1, c2, c3, c4, c5, time, omega);
          CapturePointTools.computeDesiredCapturePointPosition(desiredCoMPosition, desiredCoMVelocity, omega, desiredDCMPosition);
-
 
          FramePoint3D desiredCoMPositionExpected = new FramePoint3D();
          FramePoint3D desiredDCMPositionExpected = new FramePoint3D();
@@ -788,7 +790,6 @@ public class CoMTrajectoryPlannerTest
          temp.scale(CoMTrajectoryPlanner.getCoMVelocitySixthCoefficient());
 
          desiredCoMVelocityExpected.add(temp);
-
 
          // com acceleration
          temp.set(c0);

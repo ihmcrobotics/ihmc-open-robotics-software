@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
-import junit.framework.TestCase;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -49,7 +48,6 @@ public class DCMPlanningTestTools
       for (int i = 0; i < expected.size(); i++)
          assertQuadrupedStepTransitionsEqual(expected.get(i), actual.get(i), epsilon);
    }
-
 
    public static void assertTimeIntervalsEqual(TimeInterval expected, TimeInterval actual, double epsilon)
    {

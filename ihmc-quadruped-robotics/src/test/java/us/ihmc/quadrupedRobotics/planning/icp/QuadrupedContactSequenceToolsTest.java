@@ -113,7 +113,6 @@ public class QuadrupedContactSequenceToolsTest
 
          QuadrupedContactSequenceTools.computeStepTransitionsFromStepSequence(stepTransitions, currentTime, timedSteps);
 
-
          RecyclingArrayList<QuadrupedStepTransition> stepTransitionsExpected = new RecyclingArrayList<>(QuadrupedStepTransition::new);
 
          timedSteps.sort(Comparator.comparingDouble(timedStep -> timedStep.getTimeInterval().getStartTime()));

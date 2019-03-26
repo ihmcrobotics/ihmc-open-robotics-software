@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,7 +50,6 @@ public class BipedStepTransition
       transitionSides.add(transitionSide);
       transitionPoses.get(transitionSide).set(transitionPose);
    }
-
 
    public void addTransition(BipedStepTransition other)
    {

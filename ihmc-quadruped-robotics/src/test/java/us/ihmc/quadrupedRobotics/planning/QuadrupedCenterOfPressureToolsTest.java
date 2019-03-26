@@ -77,7 +77,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // back two and front left in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.FRONT_RIGHT);
@@ -104,8 +103,6 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
-
-
 
       // front two and back right in contact
       feetInContact.clear();
@@ -134,7 +131,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // front two and back left in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.FRONT_LEFT);
@@ -161,9 +157,6 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.25, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.25, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
-
-
-
 
       // front two in contact
       feetInContact.clear();
@@ -217,7 +210,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // left two in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.HIND_LEFT);
@@ -270,7 +262,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // front left hind right in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.HIND_RIGHT);
@@ -296,8 +287,6 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
-
-
 
       // front right hind left in contact
       feetInContact.clear();
@@ -325,8 +314,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.5, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.5, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
-
       // hind left in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.HIND_LEFT);
@@ -352,7 +339,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // hind right in contact
       feetInContact.clear();
       feetInContact.add(RobotQuadrant.HIND_RIGHT);
@@ -377,7 +363,6 @@ public class QuadrupedCenterOfPressureToolsTest
 
       assertEquals(0.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(0.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
-
 
       // front left in contact
       feetInContact.clear();
@@ -429,7 +414,6 @@ public class QuadrupedCenterOfPressureToolsTest
       assertEquals(1.0, normalizedContactPressures.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
       assertEquals(1.0, normalizedContactPressures2.get(RobotQuadrant.FRONT_RIGHT).getValue(), epsilon);
 
-
       // no contact
       feetInContact.clear();
 
@@ -463,7 +447,6 @@ public class QuadrupedCenterOfPressureToolsTest
       QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
       QuadrantDependentList<MutableDouble> normalizedPressures = new QuadrantDependentList<>();
 
-
       for (int iter = 0; iter < 100; iter++)
       {
          double pressure = 0.0;
@@ -473,7 +456,6 @@ public class QuadrupedCenterOfPressureToolsTest
             normalizedPressures.put(quadrant, new MutableDouble(RandomNumbers.nextDouble(random, 0.0, 1.0)));
             pressure += normalizedPressures.get(quadrant).getValue();
          }
-
 
          FramePoint3D copPosition = new FramePoint3D();
          QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPosition, solePositions, normalizedPressures);

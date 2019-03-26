@@ -24,7 +24,6 @@ public class ContactStateProviderToolsTest
       contactSequence.add(contactState2);
       contactSequence.add(contactState3);
 
-
       contactState1.setContactState(ContactState.FLIGHT);
       contactState2.setContactState(ContactState.FLIGHT);
       contactState3.setContactState(ContactState.IN_CONTACT);
@@ -71,7 +70,6 @@ public class ContactStateProviderToolsTest
       assertTrue(ContactStateProviderTools.checkContactSequenceIsContinuous(contactSequence));
 
       contactState2.getTimeInterval().setInterval(time2 + 0.9 * ContactStateProviderTools.epsilonForContinuity, time3);
-
 
       assertFalse(ContactStateProviderTools.checkContactSequenceIsContinuous(contactSequence));
 

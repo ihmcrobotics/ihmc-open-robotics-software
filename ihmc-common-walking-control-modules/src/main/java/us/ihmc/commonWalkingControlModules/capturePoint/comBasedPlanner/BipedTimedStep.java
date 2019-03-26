@@ -25,7 +25,8 @@ public class BipedTimedStep extends BipedStep implements TimeIntervalProvider
       setTimeInterval(timeInterval);
    }
 
-   public BipedTimedStep(RobotSide robotSide, FramePose3D goalPose, double groundClearance, TimeIntervalReadOnly timeInterval, List<Point2D> predictedContactPoints)
+   public BipedTimedStep(RobotSide robotSide, FramePose3D goalPose, double groundClearance, TimeIntervalReadOnly timeInterval,
+                         List<Point2D> predictedContactPoints)
    {
       super(robotSide, goalPose, groundClearance, predictedContactPoints);
       setTimeInterval(timeInterval);

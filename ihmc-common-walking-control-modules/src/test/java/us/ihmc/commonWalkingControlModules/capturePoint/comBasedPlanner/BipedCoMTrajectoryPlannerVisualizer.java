@@ -52,7 +52,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private static final boolean includeFlight = true;
 
-
    private static final double footLengthForControl = 0.2;
    private static final double toeWidthForControl = 0.15;
    private static final double footWidthForControl = 0.15;
@@ -162,10 +161,11 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("leftFoot", leftFoot, Color.green, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("rightFoot", rightFoot, Color.green, false));
-//      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("combinedFeet", combinedFeet, Color.red, false));
+      //      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("combinedFeet", combinedFeet, Color.red, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextFootstep", yoNextFootstepPolygon, Color.blue, false));
       yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextFootstep", yoNextNextFootstepPolygon, Color.blue, false));
-      yoGraphicsListRegistry.registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextNextFootstep", yoNextNextNextFootstepPolygon, Color.blue, false));
+      yoGraphicsListRegistry
+            .registerArtifact("upcomingFootsteps", new YoArtifactPolygon("nextNextNextFootstep", yoNextNextNextFootstepPolygon, Color.blue, false));
 
       List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
       contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
@@ -181,12 +181,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
       footstepGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.blue));
       stanceFootGraphics.addExtrudedPolygon(contactPointsInSoleFrame, 0.02, YoAppearance.Color(Color.green));
 
-
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("leftFootPose", stanceFootGraphics, leftFootPose, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("rightFootPose", stanceFootGraphics, rightFootPose, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextFootstep", footstepGraphics, yoNextNextFootstepPose, 1.0));
-      yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextNextFootstep", footstepGraphics, yoNextNextNextFootstepPose, 1.0));
+      yoGraphicsListRegistry
+            .registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextNextFootstep", footstepGraphics, yoNextNextNextFootstepPose, 1.0));
 
       nextFootstepPoses.add(yoNextFootstepPose);
       nextFootstepPoses.add(yoNextNextFootstepPose);
@@ -198,12 +198,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       planner = new BipedCoMTrajectoryPlanner(soleFrames, omega, gravity, nominalHeight, registry, yoGraphicsListRegistry);
       steps = stepGetter.getSteps(soleFrames, worldGraphics);
-//      steps = createSteps(soleFrames);
-//      steps = createFancySteps(soleFrames);
-//      steps = createSkippingSteps(soleFrames);
+      //      steps = createSteps(soleFrames);
+      //      steps = createFancySteps(soleFrames);
+      //      steps = createSkippingSteps(soleFrames);
 
       springStiffness.set(computeStiffness());
-//      restingSpringLength.set(computeSpringRestingLength(nominalHeight, springStiffness.getDoubleValue()));
+      //      restingSpringLength.set(computeSpringRestingLength(nominalHeight, springStiffness.getDoubleValue()));
       restingSpringLength.set(1.4);
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + extraSimDuration;
@@ -324,10 +324,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
          }
       }
 
-
       return steps;
    }
-
 
    static List<BipedTimedStep> createSkippingSteps(SideDependentList<MovingReferenceFrame> soleFrames, Graphics3DObject worldGraphics)
    {
@@ -340,7 +338,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       double stepStartTime = initialTransferTime;
       double currentPosition = 0.0;
       double currentHeight = 0.0;
-
 
       BipedTimedStep step1 = new BipedTimedStep();
       step1.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration);
@@ -368,8 +365,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       step3.setGoalPose(new FramePoint3D(worldFrame, currentPosition, stanceWidth / 2.0, currentHeight), new FrameQuaternion());
 
       steps.add(step3);
-
-
 
       return steps;
    }
@@ -401,7 +396,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       worldGraphics.identity();
       worldGraphics.translate(11.45, 0.0, 1.0);
       worldGraphics.addCube(0.2, 1.5, 0.3, YoAppearance.Gray());
-
 
       BipedTimedStep step1 = new BipedTimedStep();
       step1.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration);
@@ -459,8 +453,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       step6.setGoalPose(new FramePoint3D(worldFrame, currentPosition + 1.5, -stanceWidth / 2.0, currentHeight), new FrameQuaternion());
 
       steps.add(step6);
-
-
 
       stepStartTime += swingDuration - flightDuration;
       currentPosition += 1.5;
@@ -532,7 +524,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       steps.add(step13);
 
-
       stepStartTime += 1.25 * swingDuration + 2.0 * stanceDuration;
       currentPosition += 1.0;
 
@@ -545,7 +536,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       steps.add(step14);
 
-
       BipedTimedStep step15 = new BipedTimedStep();
       step15.getTimeInterval().setInterval(stepStartTime, stepStartTime + 1.15 * swingDuration);
       step15.setRobotSide(RobotSide.LEFT);
@@ -553,11 +543,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       steps.add(step15);
 
-
       stepStartTime += 1.15 * swingDuration + 2.0 * stanceDuration;
       currentPosition += 1.0;
-
-
 
       BipedTimedStep step16 = new BipedTimedStep();
       step16.getTimeInterval().setInterval(stepStartTime, stepStartTime + swingDuration);
@@ -605,7 +592,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       steps.add(step20);
 
-
       return steps;
    }
 
@@ -635,7 +621,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
          desiredCoPPosition.set(desiredECMPPosition);
          desiredCoPPosition.setZ(0.0);
 
-
          desiredForce.set(desiredCoMAcceleration);
          desiredForce.addZ(gravity);
 
@@ -647,7 +632,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
          assertCoMDynamicsHold();
 
          computeStiffnessThatBestMeetsAcceleration();
-
 
          yoTime.add(simDt);
          updateFeetStates(yoTime.getDoubleValue());
@@ -683,7 +667,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(constructedCoMAcceleration, desiredCoMAcceleration, epsilon);
    }
 
-
    private void computeStiffnessThatBestMeetsAcceleration()
    {
       if (MathTools.epsilonEquals(desiredForce.length(), 0.0, 1e-1))
@@ -706,13 +689,11 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
    private final PoseReferenceFrame stepPoseFrame = new PoseReferenceFrame("stepPoseFrame", worldFrame);
 
-
    private void updateFeetStates(double currentTime)
    {
       feetInContact.clear();
       for (RobotSide robotSide : RobotSide.values)
          feetInContact.add(robotSide);
-
 
       int stepNumber = 0;
       while (stepNumber < steps.size())
@@ -749,7 +730,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
       }
 
       int nextStepIndex = 0;
-
 
       int stepIndex = 0;
       while (stepIndex < steps.size() && nextStepIndex < nextFootstepPoses.size() && nextStepIndex < nextFootstepPolygons.size())
@@ -814,7 +794,6 @@ public class BipedCoMTrajectoryPlannerVisualizer
    {
       List<BipedTimedStep> getSteps(SideDependentList<MovingReferenceFrame> soleFrames, Graphics3DObject graphics3DObject);
    }
-
 
    @Test
    public void testFancySteps()

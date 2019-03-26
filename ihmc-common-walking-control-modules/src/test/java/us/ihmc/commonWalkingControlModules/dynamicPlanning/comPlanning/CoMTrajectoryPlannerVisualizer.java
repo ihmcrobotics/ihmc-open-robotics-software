@@ -25,7 +25,7 @@ import java.util.List;
 public class CoMTrajectoryPlannerVisualizer
 {
    private static final double gravity = 9.81;
-//   private static final double nominalHeight = 0.75;
+   //   private static final double nominalHeight = 0.75;
    private static final double nominalHeight = 9.81 / 9;
 
    private static final double initialTransferDuration = 1.0;
@@ -103,9 +103,11 @@ public class CoMTrajectoryPlannerVisualizer
       contactStates = createContacts();
       planner = new CoMTrajectoryPlanner(omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
-      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
+                                                       YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
-      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
+                                                       YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       YoGraphicVector forceViz = new YoGraphicVector("desiredGRF", desiredECMPPosition, desiredGroundReactionForce, 0.05, YoAppearance.Red());
 
@@ -219,10 +221,8 @@ public class CoMTrajectoryPlannerVisualizer
 
       simDuration = currentTime + settlingTime;
 
-
       return contacts;
    }
-
 
    private void simulate()
    {
@@ -237,7 +237,7 @@ public class CoMTrajectoryPlannerVisualizer
          if (!MathTools.epsilonEquals(contactStates.get(0).getTimeInterval().getStartTime(), 0.0, 1e-5))
             throw new RuntimeException("This is a problem");
 
-//         planner.solveForTrajectory();
+         //         planner.solveForTrajectory();
          planner.compute(timeInPhase.getDoubleValue());
 
          desiredCoMPosition.set(planner.getDesiredCoMPosition());

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -39,7 +38,6 @@ public class BipedStep
       setSwingHeight(groundClearance);
       setPredictedContactPoints(predictedContactPoints);
    }
-
 
    public RobotSide getRobotSide()
    {
@@ -109,7 +107,8 @@ public class BipedStep
       }
    }
 
-   @Override public String toString()
+   @Override
+   public String toString()
    {
       String string = super.toString();
       string += "\nrobotSide: " + getRobotSide();

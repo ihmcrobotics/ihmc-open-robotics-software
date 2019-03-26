@@ -16,7 +16,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -125,7 +124,6 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + finalExtraTime;
 
-
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
 
@@ -168,7 +166,6 @@ public class QuadrupedCoMTrajectoryPlannerVisualizer
 
       return soleFrames;
    }
-
 
    private List<QuadrupedTimedStep> createSteps(QuadrantDependentList<MovingReferenceFrame> soleFrames)
    {

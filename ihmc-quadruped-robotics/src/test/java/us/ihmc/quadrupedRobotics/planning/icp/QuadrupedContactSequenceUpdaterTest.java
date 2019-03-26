@@ -141,8 +141,6 @@ public class QuadrupedContactSequenceUpdaterTest
       assertEquals(1.0, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
 
-
-
       double timeInPhase = 0.25;
       contactSequenceUpdater.update(stepList, currentFeetInContact, timeInPhase);
 
@@ -383,8 +381,6 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            ninthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
       assertEquals(1.85, ninthContactPhase.getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, ninthContactPhase.getTimeInterval().getEndTime(), epsilon);
-
-
 
       double timeInPhase = 0.25;
       contactSequenceUpdater.update(stepList, currentFeetInContact, currentTime + timeInPhase);
