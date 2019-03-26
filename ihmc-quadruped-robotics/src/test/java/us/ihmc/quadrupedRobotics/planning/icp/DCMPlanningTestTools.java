@@ -10,8 +10,8 @@ import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.List;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class DCMPlanningTestTools
 {
