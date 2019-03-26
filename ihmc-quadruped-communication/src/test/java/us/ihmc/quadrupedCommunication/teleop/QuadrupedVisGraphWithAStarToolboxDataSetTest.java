@@ -31,12 +31,12 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
       return settings;
    }
 
-   @Override
-   @Test
-   public void testDatasetsWithoutOcclusion()
-   {
-      super.testDatasetsWithoutOcclusion();
-   }
+//   @Override
+//   @Test
+//   public void testDatasetsWithoutOcclusion()
+//   {
+//      super.testDatasetsWithoutOcclusion();
+//   }
 
    public static void main(String[] args) throws Exception
    {
@@ -44,7 +44,7 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
       String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
+//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204953_FlatGroundWithWall");
 //      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
       ThreadTools.sleepForever();
       test.tearDown();
