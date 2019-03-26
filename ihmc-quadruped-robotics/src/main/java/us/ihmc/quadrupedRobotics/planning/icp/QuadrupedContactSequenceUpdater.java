@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,6 +20,10 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class computes a list of {@link ContactStateProvider} from a list of {@link QuadrupedTimedStep}. This uses transition trajectories from the
+ * start CoP to the end CoP.
+ */
 public class QuadrupedContactSequenceUpdater
 {
    private static final boolean VISUALIZE = true;

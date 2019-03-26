@@ -13,6 +13,9 @@ import us.ihmc.robotics.time.TimeInterval;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the an implementation fo {@link ContactStateProvider} for quadruped. It could be used to compute fancy CoP locations, if desired.
+ */
 public class QuadrupedContactPhase implements ContactStateProvider
 {
    private final TimeInterval timeInterval = new TimeInterval();

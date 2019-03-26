@@ -5,10 +5,15 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is used to define contact transitions for quadrupeds. This essentially converts {@link TimeInterval} to step transition events, including
+ * touchdowns and lift offs. This is used then to convert to contact sequences.
+ */
 class QuadrupedStepTransition
 {
    public static final double sameTimeEpsilon = 1e-3;
