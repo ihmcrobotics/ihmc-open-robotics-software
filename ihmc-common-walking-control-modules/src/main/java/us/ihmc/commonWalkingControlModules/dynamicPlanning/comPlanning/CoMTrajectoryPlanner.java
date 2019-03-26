@@ -84,9 +84,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    private final double gravityZ;
    private double nominalCoMHeight;
 
-   private final List<? extends ContactStateProvider> contactSequence;
-
-   private final ThirdOrderCoMTrajectoryPlannerIndexHandler indexHandler;
+   private final ThirdOrderCoMTrajectoryPlannerIndexHandler indexHandler = new ThirdOrderCoMTrajectoryPlannerIndexHandler();
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -115,21 +113,17 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    private int numberOfConstraints = 0;
 
-   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                               YoVariableRegistry parentRegistry)
+   public CoMTrajectoryPlanner(DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry)
    {
-      this(contactSequence, omega, gravityZ, nominalCoMHeight, parentRegistry, null);
+      this(omega, gravityZ, nominalCoMHeight, parentRegistry, null);
    }
 
-   public CoMTrajectoryPlanner(List<? extends ContactStateProvider> contactSequence, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+   public CoMTrajectoryPlanner(DoubleProvider omega, double gravityZ, double nominalCoMHeight,
                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.contactSequence = contactSequence;
       this.omega = omega;
       this.nominalCoMHeight = nominalCoMHeight;
       this.gravityZ = Math.abs(gravityZ);
-
-      indexHandler = new ThirdOrderCoMTrajectoryPlannerIndexHandler(contactSequence);
 
       for (int i = 0; i < maxCapacity + 1; i++)
       {
@@ -177,35 +171,35 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
 
    /** {@inheritDoc} */
    @Override
-   public void solveForTrajectory()
+   public void solveForTrajectory(List<? extends ContactStateProvider> contactSequence)
    {
       if (!ContactStateProviderTools.checkContactSequenceIsValid(contactSequence))
          throw new IllegalArgumentException("The contact sequence is not valid.");
 
-      indexHandler.update();
+      indexHandler.update(contactSequence);
 
       resetMatrices();
 
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
-      computeVRPWaypointsFromContactSequence();
+      computeVRPWaypointsFromContactSequence(contactSequence);
 
       numberOfConstraints = 0;
 
       // set initial constraint
       setCoMPositionConstraint(currentCoMPosition);
-      setDynamicsInitialConstraint(0);
+      setDynamicsInitialConstraint(contactSequence, 0);
 
       // add transition continuity constraints
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int previousSequence = transition;
          int nextSequence = transition + 1;
-         setCoMPositionContinuity(previousSequence, nextSequence);
-         setCoMVelocityContinuity(previousSequence, nextSequence);
-         setDynamicsFinalConstraint(previousSequence);
-         setDynamicsInitialConstraint(nextSequence);
+         setCoMPositionContinuity(contactSequence, previousSequence, nextSequence);
+         setCoMVelocityContinuity(contactSequence, previousSequence, nextSequence);
+         setDynamicsFinalConstraint(contactSequence, previousSequence);
+         setDynamicsInitialConstraint(contactSequence, nextSequence);
       }
 
       // set terminal constraint
@@ -213,7 +207,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       finalDCMPosition.set(lastContactPhase.getCopEndPosition());
       finalDCMPosition.addZ(nominalCoMHeight);
       setDCMPositionConstraint(numberOfPhases - 1, lastContactPhase.getTimeInterval().getDuration(), finalDCMPosition);
-      setDynamicsFinalConstraint(numberOfPhases - 1);
+      setDynamicsFinalConstraint(contactSequence, numberOfPhases - 1);
 
       // map from VRP waypoints to the value
       xEquivalents.set(xConstants);
@@ -264,7 +258,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       updateCornerPoints(numberOfPhases);
    }
 
-   private void computeVRPWaypointsFromContactSequence()
+   private void computeVRPWaypointsFromContactSequence(List<? extends ContactStateProvider> contactSequence)
    {
       startVRPPositions.clear();
       endVRPPositions.clear();
@@ -604,10 +598,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
     * <p> x<sub>i-1</sub>(T<sub>i-1</sub>) = x<sub>i</sub>(0), </p>
     * <p> substituting in the trajectory coefficients. </p>
     *
+    * @param contactSequence current contact sequence.
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMPositionContinuity(int previousSequence, int nextSequence)
+   private void setCoMPositionContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
    {
       ContactStateProvider previousContact = contactSequence.get(previousSequence);
       double omega = this.omega.getValue();
@@ -646,10 +641,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
     * <p> d / dt x<sub>i-1</sub>(T<sub>i-1</sub>) = d / dt x<sub>i</sub>(0), </p>
     * <p> substituting in the trajectory coefficients. </p>
     *
+    * @param contactSequence current contact sequence.
     * @param previousSequence i-1 in the above equations.
     * @param nextSequence i in the above equations.
     */
-   private void setCoMVelocityContinuity(int previousSequence, int nextSequence)
+   private void setCoMVelocityContinuity(List<? extends ContactStateProvider> contactSequence, int previousSequence, int nextSequence)
    {
       ContactStateProvider previousContact = contactSequence.get(previousSequence);
       double omega = this.omega.getValue();
@@ -680,9 +676,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    /**
     * Used to enforce the dynamics at the beginning of the trajectory segment {@param sequenceId}.
     *
+    * @param contactSequence current contact sequence.
     * @param sequenceId desired trajectory segment.
     */
-   private void setDynamicsInitialConstraint(int sequenceId)
+   private void setDynamicsInitialConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       ContactState contactState = contactStateProvider.getContactState();
@@ -703,9 +700,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
    /**
     * Used to enforce the dynamics at the end of the trajectory segment {@param sequenceId}.
     *
+    * @param contactSequence current contact sequence.
     * @param sequenceId desired trajectory segment.
     */
-   private void setDynamicsFinalConstraint(int sequenceId)
+   private void setDynamicsFinalConstraint(List<? extends ContactStateProvider> contactSequence, int sequenceId)
    {
       ContactStateProvider contactStateProvider = contactSequence.get(sequenceId);
       ContactState contactState = contactStateProvider.getContactState();

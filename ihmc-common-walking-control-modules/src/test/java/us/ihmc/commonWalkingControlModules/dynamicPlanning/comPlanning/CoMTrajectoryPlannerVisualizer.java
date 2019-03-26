@@ -101,7 +101,7 @@ public class CoMTrajectoryPlannerVisualizer
       timeInPhase = new YoDouble("timeInPhase", registry);
 
       contactStates = createContacts();
-      planner = new CoMTrajectoryPlanner(contactStates, omega, gravity, nominalHeight, registry, graphicsListRegistry);
+      planner = new CoMTrajectoryPlanner(omega, gravity, nominalHeight, registry, graphicsListRegistry);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
@@ -230,7 +230,7 @@ public class CoMTrajectoryPlannerVisualizer
       desiredCoMPosition.setZ(nominalHeight);
       desiredCoMVelocity.setToZero();
       planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
-      planner.solveForTrajectory();
+      planner.solveForTrajectory(contactStates);
 
       while (simDuration > yoTime.getDoubleValue())
       {
@@ -279,7 +279,7 @@ public class CoMTrajectoryPlannerVisualizer
             contactState.getTimeInterval().shiftInterval(timeShift);
 
          planner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
-         planner.solveForTrajectory();
+         planner.solveForTrajectory(contactStates);
 
          timeInPhase.set(0.0);
       }
