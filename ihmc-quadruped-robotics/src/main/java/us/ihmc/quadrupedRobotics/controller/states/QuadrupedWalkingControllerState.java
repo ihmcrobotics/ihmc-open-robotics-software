@@ -241,7 +241,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(quadrant));
       groundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
 
-      step.getGoalPositionProvider(tempPoint);
+      tempPoint.setIncludingFrame(step.getReferenceFrame(), step.getGoalPosition());
       tempPoint.changeFrame(worldFrame);
       upcomingGroundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
 
@@ -259,7 +259,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getDesiredStepInterval().setEndTime(step.getTimeInterval().getEndTime());
       footstepStatusMessage.getActualStepInterval().setStartTime(currentTime);
       footstepStatusMessage.getActualStepInterval().setEndTime(Double.NaN);
-      step.getGoalPositionProvider(footstepStatusMessage.getDesiredTouchdownPositionInWorld());
+      footstepStatusMessage.getDesiredTouchdownPositionInWorld().set(step.getGoalPosition());
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
       controllerToolbox.getFallDetector().setNextFootstep(quadrant, step);

@@ -153,7 +153,7 @@ public class QuadrupedCoMTrajectoryPlannerTest
       }
 
       MovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("newSoleFrame", ReferenceFrame.getWorldFrame());
-      ((TranslationMovingReferenceFrame) newSoleFrame).updateTranslation(step.getGoalPositionProvider());
+      ((TranslationMovingReferenceFrame) newSoleFrame).updateTranslation(step.getGoalPosition());
       soleFrames.put(RobotQuadrant.FRONT_LEFT, newSoleFrame);
 
       feetInContact.add(RobotQuadrant.FRONT_LEFT);

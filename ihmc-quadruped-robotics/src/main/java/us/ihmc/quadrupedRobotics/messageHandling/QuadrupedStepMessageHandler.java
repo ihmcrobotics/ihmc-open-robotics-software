@@ -13,7 +13,6 @@ import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -173,7 +172,7 @@ public class QuadrupedStepMessageHandler
       for (int i = 0; i < numberOfStepsToAdjust; i++)
       {
          double multiplier = (numberOfStepsToRecover.getIntegerValue() - i) / (double) numberOfStepsToRecover.getIntegerValue();
-         receivedStepSequence.get(i).getGoalPositionProvider(tempStep);
+         tempStep.setIncludingFrame(receivedStepSequence.get(i).getReferenceFrame(), receivedStepSequence.get(i).getGoalPosition());
          tempStep.scaleAdd(multiplier, stepAdjustment, tempStep);
          receivedStepSequence.get(i).setGoalPosition(tempStep);
       }
