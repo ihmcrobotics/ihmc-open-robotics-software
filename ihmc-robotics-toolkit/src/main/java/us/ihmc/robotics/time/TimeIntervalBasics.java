@@ -1,5 +1,7 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.MathTools;
+
 public interface TimeIntervalBasics extends TimeIntervalReadOnly
 {
    /**
@@ -21,7 +23,26 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
 
    void setInterval(double startTime, double endTime);
 
-   TimeIntervalBasics shiftInterval(double shiftTime);
+   default void set(TimeIntervalReadOnly timeInterval)
+   {
+      setInterval(timeInterval.getStartTime(), timeInterval.getEndTime());
+      checkInterval();
+   }
 
-   void set(TimeIntervalReadOnly timeInterval);
+   default TimeIntervalBasics shiftInterval(double shiftTime)
+   {
+      setInterval(getStartTime() + shiftTime, getEndTime() + shiftTime);
+      return this;
+   }
+
+
+   default boolean epsilonEquals(TimeInterval other, double epsilon)
+   {
+      return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
+   }
+
+   default boolean intervalContains(double time)
+   {
+      return MathTools.intervalContains(time, getStartTime(), getEndTime());
+   }
 }

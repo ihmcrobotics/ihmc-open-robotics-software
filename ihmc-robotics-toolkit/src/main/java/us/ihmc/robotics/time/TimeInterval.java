@@ -1,6 +1,5 @@
 package us.ihmc.robotics.time;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
 public class TimeInterval implements TimeIntervalBasics
@@ -65,30 +64,6 @@ public class TimeInterval implements TimeIntervalBasics
       return getEndTime() - getStartTime();
    }
 
-   public TimeIntervalBasics shiftInterval(double shiftTime)
-   {
-      this.startTime = getStartTime() + shiftTime;
-      this.endTime = getEndTime() + shiftTime;
-      return this;
-   }
-
-   public void set(TimeIntervalReadOnly timeInterval)
-   {
-      this.startTime = timeInterval.getStartTime();
-      this.endTime = timeInterval.getEndTime();
-
-      checkInterval();
-   }
-
-   public boolean epsilonEquals(TimeInterval other, double epsilon)
-   {
-      return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
-   }
-
-   public boolean intervalContains(double time)
-   {
-      return MathTools.intervalContains(time, getStartTime(), getEndTime());
-   }
 
    @Override
    public String toString()
