@@ -103,8 +103,6 @@ public class SimpleBipedContactPhase implements ContactStateProvider
       isUpToDate = false;
    }
 
-
-
    public void set(SimpleBipedContactPhase other)
    {
       reset();

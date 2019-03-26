@@ -23,11 +23,10 @@ public class BipedCoMTrajectoryPlanner
 
    private final YoDouble timeInContactPhase = new YoDouble("timeInContactPhase", registry);
 
-
    private final List<BipedTimedStep> stepSequence = new ArrayList<>();
 
-   public BipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   public BipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleFrames, DoubleProvider omega, double gravityZ, double nominalCoMHeight,
+                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       sequenceUpdater = new BipedContactSequenceUpdater(soleFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new CoMTrajectoryPlanner(omega, gravityZ, nominalCoMHeight, registry, yoGraphicsListRegistry);
@@ -54,7 +53,6 @@ public class BipedCoMTrajectoryPlanner
    {
       sequenceUpdater.initialize();
    }
-
 
    void computeSetpoints(double currentTime, List<RobotSide> currentFeetInContact)
    {

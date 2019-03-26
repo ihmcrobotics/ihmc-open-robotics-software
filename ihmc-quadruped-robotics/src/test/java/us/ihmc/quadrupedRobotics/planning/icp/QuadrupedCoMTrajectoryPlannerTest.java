@@ -69,8 +69,10 @@ public class QuadrupedCoMTrajectoryPlannerTest
       {
          planner.computeSetpoints(timeInState, feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools
+               .assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools
+               .assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
    }
 
@@ -121,8 +123,10 @@ public class QuadrupedCoMTrajectoryPlannerTest
       {
          planner.computeSetpoints(timeInState, feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools
+               .assertFramePoint3DGeometricallyEquals("Position failed at t = " + timeInState, expectedDesiredDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools
+               .assertFrameVector3DGeometricallyEquals("Velocity failed at t = " + timeInState, new FrameVector3D(), planner.getDesiredDCMVelocity(), epsilon);
       }
 
       time.set(0.3);
@@ -175,8 +179,6 @@ public class QuadrupedCoMTrajectoryPlannerTest
       solePosition = new FramePoint3D(soleFrames.get(RobotQuadrant.HIND_RIGHT));
       solePosition.changeFrame(ReferenceFrame.getWorldFrame());
       finalDCM.add(solePosition);
-
-
 
       finalDCM.add(step.getGoalPosition());
       finalDCM.scale(0.25);

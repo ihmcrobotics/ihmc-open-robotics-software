@@ -31,7 +31,7 @@ public interface TimeIntervalReadOnly
    static void checkInterval(TimeIntervalReadOnly timeInterval)
    {
       if (timeInterval.getEndTime() < timeInterval.getStartTime())
-         throw new IllegalArgumentException("The end time is not valid! End time " + timeInterval.getEndTime() + " must be greater than start time " +
-                                                  timeInterval.getStartTime());
+         throw new IllegalArgumentException(
+               "The end time is not valid! End time " + timeInterval.getEndTime() + " must be greater than start time " + timeInterval.getStartTime());
    }
 }

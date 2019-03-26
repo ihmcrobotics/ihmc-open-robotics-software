@@ -34,7 +34,8 @@ public class BipedContactSequenceUpdater
    private final SideDependentList<FramePose3D> solePoses = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
-   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public BipedContactSequenceUpdater(SideDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry registry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrames = soleFrames;
       contactSequenceInAbsoluteTime.clear();
@@ -51,8 +52,10 @@ public class BipedContactSequenceUpdater
          startCoPs.add(new YoFramePoint2D("startCoP" + i, ReferenceFrame.getWorldFrame(), registry));
          endCoPs.add(new YoFramePoint2D("endCoP" + i, ReferenceFrame.getWorldFrame(), registry));
 
-         YoGraphicPosition startCoP = new YoGraphicPosition("start cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
-         YoGraphicPosition endCoP = new YoGraphicPosition("end cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
+         YoGraphicPosition startCoP = new YoGraphicPosition("start cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(),
+                                                            YoGraphicPosition.GraphicType.SOLID_BALL);
+         YoGraphicPosition endCoP = new YoGraphicPosition("end cop " + i, startCoPs.get(i), 0.01, YoAppearance.Green(),
+                                                          YoGraphicPosition.GraphicType.SOLID_BALL);
 
          if (graphicsListRegistry != null)
          {
@@ -121,7 +124,6 @@ public class BipedContactSequenceUpdater
          endCoPs.get(i).setToNaN();
       }
    }
-
 
    private void computeContactPhasesFromStepTransitions()
    {
@@ -197,10 +199,11 @@ public class BipedContactSequenceUpdater
          contactPhase.setFeetInContact(feetInContact);
 
          contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
-//         contactPhase.update();
+         //         contactPhase.update();
 
          previousContactPhase = contactPhase;
-         boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() >= maxCapacity && feetInContact.size() > 0);
+         boolean isLastContact =
+               (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() >= maxCapacity && feetInContact.size() > 0);
          if (isLastContact)
             break;
       }
@@ -210,8 +213,6 @@ public class BipedContactSequenceUpdater
          previousContactPhase.addEndFoot(feetInContact.get(i), solePoses.get(feetInContact.get(i)));
       previousContactPhase.update();
    }
-
-
 
    private void computeContactPhasesFromStepTransitionsOther()
    {

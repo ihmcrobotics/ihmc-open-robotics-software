@@ -41,7 +41,7 @@ public class BipedContactSequenceTools
     * </p>
     */
    public static void computeStepTransitionsFromStepSequence(RecyclingArrayList<BipedStepTransition> stepTransitionsToPack, double currentTime,
-                                                      List<? extends BipedTimedStep> stepSequence)
+                                                             List<? extends BipedTimedStep> stepSequence)
    {
       stepTransitionsToPack.clear();
       for (int i = 0; i < stepSequence.size(); i++)
@@ -79,8 +79,7 @@ public class BipedContactSequenceTools
    }
 
    public static void trimPastContactSequences(RecyclingArrayList<SimpleBipedContactPhase> contactSequenceToPack, double currentTime,
-                                               List<RobotSide> currentFeetInContact,
-                                               SideDependentList<? extends FramePose3DReadOnly> currentSolePoses)
+                                               List<RobotSide> currentFeetInContact, SideDependentList<? extends FramePose3DReadOnly> currentSolePoses)
    {
       // remove all future steps, as they don't affect the past sequence and could have been changed.
       TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, contactSequenceToPack);

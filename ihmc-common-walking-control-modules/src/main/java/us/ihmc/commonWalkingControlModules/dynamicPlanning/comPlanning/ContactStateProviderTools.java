@@ -20,8 +20,8 @@ public class ContactStateProviderTools
    {
       for (int index = 0; index < contactStateSequence.size() - 1; index++)
       {
-         if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(), contactStateSequence.get(index + 1).getTimeInterval().getStartTime(),
-                                      epsilonForContinuity))
+         if (!MathTools.epsilonEquals(contactStateSequence.get(index).getTimeInterval().getEndTime(),
+                                      contactStateSequence.get(index + 1).getTimeInterval().getStartTime(), epsilonForContinuity))
             return false;
       }
 

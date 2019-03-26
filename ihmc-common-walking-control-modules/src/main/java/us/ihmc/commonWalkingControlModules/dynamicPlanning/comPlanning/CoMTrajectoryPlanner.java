@@ -118,8 +118,8 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       this(omega, gravityZ, nominalCoMHeight, parentRegistry, null);
    }
 
-   public CoMTrajectoryPlanner(DoubleProvider omega, double gravityZ, double nominalCoMHeight,
-                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CoMTrajectoryPlanner(DoubleProvider omega, double gravityZ, double nominalCoMHeight, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.omega = omega;
       this.nominalCoMHeight = nominalCoMHeight;
@@ -132,7 +132,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       }
 
       String packageName = "dcmPlanner";
-//      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
+      //      YoGraphicsList graphicsList = new YoGraphicsList(packageName);
       ArtifactList artifactList = new ArtifactList(packageName);
 
       for (int i = 0; i < dcmCornerPoints.size(); i++)
@@ -143,19 +143,19 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
                                                                      YoGraphicPosition.GraphicType.BALL);
          YoGraphicPosition comCornerPointViz = new YoGraphicPosition("CoMCornerPoint" + i, comCornerPoint, POINT_SIZE, YoAppearance.Black(),
                                                                      YoGraphicPosition.GraphicType.BALL);
-//         graphicsList.add(dcmCornerPointViz);
-//         graphicsList.add(comCornerPointViz);
+         //         graphicsList.add(dcmCornerPointViz);
+         //         graphicsList.add(comCornerPointViz);
 
          artifactList.add(dcmCornerPointViz.createArtifact());
          artifactList.add(comCornerPointViz.createArtifact());
       }
 
       artifactList.setVisible(VISUALIZE);
-//      graphicsList.setVisible(VISUALIZE);
+      //      graphicsList.setVisible(VISUALIZE);
 
       if (yoGraphicsListRegistry != null)
       {
-//         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+         //         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
@@ -274,7 +274,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          if (!finalContact)
             nextContactStateProvider = contactSequence.get(i + 1);
 
-
          double duration = contactStateProvider.getTimeInterval().getDuration();
          if (!contactStateProvider.getContactState().isLoadBearing())
          {
@@ -312,14 +311,12 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
          // offset the height VRP waypoint based on the desired velocity change
          double heightVelocityChange = finalHeightVelocity - initialHeightVelocity;
          double offset = heightVelocityChange / (MathTools.square(omega.getValue()) * duration);
-         start.subZ(offset);end.subZ(offset);
+         start.subZ(offset);
+         end.subZ(offset);
 
          initialHeightVelocity = finalHeightVelocity;
       }
    }
-
-
-
 
    private final FramePoint3D firstCoefficient = new FramePoint3D();
    private final FramePoint3D secondCoefficient = new FramePoint3D();
@@ -393,7 +390,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       sixthCoefficient.setY(yCoefficientVector.get(sixthCoefficientIndex));
       sixthCoefficient.setZ(zCoefficientVector.get(sixthCoefficientIndex));
 
-
       double omega = this.omega.getValue();
 
       constructDesiredCoMPosition(comPositionToPack, firstCoefficient, secondCoefficient, thirdCoefficient, fourthCoefficient, fifthCoefficient,
@@ -406,7 +402,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       computeDesiredCapturePointPosition(comPositionToPack, comVelocityToPack, omega, dcmPositionToPack);
       computeDesiredCapturePointVelocity(comVelocityToPack, comAccelerationToPack, omega, dcmVelocityToPack);
       computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, vrpPositionToPack);
-//      computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, desiredVRPVelocity);
+      //      computeDesiredCentroidalMomentumPivot(dcmPositionToPack, desiredDCMVelocity, omega, desiredVRPVelocity);
    }
 
    /** {@inheritDoc} */
@@ -611,7 +607,6 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryPlannerInterface
       // move next sequence coefficients to the left hand side, and previous sequence constants to the right
       int previousStartIndex = indexHandler.getContactSequenceStartIndex(previousSequence);
       int nextStartIndex = indexHandler.getContactSequenceStartIndex(nextSequence);
-
 
       coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 0, getCoMPositionFirstCoefficient(omega, previousDuration));
       coefficientMultipliers.set(numberOfConstraints, previousStartIndex + 1, getCoMPositionSecondCoefficient(omega, previousDuration));

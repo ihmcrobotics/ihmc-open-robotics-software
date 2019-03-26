@@ -20,7 +20,7 @@ public interface DCMPlannerInterface
                               FrameVector3DReadOnly currentDCMVelocity);
 
    void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
-                                   FixedFrameVector3DBasics desiredDCMVelocityToPack);
+                            FixedFrameVector3DBasics desiredDCMVelocityToPack);
 
    void getDesiredECMPPosition(FramePoint3DBasics eCMPPositionToPack);
 

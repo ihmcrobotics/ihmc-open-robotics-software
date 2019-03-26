@@ -63,7 +63,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
          this.solePositions.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
    }
 
-
    public void set(QuadrupedContactPhase other)
    {
       setTimeInterval(other.getTimeInterval());
@@ -107,7 +106,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
    {
       return contactState;
    }
-
 
    public List<RobotQuadrant> getFeetInContact()
    {

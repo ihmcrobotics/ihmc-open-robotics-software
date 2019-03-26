@@ -75,8 +75,7 @@ public class QuadrupedContactSequenceUpdater
          YoFramePoint3D copKnot = new YoFramePoint3D("copKnot" + i, worldFrame, registry);
          copKnots.add(copKnot);
 
-         YoGraphicPosition copKnotViz = new YoGraphicPosition("CoPKnot" + i, copKnot, POINT_SIZE, YoAppearance.Green(),
-                                                              YoGraphicPosition.GraphicType.BALL);
+         YoGraphicPosition copKnotViz = new YoGraphicPosition("CoPKnot" + i, copKnot, POINT_SIZE, YoAppearance.Green(), YoGraphicPosition.GraphicType.BALL);
          graphicsList.add(copKnotViz);
          artifactList.add(copKnotViz.createArtifact());
       }
@@ -127,7 +126,7 @@ public class QuadrupedContactSequenceUpdater
       }
 
       // FIXME this isn't working correctly.
-//      QuadrupedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
+      //      QuadrupedContactSequenceTools.shiftContactSequencesToRelativeTime(contactSequenceInRelativeTime, currentTime);
 
       int currentSize = contactSequenceInRelativeTime.size();
       TimeIntervalTools.removeEndTimesLessThan(0.0, contactSequenceInRelativeTime);
@@ -141,7 +140,6 @@ public class QuadrupedContactSequenceUpdater
       for (; copKnotIndex < copKnots.size(); copKnotIndex++)
          copKnots.get(copKnotIndex).setToNaN();
    }
-
 
    private void computeContactPhasesFromStepTransitions()
    {
@@ -177,7 +175,6 @@ public class QuadrupedContactSequenceUpdater
          contactPhase.setSolePositions(solePositions);
          contactPhase.getTimeInterval().setStartTime(stepTransition.getTransitionTime());
          contactPhase.update();
-
 
          boolean isLastContact = (transitionNumber == numberOfTransitions - 1) || (contactSequenceInAbsoluteTime.size() == maxCapacity);
          if (isLastContact)
