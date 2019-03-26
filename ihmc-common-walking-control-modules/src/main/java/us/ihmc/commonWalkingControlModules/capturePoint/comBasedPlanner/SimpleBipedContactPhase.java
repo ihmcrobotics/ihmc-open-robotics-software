@@ -15,6 +15,9 @@ import us.ihmc.robotics.time.TimeIntervalBasics;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is the an implementation fo {@link ContactStateProvider} for bipeds. It could be used to compute fancy CoP locations, if desired.
+ */
 public class SimpleBipedContactPhase implements ContactStateProvider
 {
    private final TimeInterval timeInterval = new TimeInterval();

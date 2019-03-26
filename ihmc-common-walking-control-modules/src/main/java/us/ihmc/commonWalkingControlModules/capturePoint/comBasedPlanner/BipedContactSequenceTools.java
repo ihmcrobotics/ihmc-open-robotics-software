@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,9 +11,12 @@ import us.ihmc.robotics.time.TimeIntervalTools;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * This is a tools class for computing a list of {@link ContactStateProvider} from a list of {@link BipedTimedStep}. It is used by
+ * the {@link BipedContactSequenceUpdater} class.
+ */
 public class BipedContactSequenceTools
 {
-
    public static void collapseTransitionEvents(List<BipedStepTransition> stepTransitionsToPack)
    {
       // collapse the transitions that occur at the same time

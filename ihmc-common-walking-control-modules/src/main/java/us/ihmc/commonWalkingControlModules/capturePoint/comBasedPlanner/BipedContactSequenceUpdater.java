@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,6 +17,10 @@ import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class computes a list of {@link ContactStateProvider} from a list of {@link BipedTimedStep}. This uses transition trajectories from the
+ * start CoP to the end CoP. This class should be made smarter for computing better VRP waypoints for things like heel-toe walking.
+ */
 public class BipedContactSequenceUpdater
 {
    private static final boolean debug = true;
