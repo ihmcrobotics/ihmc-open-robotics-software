@@ -49,21 +49,6 @@ public class YoTimeInterval implements TimeIntervalBasics
    }
 
    @Override
-   public TimeIntervalBasics shiftInterval(double shiftTime)
-   {
-      this.startTime.add(shiftTime);
-      this.endTime.add(shiftTime);
-      return this;
-   }
-
-   @Override
-   public void set(TimeIntervalReadOnly timeInterval)
-   {
-      this.startTime.set(timeInterval.getStartTime());
-      this.endTime.set(timeInterval.getEndTime());
-   }
-
-   @Override
    public String toString()
    {
       return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());

@@ -13,12 +13,6 @@ public interface TimeIntervalReadOnly
       return getEndTime() - getStartTime();
    }
 
-   default void get(TimeIntervalBasics timeIntervalToPack)
-   {
-      timeIntervalToPack.set(this);
-   }
-
-
    default boolean epsilonEquals(TimeIntervalReadOnly other, double epsilon)
    {
       return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
@@ -29,11 +23,15 @@ public interface TimeIntervalReadOnly
       return MathTools.intervalContains(time, getStartTime(), getEndTime());
    }
 
-
-
    default void checkInterval()
    {
-      if (getEndTime() < getStartTime())
-         throw new IllegalArgumentException("The end time is not valid! End time " + getEndTime() + " must be greater than start time " + getStartTime());
+      checkInterval(this);
+   }
+
+   static void checkInterval(TimeIntervalReadOnly timeInterval)
+   {
+      if (timeInterval.getEndTime() < timeInterval.getStartTime())
+         throw new IllegalArgumentException("The end time is not valid! End time " + timeInterval.getEndTime() + " must be greater than start time " +
+                                                  timeInterval.getStartTime());
    }
 }
