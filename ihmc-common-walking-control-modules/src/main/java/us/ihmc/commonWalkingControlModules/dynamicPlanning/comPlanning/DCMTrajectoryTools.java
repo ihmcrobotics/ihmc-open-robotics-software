@@ -4,6 +4,10 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
+/**
+ * This is a tools class used to help compute a desired DCM position using either a constant or linearly moving VRP waypoint. This is useful
+ * for validating the outputs from {@link CoMTrajectoryPlanner}.
+ */
 public class DCMTrajectoryTools
 {
    private static final double EPSILON = 1.0e-15;

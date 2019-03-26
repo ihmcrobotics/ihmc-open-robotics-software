@@ -4,6 +4,9 @@ import us.ihmc.commons.MathTools;
 
 import java.util.List;
 
+/**
+ * This is a tools class to validate contact sequences for the {@link CoMTrajectoryPlanner}.
+ */
 public class ContactStateProviderTools
 {
    static double epsilonForContinuity = 1e-4;

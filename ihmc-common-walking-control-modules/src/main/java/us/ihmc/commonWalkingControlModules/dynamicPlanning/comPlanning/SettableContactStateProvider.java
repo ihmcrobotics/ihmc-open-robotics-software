@@ -3,8 +3,13 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
+/**
+ * This is the most basic implementation fo a contact state provider for the {@link CoMTrajectoryPlanner}. This is really useful for visualizing
+ * what will happen for certain sequenes, as it allows the user to directly specify where the start and end CoP positions are and the contact time intervals.
+ */
 public class SettableContactStateProvider implements ContactStateProvider
 {
    private ContactState contactState = ContactState.IN_CONTACT;
@@ -53,7 +58,7 @@ public class SettableContactStateProvider implements ContactStateProvider
       return contactState;
    }
 
-   public TimeInterval getTimeInterval()
+   public TimeIntervalBasics getTimeInterval()
    {
       return timeInterval;
    }

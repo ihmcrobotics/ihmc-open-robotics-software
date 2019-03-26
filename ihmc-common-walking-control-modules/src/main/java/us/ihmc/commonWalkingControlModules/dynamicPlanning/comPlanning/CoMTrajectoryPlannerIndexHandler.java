@@ -5,7 +5,10 @@ import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.util.List;
 
-public class ThirdOrderCoMTrajectoryPlannerIndexHandler
+/**
+ * Provides the internal indices for the constraint matrices for the {@link CoMTrajectoryPlanner}.
+ */
+public class CoMTrajectoryPlannerIndexHandler
 {
    private static final int sequenceSize = 6;
    private static final int vrpWaypointSize = 4;
