@@ -192,17 +192,23 @@ public class PatrolBehavior
       stopNotification.poll();         // poll both at the same time to handle race condition
       overrideGoToWaypointNotification.poll();
 
+      boolean interrupted = stopNotification.read() || overrideGoToWaypointNotification.read();
+
+      if (interrupted)
+      {
+         sendPauseWalking();
+         remoteFootstepPlannerInterface.abortPlanning();
+      }
+
       if (stopNotification.read())  // favor stop if race condition
       {
          LogTools.info("Interrupted with STOP");
-         sendPauseWalking();
          transitionTo(STOP);
       }
 
       if (overrideGoToWaypointNotification.read())
       {
          LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
-         sendPauseWalking();
 
          ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
          int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
@@ -217,7 +223,7 @@ public class PatrolBehavior
          }
       }
 
-      return stopNotification.read() || overrideGoToWaypointNotification.read();
+      return interrupted;
    }
 
    private void sendPauseWalking()
