@@ -54,7 +54,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -676,13 +675,16 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                 controlHeightWithMomentum);
    }
 
-   private <M extends Settable<M>> void reportStatusMessages()
+   private void reportStatusMessages()
    {
-      M statusMessage;
+      Object statusMessage;
 
-      statusMessage = feetManager.pollStatusToReport();
-      if (statusMessage != null)
-         statusOutputManager.reportStatusMessage(statusMessage);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         statusMessage = feetManager.pollStatusToReport(robotSide);
+         if (statusMessage != null)
+            statusOutputManager.reportStatusMessage(statusMessage);
+      }
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
@@ -709,7 +711,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       statusMessage = balanceManager.pollStatusToReport();
       if (statusMessage != null)
          statusOutputManager.reportStatusMessage(statusMessage);
-
    }
 
    private void submitControllerCoreCommands()
