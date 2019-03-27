@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.QuadrupedFootstepPlanningToolboxOutputStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
@@ -62,10 +63,33 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
    @Test
    public void testWalkingOverEnvironment0() throws IOException
    {
+      testEnvironment(DataSetName._20190313_114517_QuadrupedEnvironment0);
+   }
+
+   @Test
+   public void testWalkingOverEnvironment1() throws IOException
+   {
+      testEnvironment(DataSetName._20190313_115758_QuadrupedEnvironment1);
+   }
+
+   @Test
+   public void testWalkingOverEnvironment2() throws IOException
+   {
+      testEnvironment(DataSetName._20190313_115812_QuadrupedEnvironment2);
+   }
+
+   @Test
+   public void testWalkingOverEnvironment3() throws IOException
+   {
+      testEnvironment(DataSetName._20190313_115820_QuadrupedEnvironment3);
+   }
+
+   public void testEnvironment(DataSetName dataSetName) throws IOException
+   {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
 
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_114517_QuadrupedEnvironment0);
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
       PlannerInput plannerInput = dataSet.getPlannerInput();
 
@@ -81,6 +105,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
+      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 
       conductor.getScs().setCameraTracking(true, true, true, false);
 
@@ -111,7 +136,6 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       planningRequestPacket.planar_regions_list_message_.set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
-      stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), plannerInput.getQuadrupedStartPosition().getX(), 0.05));
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), plannerInput.getQuadrupedStartPosition().getY(), 0.05));
