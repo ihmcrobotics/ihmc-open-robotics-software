@@ -183,7 +183,7 @@ public class LinearMomentumRateControlModuleInput
       this.desiredCapturePoint.setIncludingFrame(desiredCapturePoint);
    }
 
-   public FramePoint2DReadOnly getDesiredCapturePoint()
+   public FramePoint2D getDesiredCapturePoint()
    {
       return desiredCapturePoint;
    }
@@ -193,7 +193,7 @@ public class LinearMomentumRateControlModuleInput
       this.desiredCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocity);
    }
 
-   public FrameVector2DReadOnly getDesiredCapturePointVelocity()
+   public FrameVector2D getDesiredCapturePointVelocity()
    {
       return desiredCapturePointVelocity;
    }
@@ -224,7 +224,7 @@ public class LinearMomentumRateControlModuleInput
       this.perfectCMP.setIncludingFrame(perfectCMP);
    }
 
-   public FramePoint2DReadOnly getPerfectCMP()
+   public FramePoint2D getPerfectCMP()
    {
       return perfectCMP;
    }
@@ -234,7 +234,7 @@ public class LinearMomentumRateControlModuleInput
       this.perfectCoP.setIncludingFrame(perfectCoP);
    }
 
-   public FramePoint2DReadOnly getPerfectCoP()
+   public FramePoint2D getPerfectCoP()
    {
       return perfectCoP;
    }
@@ -287,7 +287,7 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public List<SimpleAdjustableFootstep> getFootsteps()
+   public RecyclingArrayList<SimpleAdjustableFootstep> getFootsteps()
    {
       return footsteps;
    }
@@ -396,5 +396,95 @@ public class LinearMomentumRateControlModuleInput
    public SideDependentList<PlaneContactStateCommand> getContactStateCommands()
    {
       return contactStateCommands;
+   }
+
+   public void set(LinearMomentumRateControlModuleInput other)
+   {
+      omega0 = other.omega0;
+      desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
+      desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      perfectCMP.setIncludingFrame(other.perfectCMP);
+      perfectCoP.setIncludingFrame(other.perfectCoP);
+      controlHeightWithMomentum = other.controlHeightWithMomentum;
+      desiredCoMHeightAcceleration = other.desiredCoMHeightAcceleration;
+      supportSide = other.supportSide;
+      transferToSide = other.transferToSide;
+      initializeForStanding = other.initializeForStanding;
+      initializeForSingleSupport = other.initializeForSingleSupport;
+      initializeForTransfer = other.initializeForTransfer;
+      keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
+      minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
+      footsteps.clear();
+      for (int i = 0; i < other.footsteps.size(); i++)
+         footsteps.add().set(other.footsteps.get(i));
+      swingDurations.reset();
+      swingDurations.addAll(other.swingDurations);
+      transferDurations.reset();
+      transferDurations.addAll(other.transferDurations);
+      finalTransferDuration = other.finalTransferDuration;
+      remainingTimeInSwingUnderDisturbance = other.remainingTimeInSwingUnderDisturbance;
+      for (RobotSide robotSide : RobotSide.values)
+         contactStateCommands.get(robotSide).set(other.contactStateCommands.get(robotSide));
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof LinearMomentumRateControlModuleInput)
+      {
+         LinearMomentumRateControlModuleInput other = (LinearMomentumRateControlModuleInput) obj;
+         if (Double.compare(omega0, other.omega0) != 0)
+            return false;
+         if (!desiredCapturePoint.equals(other.desiredCapturePoint))
+            return false;
+         if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
+            return false;
+         if (!perfectCMP.equals(other.perfectCMP))
+            return false;
+         if (!perfectCoP.equals(other.perfectCoP))
+            return false;
+         if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
+            return false;
+         if (Double.compare(desiredCoMHeightAcceleration, other.desiredCoMHeightAcceleration) != 0)
+            return false;
+         if (supportSide != other.supportSide)
+            return false;
+         if (transferToSide != other.transferToSide)
+            return false;
+         if (initializeForStanding ^ other.initializeForStanding)
+            return false;
+         if (initializeForSingleSupport ^ other.initializeForSingleSupport)
+            return false;
+         if (initializeForTransfer ^ other.initializeForTransfer)
+            return false;
+         if (keepCoPInsideSupportPolygon ^ other.keepCoPInsideSupportPolygon)
+            return false;
+         if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
+            return false;
+         if (!footsteps.equals(other.footsteps))
+            return false;
+         if (!swingDurations.equals(other.swingDurations))
+            return false;
+         if (!transferDurations.equals(other.transferDurations))
+            return false;
+         if (Double.compare(finalTransferDuration, other.finalTransferDuration) != 0)
+            return false;
+         if (Double.compare(remainingTimeInSwingUnderDisturbance, other.remainingTimeInSwingUnderDisturbance) != 0)
+            return false;
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (!contactStateCommands.get(robotSide).equals(other.contactStateCommands.get(robotSide)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }

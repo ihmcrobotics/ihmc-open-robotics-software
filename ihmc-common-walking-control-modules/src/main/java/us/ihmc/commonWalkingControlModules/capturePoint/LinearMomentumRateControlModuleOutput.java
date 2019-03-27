@@ -50,7 +50,7 @@ public class LinearMomentumRateControlModuleOutput
       this.footstepSolution.setIncludingFrame(footstepSolution);
    }
 
-   public FramePose3DReadOnly getFootstepSolution()
+   public FramePose3D getFootstepSolution()
    {
       return footstepSolution;
    }
@@ -80,7 +80,7 @@ public class LinearMomentumRateControlModuleOutput
       this.desiredCMP.setIncludingFrame(desiredCMP);
    }
 
-   public FramePoint2DReadOnly getDesiredCMP()
+   public FramePoint2D getDesiredCMP()
    {
       return desiredCMP;
    }
@@ -90,8 +90,45 @@ public class LinearMomentumRateControlModuleOutput
       this.effectiveICPAdjustment.setIncludingFrame(effectiveICPAdjustment);
    }
 
-   public FrameVector3DReadOnly getEffectiveICPAdjustment()
+   public FrameVector3D getEffectiveICPAdjustment()
    {
       return effectiveICPAdjustment;
+   }
+
+   public void set(LinearMomentumRateControlModuleOutput other)
+   {
+      desiredCMP.setIncludingFrame(other.desiredCMP);
+      effectiveICPAdjustment.setIncludingFrame(other.effectiveICPAdjustment);
+      usingStepAdjustment = other.usingStepAdjustment;
+      footstepWasAdjusted = other.footstepWasAdjusted;
+      footstepSolution.setIncludingFrame(other.footstepSolution);
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof LinearMomentumRateControlModuleOutput)
+      {
+         LinearMomentumRateControlModuleOutput other = (LinearMomentumRateControlModuleOutput) obj;
+         if (!desiredCMP.equals(other.desiredCMP))
+            return false;
+         if (!effectiveICPAdjustment.equals(other.effectiveICPAdjustment))
+            return false;
+         if (usingStepAdjustment ^ other.usingStepAdjustment)
+            return false;
+         if (footstepWasAdjusted ^ other.footstepWasAdjusted)
+            return false;
+         if (!footstepSolution.equals(other.footstepSolution))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }
