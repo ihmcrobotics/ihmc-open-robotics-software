@@ -186,4 +186,10 @@ public abstract class RigidBodyControlState implements State
    {
       return controlMode;
    }
+
+   public Object pollStatusToReport()
+   {
+      // TODO Implement me
+      return null;
+   }
 }
