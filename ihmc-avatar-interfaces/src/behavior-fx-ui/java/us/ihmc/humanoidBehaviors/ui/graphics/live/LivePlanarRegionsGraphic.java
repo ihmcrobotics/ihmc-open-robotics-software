@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.graphics.live;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Node;
@@ -11,9 +14,6 @@ import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.Ros2Node;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class LivePlanarRegionsGraphic extends AnimationTimer
 {
    private final PlanarRegionsGraphic planarRegionsGraphic = new PlanarRegionsGraphic();
@@ -22,7 +22,7 @@ public class LivePlanarRegionsGraphic extends AnimationTimer
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(),
+                                           ROS2Tools.getTopicNameGenerator(null,
                                                                            ROS2Tools.REA_MODULE,
                                                                            ROS2Tools.ROS2TopicQualifier.OUTPUT),
                                            this::rosCallback);
