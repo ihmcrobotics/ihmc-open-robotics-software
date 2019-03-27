@@ -22,7 +22,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
 
    public enum BasicStates
    {
-      ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM, BEHAVIOR_COMPLETE
+      ENABLE_LIDAR, CLEAR_LIDAR, WALK_TO_LOCATION_AND_HOME_ARM
    }
 
    public BasicStateMachineBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
@@ -55,6 +55,8 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
 
       return BasicStates.ENABLE_LIDAR;
    }
+   
+   //no need to override the isdone method, this behavior will return is done when a terminal state is reached and completed.
 
    @Override
    public void onBehaviorExited()

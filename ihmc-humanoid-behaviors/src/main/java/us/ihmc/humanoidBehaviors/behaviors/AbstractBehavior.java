@@ -63,8 +63,8 @@ public abstract class AbstractBehavior implements RobotController
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    protected final String robotName;
 
-   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
-   private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+   protected final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   protected final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
 
    protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
    protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
