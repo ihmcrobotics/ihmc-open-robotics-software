@@ -108,6 +108,40 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
       return jointTrajectoryInputs.get(jointIndex);
    }
 
+   public double getTrajectoryStartTime()
+   {
+      if (getNumberOfJoints() == 0)
+         return Double.NaN;
+
+      double startTime = Double.POSITIVE_INFINITY;
+
+      for (int i = 0; i < jointTrajectoryInputs.size(); i++)
+      {
+         OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.get(i);
+         if (oneDoFJointTrajectoryCommand.getNumberOfTrajectoryPoints() > 0)
+            startTime = Math.min(startTime, oneDoFJointTrajectoryCommand.getTrajectoryPoint(0).getTime());
+      }
+
+      return startTime;
+   }
+
+   public double getTrajectoryEndTime()
+   {
+      if (getNumberOfJoints() == 0)
+         return Double.NaN;
+
+      double endTime = 0.0;
+
+      for (int i = 0; i < jointTrajectoryInputs.size(); i++)
+      {
+         OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.get(i);
+         if (oneDoFJointTrajectoryCommand.getNumberOfTrajectoryPoints() > 0)
+            endTime = Math.max(endTime, oneDoFJointTrajectoryCommand.getLastTrajectoryPoint().getTime());
+      }
+
+      return endTime;
+   }
+
    /** {@inheritDoc}} */
    @Override
    public void addTimeOffset(double timeOffsetToAdd)
