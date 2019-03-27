@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -10,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -86,6 +90,40 @@ class CrossRobotCommandResolverTest
                                                                                                         testData.frameTreeB);
          ControllerCoreCommandBuffer actualOut = new ControllerCoreCommandBuffer();
          crossRobotCommandResolver.resolveControllerCoreCommand(in, actualOut);
+         assertEquals(expectedOut, actualOut, "Iteration: " + i);
+      }
+   }
+
+   @Test
+   void testResolveLinearMomentumRateControlModuleInput() throws Exception
+   {
+      testForResolver(LinearMomentumRateControlModuleInput.class);
+   }
+
+   @Test
+   void testResolveLinearMomentumRateControlModuleOutput() throws Exception
+   {
+      testForResolver(LinearMomentumRateControlModuleOutput.class);
+   }
+
+   private static void testForResolver(Class<?> clazz) throws Exception
+   {
+      Random random = new Random(657654);
+
+      TestData testData = new TestData(random, 20, 20);
+
+      CrossRobotCommandResolver crossRobotCommandResolver = new CrossRobotCommandResolver(testData.frameResolverForB, testData.bodyResolverForB,
+                                                                                          testData.jointResolverForB);
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         // By using the same seed on a fresh random, the two commands will be built the same way.
+         long seed = random.nextLong();
+         Object in = ControllerCoreCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyA, testData.frameTreeA);
+         Object expectedOut = ControllerCoreCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyB, testData.frameTreeB);
+         Object actualOut = clazz.newInstance();
+
+         Method resolveMethod = CrossRobotCommandResolver.class.getMethod("resolve" + clazz.getSimpleName(), clazz, clazz);
+         resolveMethod.invoke(crossRobotCommandResolver, in, actualOut);
          assertEquals(expectedOut, actualOut, "Iteration: " + i);
       }
    }
