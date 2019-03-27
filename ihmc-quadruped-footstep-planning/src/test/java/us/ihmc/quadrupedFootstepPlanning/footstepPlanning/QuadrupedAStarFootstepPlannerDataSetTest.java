@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -13,6 +14,8 @@ import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import static junit.framework.TestCase.assertTrue;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
@@ -77,9 +80,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
-      super.testDatasetsWithoutOcclusion();
+      super.testDataSets();
    }
 
    public static void main(String[] args)
@@ -87,9 +90,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171216_111326_CrossoverPlatforms");
-//      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_220523_SteppingStones");
+      String errorMessage = test.runAssertions(DataSetName._20171215_220523_SteppingStones);
+      assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
       ThreadTools.sleepForever();
