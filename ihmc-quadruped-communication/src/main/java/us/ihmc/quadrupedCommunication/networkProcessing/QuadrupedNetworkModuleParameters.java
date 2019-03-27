@@ -20,6 +20,7 @@ public class QuadrupedNetworkModuleParameters
    private boolean logBodyTeleopModule;
    private boolean useXBoxModule;
    private boolean useRemoteObjectDetectionFeedback;
+   private boolean visualizeXBoxModule;
 
    private URI rosUri;
 
@@ -131,6 +132,16 @@ public class QuadrupedNetworkModuleParameters
    public boolean visualizeBodyTeleopModuleEnabled()
    {
       return visualizeBodyTeleopModule;
+   }
+
+   public void setVisualizeXBoxModule(boolean visualize)
+   {
+      this.visualizeXBoxModule = visualize;
+   }
+
+   public boolean visualizeXBoxModule()
+   {
+      return visualizeXBoxModule;
    }
 
    public void setLogBodyTeleopModule(boolean log)

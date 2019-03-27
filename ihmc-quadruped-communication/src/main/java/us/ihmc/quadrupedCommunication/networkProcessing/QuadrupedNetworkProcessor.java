@@ -26,6 +26,11 @@ public class QuadrupedNetworkProcessor
    private final boolean DEBUG = false;
    private QuadrupedStepTeleopModule stepTeleopModule;
 
+   public static final int xBoxPort = 8005;
+   public static final int bodyHeightPort = 8006;
+   public static final int footstepPlanningPort = 8007;
+   public static final int bodyTeleopPort = 8009;
+
    private final List<QuadrupedToolboxModule> modules = new ArrayList<>();
 
    public QuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrupedNetworkModuleParameters params, double nominalHeight,
@@ -117,7 +122,7 @@ public class QuadrupedNetworkProcessor
    {
       if (!params.isXBoxModuleEnabled())
          return;
-      modules.add(new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, logModelProvider, pubSubImplementation));
+      modules.add(new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, logModelProvider, params.visualizeXBoxModule(), pubSubImplementation));
    }
 
    private void setupRobotEnvironmentAwarenessModule(QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
