@@ -370,10 +370,11 @@ public class PlannerTestEnvironments
       double minTilt = Math.toRadians(0.0);
       double maxTilt = Math.toRadians(5.0);
       double randomHeightVariation = 0.0;
+      boolean onlyGenerateTopOfBlock = true;
 
       PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
                                                          (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
-                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
       return generator.getPlanarRegionsList();
    }
 
@@ -393,10 +394,11 @@ public class PlannerTestEnvironments
       double minTilt = Math.toRadians(0.0);
       double maxTilt = Math.toRadians(5.0);
       double randomHeightVariation = 0.0;
+      boolean onlyGenerateTopOfBlock = true;
 
       PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
                                                          (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
-                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
 
       return generator.getPlanarRegionsList();
    }
@@ -417,10 +419,11 @@ public class PlannerTestEnvironments
       double minTilt = Math.toRadians(0.0);
       double maxTilt = Math.toRadians(0.0);
       double randomHeightVariation = 0.04;
+      boolean onlyGenerateTopOfBlock = true;
 
       PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
                                                          (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
-                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
       return generator.getPlanarRegionsList();
    }
 
@@ -440,10 +443,11 @@ public class PlannerTestEnvironments
       double minTilt = Math.toRadians(10.0);
       double maxTilt = Math.toRadians(45.0);
       double randomHeightVariation = 0.0;
+      boolean onlyGenerateTopOfBlock = true;
 
       PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
                                                          (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength, startingBlockLength,
-                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+                                                         percentageAbsent, minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
 
       return generator.getPlanarRegionsList();
    }
