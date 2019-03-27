@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.patrol;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import sun.rmi.runtime.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
@@ -18,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -28,7 +28,6 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -65,10 +64,8 @@ public class PatrolBehavior
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
    private final Notification readyToPlanNotification = new Notification();
-   private final Notification footstepPlanCompleted = new Notification();
+   private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private final Notification walkingCompleted = new Notification();
-
-   private FootstepPlanningToolboxOutputStatus footstepPlanningOutput;
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
 
@@ -131,27 +128,22 @@ public class PatrolBehavior
          messager.submitMessage(API.CurrentWaypointIndexStatus, index);
          FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(index));
 
-         new Thread(() -> {  // plan in a thread to catch interruptions during planning TODO this shouldn't spin a new thread
-            footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
-            FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
-            ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
-            for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
-            {
-               FramePose3D soleFramePoseToPack = new FramePose3D();
-               footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
-               footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
-            }
-            messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
-            footstepPlanCompleted.set();
-         }).start();
+         footstepPlanResultNotification = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
       }
-      else if (footstepPlanCompleted.poll())
+      else if (footstepPlanResultNotification.poll())
       {
-         boolean walkable =
-               footstepPlanningOutput.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION ||
-               footstepPlanningOutput.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
+         FootstepPlanningToolboxOutputStatus footstepPlanningOutput = footstepPlanResultNotification.read();
+         FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
+         ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+         {
+            FramePose3D soleFramePoseToPack = new FramePose3D();
+            footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+            footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
+         }
+         messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
 
-         if (walkable)
+         if (FootstepPlanningResult.fromByte(footstepPlanningOutput.getFootstepPlanningResult()).validForExecution())
          {
             walkingCompleted.poll(); // acting to clear the notification
             LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());

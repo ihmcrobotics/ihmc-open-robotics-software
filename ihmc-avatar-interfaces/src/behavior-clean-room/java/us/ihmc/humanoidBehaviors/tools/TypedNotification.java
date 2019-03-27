@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.references;
+package us.ihmc.humanoidBehaviors.tools;
 
 /**
  * This class appears to be thread safe.
