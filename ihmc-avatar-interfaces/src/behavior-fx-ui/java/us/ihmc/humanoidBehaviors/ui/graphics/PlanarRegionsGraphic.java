@@ -67,11 +67,9 @@ public class PlanarRegionsGraphic extends FXUIGraphic
 
    public void update()
    {
-      synchronized (this)
-      {
-         rootChildren.clear();
-         rootChildren.addAll(regionMeshViews.get());
-      }
+      List<MeshView> meshViews = regionMeshViews.get();
+      rootChildren.clear();
+      rootChildren.addAll(meshViews);
    }
 
    public static Color getRegionColor(int regionId)
