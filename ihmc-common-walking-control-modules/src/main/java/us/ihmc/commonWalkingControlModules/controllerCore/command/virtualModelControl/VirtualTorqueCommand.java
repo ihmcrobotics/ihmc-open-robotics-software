@@ -81,12 +81,14 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void set(VirtualTorqueCommand other)
    {
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+
+      desiredAngularTorque.set(other.desiredAngularTorque);
       selectionMatrix.set(other.selectionMatrix);
+
       base = other.getBase();
       endEffector = other.getEndEffector();
 
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularTorque.set(other.desiredAngularTorque);
    }
 
    /**
@@ -455,8 +457,6 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", angular = "
-            + desiredAngularTorque;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", angular = " + desiredAngularTorque;
    }
 }

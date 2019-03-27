@@ -76,7 +76,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
+      centerOfMassJacobian = new CenterOfMassJacobian(controllerToolbox.getFullRobotModel().getElevator(), worldFrame);
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       gravity = controllerToolbox.getGravityZ();
@@ -206,6 +206,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       solve(coMHeightPartialDerivatives, isInDoubleSupport);
 
       comPosition.setToZero(centerOfMassFrame);
+      centerOfMassJacobian.reset();
       comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);

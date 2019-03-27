@@ -452,23 +452,27 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
       else if (object instanceof InverseDynamicsOptimizationSettingsCommand)
       {
          InverseDynamicsOptimizationSettingsCommand other = (InverseDynamicsOptimizationSettingsCommand) object;
-         if (rhoMin != other.rhoMin)
+         if (Double.compare(rhoMin, other.rhoMin) != 0)
             return false;
-         if (jointAccelerationMax != other.jointAccelerationMax)
+         if (Double.compare(jointAccelerationMax, other.jointAccelerationMax) != 0)
             return false;
-         if (rhoWeight != other.rhoWeight)
+         if (Double.compare(rhoWeight, other.rhoWeight) != 0)
             return false;
-         if (rhoRateWeight != other.rhoRateWeight)
+         if (Double.compare(rhoRateWeight, other.rhoRateWeight) != 0)
             return false;
-         if (!centerOfPressureWeight.equals(other.centerOfPressureWeight))
+         if (centerOfPressureWeight.containsNaN() ^ other.centerOfPressureWeight.containsNaN())
             return false;
-         if (!centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+         if (!centerOfPressureWeight.containsNaN() && !centerOfPressureWeight.equals(other.centerOfPressureWeight))
             return false;
-         if (jointAccelerationWeight != other.jointAccelerationWeight)
+         if (centerOfPressureRateWeight.containsNaN() ^ other.centerOfPressureRateWeight.containsNaN())
             return false;
-         if (jointJerkWeight != other.jointJerkWeight)
+         if (!centerOfPressureRateWeight.containsNaN() && !centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
             return false;
-         if (jointTorqueWeight != other.jointTorqueWeight)
+         if (Double.compare(jointAccelerationWeight, other.jointAccelerationWeight) != 0)
+            return false;
+         if (Double.compare(jointJerkWeight, other.jointJerkWeight) != 0)
+            return false;
+         if (Double.compare(jointTorqueWeight, other.jointTorqueWeight) != 0)
             return false;
          return true;
       }

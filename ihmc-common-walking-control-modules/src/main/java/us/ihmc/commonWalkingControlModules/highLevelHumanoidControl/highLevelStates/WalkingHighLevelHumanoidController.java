@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -44,7 +46,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -55,7 +56,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -105,7 +105,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final StateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final PlanarRegionsListHandler planarRegionsListHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
    private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
@@ -215,7 +214,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      planarRegionsListHandler = walkingMessageHandler.getPlanarRegionsListHandler();
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
                                                    registry);
 
@@ -420,6 +418,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.controllerCoreOutput = controllerCoreOutput;
    }
 
+   public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
+   {
+      balanceManager.setLinearMomentumRateControlModuleOutput(output);
+   }
+
    public void initialize()
    {
       controllerCoreCommand.requestReinitialization();
@@ -531,13 +534,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    public void doAction()
    {
-      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
-      balanceManager.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
-
       WalkingState currentState = stateMachine.getCurrentState();
       commandConsumer.update();
       commandConsumer.consumeHeadCommands();
@@ -555,9 +554,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.consumePlanarRegionsListCommand();
 
       updateFailureDetection();
-
-      if (planarRegionsListHandler.hasNewPlanarRegions())
-         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
 
       // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();
@@ -715,14 +711,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
-      controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
-
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
+   }
+
+   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   {
+      return balanceManager.getLinearMomentumRateControlModuleInput();
    }
 
    public YoVariableRegistry getYoVariableRegistry()

@@ -20,9 +20,9 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
 {
+   private static final int initialSize = 8;
    private RigidBodyBasics rigidBody;
    private double coefficientOfFriction = Double.NaN;
-   private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
@@ -49,6 +49,30 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       clearContactPoints();
    }
 
+   @Override
+   public void set(PlaneContactStateCommand other)
+   {
+      rigidBody = other.rigidBody;
+      coefficientOfFriction = other.coefficientOfFriction;
+      contactPoints.copyFromListAndTrimSize(other.contactPoints);
+      contactNormal.setIncludingFrame(other.contactNormal);
+      useHighCoPDamping = other.useHighCoPDamping;
+      hasContactStateChanged = other.hasContactStateChanged;
+
+      hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
+
+      maxContactPointNormalForces.reset();
+      rhoWeights.reset();
+
+      for (int i = 0; i < other.contactPoints.size(); i++)
+      {
+         maxContactPointNormalForces.add(other.maxContactPointNormalForces.get(i));
+         rhoWeights.add(other.rhoWeights.get(i));
+      }
+
+      contactFramePoseInBodyFixedFrame.set(other.contactFramePoseInBodyFixedFrame);
+   }
+
    public void setHasContactStateChanged(boolean hasContactStateChanged)
    {
       this.hasContactStateChanged = hasContactStateChanged;
@@ -67,8 +91,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public void clearContactPoints()
    {
       contactPoints.clear();
-      maxContactPointNormalForces.clear();
-      rhoWeights.clear();
+      maxContactPointNormalForces.reset();
+      rhoWeights.reset();
       contactFramePoseInBodyFixedFrame.setToNaN();
    }
 
@@ -207,28 +231,6 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    }
 
    @Override
-   public void set(PlaneContactStateCommand other)
-   {
-      rigidBody = other.rigidBody;
-      coefficientOfFriction = other.coefficientOfFriction;
-      contactPoints.copyFromListAndTrimSize(other.contactPoints);
-      contactNormal.setIncludingFrame(other.contactNormal);
-      useHighCoPDamping = other.useHighCoPDamping;
-      hasContactStateChanged = other.hasContactStateChanged;
-
-      hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
-
-      maxContactPointNormalForces.clear();
-      rhoWeights.clear();
-
-      for (int i = 0; i < other.contactPoints.size(); i++)
-      {
-         maxContactPointNormalForces.add(other.maxContactPointNormalForces.get(i));
-         rhoWeights.add(other.rhoWeights.get(i));
-      }
-   }
-
-   @Override
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.PLANE_CONTACT_STATE;
@@ -247,7 +249,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
          if (rigidBody != other.rigidBody)
             return false;
-         if (coefficientOfFriction != other.coefficientOfFriction)
+         if (Double.compare(coefficientOfFriction, other.coefficientOfFriction) != 0)
             return false;
          if (getNumberOfContactPoints() != other.getNumberOfContactPoints())
             return false;

@@ -11,7 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointLimitReductionCommand implements InverseKinematicsCommand<JointLimitReductionCommand>, InverseDynamicsCommand<JointLimitReductionCommand>
 {
-   private final int initialCapacity = 40;
+   private static final int initialCapacity = 40;
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList jointReductionFactors = new TDoubleArrayList(initialCapacity);
 

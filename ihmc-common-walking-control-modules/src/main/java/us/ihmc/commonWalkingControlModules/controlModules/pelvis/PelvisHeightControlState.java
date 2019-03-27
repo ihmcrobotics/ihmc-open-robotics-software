@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPos
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -21,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeight
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandConversionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -250,7 +250,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       // This is to avoid a variable changed listener that would fire when using the SCS playback.
       if (offset.getValue() != previousOffset)
       {
-         double desiredZInworld = positionController.getFeedbackControlCommand().getDesiredPosition().getZ();
+         double desiredZInworld = positionController.getFeedbackControlCommand().getReferencePosition().getZ();
          double currentDesired = desiredZInworld + adjustmentAmount.getValue();
          goToHeight(currentDesired - previousOffset, offsetTrajectoryTime.getValue());
       }
@@ -283,7 +283,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       ReferenceFrame selectionFrame = euclideanCommand.getSelectionMatrix().getSelectionFrame();
       if (selectionFrame != null && !selectionFrame.isZupFrame())
       {
-         PrintTools.warn("Pelvis linear selection matrix must be z-up!");
+         LogTools.warn("Pelvis linear selection matrix must be z-up!");
          return false;
       }
       euclideanCommand.getSelectionMatrix().selectXAxis(false);
@@ -293,7 +293,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       ReferenceFrame weightFrame = euclideanCommand.getWeightMatrix().getWeightFrame();
       if (weightFrame != null && !weightFrame.isZupFrame())
       {
-         PrintTools.warn("Pelvis linear weight matrix must be z-up!");
+         LogTools.warn("Pelvis linear weight matrix must be z-up!");
          return false;
       }
       euclideanCommand.getWeightMatrix().setXAxisWeight(0.0);
@@ -349,10 +349,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       PointFeedbackControlCommand feedbackCommand = positionController.getFeedbackControlCommand();
 
       // TODO: for some reason this is needed to avoid robot-blow up. It should be selected out by the selection matrix!
-      feedbackCommand.getFeedForwardActionIncludingFrame(feedForwardLinearAcceleration);
+      feedForwardLinearAcceleration.setIncludingFrame(feedbackCommand.getReferenceLinearAcceleration());
       feedForwardLinearAcceleration.setX(0.0);
       feedForwardLinearAcceleration.setY(0.0);
-      feedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
+      feedbackCommand.getReferenceLinearAcceleration().set(feedForwardLinearAcceleration);
 
       temp3DSelection.clearSelection();
       temp3DSelection.setSelectionFrame(ReferenceFrame.getWorldFrame());
@@ -378,9 +378,9 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       currentPelvisHeightInWorld.set(controlPosition.getZ());
-      desiredPelvisHeightInWorld.set(feedbackCommand.getDesiredPosition().getZ());
+      desiredPelvisHeightInWorld.set(feedbackCommand.getReferencePosition().getZ());
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
-      desiredPelvisVelocityInWorld.set(feedbackCommand.getDesiredLinearVelocity().getZ());
+      desiredPelvisVelocityInWorld.set(feedbackCommand.getReferenceLinearVelocity().getZ());
 
       return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
                                                  currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());

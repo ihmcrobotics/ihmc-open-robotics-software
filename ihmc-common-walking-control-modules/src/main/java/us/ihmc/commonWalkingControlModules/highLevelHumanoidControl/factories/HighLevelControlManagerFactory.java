@@ -83,8 +83,6 @@ public class HighLevelControlManagerFactory
    private final Map<String, Vector3DReadOnly> taskspaceLinearWeightMap = new HashMap<>();
    private Vector3DReadOnly loadedFootAngularWeight;
    private Vector3DReadOnly loadedFootLinearWeight;
-   private Vector3DReadOnly linearMomentumWeight;
-   private Vector3DReadOnly angularMomentumWeight;
    private PIDSE3GainsReadOnly swingFootGains;
    private PIDSE3GainsReadOnly holdFootGains;
    private PIDSE3GainsReadOnly toeOffFootGains;
@@ -127,9 +125,6 @@ public class HighLevelControlManagerFactory
       loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
       loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
 
-      linearMomentumWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), momentumRegistry);
-      angularMomentumWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), momentumRegistry);
-
       swingFootGains = new ParameterizedPIDSE3Gains("SwingFoot", walkingControllerParameters.getSwingFootControlGains(), footGainRegistry);
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
       toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
@@ -159,7 +154,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
-                                angularMomentumWeight, linearMomentumWeight, registry);
+                                          registry);
       return balanceManager;
    }
 
