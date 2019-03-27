@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -23,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -229,7 +229,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       if (desiredICPVelocity.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
-            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
+            LogTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
          comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
          desiredCMPcontainedNaN = true;
       }
