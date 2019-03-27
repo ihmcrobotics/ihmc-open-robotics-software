@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.Ros2QueuedSubscription;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -16,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static us.ihmc.communication.ROS2Tools.*;
@@ -31,9 +34,10 @@ public class RemoteFootstepPlannerInterface
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private final ROS2Input<FootstepPlanningToolboxOutputStatus> footstepPlanningStatus;
 
    private final AtomicInteger requestCounter = new AtomicInteger(1739);
+
+   private final HashMap<Integer, TypedNotification<FootstepPlanningToolboxOutputStatus>> resultNotifications = new HashMap<>();
 
    public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -48,46 +52,30 @@ public class RemoteFootstepPlannerInterface
                                       FootstepPlanningRequestPacket.class,
                                       FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
-      footstepPlanningStatus = new ROS2Input<>(ros2Node,
-                                               FootstepPlanningToolboxOutputStatus.class,
-                                               robotModel.getSimpleRobotName(),
-                                               FOOTSTEP_PLANNER_TOOLBOX);
+      new ROS2Callback<>(ros2Node,
+                         FootstepPlanningToolboxOutputStatus.class,
+                         robotModel.getSimpleRobotName(),
+                         FOOTSTEP_PLANNER_TOOLBOX,
+                         this::acceptFootstepPlanningStatus);
    }
 
-   public FootstepPlanningToolboxOutputStatus requestPlanBlocking(FramePose3D start, FramePose3D goal, PlanarRegionsListMessage planarRegionsListMessage)
+   private void acceptFootstepPlanningStatus(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus)
    {
-      int sentPlannerId = requestPlan(start, goal, planarRegionsListMessage);
-
-      LogTools.debug("Waiting for footstep plan result id {}...", sentPlannerId);
-
-      FootstepPlanningToolboxOutputStatus footstepPlanningResult = null;
-      boolean resultIdMatchesLastSent = false;
-      while (!resultIdMatchesLastSent)           // wait for our result to arrive TODO use thread scheduler?
+      if (resultNotifications.containsKey(footstepPlanningToolboxOutputStatus.getPlanId()))
       {
-         footstepPlanningResult = footstepPlanningStatus.getLatest();
-         if (footstepPlanningResult.getPlanId() == sentPlannerId)
-         {
-            LogTools.debug("Received footstep plan result id {}", sentPlannerId);
-            resultIdMatchesLastSent = true;
-         }
-         else
-         {
-            Thread.yield();
-         }
+         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(footstepPlanningToolboxOutputStatus);
       }
-
-      return footstepPlanningResult;
    }
 
-   public int requestPlan(FramePose3D start, FramePose3D goal, PlanarRegionsListMessage planarRegionsListMessage)
+   public TypedNotification<FootstepPlanningToolboxOutputStatus> requestPlan(FramePose3D start,
+                                                                             FramePose3D goal,
+                                                                             PlanarRegionsListMessage planarRegionsListMessage)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
-      double idealFootstepWidth = footstepPlannerParameters.getIdealFootstepWidth() / 2;
-      LogTools.debug("Ideal footstep width / 2: {}", idealFootstepWidth / 2);
-
+      double midFeetToSoleOffset = footstepPlannerParameters.getIdealFootstepWidth() / 2;
       start.changeFrame(worldFrame);
-      start.appendTranslation(-idealFootstepWidth, 0.0, 0.0);
+      start.appendTranslation(-midFeetToSoleOffset, 0.0, 0.0);
 
       goal.changeFrame(worldFrame);
 
@@ -115,7 +103,9 @@ public class RemoteFootstepPlannerInterface
 
       footstepPlanningRequestPublisher.publish(packet);
 
-      return sentPlannerId;
+      TypedNotification<FootstepPlanningToolboxOutputStatus> resultNotification = new TypedNotification<>();
+      resultNotifications.put(sentPlannerId, resultNotification);
+      return resultNotification;
    }
 
    public void abortPlanning()
