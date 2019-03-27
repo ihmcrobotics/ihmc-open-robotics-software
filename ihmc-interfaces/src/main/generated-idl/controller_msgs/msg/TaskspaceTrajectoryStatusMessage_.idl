@@ -9,9 +9,15 @@ module controller_msgs
   {
     module dds
     {
+      /**
+       * The trajectory input was received and accepted, the execution just started.
+       */
       const octet TRAJECTORY_EXECUTION_STATUS_STARTED =
       0;
 
+      /**
+       * The trajectory input was received, accepted, and its execution just finished.
+       */
       const octet TRAJECTORY_EXECUTION_STATUS_COMPLETED =
       1;
 
@@ -28,30 +34,34 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * Refers to the name of the rigid-body that executed the trajectory.
+         * Refers to the name of the end-effector that executed the trajectory.
          */
-        string body_name;
+        string end_effector_name;
         /**
          * The current status for the trajectory execution.
          */
         @defaultValue(value=255)
-        octet trajectory_status;
+        octet trajectory_execution_status;
         /**
-         * The desired position (in world coordinates) of the rigid-body sent to the controller.
+         * Time in trajectory in seconds.
          */
-        geometry_msgs::msg::dds::Point desired_body_position;
+        double timestamp;
         /**
-         * The desired orientation (in world coordinates) of the rigid-body sent to the controller.
+         * The desired position (in world coordinates) of the end-effector sent to the controller.
          */
-        geometry_msgs::msg::dds::Quaternion desired_foot_orientation;
+        geometry_msgs::msg::dds::Point desired_end_effector_position;
         /**
-         * The position (in world coordinates) of where the rigid-body actually arrived when the trajectory finished.
+         * The desired orientation (in world coordinates) of the end-effector sent to the controller.
          */
-        geometry_msgs::msg::dds::Point actual_body_position;
+        geometry_msgs::msg::dds::Quaternion desired_end_effector_orientation;
         /**
-         * The orientation (in world coordinates) of where the rigid-body actually arrived when the trajectory finished.
+         * The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
          */
-        geometry_msgs::msg::dds::Quaternion actual_body_orientation;
+        geometry_msgs::msg::dds::Point actual_end_effector_position;
+        /**
+         * The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
+         */
+        geometry_msgs::msg::dds::Quaternion actual_end_effector_orientation;
       };
     };
   };

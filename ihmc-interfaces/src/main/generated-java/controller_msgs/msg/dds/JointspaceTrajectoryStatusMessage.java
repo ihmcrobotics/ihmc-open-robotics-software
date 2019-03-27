@@ -12,7 +12,13 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajectoryStatusMessage> implements Settable<JointspaceTrajectoryStatusMessage>, EpsilonComparable<JointspaceTrajectoryStatusMessage>
 {
+   /**
+          * The trajectory input was received and accepted, the execution just started.
+          */
    public static final byte TRAJECTORY_EXECUTION_STATUS_STARTED = (byte) 0;
+   /**
+          * The trajectory input was received, accepted, and its execution just finished.
+          */
    public static final byte TRAJECTORY_EXECUTION_STATUS_COMPLETED = (byte) 1;
    /**
             * Unique ID of the trajectory message this status refers to.
@@ -25,7 +31,11 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
    /**
             * The current status for the trajectory execution.
             */
-   public byte trajectory_status_ = (byte) 255;
+   public byte trajectory_execution_status_ = (byte) 255;
+   /**
+            * Time in trajectory in seconds.
+            */
+   public double timestamp_;
    /**
             * The desired positions of the joints as sent to the controller.
             */
@@ -55,7 +65,9 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
       sequence_id_ = other.sequence_id_;
 
       joint_names_.set(other.joint_names_);
-      trajectory_status_ = other.trajectory_status_;
+      trajectory_execution_status_ = other.trajectory_execution_status_;
+
+      timestamp_ = other.timestamp_;
 
       desired_joint_positions_.set(other.desired_joint_positions_);
       actual_joint_positions_.set(other.actual_joint_positions_);
@@ -88,16 +100,31 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
    /**
             * The current status for the trajectory execution.
             */
-   public void setTrajectoryStatus(byte trajectory_status)
+   public void setTrajectoryExecutionStatus(byte trajectory_execution_status)
    {
-      trajectory_status_ = trajectory_status;
+      trajectory_execution_status_ = trajectory_execution_status;
    }
    /**
             * The current status for the trajectory execution.
             */
-   public byte getTrajectoryStatus()
+   public byte getTrajectoryExecutionStatus()
    {
-      return trajectory_status_;
+      return trajectory_execution_status_;
+   }
+
+   /**
+            * Time in trajectory in seconds.
+            */
+   public void setTimestamp(double timestamp)
+   {
+      timestamp_ = timestamp;
+   }
+   /**
+            * Time in trajectory in seconds.
+            */
+   public double getTimestamp()
+   {
+      return timestamp_;
    }
 
 
@@ -140,7 +167,9 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.joint_names_, other.joint_names_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_status_, other.trajectory_status_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_execution_status_, other.trajectory_execution_status_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.desired_joint_positions_, other.desired_joint_positions_, epsilon)) return false;
 
@@ -162,7 +191,9 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.joint_names_.equals(otherMyClass.joint_names_)) return false;
-      if(this.trajectory_status_ != otherMyClass.trajectory_status_) return false;
+      if(this.trajectory_execution_status_ != otherMyClass.trajectory_execution_status_) return false;
+
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
       if (!this.desired_joint_positions_.equals(otherMyClass.desired_joint_positions_)) return false;
       if (!this.actual_joint_positions_.equals(otherMyClass.actual_joint_positions_)) return false;
@@ -180,8 +211,10 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("joint_names=");
       builder.append(this.joint_names_);      builder.append(", ");
-      builder.append("trajectory_status=");
-      builder.append(this.trajectory_status_);      builder.append(", ");
+      builder.append("trajectory_execution_status=");
+      builder.append(this.trajectory_execution_status_);      builder.append(", ");
+      builder.append("timestamp=");
+      builder.append(this.timestamp_);      builder.append(", ");
       builder.append("desired_joint_positions=");
       builder.append(this.desired_joint_positions_);      builder.append(", ");
       builder.append("actual_joint_positions=");
