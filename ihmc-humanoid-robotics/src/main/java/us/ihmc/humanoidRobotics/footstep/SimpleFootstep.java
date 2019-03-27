@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.humanoidRobotics.footstep;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
