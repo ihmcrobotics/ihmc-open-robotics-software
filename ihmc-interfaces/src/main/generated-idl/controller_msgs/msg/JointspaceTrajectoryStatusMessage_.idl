@@ -7,9 +7,15 @@ module controller_msgs
   {
     module dds
     {
+      /**
+       * The trajectory input was received and accepted, the execution just started.
+       */
       const octet TRAJECTORY_EXECUTION_STATUS_STARTED =
       0;
 
+      /**
+       * The trajectory input was received, accepted, and its execution just finished.
+       */
       const octet TRAJECTORY_EXECUTION_STATUS_COMPLETED =
       1;
 
@@ -33,7 +39,11 @@ module controller_msgs
          * The current status for the trajectory execution.
          */
         @defaultValue(value=255)
-        octet trajectory_status;
+        octet trajectory_execution_status;
+        /**
+         * Time in trajectory in seconds.
+         */
+        double timestamp;
         /**
          * The desired positions of the joints as sent to the controller.
          */

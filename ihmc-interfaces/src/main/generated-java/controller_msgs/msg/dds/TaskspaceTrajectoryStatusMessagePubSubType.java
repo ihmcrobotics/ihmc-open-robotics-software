@@ -45,6 +45,8 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -69,18 +71,21 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBodyName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getEndEffectorName().length() + 1;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredBodyPosition(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredFootOrientation(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getActualBodyPosition(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredEndEffectorPosition(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getActualBodyOrientation(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredEndEffectorOrientation(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getActualEndEffectorPosition(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getActualEndEffectorOrientation(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -90,29 +95,33 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if(data.getBodyName().length() <= 255)
-      cdr.write_type_d(data.getBodyName());else
-          throw new RuntimeException("body_name field exceeds the maximum length");
+      if(data.getEndEffectorName().length() <= 255)
+      cdr.write_type_d(data.getEndEffectorName());else
+          throw new RuntimeException("end_effector_name field exceeds the maximum length");
 
-      cdr.write_type_9(data.getTrajectoryStatus());
+      cdr.write_type_9(data.getTrajectoryExecutionStatus());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredBodyPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredFootOrientation(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getActualBodyPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getActualBodyOrientation(), cdr);
+      cdr.write_type_6(data.getTimestamp());
+
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredEndEffectorPosition(), cdr);
+      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredEndEffectorOrientation(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getActualEndEffectorPosition(), cdr);
+      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getActualEndEffectorOrientation(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      cdr.read_type_d(data.getBodyName());	
-      data.setTrajectoryStatus(cdr.read_type_9());
+      cdr.read_type_d(data.getEndEffectorName());	
+      data.setTrajectoryExecutionStatus(cdr.read_type_9());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredBodyPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredFootOrientation(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getActualBodyPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getActualBodyOrientation(), cdr);	
+      data.setTimestamp(cdr.read_type_6());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredEndEffectorPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredEndEffectorOrientation(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getActualEndEffectorPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getActualEndEffectorOrientation(), cdr);	
 
    }
 
@@ -120,15 +129,16 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    public final void serialize(controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_d("body_name", data.getBodyName());
-      ser.write_type_9("trajectory_status", data.getTrajectoryStatus());
-      ser.write_type_a("desired_body_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredBodyPosition());
+      ser.write_type_d("end_effector_name", data.getEndEffectorName());
+      ser.write_type_9("trajectory_execution_status", data.getTrajectoryExecutionStatus());
+      ser.write_type_6("timestamp", data.getTimestamp());
+      ser.write_type_a("desired_end_effector_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredEndEffectorPosition());
 
-      ser.write_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());
+      ser.write_type_a("desired_end_effector_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredEndEffectorOrientation());
 
-      ser.write_type_a("actual_body_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualBodyPosition());
+      ser.write_type_a("actual_end_effector_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualEndEffectorPosition());
 
-      ser.write_type_a("actual_body_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualBodyOrientation());
+      ser.write_type_a("actual_end_effector_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualEndEffectorOrientation());
 
    }
 
@@ -136,15 +146,16 @@ public class TaskspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubsu
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_d("body_name", data.getBodyName());
-      data.setTrajectoryStatus(ser.read_type_9("trajectory_status"));
-      ser.read_type_a("desired_body_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredBodyPosition());
+      ser.read_type_d("end_effector_name", data.getEndEffectorName());
+      data.setTrajectoryExecutionStatus(ser.read_type_9("trajectory_execution_status"));
+      data.setTimestamp(ser.read_type_6("timestamp"));
+      ser.read_type_a("desired_end_effector_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredEndEffectorPosition());
 
-      ser.read_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());
+      ser.read_type_a("desired_end_effector_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredEndEffectorOrientation());
 
-      ser.read_type_a("actual_body_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualBodyPosition());
+      ser.read_type_a("actual_end_effector_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualEndEffectorPosition());
 
-      ser.read_type_a("actual_body_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualBodyOrientation());
+      ser.read_type_a("actual_end_effector_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualEndEffectorOrientation());
 
    }
 
