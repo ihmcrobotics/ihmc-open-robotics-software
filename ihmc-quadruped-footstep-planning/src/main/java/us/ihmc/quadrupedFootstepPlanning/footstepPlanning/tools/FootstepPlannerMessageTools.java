@@ -57,21 +57,17 @@ public class FootstepPlannerMessageTools
 
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
       packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
-      packet.setMaximumStepCycleDistance(parameters.getMaximumStepCycleDistance());
       packet.setMinimumStepLength(parameters.getMinimumStepLength());
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
       packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
       packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
       packet.setMaximumStepChangeZ(parameters.getMaximumStepChangeZ());
-      packet.setMaximumStepCycleChangeZ(parameters.getMaximumStepCycleChangeZ());
       packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
-      packet.setForwardWeight(parameters.getForwardWeight());
-      packet.setLateralWeight(parameters.getLateralWeight());
       packet.setYawWeight(parameters.getYawWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
       packet.setStepUpWeight(parameters.getStepUpWeight());
       packet.setStepDownWeight(parameters.getStepDownWeight());
-      packet.setHeuristicsWeight(parameters.getHeuristicsWeight());
+      packet.setHeuristicsWeight(parameters.getHeuristicsInflationWeight());
       packet.setMinXClearanceFromFoot(parameters.getMinXClearanceFromFoot());
       packet.setMinYClearanceFromFoot(parameters.getMinYClearanceFromFoot());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());

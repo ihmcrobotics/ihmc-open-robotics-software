@@ -5,6 +5,7 @@ public enum QuadrupedFootstepPlannerNodeRejectionReason
    STEP_TOO_HIGH_OR_LOW,
    STEP_YAWING_TOO_MUCH,
 //   STEP_TOO_FORWARD_AND_DOWN,
+   STEP_TOO_FAR,
    STEP_TOO_FAR_FORWARD,
    STEP_TOO_FAR_BACKWARD,
    STEP_TOO_FAR_INWARD,

@@ -38,8 +38,10 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    private final YoDouble time = new YoDouble("time", registry);
 
    private final HashMap<FootstepNode, List<FootstepNode>> validChildNodeMap = new HashMap<>();
+   private final HashMap<FootstepNode, List<FootstepNode>> invalidChildNodeMap = new HashMap<>();
 
-   private final List<YoFramePoint2D> yoActiveValidChildNodes = new ArrayList<>();
+   private final List<YoFramePoint2D> yoValidChildNodes = new ArrayList<>();
+   private final List<YoFramePoint2D> yoInValidChildNodes = new ArrayList<>();
 
    private final YoFootstepNode currentFootstepNode = new YoFootstepNode(registry);
 
@@ -52,20 +54,26 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    {
       for (int i = 0; i < maxNumberOfChildNodes; i++)
       {
-         YoFramePoint2D activeValidChildNode = new YoFramePoint2D("activeValidChildNode" + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPosition activeValidChildNodeVis = new YoGraphicPosition("activeValidChildNode" + i, activeValidChildNode, childNodeSize, YoAppearance.Blue());
+         YoFramePoint2D validChildNode = new YoFramePoint2D("validChildNode" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoGraphicPosition validChildNodeVis = new YoGraphicPosition("validChildNode" + i, validChildNode, childNodeSize, YoAppearance.Green());
 
-         yoActiveValidChildNodes.add(activeValidChildNode);
-         graphicsListRegistry.registerYoGraphic("plannerListener", activeValidChildNodeVis);
+         yoValidChildNodes.add(validChildNode);
+         graphicsListRegistry.registerYoGraphic("plannerListener", validChildNodeVis);
+
+         YoFramePoint2D invalidChildNode = new YoFramePoint2D("invalidChildNode" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoGraphicPosition invalidChildNodeVis = new YoGraphicPosition("invalidChildNode" + i, invalidChildNode, childNodeSize, YoAppearance.Red());
+
+         yoInValidChildNodes.add(invalidChildNode);
+         graphicsListRegistry.registerYoGraphic("plannerListener", invalidChildNodeVis);
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         YoGraphicPosition otherFeet = new YoGraphicPosition(robotQuadrant.getShortName() + "activeNodeFeet", currentFootstepNode.getYoPosition(robotQuadrant), nodeSize, YoAppearance.OrangeRed());
+         YoGraphicPosition otherFeet = new YoGraphicPosition(robotQuadrant.getShortName() + "activeNodeFeet", currentFootstepNode.getYoPosition(robotQuadrant), nodeSize, YoAppearance.Orange());
          graphicsListRegistry.registerYoGraphic("plannerListener", otherFeet);
 
       }
-      YoGraphicPosition nodeVis = new YoGraphicPosition("activeNode", currentFootstepNode.getMovingYoPosition(), nodeSize, YoAppearance.Orange());
+      YoGraphicPosition nodeVis = new YoGraphicPosition("activeNode", currentFootstepNode.getMovingYoPosition(), nodeSize, YoAppearance.White());
 
       graphicsListRegistry.registerYoGraphic("plannerListener", nodeVis);
 
@@ -83,8 +91,8 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
       scs.setMaxBufferSize(64000);
       scs.setCameraFix(0.0, 0.0, 0.0);
       scs.setCameraPosition(-0.001, 0.0, 15.0);
+      scs.setGroundVisible(false);
       scs.tickAndUpdate();
-
    }
 
    @Override
@@ -104,7 +112,13 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    @Override
    public void rejectNode(FootstepNode rejectedNode, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason reason)
    {
-      validChildNodeMap.get(parentNode).remove(rejectedNode);
+      if(validChildNodeMap.containsKey(parentNode))
+         validChildNodeMap.get(parentNode).remove(rejectedNode);
+
+      if (!invalidChildNodeMap.containsKey(parentNode))
+         invalidChildNodeMap.put(parentNode, new ArrayList<>());
+
+      invalidChildNodeMap.get(parentNode).add(rejectedNode);
    }
 
    @Override
@@ -122,7 +136,7 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
    @Override
    public void tickAndUpdate()
    {
-      yoActiveValidChildNodes.forEach(YoFramePoint2D::setToNaN);
+      yoValidChildNodes.forEach(YoFramePoint2D::setToNaN);
 
       FootstepNode currentNode = currentFootstepNode.getEquivalentNode();
 
@@ -137,7 +151,18 @@ public class QuadrupedAStarFootstepPlannerVisualizer implements QuadrupedFootste
          {
             FootstepNode childNode = validChildNodes.get(i);
             RobotQuadrant quadrant = childNode.getMovingQuadrant();
-            yoActiveValidChildNodes.get(i).set(childNode.getX(quadrant), childNode.getY(quadrant));
+            yoValidChildNodes.get(i).set(childNode.getX(quadrant), childNode.getY(quadrant));
+         }
+      }
+
+      List<FootstepNode> invalidChildNodes = invalidChildNodeMap.get(currentNode);
+      if (invalidChildNodes != null)
+      {
+         for (int i = 0; i < invalidChildNodes.size(); i++)
+         {
+            FootstepNode childNode = invalidChildNodes.get(i);
+            RobotQuadrant quadrant = childNode.getMovingQuadrant();
+            yoInValidChildNodes.get(i).set(childNode.getX(quadrant), childNode.getY(quadrant));
          }
       }
 
