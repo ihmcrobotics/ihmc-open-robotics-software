@@ -50,7 +50,7 @@ public class SimpleFootstep implements Settable<SimpleFootstep>
       soleFramePoseToPack.setIncludingFrame(soleFramePose);
    }
 
-   public FramePose3DReadOnly getSoleFramePose()
+   public FramePose3D getSoleFramePose()
    {
       return soleFramePose;
    }
@@ -65,7 +65,7 @@ public class SimpleFootstep implements Settable<SimpleFootstep>
       this.soleFramePose.setIncludingFrame(soleFramePose);
    }
 
-   public void setFoothold(ConvexPolygon2D foothold)
+   public void setFoothold(ConvexPolygon2DReadOnly foothold)
    {
       this.foothold.set(foothold);
    }
@@ -115,6 +115,30 @@ public class SimpleFootstep implements Settable<SimpleFootstep>
       if (!this.foothold.epsilonEquals(otherFootstep.foothold, epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof SimpleFootstep)
+      {
+         SimpleFootstep other = (SimpleFootstep) obj;
+         if (robotSide != other.robotSide)
+            return false;
+         if (!soleFramePose.equals(other.soleFramePose))
+            return false;
+         if (!foothold.equals(other.foothold))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override

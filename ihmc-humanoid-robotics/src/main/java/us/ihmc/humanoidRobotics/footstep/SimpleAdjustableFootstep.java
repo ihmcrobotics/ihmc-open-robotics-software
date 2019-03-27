@@ -27,4 +27,24 @@ public class SimpleAdjustableFootstep extends SimpleFootstep
       setSoleFramePose(other.getFootstepPose());
       setFoothold(other.getPredictedContactPoints());
    }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof SimpleAdjustableFootstep)
+      {
+         SimpleAdjustableFootstep other = (SimpleAdjustableFootstep) obj;
+         if (isAdjustable ^ other.isAdjustable)
+            return false;
+         return super.equals(obj);
+      }
+      else
+      {
+         return false;
+      }
+   }
 }
