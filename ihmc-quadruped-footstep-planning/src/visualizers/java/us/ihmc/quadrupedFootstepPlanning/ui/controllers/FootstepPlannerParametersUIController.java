@@ -143,20 +143,16 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMaximumStepWidth(maxStepWidth.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepWidth(minStepWidth.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindMaximumStepCycleDistance(maxStepCycleDistance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumStepYaw(maxStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepYaw(minStepYaw.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindMaximumStepChangeZ(maxStepChangeZ.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumStepCycleChangeZ(maxStepCycleChangeZ.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyGroundClearance(bodyGroundClearance.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindMinXClearanceFromFoot(minXClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinYClearanceFromFoot(minYClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumSurfaceInclineRadians(minSurfaceIncline.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
@@ -182,9 +178,7 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
       filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
       filePropertyHelper.saveProperty("maxStepChangeZ", maxStepChangeZ.getValue());
-      filePropertyHelper.saveProperty("maxStepCycleChangeZ", maxStepCycleChangeZ.getValue());
       filePropertyHelper.saveProperty("bodyGroundClearance", bodyGroundClearance.getValue());
-      filePropertyHelper.saveProperty("maxStepCycleDistance", maxStepCycleDistance.getValue());
       filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
       filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
       filePropertyHelper.saveProperty("minXClearanceFromFoot", minXClearanceFromFoot.getValue());
