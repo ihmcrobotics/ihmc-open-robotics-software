@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -42,13 +41,13 @@ public class LinearMomentumRateControlModuleInput
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
     * plan.
     */
-   private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
 
    /**
     * Assuming to tracking error for the ICP this is the location that the CoP should be placed at according to the ICP
     * plan.
     */
-   private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
+   private final FramePoint2D perfectCoP = new FramePoint2D();
 
    /**
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
@@ -206,7 +205,7 @@ public class LinearMomentumRateControlModuleInput
 
    public void setPerfectCMP(FramePoint2DReadOnly perfectCMP)
    {
-      this.perfectCMP.setMatchingFrame(perfectCMP);
+      this.perfectCMP.setIncludingFrame(perfectCMP);
    }
 
    public FramePoint2DReadOnly getPerfectCMP()
@@ -216,7 +215,7 @@ public class LinearMomentumRateControlModuleInput
 
    public void setPerfectCoP(FramePoint2DReadOnly perfectCoP)
    {
-      this.perfectCoP.setMatchingFrame(perfectCoP);
+      this.perfectCoP.setIncludingFrame(perfectCoP);
    }
 
    public FramePoint2DReadOnly getPerfectCoP()

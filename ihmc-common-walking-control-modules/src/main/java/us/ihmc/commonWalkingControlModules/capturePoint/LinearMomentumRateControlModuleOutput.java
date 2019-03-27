@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -20,7 +19,7 @@ public class LinearMomentumRateControlModuleOutput
     * The desired feedback CMP. It is used by the walking controller to check some conditions (e.g. it's placement
     * before toe off).
     */
-   private final FramePoint2DBasics desiredCMP = new FramePoint2D();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
 
    /**
     * If the footstep was adjusted (see {@link #footstepWasAdjusted}) this will contain the shift vector used by the

@@ -80,8 +80,8 @@ public class LinearMomentumRateControlModule
    private final FramePoint2D capturePoint = new FramePoint2D();
    private final CapturePointCalculator capturePointCalculator;
 
-   private final FramePoint2D desiredCapturePoint = new FramePoint2D();
-   private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
+   private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
+   private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
 
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
@@ -208,8 +208,8 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
-      this.desiredCapturePoint.setIncludingFrame(input.getDesiredCapturePoint());
-      this.desiredCapturePointVelocity.setIncludingFrame(input.getDesiredCapturePointVelocity());
+      this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
+      this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
@@ -479,7 +479,7 @@ public class LinearMomentumRateControlModule
       return success;
    }
 
-   private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
+   private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FixedFramePoint2DBasics desiredCapturePoint,
                                       FixedFrameVector2DBasics desiredCapturePointVelocity, FixedFramePoint2DBasics perfectCoP,
                                       FixedFramePoint2DBasics perfectCMP)
    {
