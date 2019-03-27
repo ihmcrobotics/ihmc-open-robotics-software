@@ -344,7 +344,6 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          
          if (plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.getFootstepPlanningResult()).validForExecution())
          {
-            System.out.println("******************************SENDING FOOT STEP PLAN**********************************");
             sendFootstepPlan();
          }
       }
