@@ -18,6 +18,8 @@ import org.ejml.ops.RandomMatrices;
 import org.reflections.Reflections;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -68,6 +70,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -82,6 +85,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -97,6 +101,8 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -301,6 +307,17 @@ public class ControllerCoreCommandRandomTools
       TDoubleArrayList next = new TDoubleArrayList();
       while (next.size() < size)
          next.add(random.nextDouble());
+      return next;
+   }
+
+   public static <T> RecyclingArrayList<T> nextRecyclingArrayList(Class<T> elementType, int size, Random random, boolean ensureNonEmptyCommand,
+                                                                  RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+         throws Exception
+   {
+      RecyclingArrayList<T> next = new RecyclingArrayList<>(elementType);
+      while (next.size() < size)
+         next.add();
+      randomizeRecyclingArrayList(next, (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
       return next;
    }
 
@@ -1231,6 +1248,68 @@ public class ControllerCoreCommandRandomTools
       return next;
    }
 
+   public static LinearMomentumRateControlModuleOutput nextLinearMomentumRateControlModuleOutput(Random random, ReferenceFrame... possibleFrames)
+   {
+      LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
+      next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
+      next.setEffectiveICPAdjustment(nextFrameVector3D(random, possibleFrames));
+      next.setUsingStepAdjustment(random.nextBoolean());
+      next.setFootstepWasAdjusted(random.nextBoolean());
+      next.setFootstepSolution(nextFramePose3D(random, possibleFrames));
+      return next;
+   }
+
+   public static LinearMomentumRateControlModuleInput nextLinearMomentumRateControlModuleInput(Random random, RigidBodyBasics rootBody,
+                                                                                               ReferenceFrame... possibleFrames)
+         throws Exception
+   {
+      LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
+      next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
+                                                                                  nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setControlHeightWithMomentum(random.nextBoolean());
+      next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
+      next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
+      next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
+      next.setFinalTransferDuration(random.nextDouble());
+      next.setFootsteps(nextRecyclingArrayList(SimpleAdjustableFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
+      next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
+      next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
+      next.setInitializeForSingleSupport(random.nextBoolean());
+      next.setInitializeForStanding(random.nextBoolean());
+      next.setInitializeForTransfer(random.nextBoolean());
+      next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
+      next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
+      next.setOmega0(random.nextDouble());
+      next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));
+      next.setPerfectCoP(nextFramePoint2D(random, possibleFrames));
+      next.setRemainingTimeInSwingUnderDisturbance(random.nextDouble());
+      next.setSupportSide(nextElementIn(random, RobotSide.values));
+      next.setTransferToSide(nextElementIn(random, RobotSide.values));
+      return next;
+   }
+
+   public static SimpleAdjustableFootstep nextSimpleAdjustableFootstep(Random random, ReferenceFrame... possibleFrames)
+   {
+      SimpleAdjustableFootstep next = new SimpleAdjustableFootstep();
+      next.setSoleFramePose(nextFramePose3D(random, possibleFrames));
+      next.setRobotSide(nextElementIn(random, RobotSide.values));
+      next.setFoothold(nextConvexPolygon2D(random));
+      next.setIsAdjustable(random.nextBoolean());
+      return next;
+   }
+
+   public static ConvexPolygon2D nextConvexPolygon2D(Random random)
+   {
+      ConvexPolygon2D next = new ConvexPolygon2D();
+      int vertices = random.nextInt(10);
+      for (int i = 0; i < vertices; i++)
+      {
+         next.addVertex(nextPoint2D(random));
+      }
+      next.update();
+      return next;
+   }
+
    public static void randomizeDoubleArray(Random random, double[] array)
    {
       for (int i = 0; i < array.length; i++)
@@ -1296,6 +1375,15 @@ public class ControllerCoreCommandRandomTools
       }
    }
 
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   public static void randomizeSideDependentList(SideDependentList listToRandomize, ReflectionBuilder randomElementSupplier) throws Exception
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         listToRandomize.put(robotSide, randomElementSupplier.get(listToRandomize.get(robotSide).getClass()));
+      }
+   }
+
    @SuppressWarnings("rawtypes")
    public static void randomizeField(Random random, Field field, Object fieldOwnerInstance, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
          throws Exception
@@ -1336,6 +1424,11 @@ public class ControllerCoreCommandRandomTools
       else if (fieldType == DenseMatrix64F.class)
       {
          field.set(fieldOwnerInstance, RandomMatrices.createRandom(10, 10, random));
+      }
+      else if (fieldType == SideDependentList.class)
+      {
+         randomizeSideDependentList((SideDependentList) fieldInstance,
+                                    (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
       }
       else
       {
