@@ -49,4 +49,9 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0,
                                                               boolean isRecoveringFromPush, FeetManager feetManager);
+
+   default Object pollStatusToReport()
+   {
+      return null;
+   }
 }

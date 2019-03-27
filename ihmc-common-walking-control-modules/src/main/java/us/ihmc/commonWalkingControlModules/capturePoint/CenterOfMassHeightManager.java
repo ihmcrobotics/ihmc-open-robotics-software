@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -391,9 +390,11 @@ public class CenterOfMassHeightManager
       pelvisHeightControlState.transfer(transferPosition, transferTime, swingSide, toeOffHeight);
    }
 
-   public <M extends Settable<M>> M pollStatusToReport()
+   public Object pollStatusToReport()
    {
-      // TODO Implement me
-      return null;
+      if (useStateMachine)
+         return stateMachine.getCurrentState().pollStatusToReport();
+      else
+         return pelvisHeightControlState.pollStatusToReport();
    }
 }

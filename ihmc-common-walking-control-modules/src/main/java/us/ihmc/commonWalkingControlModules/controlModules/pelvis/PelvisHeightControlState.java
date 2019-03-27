@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPositionController;
@@ -90,6 +91,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    private final EuclideanTrajectoryControllerCommand command = new EuclideanTrajectoryControllerCommand();
    private final Vector3D zeroVelocity = new Vector3D();
    private final Point3D trajectoryPoint = new Point3D();
+
+   private final FramePoint3D statusDesiredPosition = new FramePoint3D();
+   private final FramePoint3D statusActualPosition = new FramePoint3D();
+   private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
    public PelvisHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -261,8 +266,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      if (positionController.handleTrajectoryCommand(command.getEuclideanTrajectory()))
+      EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+
+      if (positionController.handleTrajectoryCommand(euclideanTrajectory))
       {
+         euclideanTrajectory.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(euclideanTrajectory);
          return true;
       }
 
@@ -302,6 +311,8 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       if (positionController.handleTrajectoryCommand(euclideanCommand))
       {
+         euclideanCommand.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(euclideanCommand);
          return true;
       }
 
@@ -384,5 +395,20 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
       return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
                                                  currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());
+   }
+
+   
+
+   @Override
+   public Object pollStatusToReport()
+   {
+      statusDesiredPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getReferencePosition());
+      statusDesiredPosition.setX(Double.NaN);
+      statusDesiredPosition.setY(Double.NaN);
+      statusActualPosition.setIncludingFrame(controlPosition);
+      statusActualPosition.setX(Double.NaN);
+      statusActualPosition.setY(Double.NaN);
+
+      return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
    }
 }
