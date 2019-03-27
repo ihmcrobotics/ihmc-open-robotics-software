@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -113,28 +115,42 @@ public class LinearMomentumRateControlModuleInput
     * List of upcoming footsteps that are being executed by the controller. This is of interest to the ICP controller
     * because it might consider n-step capturability or adjust the locations of the upcoming footsteps when needed.
     * <p>
-    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
-    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    * The fields {@link #footsteps}, {@link #swingDurations}, {@link #transferDurations}, and
+    * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
+    * initialize flags is set to {@code true}
     */
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
+   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
 
    /**
-    * List of upcoming footstep timings that are being executed by the controller. This is of interest to the ICP
-    * controller because it might consider n-step capturability or adjust the locations of the upcoming footsteps when
-    * needed.
+    * List of upcoming footstep swing durations that are being executed by the controller. This is of interest to the
+    * ICP controller because it might consider n-step capturability or adjust the locations of the upcoming footsteps
+    * when needed.
     * <p>
-    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
-    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    * The fields {@link #footsteps}, {@link #swingDurations}, {@link #transferDurations}, and
+    * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
+    * initialize flags is set to {@code true}
     */
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+   private final TDoubleArrayList swingDurations = new TDoubleArrayList();
+
+   /**
+    * List of upcoming footstep transfer durations that are being executed by the controller. This is of interest to the
+    * ICP controller because it might consider n-step capturability or adjust the locations of the upcoming footsteps
+    * when needed.
+    * <p>
+    * The fields {@link #footsteps}, {@link #swingDurations}, {@link #transferDurations}, and
+    * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
+    * initialize flags is set to {@code true}
+    */
+   private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
    /**
     * The final transfer duration for a footstep plan. This is a separate field since footsteps only hold the time to
     * transfer to and the time to swing. Hence, the time for the final transfer back to standing is not contained in the
     * list of {@link #footstepTimings}.
     * <p>
-    * The fields {@link #footsteps}, {@link #footstepTimings}, and {@link #finalTransferDuration} shopuld always be set
-    * together. Note, that they will only be used if one of the initialize flags is set to {@code true}
+    * The fields {@link #footsteps}, {@link #swingDurations}, {@link #transferDurations}, and
+    * {@link #finalTransferDuration} should always be set together. Note, that they will only be used if one of the
+    * initialize flags is set to {@code true}
     */
    private double finalTransferDuration;
 
@@ -253,7 +269,7 @@ public class LinearMomentumRateControlModuleInput
       return transferToSide;
    }
 
-   public void setFootsteps(List<Footstep> footsteps)
+   public void setFromFootsteps(List<Footstep> footsteps)
    {
       this.footsteps.clear();
       for (int i = 0; i < footsteps.size(); i++)
@@ -262,23 +278,51 @@ public class LinearMomentumRateControlModuleInput
       }
    }
 
-   public List<Footstep> getFootsteps()
+   public void setFootsteps(List<SimpleAdjustableFootstep> footsteps)
+   {
+      this.footsteps.clear();
+      for (int i = 0; i < footsteps.size(); i++)
+      {
+         this.footsteps.add().set(footsteps.get(i));
+      }
+   }
+
+   public List<SimpleAdjustableFootstep> getFootsteps()
    {
       return footsteps;
    }
 
-   public void setFootstepTimings(List<FootstepTiming> footstepTimings)
+   public void setFromFootstepTimings(List<FootstepTiming> footstepTimings)
    {
-      this.footstepTimings.clear();
+      swingDurations.reset();
+      transferDurations.reset();
       for (int i = 0; i < footsteps.size(); i++)
       {
-         this.footstepTimings.add().set(footstepTimings.get(i));
+         swingDurations.add(footstepTimings.get(i).getSwingTime());
+         transferDurations.add(footstepTimings.get(i).getTransferTime());
       }
    }
 
-   public List<FootstepTiming> getFootstepTimings()
+   public void setSwingDurations(TDoubleArrayList swingDurations)
    {
-      return footstepTimings;
+      this.swingDurations.reset();
+      this.swingDurations.addAll(swingDurations);
+   }
+
+   public TDoubleArrayList getSwingDurations()
+   {
+      return swingDurations;
+   }
+
+   public void setTransferDurations(TDoubleArrayList transferDurations)
+   {
+      this.transferDurations.reset();
+      this.transferDurations.addAll(transferDurations);
+   }
+
+   public TDoubleArrayList getTransferDurations()
+   {
+      return transferDurations;
    }
 
    public void setFinalTransferDuration(double finalTransferDuration)
