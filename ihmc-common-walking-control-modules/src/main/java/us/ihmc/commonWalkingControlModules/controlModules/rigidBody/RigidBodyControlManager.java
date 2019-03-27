@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -541,9 +540,8 @@ public class RigidBodyControlManager
       return jointsToControl;
    }
 
-   public <M extends Settable<M>> M pollStatusToReport()
+   public Object pollStatusToReport()
    {
-      // TODO Implement me
-      return null;
+      return stateMachine.getCurrentState().pollStatusToReport();
    }
 }
