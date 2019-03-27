@@ -202,7 +202,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       if (lastStepPosition.containsNaN())
          lastStepPosition.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
 
-      finalPosition.setIncludingFrame(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
+      finalPosition.set(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
 
       if (stepTransitionCallback != null)
       {
