@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -546,9 +545,8 @@ public class FeetManager
       footControlModules.get(sideToUnload).resetLoadConstraints();
    }
 
-   public <M extends Settable<M>> M pollStatusToReport()
+   public Object pollStatusToReport(RobotSide robotSide)
    {
-      // TODO Implement me
-      return null;
+      return footControlModules.get(robotSide).pollStatusToReport();
    }
 }
