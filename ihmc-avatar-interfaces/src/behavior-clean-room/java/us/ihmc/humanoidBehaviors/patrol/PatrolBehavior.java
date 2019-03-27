@@ -3,12 +3,14 @@ package us.ihmc.humanoidBehaviors.patrol;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import sun.rmi.runtime.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -55,6 +57,7 @@ public class PatrolBehavior
    private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
+   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
    private final Notification stopNotification = new Notification();
    private final Notification overrideGoToWaypointNotification = new Notification();
@@ -69,8 +72,6 @@ public class PatrolBehavior
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
 
-   private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegions = new AtomicReference<>();
-
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       this.messager = messager;
@@ -83,16 +84,10 @@ public class PatrolBehavior
       pausePublisher = ROS2Tools.createPublisher(ros2Node,
                                                  ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
                                                  ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           WalkingStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
-                                           this::updateWalkingCompletedStatus);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(),
-                                                                           ROS2Tools.REA_MODULE,
-                                                                           ROS2Tools.ROS2TopicQualifier.OUTPUT),
-                                           this::receivePlanarRegions);
+      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROL_MODULE, this::acceptWalkingStatus);
+
+      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.REA_MODULE);
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
 
@@ -136,8 +131,8 @@ public class PatrolBehavior
          messager.submitMessage(API.CurrentWaypointIndexStatus, index);
          FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(index));
 
-         new Thread(() -> {  // plan in a thread to catch interruptions during planning
-            footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint, latestPlanarRegions.get());
+         new Thread(() -> {  // plan in a thread to catch interruptions during planning TODO this shouldn't spin a new thread
+            footstepPlanningOutput = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
             FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
             ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
             for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
@@ -241,25 +236,12 @@ public class PatrolBehavior
       messager.submitMessage(API.CurrentState, currentState.getKey());
    }
 
-   private void updateWalkingCompletedStatus(Subscriber<WalkingStatusMessage> status)
+   private void acceptWalkingStatus(WalkingStatusMessage message)
    {
-      WalkingStatusMessage walkingStatusMessage;
-      while ((walkingStatusMessage = status.takeNextData()) != null)
+      LogTools.debug("Walking status: {}", WalkingStatus.fromByte(message.getWalkingStatus()).name());
+      if (message.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
       {
-         LogTools.debug("Walking status: {}", WalkingStatus.fromByte(walkingStatusMessage.getWalkingStatus()).name());
-         if (walkingStatusMessage.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
-         {
-            walkingCompleted.set();
-         }
-      }
-   }
-
-   private void receivePlanarRegions(Subscriber<PlanarRegionsListMessage> subscriber)
-   {
-      PlanarRegionsListMessage incomingData = subscriber.takeNextData(); // may be 1 or 2 ticks behind, is this okay?
-      if (incomingData != null)
-      {
-         latestPlanarRegions.set(incomingData);
+         walkingCompleted.set();
       }
    }
 
