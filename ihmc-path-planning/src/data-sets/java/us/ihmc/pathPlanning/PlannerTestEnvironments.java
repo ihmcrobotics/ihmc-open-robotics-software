@@ -454,11 +454,11 @@ public class PlannerTestEnvironments
 
    public static void main(String[] args)
    {
-      String dataSetNameSuffix = "QuadrupedEnvironment0";
+      String dataSetNameSuffix = "QuadrupedEnvironment3";
       DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
       String date = LocalDateTime.now().format(dateTimeFormatter);
 
-      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getQuadrupedEnvironment0());
+      DataSet dataSet = new DataSet(date + "_" + dataSetNameSuffix, getQuadrupedEnvironment3());
       DataSetIOTools.exportDataSet(dataSet);
    }
 }

@@ -69,19 +69,19 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
    @Test
    public void testWalkingOverEnvironment1() throws IOException
    {
-      testEnvironment(DataSetName._20190313_115758_QuadrupedEnvironment1);
+      testEnvironment(DataSetName._20190327_174535_QuadrupedEnvironment1);
    }
 
    @Test
    public void testWalkingOverEnvironment2() throws IOException
    {
-      testEnvironment(DataSetName._20190313_115812_QuadrupedEnvironment2);
+      testEnvironment(DataSetName._20190327_175120_QuadrupedEnvironment2);
    }
 
    @Test
    public void testWalkingOverEnvironment3() throws IOException
    {
-      testEnvironment(DataSetName._20190313_115820_QuadrupedEnvironment3);
+      testEnvironment(DataSetName._20190327_175227_QuadrupedEnvironment3);
    }
 
    public void testEnvironment(DataSetName dataSetName) throws IOException
