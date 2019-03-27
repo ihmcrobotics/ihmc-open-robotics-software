@@ -82,12 +82,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void set(VirtualForceCommand other)
    {
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearForce.set(other.desiredLinearForce);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredLinearForce.set(other.desiredLinearForce);
    }
 
    /**
@@ -459,12 +458,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       }
    }
 
-
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + desiredLinearForce;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearForce;
    }
 }

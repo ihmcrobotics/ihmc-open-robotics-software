@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="LeggedRobotEKF">
+        <parameter name="PelvisAngularAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+        <parameter name="PelvisLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+        <parameter name="SpineAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+        <parameter name="LegAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+
+        <parameter name="PelvisImuSensorAtPelvisFrameAngularVelocityVariance" type="DoubleParameter" min="0.0" max="1.0" value="5.8E-8"/>
+        <parameter name="PelvisImuSensorAtPelvisFrameLinearAccelerationVariance" type="DoubleParameter" min="0.0" max="1.0" value="2.4E-5"/>
+        <parameter name="SpineJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-8"/>
+        <parameter name="LegJointPositionVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E-8"/>
+
+        <parameter name="FootMinVariance" type="DoubleParameter" min="0.0" max="1.0" value="0.001"/>
+        <parameter name="FootMaxVariance" type="DoubleParameter" min="0.0" max="1.0" value="1.0E10"/>
+        <parameter name="FootWrenchFilter" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+    </registry>
+</parameters>

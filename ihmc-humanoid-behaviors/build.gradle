@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -43,16 +43,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
 }
 
-fxUiDependencies {
-   compile ihmc.sourceSetProject("main")
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
-   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
-}
-
 testDependencies {
-
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }

@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
    id("org.hidetake.ssh") version "2.9.0"
    id "application"
 }
@@ -53,7 +53,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors-fx-ui", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-fx-ui", version: "source"
 }
 
 testDependencies {

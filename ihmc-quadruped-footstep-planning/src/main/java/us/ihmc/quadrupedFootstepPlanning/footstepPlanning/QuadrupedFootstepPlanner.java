@@ -23,7 +23,16 @@ public interface QuadrupedFootstepPlanner
 
    void cancelPlanning();
 
-  FootstepPlan getPlan();
+   FootstepPlan getPlan();
+
+   default void setPlanningHorizonLength(double planningHorizon)
+   {
+   }
+
+   default double getPlanningHorizonLength()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 
    double getPlanningDuration();
 }

@@ -33,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -200,7 +201,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       if (controllerToolbox != null)
       {
-         System.out.println("In createdQueuedControllerCommandGenerator");
+         LogTools.info("Creating queued controller command generator");
 
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -350,9 +351,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
                                         YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                        ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputList lowLevelControllerOutput, JointBasics... jointsToIgnore)
+                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, JointDesiredOutputList lowLevelControllerOutput,
+                                        JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -379,9 +380,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
-                                                                 yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies,
-                                                                 yoGraphicsListRegistry, jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0,
+                                                                 feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)

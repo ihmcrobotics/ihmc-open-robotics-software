@@ -3,6 +3,16 @@
     <registry name="DRCControllerThread">
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
+                <registry name="WalkingControllerState">
+            	    <registry name="LinearMomentumRateControlModule">
+            		    <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    </registry>
+            	</registry>
                 <registry name="HighLevelHumanoidControllerFactory">
                     <registry name="MomentumOptimizationSettings">
                         <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
@@ -43,12 +53,6 @@
                         <parameter name="LoadedFootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                        <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                        <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     </registry>
                     <registry name="JointspaceGains">
                         <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>

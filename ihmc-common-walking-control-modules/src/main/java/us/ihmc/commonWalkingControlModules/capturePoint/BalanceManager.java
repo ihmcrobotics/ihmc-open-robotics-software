@@ -14,10 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
@@ -38,7 +34,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -52,12 +47,10 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -79,9 +72,7 @@ public class BalanceManager
    private final PrecomputedICPPlanner precomputedICPPlanner;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
-   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
-   private final LinearMomentumRateControlModuleOutput linearMomentumRateControlModuleOutput = new LinearMomentumRateControlModuleOutput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -106,7 +97,6 @@ public class BalanceManager
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FrameVector2D capturePointVelocity2d = new FrameVector2D();
    private final FramePoint3D tempCapturePoint = new FramePoint3D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
@@ -133,10 +123,6 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
-
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-
    private final SmoothCMPBasedICPPlanner smoothCMPPlanner;
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
 
@@ -146,26 +132,21 @@ public class BalanceManager
    private boolean minimizeAngularMomentumRateZ = false;
    private boolean footstepWasAdjusted = false;
    private boolean usingStepAdjustment = false;
-   private boolean updatePlanarRegions = false;
    private double finalTransferDuration;
    private double timeRemainingInSwing = Double.NaN;
    private RobotSide supportSide;
    private RobotSide transferToSide;
    private final FixedFramePose3DBasics footstepSolution = new FramePose3D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
-   private final FixedFrameVector3DBasics achievedLinearMomentumRate = new FrameVector3D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
    private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                          ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
-                         Vector3DReadOnly angularMomentumRateWeight, Vector3DReadOnly linearMomentumRateWeight, YoVariableRegistry parentRegistry)
+                         YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -173,7 +154,6 @@ public class BalanceManager
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
@@ -183,10 +163,6 @@ public class BalanceManager
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
-
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, walkingControllerParameters, yoTime, totalMass,
-                                                                            gravityZ, controlDT, angularMomentumRateWeight, linearMomentumRateWeight, registry,
-                                                                            yoGraphicsListRegistry);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       ICPPlannerInterface icpPlanner;
@@ -391,10 +367,8 @@ public class BalanceManager
    }
 
    private final FramePoint3D copEstimate = new FramePoint3D();
-   private final FrameVector2D emptyVector = new FrameVector2D();
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCoPInsideSupportPolygon, boolean controlHeightWithMomentum)
    {
-      controllerToolbox.getCapturePointVelocity(capturePointVelocity2d);
       controllerToolbox.getCoP(copEstimate);
 
       if (icpPlanner instanceof ICPPlannerWithAngularMomentumOffsetInterface)
@@ -449,12 +423,7 @@ public class BalanceManager
          contactState.getPlaneContactStateCommand(contactStateCommands.get(robotSide));
       }
 
-      linearMomentumRateControlModuleInput.setCapturePoint(capturePoint2d);
-      linearMomentumRateControlModuleInput.setCapturePointVelocity(capturePointVelocity2d);
       linearMomentumRateControlModuleInput.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-      linearMomentumRateControlModuleInput.setAchievedLinearMomentumRate(achievedLinearMomentumRate);
-      linearMomentumRateControlModuleInput.setPlanarRegions(planarRegions);
-      linearMomentumRateControlModuleInput.setUpdatePlanarRegions(updatePlanarRegions);
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
@@ -474,25 +443,9 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
-      linearMomentumRateControlModule.setInput(linearMomentumRateControlModuleInput);
-      if (!linearMomentumRateControlModule.compute())
-      {
-         controllerToolbox.reportControllerFailureToListeners(emptyVector);
-      }
-      linearMomentumRateControlModule.packOutput(linearMomentumRateControlModuleOutput);
-
-      desiredCMP.set(linearMomentumRateControlModuleOutput.getDesiredCMP());
-      effectiveICPAdjustment.set(linearMomentumRateControlModuleOutput.getEffectiveICPAdjustment());
-      footstepSolution.set(linearMomentumRateControlModuleOutput.getFootstepSolution());
-      footstepWasAdjusted = linearMomentumRateControlModuleOutput.getFootstepWasAdjusted();
-      usingStepAdjustment = linearMomentumRateControlModuleOutput.getUsingStepAdjustment();
-      momentumRateCommand.set(linearMomentumRateControlModuleOutput.getMomentumRateCommand());
-      centerOfPressureCommand.set(linearMomentumRateControlModuleOutput.getCenterOfPressureCommand());
-
       initializeForStanding = false;
       initializeForTransfer = false;
       initializeForSingleSupport = false;
-      updatePlanarRegions = false;
       footstepTimings.clear();
       footsteps.clear();
       supportSide = null;
@@ -564,17 +517,6 @@ public class BalanceManager
    public void getDesiredICPVelocity(FrameVector2D desiredICPVelocityToPack)
    {
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
-   }
-
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
-   {
-      inverseDynamicsCommandList.clear();
-      inverseDynamicsCommandList.addCommand(momentumRateCommand);
-      if (useCoPObjective.getValue())
-      {
-         inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
-      }
-      return inverseDynamicsCommandList;
    }
 
    public void getNextExitCMP(FramePoint3D entryCMPToPack)
@@ -835,11 +777,6 @@ public class BalanceManager
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
 
-   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      this.achievedLinearMomentumRate.set(achievedLinearMomentumRate);
-   }
-
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()
    {
       desiredCapturePoint2d.setIncludingFrame(yoDesiredCapturePoint);
@@ -859,16 +796,6 @@ public class BalanceManager
       }
 
       return capturabilityBasedStatus;
-   }
-
-   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
-   {
-      updatePlanarRegions = true;
-      this.planarRegions.clear();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         this.planarRegions.add().set(planarRegions.get(i));
-      }
    }
 
    public void updateCurrentICPPlan()
@@ -894,5 +821,19 @@ public class BalanceManager
    public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
    {
       this.minimizeAngularMomentumRateZ = minimizeAngularMomentumRateZ;
+   }
+
+   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   {
+      return linearMomentumRateControlModuleInput;
+   }
+
+   public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
+   {
+      desiredCMP.set(output.getDesiredCMP());
+      effectiveICPAdjustment.set(output.getEffectiveICPAdjustment());
+      footstepSolution.set(output.getFootstepSolution());
+      footstepWasAdjusted = output.getFootstepWasAdjusted();
+      usingStepAdjustment = output.getUsingStepAdjustment();
    }
 }

@@ -288,11 +288,11 @@ public abstract class FootstepPlannerDataSetTest
 
       FootstepPlanningResult pathResult = planner.planPath();
       if (!pathResult.validForExecution())
-         return "Path plan for " + datasetName + " is invalid.";
+         return "Path plan for " + datasetName + " is invalid. Got path result " + pathResult;
 
       FootstepPlanningResult planResult = planner.plan();
       if (!planResult.validForExecution())
-         return "Footstep plan for " + datasetName + " is invalid.";
+         return "Footstep plan for " + datasetName + " is invalid. Got plan result " + planResult;
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 

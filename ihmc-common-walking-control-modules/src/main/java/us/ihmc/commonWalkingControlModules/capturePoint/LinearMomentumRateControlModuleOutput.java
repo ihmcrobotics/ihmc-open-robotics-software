@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -18,12 +16,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
  */
 public class LinearMomentumRateControlModuleOutput
 {
-   @Deprecated // this should be going straight to the controller core
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
-
-   @Deprecated // this should be going straight to the controller core
-   private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
-
    /**
     * The desired feedback CMP. It is used by the walking controller to check some conditions (e.g. it's placement
     * before toe off).
@@ -82,26 +74,6 @@ public class LinearMomentumRateControlModuleOutput
    public boolean getUsingStepAdjustment()
    {
       return usingStepAdjustment;
-   }
-
-   public void setMomentumRateCommand(MomentumRateCommand momentumRateCommand)
-   {
-      this.momentumRateCommand.set(momentumRateCommand);
-   }
-
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return momentumRateCommand;
-   }
-
-   public void setCenterOfPressureCommand(CenterOfPressureCommand centerOfPressureCommand)
-   {
-      this.centerOfPressureCommand.set(centerOfPressureCommand);
-   }
-
-   public CenterOfPressureCommand getCenterOfPressureCommand()
-   {
-      return centerOfPressureCommand;
    }
 
    public void setDesiredCMP(FramePoint2DReadOnly desiredCMP)

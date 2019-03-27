@@ -6,14 +6,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -30,12 +27,6 @@ public class LinearMomentumRateControlModuleInput
     * is {@code omega0 = sqrt(gravity / comZ)}.
     */
    private double omega0;
-
-   @Deprecated // Should be computed in the fast thread
-   private final FramePoint2D capturePoint = new FramePoint2D();
-
-   @Deprecated // Should be computed in the fast thread
-   private final FrameVector2D capturePointVelocity = new FrameVector2D();
 
    /**
     * The desired capture point that the ICP controller should track.
@@ -58,9 +49,6 @@ public class LinearMomentumRateControlModuleInput
     * plan.
     */
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
-
-   @Deprecated // This will be coming from the controller core
-   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    /**
     * Is a flag that enables the z-selection in the linear momentum rate command if {@code true}.
@@ -122,12 +110,6 @@ public class LinearMomentumRateControlModuleInput
     */
    private boolean minimizeAngularMomentumRateZ;
 
-   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
-   private boolean updatePlanarRegions;
-
-   @Deprecated // should be listening to planar regions itself or have this information come from the same thread at least.
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion.class);
-
    /**
     * List of upcoming footsteps that are being executed by the controller. This is of interest to the ICP controller
     * because it might consider n-step capturability or adjust the locations of the upcoming footsteps when needed.
@@ -179,28 +161,6 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
-   }
-
-   @Deprecated // TODO: this should be computed inside the module and be an output rather then an input.
-   public void setCapturePoint(FramePoint2DReadOnly capturePoint)
-   {
-      this.capturePoint.setIncludingFrame(capturePoint);
-   }
-
-   public FramePoint2DReadOnly getCapturePoint()
-   {
-      return capturePoint;
-   }
-
-   @Deprecated // TODO: this should be computed inside the module and be an output rather then an input.
-   public void setCapturePointVelocity(FrameVector2DReadOnly capturePointVelocity)
-   {
-      this.capturePointVelocity.setIncludingFrame(capturePointVelocity);
-   }
-
-   public FrameVector2DReadOnly getCapturePointVelocity()
-   {
-      return capturePointVelocity;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
@@ -262,17 +222,6 @@ public class LinearMomentumRateControlModuleInput
    public FramePoint2DReadOnly getPerfectCoP()
    {
       return perfectCoP;
-   }
-
-   @Deprecated // TODO: This is used to compute and visualize the achieved CMP only. Lets do that somewhere else and not pass this around needlessly.
-   public void setAchievedLinearMomentumRate(FrameVector3DReadOnly achievedLinearMomentumRate)
-   {
-      this.achievedLinearMomentumRate.setIncludingFrame(achievedLinearMomentumRate);
-   }
-
-   public FrameVector3DReadOnly getAchievedLinearMomentumRate()
-   {
-      return achievedLinearMomentumRate;
    }
 
    public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
@@ -381,32 +330,6 @@ public class LinearMomentumRateControlModuleInput
    public double getRemainingTimeInSwingUnderDisturbance()
    {
       return remainingTimeInSwingUnderDisturbance;
-   }
-
-   @Deprecated // TODO: This should not be coming from the walking controller. Listen to the planar regions message.
-   public void setUpdatePlanarRegions(boolean updatePlanarRegions)
-   {
-      this.updatePlanarRegions = updatePlanarRegions;
-   }
-
-   public boolean getUpdatePlanarRegions()
-   {
-      return updatePlanarRegions;
-   }
-
-   @Deprecated // TODO: This should not be coming from the walking controller. Listen to the planar regions message.
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
-   {
-      this.planarRegions.clear();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         this.planarRegions.add().set(planarRegions.get(i));
-      }
-   }
-
-   public List<PlanarRegion> getPlanarRegions()
-   {
-      return planarRegions;
    }
 
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
