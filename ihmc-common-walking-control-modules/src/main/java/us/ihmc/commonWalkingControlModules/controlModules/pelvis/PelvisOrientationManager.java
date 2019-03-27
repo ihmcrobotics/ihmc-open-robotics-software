@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -259,10 +259,9 @@ public class PelvisOrientationManager
       walkingManager.setSelectionMatrix(selectionMatrix);
    }
 
-   public <M extends Settable<M>> M pollStatusToReport()
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
-      // TODO Implement me
-      return null;
+      return userManager.pollStatusToReport();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

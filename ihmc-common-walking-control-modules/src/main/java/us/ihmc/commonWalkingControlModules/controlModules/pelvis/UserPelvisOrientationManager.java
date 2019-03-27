@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -79,5 +80,10 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    public FrameQuaternionReadOnly getDesiredOrientation()
    {
       return orientationController.getDesiredOrientation();
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return orientationController.pollStatusToReport();
    }
 }
