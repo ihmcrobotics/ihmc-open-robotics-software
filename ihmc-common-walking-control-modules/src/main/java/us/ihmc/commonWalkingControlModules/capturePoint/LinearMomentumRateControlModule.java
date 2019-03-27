@@ -5,6 +5,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
@@ -34,6 +35,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -133,8 +135,9 @@ public class LinearMomentumRateControlModule
    private boolean keepCoPInsideSupportPolygon;
    private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final TDoubleArrayList swingDurations = new TDoubleArrayList();
+   private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
@@ -222,11 +225,10 @@ public class LinearMomentumRateControlModule
       {
          this.footsteps.add().set(input.getFootsteps().get(i));
       }
-      this.footstepTimings.clear();
-      for (int i = 0; i < input.getFootstepTimings().size(); i++)
-      {
-         this.footstepTimings.add().set(input.getFootstepTimings().get(i));
-      }
+      this.swingDurations.reset();
+      this.swingDurations.addAll(input.getSwingDurations());
+      this.transferDurations.reset();
+      this.transferDurations.addAll(input.getTransferDurations());
       this.finalTransferDuration = input.getFinalTransferDuration();
       this.initializeForStanding = input.getInitializeForStanding();
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();
@@ -373,7 +375,7 @@ public class LinearMomentumRateControlModule
          icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
          for (int i = 0; i < footsteps.size(); i++)
          {
-            icpOptimizationController.addFootstepToPlan(footsteps.get(i), footstepTimings.get(i));
+            icpOptimizationController.addFootstepToPlan(footsteps.get(i), swingDurations.get(i), transferDurations.get(i));
          }
       }
 

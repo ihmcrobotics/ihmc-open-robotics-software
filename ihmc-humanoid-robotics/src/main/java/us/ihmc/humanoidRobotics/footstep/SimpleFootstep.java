@@ -1,14 +1,24 @@
 package us.ihmc.humanoidRobotics.footstep;
 
+import java.util.List;
+
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SimpleFootstep
+public class SimpleFootstep implements Settable<SimpleFootstep>
 {
    private RobotSide robotSide;
    private final FramePose3D soleFramePose = new FramePose3D();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
+
+   public SimpleFootstep()
+   {
+   }
 
    public SimpleFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
@@ -22,6 +32,7 @@ public class SimpleFootstep
       set(other);
    }
 
+   @Override
    public void set(SimpleFootstep other)
    {
       this.robotSide = other.robotSide;
@@ -39,6 +50,11 @@ public class SimpleFootstep
       soleFramePoseToPack.setIncludingFrame(soleFramePose);
    }
 
+   public FramePose3DReadOnly getSoleFramePose()
+   {
+      return soleFramePose;
+   }
+
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;
@@ -52,6 +68,19 @@ public class SimpleFootstep
    public void setFoothold(ConvexPolygon2D foothold)
    {
       this.foothold.set(foothold);
+   }
+
+   public void setFoothold(List<Point2D> contactPoints)
+   {
+      foothold.clear();
+      if (contactPoints != null)
+      {
+         for (int i = 0; i < contactPoints.size(); i++)
+         {
+            foothold.addVertex(contactPoints.get(i));
+         }
+      }
+      foothold.update();
    }
 
    public boolean hasFoothold()
@@ -69,6 +98,11 @@ public class SimpleFootstep
          footholdToPack.set(foothold);
    }
 
+   public ConvexPolygon2DReadOnly getFoothold()
+   {
+      return foothold;
+   }
+
    public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)
    {
       this.foothold.update();
@@ -83,6 +117,7 @@ public class SimpleFootstep
       return true;
    }
 
+   @Override
    public String toString()
    {
       String message = "Robot side = " + robotSide;
