@@ -23,7 +23,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
  */
 public class AtlasRemoteFootstepPlannerUI extends Application
 {
-   private static final boolean launchPlannerToolbox = false;
+   private static final boolean launchPlannerToolbox = true;
 
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
@@ -46,7 +46,7 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, null,
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewModel,
                                               drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
