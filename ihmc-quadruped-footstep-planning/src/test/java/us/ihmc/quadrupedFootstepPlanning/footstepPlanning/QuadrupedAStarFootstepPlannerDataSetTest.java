@@ -15,7 +15,7 @@ import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import static junit.framework.TestCase.assertTrue;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
