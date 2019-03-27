@@ -9,7 +9,7 @@ import us.ihmc.pubsub.DomainFactory;
 public class AtlasFootstepPlanningToolbox
 {
    public static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-   private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
+   private static final RobotTarget ATLAS_TARGET = RobotTarget.REAL_ROBOT;
 
    public static void main(String[] args)
    {
