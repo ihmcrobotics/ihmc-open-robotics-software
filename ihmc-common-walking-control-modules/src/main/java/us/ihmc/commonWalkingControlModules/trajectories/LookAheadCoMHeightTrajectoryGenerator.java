@@ -25,6 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
@@ -858,17 +859,20 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final PelvisHeightTrajectoryCommand tempPelvisHeightTrajectoryCommand = new PelvisHeightTrajectoryCommand();
 
-   public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
+   public boolean handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      if (!command.getSE3Trajectory().getSelectionMatrix().isLinearZSelected())
-         return; // The user does not want to control the height, do nothing.
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
 
-      command.getSE3Trajectory().changeFrame(worldFrame);
+      if (!se3Trajectory.getSelectionMatrix().isLinearZSelected())
+         return false; // The user does not want to control the height, do nothing.
+
+      se3Trajectory.changeFrame(worldFrame);
       tempPelvisHeightTrajectoryCommand.set(command);
       handlePelvisHeightTrajectoryCommand(tempPelvisHeightTrajectoryCommand);
+      return true;
    }
 
-   public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
+   public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
       EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
 
@@ -878,7 +882,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          clearCommandQueue(euclideanTrajectory.getCommandId());
          offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
          initializeOffsetTrajectoryGenerator(command, 0.0);
-         return;
+         return true;
       }
       else if (euclideanTrajectory.getExecutionMode() == ExecutionMode.QUEUE)
       {
@@ -891,12 +895,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
             offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
             offsetHeightTrajectoryGenerator.initialize();
          }
-         return;
+         return success;
       }
       else
       {
          LogTools.warn("Unknown {} value: {}. Command ignored.", ExecutionMode.class.getSimpleName(), euclideanTrajectory.getExecutionMode());
-         return;
+         return false;
       }
    }
 
