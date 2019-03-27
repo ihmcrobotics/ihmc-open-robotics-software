@@ -41,6 +41,10 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
 
+benchmarksDependencies {
+   compile ihmc.sourceSetProject("main")
+}
+
 testDependencies {
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
 }
