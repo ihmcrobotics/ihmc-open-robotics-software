@@ -127,6 +127,16 @@ public class ControllerCoreCommandRandomTools
    @SuppressWarnings("rawtypes")
    private static Set<Class<? extends FeedbackControlCommand>> allFeedbackControlCommands = null;
 
+   private static final Set<Class<?>> additionalClassesToTest = createAdditionalClassesToTest();
+
+   private static Set<Class<?>> createAdditionalClassesToTest()
+   {
+      HashSet<Class<?>> set = new HashSet<>();
+      set.add(LinearMomentumRateControlModuleInput.class);
+      set.add(LinearMomentumRateControlModuleOutput.class);
+      return set;
+   }
+
    public static Reflections getControllerCoreReflectionsInstance()
    {
       if (controllerCoreReflections == null)
@@ -202,6 +212,11 @@ public class ControllerCoreCommandRandomTools
             commandTypes.remove(commandTypeToIgnore);
       }
       return commandTypes;
+   }
+
+   public static Set<Class<?>> getAdditionalClassesToTest()
+   {
+      return additionalClassesToTest;
    }
 
    @SafeVarargs
