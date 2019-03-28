@@ -67,7 +67,7 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ControllerCoreCommandCodeQualityTest
+public class CrossRobotCommandCodeQualityTest
 {
    /**
     * Number of attempts used when comparing 2 random objects before failing.
@@ -88,27 +88,27 @@ public class ControllerCoreCommandCodeQualityTest
    {
       String errorMessage = "";
 
-      for (Class<? extends InverseDynamicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes())
+      for (Class<? extends InverseDynamicsCommand> commandType : CrossRobotCommandRandomTools.getInverseDynamicsCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends InverseKinematicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes())
+      for (Class<? extends InverseKinematicsCommand> commandType : CrossRobotCommandRandomTools.getInverseKinematicsCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends VirtualModelControlCommand> commandType : ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes())
+      for (Class<? extends VirtualModelControlCommand> commandType : CrossRobotCommandRandomTools.getVirtualModelControlCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends FeedbackControlCommand> commandType : ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes())
+      for (Class<? extends FeedbackControlCommand> commandType : CrossRobotCommandRandomTools.getFeedbackControlCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<?> commandType : ControllerCoreCommandRandomTools.getAdditionalClassesToTest())
+      for (Class<?> commandType : CrossRobotCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
@@ -158,27 +158,27 @@ public class ControllerCoreCommandCodeQualityTest
    {
       String errorMessage = "";
 
-      for (Class<? extends InverseDynamicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes())
+      for (Class<? extends InverseDynamicsCommand> commandType : CrossRobotCommandRandomTools.getInverseDynamicsCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends InverseKinematicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes())
+      for (Class<? extends InverseKinematicsCommand> commandType : CrossRobotCommandRandomTools.getInverseKinematicsCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends VirtualModelControlCommand> commandType : ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes())
+      for (Class<? extends VirtualModelControlCommand> commandType : CrossRobotCommandRandomTools.getVirtualModelControlCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends FeedbackControlCommand> commandType : ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes())
+      for (Class<? extends FeedbackControlCommand> commandType : CrossRobotCommandRandomTools.getFeedbackControlCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<?> commandType : ControllerCoreCommandRandomTools.getAdditionalClassesToTest())
+      for (Class<?> commandType : CrossRobotCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
@@ -233,7 +233,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -265,13 +265,13 @@ public class ControllerCoreCommandCodeQualityTest
             {
                long seed = random.nextLong();
                // Generating 2 objects that we know are the same because we use a fresh random with the same seed both times.
-               Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody, referenceFrames);
-               Object typeRandomInstanceDuplicate = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody,
+               Object typeRandomInstance = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody, referenceFrames);
+               Object typeRandomInstanceDuplicate = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody,
                                                                                                       referenceFrames);
 
                try
                { // We randomize the field's value on the first random object.
-                  ControllerCoreCommandRandomTools.randomizeField(random, field, typeRandomInstance, rootBody, referenceFrames);
+                  CrossRobotCommandRandomTools.randomizeField(random, field, typeRandomInstance, rootBody, referenceFrames);
                }
                catch (UnsupportedOperationException e)
                {
@@ -297,7 +297,7 @@ public class ControllerCoreCommandCodeQualityTest
    }
 
    /**
-    * API test to verify that {@link ControllerCoreCommandRandomTools} declares the random generators
+    * API test to verify that {@link CrossRobotCommandRandomTools} declares the random generators
     * we need to generate controller core commands, including their fields.
     * 
     * @throws Exception
@@ -311,7 +311,7 @@ public class ControllerCoreCommandCodeQualityTest
       typesToIgnore.add(OneDoFJointBasics.class);
       typesToIgnore.add(RigidBodyBasics.class);
 
-      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       allCommandTypes.removeIf(type -> type.isInterface());
       Map<Class<?>, Class<?>> typesToVerify = new HashMap<>();
       for (Class<?> commandType : allCommandTypes)
@@ -323,7 +323,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       String errorMessage = "";
 
-      Set<String> randomGeneratorNames = Stream.of(ControllerCoreCommandRandomTools.class.getDeclaredMethods()).map(Method::getName)
+      Set<String> randomGeneratorNames = Stream.of(CrossRobotCommandRandomTools.class.getDeclaredMethods()).map(Method::getName)
                                                .collect(Collectors.toSet());
 
       for (Entry<Class<?>, Class<?>> typeToVerifyAndOwnerEntry : typesToVerify.entrySet())
@@ -355,7 +355,7 @@ public class ControllerCoreCommandCodeQualityTest
    }
 
    /**
-    * This tests asserts that the random generators in {@link ControllerCoreCommandRandomTools}
+    * This tests asserts that the random generators in {@link CrossRobotCommandRandomTools}
     * generate fully random objects, i.e. each field of a random object is generated randomly.
     * <ol>
     * <li>2 objects of the same type are generated randomly.
@@ -380,7 +380,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -414,7 +414,7 @@ public class ControllerCoreCommandCodeQualityTest
             // We first assert that the random object is different from the instance created with empty constructor.
             for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
-               Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstance = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstance = field.get(typeRandomInstance);
 
                if (fieldTypeRandomInstance != null && !fieldTypeRandomInstance.equals(fieldTypeDefaultInstance))
@@ -434,9 +434,9 @@ public class ControllerCoreCommandCodeQualityTest
 
             for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
-               Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstanceA = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceA = field.get(typeRandomInstanceA);
-               Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstanceB = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceB = field.get(typeRandomInstanceB);
 
                if (fieldTypeRandomInstanceA == fieldTypeRandomInstanceB)
@@ -493,7 +493,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -515,11 +515,11 @@ public class ControllerCoreCommandCodeQualityTest
             throw new AssertionFailedError("Could not find a copy setter method for the type: " + typeToTest.getSimpleName());
          }
 
-         Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+         Object typeRandomInstanceA = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
          for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
          {
-            Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+            Object typeRandomInstanceB = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
             copySetter.invoke(typeRandomInstanceA, typeRandomInstanceB);
 
@@ -668,7 +668,7 @@ public class ControllerCoreCommandCodeQualityTest
          field.setAccessible(true);
          Random random = new Random();
          List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 2);
-         Object ownerInstance = ControllerCoreCommandRandomTools.nextTypeInstance(ownerType, random, true,
+         Object ownerInstance = CrossRobotCommandRandomTools.nextTypeInstance(ownerType, random, true,
                                                                                   joints.get(0).getSuccessor(),
                                                                                   ReferenceFrame.getWorldFrame());
          Object fieldInstance = field.get(ownerInstance);
@@ -680,7 +680,7 @@ public class ControllerCoreCommandCodeQualityTest
       if (fieldType == SideDependentList.class)
       {
          field.setAccessible(true);
-         Object ownerInstance = ControllerCoreCommandRandomTools.nextTypeInstance(ownerType, new Random(), true,
+         Object ownerInstance = CrossRobotCommandRandomTools.nextTypeInstance(ownerType, new Random(), true,
                                                                                   new RigidBody("Dummy", ReferenceFrame.getWorldFrame()),
                                                                                   ReferenceFrame.getWorldFrame());
          Object fieldInstance = field.get(ownerInstance);

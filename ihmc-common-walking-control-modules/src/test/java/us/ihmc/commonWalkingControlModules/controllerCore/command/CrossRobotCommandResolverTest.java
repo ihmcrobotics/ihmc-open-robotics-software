@@ -48,7 +48,7 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Set<Class<? extends InverseDynamicsCommand>> commandTypes = ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class,
+      Set<Class<? extends InverseDynamicsCommand>> commandTypes = CrossRobotCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandList.class,
                                                                                                                                   InverseDynamicsCommandBuffer.class);
 
       String errorMessage = "";
@@ -74,7 +74,7 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Set<Class<? extends InverseKinematicsCommand>> commandTypes = ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class,
+      Set<Class<? extends InverseKinematicsCommand>> commandTypes = CrossRobotCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandList.class,
                                                                                                                                       InverseKinematicsCommandBuffer.class);
 
       String errorMessage = "";
@@ -100,7 +100,7 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Set<Class<? extends VirtualModelControlCommand>> commandTypes = ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
+      Set<Class<? extends VirtualModelControlCommand>> commandTypes = CrossRobotCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandList.class,
                                                                                                                                           VirtualModelControlCommandBuffer.class);
 
       String errorMessage = "";
@@ -126,7 +126,7 @@ class CrossRobotCommandResolverTest
    {
       boolean verbose = true;
 
-      Set<Class<? extends FeedbackControlCommand>> commandTypes = ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandList.class,
+      Set<Class<? extends FeedbackControlCommand>> commandTypes = CrossRobotCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandList.class,
                                                                                                                                   FeedbackControlCommandBuffer.class);
 
       String errorMessage = "";
@@ -191,7 +191,7 @@ class CrossRobotCommandResolverTest
    @Test
    void testResolvingCommands() throws Exception
    {
-      for (Class<?> commandType : ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces())
+      for (Class<?> commandType : CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces())
       {
          testForResolver(commandType);
       }
@@ -209,8 +209,8 @@ class CrossRobotCommandResolverTest
       {
          // By using the same seed on a fresh random, the two commands will be built the same way.
          long seed = random.nextLong();
-         Object in = ControllerCoreCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyA, testData.frameTreeA);
-         Object expectedOut = ControllerCoreCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyB, testData.frameTreeB);
+         Object in = CrossRobotCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyA, testData.frameTreeA);
+         Object expectedOut = CrossRobotCommandRandomTools.nextTypeInstance(clazz, new Random(seed), true, testData.rootBodyB, testData.frameTreeB);
 
          // Find the resolve method by name only. This is robust to the parameter being an interface or a buffer.
          Method[] methods = CrossRobotCommandResolver.class.getMethods();

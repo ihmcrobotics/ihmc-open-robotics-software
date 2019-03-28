@@ -110,7 +110,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 
-public class ControllerCoreCommandRandomTools
+public class CrossRobotCommandRandomTools
 {
    public static interface ReflectionBuilder
    {
@@ -1094,7 +1094,7 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                            RigidBodyBasics.class, ReferenceFrame[].class);
          InverseDynamicsCommand<?> command = (InverseDynamicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
@@ -1133,7 +1133,7 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                            RigidBodyBasics.class, ReferenceFrame[].class);
          InverseKinematicsCommand<?> command = (InverseKinematicsCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
@@ -1172,7 +1172,7 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                            RigidBodyBasics.class, ReferenceFrame[].class);
          VirtualModelControlCommand<?> command = (VirtualModelControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
@@ -1210,7 +1210,7 @@ public class ControllerCoreCommandRandomTools
             numberOfCommandsToGenerate.remove(index);
          }
 
-         Method randomGenerator = ControllerCoreCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
+         Method randomGenerator = CrossRobotCommandRandomTools.class.getDeclaredMethod("next" + commandType.getSimpleName(), Random.class,
                                                                                            RigidBodyBasics.class, ReferenceFrame[].class);
          FeedbackControlCommand<?> command = (FeedbackControlCommand<?>) randomGenerator.invoke(null, random, rootBody, possibleFrames);
          next.addCommand(command);
@@ -1507,7 +1507,7 @@ public class ControllerCoreCommandRandomTools
       }
 
       String methodName = "next" + typeToInstantiateRandomly.getSimpleName();
-      List<Method> potentialGenerators = Stream.of(ControllerCoreCommandRandomTools.class.getDeclaredMethods()).filter(m -> m.getName().equals(methodName))
+      List<Method> potentialGenerators = Stream.of(CrossRobotCommandRandomTools.class.getDeclaredMethods()).filter(m -> m.getName().equals(methodName))
                                                .collect(Collectors.toList());
 
       if (potentialGenerators.size() > 1)
