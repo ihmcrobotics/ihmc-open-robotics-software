@@ -137,9 +137,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          return false;
       }
-      statusHelper.registerNewTrajectory(command);
-
-      return jointControlHelper.handleTrajectoryCommand(command, initialJointPositions);
+      else if (jointControlHelper.handleTrajectoryCommand(command, initialJointPositions))
+      {
+         statusHelper.registerNewTrajectory(command);
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override
@@ -152,7 +158,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public boolean isEmpty()
    {
       return jointControlHelper.isEmpty();
-   };
+   }
 
    public double getJointDesiredPosition(int jointIdx)
    {

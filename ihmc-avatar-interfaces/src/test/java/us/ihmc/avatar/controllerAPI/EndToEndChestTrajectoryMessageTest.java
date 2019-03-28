@@ -21,6 +21,7 @@ import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -970,7 +971,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       {
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
-      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       assertNumberOfWaypoints(1, scs, chest, prefix);
    }
 
@@ -1046,7 +1047,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       {
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
-      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       assertNumberOfWaypoints(1, scs, chest, prefix);
 
       drcSimulationTestHelper.publishToController(lookRightMessage);
@@ -1056,7 +1057,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       drcSimulationTestHelper.publishToController(LookLeftMessageWithChangeTrajFrame);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
 
-      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       assertNumberOfWaypoints(1, scs, chest, prefix);
 
       drcSimulationTestHelper.publishToController(lookStraightAheadMessage);
@@ -1294,7 +1295,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientationBeforeStop = findControllerDesiredOrientation(scs, chest);
 
-      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       assertNumberOfWaypoints(2, scs, chest, prefix);
 
       StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
@@ -1310,7 +1311,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       {
          defaultControlMode = RigidBodyControlMode.JOINTSPACE;
       }
-      assertEquals(defaultControlMode, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlMode, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       assertNumberOfWaypoints(1, scs, chest, prefix);
 
       EuclidCoreTestTools.assertQuaternionEquals(desiredOrientationBeforeStop, desiredOrientationAfterStop, 1.0e-3);
