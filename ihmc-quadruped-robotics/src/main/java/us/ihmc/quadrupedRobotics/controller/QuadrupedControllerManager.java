@@ -40,6 +40,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -50,7 +51,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorModeSubscriber;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -153,6 +153,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       }
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialControllerState, calibrationState);
+   }
+
+   public void registerHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> listener)
+   {
+      stateMachine.addStateChangedListener(listener);
    }
 
    public State getState(HighLevelControllerName state)
