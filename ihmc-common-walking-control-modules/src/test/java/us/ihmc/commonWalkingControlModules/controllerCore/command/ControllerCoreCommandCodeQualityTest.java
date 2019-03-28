@@ -76,16 +76,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ControllerCoreCommandCodeQualityTest
 {
-   public static final Set<Class<?>> additionalClassesToTest = createAdditionalClassesToTest();
-
-   private static Set<Class<?>> createAdditionalClassesToTest()
-   {
-      HashSet<Class<?>> set = new HashSet<>();
-      set.add(LinearMomentumRateControlModuleInput.class);
-      set.add(LinearMomentumRateControlModuleOutput.class);
-      return set;
-   }
-
    /**
     * Number of attempts used when comparing 2 random objects before failing.
     * <p>
@@ -125,7 +115,7 @@ public class ControllerCoreCommandCodeQualityTest
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<?> commandType : additionalClassesToTest)
+      for (Class<?> commandType : ControllerCoreCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
@@ -195,7 +185,7 @@ public class ControllerCoreCommandCodeQualityTest
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<?> commandType : additionalClassesToTest)
+      for (Class<?> commandType : ControllerCoreCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
@@ -257,7 +247,7 @@ public class ControllerCoreCommandCodeQualityTest
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
                                                                                                  VirtualEffortCommand.class));
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(additionalClassesToTest);
+      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
 
       String errorMessage = "";
 
@@ -342,7 +332,7 @@ public class ControllerCoreCommandCodeQualityTest
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
                                                                                                  VirtualEffortCommand.class));
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(additionalClassesToTest);
+      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
       allCommandTypes.removeIf(type -> type.isInterface());
       Map<Class<?>, Class<?>> typesToVerify = new HashMap<>();
       for (Class<?> commandType : allCommandTypes)
@@ -418,7 +408,7 @@ public class ControllerCoreCommandCodeQualityTest
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
                                                                                                  VirtualEffortCommand.class));
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(additionalClassesToTest);
+      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
 
       String errorMessage = "";
 
@@ -539,7 +529,7 @@ public class ControllerCoreCommandCodeQualityTest
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
                                                                                                  VirtualEffortCommand.class));
       allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(additionalClassesToTest);
+      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
 
       String errorMessage = "";
 
