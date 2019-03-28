@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
@@ -12,10 +13,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -134,8 +137,9 @@ public class EndToEndTestTools
       assertEquals(expectedNumberOfWaypoints, numberOfPoints, "Unexpected number of trajectory points for " + jointName);
    }
 
-   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp, double[] expectedDesiredPositions,
-                                                       String[] jointNames, JointspaceTrajectoryStatusMessage statusMessage, double epsilon, double controllerDT)
+   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
+                                                       double[] expectedDesiredPositions, String[] jointNames, JointspaceTrajectoryStatusMessage statusMessage,
+                                                       double epsilon, double controllerDT)
    {
       assertJointspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, jointNames, statusMessage, controllerDT);
 
@@ -145,8 +149,8 @@ public class EndToEndTestTools
       }
    }
 
-   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp, String[] jointNames,
-                                                       JointspaceTrajectoryStatusMessage statusMessage, double controllerDT)
+   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
+                                                       String[] jointNames, JointspaceTrajectoryStatusMessage statusMessage, double controllerDT)
    {
       assertEquals(expectedSequenceID, statusMessage.getSequenceId());
       assertEquals(expectedStatus, TrajectoryExecutionStatus.fromByte(statusMessage.getTrajectoryExecutionStatus()));
@@ -159,6 +163,46 @@ public class EndToEndTestTools
       {
          assertEquals(jointNames[jointIndex], statusMessage.getJointNames().getString(jointIndex));
       }
+   }
+
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
+                                                      Point3DReadOnly expectedDesiredPosition, Orientation3DReadOnly expectedDesiredOrientation,
+                                                      String endEffectorName, TaskspaceTrajectoryStatusMessage statusMessage, double epsilon,
+                                                      double controllerDT)
+   {
+      if (expectedDesiredPosition != null)
+      {
+         EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+         assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
+      }
+      else
+      {
+         assertTrue(statusMessage.getDesiredEndEffectorPosition().containsNaN());
+         assertTrue(statusMessage.getActualEndEffectorPosition().containsNaN());
+      }
+
+      if (expectedDesiredOrientation != null)
+      {
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(new Quaternion(expectedDesiredOrientation), statusMessage.getDesiredEndEffectorOrientation(),
+                                                                 epsilon);
+         assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
+      }
+      else
+      {
+         assertTrue(statusMessage.getDesiredEndEffectorOrientation().containsNaN());
+         assertTrue(statusMessage.getActualEndEffectorOrientation().containsNaN());
+      }
+      assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, endEffectorName, statusMessage, controllerDT);
+   }
+
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
+                                                      String endEffectorName, TaskspaceTrajectoryStatusMessage statusMessage, double controllerDT)
+   {
+      assertEquals(expectedSequenceID, statusMessage.getSequenceId());
+      assertEquals(expectedStatus, TrajectoryExecutionStatus.fromByte(statusMessage.getTrajectoryExecutionStatus()));
+      assertEquals(expectedTimestamp, statusMessage.getTimestamp(), 1.01 * controllerDT); // When queueing messages, the time can drift a tiny bit.
+      assertEquals(endEffectorName, statusMessage.getEndEffectorName().toString());
+
    }
 
    @SuppressWarnings("unchecked")

@@ -18,6 +18,7 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -38,7 +39,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
@@ -140,6 +143,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
+
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -162,9 +169,15 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation,
                                                                                                         ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      chestTrajectoryMessage.setSequenceId(random.nextLong());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT));
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, chest.getName(),
+                                                        statusMessages.remove(0), controllerDT);
+
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
 
@@ -175,6 +188,10 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       assertControlErrorIsLow(scs, chest, 1.0e-2);
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest, prefix);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
+                                                        desiredRandomChestOrientation, chest.getName(), statusMessages.remove(0), 1.0e-5, controllerDT);
    }
 
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
@@ -447,8 +464,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
+      Random random = new Random(3456357);
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -469,6 +492,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
       so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
       so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
+      chestTrajectoryMessage.setSequenceId(random.nextLong());
 
       FrameQuaternion[] desiredChestOrientations = new FrameQuaternion[numberOfTrajectoryPoints];
       FrameVector3D[] desiredChestAngularVelocities = new FrameVector3D[numberOfTrajectoryPoints];
@@ -497,9 +521,13 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT); // Trick to get frames synchronized with the controller.
       assertTrue(success);
       humanoidReferenceFrames.updateFrames();
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, chest.getName(),
+                                                        statusMessages.remove(0), controllerDT);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -507,7 +535,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          desiredChestAngularVelocities[trajectoryPointIndex].changeFrame(pelvisZUpFrame);
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT);
       assertTrue(success);
 
       assertNumberOfWaypoints(numberOfTrajectoryPoints + 1, scs, chest, prefix);
@@ -531,6 +559,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
       assertControlErrorIsLow(scs, chest, 1.0e-2);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
+                                                        desiredChestOrientations[desiredChestOrientations.length - 1], chest.getName(),
+                                                        statusMessages.remove(0), 1.0e-4, controllerDT);
    }
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
@@ -752,11 +785,17 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
+      Random random = new Random(532);
+
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -791,6 +830,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          FrameQuaternion[] desiredChestOrientations = new FrameQuaternion[numberOfTrajectoryPoints];
          FrameVector3D[] desiredChestAngularVelocities = new FrameVector3D[numberOfTrajectoryPoints];
          ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
+         chestTrajectoryMessage.setSequenceId(random.nextLong());
          SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
          so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
@@ -827,7 +867,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
             trajectoryPoint.getAngularVelocity().set(desiredChestAngularVelocities[trajectoryPointIndex]);
          }
          drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT); // Trick to get frames synchronized with the controller.
          assertTrue(success);
 
          humanoidReferenceFrames.updateFrames();
@@ -842,7 +882,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          messageList.add(chestTrajectoryMessage);
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * getRobotModel().getControllerDT());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
       assertTrue(success);
 
       int totalPoints = numberOfMessages * numberOfTrajectoryPoints + 1;
@@ -877,6 +917,29 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       assertNumberOfWaypoints(pointsInLastTrajectory, scs, chest, prefix);
       assertControlErrorIsLow(scs, chest, 1.0e-2);
+
+      assertEquals(2 * messageList.size(), statusMessages.size());
+
+      double startTime = 0.0;
+
+      for (int inputIndex = 0; inputIndex < messageList.size(); inputIndex++)
+      {
+         ChestTrajectoryMessage chestTrajectoryMessage = messageList.get(inputIndex);
+         Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = chestTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints();
+
+         double endTime = startTime + taskspaceTrajectoryPoints.getLast().getTime();
+         if (inputIndex > 0)
+            startTime += taskspaceTrajectoryPoints.getFirst().getTime();
+
+         TaskspaceTrajectoryStatusMessage startedStatus = statusMessages.remove(0);
+         TaskspaceTrajectoryStatusMessage completedStatus = statusMessages.remove(0);
+         long expectedSequenceID = chestTrajectoryMessage.getSequenceId();
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID, TrajectoryExecutionStatus.STARTED, startTime, chest.getName(), startedStatus,
+                                                           controllerDT);
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(expectedSequenceID, TrajectoryExecutionStatus.COMPLETED, endTime, chest.getName(), completedStatus,
+                                                           controllerDT);
+         startTime = endTime;
+      }
    }
 
    public void testQueueWithWrongPreviousId() throws Exception
