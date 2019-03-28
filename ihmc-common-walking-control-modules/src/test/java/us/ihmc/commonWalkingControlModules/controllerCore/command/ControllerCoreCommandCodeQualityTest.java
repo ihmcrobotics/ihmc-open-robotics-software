@@ -29,17 +29,10 @@ import org.opentest4j.AssertionFailedError;
 import com.google.common.base.CaseFormat;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
-import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
@@ -240,15 +233,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
-
+      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -326,13 +311,7 @@ public class ControllerCoreCommandCodeQualityTest
       typesToIgnore.add(OneDoFJointBasics.class);
       typesToIgnore.add(RigidBodyBasics.class);
 
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
+      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       allCommandTypes.removeIf(type -> type.isInterface());
       Map<Class<?>, Class<?>> typesToVerify = new HashMap<>();
       for (Class<?> commandType : allCommandTypes)
@@ -401,15 +380,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
-
+      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -522,15 +493,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getAdditionalClassesToTest());
-
+      Set<Class<?>> allCommandTypes = ControllerCoreCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -594,8 +557,13 @@ public class ControllerCoreCommandCodeQualityTest
          {
             Class<?> extractedGenericType = extractGenericType(type, field);
             if (extractedGenericType != null)
-               extractTypeSubTypes(extractedGenericType, subTypeToOwnerTypeMapToPack, typesToStopRecursionAt);
-
+            {
+               subTypeToOwnerTypeMapToPack.put(fieldType, type);
+               if (!typesToStopRecursionAt.contains(extractedGenericType))
+               {
+                  extractTypeSubTypes(extractedGenericType, subTypeToOwnerTypeMapToPack, typesToStopRecursionAt);
+               }
+            }
             continue;
          }
 
@@ -706,7 +674,7 @@ public class ControllerCoreCommandCodeQualityTest
          Object fieldInstance = field.get(ownerInstance);
          Object object = ((List<?>) fieldInstance).get(0);
          if (object == null)
-            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in side dependent list " + field.getName() + ".");
+            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in list " + field.getName() + ".");
          return object.getClass();
       }
       if (fieldType == SideDependentList.class)
@@ -721,6 +689,8 @@ public class ControllerCoreCommandCodeQualityTest
             fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in side dependent list " + field.getName() + ".");
          return object.getClass();
       }
+
+      // TODO: Add a check that all safe types with generics extract their generics here.
 
       return null;
    }

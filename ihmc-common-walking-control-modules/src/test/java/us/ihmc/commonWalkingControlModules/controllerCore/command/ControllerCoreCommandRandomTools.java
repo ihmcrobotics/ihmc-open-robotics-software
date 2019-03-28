@@ -134,6 +134,7 @@ public class ControllerCoreCommandRandomTools
       HashSet<Class<?>> set = new HashSet<>();
       set.add(LinearMomentumRateControlModuleInput.class);
       set.add(LinearMomentumRateControlModuleOutput.class);
+      set.add(ControllerCoreCommand.class);
       return set;
    }
 
@@ -217,6 +218,17 @@ public class ControllerCoreCommandRandomTools
    public static Set<Class<?>> getAdditionalClassesToTest()
    {
       return additionalClassesToTest;
+   }
+
+   public static Set<Class<?>> getAllCommandTypesWithoutBuffersAndInterfaces()
+   {
+      Set<Class<?>> allCommandTypes = new HashSet<>();
+      allCommandTypes.addAll(getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
+      allCommandTypes.addAll(getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
+      allCommandTypes.addAll(getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class, VirtualEffortCommand.class));
+      allCommandTypes.addAll(getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
+      allCommandTypes.addAll(getAdditionalClassesToTest());
+      return allCommandTypes;
    }
 
    @SafeVarargs
