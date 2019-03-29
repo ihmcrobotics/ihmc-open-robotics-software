@@ -15,30 +15,40 @@ import us.ihmc.ros2.Ros2Node;
 
 public class BasicTimingBehavior extends AbstractBehavior
 {
-   private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
-   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
-   private final AtomicReference<DoorLocationPacket> doorLocationMessage = new AtomicReference<>(null);
-   private final AtomicReference<WalkOverTerrainGoalPacket> walkOverTerrainGoalMessage = new AtomicReference<>(null);
-   private final AtomicReference<HandTrajectoryMessage> handTrajectoryMessage = new AtomicReference<>(null);
-   private final AtomicReference<ArmTrajectoryMessage> armTrajectoryMessage = new AtomicReference<>(null);
+   public final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
+   public final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
+   public final AtomicReference<DoorLocationPacket> doorLocationMessage = new AtomicReference<>(null);
+   public final AtomicReference<WalkOverTerrainGoalPacket> walkOverTerrainGoalMessage = new AtomicReference<>(null);
+   public final AtomicReference<HandTrajectoryMessage> handTrajectoryMessage = new AtomicReference<>(null);
+   public final AtomicReference<ArmTrajectoryMessage> armTrajectoryMessage = new AtomicReference<>(null);
 
-   private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
-   private final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
+   public final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
+   public final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
 
    public BasicTimingBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
 
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      
       createSubscriber(FootstepStatusMessage.class  , controllerSubGenerator, footstepStatusMessage::set);
       createSubscriber(HandTrajectoryMessage.class  , controllerSubGenerator, handTrajectoryMessage::set);
       createSubscriber(ArmTrajectoryMessage.class   , controllerSubGenerator, armTrajectoryMessage::set);
       createSubscriber(FootstepDataListMessage.class, controllerSubGenerator, footstepDataListMessage::set);
       createSubscriber(WalkingStatusMessage.class   , controllerSubGenerator, walkingStatusMessage::set);
+      
+      createSubscriber(FootstepStatusMessage.class  , controllerPubGenerator, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class  , controllerPubGenerator, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class   , controllerPubGenerator, armTrajectoryMessage::set);
+      createSubscriber(FootstepDataListMessage.class, controllerPubGenerator, footstepDataListMessage::set);
+      createSubscriber(WalkingStatusMessage.class   , controllerPubGenerator, walkingStatusMessage::set);
+      
+      
+      
+      
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       
-      publishTextToSpeack("created timer behavior");
 
    }
 
@@ -92,7 +102,6 @@ public class BasicTimingBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("entering timer behavior");
 
    }
 
@@ -120,7 +129,6 @@ public class BasicTimingBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("leaving timer behavior");
 
    }
 

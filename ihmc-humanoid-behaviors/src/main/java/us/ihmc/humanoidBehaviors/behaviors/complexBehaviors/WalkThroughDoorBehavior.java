@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -69,18 +70,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
    private final IHMCROS2Publisher<DoorLocationPacket> publisher;
    
-   private BasicTimingBehavior basicTimingBehavior;
+  // private BasicTimingBehavior basicTimingBehavior;
 
    public WalkThroughDoorBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
                                   HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                  AtlasPrimitiveActions atlasPrimitiveActions)
+                                  AtlasPrimitiveActions atlasPrimitiveActions, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
+  //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
-      searchForDoorBehavior = new SearchForDoorBehavior(robotName, ros2Node);
+      searchForDoorBehavior = new SearchForDoorBehavior(robotName, ros2Node,goalDetectorBehaviorService);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
       openDoorBehavior = new OpenDoorBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
@@ -96,7 +97,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       //should constantly be searching for door and updating its location here
       super.doControl();
-      basicTimingBehavior.doControl();
+    //  basicTimingBehavior.doControl();
    }
 
    @Override

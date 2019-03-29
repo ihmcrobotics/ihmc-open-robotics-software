@@ -186,14 +186,14 @@ public class FollowFiducialBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      checkFootstepStatusAndDetermineSwingingFoot();
+     // checkFootstepStatusAndDetermineSwingingFoot();
 
-      if (footstepSentTimer.totalElapsed() < 0.5)
-      {
-         return;
-      }
+     // if (footstepSentTimer.totalElapsed() < 0.5)
+     // {
+     //    return;
+     // }
 
-      updatePlannerIfPlanarRegionsListIsAvailable();
+      //updatePlannerIfPlanarRegionsListIsAvailable();
 
       //      WalkingStatusMessage walkingStatusLatestPacket = walkingStatusQueue.getLatestPacket();
       //      if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() != Status.COMPLETED)
@@ -211,7 +211,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       //      {
       //         return;
       //      }
-
+     // System.out.println("2");
       if (!fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
          sendTextToSpeechPacket("Fiducial not located.");
@@ -219,7 +219,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
          pitchHeadToFindFiducial();
          return;
       }
-
+      System.out.println("3");
       pitchHeadToCenterFiducial();
 
       fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tempFootstepPlannerGoalPose);
@@ -227,7 +227,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       footstepPlanner.plan();
       FootstepPlan plan = footstepPlanner.getPlan();
-
+      System.out.println("4");
       if (plan == null)
       {
          sendTextToSpeechPacket("No Plan was found!");
@@ -238,6 +238,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       int maxNumberOfStepsToTake = 5;
       FootstepDataListMessage footstepDataListMessage = createFootstepDataListFromPlan(plan, maxNumberOfStepsToTake);
       sendFootstepDataListMessage(footstepDataListMessage);
+      System.out.println("5");
    }
 
    private void sendTextToSpeechPacket(String message)
@@ -406,8 +407,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       xyGoal.setY(goalPose.getY());
       double distanceFromXYGoal = 1.0;
       footstepPlannerGoal.setXYGoal(xyGoal, distanceFromXYGoal);
-      //      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
+            footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      //footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
 
       uiPositionCheckerPublisher.publish(MessageTools.createUIPositionCheckerPacket(new Point3D(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()),
                                                                                     new Quaternion()));

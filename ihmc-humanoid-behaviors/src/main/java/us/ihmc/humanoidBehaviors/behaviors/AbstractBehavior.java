@@ -195,7 +195,7 @@ public abstract class AbstractBehavior implements RobotController
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
-         behaviorService.pause();
+         behaviorService.destroy();
       }
 
       onBehaviorAborted();
