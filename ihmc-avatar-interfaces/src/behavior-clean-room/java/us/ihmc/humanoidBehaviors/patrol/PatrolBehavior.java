@@ -29,6 +29,8 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
@@ -44,18 +46,16 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
-   /** Stop state that waits for or is triggered by a GoToWaypoint message */
-   private final Pair<String, Runnable> STOP_PAIR = Pair.of("STOP_PAIR", this::updateStopState);
-   /** Request and wait for footstep planner result */
-   private final Pair<String, Runnable> RETRIEVE_FOOTSTEP_PLAN = Pair.of("RETRIEVE_FOOTSTEP_PLAN", this::updateRetrieveFootstepPlanState);
-   /** Walking towards goal waypoint */
-   private final Pair<String, Runnable> WALK_TO_GOAL_WAYPOINT = Pair.of("WALK_TO_GOAL_WAYPOINT", this::updateWalkToGoalWaypointState);
-
-   private Pair<String, Runnable> currentState;
+   private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
    enum PatrolBehaviorState
    {
-      STOP, PLAN, WALK
+      /** Stop state that waits for or is triggered by a GoToWaypoint message */
+      STOP,
+      /** Request and wait for footstep planner result */
+      PLAN,
+      /** Walking towards goal waypoint */
+      WALK
    }
 
    private final Messager messager;
@@ -70,7 +70,6 @@ public class PatrolBehavior
 
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
-   private final Notification readyToPlanNotification = new Notification();
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private final Notification walkingCompleted = new Notification();
 
@@ -88,10 +87,12 @@ public class PatrolBehavior
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
-      factory.addTransition(PLAN, Lists.newArrayList(STOP, PLAN, WALK), this::transitionFromPlan);
+      factory.addTransition(PLAN, this::transitionFromPlan);
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
-      factory.addTransition(WALK, Lists.newArrayList(STOP, PLAN), this::transitionFromWalk);
+      factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
+      factory.addTransition(WALK, this::transitionFromWalk);
+      stateMachine = factory.getFactory().build(STOP);
 
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
@@ -115,34 +116,47 @@ public class PatrolBehavior
 
       waypoints = messager.createInput(API.Waypoints);
 
-      transitionTo(STOP_PAIR);
-
       PeriodicNonRealtimeThreadScheduler patrolThread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
+      patrolThread.schedule(this::patrolThread, 750, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
-      currentState.getValue().run();
+      LogTools.debug("Current state: {}", stateMachine.getCurrentStateKey());
+      stateMachine.doActionAndTransition();
    }
 
    private void onStopStateEntry()
    {
+      LogTools.debug("onStopStateEntry");
+      messager.submitMessage(API.CurrentState, STOP.name());
+
       sendPauseWalking(); // TODO make into tool
    }
 
    private void doStopStateAction(double timeInState)
    {
+      LogTools.debug("doStopStateAction");
       pollInterrupts();
    }
 
    private boolean transitionFromStopToPlan(double timeInState)
    {
-      return overrideGoToWaypointNotification.read() && goalWaypointInBounds();
+      LogTools.debug("Checking transition from STOP");
+
+      boolean transition = overrideGoToWaypointNotification.read() && goalWaypointInBounds();
+      if (transition)
+      {
+         LogTools.debug("STOP -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
+      }
+      return transition;
    }
 
    private void onPlanStateEntry()
    {
+      LogTools.debug("onPlanStateEntry");
+      messager.submitMessage(API.CurrentState, PLAN.name());
+
       remoteFootstepPlannerInterface.abortPlanning();
 
       FramePose3D midFeetZUpPose = new FramePose3D();
@@ -157,24 +171,29 @@ public class PatrolBehavior
 
    private void doPlanStateAction(double timeInState)
    {
+      LogTools.debug("doPlanStateAction");
       pollInterrupts();
       footstepPlanResultNotification.poll();
    }
 
    private PatrolBehaviorState transitionFromPlan(double timeInState)
    {
+      LogTools.debug("Checking transition from PLAN");
       if (stopNotification.read())
       {
+         LogTools.debug("PLAN -> STOP (stopNotification)");
          return STOP;
       }
       else if (overrideGoToWaypointNotification.read())
       {
          if (goalWaypointInBounds())
          {
+            LogTools.debug("PLAN -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
             return PLAN;
          }
          else
          {
+            LogTools.debug("PLAN -> STOP (overrideGoToWaypointNotification + !goalWaypointInBounds)");
             return STOP;
          }
       }
@@ -182,10 +201,12 @@ public class PatrolBehavior
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.read().getFootstepPlanningResult()).validForExecution())
          {
+            LogTools.debug("PLAN -> WALK (footstepPlanResultNotification + validForExecution)");
             return WALK;
          }
          else
          {
+            LogTools.debug("PLAN -> PLAN (footstepPlanResultNotification + !validForExecution)");
             return PLAN;
          }
       }
@@ -195,6 +216,9 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
+      LogTools.debug("onWalkStateEntry");
+      messager.submitMessage(API.CurrentState, WALK.name());
+
       FootstepPlanningToolboxOutputStatus footstepPlanningOutput = footstepPlanResultNotification.read();
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
       ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
@@ -213,29 +237,35 @@ public class PatrolBehavior
 
    private void doWalkStateAction(double timeInState)
    {
+      LogTools.debug("doWalkStateAction");
       pollInterrupts();
       walkingCompleted.poll();
    }
 
    private PatrolBehaviorState transitionFromWalk(double timeInState)
    {
+      LogTools.debug("Checking transition from WALK");
       if (stopNotification.read())
       {
+         LogTools.debug("WALK -> STOP (stopNotification)");
          return STOP;
       }
       else if (overrideGoToWaypointNotification.read())
       {
          if (goalWaypointInBounds())
          {
+            LogTools.debug("WALK -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
             return PLAN;
          }
          else
          {
+            LogTools.debug("WALK -> PLAN (overrideGoToWaypointNotification + !goalWaypointInBounds)");
             return STOP;
          }
       }
       else if (walkingCompleted.read())
       {
+         LogTools.debug("WALK -> PLAN (walkingCompleted)");
          return PLAN;
       }
 
@@ -244,6 +274,7 @@ public class PatrolBehavior
 
    private void onWalkStateExit()
    {
+      LogTools.debug("onWalkStateExit");
       if (!stopNotification.read() && !overrideGoToWaypointNotification.read()) // only increment if WALK -> PLAN
       {
          ArrayList<Pose3D> latestWaypoints = waypoints.get();      // access and store these early
@@ -254,110 +285,10 @@ public class PatrolBehavior
       }
    }
 
-   private void updateRetrieveFootstepPlanState()
-   {
-      if (checkForInterruptions())
-         return;  // need to return in case of stop condition
-
-      if (readyToPlanNotification.poll())
-      {
-         FramePose3D midFeetZUpPose = new FramePose3D();
-         // prevent frame from continuing to change
-         midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
-         int index = goalWaypointIndex.get();
-         messager.submitMessage(API.CurrentWaypointIndexStatus, index);
-         FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(index));
-
-         footstepPlanResultNotification = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
-      }
-      else if (footstepPlanResultNotification.poll())
-      {
-         FootstepPlanningToolboxOutputStatus footstepPlanningOutput = footstepPlanResultNotification.read();
-         FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
-         ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
-         {
-            FramePose3D soleFramePoseToPack = new FramePose3D();
-            footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
-            footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
-         }
-         messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
-
-         if (FootstepPlanningResult.fromByte(footstepPlanningOutput.getFootstepPlanningResult()).validForExecution())
-         {
-            walkingCompleted.poll(); // acting to clear the notification
-            LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());
-            footstepDataListPublisher.publish(footstepPlanningOutput.getFootstepDataList());
-            transitionTo(WALK_TO_GOAL_WAYPOINT);
-         }
-         else
-         {
-            LogTools.warn("Footstep plan result: {}", FootstepPlanningResult.fromByte(footstepPlanningOutput.getFootstepPlanningResult()).name());
-            readyToPlanNotification.set();  // plan again until walkable plan, also functions to wait for perception data and user modifications
-         }
-      }
-   }
-
-   private void updateWalkToGoalWaypointState()
-   {
-      if (checkForInterruptions())
-         return;
-
-      if (walkingCompleted.poll())  // in the future, may want to count steps and assert robot got to the waypoint bounding box
-      {
-         ArrayList<Pose3D> latestWaypoints = waypoints.get();      // access and store these early
-         int nextGoalWaypointIndex = goalWaypointIndex.get() + 1;  // to make thread-safe
-         if (nextGoalWaypointIndex >= latestWaypoints.size())
-            nextGoalWaypointIndex = 0;
-         goalWaypointIndex.set(nextGoalWaypointIndex);
-         readyToPlanNotification.set();
-         transitionTo(RETRIEVE_FOOTSTEP_PLAN);
-      }
-   }
-
    private void pollInterrupts()
    {
       stopNotification.poll();         // poll both at the same time to handle race condition
       overrideGoToWaypointNotification.poll();
-   }
-
-   private boolean checkForInterruptions()
-   {
-      stopNotification.poll();         // poll both at the same time to handle race condition
-      overrideGoToWaypointNotification.poll();
-
-      boolean interrupted = stopNotification.read() || overrideGoToWaypointNotification.read();
-
-      if (interrupted)
-      {
-         sendPauseWalking();
-         remoteFootstepPlannerInterface.abortPlanning();
-      }
-
-      if (stopNotification.read())  // favor stop if race condition
-      {
-         LogTools.info("Interrupted with STOP");
-         transitionTo(STOP_PAIR);
-      }
-
-      if (overrideGoToWaypointNotification.read())
-      {
-         LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
-
-         ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
-         int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
-         if (currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size())
-         {
-            readyToPlanNotification.set();
-            transitionTo(RETRIEVE_FOOTSTEP_PLAN);
-         }
-         else
-         {
-            transitionTo(STOP_PAIR); // TODO submit message about incorrect index
-         }
-      }
-
-      return interrupted;
    }
 
    private void sendPauseWalking()
@@ -366,13 +297,6 @@ public class PatrolBehavior
       PauseWalkingMessage pause = new PauseWalkingMessage();
       pause.setPause(true);
       pausePublisher.publish(pause);
-   }
-
-   private void transitionTo(Pair<String, Runnable> stateToTransitionTo)
-   {
-      LogTools.debug("Transitioning to {}", stateToTransitionTo.getKey());
-      currentState = stateToTransitionTo;
-      messager.submitMessage(API.CurrentState, currentState.getKey());
    }
 
    private boolean goalWaypointInBounds()

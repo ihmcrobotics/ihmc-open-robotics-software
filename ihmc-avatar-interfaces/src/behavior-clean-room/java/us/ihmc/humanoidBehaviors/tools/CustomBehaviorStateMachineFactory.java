@@ -7,7 +7,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
 {
@@ -40,7 +39,7 @@ public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
    {
       for (K value : EnumSet.allOf(keyType))
       {
-         factory.addTransition(from, value, timeInState-> stateTransitionToAny.shouldTransitionTo(timeInState).equals(value));
+         factory.addTransition(from, value, timeInState-> stateTransitionToAny.shouldTransitionTo(timeInState) == value); // must use == for null safety
       }
    }
 
@@ -57,7 +56,7 @@ public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
                throw new RuntimeException("Invalid transition to " + transitionTo + ". Options are " + toOptions);
             }
 
-            return transitionTo.equals(value);
+            return transitionTo == value; // must use == for null safety
          });
       }
    }
