@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -163,6 +164,14 @@ public class EndToEndTestTools
       {
          assertEquals(jointNames[jointIndex], statusMessage.getJointNames().getString(jointIndex));
       }
+   }
+
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
+                                                      Pose3DReadOnly expectedDesiredPose, String endEffectorName,
+                                                      TaskspaceTrajectoryStatusMessage statusMessage, double epsilon, double controllerDT)
+   {
+      assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, expectedDesiredPose.getPosition(),
+                                      expectedDesiredPose.getOrientation(), endEffectorName, statusMessage, epsilon, controllerDT);
    }
 
    public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,

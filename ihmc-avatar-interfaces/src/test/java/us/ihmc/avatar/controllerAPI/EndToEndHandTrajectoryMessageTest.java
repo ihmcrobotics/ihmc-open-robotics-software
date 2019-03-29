@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -34,6 +32,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -98,6 +97,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    /**
     * Method used to scale down trajectories for different robots.
+    * 
     * @return shinLength + thighLength of the robot
     */
    public abstract double getLegLength();
@@ -826,7 +826,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       int numberOfTrajectoryPoints = 10;
       int numberOfMessages = 10;
       double timeDurationForBetweenWaypoints = 0.1;
-      
+
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       // This test was originally made for Atlas, a robot with a leg length of ~0.8m
@@ -858,7 +858,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(worldFrame);
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(i * timeDurationForBetweenWaypoints , tempPoint);
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(i * timeDurationForBetweenWaypoints, tempPoint);
          }
 
          euclideanTrajectoryPointCalculator.compute(timeDurationForBetweenWaypoints * (numberOfTrajectoryPoints * numberOfMessages - 1));
@@ -1138,6 +1138,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simpleSE3TrajectoryPoint.setLinearVelocity(findControllerDesiredLinearVelocity(bodyName, scs));
       simpleSE3TrajectoryPoint.setAngularVelocity(findControllerDesiredAngularVelocity(bodyName, scs));
       return simpleSE3TrajectoryPoint;
+   }
+
+   public static void assertSingleWaypointExecuted(String bodyName, Pose3DReadOnly desiredPose, SimulationConstructionSet scs)
+   {
+      assertSingleWaypointExecuted(bodyName, desiredPose.getPosition(), desiredPose.getOrientation(), scs);
    }
 
    public static void assertSingleWaypointExecuted(String bodyName, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
