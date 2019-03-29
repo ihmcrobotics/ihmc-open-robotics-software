@@ -6,7 +6,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -38,6 +37,13 @@ public class SimpleFootstep implements Settable<SimpleFootstep>
       this.robotSide = other.robotSide;
       this.soleFramePose.setIncludingFrame(other.soleFramePose);
       this.foothold.set(other.foothold);
+   }
+
+   public void set(Footstep other)
+   {
+      setRobotSide(other.getRobotSide());
+      setSoleFramePose(other.getFootstepPose());
+      setFoothold(other.getPredictedContactPoints());
    }
 
    public RobotSide getRobotSide()
