@@ -610,6 +610,7 @@ public class CrossRobotCommandCodeQualityTest
    {
       Set<Class<?>> safeTypes = new HashSet<>();
       safeTypes.add(ArrayList.class);
+      safeTypes.add(List.class);
       safeTypes.add(TDoubleArrayList.class);
       safeTypes.add(ReferenceFrame.class);
       safeTypes.add(MovingReferenceFrame.class);
@@ -635,6 +636,7 @@ public class CrossRobotCommandCodeQualityTest
       safeTypes.add(PrismaticJoint.class);
       safeTypes.add(RevoluteJoint.class);
       safeTypes.add(RigidBodyBasics.class);
+      safeTypes.add(RigidBody.class);
       safeTypes.add(Wrench.class);
       safeTypes.add(SpatialForce.class);
       safeTypes.add(ConvexPolygon2D.class);
@@ -644,10 +646,23 @@ public class CrossRobotCommandCodeQualityTest
 
    private static List<Field> getAllFields(Class<?> clazz)
    {
+      return getAllFields(clazz, false);
+   }
+
+   private static List<Field> getAllFields(Class<?> clazz, boolean isSuperClass)
+   {
       if (clazz == null)
          return Collections.emptyList();
+
+      // TODO: fix this.
+      // Testing can be circumvented by referring to members as interfaces e.g.
+      // private final PID3DGains gains = new DefaultPID3DGains();
+      // will prevent the gains from getting checked!
+      if (clazz.isInterface() && !isSuperClass && !safeTypes().contains(clazz))
+         LogTools.warn("Was asked to check fields of " + clazz.getSimpleName() + " but is an interface.");
+
       List<Field> declaredFields = new ArrayList<Field>(Arrays.asList(clazz.getDeclaredFields()));
-      declaredFields.addAll(getAllFields(clazz.getSuperclass()));
+      declaredFields.addAll(getAllFields(clazz.getSuperclass(), true));
       return declaredFields;
    }
 
