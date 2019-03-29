@@ -50,7 +50,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       frameNumber = 0;
-      publishTextToSpeack("Getting Video Packets");
+      publishTextToSpeech("Getting Video Packets");
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetVideoPacketExampleBehavior", 1);
    }

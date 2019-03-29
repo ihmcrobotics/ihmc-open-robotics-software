@@ -56,7 +56,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    private void setupPipeline()
    {
 
-      publishTextToSpeack("Resetting Robot Pose");
+      publishTextToSpeech("Resetting Robot Pose");
       pipeLine.clearAll();
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, 2);

@@ -406,6 +406,6 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
    private void sendTextToSpeechPacket(String text)
    {
-      publishTextToSpeack(text);
+      publishTextToSpeech(text);
    }
 }
