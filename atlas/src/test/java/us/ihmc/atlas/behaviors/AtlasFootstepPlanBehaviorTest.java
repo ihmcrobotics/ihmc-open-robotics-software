@@ -9,12 +9,14 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
@@ -28,7 +30,9 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
+import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("humanoid-behaviors")
@@ -109,7 +113,10 @@ public class AtlasFootstepPlanBehaviorTest
       LogTools.info("Planning from {}, {}, yaw: {}", lastX, lastY, lastYaw);
       LogTools.info("to {}, {}, yaw: {}", x, y, yaw);
 
-      FootstepPlanningToolboxOutputStatus output1 = remoteFootstepPlannerInterface.requestPlanBlocking(startPose, goalPose, null);
+      TypedNotification<FootstepPlanningToolboxOutputStatus> resultNotification = remoteFootstepPlannerInterface
+            .requestPlan(startPose, goalPose, null);
+
+      FootstepPlanningToolboxOutputStatus output1 = resultNotification.blockingPoll();
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(output1.getFootstepPlanningResult()));
       LogTools.info("Received footstep plan took: {} s", output1.getTimeTaken());
@@ -171,9 +178,9 @@ public class AtlasFootstepPlanBehaviorTest
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
       currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
-      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlanBlocking(midFeetZUpPose,
+      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
                                                                                                       currentGoalWaypoint,
-                                                                                                      null);
+                                                                                                      null).blockingPoll();
 
       LogTools.info("Received footstep planning status: {}", output);
 
