@@ -107,7 +107,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               publishTextToSpeack("PlanPathToLocationBehavior: Telling Planner To Wake Up");
+               publishTextToSpeech("PlanPathToLocationBehavior: Telling Planner To Wake Up");
             }
             toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
@@ -121,7 +121,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               publishTextToSpeack("PlanPathToLocationBehavior: Requesting Plan");
+               publishTextToSpeech("PlanPathToLocationBehavior: Requesting Plan");
             }
 
             planId.increment();
@@ -141,7 +141,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            publishTextToSpeack("PlanPathToLocationBehavior: Waiting For Plan");
+            publishTextToSpeech("PlanPathToLocationBehavior: Waiting For Plan");
 
             sleepBehavior.setSleepTime(timeout);
          }
@@ -175,14 +175,14 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                }
                else
                {
-                  publishTextToSpeack("PlanPathToLocationBehavior: bad plan");
+                  publishTextToSpeech("PlanPathToLocationBehavior: bad plan");
 
                   planningSuccess = false;
                }
             }
             else
             {
-               publishTextToSpeack("PlanPathToLocationBehavior: never got a plan");
+               publishTextToSpeech("PlanPathToLocationBehavior: never got a plan");
 
                planningSuccess = false;
             }

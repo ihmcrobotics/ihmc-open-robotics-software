@@ -106,7 +106,7 @@ public class OpenDoorBehavior extends AbstractBehavior
 
    private HandTrajectoryMessage moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,final RobotSide side, final String description)
    {
-      publishTextToSpeack(description);
+      publishTextToSpeech(description);
 
     
       FramePose3D point = offsetPointFromDoorInWorldFrame(x, y, z, yaw, pitch, roll);

@@ -23,7 +23,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("Searching For The Valve");
+      publishTextToSpeech("Searching For The Valve");
    }
 
    @Override
@@ -59,7 +59,7 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    private void recievedValveLocation(ValveLocationPacket valveLocationPacket)
    {
-      publishTextToSpeack("Recieved Valve Location From UI");
+      publishTextToSpeech("Recieved Valve Location From UI");
       valveTransformToWorld = valveLocationPacket.getValvePoseInWorld();
 
       valveRadius = valveLocationPacket.getValveRadius();

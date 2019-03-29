@@ -38,7 +38,7 @@ public class BasicTimingBehavior extends AbstractBehavior
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       
-      publishTextToSpeack("created timer behavior");
+      publishTextToSpeech("created timer behavior");
 
    }
 
@@ -48,42 +48,42 @@ public class BasicTimingBehavior extends AbstractBehavior
 
       if (plannerResult.get() != null)
       {
-         publishTextToSpeack("timer recieved plannerResultMessage");
+         publishTextToSpeech("timer received plannerResultMessage");
          plannerResult.set(null);
       }
       if (footstepStatusMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved footstepStatusMessage");
+         publishTextToSpeech("timer received footstepStatusMessage");
          footstepStatusMessage.set(null);
       }
       if (handTrajectoryMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved handTrajectoryMessage");
+         publishTextToSpeech("timer received handTrajectoryMessage");
          handTrajectoryMessage.set(null);
       }
       if (armTrajectoryMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved armTrajectoryMessage");
+         publishTextToSpeech("timer received armTrajectoryMessage");
          armTrajectoryMessage.set(null);
       }
       if (footstepDataListMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved footstepDataListMessage");
+         publishTextToSpeech("timer received footstepDataListMessage");
          footstepDataListMessage.set(null);
       }
       if (walkingStatusMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved walkingStatusMessage");
+         publishTextToSpeech("timer received walkingStatusMessage");
          walkingStatusMessage.set(null);
       }
       if (doorLocationMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved doorLocationMessage");
+         publishTextToSpeech("timer received doorLocationMessage");
          doorLocationMessage.set(null);
       }
       if (walkOverTerrainGoalMessage.get() != null)
       {
-         publishTextToSpeack("timer recieved walkOverTerrainGoalMessage");
+         publishTextToSpeech("timer received walkOverTerrainGoalMessage");
          walkOverTerrainGoalMessage.set(null);
       }
 
@@ -92,7 +92,7 @@ public class BasicTimingBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("entering timer behavior");
+      publishTextToSpeech("entering timer behavior");
 
    }
 
@@ -120,7 +120,7 @@ public class BasicTimingBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("leaving timer behavior");
+      publishTextToSpeech("leaving timer behavior");
 
    }
 
