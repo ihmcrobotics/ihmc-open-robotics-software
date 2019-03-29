@@ -36,6 +36,9 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.STAND_READY));
       conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getTimeInStandPrep());
       conductor.simulate();
+
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 0.5));
+      conductor.simulate();
    }
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables)
