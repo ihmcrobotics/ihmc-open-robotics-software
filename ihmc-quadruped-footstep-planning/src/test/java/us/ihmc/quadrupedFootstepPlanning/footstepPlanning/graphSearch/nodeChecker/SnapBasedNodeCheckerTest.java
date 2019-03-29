@@ -48,6 +48,12 @@ public class SnapBasedNodeCheckerTest
          {
             return -0.3;
          }
+
+         @Override
+         public double getProjectInsideDistance()
+         {
+            return 0.0;
+         }
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
@@ -397,6 +403,12 @@ public class SnapBasedNodeCheckerTest
 
          @Override
          public double getMinYClearanceFromFoot()
+         {
+            return 0.0;
+         }
+
+         @Override
+         public double getProjectInsideDistance()
          {
             return 0.0;
          }

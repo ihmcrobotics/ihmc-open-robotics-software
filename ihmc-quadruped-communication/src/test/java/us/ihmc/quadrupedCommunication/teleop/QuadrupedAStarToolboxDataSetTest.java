@@ -47,7 +47,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       VISUALIZE = true;
       test.setup();
 
-      test.runAssertions(DataSetName._20190313_114517_QuadrupedEnvironment0);
+      test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
       ThreadTools.sleepForever();
       test.tearDown();
    }

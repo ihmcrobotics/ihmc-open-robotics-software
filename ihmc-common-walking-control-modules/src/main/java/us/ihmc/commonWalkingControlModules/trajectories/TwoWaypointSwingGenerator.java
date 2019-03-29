@@ -5,6 +5,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -110,13 +112,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
+   public void setInitialConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
       this.finalPosition.setIncludingFrame(finalPosition);
       this.finalVelocity.setIncludingFrame(finalVelocity);

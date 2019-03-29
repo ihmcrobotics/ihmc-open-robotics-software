@@ -44,6 +44,7 @@ public class QuadrupedStepAdjustmentController
    private final DoubleParameter minimumFootstepMultiplier = new DoubleParameter("minimumFootstepMultiplier", registry, 0.0);
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
    private final DoubleParameter dcmErrorDeadbandForStepAdjustment = new DoubleParameter("dcmErrorDeadbandForStepAdjustment", registry, 0.0);
+   private final BooleanParameter useTimeBasedStepAdjustment = new BooleanParameter("useTimeBasedStepAdjustment", registry, true);
    private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -140,10 +141,20 @@ public class QuadrupedStepAdjustmentController
 
             if (DeadbandTools.applyDeadband(dcmErrorWithDeadband, dcmErrorDeadbandForStepAdjustment.getValue()))
             {
-               double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
-               double recursionMultiplier = Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency());
-               double adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier;
+               double adjustmentMultiplier;
+               if (useTimeBasedStepAdjustment.getValue())
+               {
+                  double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
+                  double recursionMultiplier = Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency());
+                  adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier;
+               }
+               else
+               {
+                  adjustmentMultiplier = 1.0;
+               }
+
                dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * adjustmentMultiplier);
+
 
                instantaneousStepAdjustment.set(dcmError);
                instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
