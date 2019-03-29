@@ -19,10 +19,14 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final FrameVector3D linearMomentumRate = new FrameVector3D();
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
-   private final JointDesiredOutputListBasics lowLevelOneDoFJointDesiredDataHolder;
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
+
+   @Deprecated
+   private final transient JointDesiredOutputListBasics jointDesiredOutputList;
 
    /**
-    * Do not use this constructor.
+    * Do not use this constructor. It will break the barrier scheduler and the {@link #set(ControllerCoreOutput)} and
+    * {@link #equals(Object)} methods will not work.
     * <p>
     * This is a simple command that is only holding on to data. Use the getters of this class to get its data. This
     * constructor should be removed after the thread refactor summer 2019.
@@ -34,20 +38,27 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
       if (lowLevelControllerOutput != null)
-         lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
+         jointDesiredOutputList = lowLevelControllerOutput;
       else
-         lowLevelOneDoFJointDesiredDataHolder = new JointDesiredOutputList(controlledOneDoFJoints);
+         jointDesiredOutputList = new JointDesiredOutputList(controlledOneDoFJoints);
+      lowLevelOneDoFJointDesiredDataHolder = null;
    }
 
    public ControllerCoreOutput()
    {
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+      jointDesiredOutputList = lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public void setCenterOfPressureData(CenterOfPressureDataHolder centerOfPressureDataHolder)
    {
       this.centerOfPressureDataHolder.set(centerOfPressureDataHolder);
+   }
+
+   public CenterOfPressureDataHolder getCenterOfPressureData()
+   {
+      return centerOfPressureDataHolder;
    }
 
    public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBodyBasics rigidBody)
@@ -72,6 +83,11 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       linearMomentumRateToPack.setIncludingFrame(linearMomentumRate);
    }
 
+   public FrameVector3D getLinearMomentumRate()
+   {
+      return linearMomentumRate;
+   }
+
    public void setRootJointDesiredConfigurationData(RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfigurationData)
    {
       this.rootJointDesiredConfigurationData.set(rootJointDesiredConfigurationData);
@@ -85,26 +101,42 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 
    public void setLowLevelOneDoFJointDesiredDataHolder(JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      this.lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+      this.jointDesiredOutputList.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
+   /**
+    * This is depreceted and will be removed after a cleanup of this class. Use
+    * {@link #getLowLevelOneDoFJointDesiredDataHolderPreferred()} instead.
+    */
    @Override
-   public JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder()
+   @Deprecated
+   public JointDesiredOutputListBasics getLowLevelOneDoFJointDesiredDataHolder()
+   {
+      return jointDesiredOutputList;
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointDesiredDataHolderPreferred()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    public void set(ControllerCoreOutput other)
    {
+      if (lowLevelOneDoFJointDesiredDataHolder == null)
+         throw new RuntimeException("You used the deprecated constructor set is not supported in that case.");
+
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
-      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(other.lowLevelOneDoFJointDesiredDataHolder);
+      lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override
    public boolean equals(Object obj)
    {
+      if (lowLevelOneDoFJointDesiredDataHolder == null)
+         throw new RuntimeException("You used the deprecated constructor equals is not supported in that case.");
+
       if (obj == this)
       {
          return true;

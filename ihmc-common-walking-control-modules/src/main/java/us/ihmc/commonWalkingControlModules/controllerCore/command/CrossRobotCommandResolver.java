@@ -57,6 +57,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -111,6 +112,24 @@ public class CrossRobotCommandResolver
       resolveVirtualModelControlCommandList(in.getVirtualModelControlCommandList(), out.getVirtualModelControlCommandList());
       resolveFeedbackControlCommandList(in.getFeedbackControlCommandList(), out.getFeedbackControlCommandList());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolder(), out.getLowLevelOneDoFJointDesiredDataHolder());
+   }
+
+   public void resolveControllerCoreOutput(ControllerCoreOutput in, ControllerCoreOutput out)
+   {
+      resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
+      resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
+      out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(), out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
+   }
+
+   private void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfBodiesWithCenterOfPressure(); i++)
+      {
+         out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
+         resolveFrameTuple2D(in.getCenterOfPressure(i), out.getCenterOfPressure(i));
+      }
    }
 
    public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
