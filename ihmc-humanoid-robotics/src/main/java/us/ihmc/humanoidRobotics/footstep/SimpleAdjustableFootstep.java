@@ -20,12 +20,11 @@ public class SimpleAdjustableFootstep extends SimpleFootstep
       super.set(other);
    }
 
+   @Override
    public void set(Footstep other)
    {
+      super.set(other);
       setIsAdjustable(other.getIsAdjustable());
-      setRobotSide(other.getRobotSide());
-      setSoleFramePose(other.getFootstepPose());
-      setFoothold(other.getPredictedContactPoints());
    }
 
    @Override
