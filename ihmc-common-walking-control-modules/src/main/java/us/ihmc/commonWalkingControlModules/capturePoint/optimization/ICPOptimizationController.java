@@ -13,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlG
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,8 +29,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -404,48 +403,42 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
+   public void addFootstepToPlan(SimpleAdjustableFootstep footstep, double swingDuration, double transferDuration)
    {
-      if (footstep != null)
+      FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
+      footstepPose.checkReferenceFrameMatch(worldFrame);
+      if (!footstepPose.containsNaN())
       {
-         FramePose3D footstepPose = footstep.getFootstepPose();
-         footstepPose.checkReferenceFrameMatch(worldFrame);
-         if (!footstepPose.containsNaN())
+         if (numberOfRegisteredSteps.getValue() == 0)
          {
-            if (numberOfRegisteredSteps.getValue() == 0)
+            upcomingFootstep.set(footstepPose);
+            upcomingFootstepSide.set(footstep.getRobotSide());
+            upcomingFootstepContactPoints.clear();
+            ConvexPolygon2DReadOnly foothold = footstep.getFoothold();
+            for (int i = 0; i < foothold.getNumberOfVertices(); i++)
             {
-               upcomingFootstep.set(footstepPose);
-               upcomingFootstepSide.set(footstep.getRobotSide());
-               upcomingFootstepContactPoints.clear();
-               List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
-               if (predictedContactPoints != null)
-               {
-                  for (int i = 0; i < predictedContactPoints.size(); i++)
-                  {
-                     upcomingFootstepContactPoints.add().set(predictedContactPoints.get(i));
-                  }
-               }
-
-               footstepSolution.set(footstepPose);
-               unclippedFootstepSolution.set(footstepPose.getPosition());
-
-               swingDuration.set(timing.getSwingTime());
-               transferDuration.set(timing.getTransferTime());
-
-               footstepIsAdjustable.set(footstep.getIsAdjustable());
-               useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
-            }
-            else if (numberOfRegisteredSteps.getValue() == 1)
-            {
-               nextTransferDuration.set(timing.getTransferTime());
+               upcomingFootstepContactPoints.add().set(foothold.getVertex(i));
             }
 
-            numberOfRegisteredSteps.increment();
+            footstepSolution.set(footstepPose);
+            unclippedFootstepSolution.set(footstepPose.getPosition());
+
+            this.swingDuration.set(swingDuration);
+            this.transferDuration.set(transferDuration);
+
+            footstepIsAdjustable.set(footstep.getIsAdjustable());
+            useStepAdjustment.set(allowStepAdjustment.getValue() && footstepIsAdjustable.getBooleanValue());
          }
-         else
+         else if (numberOfRegisteredSteps.getValue() == 1)
          {
-            LogTools.warn("Received bad footstep: " + footstep);
+            nextTransferDuration.set(transferDuration);
          }
+
+         numberOfRegisteredSteps.increment();
+      }
+      else
+      {
+         LogTools.warn("Received bad footstep: " + footstep);
       }
    }
 
