@@ -85,7 +85,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    public void setTarget(FramePose3D targetPoseInWorld)
    {
-      publishTextToSpeack("New Goal Target Recieved");
+      publishTextToSpeech("New Goal Target Recieved");
       currentGoalPose.set(targetPoseInWorld);
       goalLocationChanged=true;
    }

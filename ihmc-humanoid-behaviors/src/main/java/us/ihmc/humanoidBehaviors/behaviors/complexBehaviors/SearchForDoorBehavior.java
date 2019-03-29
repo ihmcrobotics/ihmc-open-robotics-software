@@ -42,7 +42,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
          FramePose3D tmpFP = new FramePose3D();
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
          Pose3D pose = new Pose3D(tmpFP.getPosition(), tmpFP.getOrientation());
-         publishTextToSpeack("Recieved Door Location From fiducial");
+         publishTextToSpeech("Recieved Door Location From fiducial");
 
          setDoorLocation(pose);
       }
@@ -70,7 +70,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    private void recievedDoorLocation(DoorLocationPacket valveLocationPacket)
    {
 
-      publishTextToSpeack("Recieved Door Location From UI");
+      publishTextToSpeech("Recieved Door Location From UI");
       setDoorLocation(valveLocationPacket.getDoorTransformToWorld());
 
 
