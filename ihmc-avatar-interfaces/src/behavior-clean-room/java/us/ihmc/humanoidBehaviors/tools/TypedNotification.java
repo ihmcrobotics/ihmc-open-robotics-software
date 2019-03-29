@@ -1,11 +1,14 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 /**
  * This class appears to be thread safe.
  */
 public class TypedNotification<T>
 {
-   private T notification = null;
+   private volatile T notification = null;
    private T previousValue = null;
 
    /**
@@ -13,11 +16,23 @@ public class TypedNotification<T>
     *
     * @return value available
     */
-   public boolean poll()
+   public synchronized boolean poll()
    {
       previousValue = notification;
       notification = null;
       return previousValue != null;
+   }
+
+   /**
+    * Block and wait to be notified.
+    *
+    * @return notification
+    */
+   public synchronized T blockingPoll()
+   {
+      ExceptionTools.handle(() -> this.wait(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      poll();
+      return previousValue;
    }
 
    /**
@@ -40,13 +55,17 @@ public class TypedNotification<T>
       return previousValue;
    }
 
+   /** THREAD 2 ACCESS BELOW THIS POINT TODO: Make this safe somehow? Store thread names? */
+
    /**
     * Submits a value to the queue.
     *
     * @param value
     */
-   public void add(T value)
+   public synchronized void add(T value)
    {
       notification = value;
+
+      this.notifyAll(); // if wait has been called, notify it
    }
 }
