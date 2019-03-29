@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import com.esotericsoftware.minlog.Log;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -96,20 +95,14 @@ public class AtlasBehaviorUIDemo extends Application
    private PlanarRegionsList createPlanarRegions()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      double startingBlockLength = 1.5;
-      double cinderBlockSize = 0.8;
-      double cinderBlockHeight = 0.10;
-      double courseLength = 1.5;
-      double courseWidth = 1.5;
-      double heightVariation = 0.03;
-      double extrusionLength = -0.05;
-      double percentageAbsent = 0.0;
-      double minTilt = Math.toRadians(0.0);
-      double maxTilt = Math.toRadians(15.0);
-      double randomHeightVariation = 0.0;
-      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) Math.round(courseLength / cinderBlockSize),
-                                                         (int) Math.round(courseWidth / cinderBlockSize), heightVariation, extrusionLength,
-                                                         startingBlockLength, percentageAbsent, minTilt, maxTilt, randomHeightVariation);
+      PlanarRegionsListExamples.generateCinderBlockField(generator,
+                                                         0.4,
+                                                         0.1,
+                                                         5,
+                                                         6,
+                                                         0.0,
+                                                         - 0.03,
+                                                         0.6);
       return generator.getPlanarRegionsList();
    }
 
