@@ -41,7 +41,7 @@ public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<Rou
          public void doTransitionIntoAction()
          {
             super.doTransitionIntoAction();
-            publishTextToSpeack("Timer Entering Planning State");
+            publishTextToSpeech("Timer Entering Planning State");
 
          }
          @Override
@@ -76,7 +76,7 @@ public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<Rou
          public void doTransitionIntoAction()
          {
             super.doTransitionIntoAction();
-            publishTextToSpeack("Timer Entering Walking State");
+            publishTextToSpeech("Timer Entering Walking State");
 
          }
          @Override
@@ -121,13 +121,13 @@ public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<Rou
    private void addTimeToPlanning()
    {
       totalPlanningTime.add(getStateMachine().getTimeInCurrentState());
-      publishTextToSpeack("Adding time to total planning: "+getStateMachine().getTimeInCurrentState());
+      publishTextToSpeech("Adding time to total planning: "+getStateMachine().getTimeInCurrentState());
 
    }
    private void addTimeToWalking()
    {
       totalWalkTime.add(getStateMachine().getTimeInCurrentState());
-      publishTextToSpeack("Adding time to total walking: "+getStateMachine().getTimeInCurrentState());
+      publishTextToSpeech("Adding time to total walking: "+getStateMachine().getTimeInCurrentState());
 
    }
 
@@ -135,15 +135,15 @@ public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<Rou
    public void onBehaviorEntered()
    {
       super.onBehaviorEntered();
-      publishTextToSpeack("Starting timer for walk task");
+      publishTextToSpeech("Starting timer for walk task");
       //save start time
    }
 
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("Stopping timer for walk task");
-      publishTextToSpeack("Total Planning Time:"+totalPlanningTime.getDoubleValue()+" Total Walking Time:"+totalWalkTime.getDoubleValue());
+      publishTextToSpeech("Stopping timer for walk task");
+      publishTextToSpeech("Total Planning Time:"+totalPlanningTime.getDoubleValue()+" Total Walking Time:"+totalWalkTime.getDoubleValue());
    }
 
 }
