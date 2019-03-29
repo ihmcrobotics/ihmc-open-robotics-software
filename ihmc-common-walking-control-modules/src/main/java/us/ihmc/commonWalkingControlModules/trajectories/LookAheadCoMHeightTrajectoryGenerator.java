@@ -1095,4 +1095,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       positionToPack.setIncludingFrame(desiredCoMPosition);
    }
+
+   public double getOffsetHeightTimeInTrajectory()
+   {
+      return yoTime.getValue() - offsetHeightAboveGroundChangedTime.getValue();
+   }
 }

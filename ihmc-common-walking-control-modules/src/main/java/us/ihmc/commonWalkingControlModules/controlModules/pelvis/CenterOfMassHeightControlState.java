@@ -221,6 +221,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          FeetManager feetManager)
    {
       solve(coMHeightPartialDerivatives, isInDoubleSupport);
+      statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
       centerOfMassJacobian.reset();
