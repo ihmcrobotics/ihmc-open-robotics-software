@@ -131,7 +131,7 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
    public StateMachineFactory<K, S> buildYoClock(DoubleProvider timeProvider)
    {
       if (namePrefix == null || registry == null)
-         throw new RuntimeException("The namePrefix and registry fields have to be set in order to create yo-variables.");
+         throw new RuntimeException("The namePrefix and registry fields have to be set in order to create yo-variables. namePrefix:"+namePrefix+" registry:"+registry);
       clock = StateMachineClock.yoClock(timeProvider, namePrefix, registry);
       return this;
    }

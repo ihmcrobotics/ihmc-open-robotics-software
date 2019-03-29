@@ -1,6 +1,12 @@
 package us.ihmc.ihmcPerception.fiducialDetector;
 
+import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
@@ -40,6 +46,8 @@ public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
 
+   private boolean DEBUG = false;
+
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
    private final Quaternion tempFiducialRotationQuat = new Quaternion();
@@ -72,18 +80,22 @@ public class FiducialDetectorFromCameraImages
    private final YoDouble detectorEulerRotZ = new YoDouble(prefix + "DetectorEulerRotZ", registry);
 
    private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
-   private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry, targetIDHasBeenLocated, 4);
+   private final GlitchFilteredYoBoolean targetIDHasBeenLocatedFiltered = new GlitchFilteredYoBoolean(prefix + "TargetIDHasBeenLocatedFiltered", registry,
+                                                                                                      targetIDHasBeenLocated, 4);
    private final YoLong targetIDToLocate = new YoLong(prefix + "TargetIDToLocate", registry);
 
    private final YoFramePose3D cameraPose = new YoFramePose3D(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D locatedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(),
+                                                                                    registry);
 
-   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry,
+                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.expectedFiducialSize.set(1.0);
 
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+                                              ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
 
       expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
       {
@@ -92,7 +104,8 @@ public class FiducialDetectorFromCameraImages
          {
             synchronized (expectedFiducialSizeChangedConch)
             {
-               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
+                                                       ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
             }
          }
       });
@@ -128,7 +141,8 @@ public class FiducialDetectorFromCameraImages
          }
       };
 
-      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame, transformFromReportedToFiducialFrame);
+      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame", locatedFiducialReferenceFrame,
+                                                                   transformFromReportedToFiducialFrame);
 
       if (yoGraphicsListRegistry == null)
       {
@@ -171,10 +185,32 @@ public class FiducialDetectorFromCameraImages
       detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
    }
 
+   private JFrame frame;
+   private ImageIcon image;
+
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward)
    {
+      
+      RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
+      if (DEBUG)
+      {
+         if (frame == null)
+         {
+            frame = new JFrame();
+
+            frame.getContentPane().setLayout(new FlowLayout());
+
+            image = new ImageIcon(bufferedImage);
+            frame.getContentPane().add(new JLabel(image));
+
+            frame.pack();
+            frame.setVisible(true);
+         }
+      }
       synchronized (expectedFiducialSizeChangedConch)
       {
+         
          setIntrinsicParameters(bufferedImage);
 
          cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
@@ -189,8 +225,15 @@ public class FiducialDetectorFromCameraImages
 
          GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
+         
+         if (DEBUG)
+         {
+            image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
+            frame.setVisible(true);
+         }
+         
+         
          detector.detect(grayImage);
-
          int matchingFiducial = -1;
          for (int i = 0; i < detector.totalFound(); i++)
          {
@@ -247,7 +290,7 @@ public class FiducialDetectorFromCameraImages
             targetIDHasBeenLocated.set(false);
          }
       }
-      
+
       targetIDHasBeenLocatedFiltered.update();
    }
 
