@@ -1,14 +1,13 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
 import com.google.common.collect.Lists;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -16,13 +15,12 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.tools.*;
+import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.state.EnhancedStateMachineFactory;
 import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -198,7 +196,8 @@ public class PatrolBehavior
    {
       messager.submitMessage(API.CurrentState, WALK.name());
       reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
-      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read().getFootstepDataList());
+      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
+                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
    }
 
    private void doWalkStateAction(double timeInState)

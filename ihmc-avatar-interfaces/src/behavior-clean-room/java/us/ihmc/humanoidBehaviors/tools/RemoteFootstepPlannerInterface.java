@@ -1,9 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
@@ -35,6 +32,7 @@ public class RemoteFootstepPlannerInterface
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private final IHMCROS2Publisher<RequestFootstepPlannerParametersMessage> parametersPublisher;
 
    private final AtomicInteger requestCounter = new AtomicInteger(1739);
 
@@ -51,6 +49,10 @@ public class RemoteFootstepPlannerInterface
       footstepPlanningRequestPublisher =
             ROS2Tools.createPublisher(ros2Node,
                                       FootstepPlanningRequestPacket.class,
+                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      parametersPublisher =
+            ROS2Tools.createPublisher(ros2Node,
+                                      RequestFootstepPlannerParametersMessage.class,
                                       FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
@@ -73,6 +75,9 @@ public class RemoteFootstepPlannerInterface
                                                                              PlanarRegionsListMessage planarRegionsListMessage)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
+
+
+
 
       double midFeetToSoleOffset = footstepPlannerParameters.getIdealFootstepWidth() / 2;
       start.changeFrame(worldFrame);
