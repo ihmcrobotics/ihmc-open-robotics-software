@@ -271,11 +271,6 @@ public class CrossRobotCommandRandomTools
       return EuclidCoreRandomTools.nextRigidBodyTransform(random);
    }
 
-   public static RigidBodyBasics nextRigidBody(Random random, RigidBodyBasics rootBody)
-   {
-      return nextElementIn(random, SubtreeStreams.from(rootBody).collect(Collectors.toList()));
-   }
-
    public static FrameTupleArrayList<FramePoint3D> nextFrameTupleArrayList(Random random, int size, ReferenceFrame... possibleFrames)
    {
       FrameTupleArrayList<FramePoint3D> next = FrameTupleArrayList.createFramePointArrayList();
@@ -1551,7 +1546,7 @@ public class CrossRobotCommandRandomTools
       {
          return nextElementIn(random, typeToInstantiateRandomly.getEnumConstants());
       }
-      else if (typeToInstantiateRandomly == RigidBodyBasics.class)
+      else if (RigidBodyBasics.class.isAssignableFrom(typeToInstantiateRandomly))
       {
          return nextElementIn(random, rootBody.subtreeArray());
       }
