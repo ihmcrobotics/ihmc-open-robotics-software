@@ -97,11 +97,11 @@ public class AtlasBehaviorUIDemo extends Application
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       double startingBlockLength = 1.5;
-      double cinderBlockSize = 0.5;
+      double cinderBlockSize = 0.8;
       double cinderBlockHeight = 0.10;
       double courseLength = 1.5;
       double courseWidth = 1.5;
-      double heightVariation = 0.05;
+      double heightVariation = 0.03;
       double extrusionLength = -0.05;
       double percentageAbsent = 0.0;
       double minTilt = Math.toRadians(0.0);
