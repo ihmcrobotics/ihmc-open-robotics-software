@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.thread;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;

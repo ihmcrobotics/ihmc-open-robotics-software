@@ -17,6 +17,9 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.*;
+import us.ihmc.humanoidBehaviors.tools.state.EnhancedStateMachineFactory;
+import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
+import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -79,7 +82,7 @@ public class PatrolBehavior
 
       LogTools.debug("Initializing patrol behavior");
 
-      CustomBehaviorStateMachineFactory<PatrolBehaviorState> factory = new CustomBehaviorStateMachineFactory<>(PatrolBehaviorState.class);
+      EnhancedStateMachineFactory<PatrolBehaviorState> factory = new EnhancedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);

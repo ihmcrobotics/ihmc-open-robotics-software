@@ -5,7 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.humanoidBehaviors.tools.Activator;
+import us.ihmc.humanoidBehaviors.tools.thread.Activator;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;

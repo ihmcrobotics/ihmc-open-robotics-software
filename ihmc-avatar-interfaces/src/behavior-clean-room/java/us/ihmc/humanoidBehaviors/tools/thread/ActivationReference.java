@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.thread;
 
 import java.util.concurrent.atomic.AtomicReference;
 

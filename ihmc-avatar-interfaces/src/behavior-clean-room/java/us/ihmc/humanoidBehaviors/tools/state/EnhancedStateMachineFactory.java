@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.state;
 
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -8,7 +8,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
-public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
+/**
+ * This factory helps by adding complete do nothing state implementations for every enum value
+ * and providing a one to many state transition condition.
+ */
+public class EnhancedStateMachineFactory<K extends Enum<K>>
 {
    private final Class<K> keyType;
    private final StateMachineFactory<K, State> factory;
@@ -19,7 +23,7 @@ public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
     *
     * @param keyType
     */
-   public CustomBehaviorStateMachineFactory(Class<K> keyType)
+   public EnhancedStateMachineFactory(Class<K> keyType)
    {
       factory = new StateMachineFactory<>(keyType);
       this.keyType = keyType;
@@ -35,6 +39,11 @@ public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
       }
    }
 
+   /**
+    * Allows to have a single condition which returns the state to switch to or null.
+    *
+    * Note: Requires that application state is not changed in the condition, as it will be called many times per tick.
+    */
    public void addTransition(K from, List<K> toOptions, StateTransitionTo<K> stateTransitionTo)
    {
       for (K value : toOptions)

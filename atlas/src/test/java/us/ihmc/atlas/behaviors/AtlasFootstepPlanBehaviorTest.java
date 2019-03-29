@@ -9,14 +9,13 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidBehaviors.tools.TypedNotification;
+import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
@@ -30,7 +29,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
-import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;

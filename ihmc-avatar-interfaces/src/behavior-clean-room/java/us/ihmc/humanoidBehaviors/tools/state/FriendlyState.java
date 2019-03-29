@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.state;
 
 import us.ihmc.robotics.stateMachine.core.State;
 
