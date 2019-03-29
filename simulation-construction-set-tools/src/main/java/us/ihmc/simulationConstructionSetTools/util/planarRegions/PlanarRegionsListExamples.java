@@ -72,15 +72,16 @@ public class PlanarRegionsListExamples
    {
       double defaultTiltAngle = Math.toRadians(15.0);
       double randomHeightVariation = 0.1;
+      boolean onlyGenerateTopOfBlock = false;
 
       generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation,
-                               extrusionLength, startingBlockLength, 0.0, defaultTiltAngle, defaultTiltAngle, randomHeightVariation);
+                               extrusionLength, startingBlockLength, 0.0, defaultTiltAngle, defaultTiltAngle, randomHeightVariation, onlyGenerateTopOfBlock);
    }
 
    public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight,
                                                int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation,
                                                double extrusionLength, double startingBlockLength, double absentBlockPercentage, double minTiltAngle,
-                                               double maxTiltAngle, double randomHeightVariation)
+                                               double maxTiltAngle, double randomHeightVariation, boolean onlyGenerateTopOfBlock)
    {
       double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
 
@@ -101,7 +102,7 @@ public class PlanarRegionsListExamples
 
             double tiltAngle = EuclidCoreRandomTools.nextDouble(random, minTiltAngle, maxTiltAngle);
             if(random.nextDouble() > absentBlockPercentage)
-               generateSingleCiderBlock(generator, cinderBlockSize + extrusionLength, cinderBlockHeight + extrusionLength, angleType, axisType, tiltAngle);
+               generateSingleCiderBlock(generator, cinderBlockSize + extrusionLength, cinderBlockHeight + extrusionLength, angleType, axisType, tiltAngle, onlyGenerateTopOfBlock);
 
             generator.translate(0.0, 0.0, -extraHeightVariation);
             generator.translate(0.0, cinderBlockSize, 0.0);
@@ -157,11 +158,12 @@ public class PlanarRegionsListExamples
                                                int axisType)
    {
       double defaultTiltAngle = Math.toRadians(15.0);
-      generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType, defaultTiltAngle);
+      boolean onlyGenerateTopOfBlock = false;
+      generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType, defaultTiltAngle, onlyGenerateTopOfBlock);
    }
 
    public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
-                                                int axisType, double tiltAngle)
+                                                int axisType, double tiltAngle, boolean onlyGenerateTopOfBlock)
    {
       double angle = 0;
       switch (angleType)
@@ -189,7 +191,10 @@ public class PlanarRegionsListExamples
       }
 
       generator.rotate(angle, axis);
-      generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
+      if(onlyGenerateTopOfBlock)
+         generator.addRectangle(cinderBlockSize, cinderBlockSize);
+      else
+         generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
       generator.rotate(-angle, axis);
    }
 
@@ -491,10 +496,11 @@ public class PlanarRegionsListExamples
       double minTilt = Math.toRadians(10.0);
       double maxTilt = Math.toRadians(75.0);
       double randomHeightVariation = 0.0;
+      boolean onlyGenerateTopOfBlock = false;
 
       PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) (courseLength / cinderBlockSize),
                                                          (int) (courseWidth / cinderBlockSize), heightVariation, extrusionLength, 0.5, percentageAbsent,
-                                                         minTilt, maxTilt, randomHeightVariation);
+                                                         minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment",
                                                                                                 new PlanarRegionsList[] {generator.getPlanarRegionsList()},

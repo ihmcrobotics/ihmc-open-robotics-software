@@ -40,7 +40,7 @@ public class BodyCollisionNodeCost implements FootstepCost
          return 0.0;
 
       double height = snapTransform.getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode.getLatticeNode(), height);
+      BodyCollisionData collisionData = collisionDetector.checkForCollision(endNode, height);
 
       if(collisionData.isCollisionDetected())
       {

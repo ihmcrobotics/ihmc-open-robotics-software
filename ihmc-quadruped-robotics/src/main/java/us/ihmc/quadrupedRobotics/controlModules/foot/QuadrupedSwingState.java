@@ -14,7 +14,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -59,7 +62,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
 
-   private final FramePoint3D finalPosition = new FramePoint3D();
+   private final YoFramePoint3D finalPosition;
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
 
    private final FramePoint3D lastStepPosition = new FramePoint3D();
@@ -154,6 +157,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       minSwingTimeForDisturbanceRecovery = new DoubleParameter(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry, 0.2);
       minRequiredSpeedUpFactor = new DoubleParameter(namePrefix + "MinRequiredSpeedUpFactor", registry, 1.05);
 
+      finalPosition = new YoFramePoint3D(namePrefix + "StepFinalPosition", worldFrame, registry);
+
       finalPosition.setToNaN();
       lastStepPosition.setToNaN();
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
@@ -195,6 +200,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
+
+      graphicsListRegistry.registerYoGraphic("SwingState", new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red()));
    }
 
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
@@ -215,7 +222,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       controllerToolbox.getFootContactState(robotQuadrant).clear();
       footSwitch.reset();
 
-      lastStepPosition.setIncludingFrame(finalPosition);
+      lastStepPosition.setMatchingFrame(finalPosition);
       if (lastStepPosition.containsNaN())
          lastStepPosition.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
 
@@ -232,7 +239,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       initialPosition.changeFrame(worldFrame);
       initialLinearVelocity.changeFrame(worldFrame);
 
-      finalPosition.changeFrame(worldFrame);
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       setFootstepDurationInternal(currentStepCommand.getTimeInterval().getDuration());
@@ -394,13 +400,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       // Compute current goal position.
       currentStepCommand.getGoalPosition(finalPosition);
-      finalPosition.changeFrame(worldFrame);
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
+      double duration = swingDuration.getDoubleValue();
+      double fractionRemaining = timeRemainingInState.getDoubleValue() / duration;
+      double fractionThrough = timeInState.getDoubleValue() / duration;
+
       // Compute swing trajectory.
-      if (timeRemainingInState.getDoubleValue() > parameters.getMinimumStepAdjustmentTimeParameter())
+      if (fractionRemaining > parameters.getMinimumStepAdjustmentFractionRemaining() && fractionThrough > parameters.getFractionThroughSwingForAdjustment())
       {
-         double duration = swingDuration.getDoubleValue();
          blendedSwingTrajectory.clear();
 
          touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);

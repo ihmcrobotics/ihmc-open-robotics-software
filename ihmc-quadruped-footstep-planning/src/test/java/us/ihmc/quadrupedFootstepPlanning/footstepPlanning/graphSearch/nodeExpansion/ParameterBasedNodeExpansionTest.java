@@ -27,6 +27,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPl
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionsListPointSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -311,7 +312,7 @@ public class ParameterBasedNodeExpansionTest
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      FootstepNodeSnapper snapper = null;//new FlatGroundFootstepNodeSnapper(); // FIXME
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();

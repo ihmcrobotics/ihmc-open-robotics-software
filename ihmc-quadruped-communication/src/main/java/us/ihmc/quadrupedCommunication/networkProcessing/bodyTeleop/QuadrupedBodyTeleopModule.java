@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.bodyTeleopPort;
 
 public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
 {
@@ -31,7 +32,7 @@ public class QuadrupedBodyTeleopModule extends QuadrupedToolboxModule
                                     boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider,startYoVariableServer,
-            new DataServerSettings(logYoVariables, true, 8009, "BodyTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
+            new DataServerSettings(logYoVariables, true, bodyTeleopPort, "BodyTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
       bodyTeleopController = new QuadrupedBodyTeleopController(outputManager, robotDataReceiver, registry);
 

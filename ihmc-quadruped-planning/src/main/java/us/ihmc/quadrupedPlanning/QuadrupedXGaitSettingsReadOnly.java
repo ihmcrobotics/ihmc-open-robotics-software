@@ -56,6 +56,7 @@ public interface QuadrupedXGaitSettingsReadOnly
       return getStepDuration(getQuadrupedSpeed(), getEndPhaseShift());
    }
 
+
    /**
     * Time duration of each swing phase (in seconds).
     *
@@ -84,6 +85,16 @@ public interface QuadrupedXGaitSettingsReadOnly
    default double getEndDoubleSupportDuration(QuadrupedSpeed speed, double endPhaseShift)
    {
       return interpolate(speed, endPhaseShift, this, QuadrupedGaitTimingsReadOnly::getEndDoubleSupportDuration);
+   }
+
+   default double getMaxSpeed()
+   {
+      return getMaxSpeed(getQuadrupedSpeed(), getEndPhaseShift());
+   }
+
+   default double getMaxSpeed(QuadrupedSpeed speed, double endPhaseShift)
+   {
+      return interpolate(speed, endPhaseShift, this, QuadrupedGaitTimingsReadOnly::getMaxSpeed);
    }
 
    static double interpolate(QuadrupedSpeed speed, double endPhaseShift, QuadrupedXGaitSettingsReadOnly gaitSettings, SettingProvider settingProvider)
