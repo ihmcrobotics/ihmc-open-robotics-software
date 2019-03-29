@@ -242,7 +242,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void sendTextToSpeechPacket(String message)
    {
-      publishTextToSpeack(message);
+      publishTextToSpeech(message);
    }
 
    private void pitchHeadToFindFiducial()
