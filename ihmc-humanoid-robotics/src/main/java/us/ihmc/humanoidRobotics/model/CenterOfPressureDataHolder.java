@@ -94,12 +94,12 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       centerOfPressureToPack.setIncludingFrame(centerOfPressureMap.get(foot));
    }
 
-   public FramePoint2DReadOnly getCenterOfPressure(RigidBodyBasics foot)
+   public FramePoint2D getCenterOfPressure(RigidBodyBasics foot)
    {
       return centerOfPressureMap.get(foot);
    }
 
-   public FramePoint2DReadOnly getCenterOfPressure(int bodyIndex)
+   public FramePoint2D getCenterOfPressure(int bodyIndex)
    {
       return centerOfPressures.get(bodyIndex);
    }
