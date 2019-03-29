@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidBehaviors.tools.ActivationReference;
+import us.ihmc.humanoidBehaviors.tools.thread.ActivationReference;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;

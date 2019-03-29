@@ -14,7 +14,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
-import us.ihmc.humanoidBehaviors.tools.TypedNotification;
+import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
