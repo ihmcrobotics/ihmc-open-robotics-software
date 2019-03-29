@@ -35,23 +35,15 @@ public class CustomBehaviorStateMachineFactory<K extends Enum<K>>
       }
    }
 
-   public void addTransition(K from, StateTransitionToAny<K> stateTransitionToAny)
-   {
-      for (K value : EnumSet.allOf(keyType))
-      {
-         factory.addTransition(from, value, timeInState-> stateTransitionToAny.shouldTransitionTo(timeInState) == value); // must use == for null safety
-      }
-   }
-
-   public void addTransition(K from, List<K> toOptions, StateTransitionToAny<K> stateTransitionToAny)
+   public void addTransition(K from, List<K> toOptions, StateTransitionTo<K> stateTransitionTo)
    {
       for (K value : toOptions)
       {
          factory.addTransition(from, value, timeInState ->
          {
-            K transitionTo = stateTransitionToAny.shouldTransitionTo(timeInState);
+            K transitionTo = stateTransitionTo.shouldTransitionTo(timeInState);
 
-            if (!toOptions.contains(transitionTo))
+            if (transitionTo != null && !toOptions.contains(transitionTo)) // must check null here
             {
                throw new RuntimeException("Invalid transition to " + transitionTo + ". Options are " + toOptions);
             }
