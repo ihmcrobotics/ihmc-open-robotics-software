@@ -13,11 +13,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -181,8 +183,56 @@ public class EndToEndTestTools
    {
       if (expectedDesiredPosition != null)
       {
-         EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
-         assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
+         if (!expectedDesiredPosition.containsNaN())
+         {
+            EuclidCoreTestTools.assertTuple3DEquals(expectedDesiredPosition, statusMessage.getDesiredEndEffectorPosition(), epsilon);
+            assertFalse(statusMessage.getActualEndEffectorPosition().containsNaN());
+         }
+         else
+         {
+            boolean areEqual = true;
+            for (int i = 0; i < 3; i++)
+            {
+               if (!MathTools.epsilonCompare(expectedDesiredPosition.getElement(i), statusMessage.getDesiredEndEffectorPosition().getElement(i), epsilon))
+               {
+                  areEqual = false;
+                  break;
+               }
+            }
+
+            if (!areEqual)
+            {
+               fail("expected:\n" + expectedDesiredPosition.toString() + "\n but was:\n" + statusMessage.getDesiredEndEffectorPosition().toString());
+            }
+            else
+            {
+               boolean badActual = false;
+
+               for (int i = 0; i < 3; i++)
+               {
+                  if (Double.isNaN(expectedDesiredPosition.getElement(i)))
+                  {
+                     if (!Double.isNaN(statusMessage.getActualEndEffectorPosition().getElement(i)))
+                     {
+                        badActual = true;
+                        break;
+                     }
+                  }
+               }
+
+               if (badActual)
+               {
+                  Point3D expectedActualPosition = new Point3D(statusMessage.getActualEndEffectorPosition());
+
+                  for (int i = 0; i < 3; i++)
+                  {
+                     if (Double.isNaN(expectedDesiredPosition.getElement(i)))
+                        expectedActualPosition.setElement(i, Double.NaN);
+                  }
+                  fail("expected:\n" + expectedActualPosition.toString() + "\n but was:\n" + statusMessage.getActualEndEffectorPosition().toString());
+               }
+            }
+         }
       }
       else
       {

@@ -102,7 +102,7 @@ public abstract class RigidBodyControlState implements State
       trajectoryStartTime.set(yoTime.getDoubleValue());
    }
 
-   protected double getTimeInTrajectory()
+   public double getTimeInTrajectory()
    {
       return yoTime.getDoubleValue() - trajectoryStartTime.getDoubleValue();
    }

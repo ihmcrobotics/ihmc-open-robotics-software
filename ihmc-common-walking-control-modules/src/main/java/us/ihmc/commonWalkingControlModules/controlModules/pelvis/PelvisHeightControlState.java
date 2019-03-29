@@ -43,13 +43,19 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   /** We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a point feedback command and set the selection matrix to Z only**/
+   /**
+    * We take the spatialFeedback command from the RigidBodyTaskspaceControlState and pack it into a
+    * point feedback command and set the selection matrix to Z only
+    **/
    private final SelectionMatrix3D temp3DSelection = new SelectionMatrix3D();
 
-   /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
+   /**
+    * When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another
+    * PelvisTrajectoryCommand
+    **/
    private final EuclideanTrajectoryControllerCommand euclideanCommand = new EuclideanTrajectoryControllerCommand();
 
-   /** handles the trajectory and the queuing**/
+   /** handles the trajectory and the queuing **/
    private final RigidBodyPositionController positionController;
 
    private final RigidBodyBasics pelvis;
@@ -242,6 +248,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * set the qp weights for the taskspace linear z command
+    * 
     * @param linearWeight
     */
    public void setWeights(Vector3DReadOnly linearWeight)
@@ -262,6 +269,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       previousOffset = offset.getValue();
 
       positionController.doAction(Double.NaN);
+      statusHelper.updateWithTimeInTrajectory(positionController.getTimeInTrajectory());
    }
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
@@ -281,6 +289,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
 
    /**
     * check that the command is valid and queue the trajectory
+    * 
     * @param command
     * @param initialPose the initial pelvis position
     * @return whether the command passed validation and was queued
@@ -396,8 +405,6 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       return linearMomentumZPDController.compute(currentPelvisHeightInWorld.getValue(), desiredPelvisHeightInWorld.getValue(),
                                                  currentPelvisVelocityInWorld.getValue(), desiredPelvisVelocityInWorld.getValue());
    }
-
-   
 
    @Override
    public Object pollStatusToReport()
