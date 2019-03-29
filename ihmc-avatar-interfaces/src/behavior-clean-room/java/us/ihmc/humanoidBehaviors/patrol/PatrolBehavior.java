@@ -47,8 +47,6 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
-   private final StateMachine<PatrolBehaviorState, State> stateMachine;
-
    enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
@@ -60,11 +58,12 @@ public class PatrolBehavior
    }
 
    private final Messager messager;
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
-   private final IHMCROS2Publisher<PauseWalkingMessage> pausePublisher;
+   private final StateMachine<PatrolBehaviorState, State> stateMachine;
+
+   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
-   private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
    private final Notification stopNotification = new Notification();
    private final Notification overrideGoToWaypointNotification = new Notification();
@@ -72,7 +71,7 @@ public class PatrolBehavior
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
-   private final Notification walkingCompleted = new Notification();
+   private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
 
@@ -95,19 +94,9 @@ public class PatrolBehavior
       factory.addTransition(WALK, Lists.newArrayList(PLAN, STOP), this::transitionFromWalk);
       stateMachine = factory.getFactory().build(STOP);
 
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      pausePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                 ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
-                                                 ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-
-      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROL_MODULE, this::acceptWalkingStatus);
-
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.REA_MODULE);
-
+      remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
@@ -121,7 +110,7 @@ public class PatrolBehavior
 
       // TODO Use ExecutorService directly to print unchecked exceptions
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
-      patrolThread.schedule(this::patrolThread, 500, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
+      patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
    private void patrolThread()   // pretty much just updating whichever state is active
@@ -133,7 +122,7 @@ public class PatrolBehavior
    {
       messager.submitMessage(API.CurrentState, STOP.name());
 
-      sendPauseWalking(); // TODO make into tool
+      remoteRobotControllerInterface.pauseWalking();
    }
 
    private void doStopStateAction(double timeInState)
@@ -208,21 +197,8 @@ public class PatrolBehavior
    private void onWalkStateEntry()
    {
       messager.submitMessage(API.CurrentState, WALK.name());
-
-      FootstepPlanningToolboxOutputStatus footstepPlanningOutput = footstepPlanResultNotification.read();
-      FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
-      ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
-      {
-         FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
-         footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
-      }
-      messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
-
-      walkingCompleted.poll(); // acting to clear the notification TODO return walk result same as footstep plan
-      LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlanningOutput.getFootstepDataList().getFootstepDataList().size());
-      footstepDataListPublisher.publish(footstepPlanningOutput.getFootstepDataList());
+      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
+      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read().getFootstepDataList());
    }
 
    private void doWalkStateAction(double timeInState)
@@ -248,7 +224,7 @@ public class PatrolBehavior
             return STOP;
          }
       }
-      else if (walkingCompleted.read())
+      else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
          return PLAN;
       }
@@ -274,12 +250,17 @@ public class PatrolBehavior
       overrideGoToWaypointNotification.poll();
    }
 
-   private void sendPauseWalking()
+   private void reduceAndSendFootstepsForVisualization(FootstepPlanningToolboxOutputStatus footstepPlanningOutput)
    {
-      LogTools.debug("Sending pause walking to robot");
-      PauseWalkingMessage pause = new PauseWalkingMessage();
-      pause.setPause(true);
-      pausePublisher.publish(pause);
+      FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
+      ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         FramePose3D soleFramePoseToPack = new FramePose3D();
+         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
+      }
+      messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
    }
 
    private boolean goalWaypointInBounds()
@@ -288,15 +269,6 @@ public class PatrolBehavior
       int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
       boolean indexInBounds = currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
       return indexInBounds;
-   }
-
-   private void acceptWalkingStatus(WalkingStatusMessage message)
-   {
-      LogTools.debug("Walking status: {}", WalkingStatus.fromByte(message.getWalkingStatus()).name());
-      if (message.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
-      {
-         walkingCompleted.set();
-      }
    }
 
    public static class API
