@@ -36,6 +36,7 @@ public class QuadrupedStepAdjustmentController
    private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 5.0);
 
    private final QuadrantDependentList<YoDouble> dcmStepAdjustmentMultipliers = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoDouble> recursionMultipliers = new QuadrantDependentList<>();
    private final YoFrameVector3D dcmError = new YoFrameVector3D("dcmError", worldFrame, registry);
    private final FrameVector3D dcmErrorWithDeadband = new FrameVector3D();
    private final YoBoolean stepHasBeenAdjusted = new YoBoolean("stepHasBeenAdjusted", registry);
@@ -76,13 +77,15 @@ public class QuadrupedStepAdjustmentController
                                                                                                     instantaneousStepAdjustment);
 
          YoDouble dcmStepAdjustmentMultiplier = new YoDouble(prefix + "DcmStepAdjustmentMultiplier", registry);
-         instantaneousStepAdjustment.setToNaN();
+         YoDouble recursionMultiplier = new YoDouble(prefix + "RecursionMultiplier", registry);
          limitedInstantaneousStepAdjustment.setToZero();
          dcmStepAdjustmentMultiplier.setToNaN();
+         recursionMultiplier.setToNaN();
 
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
          limitedInstantaneousStepAdjustments.put(robotQuadrant, limitedInstantaneousStepAdjustment);
          dcmStepAdjustmentMultipliers.put(robotQuadrant, dcmStepAdjustmentMultiplier);
+         recursionMultipliers.put(robotQuadrant, recursionMultiplier);
       }
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, QuadrupedStep::new);
@@ -99,6 +102,7 @@ public class QuadrupedStepAdjustmentController
       instantaneousStepAdjustments.get(robotQuadrant).setToNaN();
       limitedInstantaneousStepAdjustments.get(robotQuadrant).setToZero();
       dcmStepAdjustmentMultipliers.get(robotQuadrant).setToNaN();
+      recursionMultipliers.get(robotQuadrant).setToNaN();
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition)
@@ -134,6 +138,7 @@ public class QuadrupedStepAdjustmentController
          }
 
          YoDouble dcmStepAdjustmentMultiplier = dcmStepAdjustmentMultipliers.get(robotQuadrant);
+         YoDouble recursionMultiplier = recursionMultipliers.get(robotQuadrant);
 
          if (useStepAdjustment.getValue() && (dcmError.length() > dcmErrorThresholdForStepAdjustment.getValue() || instantaneousStepAdjustment.length() > 0.0))
          {
@@ -144,20 +149,21 @@ public class QuadrupedStepAdjustmentController
                double adjustmentMultiplier;
                if (useTimeBasedStepAdjustment.getValue())
                {
+                  // FIXME
                   double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
-                  double recursionMultiplier = Math.exp(timeRemainingInStep * lipModel.getNaturalFrequency());
-                  adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier;
+                  recursionMultiplier.set(Math.exp(-timeRemainingInStep * lipModel.getNaturalFrequency()));
+                  adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier.getDoubleValue();
                }
                else
                {
                   adjustmentMultiplier = 1.0;
                }
 
-               dcmStepAdjustmentMultiplier.set(dcmStepAdjustmentGain.getValue() * adjustmentMultiplier);
+               dcmStepAdjustmentMultiplier.set(adjustmentMultiplier / dcmStepAdjustmentGain.getValue());
 
 
                instantaneousStepAdjustment.set(dcmError);
-               instantaneousStepAdjustment.scale(-dcmStepAdjustmentMultiplier.getDoubleValue());
+               instantaneousStepAdjustment.scale(-1.0 / dcmStepAdjustmentMultiplier.getDoubleValue());
                instantaneousStepAdjustment.setZ(0);
 
                stepHasBeenAdjusted = true;
