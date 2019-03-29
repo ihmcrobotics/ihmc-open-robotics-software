@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
-import boofcv.core.image.FactoryGImageMultiBand.PL;
 import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -32,7 +31,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -87,16 +85,18 @@ public class PatrolBehavior
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
-      factory.addTransition(PLAN, this::transitionFromPlan);
+      factory.addTransition(PLAN, Lists.newArrayList(WALK, STOP, PLAN), this::transitionFromPlan);
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
-      factory.addTransition(WALK, this::transitionFromWalk);
+      factory.addTransition(WALK, Lists.newArrayList(PLAN, STOP), this::transitionFromWalk);
       stateMachine = factory.getFactory().build(STOP);
 
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
                                                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
-      pausePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
+      pausePublisher = ROS2Tools.createPublisher(ros2Node,
+                                                 ROS2Tools.newMessageInstance(PauseWalkingCommand.class).getMessageClass(),
                                                  ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROL_MODULE, this::acceptWalkingStatus);
@@ -116,19 +116,18 @@ public class PatrolBehavior
 
       waypoints = messager.createInput(API.Waypoints);
 
-      PeriodicNonRealtimeThreadScheduler patrolThread = new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName());
-      patrolThread.schedule(this::patrolThread, 750, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
+      // TODO Use ExecutorService directly to print unchecked exceptions
+      ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
+      patrolThread.schedule(this::patrolThread, 500, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
    private void patrolThread()   // pretty much just updating whichever state is active
    {
-      LogTools.debug("Current state: {}", stateMachine.getCurrentStateKey());
       stateMachine.doActionAndTransition();
    }
 
    private void onStopStateEntry()
    {
-      LogTools.debug("onStopStateEntry");
       messager.submitMessage(API.CurrentState, STOP.name());
 
       sendPauseWalking(); // TODO make into tool
@@ -136,25 +135,21 @@ public class PatrolBehavior
 
    private void doStopStateAction(double timeInState)
    {
-      LogTools.debug("doStopStateAction");
       pollInterrupts();
    }
 
    private boolean transitionFromStopToPlan(double timeInState)
    {
-      LogTools.debug("Checking transition from STOP");
-
       boolean transition = overrideGoToWaypointNotification.read() && goalWaypointInBounds();
       if (transition)
       {
-         LogTools.debug("STOP -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
+         LogTools.debug("STOP -> PLAN");
       }
       return transition;
    }
 
    private void onPlanStateEntry()
    {
-      LogTools.debug("onPlanStateEntry");
       messager.submitMessage(API.CurrentState, PLAN.name());
 
       remoteFootstepPlannerInterface.abortPlanning();
@@ -171,29 +166,24 @@ public class PatrolBehavior
 
    private void doPlanStateAction(double timeInState)
    {
-      LogTools.debug("doPlanStateAction");
       pollInterrupts();
       footstepPlanResultNotification.poll();
    }
 
    private PatrolBehaviorState transitionFromPlan(double timeInState)
    {
-      LogTools.debug("Checking transition from PLAN");
       if (stopNotification.read())
       {
-         LogTools.debug("PLAN -> STOP (stopNotification)");
          return STOP;
       }
       else if (overrideGoToWaypointNotification.read())
       {
          if (goalWaypointInBounds())
          {
-            LogTools.debug("PLAN -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
             return PLAN;
          }
          else
          {
-            LogTools.debug("PLAN -> STOP (overrideGoToWaypointNotification + !goalWaypointInBounds)");
             return STOP;
          }
       }
@@ -201,12 +191,10 @@ public class PatrolBehavior
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.read().getFootstepPlanningResult()).validForExecution())
          {
-            LogTools.debug("PLAN -> WALK (footstepPlanResultNotification + validForExecution)");
             return WALK;
          }
          else
          {
-            LogTools.debug("PLAN -> PLAN (footstepPlanResultNotification + !validForExecution)");
             return PLAN;
          }
       }
@@ -216,7 +204,6 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
-      LogTools.debug("onWalkStateEntry");
       messager.submitMessage(API.CurrentState, WALK.name());
 
       FootstepPlanningToolboxOutputStatus footstepPlanningOutput = footstepPlanResultNotification.read();
@@ -237,35 +224,29 @@ public class PatrolBehavior
 
    private void doWalkStateAction(double timeInState)
    {
-      LogTools.debug("doWalkStateAction");
       pollInterrupts();
       walkingCompleted.poll();
    }
 
    private PatrolBehaviorState transitionFromWalk(double timeInState)
    {
-      LogTools.debug("Checking transition from WALK");
       if (stopNotification.read())
       {
-         LogTools.debug("WALK -> STOP (stopNotification)");
          return STOP;
       }
       else if (overrideGoToWaypointNotification.read())
       {
          if (goalWaypointInBounds())
          {
-            LogTools.debug("WALK -> PLAN (overrideGoToWaypointNotification + goalWaypointInBounds)");
             return PLAN;
          }
          else
          {
-            LogTools.debug("WALK -> PLAN (overrideGoToWaypointNotification + !goalWaypointInBounds)");
             return STOP;
          }
       }
       else if (walkingCompleted.read())
       {
-         LogTools.debug("WALK -> PLAN (walkingCompleted)");
          return PLAN;
       }
 
@@ -274,7 +255,6 @@ public class PatrolBehavior
 
    private void onWalkStateExit()
    {
-      LogTools.debug("onWalkStateExit");
       if (!stopNotification.read() && !overrideGoToWaypointNotification.read()) // only increment if WALK -> PLAN
       {
          ArrayList<Pose3D> latestWaypoints = waypoints.get();      // access and store these early

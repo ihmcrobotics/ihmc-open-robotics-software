@@ -4,7 +4,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 
 @FunctionalInterface
-public interface StateTransitionToAny<K>
+public interface StateTransitionTo<K>
 {
    K shouldTransitionTo(double timeInCurrentState);
 }
