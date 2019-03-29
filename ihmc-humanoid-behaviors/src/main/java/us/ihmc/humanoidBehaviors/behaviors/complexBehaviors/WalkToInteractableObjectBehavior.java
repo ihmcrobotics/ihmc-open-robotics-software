@@ -125,7 +125,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          {
             succeded = false;
             behaviorComplete = true;
-            publishTextToSpeack("Walk Failed");
+            publishTextToSpeech("Walk Failed");
          }
       };
 
@@ -136,7 +136,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          {
             succeded = true;
             behaviorComplete = true;
-            publishTextToSpeack("Walk Complete");
+            publishTextToSpeech("Walk Complete");
          }
       };
 

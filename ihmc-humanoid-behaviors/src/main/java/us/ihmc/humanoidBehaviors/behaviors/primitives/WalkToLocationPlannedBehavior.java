@@ -172,7 +172,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             walkSucceded = false;
-            publishTextToSpeack("WalkToLocationPlannedBehavior: Plan Failed");
+            publishTextToSpeech("WalkToLocationPlannedBehavior: Plan Failed");
          }
       };
       

@@ -87,7 +87,6 @@ public class AtlasBehaviorSimulation
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeRos2Node(realtimeRos2Node);
-      avatarSimulationFactory.setCreateYoVariableServer(true);
 
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 

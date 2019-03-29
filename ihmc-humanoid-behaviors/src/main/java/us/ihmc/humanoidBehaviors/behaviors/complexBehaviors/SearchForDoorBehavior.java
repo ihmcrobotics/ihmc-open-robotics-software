@@ -69,8 +69,10 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    private void recievedDoorLocation(DoorLocationPacket valveLocationPacket)
    {
+
       publishTextToSpeack("Recieved Door Location From UI");
       setDoorLocation(valveLocationPacket.getDoorTransformToWorld());
+
 
 
    }

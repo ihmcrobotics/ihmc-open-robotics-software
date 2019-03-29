@@ -53,7 +53,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       scanNumber = 0;
-      publishTextToSpeack("Getting Lidar");
+      publishTextToSpeech("Getting Lidar");
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);
    }
