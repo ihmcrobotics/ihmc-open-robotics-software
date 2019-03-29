@@ -43,6 +43,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventState;
@@ -316,8 +317,9 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
          controllerToolbox.getContactStates().get(robotQuadrant).set(ContactState.IN_CONTACT);
 
          tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
-         groundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
-         upcomingGroundPlanePositions.get(robotQuadrant).setMatchingFrame(tempPoint);
+         tempPoint.changeFrame(worldFrame);
+         groundPlanePositions.get(robotQuadrant).set(tempPoint);
+         upcomingGroundPlanePositions.get(robotQuadrant).set(tempPoint);
 
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
          upcomingGroundPlaneEstimator.addContactPoint(upcomingGroundPlanePositions.get(robotQuadrant));
@@ -431,8 +433,15 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // update ground plane estimate
       groundPlaneEstimator.clearContactPoints();
       upcomingGroundPlaneEstimator.clearContactPoints();
+      QuadrantDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         if (footSwitches.get(robotQuadrant).hasFootHitGround())
+         {
+            groundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
+            upcomingGroundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
+         }
+
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
          upcomingGroundPlaneEstimator.addContactPoint(upcomingGroundPlanePositions.get(robotQuadrant));
       }

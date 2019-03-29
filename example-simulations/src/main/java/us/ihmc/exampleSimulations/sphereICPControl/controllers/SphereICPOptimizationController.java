@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -286,6 +287,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    }
 
    private final FootstepTiming timing = new FootstepTiming();
+   private final SimpleAdjustableFootstep footstep = new SimpleAdjustableFootstep();
 
    private class SingleSupportState implements State
    {
@@ -333,9 +335,12 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
          icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
 
-         icpOptimizationController.addFootstepToPlan(nextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextNextFootstep, timing);
+         footstep.set(nextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
 
          RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
 
@@ -426,9 +431,12 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
          icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
 
-         icpOptimizationController.addFootstepToPlan(nextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextNextFootstep, timing);
+         footstep.set(nextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
 
          RobotSide transferToSide = nextFootstep.getRobotSide().getOppositeSide();
 
