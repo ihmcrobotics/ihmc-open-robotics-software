@@ -111,7 +111,7 @@ public class QuadrupedAStarFootstepPlannerTest
       double stanceLength = 0.8;
       double stanceWidth = 0.4;
 
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_114517_QuadrupedEnvironment0);
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190327_163532_QuadrupedEnvironment0);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
       FramePose3D startPose = new FramePose3D();
@@ -135,7 +135,7 @@ public class QuadrupedAStarFootstepPlannerTest
       double stanceWidth = 0.4;
 
 
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115758_QuadrupedEnvironment1);
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190327_174535_QuadrupedEnvironment1);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
       FramePose3D startPose = new FramePose3D();
@@ -158,7 +158,7 @@ public class QuadrupedAStarFootstepPlannerTest
       double stanceLength = 0.8;
       double stanceWidth = 0.4;
 
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115812_QuadrupedEnvironment2);
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190327_175120_QuadrupedEnvironment2);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
       FramePose3D startPose = new FramePose3D();
@@ -182,7 +182,7 @@ public class QuadrupedAStarFootstepPlannerTest
       double stanceLength = 0.8;
       double stanceWidth = 0.4;
 
-      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190313_115820_QuadrupedEnvironment3);
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190327_175227_QuadrupedEnvironment3);
       PlanarRegionsList planarRegionsList = dataSet.getPlanarRegionsList();
 
       FramePose3D startPose = new FramePose3D();

@@ -20,10 +20,12 @@ public class QuadrupedStandController implements EventState
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    public QuadrupedStandController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                    YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
@@ -46,6 +48,7 @@ public class QuadrupedStandController implements EventState
    {
       // update desired horizontal com forces
       balanceManager.compute();
+      controllerToolbox.updateSupportPolygon();
 
       // update desired body orientation, angular velocity, and torque
       bodyOrientationManager.compute();
