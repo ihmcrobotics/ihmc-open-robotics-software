@@ -1,15 +1,13 @@
 package us.ihmc.wholeBodyController.concurrent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.IntermediateDesiredJointDataHolder;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -17,11 +15,9 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 public class ControllerDataForEstimatorHolder
 {
    // Do not use FramePoint here, as HumanoidReferenceFrames are not shared between controller/estimator
-   private final Map<String, Point2D> centerOfPressure = new HashMap<String, Point2D>();
+   private final List<Point2D> centerOfPressure = new ArrayList<>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 
-   private final List<RigidBodyBasics> controllerFeet;
-   private final List<RigidBodyBasics> estimatorFeet;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
 
@@ -30,14 +26,15 @@ public class ControllerDataForEstimatorHolder
 
    private final IntermediateDesiredJointDataHolder intermediateDesiredJointDataHolder;
 
-   public ControllerDataForEstimatorHolder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder,
-         CenterOfPressureDataHolder controllerCenterOfPressureDataHolder, RobotMotionStatusHolder estimatorRobotMotionStatusHolder,
-         RobotMotionStatusHolder controllerRobotMotionStatusHolder, JointDesiredOutputList estimatorJointDataHolder,
-         JointDesiredOutputList controllerJointDataHolder)
-   {      
-      this.controllerFeet = new ArrayList<>(controllerCenterOfPressureDataHolder.getRigidBodies());
-      this.estimatorFeet = new ArrayList<>(estimatorCenterOfPressureDataHolder.getRigidBodies());
+   private final List<ReferenceFrame> estimatorSoleFrames;
+   private final List<ReferenceFrame> controllerSoleFrames;
 
+   public ControllerDataForEstimatorHolder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder,
+                                           CenterOfPressureDataHolder controllerCenterOfPressureDataHolder,
+                                           RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder,
+                                           JointDesiredOutputList estimatorJointDataHolder, JointDesiredOutputList controllerJointDataHolder,
+                                           List<ReferenceFrame> estimatorSoleFrames, List<ReferenceFrame> controllerSoleFrames)
+   {
       this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
       this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
 
@@ -45,20 +42,21 @@ public class ControllerDataForEstimatorHolder
       this.controllerRobotMotionStatusHolder = controllerRobotMotionStatusHolder;
 
       this.intermediateDesiredJointDataHolder = new IntermediateDesiredJointDataHolder(estimatorJointDataHolder, controllerJointDataHolder);
-      
-      for (int i = 0; i < controllerFeet.size(); i++)
+
+      this.estimatorSoleFrames = estimatorSoleFrames;
+      this.controllerSoleFrames = controllerSoleFrames;
+
+      for (int i = 0; i < estimatorSoleFrames.size(); i++)
       {
-         RigidBodyBasics foot = controllerFeet.get(i);
-         centerOfPressure.put(foot.getName(), new Point2D());
+         centerOfPressure.add(new Point2D());
       }
    }
 
    public void readControllerDataIntoEstimator()
    {
-      for (int i = 0; i < estimatorFeet.size(); i++)
+      for (int i = 0; i < estimatorSoleFrames.size(); i++)
       {
-         RigidBodyBasics foot = estimatorFeet.get(i);
-         estimatorCenterOfPressureDataHolder.setCenterOfPressure(centerOfPressure.get(foot.getName()), foot);
+         estimatorCenterOfPressureDataHolder.setCenterOfPressure(estimatorSoleFrames.get(i), centerOfPressure.get(i), i);
       }
 
       if (robotMotionStatus.get() != null)
@@ -69,10 +67,9 @@ public class ControllerDataForEstimatorHolder
 
    public void writeControllerDataFromController()
    {
-      for (int i = 0; i < controllerFeet.size(); i++)
+      for (int i = 0; i < controllerSoleFrames.size(); i++)
       {
-         RigidBodyBasics foot = controllerFeet.get(i);
-         controllerCenterOfPressureDataHolder.getCenterOfPressureByName(centerOfPressure.get(foot.getName()), foot);
+         centerOfPressure.get(i).set(controllerCenterOfPressureDataHolder.getCenterOfPressure(i));
       }
 
       robotMotionStatus.set(controllerRobotMotionStatusHolder.getCurrentRobotMotionStatus());
@@ -91,9 +88,13 @@ public class ControllerDataForEstimatorHolder
       private final JointDesiredOutputList estimatorDesiredJointDataHolder;
       private final JointDesiredOutputList controllerDesiredJointDataHolder;
 
+      private final List<ReferenceFrame> estimatorSoleFrames;
+      private final List<ReferenceFrame> controllerSoleFrames;
+
       public Builder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder, CenterOfPressureDataHolder controllerCenterOfPressureDataHolder,
             RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder,
-            JointDesiredOutputList estimatorDesiredJointDataHolder, JointDesiredOutputList controllerDesiredJointDataHolder)
+            JointDesiredOutputList estimatorDesiredJointDataHolder, JointDesiredOutputList controllerDesiredJointDataHolder,
+            List<ReferenceFrame> estimatorSoleFrames, List<ReferenceFrame> controllerSoleFrames)
       {
          this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
          this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
@@ -103,13 +104,17 @@ public class ControllerDataForEstimatorHolder
 
          this.estimatorDesiredJointDataHolder = estimatorDesiredJointDataHolder;
          this.controllerDesiredJointDataHolder = controllerDesiredJointDataHolder;
+
+         this.estimatorSoleFrames = estimatorSoleFrames;
+         this.controllerSoleFrames = controllerSoleFrames;
       }
 
       @Override
       public ControllerDataForEstimatorHolder newInstance()
       {
          return new ControllerDataForEstimatorHolder(estimatorCenterOfPressureDataHolder, controllerCenterOfPressureDataHolder,
-               estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder, estimatorDesiredJointDataHolder, controllerDesiredJointDataHolder);
+                                                     estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder, estimatorDesiredJointDataHolder,
+                                                     controllerDesiredJointDataHolder, estimatorSoleFrames, controllerSoleFrames);
       }
 
    }
