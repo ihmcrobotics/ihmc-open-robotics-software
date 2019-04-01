@@ -118,7 +118,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("LOOKING FOR BALL");
+            publishTextToSpeech("LOOKING FOR BALL");
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
