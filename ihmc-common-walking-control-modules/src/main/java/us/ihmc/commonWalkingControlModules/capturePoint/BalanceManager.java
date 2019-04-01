@@ -427,8 +427,8 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
-      linearMomentumRateControlModuleInput.setFootsteps(footsteps);
-      linearMomentumRateControlModuleInput.setFootstepTimings(footstepTimings);
+      linearMomentumRateControlModuleInput.setFromFootsteps(footsteps);
+      linearMomentumRateControlModuleInput.setFromFootstepTimings(footstepTimings);
       linearMomentumRateControlModuleInput.setFinalTransferDuration(finalTransferDuration);
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);

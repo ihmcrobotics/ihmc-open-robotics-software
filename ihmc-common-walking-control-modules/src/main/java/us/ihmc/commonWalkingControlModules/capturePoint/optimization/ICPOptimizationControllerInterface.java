@@ -1,21 +1,15 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import java.util.List;
+
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.robotics.geometry.PlanarRegion;
-
-import java.util.List;
-
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ICPOptimizationControllerInterface
@@ -30,7 +24,7 @@ public interface ICPOptimizationControllerInterface
 
    void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
 
-   void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
+   void addFootstepToPlan(SimpleAdjustableFootstep footstep, double swingDuration, double transferDuration);
 
    /**
     * Lets the controller know that it just entered the standing state. This does things
