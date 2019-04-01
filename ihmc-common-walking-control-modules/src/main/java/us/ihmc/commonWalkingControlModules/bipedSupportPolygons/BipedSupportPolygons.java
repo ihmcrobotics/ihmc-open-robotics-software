@@ -196,18 +196,19 @@ public class BipedSupportPolygons
 
    private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
    {
-      // Get the support polygon. If in double support, it is the combined polygon.
-      // FIXME: Assumes the individual feet polygons are disjoint for faster computation. Will crash if the feet overlap.
-      // If in single support, then the support polygon is just the foot polygon of the supporting foot.
-      if (neitherFootIsSupportingFoot)
-         throw new RuntimeException("neither foot is a supporting foot!");
-
       if (inDoubleSupport)
       {
+         // If in double support, it is the combined polygon.
          supportPolygonInMidFeetZUp.set(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+      }
+      else if (neitherFootIsSupportingFoot)
+      {
+         // When no foot is in contact the support polygon is empty.
+         supportPolygonInMidFeetZUp.clearAndUpdate();
       }
       else
       {
+         // If in single support, then the support polygon is just the foot polygon of the supporting foot.
          supportPolygonInMidFeetZUp.set(footPolygonsInMidFeetZUp.get(supportSide));
       }
 

@@ -62,6 +62,20 @@ mainDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
 }
 
+behaviorCleanRoomDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.0"
+}
+
+behaviorFxUiDependencies {
+   compile ihmc.sourceSetProject("main")
+   compile ihmc.sourceSetProject("behavior-clean-room")
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
+   compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
+}
+
 testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"

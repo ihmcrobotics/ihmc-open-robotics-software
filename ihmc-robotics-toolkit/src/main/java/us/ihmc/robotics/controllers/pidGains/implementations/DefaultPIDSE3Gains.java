@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 
@@ -10,7 +11,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
  * internally.
  * </p>
  */
-public class DefaultPIDSE3Gains implements PIDSE3Gains
+public class DefaultPIDSE3Gains implements PIDSE3Gains, Settable<DefaultPIDSE3Gains>
 {
    private final DefaultPID3DGains positionGains;
    private final DefaultPID3DGains orientationGains;
@@ -19,6 +20,12 @@ public class DefaultPIDSE3Gains implements PIDSE3Gains
    {
       positionGains = new DefaultPID3DGains();
       orientationGains = new DefaultPID3DGains();
+   }
+
+   @Override
+   public void set(DefaultPIDSE3Gains other)
+   {
+      PIDSE3Gains.super.set(other);
    }
 
    @Override

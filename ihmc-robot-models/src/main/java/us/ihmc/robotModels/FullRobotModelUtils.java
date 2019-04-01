@@ -1,11 +1,11 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
-
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
 
 public class FullRobotModelUtils
 {
@@ -15,6 +15,7 @@ public class FullRobotModelUtils
       getAllJointsExcludingHands(joints, model);
       return joints.toArray(new OneDoFJointBasics[joints.size()]);
    }
+
    public static void getAllJointsExcludingHands(ArrayList<OneDoFJointBasics> jointsToPack, FullHumanoidRobotModel model)
    {
       model.getOneDoFJoints(jointsToPack);
@@ -29,6 +30,14 @@ public class FullRobotModelUtils
                jointsToPack.remove(fingerJoint);
             }
          }
+      }
+   }
+
+   public static void checkJointNameHash(int expectedJointNameHash, int actualJointNameHash)
+   {
+      if (expectedJointNameHash != actualJointNameHash)
+      {
+         throw new RuntimeException("Joint names do not match");
       }
    }
 }

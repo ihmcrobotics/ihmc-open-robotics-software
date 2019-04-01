@@ -50,6 +50,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 public class MainTabController
 {
    private static final boolean verbose = false;
+   private static final double safetyRadiusToDiscardSteps = 0.8;
 
    // control
    @FXML
@@ -169,6 +170,19 @@ public class MainTabController
          {
             FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
             footstepDataMessage.setSwingHeight(swingHeightSpinner.getValue());
+         }
+      }
+      
+      us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstepSequence = footstepDataListMessage.getFootstepDataList();
+      for(int i = 1; i < footstepSequence.size(); i++)
+      {
+         Point3D previousLocation = footstepSequence.get(i - 1).getLocation();
+         Point3D location = footstepSequence.get(i).getLocation();
+         
+         if(previousLocation.distance(location) >= safetyRadiusToDiscardSteps)
+         {
+            footstepSequence.remove(i);
+            i--;
          }
       }
 
@@ -354,6 +368,7 @@ public class MainTabController
          return;
       
       requestMessage.getFootsteps().set(footstepDataListMessage);
+      requestMessage.getFootsteps().setOffsetFootstepsWithExecutionError(false);
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestWalkingPreview, requestMessage);
    }
 

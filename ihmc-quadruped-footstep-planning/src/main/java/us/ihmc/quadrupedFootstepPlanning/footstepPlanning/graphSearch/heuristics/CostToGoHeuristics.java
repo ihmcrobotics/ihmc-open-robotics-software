@@ -2,7 +2,6 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristic
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class CostToGoHeuristics
 {
@@ -15,12 +14,12 @@ public abstract class CostToGoHeuristics
 
    public double getWeight()
    {
-      return parameters.getHeuristicsWeight();
+      return parameters.getHeuristicsInflationWeight();
    }
 
    public double compute(FootstepNode node, FootstepNode goalNode)
    {
-      return parameters.getHeuristicsWeight() * computeHeuristics(node, goalNode);
+      return parameters.getHeuristicsInflationWeight() * computeHeuristics(node, goalNode);
    }
 
    protected abstract double computeHeuristics(FootstepNode node, FootstepNode goalNode);

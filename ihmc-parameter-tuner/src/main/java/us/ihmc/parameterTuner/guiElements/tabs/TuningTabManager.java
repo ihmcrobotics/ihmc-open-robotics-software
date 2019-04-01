@@ -103,11 +103,10 @@ public class TuningTabManager
          ((TuningTab) tab).setSliderboard(sliderboard);
          ((TuningTab) tab).hide();
       });
-      tabPane.getSelectionModel().select(0);
-      Tab tuningTab = tabPane.getSelectionModel().getSelectedItem();
-      if (tuningTab != null)
+      if (!tabPane.getSelectionModel().isEmpty())
       {
-         ((TuningTab) tuningTab).updateView();
+         tabPane.getSelectionModel().select(0);
+         ((TuningTab) tabPane.getSelectionModel().getSelectedItem()).updateView();
       }
       updateMenuItems();
    }
