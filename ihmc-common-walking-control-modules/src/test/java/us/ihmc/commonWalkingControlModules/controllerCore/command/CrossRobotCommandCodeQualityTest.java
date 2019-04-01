@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,15 +30,11 @@ import com.google.common.base.CaseFormat;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -51,6 +49,11 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -61,10 +64,10 @@ import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ControllerCoreCommandCodeQualityTest
+public class CrossRobotCommandCodeQualityTest
 {
    /**
     * Number of attempts used when comparing 2 random objects before failing.
@@ -85,22 +88,27 @@ public class ControllerCoreCommandCodeQualityTest
    {
       String errorMessage = "";
 
-      for (Class<? extends InverseDynamicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes())
+      for (Class<? extends InverseDynamicsCommand> commandType : CrossRobotCommandRandomTools.getInverseDynamicsCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends InverseKinematicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes())
+      for (Class<? extends InverseKinematicsCommand> commandType : CrossRobotCommandRandomTools.getInverseKinematicsCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends VirtualModelControlCommand> commandType : ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes())
+      for (Class<? extends VirtualModelControlCommand> commandType : CrossRobotCommandRandomTools.getVirtualModelControlCommandTypes())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
 
-      for (Class<? extends FeedbackControlCommand> commandType : ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes())
+      for (Class<? extends FeedbackControlCommand> commandType : CrossRobotCommandRandomTools.getFeedbackControlCommandTypes())
+      {
+         errorMessage += testEmptyConstructor(commandType);
+      }
+
+      for (Class<?> commandType : CrossRobotCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEmptyConstructor(commandType);
       }
@@ -150,22 +158,27 @@ public class ControllerCoreCommandCodeQualityTest
    {
       String errorMessage = "";
 
-      for (Class<? extends InverseDynamicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes())
+      for (Class<? extends InverseDynamicsCommand> commandType : CrossRobotCommandRandomTools.getInverseDynamicsCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends InverseKinematicsCommand> commandType : ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes())
+      for (Class<? extends InverseKinematicsCommand> commandType : CrossRobotCommandRandomTools.getInverseKinematicsCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends VirtualModelControlCommand> commandType : ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes())
+      for (Class<? extends VirtualModelControlCommand> commandType : CrossRobotCommandRandomTools.getVirtualModelControlCommandTypes())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
 
-      for (Class<? extends FeedbackControlCommand> commandType : ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes())
+      for (Class<? extends FeedbackControlCommand> commandType : CrossRobotCommandRandomTools.getFeedbackControlCommandTypes())
+      {
+         errorMessage += testEqualsWithEmptyObject(commandType);
+      }
+
+      for (Class<?> commandType : CrossRobotCommandRandomTools.getAdditionalClassesToTest())
       {
          errorMessage += testEqualsWithEmptyObject(commandType);
       }
@@ -220,14 +233,7 @@ public class ControllerCoreCommandCodeQualityTest
 
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -239,7 +245,7 @@ public class ControllerCoreCommandCodeQualityTest
             continue;
          }
 
-         for (Field field : typeToTest.getDeclaredFields())
+         for (Field field : getAllFields(typeToTest))
          {
             // A static field is considered as non-representative of the object state.
             if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))
@@ -259,13 +265,13 @@ public class ControllerCoreCommandCodeQualityTest
             {
                long seed = random.nextLong();
                // Generating 2 objects that we know are the same because we use a fresh random with the same seed both times.
-               Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody, referenceFrames);
-               Object typeRandomInstanceDuplicate = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody,
+               Object typeRandomInstance = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody, referenceFrames);
+               Object typeRandomInstanceDuplicate = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, new Random(seed), true, rootBody,
                                                                                                       referenceFrames);
 
                try
                { // We randomize the field's value on the first random object.
-                  ControllerCoreCommandRandomTools.randomizeField(random, field, typeRandomInstance, rootBody, referenceFrames);
+                  CrossRobotCommandRandomTools.randomizeField(random, field, typeRandomInstance, rootBody, referenceFrames);
                }
                catch (UnsupportedOperationException e)
                {
@@ -291,7 +297,7 @@ public class ControllerCoreCommandCodeQualityTest
    }
 
    /**
-    * API test to verify that {@link ControllerCoreCommandRandomTools} declares the random generators
+    * API test to verify that {@link CrossRobotCommandRandomTools} declares the random generators
     * we need to generate controller core commands, including their fields.
     * 
     * @throws Exception
@@ -305,21 +311,19 @@ public class ControllerCoreCommandCodeQualityTest
       typesToIgnore.add(OneDoFJointBasics.class);
       typesToIgnore.add(RigidBodyBasics.class);
 
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       allCommandTypes.removeIf(type -> type.isInterface());
       Map<Class<?>, Class<?>> typesToVerify = new HashMap<>();
       for (Class<?> commandType : allCommandTypes)
          typesToVerify.put(commandType, null);
-      allCommandTypes.forEach(commandType -> extractTypeSubTypes(commandType, typesToVerify, safeTypes()));
+      for (Class<?> commandType : allCommandTypes)
+      {
+         extractTypeSubTypes(commandType, typesToVerify, safeTypes());
+      }
 
       String errorMessage = "";
 
-      Set<String> randomGeneratorNames = Stream.of(ControllerCoreCommandRandomTools.class.getDeclaredMethods()).map(Method::getName)
+      Set<String> randomGeneratorNames = Stream.of(CrossRobotCommandRandomTools.class.getDeclaredMethods()).map(Method::getName)
                                                .collect(Collectors.toSet());
 
       for (Entry<Class<?>, Class<?>> typeToVerifyAndOwnerEntry : typesToVerify.entrySet())
@@ -351,7 +355,7 @@ public class ControllerCoreCommandCodeQualityTest
    }
 
    /**
-    * This tests asserts that the random generators in {@link ControllerCoreCommandRandomTools}
+    * This tests asserts that the random generators in {@link CrossRobotCommandRandomTools}
     * generate fully random objects, i.e. each field of a random object is generated randomly.
     * <ol>
     * <li>2 objects of the same type are generated randomly.
@@ -374,21 +378,9 @@ public class ControllerCoreCommandCodeQualityTest
       SubtreeStreams.fromChildren(rootBody).map(JointBasics::getFrameAfterJoint).forEach(referenceFramesList::add);
       ReferenceFrame[] referenceFrames = referenceFramesList.toArray(new ReferenceFrame[0]);
 
-      Set<Field> fieldsToIgnore = new HashSet<>();
-      // The following are fields used for internal computation but do not reflect the state of the object.
-      fieldsToIgnore.add(SelectionMatrix3D.class.getDeclaredField("frameMatrix"));
-      fieldsToIgnore.add(WeightMatrix3D.class.getDeclaredField("frameMatrix"));
-
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -402,9 +394,9 @@ public class ControllerCoreCommandCodeQualityTest
 
          Object typeDefaultInstance = typeToTest.newInstance();
 
-         for (Field field : typeToTest.getDeclaredFields())
+         for (Field field : getAllFields(typeToTest))
          {
-            if (Modifier.isStatic(field.getModifiers()) || fieldsToIgnore.contains(field))
+            if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))
             {
                if (verbose)
                   LogTools.info("Skipping: " + typeToTest.getSimpleName() + "." + field.getName());
@@ -422,7 +414,7 @@ public class ControllerCoreCommandCodeQualityTest
             // We first assert that the random object is different from the instance created with empty constructor.
             for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
-               Object typeRandomInstance = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstance = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstance = field.get(typeRandomInstance);
 
                if (fieldTypeRandomInstance != null && !fieldTypeRandomInstance.equals(fieldTypeDefaultInstance))
@@ -442,9 +434,9 @@ public class ControllerCoreCommandCodeQualityTest
 
             for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
             {
-               Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstanceA = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceA = field.get(typeRandomInstanceA);
-               Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+               Object typeRandomInstanceB = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
                Object fieldTypeRandomInstanceB = field.get(typeRandomInstanceB);
 
                if (fieldTypeRandomInstanceA == fieldTypeRandomInstanceB)
@@ -499,21 +491,9 @@ public class ControllerCoreCommandCodeQualityTest
       SubtreeStreams.fromChildren(rootBody).map(JointBasics::getFrameAfterJoint).forEach(referenceFramesList::add);
       ReferenceFrame[] referenceFrames = referenceFramesList.toArray(new ReferenceFrame[0]);
 
-      Set<Field> fieldsToIgnore = new HashSet<>();
-      // The following are fields used for internal computation but do not reflect the state of the object.
-      fieldsToIgnore.add(SelectionMatrix3D.class.getDeclaredField("frameMatrix"));
-      fieldsToIgnore.add(WeightMatrix3D.class.getDeclaredField("frameMatrix"));
-
       // Low-level types or types from 3rd party libraries assumed to be safe.
       Set<Class<?>> safeTypes = safeTypes();
-
-      Set<Class<?>> allCommandTypes = new HashSet<>();
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseDynamicsCommandTypes(InverseDynamicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getInverseKinematicsCommandTypes(InverseKinematicsCommandBuffer.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getVirtualModelControlCommandTypes(VirtualModelControlCommandBuffer.class,
-                                                                                                 VirtualEffortCommand.class));
-      allCommandTypes.addAll(ControllerCoreCommandRandomTools.getFeedbackControlCommandTypes(FeedbackControlCommandBuffer.class));
-
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
       String errorMessage = "";
 
       for (Class<?> typeToTest : collectTypesAndSubTypes(allCommandTypes, safeTypes))
@@ -535,11 +515,11 @@ public class ControllerCoreCommandCodeQualityTest
             throw new AssertionFailedError("Could not find a copy setter method for the type: " + typeToTest.getSimpleName());
          }
 
-         Object typeRandomInstanceA = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+         Object typeRandomInstanceA = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
          for (int attempt = 0; attempt < NUMBER_OF_ATTEMPTS; attempt++)
          {
-            Object typeRandomInstanceB = ControllerCoreCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
+            Object typeRandomInstanceB = CrossRobotCommandRandomTools.nextTypeInstance(typeToTest, random, true, rootBody, referenceFrames);
 
             copySetter.invoke(typeRandomInstanceA, typeRandomInstanceB);
 
@@ -557,8 +537,9 @@ public class ControllerCoreCommandCodeQualityTest
    }
 
    public static void extractTypeSubTypes(Class<?> type, Map<Class<?>, Class<?>> subTypeToOwnerTypeMapToPack, Collection<Class<?>> typesToStopRecursionAt)
+         throws Exception
    {
-      for (Field field : type.getDeclaredFields())
+      for (Field field : getAllFields(type))
       {
          Class<?> fieldType = field.getType();
 
@@ -573,20 +554,35 @@ public class ControllerCoreCommandCodeQualityTest
          subTypeToOwnerTypeMapToPack.put(fieldType, type);
 
          if (typesToStopRecursionAt.contains(fieldType))
+         {
+            Class<?> extractedGenericType = extractGenericType(type, field);
+            if (extractedGenericType != null)
+            {
+               subTypeToOwnerTypeMapToPack.put(fieldType, type);
+               if (!typesToStopRecursionAt.contains(extractedGenericType))
+               {
+                  extractTypeSubTypes(extractedGenericType, subTypeToOwnerTypeMapToPack, typesToStopRecursionAt);
+               }
+            }
             continue;
+         }
 
          extractTypeSubTypes(fieldType, subTypeToOwnerTypeMapToPack, typesToStopRecursionAt);
       }
    }
 
-   public static Collection<Class<?>> collectTypesAndSubTypes(Collection<Class<?>> types, Collection<Class<?>> typesToStopRecursionAt)
+   public static Collection<Class<?>> collectTypesAndSubTypes(Collection<Class<?>> types, Collection<Class<?>> typesToStopRecursionAt) throws Exception
    {
       Collection<Class<?>> typesAndSubTypes = new HashSet<>();
-      types.forEach(type -> collectTypeAndSubTypes(type, typesAndSubTypes, typesToStopRecursionAt));
+      for (Class<?> type : types)
+      {
+         collectTypeAndSubTypes(type, typesAndSubTypes, typesToStopRecursionAt);
+      }
       return typesAndSubTypes;
    }
 
    public static void collectTypeAndSubTypes(Class<?> type, Collection<Class<?>> typesAndSubTypesToPack, Collection<Class<?>> typesToStopRecursionAt)
+         throws Exception
    {
       if (type.isPrimitive() || type.isEnum())
          return;
@@ -595,12 +591,17 @@ public class ControllerCoreCommandCodeQualityTest
       if (typesToStopRecursionAt.contains(type))
          return;
 
-      for (Field field : type.getDeclaredFields())
+      for (Field field : getAllFields(type))
       {
          if (Modifier.isStatic(field.getModifiers()))
             continue;
          if (Modifier.isTransient(field.getModifiers()))
             continue;
+
+         Class<?> extractedGenericType = extractGenericType(type, field);
+         if (extractedGenericType != null)
+            collectTypeAndSubTypes(extractedGenericType, typesAndSubTypesToPack, typesToStopRecursionAt);
+
          collectTypeAndSubTypes(field.getType(), typesAndSubTypesToPack, typesToStopRecursionAt);
       }
    }
@@ -611,8 +612,10 @@ public class ControllerCoreCommandCodeQualityTest
       safeTypes.add(ArrayList.class);
       safeTypes.add(TDoubleArrayList.class);
       safeTypes.add(ReferenceFrame.class);
+      safeTypes.add(MovingReferenceFrame.class);
       safeTypes.add(FrameTupleArrayList.class);
       safeTypes.add(RecyclingArrayList.class);
+      safeTypes.add(SideDependentList.class);
       safeTypes.add(DenseMatrix64F.class);
       safeTypes.add(DenseMatrixArrayList.class);
       safeTypes.add(FramePoint3D.class);
@@ -629,10 +632,66 @@ public class ControllerCoreCommandCodeQualityTest
       safeTypes.add(RigidBodyTransform.class);
       safeTypes.add(JointBasics.class);
       safeTypes.add(OneDoFJointBasics.class);
+      safeTypes.add(PrismaticJoint.class);
+      safeTypes.add(RevoluteJoint.class);
       safeTypes.add(RigidBodyBasics.class);
       safeTypes.add(Wrench.class);
       safeTypes.add(SpatialForce.class);
+      safeTypes.add(ConvexPolygon2D.class);
       safeTypes.add(double[].class);
       return safeTypes;
+   }
+
+   private static List<Field> getAllFields(Class<?> clazz)
+   {
+      if (clazz == null)
+         return Collections.emptyList();
+      List<Field> declaredFields = new ArrayList<Field>(Arrays.asList(clazz.getDeclaredFields()));
+      declaredFields.addAll(getAllFields(clazz.getSuperclass()));
+      return declaredFields;
+   }
+
+   public static Class<?> extractGenericType(Class<?> ownerType, Field field) throws Exception
+   {
+      Class<?> fieldType = field.getType();
+      if (fieldType == RecyclingArrayList.class)
+      {
+         field.setAccessible(true);
+         Object owner = ownerType.newInstance();
+         Object fieldInstance = field.get(owner);
+         Field allocatorField = RecyclingArrayList.class.getDeclaredField("allocator");
+         allocatorField.setAccessible(true);
+         return ((Supplier<?>) allocatorField.get(fieldInstance)).get().getClass();
+      }
+      if (fieldType == List.class)
+      {
+         field.setAccessible(true);
+         Random random = new Random();
+         List<OneDoFJoint> joints = MultiBodySystemRandomTools.nextOneDoFJointChain(random, 2);
+         Object ownerInstance = CrossRobotCommandRandomTools.nextTypeInstance(ownerType, random, true,
+                                                                                  joints.get(0).getSuccessor(),
+                                                                                  ReferenceFrame.getWorldFrame());
+         Object fieldInstance = field.get(ownerInstance);
+         Object object = ((List<?>) fieldInstance).get(0);
+         if (object == null)
+            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in list " + field.getName() + ".");
+         return object.getClass();
+      }
+      if (fieldType == SideDependentList.class)
+      {
+         field.setAccessible(true);
+         Object ownerInstance = CrossRobotCommandRandomTools.nextTypeInstance(ownerType, new Random(), true,
+                                                                                  new RigidBody("Dummy", ReferenceFrame.getWorldFrame()),
+                                                                                  ReferenceFrame.getWorldFrame());
+         Object fieldInstance = field.get(ownerInstance);
+         Object object = ((SideDependentList<?>) fieldInstance).get(RobotSide.LEFT);
+         if (object == null)
+            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in side dependent list " + field.getName() + ".");
+         return object.getClass();
+      }
+
+      // TODO: Add a check that all safe types with generics extract their generics here.
+
+      return null;
    }
 }

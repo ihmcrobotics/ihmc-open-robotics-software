@@ -16,8 +16,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
    private final List<OneDoFJointBasics> jointsWithDesiredData;
-   private final TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
    private final RecyclingArrayList<JointDesiredOutput> lowLevelJointData;
+
+   /**
+    * This is used for lookups only and is populated from the {@link #lowLevelJointData}. It should not
+    * be modified directly and does not represent the state of the class.
+    */
+   private final transient TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
 
    public LowLevelOneDoFJointDesiredDataHolder()
    {
@@ -167,6 +172,11 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       lowLevelJointDataMap.put(joint.hashCode(), jointData);
       jointsWithDesiredData.add(joint);
       return jointData;
+   }
+
+   public void set(LowLevelOneDoFJointDesiredDataHolder other)
+   {
+      overwriteWith(other);
    }
 
    private static void throwJointAlreadyRegisteredException(OneDoFJointBasics joint)

@@ -46,6 +46,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    }
 
+   public ControllerCoreCommand()
+   {
+      inverseDynamicsCommandList = new InverseDynamicsCommandList();
+      virtualModelControlCommandList = new VirtualModelControlCommandList();
+      feedbackControlCommandList = new FeedbackControlCommandList();
+      inverseKinematicsCommandList = new InverseKinematicsCommandList();
+      lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   }
+
    /**
     * Clears all the command lists.
     */
@@ -206,7 +215,9 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       inverseDynamicsCommandList.set(other.inverseDynamicsCommandList);
       feedbackControlCommandList.set(other.feedbackControlCommandList);
       inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
-      lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+      virtualModelControlCommandList.set(other.virtualModelControlCommandList);
+      lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
+      reinitialize = other.reinitialize;
    }
 
    /**
