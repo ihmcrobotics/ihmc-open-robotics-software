@@ -75,11 +75,13 @@ public class SmoothCMPPlannerParameters implements ICPWithTimeFreezingPlannerPar
       copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
    }
 
+   @Override
    public boolean planSwingAngularMomentum()
    {
       return false;
    }
 
+   @Override
    public boolean planTransferAngularMomentum()
    {
       return false;
@@ -127,6 +129,7 @@ public class SmoothCMPPlannerParameters implements ICPWithTimeFreezingPlannerPar
     * The value calculated using this must be greater than that returned by {@link #getMinTimeToSpendOnExitCoPInSingleSupport()},
     * or it is overwritten.
     */
+   @Override
    public double getSwingDurationShiftFraction()
    {
       return 0.90;
@@ -152,11 +155,13 @@ public class SmoothCMPPlannerParameters implements ICPWithTimeFreezingPlannerPar
       return exitCoPName;
    }
 
+   @Override
    public CoPPointName[] getSwingCoPPointsToPlan()
    {
       return swingCopPointsToPlan;
    }
 
+   @Override
    public CoPPointName[] getTransferCoPPointsToPlan()
    {
       return transferCoPPointsToPlan;
@@ -169,46 +174,55 @@ public class SmoothCMPPlannerParameters implements ICPWithTimeFreezingPlannerPar
       return stepLengthToCoPOffsetFactor;
    }
 
+   @Override
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
    }
 
+   @Override
    public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
    {
       return new AngularMomentumEstimationParameters();
    }
 
+   @Override
    public boolean adjustCoPPlanForSingleSupportContinuity()
    {
       return adjustPlanForSingleSupport;
    }
 
+   @Override
    public boolean adjustInitialCoPPlanForDoubleSupportContinuity()
    {
       return adjustPlanForInitialDoubleSupport;
    }
 
+   @Override
    public boolean adjustEveryCoPPlanForDoubleSupportContinuity()
    {
       return adjustPlanForEachDoubleSupport;
    }
 
+   @Override
    public boolean adjustCoPPlanForStandingContinuity()
    {
       return adjustPlanWhenGoingToStand;
    }
 
+   @Override
    public boolean doContinuousReplanningForStanding()
    {
       return doContinuousReplanningForStanding;
    }
 
+   @Override
    public boolean doContinuousReplanningForTransfer()
    {
       return doContinuousReplanningForTransfer;
    }
 
+   @Override
    public boolean doContinuousReplanningForSwing()
    {
       return doContinuousReplanningForSwing;

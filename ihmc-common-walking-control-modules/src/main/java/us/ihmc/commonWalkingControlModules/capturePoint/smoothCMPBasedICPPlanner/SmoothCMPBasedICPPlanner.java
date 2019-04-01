@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepData;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
@@ -229,7 +229,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ReferenceFrame> soleZUpFrames, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                    MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoVariableRegistry parentRegistry,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ, SmoothCMPPlannerParameters icpPlannerParameters)
+                                   YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ, ICPPlannerParameters icpPlannerParameters)
    {
 
       this(fullRobotModel.getTotalMass(), bipedSupportPolygons, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime, parentRegistry,
@@ -239,7 +239,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    public SmoothCMPBasedICPPlanner(double robotMass, BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, MomentumTrajectoryHandler momentumTrajectoryHandler,
                                    YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ,
-                                   SmoothCMPPlannerParameters icpPlannerParameters)
+                                   ICPPlannerParameters icpPlannerParameters)
    {
       isStanding.set(true);
 
@@ -335,7 +335,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       initializeParameters(icpPlannerParameters);
    }
 
-   private void initializeParameters(SmoothCMPPlannerParameters icpPlannerParameters)
+   private void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
       defaultTransferDurationAlpha.set(icpPlannerParameters.getTransferSplitFraction());
       defaultSwingDurationAlpha.set(icpPlannerParameters.getSwingSplitFraction());
