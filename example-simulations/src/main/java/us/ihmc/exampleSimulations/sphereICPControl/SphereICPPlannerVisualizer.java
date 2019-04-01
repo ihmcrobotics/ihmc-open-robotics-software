@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.AbstractICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -106,7 +105,7 @@ public class SphereICPPlannerVisualizer
    private BipedSupportPolygons bipedSupportPolygons;
 
    private final SimulationConstructionSet scs;
-   private final AbstractICPPlanner icpPlanner;
+   private final SmoothCMPBasedICPPlanner icpPlanner;
 
    private final YoDouble yoTime;
    private final double dt = 0.006;
@@ -621,7 +620,7 @@ public class SphereICPPlannerVisualizer
       return footsteps;
    }
 
-   private AbstractICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private SmoothCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -679,11 +678,9 @@ public class SphereICPPlannerVisualizer
 
       SmoothCMPPlannerParameters capturePointPlannerParameters = new SphereSmoothCMPPlannerParameters();
 
-      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons, soleZUpFrames, contactableFeet,
-                                                                         capturePointPlannerParameters.getNumberOfFootstepsToConsider(), null, yoTime, registry,
-                                                                         yoGraphicsListRegistry, gravity);
+      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons, soleZUpFrames, contactableFeet, null, yoTime, registry,
+                                                                         yoGraphicsListRegistry, gravity, capturePointPlannerParameters);
       icpPlanner.setOmega0(omega0);
-      icpPlanner.initializeParameters(capturePointPlannerParameters);
       icpPlanner.setFinalTransferDuration(1.0);
       return icpPlanner;
    }
