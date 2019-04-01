@@ -52,7 +52,7 @@ public class SelectionMatrix3D
     * Internal object used only to convert the three booleans into an actual 3-by-3 selection
     * matrix.
     */
-   private final FrameMatrix3D frameMatrix = new FrameMatrix3D();
+   private final transient FrameMatrix3D frameMatrix = new FrameMatrix3D();
 
    /**
     * Creates a new selection matrix. This selection matrix is initialized with all the axes

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -44,6 +46,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -53,6 +56,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -60,6 +64,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -506,6 +511,7 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearVelocity().set(in.getDesiredLinearVelocity());
       out.getDesiredAngularVelocity().set(in.getDesiredAngularVelocity());
+      out.setConstraintType(in.getConstraintType());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
@@ -625,6 +631,52 @@ public class CrossRobotCommandResolver
       out.getGains().set(in.getGains());
       out.setGainsFrames(resolveReferenceFrame(in.getAngularGainsFrame()), resolveReferenceFrame(in.getLinearGainsFrame()));
       out.setControlBaseFrame(resolveReferenceFrame(in.getControlBaseFrame()));
+   }
+
+   public void resolveLinearMomentumRateControlModuleInput(LinearMomentumRateControlModuleInput in, LinearMomentumRateControlModuleInput out)
+   {
+      out.setOmega0(in.getOmega0());
+      resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
+      resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
+      resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
+      resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
+      out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
+      out.setDesiredCenterOfMassHeightAcceleration(in.getDesiredCoMHeightAcceleration());
+      out.setSupportSide(in.getSupportSide());
+      out.setTransferToSide(in.getTransferToSide());
+      out.setInitializeForStanding(in.getInitializeForStanding());
+      out.setInitializeForSingleSupport(in.getInitializeForSingleSupport());
+      out.setInitializeForTransfer(in.getInitializeForTransfer());
+      out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
+      out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
+      RecyclingArrayList<SimpleAdjustableFootstep> outFootsteps = out.getFootsteps();
+      RecyclingArrayList<SimpleAdjustableFootstep> inFootsteps = in.getFootsteps();
+      outFootsteps.clear();
+      for (int i = 0; i < inFootsteps.size(); i++)
+         resolveSimpleAdjustableFootstep(inFootsteps.get(i), outFootsteps.add());
+      out.setSwingDurations(in.getSwingDurations());
+      out.setTransferDurations(in.getTransferDurations());
+      out.setFinalTransferDuration(in.getFinalTransferDuration());
+      out.setRemainingTimeInSwingUnderDisturbance(in.getRemainingTimeInSwingUnderDisturbance());
+      for (RobotSide robotSide : RobotSide.values)
+         resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
+   }
+
+   public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
+   {
+      resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
+      resolveFrameTuple3D(in.getEffectiveICPAdjustment(), out.getEffectiveICPAdjustment());
+      out.setUsingStepAdjustment(in.getUsingStepAdjustment());
+      out.setFootstepWasAdjusted(in.getFootstepWasAdjusted());
+      resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
+   }
+
+   private void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
+   {
+      out.setIsAdjustable(in.getIsAdjustable());
+      out.setRobotSide(in.getRobotSide());
+      resolveFramePose3D(in.getSoleFramePose(), out.getSoleFramePose());
+      out.setFoothold(in.getFoothold());
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)

@@ -6,10 +6,11 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidBehaviors.BehaviorTeleop;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -30,13 +31,12 @@ public class ValkyrieBehaviorUI extends Application
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_behavior_ui");
 //      AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
 
+      BehaviorTeleop teleop = BehaviorTeleop.createForUI(drcRobotModel, "localhost");
 
-      ui = BehaviorUI.createMessagerUI(primaryStage, messager,
-                                       drcRobotModel.getFootstepPlannerParameters(),
-                                       drcRobotModel.getVisibilityGraphsParameters(),
-                                       drcRobotModel,
-                                       drcRobotModel.getContactPointParameters(),
-                                       drcRobotModel.getWalkingControllerParameters());
+      ui = new BehaviorUI(primaryStage,
+                          teleop,
+                          drcRobotModel,
+                          PubSubImplementation.FAST_RTPS);
       ui.show();
 
       messager.startMessager();

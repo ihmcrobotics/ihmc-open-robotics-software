@@ -53,7 +53,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: "source"
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning-visualizers", version: "source"
-   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors-fx-ui", version: "source"
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-behavior-fx-ui", version: "source"
 }
 
 testDependencies {

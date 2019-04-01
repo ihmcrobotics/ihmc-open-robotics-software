@@ -223,6 +223,11 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
       this.maxVelocityError = maxVelocityError;
    }
 
+   public void set(JointDesiredOutput other)
+   {
+      JointDesiredOutputBasics.super.set(other);
+   }
+
    @Override
    public boolean equals(Object object)
    {

@@ -30,7 +30,7 @@ import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
 {
    /** Initial capacity of the internal memory. */
-   private final int initialCapacity = 15;
+   private static final int initialCapacity = 15;
    /** Gains to used by the PD controllers for the next control tick. */
    private final RecyclingArrayList<OneDoFJointFeedbackControlCommand> jointCommands = new RecyclingArrayList<>(initialCapacity,
                                                                                                                 OneDoFJointFeedbackControlCommand.class);
@@ -46,6 +46,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
    /**
     * Clears the data contained in this command.
     */
+   @Override
    public void clear()
    {
       super.clear();
@@ -54,7 +55,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
 
    /**
     * Adds a {@code OneDoFJointFeedbackControlCommand} to this command.
-    * 
+    *
     * @throws IllegalArgumentException if the given {@code command} is not an instance of
     *            {@code OneDoFJointFeedbackControlCommand}.
     */
@@ -116,7 +117,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
     * <p>
     * The new command has to be configured.
     * </p>
-    * 
+    *
     * @return the new empty command.
     */
    public OneDoFJointFeedbackControlCommand addEmptyCommand()
@@ -220,7 +221,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
                return false;
          }
 
-         return true;
+         return super.equals(object);
       }
       else
       {
