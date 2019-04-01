@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
+public class SmoothCMPPlannerParameters implements ICPWithTimeFreezingPlannerParameters
 {
    private static final boolean adjustPlanForSingleSupport = false;
    private static final boolean adjustPlanForInitialDoubleSupport = true;
@@ -42,6 +42,8 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
    protected CoPPointName exitCoPName;
 
+   protected final double modelScale;
+
    public SmoothCMPPlannerParameters()
    {
       this(1.0);
@@ -49,7 +51,7 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
 
    public SmoothCMPPlannerParameters(double modelScale)
    {
-      super(modelScale);
+      this.modelScale = modelScale;
 
       this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
       this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
@@ -210,5 +212,97 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
    public boolean doContinuousReplanningForSwing()
    {
       return doContinuousReplanningForSwing;
+   }
+
+   /**
+    * <p>
+    * {@inheritDoc}
+    * </p>
+    * <p>
+    * The values 3 and 4 seem to be good.
+    * </p>
+    */
+   @Override
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 3;
+   }
+
+   @Override
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return modelScale * 0.025;
+   }
+
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return modelScale * 0.03;
+   }
+
+   @Override
+   public boolean getDoTimeFreezing()
+   {
+      return false;
+   }
+
+   @Override
+   public double getMinTimeToSpendOnExitCoPInSingleSupport()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return Double.NaN;
+   }
+
+   @Override
+   public double getCoPSafeDistanceAwayFromSupportEdges()
+   {
+      return modelScale * 0.01;
+   }
+
+   @Override
+   public boolean putExitCoPOnToes()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean useExitCoPOnToesForSteppingDown()
+   {
+      return false;
+   }
+
+   @Override
+   public double getStepLengthThresholdForExitCoPOnToesWhenSteppingDown()
+   {
+      return modelScale * 0.15;
+   }
+
+   @Override
+   public double getStepHeightThresholdForExitCoPOnToesWhenSteppingDown()
+   {
+      return modelScale * 0.10;
+   }
+
+   @Override
+   public double getCoPSafeDistanceAwayFromToesWhenSteppingDown()
+   {
+      return modelScale * 0.0;
+   }
+
+   @Override
+   public double getExitCoPForwardSafetyMarginOnToes()
+   {
+      return modelScale * 1.6e-2;
+   }
+
+   @Override
+   public double getStepLengthThresholdForExitCoPOnToes()
+   {
+      return modelScale * 0.15;
    }
 }
