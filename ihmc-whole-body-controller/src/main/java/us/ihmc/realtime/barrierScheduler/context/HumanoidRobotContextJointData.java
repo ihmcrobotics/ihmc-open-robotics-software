@@ -1,6 +1,7 @@
 package us.ihmc.realtime.barrierScheduler.context;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 /**
@@ -67,7 +68,7 @@ public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRo
       this.rootJointData.copyFrom(other);
    }
 
-   public void setRootJointData(QuaternionReadOnly orientation, double angularVelocity, double angularAcceleration)
+   public void setRootJointData(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity, Vector3DReadOnly angularAcceleration)
    {
       this.rootJointData.setRootJointOrientation(orientation);
       this.rootJointData.setRootJointAngularVelocity(angularVelocity);
