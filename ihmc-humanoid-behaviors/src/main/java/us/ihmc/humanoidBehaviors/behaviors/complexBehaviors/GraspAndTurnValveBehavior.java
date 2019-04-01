@@ -91,7 +91,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            publishTextToSpeack("Moving Hand To Approach Location");
+            publishTextToSpeech("Moving Hand To Approach Location");
          }
       };
 
@@ -168,7 +168,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("rotate Valve");
+            publishTextToSpeech("rotate Valve");
             FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
             GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
@@ -188,7 +188,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      publishTextToSpeack(description);
+      publishTextToSpeech(description);
 
       //      Vector3d orient = new Vector3d();
       //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);

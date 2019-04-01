@@ -4,6 +4,7 @@ public enum HumanoidBehaviorType
 {
    STOP,
    TEST,
+   BASIC_TIMER_BEHAVIOR,
    WALK_TO_LOCATION,
    WALK_TO_GOAL,
    DIAGNOSTIC,

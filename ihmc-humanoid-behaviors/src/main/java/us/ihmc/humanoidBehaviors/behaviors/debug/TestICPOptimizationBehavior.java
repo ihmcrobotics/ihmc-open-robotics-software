@@ -64,16 +64,16 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       if (Math.abs(rightFoot.getX()) > 0.1)
       {
-         publishTextToSpeack("Squaring up.");
+         publishTextToSpeech("Squaring up.");
       }
       else if (!stepInPlace.getBooleanValue())
       {
-         publishTextToSpeack("Step forward.");
+         publishTextToSpeech("Step forward.");
          stepPose.setX(stepLength.getDoubleValue());
       }
       else
       {
-         publishTextToSpeack("Step in place.");
+         publishTextToSpeech("Step in place.");
       }
 
       stepPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -94,7 +94,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    {
       abortBehavior.set(false);
       stepInPlace.set(true);
-      publishTextToSpeack("Starting to step forward and backward with the right foot.");
+      publishTextToSpeech("Starting to step forward and backward with the right foot.");
    }
 
    @Override
