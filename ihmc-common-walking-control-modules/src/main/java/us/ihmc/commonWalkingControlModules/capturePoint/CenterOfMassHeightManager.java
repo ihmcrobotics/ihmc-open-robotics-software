@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
@@ -390,7 +391,7 @@ public class CenterOfMassHeightManager
       pelvisHeightControlState.transfer(transferPosition, transferTime, swingSide, toeOffHeight);
    }
 
-   public Object pollStatusToReport()
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       if (useStateMachine)
          return stateMachine.getCurrentState().pollStatusToReport();

@@ -1,13 +1,10 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint2d;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
+import static us.ihmc.robotics.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -21,10 +18,12 @@ import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
@@ -52,6 +51,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -94,20 +94,24 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      runSingleWaypintTest();
+      runSingleWaypointTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
-   private void runSingleWaypintTest() throws SimulationExceededMaximumTimeException
+   private void runSingleWaypointTest() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(564574L);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
+
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -136,11 +140,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
+      pelvisTrajectoryMessage.setSequenceId(random.nextLong());
 
       drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
       assertTrue(success);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, pelvis.getName(), statusMessages.remove(0), controllerDT);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -156,22 +164,27 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Quaternion desiredOrientationCorrected = new Quaternion(desiredOrientation);
       desiredOrientationCorrected.applyTransform(fromWorldToMidFeetZUpTransform);
 
-      desiredPosition.setX(desiredPosition2d.getX());
-      desiredPosition.setY(desiredPosition2d.getY());
+      Point3D desiredPositionCorrected = new Point3D(desiredPosition);
+      desiredPositionCorrected.setX(desiredPosition2d.getX());
+      desiredPositionCorrected.setY(desiredPosition2d.getY());
       desiredOrientation.set(desiredOrientationCorrected);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 2.0);
       assertTrue(success);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
-      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs, isUsingPelvisHeightControlOnly());
+      assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPositionCorrected, desiredOrientation, scs, isUsingPelvisHeightControlOnly());
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime,
+                                                        desiredPosition, desiredOrientation, pelvis.getName(), statusMessages.remove(0), 2.0e-4, controllerDT);
    }
 
    @Test
    public void testSingleWaypointAndAbort() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      runSingleWaypintTest();
+      runSingleWaypointTest();
 
       StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
       drcSimulationTestHelper.publishToController(stopAll);
@@ -306,8 +319,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
+      Random random = new Random(453563);
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
 
       ThreadTools.sleep(200);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -326,6 +345,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
+      pelvisTrajectoryMessage.setSequenceId(random.nextLong());
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearAngularSelection();
       selectionMatrix6D.clearLinearSelection();
@@ -375,11 +395,16 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          finalHeight = z;
       }
+      FramePoint3D expectedDesiredPositionInWorld = new FramePoint3D(midFootZUpGroundFrame, 0.0, 0.0, finalHeight);
+      expectedDesiredPositionInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
       drcSimulationTestHelper.publishToController(pelvisTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * getRobotModel().getControllerDT());
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * controllerDT);
       assertTrue(success);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, "pelvisHeight", statusMessages.remove(0), controllerDT);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       assertCenterOfMassHeightManagerIsInState(scs, PelvisHeightControlMode.USER);
@@ -420,6 +445,13 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       assertEquals(finalHeight, pelvisPosition.getZ(), 0.004);
       assertCenterOfMassHeightManagerIsInState(scs, PelvisHeightControlMode.USER);
+
+      expectedDesiredPositionInWorld.setX(Double.NaN);
+      expectedDesiredPositionInWorld.setY(Double.NaN);
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(pelvisTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED,
+                                                        pelvisTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime(),
+                                                        expectedDesiredPositionInWorld, null, "pelvisHeight", statusMessages.remove(0), 2.0e-4, controllerDT);
    }
 
    @SuppressWarnings("unchecked")

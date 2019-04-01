@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -407,7 +408,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    }
 
    @Override
-   public Object pollStatusToReport()
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
       statusDesiredPosition.setIncludingFrame(positionController.getFeedbackControlCommand().getReferencePosition());
       statusDesiredPosition.setX(Double.NaN);
