@@ -55,6 +55,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
@@ -86,6 +87,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -109,6 +111,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 
 public class CrossRobotCommandRandomTools
 {
@@ -135,6 +138,7 @@ public class CrossRobotCommandRandomTools
       set.add(LinearMomentumRateControlModuleInput.class);
       set.add(LinearMomentumRateControlModuleOutput.class);
       set.add(ControllerCoreCommand.class);
+      set.add(ControllerCoreOutput.class);
       return set;
    }
 
@@ -1218,6 +1222,17 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static JointDesiredOutputListBasics nextJointDesiredOutputListBasics(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      return nextLowLevelOneDoFJointDesiredDataHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static JointDesiredOutputListBasics nextJointDesiredOutputListBasics(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                               ReferenceFrame... possibleFrames)
+   {
+      return nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
+   }
+
    public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, RigidBodyBasics rootBody,
                                                                                                ReferenceFrame... possibleFrames)
    {
@@ -1240,6 +1255,49 @@ public class CrossRobotCommandRandomTools
          next.registerJointWithEmptyData(joint).set(nextJointDesiredOutput(random));
       }
 
+      return next;
+   }
+
+   public static CenterOfPressureDataHolder nextCenterOfPressureDataHolder(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      return nextCenterOfPressureDataHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static CenterOfPressureDataHolder nextCenterOfPressureDataHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                           ReferenceFrame... possibleFrames)
+   {
+      CenterOfPressureDataHolder next = new CenterOfPressureDataHolder();
+
+      List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
+      int numberOfBodies = random.nextInt(allBodies.size());
+      if (ensureNonEmptyCommand)
+         numberOfBodies = Math.max(numberOfBodies, 1);
+
+      for (int bodyIndex = 0; bodyIndex < numberOfBodies; bodyIndex++)
+      {
+         RigidBodyBasics rigidBody = allBodies.remove(random.nextInt(allBodies.size()));
+         next.registerRigidBody(rigidBody, nextFramePoint2D(random, possibleFrames));
+      }
+
+      return next;
+   }
+
+   public static RootJointDesiredConfigurationData nextRootJointDesiredConfigurationData(Random random, ReferenceFrame... possibleFrames)
+   {
+      RootJointDesiredConfigurationData next = new RootJointDesiredConfigurationData();
+      next.setDesiredConfiguration(nextFrameQuaternion(random, possibleFrames), nextFramePoint3D(random, possibleFrames));
+      next.setDesiredVelocity(nextFrameVector3D(random, possibleFrames), nextFrameVector3D(random, possibleFrames));
+      next.setDesiredAcceleration(nextFrameVector3D(random, possibleFrames), nextFrameVector3D(random, possibleFrames));
+      return next;
+   }
+
+   public static ControllerCoreOutput nextControllerCoreOutput(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      ControllerCoreOutput next = new ControllerCoreOutput();
+      next.setCenterOfPressureData(nextCenterOfPressureDataHolder(random, rootBody, possibleFrames));
+      next.setLinearMomentumRate(nextFrameVector3D(random, possibleFrames));
+      next.setRootJointDesiredConfigurationData(nextRootJointDesiredConfigurationData(random, possibleFrames));
+      next.setLowLevelOneDoFJointDesiredDataHolder(nextJointDesiredOutputListBasics(random, rootBody, possibleFrames));
       return next;
    }
 
@@ -1488,7 +1546,7 @@ public class CrossRobotCommandRandomTools
       {
          return nextElementIn(random, typeToInstantiateRandomly.getEnumConstants());
       }
-      else if (typeToInstantiateRandomly == RigidBodyBasics.class)
+      else if (RigidBodyBasics.class.isAssignableFrom(typeToInstantiateRandomly))
       {
          return nextElementIn(random, rootBody.subtreeArray());
       }

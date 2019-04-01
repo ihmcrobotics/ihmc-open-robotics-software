@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.ui.components;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.FootstepPlanningTestTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerCostParameters;
 
 import java.util.Random;
 
