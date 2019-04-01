@@ -60,7 +60,7 @@ public class FiducialDetectorFromCameraImagesTest
       RigidBodyTransform transformFromReportedToFiducialFrame = new RigidBodyTransform();
       transformFromReportedToFiducialFrame.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI / 2.0);
 
-      final FiducialDetectorFromCameraImages detector = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
+      final FiducialDetectorFromCameraImages detector = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, simpleRobotWithCamera.getRobotsYoVariableRegistry(), yoGraphicsListRegistry,"test");
       detector.setTargetIDToLocate(50L);
 
       detector.setFieldOfView(fieldOfView, fieldOfView);
