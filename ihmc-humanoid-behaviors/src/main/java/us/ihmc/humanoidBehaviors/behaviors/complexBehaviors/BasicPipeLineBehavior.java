@@ -76,7 +76,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
       GoHomeMessage goHomeLeftArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, 2);
       GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
-      BehaviorAction walkToBallTask = new BehaviorAction(walkToLocationBehavior)
+      BehaviorAction walkToZeroTask = new BehaviorAction(walkToLocationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -96,32 +96,13 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          }
       };
 
-      //      FramePose2d poseToWalkTo = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0, 0), 0);
-      //
-      //      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(poseToWalkTo, walkToLocationBehavior, 0, 2)
-      //      {
-      //            @Override
-      //            public void doTransitionIntoAction()
-      //            {
-      //               super.doTransitionIntoAction();
-      //               currentState = BasicStates.WALK_TO_LOCATION_AND_HOME_ARM;
-      //            }
-      //      @Override
-      //      public void doTransitionOutOfAction()
-      //      {
-      //       
-      //         super.doTransitionOutOfAction();
-      //         currentState = BasicStates.BEHAVIOR_COMPLETE;
-      //
-      //      }
-      //      };
-
+      pipeLine.clearAll();
       pipeLine.requestNewStage();
       pipeLine.submitSingleTaskStage(enableLidarTask);
       pipeLine.submitSingleTaskStage(clearLidarTask);
 
       pipeLine.requestNewStage();
-      pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToBallTask);
+      pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToZeroTask);
       pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, goHomeLeftArmTask);
 
    }

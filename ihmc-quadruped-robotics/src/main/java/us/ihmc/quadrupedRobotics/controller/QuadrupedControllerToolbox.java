@@ -176,6 +176,13 @@ public class QuadrupedControllerToolbox
    public void updateSupportPolygon()
    {
       supportPolygon.updateUsingContactStates(footContactStates);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footContactStates.get(robotQuadrant).inContact())
+            contactStates.get(robotQuadrant).set(ContactState.IN_CONTACT);
+         else
+            contactStates.get(robotQuadrant).set(ContactState.NO_CONTACT);
+      }
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()

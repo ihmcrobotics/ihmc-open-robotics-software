@@ -314,8 +314,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       upcomingGroundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         controllerToolbox.getContactStates().get(robotQuadrant).set(ContactState.IN_CONTACT);
-
          tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
          tempPoint.changeFrame(worldFrame);
          groundPlanePositions.get(robotQuadrant).set(tempPoint);
@@ -465,11 +463,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-      }
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         controllerToolbox.getContactStates().get(robotQuadrant).set(feetManager.getContactState(robotQuadrant));
       }
    }
 
