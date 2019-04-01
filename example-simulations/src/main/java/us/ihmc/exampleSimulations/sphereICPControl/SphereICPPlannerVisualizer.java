@@ -3,7 +3,6 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
@@ -13,10 +12,10 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.AbstractICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -30,9 +29,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereControlToolbox.SphereSmoothCMPPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -107,7 +106,7 @@ public class SphereICPPlannerVisualizer
    private BipedSupportPolygons bipedSupportPolygons;
 
    private final SimulationConstructionSet scs;
-   private final ContinuousCMPBasedICPPlanner icpPlanner;
+   private final AbstractICPPlanner icpPlanner;
 
    private final YoDouble yoTime;
    private final double dt = 0.006;
@@ -145,6 +144,8 @@ public class SphereICPPlannerVisualizer
    private final YoFrameVector2D centerOfMassVelocity = new YoFrameVector2D("centerOfMassVelocity", worldFrame, registry);
 
    private final double omega0 = 3.4;
+   private final double mass = 100.0;
+   private final double gravity = 9.81;
 
    private final BagOfBalls cmpTrack, icpTrack;
    private final int simulatedTicksPerGraphicUpdate = 16;
@@ -620,7 +621,7 @@ public class SphereICPPlannerVisualizer
       return footsteps;
    }
 
-   private ContinuousCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private AbstractICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -676,63 +677,15 @@ public class SphereICPPlannerVisualizer
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
-      ContinuousCMPICPPlannerParameters capturePointPlannerParameters = createICPPlannerParameters();
+      SmoothCMPPlannerParameters capturePointPlannerParameters = new SphereSmoothCMPPlannerParameters();
 
-      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet,
-                                                                                 capturePointPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                                                 midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
+      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons, soleZUpFrames, contactableFeet,
+                                                                         capturePointPlannerParameters.getNumberOfFootstepsToConsider(), null, yoTime, registry,
+                                                                         yoGraphicsListRegistry, gravity);
       icpPlanner.setOmega0(omega0);
       icpPlanner.initializeParameters(capturePointPlannerParameters);
+      icpPlanner.setFinalTransferDuration(1.0);
       return icpPlanner;
-   }
-
-   private ContinuousCMPICPPlannerParameters createICPPlannerParameters()
-   {
-      return new ContinuousCMPICPPlannerParameters()
-      {
-         @Override
-         public int getNumberOfCoPWayPointsPerFoot()
-         {
-            return 2;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
-         {
-            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
-
-            Vector2D entryBounds = new Vector2D(0.0, 0.03);
-            Vector2D exitBounds = new Vector2D(-0.04, 0.08);
-
-            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-            copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
-            copForwardOffsetBounds.put(exitCoPName, exitBounds);
-
-            return copForwardOffsetBounds;
-         }
-
-         /**{@inheritDoc} */
-         @Override
-         public CoPPointName getExitCoPName()
-         {
-            return exitCoPName;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
-         {
-            EnumMap<CoPPointName, Vector2D> copOffsets;
-
-            Vector2D entryOffset = new Vector2D(0.0, -0.005);
-            Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
-
-            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
-            copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
-            copOffsets.put(exitCoPName, exitOffset);
-
-            return copOffsets;
-         }
-      };
    }
 
    public static void main(String[] args)
