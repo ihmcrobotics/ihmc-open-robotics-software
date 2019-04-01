@@ -9,14 +9,17 @@ import us.ihmc.ros2.Ros2Node;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Callback listener to non-null reception of a message on a ROS 2 topic.
+ *
+ * @param <T> messageType
+ */
 public class ROS2Callback<T>
 {
-   private final AtomicReference<T> atomicReference;
    private final Consumer<T> messageCallback;
 
    public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleName, Consumer<T> messageCallback)
    {
-      atomicReference = new AtomicReference<>(ROS2Tools.newMessageInstance(messageType));
       this.messageCallback = messageCallback;
       ExceptionTools.handle(() -> ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
                                                               this::nullOmissionCallback,
@@ -38,10 +41,5 @@ public class ROS2Callback<T>
       {
          LogTools.warn("Received null from takeNextData()");
       }
-   }
-
-   public T getLatest()
-   {
-      return atomicReference.get();
    }
 }
