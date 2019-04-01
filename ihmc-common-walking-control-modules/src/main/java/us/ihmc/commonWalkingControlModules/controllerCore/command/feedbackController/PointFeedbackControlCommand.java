@@ -58,7 +58,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    private final FrameVector3D referenceForceInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final PID3DGains gains = new DefaultPID3DGains();
+   private final DefaultPID3DGains gains = new DefaultPID3DGains();
    /**
     * This is the reference frame in which the linear part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.
