@@ -1,7 +1,10 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +19,7 @@ import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -36,6 +40,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -96,6 +101,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    @Test
    public void testSingleTrajectoryPoint() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(346665);
+      double controllerDT = getRobotModel().getControllerDT();
+
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+
       double epsilon = 1.0e-10;
       double yaw = Math.toRadians(5.0);
       double pitch = Math.toRadians(-6.0);
@@ -112,17 +123,25 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       pelvisOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
+      message.setSequenceId(random.nextLong());
       SO3TrajectoryPointMessage waypoint = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().get(0);
       drcSimulationTestHelper.publishToController(message);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * controllerDT);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(message.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, pelvisName, statusMessages.remove(0), controllerDT);
+
       String postFix = "Orientation";
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(pelvisName, postFix, 2, scs);
       EndToEndTestTools.assertWaypointInGeneratorMatches(pelvisName, 1, waypoint, epsilon, scs);
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, epsilon, scs);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(message.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null, pelvisOrientation, pelvisName, statusMessages.remove(0), epsilon, controllerDT);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
@@ -208,6 +227,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    @Test
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
+      Random random = new Random(159684);
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+      double controllerDT = getRobotModel().getControllerDT();
+
       double epsilon = 1.0e-10;
       int numberOfPoints = 23;
       double yawMagnitude = Math.toRadians(5.0);
@@ -222,6 +246,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       initialOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
+      message.setSequenceId(random.nextLong());
       SO3TrajectoryMessage so3Trajectory = message.getSo3Trajectory();
       so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
@@ -261,9 +286,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       }
 
       drcSimulationTestHelper.publishToController(message);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(message.getSequenceId(), TrajectoryExecutionStatus.STARTED, 0.0, pelvisName, statusMessages.remove(0), controllerDT);
+
       String postFix = "Orientation";
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(pelvisName, postFix, numberOfPoints + 1, scs);
       for (int point = 1; point < RigidBodyTaskspaceControlState.maxPointsInGenerator; point++)
@@ -276,6 +304,9 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       SO3TrajectoryPointMessage waypoint = so3Trajectory.getTaskspaceTrajectoryPoints().get(numberOfPoints - 1);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, epsilon, scs);
+
+      assertEquals(1, statusMessages.size());
+      EndToEndTestTools.assertTaskspaceTrajectoryStatus(message.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, timePerPoint * numberOfPoints, pelvisName, statusMessages.remove(0), controllerDT);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
