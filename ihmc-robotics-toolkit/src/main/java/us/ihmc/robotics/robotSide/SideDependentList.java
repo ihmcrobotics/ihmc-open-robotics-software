@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
-   private final RobotSide[][] sideArrays = new RobotSide[3][];
+   private final transient RobotSide[][] sideArrays = new RobotSide[3][];
    {
       sideArrays[0] = new RobotSide[0];
       sideArrays[1] = new RobotSide[1];
@@ -71,6 +71,7 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       }
    }
 
+   @Override
    public String toString()
    {
       return new String("type: " + this.getClass() + "\n" + "left: " + get(RobotSide.LEFT) + "\n" + "right: " + get(RobotSide.RIGHT));
@@ -85,12 +86,13 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
    {
       return new SideDependentList<Map<K, V>>(new LinkedHashMap<K, V>(), new LinkedHashMap<K, V>());
    }
-   
+
    public static <V> SideDependentList<ArrayList<V>> createListOfArrayLists()
    {
       return new SideDependentList<ArrayList<V>>(new ArrayList<V>(), new ArrayList<V>());
    }
 
+   @Override
    public Iterator<V> iterator()
    {
       return new Itr();
@@ -107,11 +109,13 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
          this.state = 0;
       }
 
+      @Override
       public boolean hasNext()
       {
          return state < 2;
       }
 
+      @Override
       public V next()
       {
          if (state == 0)
@@ -132,6 +136,7 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
          }
       }
 
+      @Override
       public void remove()
       {
          throw new UnsupportedOperationException("Cannot remove elements from a SideDependentList.");
