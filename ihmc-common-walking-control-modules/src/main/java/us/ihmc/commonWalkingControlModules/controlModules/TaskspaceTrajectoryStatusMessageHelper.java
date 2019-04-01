@@ -9,7 +9,9 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -126,6 +128,21 @@ public class TaskspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMess
       return statusMessage;
    }
 
+   public TaskspaceTrajectoryStatusMessage pollStatusMessage(FramePoint2DReadOnly desiredPositionInWorld, FramePoint2DReadOnly actualPositionInWorld)
+   {
+      TrajectoryStatus currentStatus = pollStatus();
+
+      if (currentStatus == null)
+         return null;
+
+      updateStatusCommonInfo(currentStatus);
+      desiredPositionInWorld.checkReferenceFrameMatch(worldFrame);
+      actualPositionInWorld.checkReferenceFrameMatch(worldFrame);
+      updateStatusInfo(desiredPositionInWorld, actualPositionInWorld);
+
+      return statusMessage;
+   }
+
    public TaskspaceTrajectoryStatusMessage pollStatusMessage(FramePoint3DReadOnly desiredPositionInWorld, FramePoint3DReadOnly actualPositionInWorld)
    {
       TrajectoryStatus currentStatus = pollStatus();
@@ -177,6 +194,14 @@ public class TaskspaceTrajectoryStatusMessageHelper extends TrajectoryStatusMess
       desiredPose.getPosition().setMatchingFrame(feedbackControlCommand.getReferencePosition());
 
       updateStatusInfo(desiredPose, controlFramePose);
+   }
+
+   private void updateStatusInfo(Point2DReadOnly desiredPosition, Point2DReadOnly actualPosition)
+   {
+      statusMessage.getDesiredEndEffectorOrientation().setToNaN();
+      statusMessage.getDesiredEndEffectorPosition().set(desiredPosition, Double.NaN);
+      statusMessage.getActualEndEffectorOrientation().setToNaN();
+      statusMessage.getActualEndEffectorPosition().set(actualPosition, Double.NaN);
    }
 
    private void updateStatusInfo(Point3DReadOnly desiredPosition, Point3DReadOnly actualPosition)
