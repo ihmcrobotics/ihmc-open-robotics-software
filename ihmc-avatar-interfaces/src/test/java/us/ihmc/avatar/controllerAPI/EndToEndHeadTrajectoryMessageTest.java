@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 import java.util.Random;
 
@@ -15,6 +13,7 @@ import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -141,8 +140,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), environment);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       ThreadTools.sleep(1000);
@@ -161,7 +159,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    public static Quaternion findControllerDesiredOrientation(String bodyName, SimulationConstructionSet scs)
    {
-      return findQuat4d("FeedbackControllerToolbox", bodyName + "DesiredOrientation", scs);
+      return EndToEndTestTools.findQuaternion("FeedbackControllerToolbox", bodyName + "DesiredOrientation", scs);
    }
 
    public static int findNumberOfWaypoints(String bodyName, SimulationConstructionSet scs)

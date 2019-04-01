@@ -19,6 +19,8 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -29,13 +31,17 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -49,9 +55,16 @@ public class EndToEndTestTools
     * that is controlling the {@link RigidBodyBasics} with given name. The number of waypoints checked
     * is the total number of trajectory points (in queue and in generator) of the controller.
     */
-   public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, int points, YoVariableHolder yoVariableHolder)
+   public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, int expectedNumberOfPoints, YoVariableHolder yoVariableHolder)
    {
-      assertEquals(points, findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder), "Unexpected number of waypoints:");
+      assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, "", expectedNumberOfPoints, yoVariableHolder);
+   }
+
+   public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, int expectedNumberOfPoints,
+                                                                     YoVariableHolder yoVariableHolder)
+   {
+      assertEquals(expectedNumberOfPoints, findTotalNumberOfWaypointsInTaskspaceManager(bodyName, postfix, yoVariableHolder),
+                   "Unexpected number of waypoints:");
    }
 
    public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage expectedWaypoint, double epsilon,
@@ -73,7 +86,7 @@ public class EndToEndTestTools
                                                        double epsilon, YoVariableHolder yoVariableHolder)
    {
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
-      SO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
+      SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
       EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedWaypoint.getOrientation(), actualWaypoint.getOrientationCopy(), epsilon,
                                                               FORMAT);
@@ -101,14 +114,14 @@ public class EndToEndTestTools
    public static void assertOneDoFJointFeedbackControllerDesiredPosition(String jointName, double desiredPosition, double epsilon,
                                                                          YoVariableHolder yoVariableHolder)
    {
-      YoDouble scsDesiredPosition = EndToEndTestTools.findOneDoFJointFeedbackControllerDesiredPosition(jointName, yoVariableHolder);
+      YoDouble scsDesiredPosition = findOneDoFJointFeedbackControllerDesiredPosition(jointName, yoVariableHolder);
       assertEquals(desiredPosition, scsDesiredPosition.getDoubleValue(), epsilon);
    }
 
    public static void assertOneDoFJointFeedbackControllerDesiredVelocity(String jointName, double desiredVelocity, double epsilon,
                                                                          YoVariableHolder yoVariableHolder)
    {
-      YoDouble scsDesiredVelocity = EndToEndTestTools.findOneDoFJointFeedbackControllerDesiredVelocity(jointName, yoVariableHolder);
+      YoDouble scsDesiredVelocity = findOneDoFJointFeedbackControllerDesiredVelocity(jointName, yoVariableHolder);
       assertEquals(desiredVelocity, scsDesiredVelocity.getDoubleValue(), epsilon);
    }
 
@@ -116,13 +129,13 @@ public class EndToEndTestTools
                                                                       YoVariableHolder yoVariableHolder)
    {
       for (String jointName : jointNames)
-         EndToEndTestTools.assertTotalNumberOfWaypointsInJointspaceManager(expectedNumberOfTrajectoryPoints, bodyName, jointName, yoVariableHolder);
+         assertTotalNumberOfWaypointsInJointspaceManager(expectedNumberOfTrajectoryPoints, bodyName, jointName, yoVariableHolder);
    }
 
    public static void assertTotalNumberOfWaypointsInJointspaceManager(int expectedNumberOfWaypoints, String bodyName, String jointName,
                                                                       YoVariableHolder yoVariableHolder)
    {
-      int numberOfPoints = EndToEndTestTools.findTotalNumberOfWaypointsInJointspaceManager(bodyName, jointName, yoVariableHolder);
+      int numberOfPoints = findTotalNumberOfWaypointsInJointspaceManager(bodyName, jointName, yoVariableHolder);
       assertEquals(expectedNumberOfWaypoints, numberOfPoints, "Unexpected number of trajectory points for " + jointName);
    }
 
@@ -271,10 +284,10 @@ public class EndToEndTestTools
       return ((YoEnum<RigidBodyControlMode>) yoVariableHolder.getVariable(managerName, managerName + "CurrentState")).getEnumValue();
    }
 
-   public static SO3TrajectoryPoint findOrientationTrajectoryPoint(String bodyName, int index, YoVariableHolder yoVariableHolder)
+   public static SO3TrajectoryPoint findSO3TrajectoryPoint(String bodyName, int trajectoryPointIndex, YoVariableHolder yoVariableHolder)
    {
       String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
-      String suffix = "AtWaypoint" + index;
+      String suffix = "AtWaypoint" + trajectoryPointIndex;
       String timeName = bodyName + "Time";
       String orientationName = bodyName + "Orientation";
       String angularVelocityName = bodyName + "AngularVelocity";
@@ -285,13 +298,61 @@ public class EndToEndTestTools
       return simpleSO3TrajectoryPoint;
    }
 
+   public static SE3TrajectoryPoint findSE3TrajectoryPoint(String bodyName, int trajectoryPointIndex, YoVariableHolder yoVariableHolder)
+   {
+      String positionTrajectoryName = bodyName + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName();
+      String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
+
+      String suffix = "AtWaypoint" + trajectoryPointIndex;
+
+      String timeName = bodyName + "Time";
+      String positionName = bodyName + "Position";
+      String orientationName = bodyName + "Orientation";
+      String linearVelocityName = bodyName + "LinearVelocity";
+      String angularVelocityName = bodyName + "AngularVelocity";
+
+      SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
+      simpleSE3TrajectoryPoint.setTime(yoVariableHolder.getVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSE3TrajectoryPoint.setPosition(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setOrientation(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setLinearVelocity(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setAngularVelocity(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
+      return simpleSE3TrajectoryPoint;
+   }
+
+   public static SE3TrajectoryPoint findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(String bodyName, YoVariableHolder yoVariableHolder)
+   {
+      SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
+      simpleSE3TrajectoryPoint.setPosition(findFeedbackControllerDesiredPosition(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setOrientation(findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setLinearVelocity(findFeedbackControllerDesiredLinearVelocity(bodyName, yoVariableHolder));
+      simpleSE3TrajectoryPoint.setAngularVelocity(findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder));
+      return simpleSE3TrajectoryPoint;
+   }
+
    /**
     * Finds the number of waypoints in a {@link RigidBodyTaskspaceControlState} for the body with the
     * given name.
     */
+   public static int findTotalNumberOfWaypointsInTaskspaceManager(String bodyName, YoVariableHolder yoVariableHolder)
+   {
+      return findTotalNumberOfWaypointsInTaskspaceManager(bodyName, "", yoVariableHolder);
+   }
+
    public static int findTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
    {
       String variableName = bodyName + postfix + "TaskspaceNumberOfPoints";
+      return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
+   }
+
+   public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, YoVariableHolder yoVariableHolder)
+   {
+      return findNumberOfWaypointsInTaskspaceManagerGenerator(bodyName, "", yoVariableHolder);
+   }
+
+   public static int findNumberOfWaypointsInTaskspaceManagerGenerator(String bodyName, String postfix, YoVariableHolder yoVariableHolder)
+   {
+      String variableName = bodyName + postfix + "TaskspaceNumberOfPointsInGenerator";
       return (int) yoVariableHolder.getVariable(variableName).getValueAsLongBits();
    }
 
@@ -322,6 +383,12 @@ public class EndToEndTestTools
 
    }
 
+   public static Point3DReadOnly findFeedbackControllerDesiredPosition(String bodyName, YoVariableHolder yoVariableHolder)
+   {
+      return findYoFramePoint3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.POSITION.getName(),
+                                yoVariableHolder);
+   }
+
    /**
     * Finds the current desired orientation in the controller for the body with the given name.
     */
@@ -329,6 +396,12 @@ public class EndToEndTestTools
    {
       return findYoFrameQuaternion(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(),
                                    yoVariableHolder);
+   }
+
+   public static Vector3DReadOnly findFeedbackControllerDesiredLinearVelocity(String bodyName, YoVariableHolder yoVariableHolder)
+   {
+      return findYoFrameVector3D(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(),
+                                 yoVariableHolder);
    }
 
    public static Vector3DReadOnly findFeedbackControllerDesiredAngularVelocity(String bodyName, YoVariableHolder yoVariableHolder)
@@ -374,11 +447,31 @@ public class EndToEndTestTools
 
    public static YoFrameQuaternion findYoFrameQuaternion(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
    {
-      YoDouble qx = EndToEndTestTools.findYoDouble(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix), yoVariableHolder);
-      YoDouble qy = EndToEndTestTools.findYoDouble(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix), yoVariableHolder);
-      YoDouble qz = EndToEndTestTools.findYoDouble(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix), yoVariableHolder);
-      YoDouble qs = EndToEndTestTools.findYoDouble(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix), yoVariableHolder);
+      YoDouble qx = findYoDouble(nameSpace, YoFrameVariableNameTools.createQxName(prefix, suffix), yoVariableHolder);
+      YoDouble qy = findYoDouble(nameSpace, YoFrameVariableNameTools.createQyName(prefix, suffix), yoVariableHolder);
+      YoDouble qz = findYoDouble(nameSpace, YoFrameVariableNameTools.createQzName(prefix, suffix), yoVariableHolder);
+      YoDouble qs = findYoDouble(nameSpace, YoFrameVariableNameTools.createQsName(prefix, suffix), yoVariableHolder);
       return new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
+   }
+
+   public static Vector2D findVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   {
+      return findVector2D(nameSpace, varname, "", yoVariableHolder);
+   }
+
+   public static Vector2D findVector2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   {
+      return new Vector2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+   }
+
+   public static Point2D findPoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   {
+      return findPoint2D(nameSpace, varname, "", yoVariableHolder);
+   }
+
+   public static Point2D findPoint2D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   {
+      return new Point2D(findYoFramePoint2D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
    }
 
    public static Vector3D findVector3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
@@ -389,6 +482,40 @@ public class EndToEndTestTools
    public static Vector3D findVector3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
    {
       return new Vector3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+   }
+
+   public static Point3D findPoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   {
+      return findPoint3D(nameSpace, varname, "", yoVariableHolder);
+   }
+
+   public static Point3D findPoint3D(String nameSpace, String varnamePrefix, String varnameSuffix, YoVariableHolder yoVariableHolder)
+   {
+      return new Point3D(findYoFramePoint3D(nameSpace, varnamePrefix, varnameSuffix, yoVariableHolder));
+   }
+
+   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   {
+      return findYoFramePoint2D(nameSpace, varname, "", yoVariableHolder);
+   }
+
+   public static YoFramePoint2D findYoFramePoint2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   {
+      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      return new YoFramePoint2D(x, y, ReferenceFrame.getWorldFrame());
+   }
+
+   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
+   {
+      return findYoFrameVector2D(nameSpace, varname, "", yoVariableHolder);
+   }
+
+   public static YoFrameVector2D findYoFrameVector2D(String nameSpace, String prefix, String suffix, YoVariableHolder yoVariableHolder)
+   {
+      YoDouble x = findYoDouble(nameSpace, YoFrameVariableNameTools.createXName(prefix, suffix), yoVariableHolder);
+      YoDouble y = findYoDouble(nameSpace, YoFrameVariableNameTools.createYName(prefix, suffix), yoVariableHolder);
+      return new YoFrameVector2D(x, y, ReferenceFrame.getWorldFrame());
    }
 
    public static YoFramePoint3D findYoFramePoint3D(String nameSpace, String varname, YoVariableHolder yoVariableHolder)
