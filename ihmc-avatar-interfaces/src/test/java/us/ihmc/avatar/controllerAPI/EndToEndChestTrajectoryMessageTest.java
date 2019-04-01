@@ -190,7 +190,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       assertEquals(1, statusMessages.size());
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
-                                                        desiredRandomChestOrientation, chest.getName(), statusMessages.remove(0), 1.0e-5, controllerDT);
+                                                        desiredRandomChestOrientation, chest.getName(), statusMessages.remove(0), 1.0e-4, controllerDT);
    }
 
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
@@ -558,7 +558,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertEquals(1, statusMessages.size());
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, trajectoryTime, null,
                                                         desiredChestOrientations[desiredChestOrientations.length - 1], chest.getName(),
-                                                        statusMessages.remove(0), 1.0e-4, controllerDT);
+                                                        statusMessages.remove(0), 1.0e-3, controllerDT);
    }
 
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
