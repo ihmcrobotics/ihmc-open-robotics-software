@@ -221,7 +221,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("LOOKING FOR BALL");
+            publishTextToSpeech("LOOKING FOR BALL");
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -262,7 +262,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Walking To The Ball");
+            publishTextToSpeech("Walking To The Ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -355,7 +355,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Looking for the ball");
+            publishTextToSpeech("Looking for the ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -395,7 +395,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   + initialSphereDetectionBehavior.getBallLocation().getY() + " " + initialSphereDetectionBehavior.getBallLocation().getZ()
                   + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
-            publishTextToSpeack("I think i found the ball");
+            publishTextToSpeech("I think i found the ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                                                   initialSphereDetectionBehavior.getBallLocation().getY(),
@@ -486,7 +486,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            publishTextToSpeack("Putting The Ball In The Bucket");
+            publishTextToSpeech("Putting The Ball In The Bucket");
             coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -642,7 +642,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("YAY IM ALL DONE");
+      publishTextToSpeech("YAY IM ALL DONE");
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);

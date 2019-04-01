@@ -52,7 +52,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    /** The (ID) feed-forward center of mass linear acceleration to use in the feedback controller. */
    private final FrameVector3D referenceLinearAccelerationInRootFrame = new FrameVector3D();
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final PID3DGains gains = new DefaultPID3DGains();
+   private final DefaultPID3DGains gains = new DefaultPID3DGains();
 
    /**
     * Momentum rate command used to save different control properties such as the weight to be used in

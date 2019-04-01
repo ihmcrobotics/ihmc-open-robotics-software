@@ -1,37 +1,46 @@
 package us.ihmc.communication;
 
 import com.google.common.base.CaseFormat;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 
 public class ROS2ModuleIdentifier
 {
    public static final String NODE_NAME_PREFIX = "ihmc_";
 
-   private final String nodeName;
-   private final String topicQualifier;
+   private final String moduleNodeName;
+   private final String moduleTopicQualifier;
 
-   public ROS2ModuleIdentifier(Class<?> clazz, String topicQualifier)
+   public ROS2ModuleIdentifier(Class<?> clazz, String moduleTopicQualifier)
    {
-      this(deriveNodeName(clazz), topicQualifier);
+      this(deriveModuleNodeName(clazz), moduleTopicQualifier);
    }
 
-   public ROS2ModuleIdentifier(String nodeName, String topicQualifier)
+   public ROS2ModuleIdentifier(String moduleNodeName, String moduleTopicQualifier)
    {
-      this.nodeName = nodeName;
-      this.topicQualifier = topicQualifier;
+      this.moduleNodeName = moduleNodeName;
+      this.moduleTopicQualifier = moduleTopicQualifier;
    }
 
-   public static String deriveNodeName(Class<?> clazz)
+   public ROS2TopicQualifier deriveIOTopicQualifier(String localNodeName)
+   {
+      return localNodeName.endsWith(moduleNodeName) ? ROS2TopicQualifier.INPUT : ROS2TopicQualifier.OUTPUT;
+   }
+
+   /**
+    * Note: Only used in some cases and is not a general or required convention
+    */
+   public static String deriveModuleNodeName(Class<?> clazz)
    {
       return NODE_NAME_PREFIX + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, clazz.getSimpleName());
    }
 
    public String getNodeName()
    {
-      return nodeName;
+      return moduleNodeName;
    }
 
-   public String getTopicQualifier()
+   public String getModuleTopicQualifier()
    {
-      return topicQualifier;
+      return moduleTopicQualifier;
    }
 }

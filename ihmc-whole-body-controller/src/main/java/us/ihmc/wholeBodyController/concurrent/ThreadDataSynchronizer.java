@@ -1,8 +1,8 @@
 package us.ihmc.wholeBodyController.concurrent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -57,12 +57,14 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
-      Map<RigidBodyBasics, ReferenceFrame> estimatorFeetFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
+      List<ReferenceFrame> estimatorSoleFrames = new ArrayList<>();
+      List<RigidBodyBasics> estimatorFeet = new ArrayList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         estimatorFeetFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));
+         estimatorSoleFrames.add(estimatorFullRobotModel.getSoleFrame(robotSide));
+         estimatorFeet.add(estimatorFullRobotModel.getFoot(robotSide));
       }
-      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFeetFrames);
+      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFeet);
 
       controllerFullRobotModel = robotModelFactory.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
@@ -72,12 +74,14 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       controllerRobotMotionStatusHolder = new RobotMotionStatusHolder();
       controllerDesiredJointDataHolder = new JointDesiredOutputList(controllerFullRobotModel.getControllableOneDoFJoints());
 
-      Map<RigidBodyBasics, ReferenceFrame> controllerFeetFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
+      List<ReferenceFrame> controllerSoleFrames = new ArrayList<>();
+      List<RigidBodyBasics> controllerFeet = new ArrayList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         controllerFeetFrames.put(controllerFullRobotModel.getFoot(robotSide), controllerFullRobotModel.getSoleFrame(robotSide));
+         controllerSoleFrames.add(controllerFullRobotModel.getSoleFrame(robotSide));
+         controllerFeet.add(controllerFullRobotModel.getFoot(robotSide));
       }
-      controllerCenterOfPressureDataHolder = new CenterOfPressureDataHolder(controllerFeetFrames);
+      controllerCenterOfPressureDataHolder = new CenterOfPressureDataHolder(controllerFeet);
 
       IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(robotModelFactory,
             estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
@@ -86,7 +90,13 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorStateCopier = new ConcurrentCopier<IntermediateEstimatorStateHolder>(stateCopierBuilder);
 
       ControllerDataForEstimatorHolder.Builder controllerStateCopierBuilder = new ControllerDataForEstimatorHolder.Builder(estimatorCenterOfPressureDataHolder,
-            controllerCenterOfPressureDataHolder, estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder, estimatorDesiredJointDataHolder, controllerDesiredJointDataHolder);
+                                                                                                                           controllerCenterOfPressureDataHolder,
+                                                                                                                           estimatorRobotMotionStatusHolder,
+                                                                                                                           controllerRobotMotionStatusHolder,
+                                                                                                                           estimatorDesiredJointDataHolder,
+                                                                                                                           controllerDesiredJointDataHolder,
+                                                                                                                           estimatorSoleFrames,
+                                                                                                                           controllerSoleFrames);
       controllerStateCopier = new ConcurrentCopier<>(controllerStateCopierBuilder);
    }
 
