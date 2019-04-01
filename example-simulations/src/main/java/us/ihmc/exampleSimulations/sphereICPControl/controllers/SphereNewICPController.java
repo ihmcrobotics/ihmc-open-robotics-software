@@ -104,11 +104,9 @@ public class SphereNewICPController implements GenericSphereController
       omega0 = controlToolbox.getOmega0();
       heightController = new BasicHeightController(controlToolbox, registry);
       icpPlanner = new SmoothCMPBasedICPPlanner(controlToolbox.getFullRobotModel(), controlToolbox.getBipedSupportPolygons(), controlToolbox.getSoleZUpFrames(),
-                                                controlToolbox.getContactableFeet(),
-                                                controlToolbox.getNewCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), null, null, registry,
-                                                yoGraphicsListRegistry, 9.81);
+                                                controlToolbox.getContactableFeet(), null, null, registry, yoGraphicsListRegistry, 9.81,
+                                                controlToolbox.getNewCapturePointPlannerParameters());
       icpPlanner.setDefaultPhaseTimes(1.0, 1.0);
-      icpPlanner.initializeParameters(controlToolbox.getNewCapturePointPlannerParameters());
       icpPlanner.setOmega0(omega0);
 
       icpGains = new YoICPControlGains("CoMController", registry);
