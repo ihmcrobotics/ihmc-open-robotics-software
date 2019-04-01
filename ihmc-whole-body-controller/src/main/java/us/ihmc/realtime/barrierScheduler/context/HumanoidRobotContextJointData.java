@@ -7,12 +7,13 @@ import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlace
  */
 public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRobotContextJointData>
 {
+   private final HumanoidRobotContextRootJointData rootJointData = new HumanoidRobotContextRootJointData();
    private final double[] jointQ;
    private final double[] jointQd;
    private final double[] jointQdd;
    private final double[] jointTau;
 
-   HumanoidRobotContextJointData(int numberOfJoints)
+   public HumanoidRobotContextJointData(int numberOfJoints)
    {
       jointQ = new double[numberOfJoints];
       jointQd = new double[numberOfJoints];
@@ -20,22 +21,72 @@ public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRo
       jointTau = new double[numberOfJoints];
    }
 
-   public void getJointQ(double[] dataToPack)
+   public void setJointQForIndex(int index, double value)
+   {
+      this.jointQ[index] = value;
+   }
+
+   public void setJointQdForIndex(int index, double value)
+   {
+      this.jointQd[index] = value;
+   }
+
+   public void setJointQddForIndex(int index, double value)
+   {
+      this.jointQdd[index] = value;
+   }
+
+   public void setJointTauForIndex(int index, double value)
+   {
+      this.jointTau[index] = value;
+   }
+
+   public void setJointQs(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQ, 0, other.length);
+   }
+
+   public void setJointQds(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQd, 0, other.length);
+   }
+
+   public void setJointQdds(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQdd, 0, other.length);
+   }
+
+   public void setJointTaus(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointTau, 0, other.length);
+   }
+
+   public HumanoidRobotContextRootJointData getRootJointData()
+   {
+      return rootJointData;
+   }
+
+   public void getAndPackRootJointData(HumanoidRobotContextRootJointData dataToPack)
+   {
+      dataToPack.copyFrom(this.rootJointData);
+   }
+
+   public void getAndPackJointQ(double[] dataToPack)
    {
       System.arraycopy(this.jointQ, 0, dataToPack, 0, this.jointQ.length);
    }
 
-   public void getJointQd(double[] dataToPack)
+   public void getAndPackJointQd(double[] dataToPack)
    {
       System.arraycopy(this.jointQd, 0, dataToPack, 0, this.jointQd.length);
    }
 
-   public void getJointQdd(double[] dataToPack)
+   public void getAndPackJointQdd(double[] dataToPack)
    {
       System.arraycopy(this.jointQdd, 0, dataToPack, 0, this.jointQdd.length);
    }
 
-   public void getJointTau(double[] dataToPack)
+   public void getAndPackJointTau(double[] dataToPack)
    {
       System.arraycopy(this.jointTau, 0, dataToPack, 0, this.jointTau.length);
    }
@@ -47,5 +98,7 @@ public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRo
       System.arraycopy(src.jointQd, 0, this.jointQd, 0, this.jointQd.length);
       System.arraycopy(src.jointQdd, 0, this.jointQdd, 0, this.jointQdd.length);
       System.arraycopy(src.jointTau, 0, this.jointTau, 0, this.jointTau.length);
+
+      this.rootJointData.copyFrom(src.rootJointData);
    }
 }
