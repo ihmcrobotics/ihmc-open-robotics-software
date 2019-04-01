@@ -39,6 +39,12 @@ public class HeadTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(HeadTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

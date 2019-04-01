@@ -58,6 +58,12 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    }
 
    @Override
+   public void setFromMessage(QuadrupedBodyOrientationMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyOrientationMessage message)
    {
       sequenceId = message.getSequenceId();

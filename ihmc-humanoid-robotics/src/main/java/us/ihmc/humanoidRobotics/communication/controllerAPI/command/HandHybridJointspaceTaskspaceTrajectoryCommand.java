@@ -50,6 +50,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(HandHybridJointspaceTaskspaceTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

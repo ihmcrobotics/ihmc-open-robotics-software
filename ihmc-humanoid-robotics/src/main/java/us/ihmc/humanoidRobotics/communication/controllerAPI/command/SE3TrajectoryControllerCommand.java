@@ -93,6 +93,12 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
    }
 
    @Override
+   public void setFromMessage(SE3TrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {
       if (resolver != null)

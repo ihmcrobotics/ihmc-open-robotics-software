@@ -42,6 +42,12 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    }
 
    @Override
+   public void setFromMessage(PelvisOrientationTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

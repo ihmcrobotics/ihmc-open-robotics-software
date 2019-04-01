@@ -77,6 +77,12 @@ public class HandTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(HandTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

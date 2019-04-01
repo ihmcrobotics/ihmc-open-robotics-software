@@ -84,6 +84,12 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
    }
 
    @Override
+   public void setFromMessage(SO3TrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SO3TrajectoryMessage message)
    {
       if (resolver != null)

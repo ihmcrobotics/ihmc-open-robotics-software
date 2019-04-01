@@ -48,6 +48,12 @@ public class QuadrupedBodyTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(QuadrupedBodyTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
