@@ -1,13 +1,14 @@
 package us.ihmc.communication;
 
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * An atomic reference to the latest received message through an optional filter.
+ *
+ * @param <T> messageType
+ */
 public class ROS2Input<T>
 {
    private final AtomicReference<T> atomicReference;
@@ -22,13 +23,7 @@ public class ROS2Input<T>
    {
       atomicReference = new AtomicReference<>(ROS2Tools.newMessageInstance(messageType));
       this.messageFilter = messageFilter;
-      ExceptionTools.handle(() -> ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
-                                                              this::messageReceivedCallback,
-                                                              ROS2Tools.generateDefaultTopicName(messageType,
-                                                                                                 robotName,
-                                                                                                 moduleName,
-                                                                                                 ROS2Tools.ROS2TopicQualifier.OUTPUT)),
-                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      new ROS2Callback<>(ros2Node, messageType, robotName, moduleName, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>
@@ -36,19 +31,11 @@ public class ROS2Input<T>
       boolean accept(T message);
    }
 
-   private void messageReceivedCallback(Subscriber<T> subscriber)
+   private void messageReceivedCallback(T incomingData)
    {
-      T incomingData = subscriber.takeNextData();
-      if (incomingData != null)
+      if (messageFilter.accept(incomingData))
       {
-         if (messageFilter.accept(incomingData))
-         {
-            atomicReference.set(incomingData);
-         }
-      }
-      else
-      {
-         LogTools.warn("Received null from takeNextData()");
+         atomicReference.set(incomingData);
       }
    }
 
