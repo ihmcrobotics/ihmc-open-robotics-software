@@ -60,7 +60,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final FrameVector3D referenceTorqueInRootFrame = new FrameVector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final PID3DGains gains = new DefaultPID3DGains();
+   private final DefaultPID3DGains gains = new DefaultPID3DGains();
    /**
     * This is the reference frame in which the angular part of the gains are to be applied. If
     * {@code null}, it is applied in the control frame.

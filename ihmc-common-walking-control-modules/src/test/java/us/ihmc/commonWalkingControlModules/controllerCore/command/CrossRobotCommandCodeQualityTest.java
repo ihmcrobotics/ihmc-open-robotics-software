@@ -536,6 +536,71 @@ public class CrossRobotCommandCodeQualityTest
          fail("The following issues were detected:\n" + errorMessage);
    }
 
+   /**
+    * This test is to assert that all commands use the same type for their fields as the object.
+    * <p>
+    * e.g.<br>a
+    * {@code private final PID3DGains gains = new DefaultPID3DGains;)}<br>
+    * for a field should make this test fail. The reason for this is that the other tests in this class
+    * collect fields and sub fields recursively to check methods like set and equals. If the field is
+    * an interface those tests would be missing checks.
+    *
+    * @throws Exception
+    */
+   @Test
+   void testFieldTypeMatchObjectType() throws Exception
+   {
+      Random random = new Random(4534);
+
+      List<JointBasics> joints = MultiBodySystemRandomTools.nextJointTree(random, 20);
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(joints.get(0).getPredecessor());
+      List<ReferenceFrame> referenceFramesList = rootBody.subtreeStream().map(RigidBodyBasics::getBodyFixedFrame).collect(Collectors.toList());
+      SubtreeStreams.fromChildren(rootBody).map(JointBasics::getFrameBeforeJoint).forEach(referenceFramesList::add);
+      SubtreeStreams.fromChildren(rootBody).map(JointBasics::getFrameAfterJoint).forEach(referenceFramesList::add);
+      ReferenceFrame[] referenceFrames = referenceFramesList.toArray(new ReferenceFrame[0]);
+
+      Set<Class<?>> allCommandTypes = CrossRobotCommandRandomTools.getAllCommandTypesWithoutBuffersAndInterfaces();
+      String errorMessage = "";
+
+      for (Class<?> commandType : allCommandTypes)
+      {
+         errorMessage += checkFieldType(random, rootBody, referenceFrames, commandType);
+      }
+
+      if (!errorMessage.isEmpty())
+         fail("The following issues were detected:\n" + errorMessage);
+   }
+
+   private String checkFieldType(Random random, RigidBodyBasics rootBody, ReferenceFrame[] referenceFrames, Class<?> type)
+         throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
+   {
+      List<Field> fields = new ArrayList<Field>(Arrays.asList(type.getDeclaredFields()));
+      Object instance = CrossRobotCommandRandomTools.nextTypeInstance(type, random, true, rootBody, referenceFrames);
+      String errorMessage = "";
+
+      for (Field field : fields)
+      {
+         if (field.getType().isPrimitive() || field.getType().isEnum())
+            continue;
+         if (Modifier.isStatic(field.getModifiers()))
+            continue;
+         if (Modifier.isTransient(field.getModifiers()))
+            continue;
+         if (safeTypes().contains(field.getType()))
+            continue;
+
+         field.setAccessible(true);
+         Object object = field.get(instance);
+         if (field.getType() != object.getClass())
+            errorMessage += "In " + type.getSimpleName() + ": " + field.getName() + " should be of type " + object.getClass().getSimpleName()
+                  + " but is of type " + field.getType().getSimpleName() + "\n";
+
+         errorMessage += checkFieldType(random, rootBody, referenceFrames, field.getType());
+      }
+
+      return errorMessage;
+   }
+
    public static void extractTypeSubTypes(Class<?> type, Map<Class<?>, Class<?>> subTypeToOwnerTypeMapToPack, Collection<Class<?>> typesToStopRecursionAt)
          throws Exception
    {
@@ -610,6 +675,7 @@ public class CrossRobotCommandCodeQualityTest
    {
       Set<Class<?>> safeTypes = new HashSet<>();
       safeTypes.add(ArrayList.class);
+      safeTypes.add(List.class);
       safeTypes.add(TDoubleArrayList.class);
       safeTypes.add(ReferenceFrame.class);
       safeTypes.add(MovingReferenceFrame.class);
@@ -635,6 +701,7 @@ public class CrossRobotCommandCodeQualityTest
       safeTypes.add(PrismaticJoint.class);
       safeTypes.add(RevoluteJoint.class);
       safeTypes.add(RigidBodyBasics.class);
+      safeTypes.add(RigidBody.class);
       safeTypes.add(Wrench.class);
       safeTypes.add(SpatialForce.class);
       safeTypes.add(ConvexPolygon2D.class);
