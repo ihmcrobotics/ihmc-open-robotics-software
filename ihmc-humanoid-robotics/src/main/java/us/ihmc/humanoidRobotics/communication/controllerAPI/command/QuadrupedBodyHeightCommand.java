@@ -54,6 +54,12 @@ public class QuadrupedBodyHeightCommand
    }
 
    @Override
+   public void setFromMessage(QuadrupedBodyHeightMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyHeightMessage message)
    {
       sequenceId = message.getSequenceId();

@@ -35,6 +35,12 @@ public class FootTrajectoryCommand implements Command<FootTrajectoryCommand, Foo
    }
 
    @Override
+   public void setFromMessage(FootTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, FootTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

@@ -28,6 +28,12 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    }
 
    @Override
+   public void setFromMessage(CenterOfMassTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, CenterOfMassTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

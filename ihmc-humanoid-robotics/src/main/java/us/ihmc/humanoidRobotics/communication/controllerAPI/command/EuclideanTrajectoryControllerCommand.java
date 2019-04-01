@@ -88,6 +88,12 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    }
 
    @Override
+   public void setFromMessage(EuclideanTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, EuclideanTrajectoryMessage message)
    {
       if (resolver != null)

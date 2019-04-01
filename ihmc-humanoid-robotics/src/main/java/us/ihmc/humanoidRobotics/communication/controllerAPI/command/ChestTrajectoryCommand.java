@@ -39,6 +39,12 @@ public class ChestTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(ChestTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

@@ -79,6 +79,12 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    }
 
    @Override
+   public void setFromMessage(PelvisHeightTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisHeightTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

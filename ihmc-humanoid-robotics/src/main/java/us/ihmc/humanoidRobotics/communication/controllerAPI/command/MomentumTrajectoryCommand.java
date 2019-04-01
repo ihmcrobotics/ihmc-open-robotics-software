@@ -21,6 +21,12 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    }
 
    @Override
+   public void setFromMessage(MomentumTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, MomentumTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

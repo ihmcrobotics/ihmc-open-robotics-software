@@ -37,6 +37,12 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    }
 
    @Override
+   public void setFromMessage(SoleTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SoleTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();

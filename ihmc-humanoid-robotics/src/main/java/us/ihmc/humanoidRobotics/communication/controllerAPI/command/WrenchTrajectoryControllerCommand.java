@@ -98,6 +98,12 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    }
 
    @Override
+   public void setFromMessage(WrenchTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, WrenchTrajectoryMessage message)
    {
       if (resolver != null)

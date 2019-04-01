@@ -41,6 +41,12 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
+   public void setFromMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
+   {
+      FrameBasedCommand.super.setFromMessage(message);
+   }
+
+   @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
