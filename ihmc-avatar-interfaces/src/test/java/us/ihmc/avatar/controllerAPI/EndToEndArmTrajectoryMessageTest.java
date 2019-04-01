@@ -472,7 +472,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          EndToEndTestTools.assertJointspaceTrajectoryStatus(armTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.STARTED, startTime, armJointNames,
                                                             startedStatusMessage, controllerDT);
          EndToEndTestTools.assertJointspaceTrajectoryStatus(armTrajectoryMessage.getSequenceId(), TrajectoryExecutionStatus.COMPLETED, endTime,
-                                                            finalDesiredPositions, armJointNames, completedStatusMessage, 1.0e-12, controllerDT);
+                                                            finalDesiredPositions, armJointNames, completedStatusMessage, 1.0e-3, controllerDT);
          startTime = endTime;
       }
    }
