@@ -49,13 +49,6 @@ public abstract class ContinuousCMPICPPlannerParameters extends AbstractICPPlann
       stepLengthToCoPOffsetFactor.put(exitCoPName, 1.0 / 3.0);
    }
 
-   @Override
-   /** {@inheritDoc} */
-   public boolean useSmoothCMPPlanner()
-   {
-      return false;
-   }
-
    /**
     * Represents in percent the repartition of the double support duration between the previous and
     * next CMP.
