@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-public abstract class AbstractICPPlannerParameters extends ICPWithTimeFreezingPlannerParameters
+public abstract class AbstractICPPlannerParameters implements ICPWithTimeFreezingPlannerParameters
 {
    protected final double modelScale;
 

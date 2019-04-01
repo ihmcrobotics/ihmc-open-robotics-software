@@ -85,13 +85,6 @@ public class SmoothCMPPlannerParameters extends AbstractICPPlannerParameters
 
    @Override
    /** {@inheritDoc} */
-   public boolean useSmoothCMPPlanner()
-   {
-      return true;
-   }
-
-   @Override
-   /** {@inheritDoc} */
    public int getNumberOfCoPWayPointsPerFoot()
    {
       return swingCopPointsToPlan.length + 1;

@@ -165,26 +165,14 @@ public class BalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      ICPPlannerInterface icpPlanner;
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
-      if (!icpPlannerParameters.useSmoothCMPPlanner())
-      {
-         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-         icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                       midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
-         smoothCMPPlanner = null;
-      }
-      else
-      {
-         MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet,
-                                                         icpPlannerParameters.getNumberOfFootstepsToConsider(), momentumTrajectoryHandler, yoTime, registry,
-                                                         yoGraphicsListRegistry, controllerToolbox.getGravityZ());
-         smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
-         icpPlanner = smoothCMPPlanner;
-      }
+      momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
+      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet,
+                                                      icpPlannerParameters.getNumberOfFootstepsToConsider(), momentumTrajectoryHandler, yoTime, registry,
+                                                      yoGraphicsListRegistry, controllerToolbox.getGravityZ());
+      smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
 
-      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, soleZUpFrames);
+      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(smoothCMPPlanner, soleZUpFrames);
       parentRegistry.addChild(icpWrapper.getYoVariableRegistry());
 
       this.icpPlanner = icpWrapper;
@@ -196,7 +184,6 @@ public class BalanceManager
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
-         momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
          precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
@@ -204,7 +191,6 @@ public class BalanceManager
       }
       else
       {
-         momentumTrajectoryHandler = null;
          precomputedICPPlanner = null;
       }
       blendICPTrajectories.set(true);
