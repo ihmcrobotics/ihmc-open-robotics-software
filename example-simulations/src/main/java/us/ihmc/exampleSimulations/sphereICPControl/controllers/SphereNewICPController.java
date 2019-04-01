@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
@@ -106,6 +107,7 @@ public class SphereNewICPController implements GenericSphereController
                                                 controlToolbox.getContactableFeet(),
                                                 controlToolbox.getNewCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), null, null, registry,
                                                 yoGraphicsListRegistry, 9.81);
+      icpPlanner.setDefaultPhaseTimes(1.0, 1.0);
       icpPlanner.initializeParameters(controlToolbox.getNewCapturePointPlannerParameters());
       icpPlanner.setOmega0(omega0);
 
@@ -145,6 +147,8 @@ public class SphereNewICPController implements GenericSphereController
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
+   private final FramePoint2D previousPerfectCMP = new FramePoint2D();
 
    private int counter = 0;
 
@@ -169,8 +173,10 @@ public class SphereNewICPController implements GenericSphereController
       desiredCapturePointVelocity2d.set(desiredCapturePointVelocity);
       finalDesiredCapturePoint2d.set(finalDesiredCapturePoint);
 
-      FramePoint2D desiredCMP = icpController.doProportionalControl(null, capturePoint2d, desiredCapturePoint2d, finalDesiredCapturePoint2d,
-                                                                    desiredCapturePointVelocity2d, null, omega0);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
+      FramePoint2D desiredCMP = icpController.doProportionalControl(previousPerfectCMP, capturePoint2d, desiredCapturePoint2d, finalDesiredCapturePoint2d,
+                                                                    desiredCapturePointVelocity2d, perfectCMP, omega0);
+      previousPerfectCMP.setIncludingFrame(perfectCMP);
 
       double fZ = heightController.getVerticalForce();
       FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
@@ -182,6 +188,9 @@ public class SphereNewICPController implements GenericSphereController
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
+         centerOfMass.setToZero(centerOfMassFrame);
+         centerOfMass.changeFrame(worldFrame);
+
          icpTrack.setBallLoop(desiredICP);
          cmpTrack.setBallLoop(yoDesiredCMP);
          comTrack.setBallLoop(centerOfMass);
