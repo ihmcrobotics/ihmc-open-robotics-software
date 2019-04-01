@@ -21,7 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehaviorOld;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
@@ -95,10 +95,10 @@ public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTes
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(drcBehaviorTestHelper.getRobotName(), ros2Node,
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(drcBehaviorTestHelper.getRobotName(),FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node,
                                                                                                             yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      FollowFiducialBehavior followFiducialBehavior = new FollowFiducialBehavior(drcBehaviorTestHelper.getRobotName(), ros2Node, fullRobotModel,
+      FollowFiducialBehaviorOld followFiducialBehavior = new FollowFiducialBehaviorOld(drcBehaviorTestHelper.getRobotName(), ros2Node, fullRobotModel,
                                                                                  referenceFrames, fiducialDetectorBehaviorService);
       followFiducialBehavior.initialize();
 

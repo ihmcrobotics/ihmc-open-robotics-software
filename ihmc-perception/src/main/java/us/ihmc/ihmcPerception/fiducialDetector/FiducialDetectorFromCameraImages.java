@@ -66,7 +66,7 @@ public class FiducialDetectorFromCameraImages
 
    private final YoGraphicReferenceFrame cameraGraphic, detectorGraphic, locatedFiducialGraphic, reportedFiducialGraphic;
 
-   private final String prefix = "fiducial";
+   private String prefix = "fiducial";
 
    private final YoDouble expectedFiducialSize = new YoDouble("expectedFiducialSize", registry);
    private final YoDouble fieldOfViewXinRadians = new YoDouble("fovXRadians", registry);
@@ -90,10 +90,10 @@ public class FiducialDetectorFromCameraImages
                                                                                     registry);
 
    public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry,
-                                           YoGraphicsListRegistry yoGraphicsListRegistry)
+                                           YoGraphicsListRegistry yoGraphicsListRegistry, String prefix)
    {
       this.expectedFiducialSize.set(1.0);
-
+      this.prefix = prefix;
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
                                               ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
 
