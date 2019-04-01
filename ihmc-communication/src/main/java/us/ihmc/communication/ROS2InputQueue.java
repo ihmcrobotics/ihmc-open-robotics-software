@@ -13,9 +13,9 @@ public class ROS2InputQueue<T>
 {
    ConcurrentLinkedQueue<T> queue = new ConcurrentLinkedQueue<>();
 
-   public ROS2InputQueue(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleName)
+   public ROS2InputQueue(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
-      new ROS2Callback<>(ros2Node, messageType, robotName, moduleName, this::messageReceivedCallback);
+      new ROS2Callback<>(ros2Node, messageType, robotName, identifier, this::messageReceivedCallback);
    }
 
    private void messageReceivedCallback(T incomingData)
