@@ -106,7 +106,6 @@ public class PatrolBehavior
 
       waypoints = messager.createInput(API.Waypoints);
 
-      // TODO Use ExecutorService directly to print unchecked exceptions
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
