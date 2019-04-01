@@ -331,7 +331,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    @Override
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
    {
-      statusDesiredPosition.setIncludingFrame(desiredCenterOfMassHeightPoint);
+      centerOfMassTrajectoryGenerator.getCurrentDesiredHeight(statusDesiredPosition);
+      statusDesiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       statusDesiredPosition.setX(Double.NaN);
       statusDesiredPosition.setY(Double.NaN);
       if (controlPelvisHeightInsteadOfCoMHeight.getValue())

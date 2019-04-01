@@ -798,10 +798,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
             initializeOffsetTrajectoryGenerator(command, firstTrajectoryPointTime);
             offsetHeightTrajectoryGenerator.compute(deltaTime);
          }
-         else if (offsetHeightTrajectoryGenerator.isDone())
-         {
-            offsetHeightAboveGround.set(offsetHeightTrajectoryGenerator.getValue());
-         }
+
+         offsetHeightAboveGround.set(offsetHeightTrajectoryGenerator.getValue(), false);
       }
       offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightTrajectoryGenerator.getValue());
 

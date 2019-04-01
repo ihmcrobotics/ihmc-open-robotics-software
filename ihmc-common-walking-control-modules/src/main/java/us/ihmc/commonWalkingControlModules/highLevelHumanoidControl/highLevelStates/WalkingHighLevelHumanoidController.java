@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -57,6 +58,8 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -119,6 +122,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final StatusMessageOutputManager statusOutputManager;
    private final WalkingCommandConsumer commandConsumer;
 
+   private final TaskspaceTrajectoryStatusMessage pelvisStatusMessage = new TaskspaceTrajectoryStatusMessage();
+
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final YoBoolean limitCommandSent = new YoBoolean("limitCommandSent", registry);
 
@@ -154,6 +159,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+      pelvisStatusMessage.setEndEffectorName(pelvis.getName());
 
       unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
@@ -657,8 +664,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
 
-      if (pelvisOrientationManager != null)
-         pelvisOrientationManager.compute();
+      pelvisOrientationManager.compute();
 
       comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
@@ -697,20 +703,75 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
 
-      if (pelvisOrientationManager != null)
+      TaskspaceTrajectoryStatusMessage pelvisOrientationStatus = pelvisOrientationManager.pollStatusToReport();
+      TaskspaceTrajectoryStatusMessage pelvisXYStatus = balanceManager.pollPelvisXYTranslationStatusToReport();
+      TaskspaceTrajectoryStatusMessage pelvisHeightStatus = comHeightManager.pollStatusToReport();
+
+      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisOrientationStatus, pelvisXYStatus, pelvisHeightStatus);
+
+      if (mergedPelvisStatus != null)
       {
-         statusMessage = pelvisOrientationManager.pollStatusToReport();
-         if (statusMessage != null)
-            statusOutputManager.reportStatusMessage(statusMessage);
+         statusOutputManager.reportStatusMessage(mergedPelvisStatus);
+      }
+   }
+
+   private TaskspaceTrajectoryStatusMessage mergePelvisStatusMessages(TaskspaceTrajectoryStatusMessage pelvisOrientationStatus,
+                                                                      TaskspaceTrajectoryStatusMessage pelvisXYStatus,
+                                                                      TaskspaceTrajectoryStatusMessage pelvisHeightStatus)
+   {
+      int numberOfStatus = pelvisOrientationStatus != null ? 1 : 0;
+      numberOfStatus += pelvisXYStatus != null ? 1 : 0;
+      numberOfStatus += pelvisHeightStatus != null ? 1 : 0;
+
+      if (numberOfStatus <= 1)
+      {
+         if (pelvisOrientationStatus != null)
+            return pelvisOrientationStatus;
+         if (pelvisXYStatus != null)
+            return pelvisXYStatus;
+         if (pelvisHeightStatus != null)
+            return pelvisHeightStatus;
+         return null;
       }
 
-      statusMessage = comHeightManager.pollStatusToReport();
-      if (statusMessage != null)
-         statusOutputManager.reportStatusMessage(statusMessage);
+      Quaternion desiredEndEffectorOrientation = pelvisStatusMessage.getDesiredEndEffectorOrientation();
+      Point3D desiredEndEffectorPosition = pelvisStatusMessage.getDesiredEndEffectorPosition();
+      Quaternion actualEndEffectorOrientation = pelvisStatusMessage.getActualEndEffectorOrientation();
+      Point3D actualEndEffectorPosition = pelvisStatusMessage.getActualEndEffectorPosition();
 
-      statusMessage = balanceManager.pollStatusToReport();
-      if (statusMessage != null)
-         statusOutputManager.reportStatusMessage(statusMessage);
+      desiredEndEffectorOrientation.setToNaN();
+      desiredEndEffectorPosition.setToNaN();
+      actualEndEffectorOrientation.setToNaN();
+      actualEndEffectorPosition.setToNaN();
+
+      if (pelvisOrientationStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisOrientationStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisOrientationStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisOrientationStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation());
+         actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation());
+      }
+
+      if (pelvisXYStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisXYStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisXYStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisXYStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
+         actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
+      }
+      
+      if (pelvisHeightStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisHeightStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisHeightStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisHeightStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorPosition.setZ(pelvisHeightStatus.getDesiredEndEffectorPosition().getZ());
+         actualEndEffectorPosition.setZ(pelvisHeightStatus.getActualEndEffectorPosition().getZ());
+      }
+
+      return pelvisStatusMessage;
    }
 
    private void submitControllerCoreCommands()
