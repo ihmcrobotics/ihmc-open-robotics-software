@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.gradientDescent;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 
 /**
@@ -19,6 +20,7 @@ public class GradientDescentModule
    private boolean solved;
    private TDoubleArrayList optimalInput;
    private double optimalQuery;
+   private double computationTime;
 
    // params
    private TDoubleArrayList inputUpperLimit;
@@ -27,7 +29,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
-
+   
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
       this.function = function;
@@ -40,8 +42,8 @@ public class GradientDescentModule
       {
          this.initialInput.add(initial.get(i));
          this.optimalInput.add(0.0);
-         this.inputUpperLimit.add(Double.MAX_VALUE);
-         this.inputLowerLimit.add(-Double.MIN_VALUE);
+         this.inputUpperLimit.add(Double.POSITIVE_INFINITY);
+         this.inputLowerLimit.add(Double.NEGATIVE_INFINITY);
       }
    }
 
@@ -68,9 +70,15 @@ public class GradientDescentModule
       for (int i = 0; i < dimension; i++)
          inputLowerLimit.add(limit.get(i));
    }
+   
+   public void setConvergenceThreshold(double value)
+   {
+      deltaThreshold = value;
+   }
 
    public int run()
    {
+      long startTime = System.nanoTime();
       solved = false;
       optimalQuery = Double.MAX_VALUE;
 
@@ -138,6 +146,7 @@ public class GradientDescentModule
             pastInput.add(optimalInput.get(j));
       }
 
+      computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       return iteration;
    }
 
@@ -154,5 +163,10 @@ public class GradientDescentModule
    public double getOptimalQuery()
    {
       return optimalQuery;
+   }
+   
+   public double getComputationTime()
+   {
+      return computationTime;
    }
 }
