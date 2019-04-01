@@ -10,7 +10,7 @@ import us.ihmc.commons.MathTools;
 public class GradientDescentModule
 {
    private final boolean DEBUG = false;
-   
+
    // internal
    private SingleQueryFunction function;
    private final int dimension;
@@ -29,7 +29,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
-   
+
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
       this.function = function;
@@ -70,10 +70,18 @@ public class GradientDescentModule
       for (int i = 0; i < dimension; i++)
          inputLowerLimit.add(limit.get(i));
    }
-   
+
    public void setConvergenceThreshold(double value)
    {
       deltaThreshold = value;
+   }
+
+   public void setStepSize(double value)
+   {
+      if (value > 0)
+         alpha = -value;
+      else
+         alpha = value;
    }
 
    public int run()
@@ -164,7 +172,7 @@ public class GradientDescentModule
    {
       return optimalQuery;
    }
-   
+
    public double getComputationTime()
    {
       return computationTime;
