@@ -14,16 +14,16 @@ public class ROS2Input<T>
    private final AtomicReference<T> atomicReference;
    private final MessageFilter<T> messageFilter;
 
-   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleName)
+   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
-      this(ros2Node, messageType, robotName, moduleName, message -> true);
+      this(ros2Node, messageType, robotName, identifier, message -> true);
    }
 
-   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleName, MessageFilter<T> messageFilter)
+   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
    {
       atomicReference = new AtomicReference<>(ROS2Tools.newMessageInstance(messageType));
       this.messageFilter = messageFilter;
-      new ROS2Callback<>(ros2Node, messageType, robotName, moduleName, this::messageReceivedCallback);
+      new ROS2Callback<>(ros2Node, messageType, robotName, identifier, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>
