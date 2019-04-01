@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,7 +33,7 @@ public class RemoteFootstepPlannerInterface
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private final IHMCROS2Publisher<RequestFootstepPlannerParametersMessage> parametersPublisher;
+   private final IHMCROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher;
 
    private final AtomicInteger requestCounter = new AtomicInteger(1739);
 
@@ -52,7 +53,7 @@ public class RemoteFootstepPlannerInterface
                                       FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
       parametersPublisher =
             ROS2Tools.createPublisher(ros2Node,
-                                      RequestFootstepPlannerParametersMessage.class,
+                                      FootstepPlannerParametersPacket.class,
                                       FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
@@ -77,7 +78,9 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
 
-
+      FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
+      FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, footstepPlannerParameters);
+      parametersPublisher.publish(footstepPlannerParametersPacket);
 
       double midFeetToSoleOffset = footstepPlannerParameters.getIdealFootstepWidth() / 2;
       start.changeFrame(worldFrame);
