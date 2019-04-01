@@ -117,7 +117,7 @@ public class DCMPlanner
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
-      dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
+      dcmTrajectory.setupVisualizers(yoGraphicsListRegistry, POINT_SIZE);
 
       YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.002, YoAppearance.BlueViolet());
 
