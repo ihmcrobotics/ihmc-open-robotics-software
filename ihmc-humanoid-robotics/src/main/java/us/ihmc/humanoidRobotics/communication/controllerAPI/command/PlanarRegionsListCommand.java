@@ -10,6 +10,7 @@ import us.ihmc.idl.IDLSequence.Object;
 
 public class PlanarRegionsListCommand implements Command<PlanarRegionsListCommand, PlanarRegionsListMessage>
 {
+   private long sequenceId;
    private final RecyclingArrayList<PlanarRegionCommand> planarRegions = new RecyclingArrayList<>(30, PlanarRegionCommand.class);
 
    public PlanarRegionsListCommand()
@@ -20,6 +21,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    @Override
    public void clear()
    {
+      sequenceId = 0;
       planarRegions.clear();
    }
 
@@ -27,6 +29,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public void setFromMessage(PlanarRegionsListMessage message)
    {
       clear();
+      sequenceId = message.getSequenceId();
 
       int upperBound = 0;
       int vertexIndex = 0;
@@ -70,6 +73,7 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    {
       clear();
 
+      sequenceId = other.sequenceId;
       RecyclingArrayList<PlanarRegionCommand> dataList = other.getPlanarRegions();
       if (dataList != null)
       {
@@ -103,5 +107,11 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public boolean isCommandValid()
    {
       return getNumberOfPlanarRegions() > 0;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

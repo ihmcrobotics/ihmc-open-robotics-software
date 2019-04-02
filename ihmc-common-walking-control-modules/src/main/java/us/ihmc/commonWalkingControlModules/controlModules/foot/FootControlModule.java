@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.GEQ_INEQUALITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.*;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -562,5 +561,10 @@ public class FootControlModule
 
       minWrenchCommand.getWrench().setLinearPartZ(minZForce.getValue());
       maxWrenchCommand.getWrench().setLinearPartZ(maxZForce.getValue());
+   }
+
+   public Object pollStatusToReport()
+   {
+      return stateMachine.getCurrentState().pollStatusToReport();
    }
 }

@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
@@ -835,5 +833,10 @@ public class BalanceManager
       footstepSolution.set(output.getFootstepSolution());
       footstepWasAdjusted = output.getFootstepWasAdjusted();
       usingStepAdjustment = output.getUsingStepAdjustment();
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollPelvisXYTranslationStatusToReport()
+   {
+      return pelvisICPBasedTranslationManager.pollStatusToReport();
    }
 }

@@ -11,6 +11,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelay
  */
 public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, ClearDelayQueueMessage>
 {
+   private long sequenceId;
    private Class<? extends Command<?, ?>> commandClassToClear;
    private Class<? extends Settable<?>> messageClassToClear;
 
@@ -111,6 +112,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    @Override
    public void set(ClearDelayQueueCommand other)
    {
+      sequenceId = other.sequenceId;
       commandClassToClear = other.commandClassToClear;
       messageClassToClear = other.messageClassToClear;
       clearAllDelayBuffers = other.clearAllDelayBuffers;
@@ -122,6 +124,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    @Override
    public void clear()
    {
+      sequenceId = 0;
       commandClassToClear = null;
       messageClassToClear = null;
       clearAllDelayBuffers = false;
@@ -153,5 +156,11 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

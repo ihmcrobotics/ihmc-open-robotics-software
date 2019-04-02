@@ -15,6 +15,7 @@ import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
@@ -67,13 +68,13 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       if (defaultControlState == null)
          defaultControlState = RigidBodyControlMode.JOINTSPACE;
 
-      assertEquals(defaultControlState, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
 
       drcSimulationTestHelper.publishToController(desiredAccelerationsMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
-      assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
       double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, scs);
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, scs);
@@ -82,7 +83,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
 
-      assertEquals(defaultControlState, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertEquals(defaultControlState, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), scs));
    }
 
    public double[] findQPOutputJointAccelerations(OneDoFJointBasics[] joints, SimulationConstructionSet scs)
