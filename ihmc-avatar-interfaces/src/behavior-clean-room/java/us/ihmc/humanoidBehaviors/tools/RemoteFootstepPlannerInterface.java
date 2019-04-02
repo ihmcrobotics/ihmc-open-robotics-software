@@ -80,7 +80,12 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
       SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
-      settableFootstepPlannerParameters.setWiggleInsideDelta(0.05);
+      settableFootstepPlannerParameters.setWiggleInsideDelta(0.015);
+      settableFootstepPlannerParameters.setMinimumDistanceFromCliffBottoms(0.02);
+      settableFootstepPlannerParameters.setRejectIfCannotFullyWiggleInside(true);
+      settableFootstepPlannerParameters.setMaximumXYWiggleDistance(0.07);
+      settableFootstepPlannerParameters.setMaximumStepZ(0.3);
+      settableFootstepPlannerParameters.setIdealFootstepLength(0.20);
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, settableFootstepPlannerParameters);
@@ -105,7 +110,7 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
       packet.getGoalOrientationInWorld().set(goal.getOrientation());
 
-      packet.setTimeout(15);
+      packet.setTimeout(5);
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
