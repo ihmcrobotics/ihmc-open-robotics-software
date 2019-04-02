@@ -6,12 +6,14 @@ import us.ihmc.communication.controllerAPI.command.Command;
 public class HumanoidKinematicsToolboxConfigurationCommand
       implements Command<HumanoidKinematicsToolboxConfigurationCommand, HumanoidKinematicsToolboxConfigurationMessage>
 {
+   private long sequenceId;
    private boolean holdCurrentCenterOfMassXYPosition = true;
    private boolean holdSupportFootPositions = true;
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       holdCurrentCenterOfMassXYPosition = true;
       holdSupportFootPositions = true;
    }
@@ -19,6 +21,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    @Override
    public void set(HumanoidKinematicsToolboxConfigurationCommand other)
    {
+      sequenceId = other.sequenceId;
       holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
       holdSupportFootPositions = other.holdSupportFootPositions;
    }
@@ -26,6 +29,7 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    @Override
    public void setFromMessage(HumanoidKinematicsToolboxConfigurationMessage message)
    {
+      sequenceId = message.getSequenceId();
       holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXyPosition();
       holdSupportFootPositions = message.getHoldSupportFootPositions();
    }
@@ -50,5 +54,11 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }
