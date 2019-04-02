@@ -249,12 +249,12 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       int count = 0;
       int maxIteration = 100;
 
-      for (double alpha = 0.0; allGCPs.stream().anyMatch(gc -> gc.getZ() > 0.01); alpha += 0.1)
+      for (double alpha = 0.0; allGCPs.stream().anyMatch(gc -> gc.getZ() > 0.01); alpha += 0.05)
       { // Putting the robot down gently
          Point3D position = new Point3D();
          position.interpolate(aboveInitialPose.getPosition(), initialPose.getPosition(), alpha);
          scsRootJoint.setPosition(position);
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.025));
          
          count++;
          assertTrue(count++ < maxIteration, "Something went wrong when lowering the robot.");

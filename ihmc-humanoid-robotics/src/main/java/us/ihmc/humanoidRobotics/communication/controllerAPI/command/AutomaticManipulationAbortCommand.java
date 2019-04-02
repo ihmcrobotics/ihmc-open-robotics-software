@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class AutomaticManipulationAbortCommand implements Command<AutomaticManipulationAbortCommand, AutomaticManipulationAbortMessage>
 {
+   private long sequenceId;
    private boolean enable;
 
    public AutomaticManipulationAbortCommand()
@@ -14,17 +15,20 @@ public class AutomaticManipulationAbortCommand implements Command<AutomaticManip
    @Override
    public void clear()
    {
+      sequenceId = 0;
    }
 
    @Override
    public void set(AutomaticManipulationAbortCommand other)
    {
+      sequenceId = other.sequenceId;
       enable = other.enable;
    }
 
    @Override
    public void setFromMessage(AutomaticManipulationAbortMessage message)
    {
+      sequenceId = message.getSequenceId();
       enable = message.getEnable();
    }
 
@@ -48,5 +52,11 @@ public class AutomaticManipulationAbortCommand implements Command<AutomaticManip
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }
