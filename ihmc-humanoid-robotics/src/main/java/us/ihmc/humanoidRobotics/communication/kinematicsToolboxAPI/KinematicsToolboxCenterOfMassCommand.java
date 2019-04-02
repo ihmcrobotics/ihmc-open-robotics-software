@@ -10,6 +10,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsToolboxCenterOfMassCommand, KinematicsToolboxCenterOfMassMessage>
 {
+   private long sequenceId;
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final DenseMatrix64F weightVector = new DenseMatrix64F(3, 1);
@@ -17,6 +18,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    @Override
    public void clear()
    {
+      sequenceId = 0;
       desiredPosition.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
       weightVector.zero();
@@ -25,6 +27,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    @Override
    public void set(KinematicsToolboxCenterOfMassCommand other)
    {
+      sequenceId = other.sequenceId;
       desiredPosition.setIncludingFrame(other.desiredPosition);
       selectionMatrix.set(other.selectionMatrix);
       weightVector.set(other.weightVector);
@@ -38,6 +41,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
          clear();
          return;
       }
+      sequenceId = message.getSequenceId();
       desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld());
       selectionMatrix.clearSelection();
       selectionMatrix.clearSelection();
@@ -82,5 +86,11 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }
