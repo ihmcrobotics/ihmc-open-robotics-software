@@ -9,7 +9,7 @@ import us.ihmc.commons.MathTools;
  */
 public class GradientDescentModule
 {
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
 
    // internal
    private SingleQueryFunction function;
@@ -88,19 +88,24 @@ public class GradientDescentModule
    {
       long startTime = System.nanoTime();
       solved = false;
-      optimalQuery = Double.MAX_VALUE;
 
       int iteration = 0;
       TDoubleArrayList pastInput = new TDoubleArrayList();
       for (int i = 0; i < dimension; i++)
          pastInput.add(initialInput.get(i));
+
+      optimalQuery = function.getQuery(pastInput);
+      
+      double pastQuery = 0;
+      double newQuery = 0;
+
       for (int i = 0; i < maximumIterations; i++)
       {
+         long curTime = System.nanoTime();
          iteration++;
-         double pastQuery = function.getQuery(pastInput);
-
+         pastQuery = optimalQuery;
+         
          double tempSignForPerturb = 1.0;
-
          TDoubleArrayList gradient = new TDoubleArrayList();
          for (int j = 0; j < dimension; j++)
          {
@@ -131,23 +136,29 @@ public class GradientDescentModule
             optimalInput.add(MathTools.clamp(input, inputLowerLimit.get(j), inputUpperLimit.get(j)));
          }
 
-         optimalQuery = function.getQuery(optimalInput);
+         newQuery = function.getQuery(optimalInput);
 
-         if (optimalQuery > pastQuery)
+         if (newQuery > pastQuery)
          {
             reduceStepSize();
             optimalInput.clear();
             for (int j = 0; j < dimension; j++)
                optimalInput.add(pastInput.get(j));
          }
+         else
+         {
+            optimalQuery = newQuery;
+            double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
 
-         double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
+            if (DEBUG)
+            {
+               double iterationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
+               System.out.println("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationTime);
+            }
 
-         if (DEBUG)
-            System.out.println("GradientDescentModule " + i + " " + optimalQuery + " " + optimalInput.get(0) + " " + gradient.get(0) + " " + delta);
-
-         if (delta < deltaThreshold)
-            break;
+            if (delta < deltaThreshold)
+               break;
+         }
 
          pastInput.clear();
          for (int j = 0; j < dimension; j++)
