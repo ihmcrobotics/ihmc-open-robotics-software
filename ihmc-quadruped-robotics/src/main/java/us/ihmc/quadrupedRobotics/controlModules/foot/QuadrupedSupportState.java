@@ -42,7 +42,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
    private boolean footIsVerifiedAsLoaded = false;
 
-   private final DoubleParameter minimumTimeInSupportState;
+   private final DoubleProvider minimumTimeInSupportState;
 
    private final YoFramePoint3D groundPlanePosition;
    private final YoFramePoint3D upcomingGroundPlanePosition;
@@ -59,10 +59,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final DoubleProvider barelyLoadedWindowLength;
    private final GlitchFilteredYoBoolean footBarelyLoaded;
-   private final DoubleParameter footBarelyLoadedThreshold;
-   private final DoubleParameter footFullyLoadedThreshold;
+   private final DoubleProvider barelyLoadedWindowLength;
+   private final DoubleProvider footBarelyLoadedThreshold;
+   private final DoubleProvider footFullyLoadedThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FramePose3D bodyFixedControlledPose = new FramePose3D();
@@ -107,12 +107,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
       spatialFeedbackControlCommand.set(rootBody, footBody);
       spatialFeedbackControlCommand.setPrimaryBase(controllerToolbox.getFullRobotModel().getBody());
 
-      minimumTimeInSupportState = new DoubleParameter(prefix + "TimeInSupportState", registry, 0.05);
+      minimumTimeInSupportState = parameters.getMinimumTimeInSupportState();
 
-      barelyLoadedWindowLength = new DoubleParameter(prefix + "_BarelyLoadedWindowLength", registry, 0.05);
       footBarelyLoaded = new GlitchFilteredYoBoolean(prefix + "_BarelyLoaded", registry, (int) (0.05 / controlDT));
-      footBarelyLoadedThreshold = new DoubleParameter(prefix + "_FootBarelyLoadedThreshold", registry, 0.10);
-      footFullyLoadedThreshold = new DoubleParameter(prefix + "_FootFullyLoadedThreshold", registry, 0.15);
+      barelyLoadedWindowLength = parameters.getBarelyLoadedWindowLength();
+      footBarelyLoadedThreshold = parameters.getBarelyLoadedThreshold();
+      footFullyLoadedThreshold = parameters.getFullyLoadedThreshold();
 
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
    }
