@@ -9,6 +9,7 @@ import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.humanoidBehaviors.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.ExecutorService;
@@ -21,7 +22,7 @@ public class LivePlanarRegionsGraphic extends AnimationTimer
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), ROS2Tools.REA_MODULE, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), LIDARBasedREAModule.ROS2_ID, this::acceptPlanarRegions);
    }
 
    private void acceptPlanarRegions(PlanarRegionsListMessage incomingData)

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -29,7 +30,7 @@ public class RemoteSyncedRobotModel
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
                                                robotModel.getSimpleRobotName(),
-                                               HUMANOID_CONTROL_MODULE,
+                                               HighLevelHumanoidControllerFactory.ROS2_ID,
                                                message ->
                                                {
                                                   FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
