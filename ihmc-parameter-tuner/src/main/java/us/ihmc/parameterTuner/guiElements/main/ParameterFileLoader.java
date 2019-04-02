@@ -7,6 +7,10 @@ import java.util.Map;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import us.ihmc.parameterTuner.JavaFXExceptionTools;
 import us.ihmc.parameterTuner.ParameterSavingTools;
@@ -27,12 +31,15 @@ public class ParameterFileLoader
          return;
       }
 
+      displayWarning();
+
       List<GuiRegistry> registries = showUserDialogAndParseFile(scene);
       if (registries == null)
       {
          return;
       }
 
+      String message = "";
       for (GuiRegistry registry : registries)
       {
          List<GuiParameter> allParameters = registry.getAllParameters();
@@ -41,8 +48,7 @@ public class ParameterFileLoader
             Tuner tuner = tunerMap.get(parameter.getUniqueName());
             if (tuner == null)
             {
-               JavaFXExceptionTools.createExceptionDialog(new Throwable("Tried to load parameter " + parameter.getUniqueName()
-                     + " but this parameter does not exist."));
+               message += parameter.getUniqueName() + "\n";
             }
             else
             {
@@ -50,6 +56,22 @@ public class ParameterFileLoader
             }
          }
       }
+
+      if (!message.isEmpty())
+      {
+         JavaFXExceptionTools.createExceptionDialog(new Throwable("Tried to load non-existing parameters\n" + message));
+      }
+   }
+
+   private boolean displayWarning()
+   {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Load File");
+      alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+      alert.getDialogPane().setMinWidth(Region.USE_PREF_SIZE);
+      alert.setHeaderText("Do you want to load values?");
+      alert.setContentText("This will modify all values defined in the file at once.");
+      return alert.showAndWait().get() == ButtonType.OK;
    }
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
