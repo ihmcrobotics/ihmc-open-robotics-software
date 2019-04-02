@@ -1,10 +1,13 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
+import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionBox extends CollisionShape
 {
+   private Box3D shape3D;
 
    private final double xExtent;
    private final double yExtent;
@@ -39,4 +42,13 @@ public class CollisionBox extends CollisionShape
       return (point.getX() >= -xExtent && point.getX() <= xExtent) && (point.getY() >= -yExtent && point.getY() <= yExtent) && (point.getZ() >= -zExtent && point.getZ() <= zExtent);
    }
 
+   @Override
+   public Shape3D<?> getOrCreateShape3D()
+   {
+      if (shape3D == null)
+      {
+         shape3D = new Box3D(getPose(), xExtent, yExtent, zExtent);
+      }
+      return shape3D;
+   }
 }
