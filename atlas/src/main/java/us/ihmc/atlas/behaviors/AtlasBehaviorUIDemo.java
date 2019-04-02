@@ -20,11 +20,14 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 import java.util.concurrent.TimeUnit;
 
@@ -100,15 +103,21 @@ public class AtlasBehaviorUIDemo extends Application
                                                          0.1,
                                                          5,
                                                          6,
-                                                         0.0,
-                                                         - 0.03,
+                                                         0.02,
+                                                         -0.03,
                                                          0.6);
       return generator.getPlanarRegionsList();
    }
 
    private AtlasRobotModel createRobotModel()
    {
-      return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values,
+                                                                                                     8,
+                                                                                                     3,
+                                                                                                     true,
+                                                                                                     true);
+      return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
+
    }
 
    @Override
