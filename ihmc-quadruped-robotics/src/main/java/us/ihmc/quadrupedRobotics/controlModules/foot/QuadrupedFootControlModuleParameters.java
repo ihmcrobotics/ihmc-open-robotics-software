@@ -58,6 +58,9 @@ public class QuadrupedFootControlModuleParameters
 
    private final DoubleProvider minimumTimeInSupportState = new DoubleParameter("minimumTimeInSupportState", finalRegistry, 0.05);
 
+   private final DoubleProvider footVelocityThresholdForSlipping = new DoubleParameter("footVelocityThresholdForSlipping", finalRegistry, 0.05);
+   private final DoubleProvider footVelocityThresholdForNotSlipping = new DoubleParameter("footVelocityThresholdForNotSlipping", finalRegistry, 0.01);
+
 
 
    public QuadrupedFootControlModuleParameters()
@@ -179,6 +182,16 @@ public class QuadrupedFootControlModuleParameters
    public DoubleProvider getFullyLoadedThreshold()
    {
       return footFullyLoadedThreshold;
+   }
+
+   public double getFootVelocityThresholdForSlipping()
+   {
+      return footVelocityThresholdForSlipping.getValue();
+   }
+
+   public double getFootVelocityThresholdForNotSlipping()
+   {
+      return footVelocityThresholdForNotSlipping.getValue();
    }
 
    public DoubleProvider getMinimumTimeInSupportState()
