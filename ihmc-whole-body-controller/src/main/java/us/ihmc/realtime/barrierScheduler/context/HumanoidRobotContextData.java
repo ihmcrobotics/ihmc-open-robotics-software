@@ -1,7 +1,7 @@
 package us.ihmc.realtime.barrierScheduler.context;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -26,7 +26,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private final JointDesiredOutputList jointDesiredOutputList;
 
    private final ArrayList<RigidBodyBasics> robotFeet;
-   private final Map<String, Point2D> copPoints = new HashMap<>();
+   private final Map<String, FramePoint2D> copPoints = new HashMap<>();
 
    HumanoidRobotContextData(HumanoidRobotContextJointData rawJointData, HumanoidRobotContextJointData processedJointData,
                             ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
@@ -36,7 +36,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
 
-      this.robotFeet = new ArrayList<>(centerOfPressureDataHolder.getRigidBodies());
+      this.robotFeet = new ArrayList<>();
+      for (int i = 0; i < centerOfPressureDataHolder.getNumberOfBodiesWithCenterOfPressure(); i++)
+      {
+         robotFeet.add(centerOfPressureDataHolder.getRigidBody(i));
+      }
 
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
@@ -45,7 +49,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       for (int i = 0; i < robotFeet.size(); i++)
       {
          RigidBodyBasics foot = robotFeet.get(i);
-         copPoints.put(foot.getName(), new Point2D());
+         copPoints.put(foot.getName(), new FramePoint2D());
       }
    }
 
@@ -60,10 +64,10 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       for (int i = 0; i < robotFeet.size(); i++)
       {
          RigidBodyBasics foot = robotFeet.get(i);
-         Point2D copTmp = copPoints.get(foot.getName());
+         FramePoint2D copTmp = copPoints.get(foot.getName());
 
-         src.centerOfPressureDataHolder.getCenterOfPressureByName(copTmp, foot);
-         this.centerOfPressureDataHolder.setCenterOfPressureByName(copTmp, foot);
+         src.centerOfPressureDataHolder.getCenterOfPressure(copTmp, foot);
+         this.centerOfPressureDataHolder.setCenterOfPressure(copTmp, foot);
       }
 
       this.robotMotionStatusHolder.setCurrentRobotMotionStatus(src.robotMotionStatusHolder.getCurrentRobotMotionStatus());
