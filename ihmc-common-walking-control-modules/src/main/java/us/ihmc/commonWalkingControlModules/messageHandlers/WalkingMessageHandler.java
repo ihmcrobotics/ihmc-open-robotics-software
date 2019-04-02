@@ -269,7 +269,7 @@ public class WalkingMessageHandler
          clearFootsteps();
       }
 
-      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
+      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxStepHeightChange.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
       {
          clearFootsteps();
       }
@@ -977,7 +977,8 @@ public class WalkingMessageHandler
     * @return if the footsteps were found to be safe
     */
    private static boolean checkFootsteps(List<Footstep> footsteps, SideDependentList<ReferenceFrame> soleFrames, double maxStepDistance,
-                                         double maxSwingDistance, FramePoint3DBasics tempStanceLocation, FramePoint3DBasics tempStepOrigin)
+                                         double maxStepHeightChange, double maxSwingDistance, FramePoint3DBasics tempStanceLocation,
+                                         FramePoint3DBasics tempStepOrigin)
    {
       if (footsteps.isEmpty())
       {
@@ -998,6 +999,14 @@ public class WalkingMessageHandler
          {
             LogTools.warn("Received step that was too far to be executed safely. Distance from previous step was " + distance
                   + ". If that is acceptable increase the MaxStepDistance parameter.");
+            return false;
+         }
+
+         double heightChange = Math.abs(stepPosition.getZ() - tempStanceLocation.getZ());
+         if (heightChange > maxStepHeightChange)
+         {
+            LogTools.warn("Received step that was too far to be executed safely. Height change w.r.t. previous step was " + heightChange
+                  + ". If that is acceptable increase the MaxStepHeightChange parameter.");
             return false;
          }
 
