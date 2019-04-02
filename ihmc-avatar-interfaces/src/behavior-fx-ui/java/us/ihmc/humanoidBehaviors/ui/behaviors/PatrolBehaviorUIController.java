@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -63,9 +64,9 @@ public class PatrolBehaviorUIController extends FXUIBehavior
          });
       });
 
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> remoteCurrentState.setText(state));
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> Platform.runLater(() -> remoteCurrentState.setText(state)));
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
-                                                       index -> remoteCurrentWaypointIndex.setText(index.toString()));
+                                             index -> Platform.runLater(() -> remoteCurrentWaypointIndex.setText(index.toString())));
 
       activeEditor = uiMessager.createInput(BehaviorUI.API.ActiveEditor, null);
       uiMessager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
