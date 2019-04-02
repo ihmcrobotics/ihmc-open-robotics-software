@@ -245,6 +245,50 @@ if (ihmc.isBuildRoot())
       }
    }
 
+   task deployOCUApplications(dependsOn: jar) {
+      
+      ihmc.jarWithLibFolder()
+      def projectDir = project.buildscript.sourceFile.parent
+      def ocuApplications = "ihmc_apps/valkyrie"
+
+      doLast {
+         def home = new File(System.properties["user.home"])
+         def dest = new File(home, ocuApplications)
+         def lib = new File(dest, "lib")
+         dest.mkdirs();
+         lib.deleteDir();
+         lib.mkdirs();
+
+         configurations.runtime.each {
+            if (!it.name.contains("IHMCHumanoidOperatorInterface"))
+            {
+               def src = file(it)
+               copy {
+                  from src
+                  into lib
+               }
+            }
+         }
+
+         copy {
+            from jar.archivePath
+            into dest
+            rename { fileName -> "IHMCValkyrieSoftware.jar" }
+         }
+
+         def scriptDirSource = new File(projectDir, "ocuApplicationLaunchScripts/")
+         def scriptCollection = files { scriptDirSource }
+         copy {
+            from scriptCollection
+            into dest
+         }
+
+        println "-------------------------------------------------------------------------"
+        println "------- Deployed files to: " + dest.getPath() + " -------"
+        println "-------------------------------------------------------------------------"
+      }
+   }
+
 //task createRosJar(type: Jar) {
 //   def gitRepo;
 //   if (!project.parent.hasProperty("repo"))
