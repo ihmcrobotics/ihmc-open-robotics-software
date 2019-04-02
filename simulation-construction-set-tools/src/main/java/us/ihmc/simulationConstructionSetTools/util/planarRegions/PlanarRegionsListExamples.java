@@ -71,7 +71,7 @@ public class PlanarRegionsListExamples
                                                double startingBlockLength)
    {
       double defaultTiltAngle = Math.toRadians(15.0);
-      double randomHeightVariation = 0.1;
+      double randomHeightVariation = 0.0;
       boolean onlyGenerateTopOfBlock = false;
 
       generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation,
