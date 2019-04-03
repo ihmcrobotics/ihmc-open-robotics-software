@@ -13,7 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
@@ -51,8 +51,9 @@ public class BehaviorUI
    private final LivePlanarRegionsGraphic planarRegionsGraphic;
    private final JavaFXRemoteRobotVisualizer robotVisualizer;
 
-   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
+   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
+   @FXML private DirectRobotUIController directRobotUIController;
 
    public BehaviorUI(Stage primaryStage,
                      Messager behaviorMessager,
@@ -93,6 +94,7 @@ public class BehaviorUI
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       patrolBehaviorUIController.init(messager, subScene, behaviorMessager, robotModel);
+      directRobotUIController.init(ros2Node, robotModel);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
       planarRegionsGraphic.start();
