@@ -85,6 +85,7 @@ public class RemoteFootstepPlannerInterface
       settableFootstepPlannerParameters.setRejectIfCannotFullyWiggleInside(true);
       settableFootstepPlannerParameters.setMaximumXYWiggleDistance(0.07);
       settableFootstepPlannerParameters.setMaximumStepZ(0.3);
+      settableFootstepPlannerParameters.setMaximumStepWidth(0.55);
       settableFootstepPlannerParameters.setIdealFootstepLength(0.20);
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
