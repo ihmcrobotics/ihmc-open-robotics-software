@@ -288,11 +288,18 @@ public class LidarScanPublisher
          scanData.transform(transformToWorld);
       }
 
-      collisionBoxNode.update();
+      if (collisionBoxNode != null)
+         collisionBoxNode.update();
+
       lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
 
       List<Integer> shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
-      List<Integer> selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
+
+      List<Integer> selfCollisionRemovalIndices;
+      if (collisionBoxNode != null)
+         selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
+      else
+         selfCollisionRemovalIndices = null;
 
       Point3D32 lidarPosition;
       Quaternion32 lidarOrientation;
@@ -317,7 +324,8 @@ public class LidarScanPublisher
 
       //            if (requestLidarScanMessage.getRemoveSelfCollisions())
       {
-         indicesToRemove.addAll(selfCollisionRemovalIndices);
+         if (selfCollisionRemovalIndices != null)
+            indicesToRemove.addAll(selfCollisionRemovalIndices);
       }
 
       //            if (requestLidarScanMessage.getRemoveShadows())
