@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -32,6 +31,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -126,7 +126,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          footstepData.setTouchdownDuration(touchdownTime);
 
          takeOffTime += previousSwingTime + footstepData.getTransferDuration();
-         PrintTools.info(stepIndex + ": " + takeOffTime);
+         LogTools.info(stepIndex + ": " + takeOffTime);
 
          previousSwingTime = footstepData.getSwingDuration();
 
@@ -206,7 +206,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
             boolean success = MathTools.epsilonEquals(expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
             if (!success)
             {
-               PrintTools.error(stepCount + " expected: " + expectedStartTimeOfNextStep + " but was: " + time);
+               LogTools.error(stepCount + " expected: " + expectedStartTimeOfNextStep + " but was: " + time);
             }
 
             assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
