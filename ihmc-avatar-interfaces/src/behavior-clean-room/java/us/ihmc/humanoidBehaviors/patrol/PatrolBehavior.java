@@ -268,7 +268,8 @@ public class PatrolBehavior
    {
       ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
       int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
-      boolean indexInBounds = currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
+
+      boolean indexInBounds = latestWaypoints != null && currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
       return indexInBounds;
    }
 
