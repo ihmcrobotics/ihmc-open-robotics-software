@@ -293,6 +293,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslationVector());
+      reinitializeStateEstimator.set(true);
       // Do nothing for the orientation since the IMU is trusted
    }
 

@@ -46,12 +46,12 @@ public class BehaviorAction implements Task, State
    {
       if (initializeOnTransitionIntoAction)
       {
+
          for (int i = 0; i < behaviors.size(); i++)
          {
             //TODO merge abstract behavior and behavior task, add transitioninto behavior here 
             //TODO: Should the setBehaviorInput be called before initialize?
             behaviors.get(i).initialize();
-            setBehaviorInput();
 
             CoactiveElement coactiveElement = behaviors.get(i).getCoactiveElement();
             if (coactiveElement != null)
@@ -59,6 +59,9 @@ public class BehaviorAction implements Task, State
                coactiveElement.initializeMachineSide();
             }
          }
+         setBehaviorInput();
+
+         
       }
    }
 

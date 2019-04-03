@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
-
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,6 +31,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    private final FrameQuaternion currentOrientation = new FrameQuaternion();
    private final RigidBodyPositionControlHelper positionHelper;
 
+   private final TaskspaceTrajectoryStatusMessageHelper statusHelper;
+
    public RigidBodyPositionController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
                                       ReferenceFrame baseFrame, YoDouble yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -57,6 +59,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
 
       graphics.addAll(positionHelper.getGraphics());
       hideGraphics();
+
+      statusHelper = new TaskspaceTrajectoryStatusMessageHelper(bodyToControl);
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -128,6 +132,8 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       numberOfPointsInGenerator.set(positionHelper.getNumberOfPointsInGenerator());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
 
+      statusHelper.updateWithTimeInTrajectory(timeInTrajectory);
+
       updateGraphics();
    }
 
@@ -148,6 +154,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       if (handleCommandInternal(command) && positionHelper.handleTrajectoryCommand(command, currentOrientation))
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid());
+         statusHelper.registerNewTrajectory(command);
          return true;
       }
 
@@ -190,5 +197,11 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
       usingWeightFromMessage.set(false);
       trajectoryDone.set(true);
       resetLastCommandId();
+   }
+
+   @Override
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return statusHelper.pollStatusMessage(positionHelper.getFeedbackControlCommand());
    }
 }
