@@ -20,6 +20,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.main.ChangeCollector;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -35,6 +36,8 @@ public class RemoteInputManager implements ParameterGuiInterface
 
    private final AtomicBoolean connected = new AtomicBoolean(false);
    private final ParameterUpdateListener updateListener;
+
+   private ChangeCollector changeCollector = new ChangeCollector();
 
    public RemoteInputManager()
    {
@@ -120,6 +123,8 @@ public class RemoteInputManager implements ParameterGuiInterface
       });
       savingNode.setRegistries(localRegistries);
 
+      changeCollector = new ChangeCollector();
+
       return guiRegistries;
    }
 
@@ -129,9 +134,10 @@ public class RemoteInputManager implements ParameterGuiInterface
       // For changes from the GUI set all properties of the parameter.
       changedParameters.stream().forEach(parameter -> {
          parameterMap.get(parameter.getUniqueName()).set(parameter);
+         changeCollector.changed(parameter);
       });
 
-      updateListener.changeVariables(changedParameters);
+      updateListener.changeVariables(changeCollector.getChangedParametersAndClear());
    }
 
    @Override
@@ -142,7 +148,13 @@ public class RemoteInputManager implements ParameterGuiInterface
       // For changes from the server only update if the value changes to avoid loosing the status.
       changedParameters.stream().forEach(externalParameter -> {
          GuiParameter localParameter = parameterMap.get(externalParameter.getUniqueName());
-         if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
+
+         String uniqueName = externalParameter.getUniqueName();
+         if (changeCollector.isPending(uniqueName))
+         {
+            changeCollector.parameterWasUpdated(uniqueName, externalParameter.getCurrentValue());
+         }
+         else if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
          {
             localParameter.setValueAndStatus(externalParameter);
          }
