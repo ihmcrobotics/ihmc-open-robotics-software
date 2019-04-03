@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -540,6 +539,4 @@ public interface ICPPlannerInterface
    RobotSide getTransferToSide();
 
    double getOmega0();
-
-   void initializeParameters(ICPPlannerParameters plannerParameters);
 }
