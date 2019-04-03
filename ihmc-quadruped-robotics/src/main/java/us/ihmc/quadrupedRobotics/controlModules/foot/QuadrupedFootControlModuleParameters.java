@@ -26,7 +26,7 @@ public class QuadrupedFootControlModuleParameters
    // swing state parameters
    private final ParameterizedPID3DGains solePositionGains;
    private final Vector3DReadOnly solePositionWeights = new ParameterVector3D("solePositionWeights", new Vector3D(30.0, 30.0, 30.0), finalRegistry);
-   private final DoubleParameter minimumStepAdjustmentTimeRemaining = new DoubleParameter("minimumStepAdjustmentFractionRemaining", finalRegistry, 0.05);
+   private final DoubleParameter minimumStepAdjustmentFractionRemaining = new DoubleParameter("minimumStepAdjustmentFractionRemaining", finalRegistry, 0.05);
    private final DoubleParameter fractionThroughSwingForAdjustment = new DoubleParameter("fractionThroughSwingForAdjustment", finalRegistry, 0.2);
    private final DoubleParameter stepGoalOffsetZParameter = new DoubleParameter("stepGoalOffsetZ", finalRegistry, 0.0);
 
@@ -96,7 +96,7 @@ public class QuadrupedFootControlModuleParameters
 
    public double getMinimumStepAdjustmentFractionRemaining()
    {
-      return minimumStepAdjustmentTimeRemaining.getValue();
+      return minimumStepAdjustmentFractionRemaining.getValue();
    }
 
    public double getFractionThroughSwingForAdjustment()
