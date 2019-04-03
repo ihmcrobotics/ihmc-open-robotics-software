@@ -1,6 +1,10 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
-import us.ihmc.exampleSimulations.sphereICPControl.controllers.*;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.BasicSphereController;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.GenericSphereController;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereControlToolbox;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereICPOptimizationController;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereNewICPController;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -9,9 +13,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SphereController implements RobotController
 {
-   private enum SphereControllerEnum {BASIC, ICP, NEW_ICP, ICP_OPTIMIZATION}
+   private enum SphereControllerEnum {BASIC, NEW_ICP, ICP_OPTIMIZATION}
 
-   private static final SphereControllerEnum controllerType = SphereControllerEnum.NEW_ICP;
+   private static final SphereControllerEnum controllerType = SphereControllerEnum.ICP_OPTIMIZATION;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 
@@ -34,9 +38,6 @@ public class SphereController implements RobotController
       case BASIC:
          sphereController = new BasicSphereController(controlToolbox, registry);
          break;
-      case ICP:
-         sphereController = new SphereICPController(controlToolbox, registry);
-         break;
       case NEW_ICP:
          sphereController = new SphereNewICPController(controlToolbox, registry);
          break;
@@ -49,6 +50,7 @@ public class SphereController implements RobotController
       }
    }
 
+   @Override
    public void doControl()
    {
       scsRobot.updateJointPositions_SCS_to_ID();
@@ -66,20 +68,24 @@ public class SphereController implements RobotController
       scsRobot.updateJointTorques_ID_to_SCS();
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getDescription()
    {
       return registry.getName();
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
