@@ -105,7 +105,12 @@ public class AtlasBehaviorUIDemo extends Application
                                                          6,
                                                          0.02,
                                                          -0.03,
-                                                         0.6);
+                                                         1.5,
+                                                         0.0,
+                                                         Math.toRadians(15.0),
+                                                         Math.toRadians(15.0),
+                                                         0.05,
+                                                         false);
       return generator.getPlanarRegionsList();
    }
 
