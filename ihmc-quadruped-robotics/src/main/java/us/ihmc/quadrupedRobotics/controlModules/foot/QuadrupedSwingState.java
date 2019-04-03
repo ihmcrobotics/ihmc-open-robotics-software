@@ -381,12 +381,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       double duration = swingDuration.getDoubleValue();
-      double fractionRemaining = timeRemainingInState.getDoubleValue() / duration;
-      double fractionThrough = timeInState.getDoubleValue() / duration;
-
+//      double fractionRemaining = timeRemainingInState.getDoubleValue() / duration;
+//      double fractionThrough = timeInState.getDoubleValue() / duration;
+//
       // Compute swing trajectory.
-      if (fractionRemaining > parameters.getMinimumStepAdjustmentFractionRemaining() && fractionThrough > parameters.getFractionThroughSwingForAdjustment())
-      {
+//      if (fractionRemaining > parameters.getMinimumStepAdjustmentFractionRemaining() && fractionThrough > parameters.getFractionThroughSwingForAdjustment())
+//      {
          blendedSwingTrajectory.clear();
 
          touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
@@ -394,7 +394,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
          blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
          blendedSwingTrajectory.initialize();
-      }
+//      }
    }
 
    /**

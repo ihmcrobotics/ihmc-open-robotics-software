@@ -103,11 +103,6 @@ public class QuadrupedFeetManager
       footControlModules.get(step.getRobotQuadrant()).adjustStep(tempPoint);
    }
 
-   public void adjustStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly adjustedStep)
-   {
-      footControlModules.get(robotQuadrant).adjustStep(adjustedStep);
-   }
-
    /**
     * Request the swing trajectory to speed up using the given speed up factor.
     * It is clamped w.r.t. to {@link QuadrupedSwingState#minSwingTimeForDisturbanceRecovery}.
