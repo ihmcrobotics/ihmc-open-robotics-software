@@ -34,6 +34,8 @@ import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateM
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -233,6 +235,8 @@ public class IHMCHumanoidBehaviorManager
                                                                 wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new BasicTimingBehavior(robotName, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
                              new TurnValveBehaviorStateMachine(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
@@ -296,6 +300,9 @@ public class IHMCHumanoidBehaviorManager
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(robotName, ros2Node, referenceFrames, walkingControllerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      
+      WalkToLocationPlannedBehavior walkToLocationBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(robotName, ros2Node, referenceFrames,
                                                                                                                      registry);

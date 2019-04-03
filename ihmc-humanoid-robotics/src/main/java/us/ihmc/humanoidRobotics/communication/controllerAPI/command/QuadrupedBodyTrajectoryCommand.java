@@ -11,6 +11,7 @@ import java.util.Random;
 public class QuadrupedBodyTrajectoryCommand
       implements Command<QuadrupedBodyTrajectoryCommand, QuadrupedBodyTrajectoryMessage>, FrameBasedCommand<QuadrupedBodyTrajectoryMessage>, EpsilonComparable<QuadrupedBodyTrajectoryCommand>
 {
+   private long sequenceId;
    private boolean isExpressedInAbsoluteTime;
 
    /**
@@ -20,17 +21,20 @@ public class QuadrupedBodyTrajectoryCommand
 
    public QuadrupedBodyTrajectoryCommand()
    {
+      sequenceId = 0;
       se3Trajectory = new SE3TrajectoryControllerCommand();
    }
 
    public QuadrupedBodyTrajectoryCommand(Random random)
    {
+      sequenceId = random.nextInt();
       se3Trajectory = new SE3TrajectoryControllerCommand(random);
    }
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       isExpressedInAbsoluteTime = true;
       se3Trajectory.clear();
    }
@@ -38,24 +42,24 @@ public class QuadrupedBodyTrajectoryCommand
    @Override
    public void set(QuadrupedBodyTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
       se3Trajectory.set(other.se3Trajectory);
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyTrajectoryMessage message)
+   public void setFromMessage(QuadrupedBodyTrajectoryMessage message)
    {
-      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-      se3Trajectory.set(resolver, message.getSe3Trajectory());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(QuadrupedBodyTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
-      se3Trajectory.setFromMessage(message.getSe3Trajectory());
+      se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
-
 
    public boolean isExpressedInAbsoluteTime()
    {
@@ -118,5 +122,11 @@ public class QuadrupedBodyTrajectoryCommand
    public double getExecutionTime()
    {
       return se3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

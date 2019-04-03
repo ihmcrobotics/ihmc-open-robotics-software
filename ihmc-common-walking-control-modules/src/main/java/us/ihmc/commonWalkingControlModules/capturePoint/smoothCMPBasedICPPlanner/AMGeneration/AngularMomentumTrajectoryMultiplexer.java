@@ -2,8 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanne
 
 import java.util.List;
 
+import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -29,7 +30,8 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
    private final FootstepAngularMomentumPredictor predictedAngularMomentum;
 
    private AngularMomentumTrajectoryGeneratorInterface currentAngularMomentumTrajectoryGenerator;
-   private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
+   private boolean planSwingAngularMomentum;
+   private boolean planTransferAngularMomentum;
 
    public AngularMomentumTrajectoryMultiplexer(String namePrefix, MomentumTrajectoryHandler momentumTrajectoryHandler, YoDouble yoTime, YoDouble omega0,
                                                boolean debug, YoVariableRegistry parentRegistry)
@@ -62,15 +64,15 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
       }
    }
 
-   @Override
-   public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters, double totalMass, double gravityZ)
    {
-      this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
-      predictedAngularMomentum.initializeParameters(smoothCMPPlannerParameters, totalMass, gravityZ);
+      planSwingAngularMomentum = icpPlannerParameters.planSwingAngularMomentum();
+      planTransferAngularMomentum = icpPlannerParameters.planTransferAngularMomentum();
+      predictedAngularMomentum.initializeParameters(icpPlannerParameters, totalMass, gravityZ);
 
       if (commandedAngularMomentum != null)
       {
-         commandedAngularMomentum.initializeParameters(smoothCMPPlannerParameters, totalMass, gravityZ);
+         commandedAngularMomentum.initializeParameters(icpPlannerParameters);
       }
    }
 
@@ -162,7 +164,7 @@ public class AngularMomentumTrajectoryMultiplexer implements AngularMomentumTraj
 
    public boolean isPredictingAngularMomentum()
    {
-      boolean isPlanningAngularMomentum = smoothCMPPlannerParameters.planSwingAngularMomentum() || smoothCMPPlannerParameters.planTransferAngularMomentum();
+      boolean isPlanningAngularMomentum = planSwingAngularMomentum || planTransferAngularMomentum;
       boolean isUsingPrediction = !referenceTrajectoryIsAvailable();
       return isPlanningAngularMomentum && isUsingPrediction;
    }

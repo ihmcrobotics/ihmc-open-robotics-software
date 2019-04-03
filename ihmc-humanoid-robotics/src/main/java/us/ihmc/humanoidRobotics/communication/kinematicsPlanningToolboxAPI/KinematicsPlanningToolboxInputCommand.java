@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class KinematicsPlanningToolboxInputCommand implements Command<KinematicsPlanningToolboxInputCommand, KinematicsPlanningToolboxInputMessage>,
       KinematicsPlanningToolboxAPI<KinematicsPlanningToolboxInputMessage>
 {
+   private long sequenceId;
    private final RecyclingArrayList<KinematicsPlanningToolboxRigidBodyCommand> rigidBodyCommands = new RecyclingArrayList<>(KinematicsPlanningToolboxRigidBodyCommand.class);
    private final KinematicsPlanningToolboxCenterOfMassCommand centerOfMassCommand = new KinematicsPlanningToolboxCenterOfMassCommand();
    private final KinematicsToolboxConfigurationCommand kinematicsConfigurationCommand = new KinematicsToolboxConfigurationCommand();
@@ -20,6 +21,9 @@ public class KinematicsPlanningToolboxInputCommand implements Command<Kinematics
    public void set(KinematicsPlanningToolboxInputCommand other)
    {
       clear();
+
+      sequenceId = other.sequenceId;
+
       for (int i = 0; i < other.getRigidBodyCommands().size(); i++)
          rigidBodyCommands.add().set(other.getRigidBodyCommands().get(i));
       centerOfMassCommand.set(other.getCenterOfMassCommand());
@@ -29,6 +33,7 @@ public class KinematicsPlanningToolboxInputCommand implements Command<Kinematics
    @Override
    public void clear()
    {
+      sequenceId = 0;
       rigidBodyCommands.clear();
       centerOfMassCommand.clear();
       kinematicsConfigurationCommand.clear();
@@ -37,13 +42,14 @@ public class KinematicsPlanningToolboxInputCommand implements Command<Kinematics
    @Override
    public void setFromMessage(KinematicsPlanningToolboxInputMessage message)
    {
-      clear();
       set(message, null, null);
    }
 
    public void set(KinematicsPlanningToolboxInputMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
+      clear();
+      sequenceId = message.getSequenceId();
       for (int i = 0; i < message.getRigidBodyMessages().size(); i++)
          rigidBodyCommands.add().set(message.getRigidBodyMessages().get(i), rigidBodyHashMap, referenceFrameResolver);
       centerOfMassCommand.setFromMessage(message.getCenterOfMassMessage());
@@ -77,4 +83,9 @@ public class KinematicsPlanningToolboxInputCommand implements Command<Kinematics
       return kinematicsConfigurationCommand;
    }
 
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
+   }
 }

@@ -86,6 +86,8 @@ public class QuadrupedUserInterface
       visibilityGraphsParametersUIController.attachMessager(messager);
       manualStepTabController.attachMessager(messager, xGaitSettings);
 
+      manualStepTabController.setFullRobotModelFactory(modelFactory);
+
       setPlannerTabTopics();
       footstepPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(QuadrupedUIMessagerAPI.VisibilityGraphsParametersTopic);

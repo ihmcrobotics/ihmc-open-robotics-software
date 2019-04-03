@@ -15,6 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, AdjustFootstepMessage>
 {
+   private long sequenceId;
    private RobotSide robotSide;
    private final FramePoint3D adjustedPosition = new FramePoint3D();
    private final FrameQuaternion adjustedOrientation = new FrameQuaternion();
@@ -34,6 +35,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       adjustedPosition.set(0.0, 0.0, 0.0);
       adjustedOrientation.set(0.0, 0.0, 0.0, 1.0);
@@ -43,6 +45,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    @Override
    public void setFromMessage(AdjustFootstepMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());
       adjustedOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getOrientation());
@@ -59,6 +62,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    @Override
    public void set(AdjustFootstepCommand other)
    {
+      sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       adjustedPosition.set(other.adjustedPosition);
       adjustedOrientation.set(other.adjustedOrientation);
@@ -170,4 +174,9 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       return true;
    }
 
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
+   }
 }

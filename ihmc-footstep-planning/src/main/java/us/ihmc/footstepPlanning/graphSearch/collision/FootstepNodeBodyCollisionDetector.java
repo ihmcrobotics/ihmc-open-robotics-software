@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -25,21 +26,28 @@ public class FootstepNodeBodyCollisionDetector
       collisionDataHolder.clear();
    }
 
-   public BodyCollisionData checkForCollision(LatticeNode node, double snappedNodeHeight)
+   public BodyCollisionData checkForCollision(FootstepNode footstepNode, double snappedNodeHeight)
    {
-      if (collisionDataHolder.containsKey(node))
+      LatticeNode latticeNode = createNodeForCollisionCheck(footstepNode);
+
+      if (collisionDataHolder.containsKey(latticeNode))
       {
-         return collisionDataHolder.get(node);
+         return collisionDataHolder.get(latticeNode);
       }
       else
       {
-         double offsetX = parameters.getBodyBoxBaseX() * Math.cos(node.getYaw()) - parameters.getBodyBoxBaseY() * Math.sin(node.getYaw());
-         double offsetY = parameters.getBodyBoxBaseX() * Math.sin(node.getYaw()) + parameters.getBodyBoxBaseY() * Math.cos(node.getYaw());
-
-         collisionDetector.setBoxPose(offsetX + node.getX(), offsetY + node.getY(), snappedNodeHeight + parameters.getBodyBoxBaseZ(), node.getYaw());
+         collisionDetector.setBoxPose(latticeNode.getX(), latticeNode.getY(), snappedNodeHeight + parameters.getBodyBoxBaseZ(), latticeNode.getYaw());
          BodyCollisionData collisionData = collisionDetector.checkForCollision();
-         collisionDataHolder.put(node, collisionData);
+         collisionDataHolder.put(latticeNode, collisionData);
          return collisionData;
       }
+   }
+
+   private LatticeNode createNodeForCollisionCheck(FootstepNode node)
+   {
+      double lateralOffsetSign = node.getRobotSide().negateIfLeftSide(1.0);
+      double offsetX = parameters.getBodyBoxBaseX() * Math.cos(node.getYaw()) - lateralOffsetSign * parameters.getBodyBoxBaseY() * Math.sin(node.getYaw());
+      double offsetY = parameters.getBodyBoxBaseX() * Math.sin(node.getYaw()) + lateralOffsetSign * parameters.getBodyBoxBaseY() * Math.cos(node.getYaw());
+      return new LatticeNode(node.getX() + offsetX, node.getY() + offsetY, node.getYaw());
    }
 }
