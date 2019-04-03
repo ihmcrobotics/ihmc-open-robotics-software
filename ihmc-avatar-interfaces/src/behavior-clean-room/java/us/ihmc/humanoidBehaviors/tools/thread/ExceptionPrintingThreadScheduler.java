@@ -47,6 +47,7 @@ public class ExceptionPrintingThreadScheduler
       catch (Throwable t)
       {
          LogTools.error(t.getMessage());
+         t.printStackTrace();
          LogTools.error("{} is terminating due to an exception.", Thread.currentThread().getName());
          throw t;
       }
