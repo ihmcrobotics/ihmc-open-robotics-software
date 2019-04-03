@@ -24,6 +24,7 @@ import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportState extends QuadrupedFootState
@@ -68,6 +69,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final DoubleProvider footFullyLoadedThreshold;
 
    private final YoBoolean isFootSlipping;
+   private final YoDouble footPlanarVelocity;
 
 
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
@@ -125,6 +127,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footFullyLoadedThreshold = parameters.getFullyLoadedThreshold();
 
       isFootSlipping = new YoBoolean(prefix + "_IsSlipping", registry);
+      footPlanarVelocity = new YoDouble(prefix + "_FootPlanarVelocity", registry);
 
       footSwitch = controllerToolbox.getRuntimeEnvironment().getFootSwitches().get(robotQuadrant);
    }
@@ -265,6 +268,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footTwist.changeFrame(groundPlaneFrame);
 
       double inPlaneVelocity = Math.sqrt(MathTools.square(footTwist.getLinearPartX()) + MathTools.square(footTwist.getLinearPartY()));
+      footPlanarVelocity.set(inPlaneVelocity);
 
       if (isFootSlipping.getBooleanValue())
          isFootSlipping.set(inPlaneVelocity > parameters.getFootVelocityThresholdForNotSlipping());
