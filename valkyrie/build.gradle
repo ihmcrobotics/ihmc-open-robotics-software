@@ -66,7 +66,7 @@ testDependencies {
 applicationName = "IHMCValkyrieJoystickApplication"
 mainClassName = "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication"
 
-task deployOCUApplications(dependsOn: ['installDist']) {
+task deployOCUApplications(dependsOn: installDist) {
    doLast {
       def ocuApplications = "ihmc_apps/valkyrie"
       def home = new File(System.properties["user.home"])
