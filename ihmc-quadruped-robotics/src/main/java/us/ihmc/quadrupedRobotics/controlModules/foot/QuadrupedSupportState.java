@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -38,7 +39,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final RigidBodyBasics rootBody;
    private final RigidBodyBasics footBody;
-   private final ReferenceFrame soleFrame;
+   private final MovingReferenceFrame soleFrame;
    private final PoseReferenceFrame desiredSoleFrame;
 
    private final FootSwitchInterface footSwitch;
@@ -86,14 +87,9 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final double controlDT;
 
-   private final QuadrupedControllerToolbox controllerToolbox;
-   private final QuadrupedReferenceFrames referenceFrames;
-
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = controllerToolbox;
-      this.referenceFrames = controllerToolbox.getReferenceFrames();
       this.groundPlanePosition = controllerToolbox.getGroundPlanePositions().get(robotQuadrant);
       this.upcomingGroundPlanePosition = controllerToolbox.getUpcomingGroundPlanePositions().get(robotQuadrant);
       this.contactState = controllerToolbox.getFootContactState(robotQuadrant);
@@ -101,6 +97,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
       this.footBody = contactState.getRigidBody();
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
+
+      ReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotQuadrant);
 
       String prefix = robotQuadrant.getShortName();
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
@@ -118,6 +116,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       spatialFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialFeedbackControlCommand.set(rootBody, footBody);
       spatialFeedbackControlCommand.setPrimaryBase(controllerToolbox.getFullRobotModel().getBody());
+      spatialFeedbackControlCommand.setGainsFrames(soleZUpFrame, soleZUpFrame);
 
       minimumTimeInSupportState = parameters.getMinimumTimeInSupportState();
 
@@ -153,6 +152,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
          isDirectionFeedbackControlled[i] = false;
 
       footBarelyLoaded.set(false);
+      isFootSlipping.set(false);
    }
 
 
@@ -259,21 +259,24 @@ public class QuadrupedSupportState extends QuadrupedFootState
          footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footBarelyLoadedThreshold.getValue());
    }
 
-   private final Twist footTwist = new Twist();
+   private final FrameVector3D footVelocity = new FrameVector3D();
 
    private void updateIsFootSlippingEstimate()
    {
-      ReferenceFrame groundPlaneFrame = controllerToolbox.getGroundPlaneEstimator().getGroundPlaneFrame();
-      referenceFrames.getSoleZUpFrames().get(robotQuadrant).getTwistRelativeToOther(groundPlaneFrame, footTwist);
-      footTwist.changeFrame(groundPlaneFrame);
+      footVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
 
-      double inPlaneVelocity = Math.sqrt(MathTools.square(footTwist.getLinearPartX()) + MathTools.square(footTwist.getLinearPartY()));
+      double inPlaneVelocity = Math.sqrt(MathTools.square(footVelocity.getX()) + MathTools.square(footVelocity.getY()));
       footPlanarVelocity.set(inPlaneVelocity);
 
       if (isFootSlipping.getBooleanValue())
          isFootSlipping.set(inPlaneVelocity > parameters.getFootVelocityThresholdForNotSlipping());
       else
          isFootSlipping.set(inPlaneVelocity > parameters.getFootVelocityThresholdForSlipping());
+
+      if (isFootSlipping.getBooleanValue())
+         contactState.setCoefficientOfFriction(parameters.getCoefficientOfFrictionWhenSlipping());
+      else
+         contactState.setCoefficientOfFriction(parameters.getCoefficientOfFrictionWhenNotSlipping());
    }
 
    @Override
@@ -287,6 +290,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       footIsVerifiedAsLoaded = false;
       footBarelyLoaded.set(false);
+      isFootSlipping.set(false);
+      footPlanarVelocity.setToNaN();
    }
 
    @Override

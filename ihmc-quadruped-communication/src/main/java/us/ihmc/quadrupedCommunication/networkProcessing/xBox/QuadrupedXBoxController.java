@@ -86,7 +86,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       maxTranslationY.set(0.15);
 
       maxYSpeedFraction.set(0.5);
-      maxYawSpeedFraction.set(0.9);
+      maxYawSpeedFraction.set(0.75);
 
       bodyOrientationShiftTime.set(0.1);
       this.bodyHeight = new InputValueIntegrator(Conversions.millisecondsToSeconds(updateTimeInMs), nominalBodyHeight);
