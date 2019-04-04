@@ -186,7 +186,7 @@ public class FollowFiducialBehaviorOld extends AbstractBehavior
    @Override
    public void doControl()
    {
-     // checkFootstepStatusAndDetermineSwingingFoot();
+      //checkFootstepStatusAndDetermineSwingingFoot();
 
      // if (footstepSentTimer.totalElapsed() < 0.5)
      // {
