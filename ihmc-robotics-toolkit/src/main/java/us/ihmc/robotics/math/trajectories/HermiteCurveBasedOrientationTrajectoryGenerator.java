@@ -478,10 +478,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       return tempLogExpQuaternion;
    }
 
-   public int numberOfComputationOfLog = 0;
    private Vector3DReadOnly log(QuaternionReadOnly q)
    {
-      numberOfComputationOfLog++;
       q.getRotationVector(tempLogExpVector3D);
       return tempLogExpVector3D;
    }

@@ -23,14 +23,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SO3TrajectoryPointCalculator
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
    private static final int maxIterations = 100;
-   private static final double convergenceThreshold = 10E-6;
-   private static final double velocitOptimizerDT = 0.001;
+   private static final double convergenceThreshold = 10E-5;
+   private static final double velocitOptimizerDT = 0.01;
    private static final double optimizerStepSize = -0.1;
-   private static final double optimizerPerturbationSize = 0.001;
+   private static final double optimizerPerturbationSize = 0.0001;
 
-   // TODO : wrap up like `OneDofTrajectoryPointCalculator.
    private final FrameSO3TrajectoryPointList trajectoryPoints = new FrameSO3TrajectoryPointList();
 
    private final TDoubleArrayList times = new TDoubleArrayList();
@@ -39,7 +38,7 @@ public class SO3TrajectoryPointCalculator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private static final int maximumNumberOfWayPoint = 300;
+   private static final int maximumNumberOfWayPoint = 100;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("trajectoryGenerator",
                                                                                                                                            maximumNumberOfWayPoint,
@@ -94,13 +93,13 @@ public class SO3TrajectoryPointCalculator
 
    public void useSecondOrderInitialGuess()
    {
-      TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
+      TDoubleArrayList defaultInitialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < times.size() - 1; i++)
          for (int j = 0; j < 3; j++)
-            initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
+            defaultInitialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
       SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
-      System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+      double defaultQuery = function.getQuery(defaultInitialAngularVelocitiesInDoubleArray);
 
       for (int i = 1; i < times.size() - 1; i++)
       {
@@ -122,14 +121,39 @@ public class SO3TrajectoryPointCalculator
          angularVelocities.get(i).set(angularVelocity);
       }
 
-      initialAngularVelocitiesInDoubleArray.clear();
+      TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < times.size() - 1; i++)
          for (int j = 0; j < 3; j++)
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
-      System.out.println("initial query with initial guess " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+      double modifiedQuery = function.getQuery(initialAngularVelocitiesInDoubleArray);
+
+      if (debug)
+      {
+         System.out.println("defaultQuery = " + defaultQuery);
+         System.out.println("modifiedQuery = " + modifiedQuery);
+      }
+
+      /**
+       * If the second order initial guess is worse than original guess, use original guess.
+       */
+      if (modifiedQuery > defaultQuery)
+      {
+         int arrayIndex = 0;
+         for (int i = 1; i < times.size() - 1; i++)
+         {
+            for (int j = 0; j < 3; j++)
+            {
+               angularVelocities.get(i).setElement(j, defaultInitialAngularVelocitiesInDoubleArray.get(arrayIndex));
+               arrayIndex++;
+            }
+         }
+      }
    }
 
+   /**
+    * This computation is using @link SimpleHermiteCurvedBasedOrientationTrajectoryGenerator to get query.
+    */
    public void computeFast()
    {
       if (times.size() != orientations.size())
@@ -140,15 +164,12 @@ public class SO3TrajectoryPointCalculator
 
       int numberOfPoints = times.size();
 
-      // set input of module
       TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < numberOfPoints - 1; i++)
          for (int j = 0; j < 3; j++)
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
       SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
-      System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
-
       GradientDescentModule optimizer = new GradientDescentModule(function, initialAngularVelocitiesInDoubleArray);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
@@ -163,13 +184,17 @@ public class SO3TrajectoryPointCalculator
 
       if (debug)
       {
-         System.out.println("iteration is " + numberOfIterationToSolve);
-         System.out.println("final query is " + optimizer.getOptimalQuery());
-         System.out.println("computation time is " + optimizer.getComputationTime());
+         System.out.println("# initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+         System.out.println("# iteration is " + numberOfIterationToSolve);
+         System.out.println("# final query is " + optimizer.getOptimalQuery());
+         System.out.println("# computation time is " + optimizer.getComputationTime());
       }
       updateTrajectoryPoints();
    }
 
+   /**
+    * This computation is using @link HermiteCurveBasedOrientationTrajectoryGenerator to get query.
+    */
    public void compute()
    {
       if (times.size() != orientations.size())
@@ -180,15 +205,12 @@ public class SO3TrajectoryPointCalculator
 
       int numberOfPoints = times.size();
 
-      // set input of module
       TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < numberOfPoints - 1; i++)
          for (int j = 0; j < 3; j++)
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
       SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
-      System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
-
       GradientDescentModule optimizer = new GradientDescentModule(function, initialAngularVelocitiesInDoubleArray);
       optimizer.setMaximumIterations(maxIterations);
       optimizer.setConvergenceThreshold(convergenceThreshold);
@@ -203,9 +225,10 @@ public class SO3TrajectoryPointCalculator
 
       if (debug)
       {
-         System.out.println("iteration is " + numberOfIterationToSolve);
-         System.out.println("final query is " + optimizer.getOptimalQuery());
-         System.out.println("computation time is " + optimizer.getComputationTime());
+         System.out.println("# initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+         System.out.println("# iteration is " + numberOfIterationToSolve);
+         System.out.println("# final query is " + optimizer.getOptimalQuery());
+         System.out.println("# computation time is " + optimizer.getComputationTime());
       }
       updateTrajectoryPoints();
    }
@@ -215,6 +238,16 @@ public class SO3TrajectoryPointCalculator
       trajectoryPoints.clear();
       for (int i = 0; i < times.size(); i++)
          trajectoryPoints.addTrajectoryPoint(times.get(i), orientations.get(i), angularVelocities.get(i));
+   }
+
+   public int getNumberOfTrajectoryPoints()
+   {
+      return trajectoryPoints.getNumberOfTrajectoryPoints();
+   }
+
+   public FrameSO3TrajectoryPoint getTrajectoryPoint(int i)
+   {
+      return trajectoryPoints.getTrajectoryPoint(i);
    }
 
    private void updateTrajectoryGenerator()
@@ -254,16 +287,6 @@ public class SO3TrajectoryPointCalculator
       return angularAcceleration;
    }
 
-   public int getNumberOfTrajectoryPoints()
-   {
-      return trajectoryPoints.getNumberOfTrajectoryPoints();
-   }
-
-   public FrameSO3TrajectoryPoint getTrajectoryPoint(int i)
-   {
-      return trajectoryPoints.getTrajectoryPoint(i);
-   }
-
    private class SO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
    {
       @Override
@@ -288,9 +311,7 @@ public class SO3TrajectoryPointCalculator
 
          for (int i = 0; i < numberOfTicks; i++)
          {
-            long start = System.nanoTime();
             trajectoryGenerator.compute(time);
-            slowComputing += System.nanoTime() - start;
 
             FrameVector3D angularAcceleration = new FrameVector3D();
             trajectoryGenerator.getAngularAcceleration(angularAcceleration);
@@ -306,9 +327,6 @@ public class SO3TrajectoryPointCalculator
          return cost;
       }
    }
-
-   public long slowComputing = 0;
-   public long fastComputing = 0;
 
    private class FastSO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
    {
@@ -337,7 +355,6 @@ public class SO3TrajectoryPointCalculator
 
             if (previousSegmentIndex != segmentIndex)
             {
-               //System.out.println(time+" "+segmentIndex+" "+previousSegmentIndex);
                trajectoryCalculator.setInitialConditions(orientations.get(segmentIndex), angularVelocities.get(segmentIndex));
                trajectoryCalculator.setFinalConditions(orientations.get(segmentIndex + 1), angularVelocities.get(segmentIndex + 1));
                trajectoryCalculator.setTrajectoryTime(times.get(segmentIndex + 1) - times.get(segmentIndex));
@@ -345,10 +362,8 @@ public class SO3TrajectoryPointCalculator
                trajectoryCalculator.initialize();
             }
 
-            long start = System.nanoTime();
             double localTime = time - times.get(segmentIndex);
             trajectoryCalculator.compute(localTime);
-            fastComputing += System.nanoTime() - start;
 
             Vector3D angularAcceleration = new Vector3D();
             trajectoryCalculator.getAngularAcceleration(angularAcceleration);
