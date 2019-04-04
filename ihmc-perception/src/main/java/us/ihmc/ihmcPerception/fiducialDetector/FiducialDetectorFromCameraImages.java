@@ -190,9 +190,9 @@ public class FiducialDetectorFromCameraImages
 
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward)
    {
-      
-      RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
-      rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
+      //increase brightness for sim
+      //RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      //rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
       if (DEBUG)
       {
          if (frame == null)
