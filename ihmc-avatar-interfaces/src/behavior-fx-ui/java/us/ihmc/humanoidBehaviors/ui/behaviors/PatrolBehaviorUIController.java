@@ -162,7 +162,7 @@ public class PatrolBehaviorUIController extends Group
    private PatrolWaypointGraphic createWaypointGraphic()
    {
       PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic();
-      getChildren().add(waypoint.getRoot());
+      getChildren().add(waypoint);
       waypoints.add(waypoint);
       return waypoint;
    }
@@ -171,14 +171,14 @@ public class PatrolBehaviorUIController extends Group
    {
       LogTools.debug("Removing all waypoint graphics.");
       waypoints.forEach(waypoint -> {
-         getChildren().remove(waypoint.getRoot());
+         getChildren().remove(waypoint);
       });
       waypoints.clear();
    }
 
    private void removeWaypoint(PatrolWaypointGraphic waypoint)
    {
-      getChildren().remove(waypoint.getRoot());
+      getChildren().remove(waypoint);
       waypoints.remove(waypoint);
    }
 

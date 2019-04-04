@@ -40,6 +40,6 @@ public class LivePlanarRegionsGraphic extends AnimationTimer
 
    public Node getRoot()
    {
-      return planarRegionsGraphic.getRoot();
+      return planarRegionsGraphic;
    }
 }

@@ -1,14 +1,14 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 
-public class PatrolWaypointGraphic extends FXUIGraphic implements PositionEditable, OrientationEditable
+public class PatrolWaypointGraphic extends Group implements PositionEditable, OrientationEditable
 {
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
@@ -18,8 +18,8 @@ public class PatrolWaypointGraphic extends FXUIGraphic implements PositionEditab
       snappedPositionGraphic = new SnappedPositionGraphic(Color.YELLOW);
       orientationGraphic = new OrientationGraphic(snappedPositionGraphic);
 
-      rootChildren.add(snappedPositionGraphic.getSphere());
-      rootChildren.add(orientationGraphic.getArrow());
+      getChildren().add(snappedPositionGraphic.getSphere());
+      getChildren().add(orientationGraphic.getArrow());
    }
 
    @Override

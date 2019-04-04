@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PlanarRegionsGraphic extends FXUIGraphic
+public class PlanarRegionsGraphic extends Group
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
@@ -68,8 +68,8 @@ public class PlanarRegionsGraphic extends FXUIGraphic
    public void update()
    {
       List<MeshView> meshViews = regionMeshViews.get();
-      rootChildren.clear();
-      rootChildren.addAll(meshViews);
+      getChildren().clear();
+      getChildren().addAll(meshViews);
    }
 
    public static Color getRegionColor(int regionId)
