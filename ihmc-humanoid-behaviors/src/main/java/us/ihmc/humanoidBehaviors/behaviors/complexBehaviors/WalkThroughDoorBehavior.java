@@ -40,10 +40,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       STOPPED,
       SETUP_ROBOT,
-      SEARCHING_FOR_DOOR,
-      WALKING_TO_DOOR,
-      SEARCHING_FOR_DOOR_FINAL,
-      OPEN_DOOR,
+      //clear planar regions and look down, then up only come here after a failed plan
+      SEARCHING_FOR_DOOR,//search for general door location
+      //if distance to door < approach point location skip this step.
+      //walk to general door location... point offseet from door approach location
+      //search for door precise location
+      WALKING_TO_DOOR, //if failed jump to clear state
+      SEARCHING_FOR_DOOR_FINAL,//search for door handle
+      OPEN_DOOR,// in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
       SET_UP_ROBOT_FOR_DOOR_WALK,
       WAITING_FOR_USER_CONFIRMATION,
       WALK_THROUGH_DOOR,

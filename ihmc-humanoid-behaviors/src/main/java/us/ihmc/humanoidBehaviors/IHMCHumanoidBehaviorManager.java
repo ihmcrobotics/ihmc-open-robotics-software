@@ -30,7 +30,8 @@ import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainOperatorTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehaviorOld;
@@ -240,7 +241,7 @@ public class IHMCHumanoidBehaviorManager
       
       dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new BasicTimingBehavior(robotName, ros2Node));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainOperatorTimingBehavior(robotName,yoTime, ros2Node));
+      dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName,yoTime, ros2Node));
       
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
@@ -250,6 +251,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
                              new WalkThroughDoorBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                          wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR,
+                             new DoorTimingBehavior(robotName, yoTime,ros2Node,true));
 
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS, new PartialFootholdBehavior(robotName, ros2Node));
 

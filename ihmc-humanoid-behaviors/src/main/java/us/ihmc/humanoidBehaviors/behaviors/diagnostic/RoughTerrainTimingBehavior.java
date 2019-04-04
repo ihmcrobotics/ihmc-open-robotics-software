@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainOperatorTimingBehavior.RoughTerrainOperatorTimingBehaviorStates;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior.RoughTerrainOperatorTimingBehaviorStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
@@ -9,7 +9,7 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<RoughTerrainOperatorTimingBehaviorStates>
+public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrainOperatorTimingBehaviorStates>
 {
 
    protected BasicTimingBehavior timingBehavior;
@@ -22,7 +22,7 @@ public class RoughTerrainOperatorTimingBehavior extends StateMachineBehavior<Rou
       PLANNING, WALKING
    }
 
-   public RoughTerrainOperatorTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node)
+   public RoughTerrainTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node)
    {
       super(robotName, "RoughTerrainOperatorTimingBehavior", RoughTerrainOperatorTimingBehaviorStates.class, yoTime, ros2Node);
       timingBehavior = new BasicTimingBehavior(robotName, ros2Node);
