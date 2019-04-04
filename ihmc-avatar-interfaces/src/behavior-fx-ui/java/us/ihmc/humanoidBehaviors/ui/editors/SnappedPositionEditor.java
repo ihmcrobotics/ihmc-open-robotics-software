@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
-import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
@@ -16,13 +15,13 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
-import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
+import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class SnappedPositionEditor extends AnimationTimer
+public class SnappedPositionEditor
 {
    protected final Messager messager;
    protected final SubScene subScene;
@@ -39,7 +38,8 @@ public class SnappedPositionEditor extends AnimationTimer
    private final Notification mouseRightClicked = new Notification();
 
    private final FXUIStateMachine positionEditorStateMachine;
-   private final OverTypedReference<PositionEditable> selectedGraphicReference;
+   private PositionEditable selectedGraphic;
+   private PrivateAnimationTimer positioningAnimationTimer;
 
    public SnappedPositionEditor(Messager messager, SubScene subScene)
    {
@@ -58,62 +58,65 @@ public class SnappedPositionEditor extends AnimationTimer
          messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
          messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
       });
-
-      selectedGraphicReference = new OverTypedReference<>(messager.createInput(BehaviorUI.API.SelectedGraphic));
    }
 
-   public void activate()
+   public void activateForSinglePoint(PositionEditable selectedGraphic)
    {
       messager.submitMessage(BehaviorUI.API.ActiveStateMachine, positionEditorStateMachine);
       positionEditorStateMachine.start();
+
+      activate(selectedGraphic);
    }
 
-   @Override
-   public void handle(long now)
+   public void activate(PositionEditable selectedGraphic)
    {
-      if (activeEditor.pollActivated())
+      this.selectedGraphic = selectedGraphic;
+
+      LogTools.debug("Snapped position editor activated");
+      subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      selectedGraphic.setMouseTransparent(true);
+
+      positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
+      positioningAnimationTimer.start();
+   }
+
+   private void handlePositioning(double now)
+   {
+      mouseMovedMeshIntersection.poll();
+      mouseClickedMeshIntersection.poll();
+
+      if (mouseClickedMeshIntersection.hasNext())  // use the clicked position if clicked
       {
-         if (activeEditor.activationChanged())
-         {
-            LogTools.debug("Snapped position editor activated");
-            subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-            subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-            selectedGraphicReference.get().setMouseTransparent(true);
-         }
+         selectedGraphic.setPosition(mouseClickedMeshIntersection.read());
+      }
+      else if (mouseMovedMeshIntersection.hasNext())  // just for selection preview
+      {
+         selectedGraphic.setPosition(mouseMovedMeshIntersection.read());
+      }
 
-         mouseMovedMeshIntersection.poll();
-         mouseClickedMeshIntersection.poll();
+      if (mouseClickedMeshIntersection.hasNext())
+      {
+         LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
+         deactivate();
+         activeStateMachine.get().transition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
+      }
 
-         if (mouseClickedMeshIntersection.hasNext())  // use the clicked position if clicked
-         {
-            selectedGraphicReference.get().setPosition(mouseClickedMeshIntersection.read());
-         }
-         else if (mouseMovedMeshIntersection.hasNext())  // just for selection preview
-         {
-            selectedGraphicReference.get().setPosition(mouseMovedMeshIntersection.read());
-         }
-
-         if (mouseClickedMeshIntersection.hasNext())
-         {
-            LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
-            deactivate();
-            activeStateMachine.get().transition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
-         }
-
-         if (mouseRightClicked.poll())
-         {
-            deactivate();
-            activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
-         }
+      if (mouseRightClicked.poll())
+      {
+         deactivate();
+         activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
       }
    }
 
    private void deactivate()
    {
+      positioningAnimationTimer.stop();
+
       LogTools.debug("Snapped position editor deactivated.");
       subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
       subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-      selectedGraphicReference.get().setMouseTransparent(false);
+      selectedGraphic.setMouseTransparent(false);
    }
 
    protected void mouseMoved(MouseEvent event)

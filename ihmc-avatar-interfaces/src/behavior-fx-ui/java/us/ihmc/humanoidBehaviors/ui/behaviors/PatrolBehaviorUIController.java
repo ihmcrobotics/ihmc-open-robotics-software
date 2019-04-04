@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
@@ -112,7 +113,7 @@ public class PatrolBehaviorUIController extends Group
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
       uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypointGraphic);
+      BehaviorUI.SNAPPED_POSITION_EDITOR.activate(waypointGraphic);
    }
 
    private final void mouseClicked(MouseEvent event)
@@ -133,7 +134,8 @@ public class PatrolBehaviorUIController extends Group
                   {
                      LogTools.debug("Editing patrol waypoint position: {}", i);
                      uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
-                     BehaviorUI.SNAPPED_POSITION_EDITOR.activate();
+                     BehaviorUI.SNAPPED_POSITION_EDITOR.activateForSinglePoint(waypoints.get(i));
+
                   }
                   else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
                   {
