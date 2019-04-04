@@ -144,8 +144,10 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       drcBehaviorTestHelper.updateRobotModel();
 
       drcBehaviorTestHelper.dispatchBehavior(behavior);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 

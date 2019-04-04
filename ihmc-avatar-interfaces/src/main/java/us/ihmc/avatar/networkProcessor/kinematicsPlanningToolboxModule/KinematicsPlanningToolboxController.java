@@ -236,6 +236,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       solution.getKeyFrameTimes().clear();
       solution.getRobotConfigurations().clear();
       solution.setSolutionQuality(0.0);
+      solution.getKeyFrameTimes().add(0.0);
+      solution.getRobotConfigurations().add().set(initialRobotConfiguration);
 
       for (int i = 0; i < getNumberOfKeyFrames(); i++)
          solution.getKeyFrameTimes().add(keyFrameTimes.get(i));
@@ -482,6 +484,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false : true;
 
+      LogTools.info("generateTrajectoriesToPreview");
+      
       generateTrajectoriesToPreview(false);
       if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
       {
@@ -494,8 +498,12 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
          isOptimalSolution = false;
       }
+      
+      LogTools.info("convertWholeBodyTrajectoryMessage");
 
       fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
+      
+      LogTools.info("convertWholeBodyTrajectoryMessage");
       convertWholeBodyTrajectoryMessage();
 
       if (isOptimalSolution)
@@ -508,7 +516,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private void generateTrajectoriesToPreview(boolean useKeyFrameOptimizer)
    {
-      fullRobotModelTrajectoryCalculator.addInitialConfiguration(initialRobotConfiguration);
+      fullRobotModelTrajectoryCalculator.clear();
       fullRobotModelTrajectoryCalculator.addKeyFrames(solution.getRobotConfigurations(), solution.getKeyFrameTimes());
       fullRobotModelTrajectoryCalculator.initializeCalculator();
       if (useKeyFrameOptimizer)
