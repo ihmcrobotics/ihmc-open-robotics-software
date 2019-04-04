@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -15,7 +16,7 @@ import us.ihmc.ros2.Ros2Node;
 
 public class BasicTimingBehavior extends AbstractBehavior
 {
-   public final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
+   public final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>(null);
    public final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
    public final AtomicReference<DoorLocationPacket> doorLocationMessage = new AtomicReference<>(null);
    public final AtomicReference<WalkOverTerrainGoalPacket> walkOverTerrainGoalMessage = new AtomicReference<>(null);
@@ -24,13 +25,16 @@ public class BasicTimingBehavior extends AbstractBehavior
 
    public final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    public final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
+   public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket= new AtomicReference<>(null);
+   
 
    public BasicTimingBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
 
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
-      
+      createSubscriber(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator, footstepPlanningRequestPacket::set);
+ 
       createSubscriber(FootstepStatusMessage.class  , controllerSubGenerator, footstepStatusMessage::set);
       createSubscriber(HandTrajectoryMessage.class  , controllerSubGenerator, handTrajectoryMessage::set);
       createSubscriber(ArmTrajectoryMessage.class   , controllerSubGenerator, armTrajectoryMessage::set);
@@ -42,10 +46,6 @@ public class BasicTimingBehavior extends AbstractBehavior
       createSubscriber(ArmTrajectoryMessage.class   , controllerPubGenerator, armTrajectoryMessage::set);
       createSubscriber(FootstepDataListMessage.class, controllerPubGenerator, footstepDataListMessage::set);
       createSubscriber(WalkingStatusMessage.class   , controllerPubGenerator, walkingStatusMessage::set);
-      
-      
-      
-      
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       
@@ -53,6 +53,20 @@ public class BasicTimingBehavior extends AbstractBehavior
 
    }
 
+   public void clean()
+   {
+      plannerResult.set(null);
+      footstepStatusMessage.set(null);
+      doorLocationMessage.set(null);
+      walkOverTerrainGoalMessage.set(null);
+      handTrajectoryMessage.set(null);
+      armTrajectoryMessage.set(null);
+      footstepDataListMessage.set(null);
+      walkingStatusMessage.set(null);
+     
+   }
+   
+   
    @Override
    public void doControl()
    {
