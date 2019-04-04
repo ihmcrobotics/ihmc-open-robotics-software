@@ -28,8 +28,8 @@ import us.ihmc.robotics.dataStructures.YoMutableFrameSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
+import us.ihmc.robotics.math.filters.RateLimitedYoMutableSpatialVector;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -64,7 +64,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final Map<RigidBodyBasics, EnumMap<Type, Pair<YoMutableFramePoint3D, List<YoBoolean>>>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Type, Pair<YoMutableFrameQuaternion, List<YoBoolean>>>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Type, EnumMap<Space, Pair<YoMutableFrameVector3D, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
-   private final Map<RigidBodyBasics, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
+   private final Map<RigidBodyBasics, EnumMap<Space, Pair<RateLimitedYoMutableFrameVector3D, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
    private final Map<RigidBodyBasics, EnumMap<Space, Pair<AlphaFilteredYoMutableFrameVector3D, List<YoBoolean>>>> endEffectorFilteredDataVectors = new HashMap<>();
 
    private final Map<RigidBodyBasics, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
@@ -74,7 +74,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final EnumMap<Type, Pair<YoMutableFramePoint3D, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
    private final EnumMap<Type, EnumMap<Space, Pair<YoMutableFrameVector3D, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
-   private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
+   private final EnumMap<Space, Pair<RateLimitedYoMutableFrameVector3D, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
    private final EnumMap<Space, Pair<AlphaFilteredYoMutableFrameVector3D, List<YoBoolean>>> centerOfMassFilteredDataVectors = new EnumMap<>(Space.class);
    private YoPID3DGains centerOfMassPositionGains;
 
@@ -208,7 +208,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoFrameVector} for the center of mass associated with
+    * Retrieves and returns the {@code RateLimitedYoMutableFrameVector3D} for the center of mass associated with
     * the given {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not exist
@@ -219,11 +219,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
     * @param maximumRate the maximum rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
+    * @return the unique {@code RateLimitedYoMutableFrameVector3D} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate, YoBoolean enabled)
+   public RateLimitedYoMutableFrameVector3D getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, YoDouble maximumRate,
+                                                                                 YoBoolean enabled)
    {
-      Pair<RateLimitedYoFrameVector, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = centerOfMassRateLimitedDataVectors.get(space);
+      Pair<RateLimitedYoMutableFrameVector3D, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = centerOfMassRateLimitedDataVectors.get(space);
 
       if (rateLimitedYoFrameVectorEnabledPair == null)
       {
@@ -232,7 +233,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
          FrameVector3DReadOnly rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space, enabled);
-         RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         RateLimitedYoMutableFrameVector3D rateLimitedYoFrameVector = new RateLimitedYoMutableFrameVector3D(namePrefix, "", registry, maximumRate, dt,
+                                                                                                            rawYoFrameVector);
          List<YoBoolean> endabledList = new ArrayList<>();
          rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
          centerOfMassRateLimitedDataVectors.put(space, rateLimitedYoFrameVectorEnabledPair);
@@ -401,7 +403,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoFrameVector} associated with the given
+    * Retrieves and returns the {@code RateLimitedYoMutableFrameVector3D} associated with the given
     * end-effector, {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not exist
@@ -419,12 +421,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
     * @param maximumRate the maximum rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
+    * @return the unique {@code RateLimitedYoMutableFrameVector3D} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt, YoDouble maximumRate,
-                                                            YoBoolean enabled)
+   public RateLimitedYoMutableFrameVector3D getRateLimitedDataVector(RigidBodyBasics endEffector, Type rawDataType, Space space, double dt,
+                                                                     YoDouble maximumRate, YoBoolean enabled)
    {
-      EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
+      EnumMap<Space, Pair<RateLimitedYoMutableFrameVector3D, List<YoBoolean>>> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
 
       if (endEffectorDataVectors == null)
       {
@@ -432,7 +434,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorRateLimitedDataVectors.put(endEffector, endEffectorDataVectors);
       }
 
-      Pair<RateLimitedYoFrameVector, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = endEffectorDataVectors.get(space);
+      Pair<RateLimitedYoMutableFrameVector3D, List<YoBoolean>> rateLimitedYoFrameVectorEnabledPair = endEffectorDataVectors.get(space);
 
       if (rateLimitedYoFrameVectorEnabledPair == null)
       {
@@ -441,7 +443,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
          FrameVector3DReadOnly rawYoFrameVector = getDataVector(endEffector, rawDataType, space, enabled);
-         RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         RateLimitedYoMutableFrameVector3D rateLimitedYoFrameVector = new RateLimitedYoMutableFrameVector3D(namePrefix, "", registry, maximumRate, dt,
+                                                                                                            rawYoFrameVector);
          List<YoBoolean> endabledList = new ArrayList<>();
          rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
          endEffectorDataVectors.put(space, rateLimitedYoFrameVectorEnabledPair);
@@ -566,7 +569,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * Retrieves and returns the {@code RateLimitedYoMutableSpatialVector} for the rate-limited angular and
     * linear velocities of the given end-effector. The data type of the vector is defined by
     * {@code type}. If it does not exist it is created.
     * <p>
@@ -579,13 +582,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param dt the duration of a control tick.
     * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                            YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getRateLimitedVelocity(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
+                                                                   YoDouble maximumLinearRate, YoBoolean enabled)
    {
-      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate, enabled),
-                                            getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate, enabled));
+      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate, enabled),
+                                                   getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate, enabled));
    }
 
    /**
@@ -616,7 +619,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * Retrieves and returns the {@code RateLimitedYoMutableSpatialVector} for the rate-limited angular and
     * linear accelerations of the given end-effector. The data type of the vector is defined by
     * {@code type}. If it does not exist it is created.
     * <p>
@@ -629,17 +632,19 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param dt the duration of a control tick.
     * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                                YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getRateLimitedAcceleration(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
+                                                                       YoDouble maximumLinearRate, YoBoolean enabled)
    {
-      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate, enabled),
-                                            getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate, enabled));
+      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate,
+                                                                            enabled),
+                                                   getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate,
+                                                                            enabled));
    }
 
    /**
-    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * Retrieves and returns the {@code RateLimitedYoMutableSpatialVector} for the rate-limited angular and
     * linear accelerations of the given end-effector. The date type of the vector is defined by
     * {@code type}. If it does not exist it is created.
     * <p>
@@ -652,13 +657,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param dt the duration of a control tick.
     * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
-    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    * @return the unique {@code RateLimitedYoMutableSpatialVector} matching the search criteria.
     */
-   public RateLimitedYoSpatialVector getRateLimitedWrench(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
-                                                          YoDouble maximumLinearRate, YoBoolean enabled)
+   public RateLimitedYoMutableSpatialVector getRateLimitedWrench(RigidBodyBasics endEffector, Type rawDataType, double dt, YoDouble maximumAngularRate,
+                                                                 YoDouble maximumLinearRate, YoBoolean enabled)
    {
-      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled),
-                                            getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled));
+      return new RateLimitedYoMutableSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled),
+                                                   getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled));
    }
 
    /**
