@@ -25,7 +25,7 @@ public abstract class FXUIEditor extends AnimationTimer
    protected final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
    protected final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
 
-   protected final ActivationReference<FXUIEditor> activeEditor;
+   protected final ActivationReference<Object> activeEditor;
    protected final AtomicReference<FXUIStateMachine> activeStateMachine;
 
    public FXUIEditor(Messager messager, SubScene subScene)
