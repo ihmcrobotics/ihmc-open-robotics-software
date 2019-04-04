@@ -19,7 +19,6 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;

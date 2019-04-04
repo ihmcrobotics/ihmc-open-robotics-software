@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
+import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
@@ -8,18 +10,29 @@ import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidBehaviors.tools.thread.ActivationReference;
+import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
-import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
-public class SnappedPositionEditor extends FXUIEditor
+import java.util.concurrent.atomic.AtomicReference;
+
+public class SnappedPositionEditor extends AnimationTimer
 {
+   protected final Messager messager;
+   protected final SubScene subScene;
+
+   protected final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   protected final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+
+   protected final ActivationReference<Object> activeEditor;
+   protected final AtomicReference<FXUIStateMachine> activeStateMachine;
+
    private final TypedNotification<Point3D> mouseMovedMeshIntersection = new TypedNotification<>();
    private final TypedNotification<Point3D> mouseClickedMeshIntersection = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
@@ -29,7 +42,11 @@ public class SnappedPositionEditor extends FXUIEditor
 
    public SnappedPositionEditor(Messager messager, SubScene subScene)
    {
-      super(messager, subScene);
+      this.messager = messager;
+      this.subScene = subScene;
+
+      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, null), this);
+      activeStateMachine = messager.createInput(BehaviorUI.API.ActiveStateMachine, null);
 
       positionEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
@@ -98,7 +115,6 @@ public class SnappedPositionEditor extends FXUIEditor
       selectedGraphicReference.get().setMouseTransparent(false);
    }
 
-   @Override
    protected void mouseMoved(MouseEvent event)
    {
       Point3D intersection = calculateMouseIntersection(event);
@@ -108,7 +124,6 @@ public class SnappedPositionEditor extends FXUIEditor
       }
    }
 
-   @Override
    protected void mouseClicked(MouseEvent event)
    {
       if (event.isStillSincePress())
