@@ -59,7 +59,7 @@ public class InverseOfTangentComputationTest
 
       System.out.println("computingWithMathTools " + computingTime);
    }
-   
+
    @Test
    public void compareIceCore()
    {
@@ -125,6 +125,7 @@ public class InverseOfTangentComputationTest
       System.out.println("computingWithRiven     " + computingTimeWithRiven);
       System.out.println("mean error (%)         " + Math.abs(totalErrorRatio / numberOfTest) * 100);
       System.out.println("total test time is     " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+      assertTrue("Java MathTool is faster than Riven. ", computingTimeWithMathTools > computingTimeWithRiven);
    }
 
    public static final class Riven
