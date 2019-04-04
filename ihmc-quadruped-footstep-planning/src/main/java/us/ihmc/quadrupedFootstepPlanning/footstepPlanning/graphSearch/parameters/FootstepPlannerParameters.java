@@ -47,18 +47,10 @@ public interface FootstepPlannerParameters
 
    double getMinYClearanceFromFoot();
 
-
-   default double getDesiredWalkingSpeed(double phase)
+   default double getMaxWalkingSpeedMultiplier()
    {
-      if (phase < 90)
-         return InterpolationTools.hermiteInterpolate(getPaceSpeed(), getCrawlSpeed(), phase / 90.0);
-      else
-         return InterpolationTools.hermiteInterpolate(getCrawlSpeed(), getTrotSpeed(), (phase - 90.0) / 90.0);
+      return 0.8;
    }
-
-   double getCrawlSpeed();
-   double getTrotSpeed();
-   double getPaceSpeed();
 
    /**
     * Distance which a foothold is projected into planar region. Should be a positive value,
@@ -169,9 +161,6 @@ public interface FootstepPlannerParameters
       packet.setHeuristicsWeight(getHeuristicsInflationWeight());
       packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
-      packet.setCrawlSpeed(getCrawlSpeed());
-      packet.setTrotSpeed(getTrotSpeed());
-      packet.setPaceSpeed(getPaceSpeed());
       packet.setProjectionInsideDistance(getProjectInsideDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
