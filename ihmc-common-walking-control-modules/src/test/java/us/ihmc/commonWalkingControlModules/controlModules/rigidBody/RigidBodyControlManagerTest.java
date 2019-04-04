@@ -75,6 +75,8 @@ public class RigidBodyControlManagerTest
    private double q1_home = random.nextDouble();
    private double q2_home = random.nextDouble();
 
+   private ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
+
    @Test
    public void testConstuctor()
    {
@@ -131,6 +133,7 @@ public class RigidBodyControlManagerTest
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
       message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
       message.getTaskspaceTrajectoryPoints().add()
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
@@ -162,7 +165,7 @@ public class RigidBodyControlManagerTest
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weightMatrix.getLinearPart()));
 
       SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
-      command.set(worldFrame, worldFrame, message);
+      command.set(referenceFrameHashCodeResolver, message);
       manager.handleTaskspaceTrajectoryCommand(command);
       manager.compute();
 
@@ -381,6 +384,7 @@ public class RigidBodyControlManagerTest
       Quaternion controlFrameOrientation = new Quaternion();
 
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
+      message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
       message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
       message.getControlFramePose().setPosition(controlFramePosition);
       message.getControlFramePose().setOrientation(controlFrameOrientation);
@@ -389,7 +393,7 @@ public class RigidBodyControlManagerTest
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
-      command.set(worldFrame, worldFrame, message);
+      command.set(referenceFrameHashCodeResolver, message);
       manager.handleTaskspaceTrajectoryCommand(command);
       manager.compute();
 
@@ -477,6 +481,9 @@ public class RigidBodyControlManagerTest
       RigidBodyBasics baseBody = link1;
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
+
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
+      referenceFrameHashCodeResolver.putAllMultiBodySystemReferenceFrames(elevator);
 
       // setup gains and weights to be all zero with weights 1.0
       Map<String, PIDGainsReadOnly> jointspaceGains = new HashMap<>();

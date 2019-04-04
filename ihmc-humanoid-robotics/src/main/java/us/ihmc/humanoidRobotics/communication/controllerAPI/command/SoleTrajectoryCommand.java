@@ -11,16 +11,19 @@ import java.util.Random;
 
 public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, SoleTrajectoryMessage>, FrameBasedCommand<SoleTrajectoryMessage>, EpsilonComparable<SoleTrajectoryCommand>
 {
+   private long sequenceId;
    private RobotQuadrant robotQuadrant;
    private final EuclideanTrajectoryControllerCommand positionTrajectory;
 
    public SoleTrajectoryCommand()
    {
+      sequenceId = 0;
       positionTrajectory = new EuclideanTrajectoryControllerCommand();
    }
 
    public SoleTrajectoryCommand(Random random)
    {
+      sequenceId = random.nextInt();
       positionTrajectory = new EuclideanTrajectoryControllerCommand(random);
       robotQuadrant = RobotQuadrant.generateRandomRobotQuadrant(random);
    }
@@ -28,6 +31,7 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    @Override
    public void clear()
    {
+      sequenceId = 0;
       positionTrajectory.clear();
       robotQuadrant = null;
    }
@@ -35,13 +39,13 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    @Override
    public void setFromMessage(SoleTrajectoryMessage message)
    {
-      positionTrajectory.setFromMessage(message.getPositionTrajectory());
-      robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SoleTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       positionTrajectory.set(resolver, message.getPositionTrajectory());
       robotQuadrant = RobotQuadrant.fromByte(message.getRobotQuadrant());
    }
@@ -60,6 +64,7 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
     */
    public void setPropertiesOnly(SoleTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       positionTrajectory.setPropertiesOnly(other.positionTrajectory);
       robotQuadrant = other.robotQuadrant;
    }
@@ -125,5 +130,11 @@ public class SoleTrajectoryCommand implements Command<SoleTrajectoryCommand, Sol
    public double getExecutionTime()
    {
       return positionTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

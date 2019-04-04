@@ -5,23 +5,27 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWalkingMessage>
 {
+   private long sequenceId;
    private boolean abortWalkingRequested = false;
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       abortWalkingRequested = false;
    }
 
    @Override
    public void set(AbortWalkingCommand other)
    {
+      sequenceId = other.sequenceId;
       abortWalkingRequested = other.isAbortWalkingRequested();
    }
 
    @Override
    public void setFromMessage(AbortWalkingMessage message)
    {
+      sequenceId = message.getSequenceId();
       abortWalkingRequested = true;
    }
 
@@ -40,5 +44,11 @@ public class AbortWalkingCommand implements Command<AbortWalkingCommand, AbortWa
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

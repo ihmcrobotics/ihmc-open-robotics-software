@@ -27,6 +27,7 @@ public class ROS2Tools
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
    public static final String INPUT_ROS_TOPIC_PREFIX = "/input";
 
+   // TODO Move these up into application classes; seems bad to define them centrally
    public static final String HUMANOID_CONTROL_MODULE = "/humanoid_control";
    public static final String QUADRUPED_CONTROL_MODULE = "/quadruped_control";
 
