@@ -21,7 +21,6 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
@@ -128,7 +127,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
                                                                                                                     goalPose, FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
             if (planarRegions.get() != null)
+            {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
+            }
+            else
+            {
+               publishTextToSpeech("PlanPathToLocationBehavior: Planar regions are null, Requesting Plan without planar regions");
+            }
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
             footstepPlanningRequestPublisher.publish(request);
