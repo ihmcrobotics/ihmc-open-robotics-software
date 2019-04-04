@@ -27,6 +27,7 @@ public class SnappedPositionEditor extends AnimationTimer
    protected final Messager messager;
    protected final SubScene subScene;
 
+   // these are necessary to keep a consistent reference
    protected final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
    protected final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
 
