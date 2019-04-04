@@ -23,8 +23,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -57,17 +60,18 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       WAIT, PLAN_FROM_DOUBLE_SUPPORT, PLAN_FROM_SINGLE_SUPPORT
    }
 
-   
    private static final double defaultSwingTime = 2.2;
    private static final double defaultTransferTime = 0.5;
-
 
    private final WaitState waitState;
    private final PlanFromDoubleSupportState planFromDoubleSupportState;
    private final PlanFromSingleSupportState planFromSingleSupportState;
 
    private final HumanoidReferenceFrames referenceFrames;
-   private final AtomicReference<FramePose3D> goalPose = new AtomicReference<>();
+   private final AtomicReference<FramePose3D> finalGoalPose = new AtomicReference<>();
+   private final AtomicReference<FramePose3D> currentGoalPose = new AtomicReference<>();
+
+   
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
@@ -79,30 +83,26 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
    private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
-   
+
    private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
 
    private final GoalDetectorBehaviorService fiducialDetectorBehaviorService;
    private YoDouble yoTime;
 
    public FollowFiducialBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                              HumanoidReferenceFrames referenceFrames,GoalDetectorBehaviorService goalDetectorBehaviorService)
+                                 HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super(robotName,"followFiducial",FollowFiducialState.class,yoTime,ros2Node);
+      super(robotName, "followFiducial", FollowFiducialState.class, yoTime, ros2Node);
       this.yoTime = yoTime;
       //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       this.fiducialDetectorBehaviorService = goalDetectorBehaviorService;
       addBehaviorService(fiducialDetectorBehaviorService);
-      
+
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
 
-      
-      
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
-                                    (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
+                                    (packet) -> finalGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
-      
-      
 
       waitState = new WaitState(yoTime);
       planFromDoubleSupportState = new PlanFromDoubleSupportState();
@@ -121,13 +121,11 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
       setupStateMachine();
    }
-   
-   
+
    @Override
    protected FollowFiducialState configureStateMachineAndReturnInitialKey(StateMachineFactory<FollowFiducialState, BehaviorAction> factory)
    {
-     
-   
+
       factory.setNamePrefix(getName() + "StateMachine").setRegistry(registry).buildYoClock(yoTime);
 
       factory.addState(FollowFiducialState.WAIT, waitState);
@@ -151,49 +149,45 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    public void onBehaviorEntered()
    {
       sendTextToSpeechPacket("Entered follow fiducial behavior");
-      goalPose.set(null);
+      finalGoalPose.set(null);
       walkingStatus.set(null);
       super.onBehaviorEntered();
    }
 
-   
-
-   private double currentTime=0;
+   private double currentTime = 0;
    private double waitTime = 2000;
-   
+
    @Override
    public void doControl()
    {
-      
+
       if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
 
          FramePose3D tmpFP = new FramePose3D();
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
          setGoalPose(tmpFP);
-         
-         if(System.currentTimeMillis() > currentTime+waitTime)
+
+/*         if (System.currentTimeMillis() > currentTime + waitTime)
          {
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
             tmpFP.get(location, orientation);
-            publishUIPositionCheckerPacket(location,orientation);
+            publishUIPositionCheckerPacket(location, orientation);
             currentTime = System.currentTimeMillis();
             //publishTextToSpeech("found "+tmpFP.getPosition().getX()+","+tmpFP.getPosition().getY()+","+tmpFP.getPosition().getZ());
 
-         }
-        
+         }*/
+
       }
-      
+
       super.doControl();
    }
 
-  
-
-  // @Override
+   // @Override
    public boolean isDone()
    {
-      FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(goalPose.get());
+      FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(finalGoalPose.get());
       goalPoseInMidFeetZUpFrame.changeFrame(referenceFrames.getMidFeetZUpFrame());
       double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(goalPoseInMidFeetZUpFrame.getX(), goalPoseInMidFeetZUpFrame.getY());
       double yawFromGoal = Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame.getYaw()));
@@ -288,7 +282,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          {
             PrintTools.info("sending planning request...");
             MovingReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-            FramePoint3D goalPoint = new FramePoint3D(goalPose.get().getPosition());
+            FramePoint3D goalPoint = new FramePoint3D(finalGoalPose.get().getPosition());
             goalPoint.changeFrame(pelvisZUpFrame);
 
             RobotSide initialStanceSide = goalPoint.getY() > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
@@ -298,7 +292,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
 
             planningRequestHasBeenSent.set(true);
          }
-         
+
          FootstepPlanningToolboxOutputStatus plannerResult = FollowFiducialBehavior.this.plannerResult.get();
       }
 
@@ -316,8 +310,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          sendFootstepPlan();
          sendTextToSpeechPacket("transitioning from planning to walking");
       }
-      
-      
+
    }
 
    class PlanFromSingleSupportState extends BehaviorAction
@@ -350,8 +343,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          }
 
          FootstepPlanningToolboxOutputStatus plannerResult = FollowFiducialBehavior.this.plannerResult.get();
-         
-         
+
          if (plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.getFootstepPlanningResult()).validForExecution())
          {
             sendFootstepPlan();
@@ -380,12 +372,13 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    public void setGoalPose(FramePose3D newGoalPose)
    {
       newGoalPose.appendYawRotation(Math.toRadians(90));
-      goalPose.set(newGoalPose);  
+      adjustGoalToBeCloser(newGoalPose);
+      finalGoalPose.set(newGoalPose);
    }
-   
+
    private boolean goalHasBeenSet()
    {
-      return goalPose.get() != null;
+      return finalGoalPose.get() != null;
    }
 
    private void sendFootstepPlan()
@@ -402,17 +395,25 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
 
    private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
-      
-      publishTextToSpeech("requesting plan to "+ goalPose.get().getX()+","+ goalPose.get().getY());
+
+      publishTextToSpeech("requesting plan to " + finalGoalPose.get().getX() + "," + finalGoalPose.get().getY());
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       planId.increment();
-      FootstepPlanningRequestPacket request = FootstepPlannerMessageTools
-            .createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose.get(),
-                                                 FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
       
-      if(planarRegions.get()!=null)
-      request.getPlanarRegionsListMessage().set(planarRegions.get());
+      
+      currentGoalPose.set(adjustGoalToBeCloser(finalGoalPose.get()));
+      
+      Point3D location = new Point3D();
+      Quaternion orientation = new Quaternion();
+      currentGoalPose.get().get(location, orientation);
+      publishUIPositionCheckerPacket(location, orientation);
+      
+      FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
+                                                                                                              currentGoalPose.get(), FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+
+      if (planarRegions.get() != null)
+         request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
       request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
@@ -425,14 +426,48 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       publishTextToSpeech(text);
    }
 
+   private FramePose3D adjustGoalToBeCloser(FramePose3D finalGoalPose)
+   {
+      
+      FramePose3D goalPose = new FramePose3D(finalGoalPose);
+      //      sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
+      FramePose3D midFeetWorld = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
+      midFeetWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      
+
+
+      Point3D pointBetweenFeet = new Point3D();
+      Point3D goalPosition = new Point3D();
+      Point3D shorterGoalPosition = new Point3D();
+      Vector3D vectorFromFeetToGoal = new Vector3D();
+
+     
+
+      goalPosition.set(goalPose.getPosition());
+      pointBetweenFeet.set(midFeetWorld.getPosition());
+      vectorFromFeetToGoal.sub(goalPosition, pointBetweenFeet);
+
+      double shorterGoalLength = 2.0;
+
+      if (vectorFromFeetToGoal.length() > shorterGoalLength)
+      {
+         vectorFromFeetToGoal.scale(shorterGoalLength / vectorFromFeetToGoal.length());
+      }
+      shorterGoalPosition.set(pointBetweenFeet);
+      shorterGoalPosition.add(vectorFromFeetToGoal);
+      goalPose.setPosition(shorterGoalPosition);
+
+      double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
+      AxisAngle goalOrientation = new AxisAngle(0.0, 0.0, 1.0, headingFromFeetToGoal);
+      goalPose.setOrientation(goalOrientation);
+      return goalPose;
+      
+   }
 
    @Override
    public void onBehaviorExited()
    {
-      sendTextToSpeechPacket("Follow fiducial Behavior Complete");    
+      sendTextToSpeechPacket("Follow fiducial Behavior Complete");
    }
-
-  
-
 
 }
