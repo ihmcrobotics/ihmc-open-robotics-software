@@ -107,17 +107,17 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    public double getPaceSpeed()
    {
-      return 0.25;
+      return 0.10;
    }
 
    public double getCrawlSpeed()
    {
-      return 0.25;
+      return 0.10;
    }
 
    public double getTrotSpeed()
    {
-      return 1.0;
+      return 0.1;
    }
 
    @Override
