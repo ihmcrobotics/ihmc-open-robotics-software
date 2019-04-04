@@ -29,7 +29,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
-   private int reducingStepSizeRatio = 10;
+   private int reducingStepSizeRatio = 2;
 
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
@@ -84,7 +84,7 @@ public class GradientDescentModule
    }
 
    /**
-    * default value is 10.
+    * default value is 1.
     */
    public void setStepSize(double value)
    {
@@ -95,7 +95,7 @@ public class GradientDescentModule
    }
 
    /**
-    * default value is 0.0001.
+    * default value is 0.001.
     */
    public void setPerturbationSize(double value)
    {
