@@ -63,36 +63,43 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       return 0.35;
    }
 
+   @Override
    public double getDistanceHeuristicWeight()
    {
       return 0.1;
    }
 
+   @Override
    public double getXGaitWeight()
    {
       return 0.75;
    }
 
+   @Override
    public double getYawWeight()
    {
       return 0.5;
    }
 
+   @Override
    public double getCostPerStep()
    {
       return 0.5;
    }
 
+   @Override
    public double getStepUpWeight()
    {
       return 0.0;
    }
 
+   @Override
    public double getStepDownWeight()
    {
       return 0.0;
    }
 
+   @Override
    public double getHeuristicsInflationWeight()
    {
       return 3.0;
@@ -103,21 +110,6 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    public double getProjectInsideDistance()
    {
       return 0.04;
-   }
-
-   public double getPaceSpeed()
-   {
-      return 0.10;
-   }
-
-   public double getCrawlSpeed()
-   {
-      return 0.10;
-   }
-
-   public double getTrotSpeed()
-   {
-      return 0.1;
    }
 
    @Override

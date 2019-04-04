@@ -40,12 +40,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinYClearanceFromFoot(double minYClearanceFromFoot);
 
-   void setCrawlSpeed(double crawlSpeed);
-
-   void setTrotSpeed(double trotSpeed);
-
-   void setPaceSpeed(double paceSpeed);
-
    void setProjectInsideDistance(double projectionInsideDistance);
 
    void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
@@ -76,9 +70,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setHeuristicsInflationWeight(other.getHeuristicsInflationWeight());
       setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
-      setCrawlSpeed(other.getCrawlSpeed());
-      setTrotSpeed(other.getTrotSpeed());
-      setPaceSpeed(other.getPaceSpeed());
       setProjectInsideDistance(other.getProjectInsideDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
@@ -124,12 +115,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       if (other.getMinYClearanceFromFoot() != other.NO_VALUE_DOUBLE)
          setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
-      if (other.getCrawlSpeed() != other.NO_VALUE_DOUBLE)
-         setCrawlSpeed(other.getCrawlSpeed());
-      if (other.getTrotSpeed() != other.NO_VALUE_DOUBLE)
-         setTrotSpeed(other.getTrotSpeed());
-      if (other.getPaceSpeed() != other.NO_VALUE_DOUBLE)
-         setPaceSpeed(other.getPaceSpeed());
       if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
          setProjectInsideDistance(other.getProjectionInsideDistance());
       if (other.getMinimumSurfaceInclineRadians() != other.NO_VALUE_DOUBLE)

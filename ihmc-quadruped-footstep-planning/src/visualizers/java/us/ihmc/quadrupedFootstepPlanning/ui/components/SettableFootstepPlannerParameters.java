@@ -32,16 +32,10 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
 
-   private double crawlSpeed;
-   private double trotSpeed;
-   private double paceSpeed;
-
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
    }
-
-
 
    /** {@inheritDoc} */
    @Override
@@ -202,27 +196,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setCrawlSpeed(double crawlSpeed)
-   {
-      this.crawlSpeed = crawlSpeed;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setTrotSpeed(double trotSpeed)
-   {
-      this.trotSpeed = trotSpeed;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setPaceSpeed(double paceSpeed)
-   {
-      this.paceSpeed = paceSpeed;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getMaximumStepReach()
    {
       return maximumStepReach;
@@ -357,27 +330,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getProjectInsideDistance()
    {
       return projectInsideDistance;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getTrotSpeed()
-   {
-      return trotSpeed;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getCrawlSpeed()
-   {
-      return crawlSpeed;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getPaceSpeed()
-   {
-      return paceSpeed;
    }
 
    /** {@inheritDoc} */
