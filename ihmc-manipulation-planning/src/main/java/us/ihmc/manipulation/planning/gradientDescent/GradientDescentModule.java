@@ -9,7 +9,7 @@ import us.ihmc.commons.MathTools;
  */
 public class GradientDescentModule
 {
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 
    // internal
    private SingleQueryFunction function;
@@ -29,6 +29,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
+   private int reducingStepSizeRatio = 10;
 
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
@@ -49,9 +50,12 @@ public class GradientDescentModule
 
    private void reduceStepSize()
    {
-      alpha = alpha * 0.1;
+      alpha = alpha / reducingStepSizeRatio;
    }
 
+   /**
+    * default value is 1000.
+    */
    public void setMaximumIterations(int value)
    {
       maximumIterations = value;
@@ -71,17 +75,39 @@ public class GradientDescentModule
          inputLowerLimit.add(limit.get(i));
    }
 
+   /**
+    * default value is 10E-10.
+    */
    public void setConvergenceThreshold(double value)
    {
       deltaThreshold = value;
    }
 
+   /**
+    * default value is 10.
+    */
    public void setStepSize(double value)
    {
       if (value > 0)
          alpha = -value;
       else
          alpha = value;
+   }
+
+   /**
+    * default value is 0.0001.
+    */
+   public void setPerturbationSize(double value)
+   {
+      if (value > 0)
+         perturb = value;
+      else
+         perturb = -value;
+   }
+
+   public void setReducingStepSizeRatio(int value)
+   {
+      reducingStepSizeRatio = value;
    }
 
    public int run()
@@ -95,7 +121,7 @@ public class GradientDescentModule
          pastInput.add(initialInput.get(i));
 
       optimalQuery = function.getQuery(pastInput);
-      
+
       double pastQuery = 0;
       double newQuery = 0;
 
@@ -104,7 +130,7 @@ public class GradientDescentModule
          long curTime = System.nanoTime();
          iteration++;
          pastQuery = optimalQuery;
-         
+
          double tempSignForPerturb = 1.0;
          TDoubleArrayList gradient = new TDoubleArrayList();
          for (int j = 0; j < dimension; j++)
@@ -152,8 +178,8 @@ public class GradientDescentModule
 
             if (DEBUG)
             {
-               double iterationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
-               System.out.println("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationTime);
+               double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
+               System.out.println("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
             }
 
             if (delta < deltaThreshold)
