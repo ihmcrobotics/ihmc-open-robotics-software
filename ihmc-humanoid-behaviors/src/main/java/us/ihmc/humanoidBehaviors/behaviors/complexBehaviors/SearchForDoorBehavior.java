@@ -113,7 +113,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    {
       recievedNewDoorLocation = true;
       publishTextToSpeech("Recieved Door Location From UI");
-      setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
+      //setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
 
 
 
