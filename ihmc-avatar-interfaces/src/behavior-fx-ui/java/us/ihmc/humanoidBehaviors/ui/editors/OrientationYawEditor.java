@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
 import com.sun.javafx.scene.CameraHelper;
+import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.scene.Camera;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
@@ -10,18 +12,29 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.tools.thread.ActivationReference;
+import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIEditor;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.references.OverTypedReference;
-import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
-public class OrientationYawEditor extends FXUIEditor
+import java.util.concurrent.atomic.AtomicReference;
+
+public class OrientationYawEditor extends AnimationTimer
 {
+   protected final Messager messager;
+   protected final SubScene subScene;
+
+   protected final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   protected final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+
+   protected final ActivationReference<Object> activeEditor;
+   protected final AtomicReference<FXUIStateMachine> activeStateMachine;
+
    private final TypedNotification<Point3D> mouseMovedOrientation = new TypedNotification<>();
    private final TypedNotification<Point3D> mouseClickedOrientation = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
@@ -29,9 +42,13 @@ public class OrientationYawEditor extends FXUIEditor
    private final FXUIStateMachine orientationEditorStateMachine;
    private final OverTypedReference<OrientationEditable> selectedGraphicReference;
 
-   public OrientationYawEditor(Messager messager, SubScene sceneNode)
+   public OrientationYawEditor(Messager messager, SubScene subScene)
    {
-      super(messager, sceneNode);
+      this.messager = messager;
+      this.subScene = subScene;
+
+      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, null), this);
+      activeStateMachine = messager.createInput(BehaviorUI.API.ActiveStateMachine, null);
 
       orientationEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
@@ -100,14 +117,12 @@ public class OrientationYawEditor extends FXUIEditor
       selectedGraphicReference.get().setMouseTransparent(false);
    }
 
-   @Override
    protected void mouseMoved(MouseEvent event)
    {
       Point3D point3D = intersectRayWithPlane(event);
       mouseMovedOrientation.add(point3D);
    }
 
-   @Override
    protected void mouseClicked(MouseEvent event)
    {
       if (event.isStillSincePress())
