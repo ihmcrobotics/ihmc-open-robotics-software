@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -11,9 +12,13 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
-public class HermiteCurvedBasedOrientationTrajectoryCalculator
+/**
+ * This calculator is based on {@link HermiteCurvedBasedOrientationTrajectoryGenerator} without YoVariables.
+ * And this is using {@code Riven.atan2(y, x)} which is faster than {@code Math.atan2(y, x)} defined in {@code jre 1.8}.
+ * See test file {@link InverseOfTangentComputationTest.}
+ */
+public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 {
-   private double currentTime;
    private double trajectoryTime;
    private int numberOfRevolutions;
 
@@ -34,10 +39,10 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
 
    private static final double EPS = 10E-5;
 
-   private boolean computeAngularVelocity = true;
+   private boolean computeAngularVelocity = false;
    private boolean computeAngularAcceleration = true;
 
-   public HermiteCurvedBasedOrientationTrajectoryCalculator()
+   public SimpleHermiteCurvedBasedOrientationTrajectoryCalculator()
    {
       cumulativeBeziers = new double[4];
       cumulativeBeziersDot = new double[4];
@@ -88,14 +93,14 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
       compute(0.0);
    }
 
+   Quaternion tempQuaternion = new Quaternion();
+   Vector3D wa = new Vector3D();
+   Vector3D wb = new Vector3D();
+   Vector3D delta = new Vector3D();
+   
    private void updateControlQuaternions()
    {
       double TOverThree = trajectoryTime / 3.0;
-
-      Quaternion tempQuaternion = new Quaternion();
-      Vector3D wa = new Vector3D();
-      Vector3D wb = new Vector3D();
-      Vector3D delta = new Vector3D();
 
       QuaternionReadOnly qa = initialOrientation;
       QuaternionReadOnly qb = finalOrientation;
@@ -130,14 +135,16 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
       controlRotations[3].set(delta);
    }
 
+   Quaternion qInterpolated = new Quaternion();
+   Vector3D angularVelocityInterpolated = new Vector3D();
+   Vector3D angularAccelerationInterpolated = new Vector3D();
+   
    public void compute(double time)
    {
       if (Double.isNaN(time))
       {
          throw new RuntimeException("Can not call compute on trajectory generator with time NaN.");
       }
-
-      currentTime = time;
 
       if (time < 0.0)
       {
@@ -165,52 +172,48 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
 
       time = MathTools.clamp(time, 0.0, trajectoryTime);
 
-      Quaternion qInterpolated = new Quaternion();
-      Vector3D angularVelocityInterpolated = new Vector3D();
-      Vector3D angularAccelerationInterpolated = new Vector3D();
-
       computeBezierBasedCurve(time, qInterpolated, angularVelocityInterpolated, angularAccelerationInterpolated);
 
       currentOrientation.set(qInterpolated);
       currentAngularVelocity.set(angularVelocityInterpolated);
       currentAngularAcceleration.set(angularAccelerationInterpolated);
    }
+   
+   Quaternion qProduct = new Quaternion();
 
+   Vector4D qDot = new Vector4D();
+   Vector4D qDot1 = new Vector4D();
+   Vector4D qDot2 = new Vector4D();
+   Vector4D qDot3 = new Vector4D();
+   Vector4D qProductDot = new Vector4D();
+
+   Vector4D qDDot = new Vector4D();
+   Vector4D qDDot1 = new Vector4D();
+   Vector4D qDDot2 = new Vector4D();
+   Vector4D qDDot3 = new Vector4D();
+   Vector4D qDDotTemp = new Vector4D();
+   Vector4D qProductDDot = new Vector4D();
+
+   Vector3D d1 = new Vector3D();
+   Vector3D d2 = new Vector3D();
+   Vector3D d3 = new Vector3D();
+
+   Quaternion expD1B1 = new Quaternion();
+   Quaternion expD2B2 = new Quaternion();
+   Quaternion expD1B1_expD2B2 = new Quaternion();
+   Quaternion expD3B3 = new Quaternion();
+
+   Vector4D d1B1Dot = new Vector4D();
+   Vector4D d2B2Dot = new Vector4D();
+   Vector4D d3B3Dot = new Vector4D();
+
+   Vector4D d1B1DDot = new Vector4D();
+   Vector4D d2B2DDot = new Vector4D();
+   Vector4D d3B3DDot = new Vector4D();
+   
    private void computeBezierBasedCurve(double time, QuaternionBasics q, Vector3D angularVelocity, Vector3D angularAcceleration)
    {
       updateBezierCoefficients(time);
-
-      Quaternion qProduct = new Quaternion();
-
-      Vector4D qDot = new Vector4D();
-      Vector4D qDot1 = new Vector4D();
-      Vector4D qDot2 = new Vector4D();
-      Vector4D qDot3 = new Vector4D();
-      Vector4D qProductDot = new Vector4D();
-
-      Vector4D qDDot = new Vector4D();
-      Vector4D qDDot1 = new Vector4D();
-      Vector4D qDDot2 = new Vector4D();
-      Vector4D qDDot3 = new Vector4D();
-      Vector4D qDDotTemp = new Vector4D();
-      Vector4D qProductDDot = new Vector4D();
-
-      Vector3D d1 = new Vector3D();
-      Vector3D d2 = new Vector3D();
-      Vector3D d3 = new Vector3D();
-
-      Quaternion expD1B1 = new Quaternion();
-      Quaternion expD2B2 = new Quaternion();
-      Quaternion expD1B1_expD2B2 = new Quaternion();
-      Quaternion expD3B3 = new Quaternion();
-
-      Vector4D d1B1Dot = new Vector4D();
-      Vector4D d2B2Dot = new Vector4D();
-      Vector4D d3B3Dot = new Vector4D();
-
-      Vector4D d1B1DDot = new Vector4D();
-      Vector4D d2B2DDot = new Vector4D();
-      Vector4D d3B3DDot = new Vector4D();
 
       // Changing naming convention to make expressions smaller
       QuaternionReadOnly q0 = initialOrientation;
@@ -365,8 +368,40 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
 
    private Vector3DReadOnly log(QuaternionReadOnly q)
    {
+      // Expensive guy.
       Vector3D tempLogExpVector3D = new Vector3D();
-      q.getRotationVector(tempLogExpVector3D);
+      
+      if (q.containsNaN())
+      {
+         tempLogExpVector3D.setToNaN();
+         return tempLogExpVector3D;
+      }
+
+      double qx = q.getX();
+      double qy = q.getY();
+      double qz = q.getZ();
+      double qs = q.getS();
+
+      double uNorm = Math.sqrt(EuclidCoreTools.normSquared(qx, qy, qz));
+
+      if (uNorm > EPS)
+      {
+         double angle = 2.0 * Riven.atan2(uNorm, qs) / uNorm;
+//         double angle = 2.0 * Math.atan(qs / uNorm) / uNorm;
+         tempLogExpVector3D.setX(qx * angle);
+         tempLogExpVector3D.setY(qy * angle);
+         tempLogExpVector3D.setZ(qz * angle);
+      }
+      else
+      {
+         // Small angle approximation
+         // "A Primer on the Differential Calculus of 3D Orientations" M. Bloesh et al
+         double sign = Math.signum(qs);
+         tempLogExpVector3D.setX(sign * qx);
+         tempLogExpVector3D.setY(sign * qy);
+         tempLogExpVector3D.setZ(sign * qz);
+      }
+      
       return tempLogExpVector3D;
    }
 
@@ -383,5 +418,83 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculator
    public void getAngularAcceleration(Vector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.set(currentAngularAcceleration);
+   }
+   
+   public static final class Riven
+   {
+      /**
+       * @param bitsPerDimension is an accuracy parameter (ATAN2_BITS).
+       * The default value is 7.
+       * If we use 7 bits per dimension, that means 2^7 (128) values for each dimension.
+       * Consequently, 128 * 128 entries are in lookup-table.
+       * The accuracy might be around (1/128) in general.
+       */
+      private static final int ATAN2_BITS = 12;
+
+      private static final int ATAN2_BITS2 = ATAN2_BITS << 1;
+      private static final int ATAN2_MASK = ~(-1 << ATAN2_BITS2);
+      private static final int ATAN2_COUNT = ATAN2_MASK + 1;
+      private static final int ATAN2_DIM = (int) Math.sqrt(ATAN2_COUNT);
+
+      private static final float INV_ATAN2_DIM_MINUS_1 = 1.0f / (ATAN2_DIM - 1);
+
+      private static final float[] atan2 = new float[ATAN2_COUNT];
+
+      static
+      {
+         for (int i = 0; i < ATAN2_DIM; i++)
+         {
+            for (int j = 0; j < ATAN2_DIM; j++)
+            {
+               float x0 = (float) i / ATAN2_DIM;
+               float y0 = (float) j / ATAN2_DIM;
+
+               atan2[j * ATAN2_DIM + i] = (float) Math.atan2(y0, x0);
+            }
+         }
+      }
+
+      public static final double atan2(double y, double x)
+      {
+         double add, mul;
+
+         if (x < 0.0f)
+         {
+            if (y < 0.0f)
+            {
+               x = -x;
+               y = -y;
+
+               mul = 1.0f;
+            }
+            else
+            {
+               x = -x;
+               mul = -1.0f;
+            }
+            add = -3.141592653f;
+            //add = -Math.PI;
+         }
+         else
+         {
+            if (y < 0.0f)
+            {
+               y = -y;
+               mul = -1.0f;
+            }
+            else
+            {
+               mul = 1.0f;
+            }
+            add = 0.0f;
+         }
+
+         double invDiv = 1.0f / (((x < y) ? y : x) * INV_ATAN2_DIM_MINUS_1);
+
+         int xi = (int) (x * invDiv);
+         int yi = (int) (y * invDiv);
+
+         return (atan2[yi * ATAN2_DIM + xi] + add) * mul;
+      }
    }
 }

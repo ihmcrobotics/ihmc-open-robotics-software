@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.HermiteCurvedBasedOrientationTrajectoryCalculator;
+import us.ihmc.robotics.math.trajectories.SimpleHermiteCurvedBasedOrientationTrajectoryCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class HermiteCurvedBasedOrientationTrajectoryCalculatorTest
@@ -43,7 +43,7 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculatorTest
       traj.setFinalConditions(finalOrientation, finalAngularVelocity);
       traj.initialize();
 
-      HermiteCurvedBasedOrientationTrajectoryCalculator trajCalculator = new HermiteCurvedBasedOrientationTrajectoryCalculator();
+      SimpleHermiteCurvedBasedOrientationTrajectoryCalculator trajCalculator = new SimpleHermiteCurvedBasedOrientationTrajectoryCalculator();
       trajCalculator.setTrajectoryTime(endIntegrationTime - startIntegrationTime);
       trajCalculator.setInitialConditions(initialOrientation, initialAngularVelocity);
       trajCalculator.setFinalConditions(finalOrientation, finalAngularVelocity);
