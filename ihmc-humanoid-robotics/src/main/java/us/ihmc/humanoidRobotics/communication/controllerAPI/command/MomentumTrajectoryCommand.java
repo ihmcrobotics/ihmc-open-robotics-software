@@ -7,6 +7,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryCommand, MomentumTrajectoryMessage>, FrameBasedCommand<MomentumTrajectoryMessage>
 {
+   private long sequenceId;
    private final EuclideanTrajectoryControllerCommand angularMomentumTrajectory = new EuclideanTrajectoryControllerCommand();
 
    public MomentumTrajectoryCommand()
@@ -22,24 +23,27 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    @Override
    public void setFromMessage(MomentumTrajectoryMessage message)
    {
-      angularMomentumTrajectory.setFromMessage(message.getAngularMomentumTrajectory());
+      FrameBasedCommand.super.setFromMessage(message);
    }
-   
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, MomentumTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       angularMomentumTrajectory.set(resolver, message.getAngularMomentumTrajectory());
    }
 
    @Override
    public void set(MomentumTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       angularMomentumTrajectory.set(other.angularMomentumTrajectory);
    }
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       angularMomentumTrajectory.clear();
    }
 
@@ -88,5 +92,11 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    public double getExecutionTime()
    {
       return angularMomentumTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

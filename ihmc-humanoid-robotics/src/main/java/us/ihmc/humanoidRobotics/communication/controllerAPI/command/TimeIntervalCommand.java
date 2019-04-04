@@ -6,6 +6,7 @@ import us.ihmc.robotics.time.TimeInterval;
 
 public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeIntervalMessage>
 {
+   private long sequenceId;
    private double startTime = Double.NaN;
    private double endTime = Double.NaN;
 
@@ -17,6 +18,7 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    @Override
    public void clear()
    {
+      sequenceId = 0;
       startTime = Double.NaN;
       endTime = Double.NaN;
    }
@@ -24,6 +26,7 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    @Override
    public void setFromMessage(TimeIntervalMessage message)
    {
+      sequenceId = message.getSequenceId();
       startTime = message.getStartTime();
       endTime = message.getEndTime();
    }
@@ -31,6 +34,7 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    @Override
    public void set(TimeIntervalCommand other)
    {
+      sequenceId = other.sequenceId;
       startTime = other.startTime;
       endTime = other.endTime;
    }
@@ -66,5 +70,11 @@ public class TimeIntervalCommand implements Command<TimeIntervalCommand, TimeInt
    public boolean isCommandValid()
    {
       return Double.isFinite(startTime) && Double.isFinite(endTime);
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

@@ -544,4 +544,9 @@ public class FeetManager
    {
       footControlModules.get(sideToUnload).resetLoadConstraints();
    }
+
+   public Object pollStatusToReport(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).pollStatusToReport();
+   }
 }

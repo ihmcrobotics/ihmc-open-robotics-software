@@ -26,15 +26,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -226,9 +223,15 @@ public class LinearMomentumRateControlModule
          this.footsteps.add().set(input.getFootsteps().get(i));
       }
       this.swingDurations.reset();
-      this.swingDurations.addAll(input.getSwingDurations());
+      for (int i = 0; i < input.getSwingDurations().size(); i++)
+      {
+         this.swingDurations.add(input.getSwingDurations().get(i));
+      }
       this.transferDurations.reset();
-      this.transferDurations.addAll(input.getTransferDurations());
+      for (int i = 0; i < input.getTransferDurations().size(); i++)
+      {
+         this.transferDurations.add(input.getTransferDurations().size());
+      }
       this.finalTransferDuration = input.getFinalTransferDuration();
       this.initializeForStanding = input.getInitializeForStanding();
       this.initializeForSingleSupport = input.getInitializeForSingleSupport();

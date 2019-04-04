@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTimeFreezerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -40,7 +39,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    protected final ICPPlannerInterface icpPlanner;
 
-   public ICPPlannerWithTimeFreezerWrapper(ICPPlannerInterface icpPlanner)
+   public ICPPlannerWithTimeFreezerWrapper(ICPPlannerInterface icpPlanner, ICPTimeFreezerParameters icpTimeFreezerParameters)
    {
       this.icpPlanner = icpPlanner;
 
@@ -55,6 +54,8 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
       this.isTimeBeingFrozen = new YoBoolean(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint2D(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector2D(worldFrame);
+
+      initializeTimeFreezerParameters(icpTimeFreezerParameters);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -62,11 +63,8 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
       return registry;
    }
 
-   @Override
-   public void initializeParameters(ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
+   private void initializeTimeFreezerParameters(ICPTimeFreezerParameters icpPlannerParameters)
    {
-      icpPlanner.initializeParameters(icpPlannerParameters);
-
       this.maxCapturePointErrorAllowedToBeginSwingPhase.set(icpPlannerParameters.getMaxInstantaneousCapturePointErrorForStartingSwing());
       this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze.set(icpPlannerParameters.getMaxAllowedErrorWithoutPartialTimeFreeze());
       this.freezeTimeFactor.set(icpPlannerParameters.getFreezeTimeFactor());
@@ -510,13 +508,6 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public double getOmega0()
    {
       return icpPlanner.getOmega0();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void initializeParameters(ICPPlannerParameters plannerParameters)
-   {
-      icpPlanner.initializeParameters(plannerParameters);
    }
 
    /** {@inheritDoc} */

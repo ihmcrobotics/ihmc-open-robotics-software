@@ -21,15 +21,14 @@ public class ROS2Callback<T>
    public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
    {
       this.messageCallback = messageCallback;
-      ROS2TopicQualifier qualifier = ros2Node.getName().equals(identifier.getNodeName()) ? ROS2TopicQualifier.INPUT : ROS2TopicQualifier.OUTPUT;
       ExceptionTools.handle(() ->
                             {
                                return ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
                                                                   this::nullOmissionCallback,
                                                                   ROS2Tools.generateDefaultTopicName(messageType,
                                                                                                      robotName,
-                                                                                                     identifier.getTopicQualifier(),
-                                                                                                     qualifier));
+                                                                                                     identifier.getModuleTopicQualifier(),
+                                                                                                     identifier.deriveIOTopicQualifier(ros2Node.getName())));
                             }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
