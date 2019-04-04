@@ -40,7 +40,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
    private JavaFXMessager uiMessager;
    private Messager behaviorMessager;
-   private AtomicReference<FXUIEditor> activeEditor;
+   private AtomicReference<Object> activeEditor;
 
    private ArrayList<PatrolWaypointGraphic> waypoints = new ArrayList<>();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
