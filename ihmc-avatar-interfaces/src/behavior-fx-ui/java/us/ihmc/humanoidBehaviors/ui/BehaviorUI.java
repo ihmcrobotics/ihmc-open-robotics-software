@@ -102,7 +102,7 @@ public class BehaviorUI
       ORIENTATION_EDITOR = new OrientationYawEditor(messager, subScene);
 
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
-      view3dFactory.addNodeToView(patrolBehaviorUIController.getRoot());
+      view3dFactory.addNodeToView(patrolBehaviorUIController);
 
       robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());

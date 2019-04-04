@@ -3,10 +3,9 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIBehavior;
 import us.ihmc.messager.Messager;
 
-public class StepInPlaceBehaviorUIController extends FXUIBehavior
+public class StepInPlaceBehaviorUIController
 {
    @FXML private Button startStepping;
    @FXML private Button pauseStepping;
