@@ -122,7 +122,7 @@ public class LidarScanPublisher
 
    public void start()
    {
-      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublish, 0L, 1L, TimeUnit.MILLISECONDS);
+      publisherTask = executorService.scheduleAtFixedRate(this::readAndPublishInternal, 0L, 1L, TimeUnit.MILLISECONDS);
    }
 
    public void shutdown()
@@ -261,6 +261,11 @@ public class LidarScanPublisher
       if (publisherTask != null)
          throw new RuntimeException("The publisher is running using its own thread, cannot manually update it.");
 
+      readAndPublishInternal();      
+   }
+
+   private void readAndPublishInternal()
+   {
       ScanData scanData = scanDataToPublish.getAndSet(null);
       if (scanData == null)
          return;
