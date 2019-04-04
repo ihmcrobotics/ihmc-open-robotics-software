@@ -19,6 +19,8 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
  */
 public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 {
+   private static final boolean useEfficientAtan2 = false;
+
    private double trajectoryTime;
    private int numberOfRevolutions;
 
@@ -37,7 +39,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    private final QuaternionBasics finalOrientation;
    private final Vector3DBasics finalAngularVelocity;
 
-   private static final double EPS = 10E-5;
+   private static final double EPS = 10E-12;
 
    private boolean computeAngularVelocity = false;
    private boolean computeAngularAcceleration = true;
@@ -97,7 +99,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    Vector3D wa = new Vector3D();
    Vector3D wb = new Vector3D();
    Vector3D delta = new Vector3D();
-   
+
    private void updateControlQuaternions()
    {
       double TOverThree = trajectoryTime / 3.0;
@@ -138,7 +140,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    Quaternion qInterpolated = new Quaternion();
    Vector3D angularVelocityInterpolated = new Vector3D();
    Vector3D angularAccelerationInterpolated = new Vector3D();
-   
+
    public void compute(double time)
    {
       if (Double.isNaN(time))
@@ -178,7 +180,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       currentAngularVelocity.set(angularVelocityInterpolated);
       currentAngularAcceleration.set(angularAccelerationInterpolated);
    }
-   
+
    Quaternion qProduct = new Quaternion();
 
    Vector4D qDot = new Vector4D();
@@ -210,7 +212,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    Vector4D d1B1DDot = new Vector4D();
    Vector4D d2B2DDot = new Vector4D();
    Vector4D d3B3DDot = new Vector4D();
-   
+
    private void computeBezierBasedCurve(double time, QuaternionBasics q, Vector3D angularVelocity, Vector3D angularAcceleration)
    {
       updateBezierCoefficients(time);
@@ -370,38 +372,41 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    {
       // Expensive guy.
       Vector3D tempLogExpVector3D = new Vector3D();
-      
-      if (q.containsNaN())
+      if (useEfficientAtan2)
       {
-         tempLogExpVector3D.setToNaN();
-         return tempLogExpVector3D;
-      }
+         if (q.containsNaN())
+         {
+            tempLogExpVector3D.setToNaN();
+            return tempLogExpVector3D;
+         }
 
-      double qx = q.getX();
-      double qy = q.getY();
-      double qz = q.getZ();
-      double qs = q.getS();
+         double qx = q.getX();
+         double qy = q.getY();
+         double qz = q.getZ();
+         double qs = q.getS();
 
-      double uNorm = Math.sqrt(EuclidCoreTools.normSquared(qx, qy, qz));
+         double uNorm = Math.sqrt(EuclidCoreTools.normSquared(qx, qy, qz));
 
-      if (uNorm > EPS)
-      {
-         double angle = 2.0 * Riven.atan2(uNorm, qs) / uNorm;
-//         double angle = 2.0 * Math.atan(qs / uNorm) / uNorm;
-         tempLogExpVector3D.setX(qx * angle);
-         tempLogExpVector3D.setY(qy * angle);
-         tempLogExpVector3D.setZ(qz * angle);
+         if (uNorm > EPS)
+         {
+            double angle = 2.0 * Riven.atan2(uNorm, qs) / uNorm;
+            tempLogExpVector3D.setX(qx * angle);
+            tempLogExpVector3D.setY(qy * angle);
+            tempLogExpVector3D.setZ(qz * angle);
+         }
+         else
+         {
+            double sign = Math.signum(qs);
+            tempLogExpVector3D.setX(sign * qx);
+            tempLogExpVector3D.setY(sign * qy);
+            tempLogExpVector3D.setZ(sign * qz);
+         }
       }
       else
       {
-         // Small angle approximation
-         // "A Primer on the Differential Calculus of 3D Orientations" M. Bloesh et al
-         double sign = Math.signum(qs);
-         tempLogExpVector3D.setX(sign * qx);
-         tempLogExpVector3D.setY(sign * qy);
-         tempLogExpVector3D.setZ(sign * qz);
+         q.getRotationVector(tempLogExpVector3D);
       }
-      
+
       return tempLogExpVector3D;
    }
 
@@ -409,17 +414,17 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    {
       angularOrientationToPack.set(currentOrientation);
    }
-   
+
    public void getAngularVelocity(Vector3D angularVelocityToPack)
    {
       angularVelocityToPack.set(currentAngularVelocity);
    }
-   
+
    public void getAngularAcceleration(Vector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.set(currentAngularAcceleration);
    }
-   
+
    public static final class Riven
    {
       /**
