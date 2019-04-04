@@ -482,10 +482,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    {
       isDone.set(true);
 
-      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false : true;
+      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false
+            : true;
 
-      LogTools.info("generateTrajectoriesToPreview");
-      
       generateTrajectoriesToPreview(false);
       if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
       {
@@ -498,12 +497,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          solution.setPlanId(KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_EXCEED_JOINT_VELOCITY_LIMIT);
          isOptimalSolution = false;
       }
-      
-      LogTools.info("convertWholeBodyTrajectoryMessage");
 
       fullRobotModelTrajectoryCalculator.packOptimizedVelocities(solution);
-      
-      LogTools.info("convertWholeBodyTrajectoryMessage");
+
       convertWholeBodyTrajectoryMessage();
 
       if (isOptimalSolution)

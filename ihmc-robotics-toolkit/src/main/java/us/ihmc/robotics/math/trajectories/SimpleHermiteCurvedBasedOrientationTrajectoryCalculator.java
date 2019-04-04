@@ -41,8 +41,44 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 
    private static final double EPS = 10E-12;
 
-   private boolean computeAngularVelocity = false;
-   private boolean computeAngularAcceleration = true;
+   private boolean convertAngularVelocity = false;
+   private boolean convertAngularAcceleration = true;
+   
+   Quaternion qProduct = new Quaternion();
+
+   Vector4D qDot = new Vector4D();
+   Vector4D qDot1 = new Vector4D();
+   Vector4D qDot2 = new Vector4D();
+   Vector4D qDot3 = new Vector4D();
+   Vector4D qProductDot = new Vector4D();
+
+   Vector4D qDDot = new Vector4D();
+   Vector4D qDDot1 = new Vector4D();
+   Vector4D qDDot2 = new Vector4D();
+   Vector4D qDDot3 = new Vector4D();
+   Vector4D qDDotTemp = new Vector4D();
+   Vector4D qProductDDot = new Vector4D();
+
+   Vector3D d1 = new Vector3D();
+   Vector3D d2 = new Vector3D();
+   Vector3D d3 = new Vector3D();
+
+   Quaternion expD1B1 = new Quaternion();
+   Quaternion expD2B2 = new Quaternion();
+   Quaternion expD1B1_expD2B2 = new Quaternion();
+   Quaternion expD3B3 = new Quaternion();
+
+   Vector4D d1B1Dot = new Vector4D();
+   Vector4D d2B2Dot = new Vector4D();
+   Vector4D d3B3Dot = new Vector4D();
+
+   Vector4D d1B1DDot = new Vector4D();
+   Vector4D d2B2DDot = new Vector4D();
+   Vector4D d3B3DDot = new Vector4D();
+
+   Quaternion qInterpolated = new Quaternion();
+   Vector3D angularVelocityInterpolated = new Vector3D();
+   Vector3D angularAccelerationInterpolated = new Vector3D();
 
    public SimpleHermiteCurvedBasedOrientationTrajectoryCalculator()
    {
@@ -136,10 +172,17 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       delta.setAndScale(TOverThree, wb);
       controlRotations[3].set(delta);
    }
+   
+   public void setConvertingAngularVelocity(boolean use)
+   {
+      convertAngularVelocity = use;
+   }
+   
+   public void setConvertingAngularAcceleration(boolean use)
+   {
+      convertAngularAcceleration = use;
+   }
 
-   Quaternion qInterpolated = new Quaternion();
-   Vector3D angularVelocityInterpolated = new Vector3D();
-   Vector3D angularAccelerationInterpolated = new Vector3D();
 
    public void compute(double time)
    {
@@ -180,38 +223,6 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       currentAngularVelocity.set(angularVelocityInterpolated);
       currentAngularAcceleration.set(angularAccelerationInterpolated);
    }
-
-   Quaternion qProduct = new Quaternion();
-
-   Vector4D qDot = new Vector4D();
-   Vector4D qDot1 = new Vector4D();
-   Vector4D qDot2 = new Vector4D();
-   Vector4D qDot3 = new Vector4D();
-   Vector4D qProductDot = new Vector4D();
-
-   Vector4D qDDot = new Vector4D();
-   Vector4D qDDot1 = new Vector4D();
-   Vector4D qDDot2 = new Vector4D();
-   Vector4D qDDot3 = new Vector4D();
-   Vector4D qDDotTemp = new Vector4D();
-   Vector4D qProductDDot = new Vector4D();
-
-   Vector3D d1 = new Vector3D();
-   Vector3D d2 = new Vector3D();
-   Vector3D d3 = new Vector3D();
-
-   Quaternion expD1B1 = new Quaternion();
-   Quaternion expD2B2 = new Quaternion();
-   Quaternion expD1B1_expD2B2 = new Quaternion();
-   Quaternion expD3B3 = new Quaternion();
-
-   Vector4D d1B1Dot = new Vector4D();
-   Vector4D d2B2Dot = new Vector4D();
-   Vector4D d3B3Dot = new Vector4D();
-
-   Vector4D d1B1DDot = new Vector4D();
-   Vector4D d2B2DDot = new Vector4D();
-   Vector4D d3B3DDot = new Vector4D();
 
    private void computeBezierBasedCurve(double time, QuaternionBasics q, Vector3D angularVelocity, Vector3D angularAcceleration)
    {
@@ -298,9 +309,9 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       QuaternionTools.multiply(q0, qProductDot, qDot);
       QuaternionTools.multiply(q0, qProductDDot, qDDot);
 
-      if (computeAngularVelocity)
+      if (convertAngularVelocity)
          convertToAngularVelocity(q, qDot, angularVelocity);
-      if (computeAngularAcceleration)
+      if (convertAngularAcceleration)
          convertToAngularAcceleration(q, qDot, qDDot, angularAcceleration);
    }
 

@@ -70,19 +70,24 @@ public class SO3TrajectoryPointCalculatorTest
       for (int i = 0; i < numberOfPoints; i++)
          trajectoryPointCalculator.appendTrajectoryPoint(times.get(i), orientations.get(i));
 
+      long startHermite = System.nanoTime();
       trajectoryPointCalculator.useSecondOrderInitialGuess();
       trajectoryPointCalculator.compute();
+      long timeHermite = System.nanoTime() - startHermite;
 
       System.out.println("use simple Hermite");
       trajectoryPointCalculator.clear();
       for (int i = 0; i < numberOfPoints; i++)
          trajectoryPointCalculator.appendTrajectoryPoint(times.get(i), orientations.get(i));
 
+      long startSimpleHermite = System.nanoTime();
       trajectoryPointCalculator.useSecondOrderInitialGuess();
       trajectoryPointCalculator.computeFast();
+      long timeSimpleHermite = System.nanoTime() - startSimpleHermite;
 
-      System.out.println(Conversions.nanosecondsToSeconds(trajectoryPointCalculator.slowComputing) + " "
-            + Conversions.nanosecondsToSeconds(trajectoryPointCalculator.fastComputing));
+      System.out.println("Hermite Computation time is " + Conversions.nanosecondsToSeconds(timeHermite));
+      System.out.println("Sime Hermite Computation time is " + Conversions.nanosecondsToSeconds(timeSimpleHermite));
+      
    }
 
    @Test
