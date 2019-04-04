@@ -212,6 +212,7 @@ public class IHMCHumanoidBehaviorManager
       // CREATE SERVICES
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+      fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
       ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
