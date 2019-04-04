@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIBehavior;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PatrolBehaviorUIController extends FXUIBehavior
+public class PatrolBehaviorUIController extends Group
 {
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
@@ -54,7 +54,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       footstepPlanGraphic.start();
-      rootChildren.add(footstepPlanGraphic.getNode());
+      getChildren().add(footstepPlanGraphic.getNode());
 
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
          executorService.submit(() -> {
@@ -162,7 +162,7 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    private PatrolWaypointGraphic createWaypointGraphic()
    {
       PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic();
-      registerGraphic(waypoint);
+      getChildren().add(waypoint.getRoot());
       waypoints.add(waypoint);
       return waypoint;
    }
@@ -171,14 +171,14 @@ public class PatrolBehaviorUIController extends FXUIBehavior
    {
       LogTools.debug("Removing all waypoint graphics.");
       waypoints.forEach(waypoint -> {
-         removeGraphic(waypoint);
+         getChildren().remove(waypoint.getRoot());
       });
       waypoints.clear();
    }
 
    private void removeWaypoint(PatrolWaypointGraphic waypoint)
    {
-      removeGraphic(waypoint);
+      getChildren().remove(waypoint.getRoot());
       waypoints.remove(waypoint);
    }
 
