@@ -10,6 +10,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.robotics.math.trajectories.generators.SO3TrajectoryPointCalculator;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class SO3TrajectoryPointCalculatorTest

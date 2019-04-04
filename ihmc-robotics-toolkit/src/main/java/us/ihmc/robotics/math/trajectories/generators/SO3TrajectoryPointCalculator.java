@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.gradientDescent;
+package us.ihmc.robotics.math.trajectories.generators;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.robotics.math.trajectories.SimpleHermiteCurvedBasedOrientationTrajectoryCalculator;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
@@ -94,6 +94,14 @@ public class SO3TrajectoryPointCalculator
 
    public void useSecondOrderInitialGuess()
    {
+      TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
+      for (int i = 1; i < times.size() - 1; i++)
+         for (int j = 0; j < 3; j++)
+            initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
+
+      SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
+      System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
+
       for (int i = 1; i < times.size() - 1; i++)
       {
          // case 2: second order
@@ -113,6 +121,13 @@ public class SO3TrajectoryPointCalculator
          angularVelocity.setZ(orientationDiffAxisAngle.getZ() * orientationDiffAxisAngle.getAngle());
          angularVelocities.get(i).set(angularVelocity);
       }
+
+      initialAngularVelocitiesInDoubleArray.clear();
+      for (int i = 1; i < times.size() - 1; i++)
+         for (int j = 0; j < 3; j++)
+            initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
+
+      System.out.println("initial query with initial guess " + function.getQuery(initialAngularVelocitiesInDoubleArray));
    }
 
    public void computeFast()
@@ -128,12 +143,8 @@ public class SO3TrajectoryPointCalculator
       // set input of module
       TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < numberOfPoints - 1; i++)
-      {
          for (int j = 0; j < 3; j++)
-         {
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
-         }
-      }
 
       SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
       System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
@@ -155,13 +166,8 @@ public class SO3TrajectoryPointCalculator
          System.out.println("iteration is " + numberOfIterationToSolve);
          System.out.println("final query is " + optimizer.getOptimalQuery());
          System.out.println("computation time is " + optimizer.getComputationTime());
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            System.out.println(i);
-            System.out.println(initialAngularVelocities.get(i));
-            System.out.println(angularVelocities.get(i));
-         }
       }
+      updateTrajectoryPoints();
    }
 
    public void compute()
@@ -177,12 +183,8 @@ public class SO3TrajectoryPointCalculator
       // set input of module
       TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
       for (int i = 1; i < numberOfPoints - 1; i++)
-      {
          for (int j = 0; j < 3; j++)
-         {
             initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
-         }
-      }
 
       SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
       System.out.println("initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
@@ -204,45 +206,15 @@ public class SO3TrajectoryPointCalculator
          System.out.println("iteration is " + numberOfIterationToSolve);
          System.out.println("final query is " + optimizer.getOptimalQuery());
          System.out.println("computation time is " + optimizer.getComputationTime());
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            System.out.println(i);
-            System.out.println(initialAngularVelocities.get(i));
-            System.out.println(angularVelocities.get(i));
-         }
       }
+      updateTrajectoryPoints();
    }
 
-   public void calculateInitialQuery()
+   private void updateTrajectoryPoints()
    {
-      if (times.size() != orientations.size())
-         throw new RuntimeException("size are not matched. (times) " + times.size() + ", (orientations) " + orientations.size());
-
-      if (MathTools.epsilonEquals(times.get(0), 0.0, 10E-5))
-         times.replace(0, 0.0);
-
-      int numberOfPoints = times.size();
-
-      // set input of module
-      TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
-      for (int i = 1; i < numberOfPoints - 1; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
-         }
-      }
-
-      SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
-      SingleQueryFunction fastFunction = new FastSO3TrajectoryPointOptimizerCostFunction();
-
-      System.out.println("function query      = " + function.getQuery(initialAngularVelocitiesInDoubleArray));
-      System.out.println("fast function query = " + fastFunction.getQuery(initialAngularVelocitiesInDoubleArray));
-   }
-
-   public FrameSO3TrajectoryPointList getTrajectoryData()
-   {
-      return trajectoryPoints;
+      trajectoryPoints.clear();
+      for (int i = 0; i < times.size(); i++)
+         trajectoryPoints.addTrajectoryPoint(times.get(i), orientations.get(i), angularVelocities.get(i));
    }
 
    private void updateTrajectoryGenerator()
@@ -280,6 +252,16 @@ public class SO3TrajectoryPointCalculator
       FrameVector3D angularAcceleration = new FrameVector3D();
       trajectoryGenerator.getAngularAcceleration(angularAcceleration);
       return angularAcceleration;
+   }
+
+   public int getNumberOfTrajectoryPoints()
+   {
+      return trajectoryPoints.getNumberOfTrajectoryPoints();
+   }
+
+   public FrameSO3TrajectoryPoint getTrajectoryPoint(int i)
+   {
+      return trajectoryPoints.getTrajectoryPoint(i);
    }
 
    private class SO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
