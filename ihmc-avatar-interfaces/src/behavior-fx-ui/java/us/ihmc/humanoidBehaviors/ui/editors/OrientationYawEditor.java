@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.ui.editors;
 import com.sun.javafx.scene.CameraHelper;
 import javafx.event.EventHandler;
 import javafx.scene.Camera;
-import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -24,7 +23,7 @@ import java.util.function.Consumer;
 public class OrientationYawEditor
 {
    private final SubScene sceneNode;
-   private final Consumer<FXUIStateTransitionTrigger> onExit;
+   private final PrivateAnimationTimer orientationAnimationTimer;
 
    // these are necessary to keep a consistent reference
    private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
@@ -35,11 +34,17 @@ public class OrientationYawEditor
    private final Notification mouseRightClicked = new Notification();
 
    private OrientationEditable selectedGraphic;
-   private PrivateAnimationTimer orientationAnimationTimer;
+   private Consumer<FXUIStateTransitionTrigger> onExit;
 
-   public OrientationYawEditor(SubScene sceneNode, OrientationEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   public OrientationYawEditor(SubScene sceneNode)
    {
       this.sceneNode = sceneNode;
+
+      orientationAnimationTimer = new PrivateAnimationTimer(this::handleOrientation);
+   }
+
+   public void edit(OrientationEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   {
       this.selectedGraphic = selectedGraphic;
       this.onExit = onExit;
 
@@ -49,7 +54,6 @@ public class OrientationYawEditor
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
       this.selectedGraphic.setMouseTransparent(true);
 
-      orientationAnimationTimer = new PrivateAnimationTimer(this::handleOrientation);
       orientationAnimationTimer.start();
    }
 
