@@ -329,7 +329,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
       double startTime = currentStepCommand.getTimeInterval().getStartTime();
       double percentDone = (currentTime - startTime) / (touchDownTime - startTime);
-      //      double percentDone = timeInState / swingDuration.getDoubleValue();
 
       // Trigger support phase.
       if (percentDone >= (1.0 + parameters.getPercentPastSwingForDone()))
@@ -381,20 +380,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       double duration = swingDuration.getDoubleValue();
-//      double fractionRemaining = timeRemainingInState.getDoubleValue() / duration;
-//      double fractionThrough = timeInState.getDoubleValue() / duration;
-//
-      // Compute swing trajectory.
-//      if (fractionRemaining > parameters.getMinimumStepAdjustmentFractionRemaining() && fractionThrough > parameters.getFractionThroughSwingForAdjustment())
-//      {
-         blendedSwingTrajectory.clear();
+      blendedSwingTrajectory.clear();
 
-         touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
-         touchdownTrajectory.initialize();
+      touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
+      touchdownTrajectory.initialize();
 
-         blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
-         blendedSwingTrajectory.initialize();
-//      }
+      blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
+      blendedSwingTrajectory.initialize();
    }
 
    /**
