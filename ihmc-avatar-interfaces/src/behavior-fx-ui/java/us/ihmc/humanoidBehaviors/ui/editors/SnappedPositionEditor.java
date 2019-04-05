@@ -1,81 +1,48 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
-import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.thread.ActivationReference;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public class SnappedPositionEditor
 {
-   private final Messager messager;
-   private final SubScene subScene;
+   private final Node sceneNode;
+   private final Consumer<FXUIStateTransitionTrigger> onExit;
 
    // these are necessary to keep a consistent reference
    private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
    private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
 
-   private final ActivationReference<Object> activeEditor;
-   private final AtomicReference<FXUIStateMachine> activeStateMachine;
-
    private final TypedNotification<Point3D> mouseMovedMeshIntersection = new TypedNotification<>();
    private final TypedNotification<Point3D> mouseClickedMeshIntersection = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
 
-   private final FXUIStateMachine positionEditorStateMachine;
    private PositionEditable selectedGraphic;
    private PrivateAnimationTimer positioningAnimationTimer;
 
-   public SnappedPositionEditor(Messager messager, SubScene subScene)
+   public SnappedPositionEditor(Node sceneNode, PositionEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
    {
-      this.messager = messager;
-      this.subScene = subScene;
-
-      activeEditor = new ActivationReference<>(messager.createInput(BehaviorUI.API.ActiveEditor, null), this);
-      activeStateMachine = messager.createInput(BehaviorUI.API.ActiveStateMachine, null);
-
-      positionEditorStateMachine = new FXUIStateMachine(messager, FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      });
-      positionEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-      });
-   }
-
-   public void activateForSinglePoint(PositionEditable selectedGraphic)
-   {
-      messager.submitMessage(BehaviorUI.API.ActiveStateMachine, positionEditorStateMachine);
-      positionEditorStateMachine.start();
-
-      activate(selectedGraphic);
-   }
-
-   public void activate(PositionEditable selectedGraphic)
-   {
+      this.sceneNode = sceneNode;
       this.selectedGraphic = selectedGraphic;
+      this.onExit = onExit;
 
-      LogTools.debug("Snapped position editor activated");
+      BehaviorUI.claimEditing(this);
 
-      subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-      subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
       this.selectedGraphic.setMouseTransparent(true);
 
       positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
@@ -99,25 +66,27 @@ public class SnappedPositionEditor
       if (mouseClickedMeshIntersection.hasNext())
       {
          LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
-         deactivate();
-         activeStateMachine.get().transition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
+         deactivate(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
       }
 
       if (mouseRightClicked.poll())
       {
-         deactivate();
-         activeStateMachine.get().transition(FXUIStateTransitionTrigger.RIGHT_CLICK);
+         deactivate(FXUIStateTransitionTrigger.RIGHT_CLICK);
       }
    }
 
-   private void deactivate()
+   private void deactivate(FXUIStateTransitionTrigger exitType)
    {
       positioningAnimationTimer.stop();
 
       LogTools.debug("Snapped position editor deactivated.");
-      subScene.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
-      subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
+      sceneNode.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
+      sceneNode.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
       selectedGraphic.setMouseTransparent(false);
+
+      BehaviorUI.ACTIVE_EDITOR = null; // do this before exit because it probably switches to new editor
+
+      onExit.accept(exitType);
    }
 
    private void mouseMoved(MouseEvent event)
@@ -131,28 +100,25 @@ public class SnappedPositionEditor
 
    private void mouseClicked(MouseEvent event)
    {
-      if (!event.isConsumed() && event.isStillSincePress())
+      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == this)
       {
-         if (activeEditor.peekActivated())
+         LogTools.debug("consume mouseClicked");
+         event.consume();
+         if (event.getButton() == MouseButton.PRIMARY)
          {
-            LogTools.debug("consume mouseClicked");
-            event.consume();
-            if (event.getButton() == MouseButton.PRIMARY)
+            Point3D intersection = calculateMouseIntersection(event);
+            if (intersection != null)
             {
-               Point3D intersection = calculateMouseIntersection(event);
-               if (intersection != null)
-               {
-                  mouseClickedMeshIntersection.add(intersection);
-               }
-               else
-               {
-                  LogTools.debug("Click mesh couldn't be found");
-               }
+               mouseClickedMeshIntersection.add(intersection);
             }
-            else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
+            else
             {
-               mouseRightClicked.set();
+               LogTools.debug("Click mesh couldn't be found");
             }
+         }
+         else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
+         {
+            mouseRightClicked.set();
          }
       }
    }
