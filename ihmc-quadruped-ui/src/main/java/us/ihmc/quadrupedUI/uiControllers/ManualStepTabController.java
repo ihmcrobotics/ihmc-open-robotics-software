@@ -135,8 +135,8 @@ public class ManualStepTabController
    public void bindControls()
    {
       swingHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.01, 0.2, defaultStepHeight, 0.01));
-      stepHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
-      stepLength.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.2, 0.2, 0.0, 0.02));
+      stepHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 0.25, 0.0, 0.01));
+      stepLength.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.2, 0.45, 0.0, 0.02));
       stepWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.1, 0.1, 0.0, 0.02));
       stepDuration.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.05, 3.0, defaultStepDuration, 0.05));
       dwellTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.0, defaultDwellTime, 0.05));
@@ -235,6 +235,8 @@ public class ManualStepTabController
 
          frontPosition.changeFrame(ReferenceFrame.getWorldFrame());
          rearPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         frontPosition.addZ(stepHeight);
+         rearPosition.addZ(stepHeight);
 
          frontFootMessage.getTimeInterval().setStartTime(timeDelay);
          frontFootMessage.getTimeInterval().setEndTime(timeDelay + stepDuration);
@@ -316,6 +318,7 @@ public class ManualStepTabController
          firstPosition.addY(widthOffset);
 
          firstPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         firstPosition.addZ(stepHeight);
 
          firstFootMessage.getTimeInterval().setStartTime(currentTime);
          firstFootMessage.getTimeInterval().setEndTime(currentTime + stepDuration);
@@ -341,6 +344,7 @@ public class ManualStepTabController
             secondPosition.addY(widthOffset);
 
             secondPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            secondPosition.addZ(stepHeight);
 
             oppositeFootMessage.getTimeInterval().setStartTime(currentTime);
             oppositeFootMessage.getTimeInterval().setEndTime(currentTime + stepDuration);

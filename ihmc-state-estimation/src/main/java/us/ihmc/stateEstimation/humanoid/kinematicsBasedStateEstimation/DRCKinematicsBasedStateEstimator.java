@@ -72,6 +72,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
+   private final List<FootSwitchInterface> footSwitchList;
+
    private final YoBoolean reinitializeStateEstimator = new YoBoolean("reinitializeStateEstimator", registry);
 
    private final FloatingJointBasics rootJoint;
@@ -87,6 +89,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
+      this.footSwitchList = new ArrayList<>(footSwitches.values());
 
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
@@ -232,6 +235,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          initialize();
       }
       yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp()));
+
+      for (int i = 0; i < footSwitchList.size(); i++)
+         footSwitchList.get(i).updateMeasurement();
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
