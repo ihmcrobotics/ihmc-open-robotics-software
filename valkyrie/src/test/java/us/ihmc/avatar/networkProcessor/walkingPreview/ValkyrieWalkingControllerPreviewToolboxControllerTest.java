@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
