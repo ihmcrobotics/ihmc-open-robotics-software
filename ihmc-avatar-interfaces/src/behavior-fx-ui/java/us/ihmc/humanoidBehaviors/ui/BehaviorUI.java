@@ -43,9 +43,6 @@ public class BehaviorUI
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
-   private final LivePlanarRegionsGraphic planarRegionsGraphic;
-   private final JavaFXRemoteRobotVisualizer robotVisualizer;
-
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
    @FXML private DirectRobotUIController directRobotUIController;
@@ -88,15 +85,9 @@ public class BehaviorUI
       patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       directRobotUIController.init(ros2Node, robotModel);
 
-      planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
-      planarRegionsGraphic.start();
-
-      view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
       view3dFactory.addNodeToView(patrolBehaviorUIController);
-
-      robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
-      view3dFactory.addNodeToView(robotVisualizer.getRootNode());
-      robotVisualizer.start();
+      view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, robotModel));
+      view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
       mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -104,20 +95,11 @@ public class BehaviorUI
       Scene mainScene = new Scene(mainPane, 1200, 800);
 
       primaryStage.setScene(mainScene);
-      primaryStage.setOnCloseRequest(event -> stop());
    }
 
    public void show()
    {
       primaryStage.show();
-   }
-
-   public void stop()
-   {
-      planarRegionsGraphic.stop();
-
-      if(robotVisualizer != null)
-         robotVisualizer.stop();
    }
 
    public static void claimEditing(Object claimingEditor)

@@ -14,13 +14,12 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarRegionsGraphic extends Group
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
-   private final AtomicReference<List<MeshView>> regionMeshViews = new AtomicReference<>();
+   private volatile List<MeshView> regionMeshViews;
 
    public PlanarRegionsGraphic()
    {
@@ -62,12 +61,12 @@ public class PlanarRegionsGraphic extends Group
          updateRegionMeshViews.add(regionMeshView);
       }
 
-      regionMeshViews.set(updateRegionMeshViews);
+      regionMeshViews = updateRegionMeshViews; // volatile set
    }
 
    public void update()
    {
-      List<MeshView> meshViews = regionMeshViews.get();
+      List<MeshView> meshViews = regionMeshViews;  // volatile get
       getChildren().clear();
       getChildren().addAll(meshViews);
    }
