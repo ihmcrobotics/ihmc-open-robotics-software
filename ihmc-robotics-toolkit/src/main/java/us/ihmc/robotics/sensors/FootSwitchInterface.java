@@ -7,6 +7,9 @@ import us.ihmc.mecano.spatial.Wrench;
 // TODO Nuke that interface
 public interface FootSwitchInterface
 {
+   /**
+    * This method is intended to be called once per control tick and should update the internal state of this foot switch. The other methods should avoid any extra computation.
+    */
    default void updateMeasurement()
    {}
 
