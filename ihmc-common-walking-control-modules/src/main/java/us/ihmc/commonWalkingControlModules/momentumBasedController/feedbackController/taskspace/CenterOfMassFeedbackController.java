@@ -22,18 +22,18 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
+import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
 {
@@ -44,25 +44,25 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    private final YoBoolean isEnabled = new YoBoolean("is" + shortName + "Enabled", registry);
 
-   private final YoFramePoint3D yoDesiredPosition;
-   private final YoFramePoint3D yoCurrentPosition;
-   private final YoFrameVector3D yoErrorPosition;
+   private final FramePoint3DBasics yoDesiredPosition;
+   private final FramePoint3DBasics yoCurrentPosition;
+   private final FrameVector3DBasics yoErrorPosition;
 
-   private final YoFrameVector3D yoErrorPositionIntegrated;
+   private final FrameVector3DBasics yoErrorPositionIntegrated;
 
-   private final YoFrameVector3D yoDesiredLinearVelocity;
-   private final YoFrameVector3D yoCurrentLinearVelocity;
-   private final YoFrameVector3D yoErrorLinearVelocity;
-   private final AlphaFilteredYoFrameVector yoFilteredErrorLinearVelocity;
-   private final YoFrameVector3D yoFeedForwardLinearVelocity;
-   private final YoFrameVector3D yoFeedbackLinearVelocity;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearVelocity;
+   private final FrameVector3DBasics yoDesiredLinearVelocity;
+   private final FrameVector3DBasics yoCurrentLinearVelocity;
+   private final FrameVector3DBasics yoErrorLinearVelocity;
+   private final AlphaFilteredYoMutableFrameVector3D yoFilteredErrorLinearVelocity;
+   private final FrameVector3DBasics yoFeedForwardLinearVelocity;
+   private final FrameVector3DBasics yoFeedbackLinearVelocity;
+   private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackLinearVelocity;
 
-   private final YoFrameVector3D yoDesiredLinearAcceleration;
-   private final YoFrameVector3D yoFeedForwardLinearAcceleration;
-   private final YoFrameVector3D yoFeedbackLinearAcceleration;
-   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
-   private final YoFrameVector3D yoAchievedLinearAcceleration;
+   private final FrameVector3DBasics yoDesiredLinearAcceleration;
+   private final FrameVector3DBasics yoFeedForwardLinearAcceleration;
+   private final FrameVector3DBasics yoFeedbackLinearAcceleration;
+   private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackLinearAcceleration;
+   private final FrameVector3DBasics yoAchievedLinearAcceleration;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FramePoint3D currentPosition = new FramePoint3D();
@@ -170,12 +170,19 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       gains.set(command.getGains());
       command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
 
-      yoDesiredPosition.setMatchingFrame(command.getReferencePosition());
-      yoDesiredLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
+      yoDesiredPosition.setIncludingFrame(command.getReferencePosition());
+      yoDesiredLinearVelocity.setIncludingFrame(command.getReferenceLinearVelocity());
+      yoDesiredLinearVelocity.checkReferenceFrameMatch(yoDesiredPosition);
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setMatchingFrame(command.getReferenceLinearVelocity());
+      {
+         yoFeedForwardLinearVelocity.setIncludingFrame(command.getReferenceLinearVelocity());
+         yoFeedForwardLinearVelocity.checkReferenceFrameMatch(yoDesiredPosition);
+      }
       if (yoFeedForwardLinearAcceleration != null)
-         yoFeedForwardLinearAcceleration.setMatchingFrame(command.getReferenceLinearAcceleration());
+      {
+         yoFeedForwardLinearAcceleration.setIncludingFrame(command.getReferenceLinearAcceleration());
+         yoFeedForwardLinearAcceleration.checkReferenceFrameMatch(yoDesiredPosition);
+      }
    }
 
    @Override
@@ -193,6 +200,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          rateLimitedFeedbackLinearVelocity.reset();
       if (yoFilteredErrorLinearVelocity != null)
          yoFilteredErrorLinearVelocity.reset();
+      if (yoErrorPositionIntegrated != null)
+         yoErrorPositionIntegrated.setToZero(worldFrame);
    }
 
    private final FrameVector3D proportionalFeedback = new FrameVector3D();
@@ -205,6 +214,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       if (!isEnabled())
          return;
 
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
+
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -215,14 +226,22 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
+      // If the trajectory frame changed reset the rate limited variable
+      if (rateLimitedFeedbackLinearAcceleration.getReferenceFrame() != trajectoryFrame)
+      {
+         rateLimitedFeedbackLinearAcceleration.setReferenceFrame(trajectoryFrame);
+         rateLimitedFeedbackLinearAcceleration.reset();
+      }
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(centerOfMassFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
-      yoDesiredLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
       desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
@@ -236,6 +255,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          return;
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
       feedForwardLinearVelocity.setIncludingFrame(yoFeedForwardLinearVelocity);
       computeProportionalTerm(proportionalFeedback);
@@ -244,13 +264,21 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
       desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoFeedbackLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+      yoFeedbackLinearVelocity.changeFrame(trajectoryFrame);
+      // If the trajectory frame changed reset the rate limited variable
+      if (rateLimitedFeedbackLinearVelocity.getReferenceFrame() != trajectoryFrame)
+      {
+         rateLimitedFeedbackLinearVelocity.setReferenceFrame(trajectoryFrame);
+         rateLimitedFeedbackLinearVelocity.reset();
+      }
       rateLimitedFeedbackLinearVelocity.update();
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackLinearVelocity);
 
       desiredLinearVelocity.add(feedForwardLinearVelocity);
 
-      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
+      yoDesiredLinearVelocity.changeFrame(trajectoryFrame);
 
       desiredLinearVelocity.scale(totalRobotMass);
       desiredLinearVelocity.changeFrame(worldFrame);
@@ -264,6 +292,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          return;
 
       virtualModelControlOutput.set(inverseDynamicsOutput);
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
@@ -275,14 +304,22 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
+      // If the trajectory frame changed reset the rate limited variable
+      if (rateLimitedFeedbackLinearAcceleration.getReferenceFrame() != trajectoryFrame)
+      {
+         rateLimitedFeedbackLinearAcceleration.setReferenceFrame(trajectoryFrame);
+         rateLimitedFeedbackLinearAcceleration.reset();
+      }
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(centerOfMassFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
-      yoDesiredLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
       desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
@@ -296,7 +333,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       achievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
       achievedLinearAcceleration.changeFrame(worldFrame);
       achievedLinearAcceleration.scale(1.0 / totalRobotMass);
-      yoAchievedLinearAcceleration.set(achievedLinearAcceleration);
+      yoAchievedLinearAcceleration.setIncludingFrame(achievedLinearAcceleration);
+      yoAchievedLinearAcceleration.changeFrame(yoDesiredPosition.getReferenceFrame());
    }
 
    /**
@@ -313,17 +351,23 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     */
    private void computeProportionalTerm(FrameVector3D feedbackTermToPack)
    {
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
+
       currentPosition.setToZero(centerOfMassFrame);
       currentPosition.changeFrame(worldFrame);
-      yoCurrentPosition.set(currentPosition);
+      yoCurrentPosition.setIncludingFrame(currentPosition);
+      yoCurrentPosition.changeFrame(trajectoryFrame);
 
       desiredPosition.setIncludingFrame(yoDesiredPosition);
+      desiredPosition.changeFrame(worldFrame);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
-      yoErrorPosition.set(feedbackTermToPack);
+
+      yoErrorPosition.setIncludingFrame(feedbackTermToPack);
+      yoErrorPosition.changeFrame(trajectoryFrame);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getProportionalGainMatrix(tempGainMatrix);
@@ -345,20 +389,34 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     */
    private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
+
       currentLinearVelocity.setIncludingFrame(centroidalMomentumHandler.getCenterOfMassVelocity());
       currentLinearVelocity.changeFrame(worldFrame);
-      yoCurrentLinearVelocity.set(currentLinearVelocity);
+      yoCurrentLinearVelocity.setIncludingFrame(currentLinearVelocity);
+      yoCurrentLinearVelocity.changeFrame(trajectoryFrame);
 
       desiredLinearVelocity.setIncludingFrame(yoDesiredLinearVelocity);
+      desiredLinearVelocity.changeFrame(worldFrame);
 
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
-      yoErrorLinearVelocity.set(feedbackTermToPack);
+      // TODO: there is an inconsistency here between this feedback controller and the point feedback controller:
+      // The point feedback controller sets this value after rate limiting.
+      yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
+      yoErrorLinearVelocity.changeFrame(trajectoryFrame);
 
       if (yoFilteredErrorLinearVelocity != null)
       {
+         // If the trajectory frame changed reset the filter.
+         if (yoFilteredErrorLinearVelocity.getReferenceFrame() != trajectoryFrame)
+         {
+            yoFilteredErrorLinearVelocity.setReferenceFrame(trajectoryFrame);
+            yoFilteredErrorLinearVelocity.reset();
+         }
+         feedbackTermToPack.changeFrame(trajectoryFrame);
          yoFilteredErrorLinearVelocity.update();
          feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
       }
@@ -389,12 +447,19 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       }
 
       double maximumIntegralError = gains.getMaximumIntegralError();
+      ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
       if (maximumIntegralError < 1.0e-5)
       {
          feedbackTermToPack.setToZero(centerOfMassFrame);
-         yoErrorPositionIntegrated.setToZero();
+         yoErrorPositionIntegrated.setToZero(trajectoryFrame);
          return;
+      }
+
+      // If the trajectory frame changed reset the integration.
+      if (yoErrorPositionIntegrated.getReferenceFrame() != trajectoryFrame)
+      {
+         yoErrorPositionIntegrated.setToZero(trajectoryFrame);
       }
 
       feedbackTermToPack.setIncludingFrame(yoErrorPosition);
@@ -402,7 +467,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       feedbackTermToPack.add(yoErrorPositionIntegrated);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);
-      yoErrorPositionIntegrated.set(feedbackTermToPack);
+      yoErrorPositionIntegrated.setIncludingFrame(feedbackTermToPack);
+      yoErrorPositionIntegrated.changeFrame(trajectoryFrame);
 
       feedbackTermToPack.changeFrame(centerOfMassFrame);
       gains.getIntegralGainMatrix(tempGainMatrix);
