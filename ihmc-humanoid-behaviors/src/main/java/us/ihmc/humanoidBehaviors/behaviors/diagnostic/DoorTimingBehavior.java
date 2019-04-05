@@ -32,7 +32,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
 
    public enum DoorTimingBehaviorStates
    {
-      LOCATE_DOOR, PLANNING, APPROACH, TRANSITION, LOCATE_HANDLE, OPEN_DOOR, PREPARE_TO_ENTER_DOOR, PLANNING_THROUGH_DOOR, GO_THROUGH_DOOR, 
+      LOCATE_DOOR, PLANNING_FOOTSTEPS, APPROACH, TRANSITION, LOCATE_HANDLE, OPEN_DOOR, PREPARE_TO_ENTER_DOOR, PLANNING_THROUGH_DOOR, GO_THROUGH_DOOR, 
    }
 
    public DoorTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, boolean userControlled)
@@ -83,6 +83,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             if (timingBehavior.doorLocationMessage.get() != null)
             {
                totalTimeFindingDoor.add(getStateMachine().getTimeInCurrentState());
+               
                publishTextToSpeech("Adding time to locating door: " + getStateMachine().getTimeInCurrentState());
                return true;
             }
@@ -403,11 +404,11 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       
 
       // if this is the behavior start here, timer starts and stops when the door is lcoated
-      factory.addStateAndDoneTransition(DoorTimingBehaviorStates.LOCATE_DOOR, locateDoor, DoorTimingBehaviorStates.PLANNING);
+      factory.addStateAndDoneTransition(DoorTimingBehaviorStates.LOCATE_DOOR, locateDoor, DoorTimingBehaviorStates.PLANNING_FOOTSTEPS);
 
       //if this is the operator start here, 
       //the timer stops when a footstep is sent to the controller
-      factory.addStateAndDoneTransition(DoorTimingBehaviorStates.PLANNING, planningToDoor, DoorTimingBehaviorStates.APPROACH);
+      factory.addStateAndDoneTransition(DoorTimingBehaviorStates.PLANNING_FOOTSTEPS, planningToDoor, DoorTimingBehaviorStates.APPROACH);
       //timer stops when foot steps are paused, completed or aborted
       factory.addStateAndDoneTransition(DoorTimingBehaviorStates.APPROACH, walkingToDoor, DoorTimingBehaviorStates.TRANSITION);
 
@@ -415,7 +416,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       factory.addState(DoorTimingBehaviorStates.TRANSITION, transitionState);
       factory.addTransition(DoorTimingBehaviorStates.TRANSITION, DoorTimingBehaviorStates.APPROACH, t -> transitionToWalking);
       factory.addTransition(DoorTimingBehaviorStates.TRANSITION, DoorTimingBehaviorStates.OPEN_DOOR, t -> transitionToManipulation);
-      factory.addTransition(DoorTimingBehaviorStates.TRANSITION, DoorTimingBehaviorStates.PLANNING, t -> transitionToPlanning);
+      factory.addTransition(DoorTimingBehaviorStates.TRANSITION, DoorTimingBehaviorStates.PLANNING_FOOTSTEPS, t -> transitionToPlanning);
 
       //if operator transition from open door to go through door else transition to prepair to enter door
       factory.addState(DoorTimingBehaviorStates.OPEN_DOOR, openDoor);
@@ -427,7 +428,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       factory.addStateAndDoneTransition(DoorTimingBehaviorStates.GO_THROUGH_DOOR, walkingThroughDoor,DoorTimingBehaviorStates.PLANNING_THROUGH_DOOR);
 
       if (operatorInControl)
-         return DoorTimingBehaviorStates.PLANNING;
+         return DoorTimingBehaviorStates.PLANNING_FOOTSTEPS;
       else
          return DoorTimingBehaviorStates.LOCATE_DOOR;
    }
