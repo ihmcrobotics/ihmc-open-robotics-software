@@ -68,6 +68,8 @@ public class YoMutableFrameSpatialVector extends YoMutableFrameObject implements
    {
       checkFrameConsistency();
       super.setReferenceFrame(referenceFrame);
+      // When constructing this with two YoMutableFrameVector3D objects the angular part is updated only by the super implementation.
+      linearPart.setReferenceFrame(referenceFrame);
    }
 
    /**
