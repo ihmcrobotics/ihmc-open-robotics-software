@@ -108,8 +108,6 @@ public class BehaviorUI
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       robotVisualizer.start();
 
-      ORIENTATION_EDITOR.start();
-
       mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(false);
@@ -127,8 +125,6 @@ public class BehaviorUI
    public void stop()
    {
       planarRegionsGraphic.stop();
-
-      ORIENTATION_EDITOR.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
@@ -23,15 +24,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class SnappedPositionEditor
 {
-   protected final Messager messager;
-   protected final SubScene subScene;
+   private final Messager messager;
+   private final SubScene subScene;
 
    // these are necessary to keep a consistent reference
-   protected final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
-   protected final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
+   private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
+   private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
 
-   protected final ActivationReference<Object> activeEditor;
-   protected final AtomicReference<FXUIStateMachine> activeStateMachine;
+   private final ActivationReference<Object> activeEditor;
+   private final AtomicReference<FXUIStateMachine> activeStateMachine;
 
    private final TypedNotification<Point3D> mouseMovedMeshIntersection = new TypedNotification<>();
    private final TypedNotification<Point3D> mouseClickedMeshIntersection = new TypedNotification<>();
@@ -73,9 +74,10 @@ public class SnappedPositionEditor
       this.selectedGraphic = selectedGraphic;
 
       LogTools.debug("Snapped position editor activated");
+
       subScene.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
       subScene.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
-      selectedGraphic.setMouseTransparent(true);
+      this.selectedGraphic.setMouseTransparent(true);
 
       positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
       positioningAnimationTimer.start();
@@ -119,7 +121,7 @@ public class SnappedPositionEditor
       selectedGraphic.setMouseTransparent(false);
    }
 
-   protected void mouseMoved(MouseEvent event)
+   private void mouseMoved(MouseEvent event)
    {
       Point3D intersection = calculateMouseIntersection(event);
       if (intersection != null)
@@ -128,13 +130,14 @@ public class SnappedPositionEditor
       }
    }
 
-   protected void mouseClicked(MouseEvent event)
+   private void mouseClicked(MouseEvent event)
    {
-      if (event.isStillSincePress())
+      if (!event.isConsumed() && event.isStillSincePress())
       {
          LogTools.debug("{} mouseClicked", getClass().getSimpleName());
          if (activeEditor.peekActivated())
          {
+            event.consume();
             if (event.getButton() == MouseButton.PRIMARY)
             {
                Point3D intersection = calculateMouseIntersection(event);
@@ -155,7 +158,7 @@ public class SnappedPositionEditor
       }
    }
 
-   public Point3D calculateMouseIntersection(MouseEvent event)
+   private Point3D calculateMouseIntersection(MouseEvent event)
    {
       PickResult pickResult = event.getPickResult();
       Node intersectedNode = pickResult.getIntersectedNode();
