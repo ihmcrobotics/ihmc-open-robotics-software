@@ -109,7 +109,12 @@ public class PatrolBehaviorUIController extends Group
    {
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
-      snappedPositionEditor.edit(waypointGraphic, exitType -> waypointPlacementStateMachine.transition(exitType));
+      waypoints.forEach(waypoint -> waypoint.setMouseTransparent(true));
+      snappedPositionEditor.edit(waypointGraphic, exitType ->
+      {
+         waypointPlacementStateMachine.transition(exitType);
+         waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
+      });
    }
 
    private final void mouseClicked(MouseEvent event)
@@ -129,10 +134,12 @@ public class PatrolBehaviorUIController extends Group
                {
                   LogTools.debug("Editing patrol waypoint position: {}", i);
                   placeWaypoints.setDisable(true);
+                  waypoints.forEach(waypoint -> waypoint.setMouseTransparent(true));
                   snappedPositionEditor.edit(waypoints.get(i), exitType ->
                   {
                      teleopUpdateWaypoints();
                      placeWaypoints.setDisable(false);
+                     waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
                   }); // TODO handle right click?
                }
                else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
