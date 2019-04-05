@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -49,24 +50,34 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
       }
    }
 
+   private final FrameVector3D tempLinearVector = new FrameVector3D();
+   private final FrameVector3D tempAngularVector = new FrameVector3D();
+
    @Override
    public void calculate()
    {
+      ReferenceFrame originalFrame = wrenchCalculators.get(0).getWrench().getReferenceFrame();
       for (int i = 0; i < wrenchCalculators.size(); i++)
       {
          WrenchCalculator wrenchCalculator = wrenchCalculators.get(i);
          wrenchCalculator.calculate();
 
          WrenchReadOnly wrench = wrenchCalculator.getWrench();
-         linearForces.get(wrenchCalculator).set(wrench.getLinearPart());
-         angularForces.get(wrenchCalculator).set(wrench.getAngularPart());
+         linearForces.get(wrenchCalculator).setMatchingFrame(wrench.getLinearPart());
+         angularForces.get(wrenchCalculator).setMatchingFrame(wrench.getAngularPart());
       }
 
       averageAngularForce.update();
       averageLinearForce.update();
 
-      wrench.setToZero(ReferenceFrame.getWorldFrame());
-      wrench.set(averageAngularForce, averageLinearForce);
+      tempAngularVector.setIncludingFrame(averageAngularForce);
+      tempLinearVector.setIncludingFrame(averageLinearForce);
+
+      tempAngularVector.changeFrame(originalFrame);
+      tempLinearVector.changeFrame(originalFrame);
+
+      wrench.setToZero(originalFrame);
+      wrench.set(tempAngularVector, tempLinearVector);
    }
 
    @Override
