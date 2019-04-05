@@ -49,9 +49,8 @@ public class PatrolBehaviorUIController extends Group
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   public void init(JavaFXMessager uiMessager, SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.uiMessager = uiMessager;
       this.sceneNode = sceneNode;
       this.behaviorMessager = behaviorMessager;
 
@@ -183,7 +182,6 @@ public class PatrolBehaviorUIController extends Group
    @FXML
    public void placeWaypoints()
    {
-      uiMessager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
       waypointPlacementStateMachine.start();
    }
 

@@ -38,7 +38,6 @@ import us.ihmc.ros2.Ros2Node;
  */
 public class BehaviorUI
 {
-   private final JavaFXMessager messager;
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -58,9 +57,6 @@ public class BehaviorUI
    {
       this.primaryStage = primaryStage;
 
-      messager = new SharedMemoryJavaFXMessager(BehaviorUI.API.create());
-      messager.startMessager();
-      
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       FXMLLoader loader = new FXMLLoader();
@@ -89,7 +85,7 @@ public class BehaviorUI
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
-      patrolBehaviorUIController.init(messager, subScene, behaviorMessager, robotModel);
+      patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
       directRobotUIController.init(ros2Node, robotModel);
 
       planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
@@ -122,8 +118,6 @@ public class BehaviorUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
-
-      ExceptionTools.handle(() -> messager.closeMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public static void claimEditing(Object claimingEditor)
@@ -136,20 +130,6 @@ public class BehaviorUI
       {
          BehaviorUI.ACTIVE_EDITOR = claimingEditor;
          LogTools.debug("editor activated: {}", claimingEditor.getClass().getSimpleName());
-      }
-   }
-
-   public static class API
-   {
-      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-      private static final Category Root = apiFactory.createRootCategory("Behavior");
-      private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
-
-      public static final Topic<FXUIStateMachine> ActiveStateMachine = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveStateMachine"));
-
-      public static final MessagerAPI create()
-      {
-         return apiFactory.getAPIAndCloseFactory();
       }
    }
 }
