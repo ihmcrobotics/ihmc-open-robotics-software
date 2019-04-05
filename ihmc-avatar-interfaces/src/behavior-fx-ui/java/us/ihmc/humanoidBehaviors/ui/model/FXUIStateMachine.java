@@ -27,20 +27,10 @@ public class FXUIStateMachine
    public final void transition(FXUIStateTransitionTrigger trigger)
    {
       transitions.get(trigger).transition(trigger);
-
-      if (trigger.equals(exitTransition))
-      {
-         deactivate();
-      }
    }
 
    public final void start()
    {
       transition(FXUIStateTransitionTrigger.START);
-   }
-
-   private final void deactivate()
-   {
-      messager.submitMessage(BehaviorUI.API.ActiveStateMachine, null);
    }
 }
