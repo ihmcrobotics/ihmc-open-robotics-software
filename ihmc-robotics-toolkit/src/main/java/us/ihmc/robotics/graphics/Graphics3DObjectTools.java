@@ -55,17 +55,31 @@ public class Graphics3DObjectTools
     */
    public static void addPlanarRegion(Graphics3DObject graphics3DObject, PlanarRegion planarRegion, AppearanceDefinition... appearances)
    {
+      double thickness = 1e-4;
+      addPlanarRegion(graphics3DObject, planarRegion, thickness, appearances);
+   }
+
+   /**
+    * Adds a PlanarRegion transforming from the current coordinate system.
+    * Uses the given appearances in order, one for each Polygon in the PlanarRegion. Then loops on the appearances.
+    * Extrudes the mesh downward in local frame by the given thickness
+    *
+    * @param planarRegion
+    */
+   public static void addPlanarRegion(Graphics3DObject graphics3DObject, PlanarRegion planarRegion, double thickness, AppearanceDefinition... appearances)
+   {
       int numberOfConvexPolygons = planarRegion.getNumberOfConvexPolygons();
 
       RigidBodyTransform transform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transform);
 
       graphics3DObject.transform(transform);
+      double extrusionHeight = - Math.max(thickness, 1e-4);
 
       for (int i = 0; i < numberOfConvexPolygons; i++)
       {
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
-         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.0001);
+         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, extrusionHeight);
          graphics3DObject.addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
       }
 

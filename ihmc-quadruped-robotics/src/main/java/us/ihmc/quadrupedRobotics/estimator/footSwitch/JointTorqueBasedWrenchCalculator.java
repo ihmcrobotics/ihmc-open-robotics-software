@@ -83,8 +83,6 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       wrench.setAngularPartX(footAngularForce.get(0));
       wrench.setAngularPartY(footAngularForce.get(1));
       wrench.setAngularPartZ(footAngularForce.get(2));
-
-      wrench.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    @Override

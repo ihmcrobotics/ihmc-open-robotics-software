@@ -147,4 +147,9 @@ public class Tuner extends VBox implements SliderboardListener
    {
       return inputNode.getValuePercent();
    }
+
+   public GuiParameter getParameter()
+   {
+      return parameter;
+   }
 }

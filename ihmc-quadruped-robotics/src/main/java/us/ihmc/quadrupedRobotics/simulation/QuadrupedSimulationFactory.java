@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.simulation;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -51,10 +52,10 @@ import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -276,6 +277,13 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
+
+         FloatingRootJointRobot simulationRobot = sdfRobot.get();
+         StateChangedListener<HighLevelControllerName> reinilizator = QuadrupedSimulationFactory.createSimulationStateEstimatorReinilizator(HighLevelControllerName.STAND_READY,
+                                                                                                                                                stateEstimator,
+                                                                                                                                                () -> simulationRobot.getRootJoint()
+                                                                                                                                                                     .getJointTransform3D());
+         controllerManager.registerHighLevelStateChangedListener(reinilizator);
          factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
       }
       else
@@ -491,9 +499,9 @@ public class QuadrupedSimulationFactory
       createContactableFeet();
       createContactablePlaneBodies();
       createFootSwitches();
-      createStateEstimator();
       createRealtimeRos2Node();
       createControllerManager();
+      createStateEstimator();
       createControllerNetworkSubscriber();
       createPoseCommunicator();
       setupYoVariableServer();
@@ -799,5 +807,39 @@ public class QuadrupedSimulationFactory
       {
          realtimeRos2Node.destroy();
       }
+   }
+
+   /**
+    * <b>For simulation only!</b>
+    * <p>
+    * Creates a listener to be attached to the controller. The listener will trigger when the
+    * controller state machine enters {@code controllerStateTrigger} for the first time. When
+    * triggering, the state estimator position estimation is reinilization to the actual one using the
+    * given supplier.
+    * </p>
+    * 
+    * @param controllerStateTrigger the enum value that should trigger the reinitialization.
+    * @param stateEstimator the instance of the state estimator to be automatically reinitialized.
+    * @param actualRootJointTransformSupplier the supplier of the root joint transofmr of the simulated robot.
+    * @return the reinitializator.
+    */
+   public static StateChangedListener<HighLevelControllerName> createSimulationStateEstimatorReinilizator(HighLevelControllerName controllerStateTrigger,
+                                                                                                          StateEstimatorController stateEstimator,
+                                                                                                          Supplier<RigidBodyTransform> actualRootJointTransformSupplier)
+   {
+      return new StateChangedListener<HighLevelControllerName>()
+      {
+         private boolean reinitilizeEstimator = true;
+   
+         @Override
+         public void stateChanged(HighLevelControllerName from, HighLevelControllerName to)
+         {
+            if (reinitilizeEstimator && to == controllerStateTrigger)
+            {
+               stateEstimator.initializeEstimator(actualRootJointTransformSupplier.get());
+               reinitilizeEstimator = false;
+            }
+         }
+      };
    }
 }

@@ -32,7 +32,6 @@ import us.ihmc.ros2.Ros2Node;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
-   // TODO : hold hand!
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double defaultRigidBodyWeight = 20.0;
@@ -168,15 +167,17 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
          numberOfValidKeyFrames = solution.getRobotConfigurations().size();
 
          Double keyFrameTimes = solution.getKeyFrameTimes();
-
-         if (keyFrameTimes.size() != solution.getKeyFrameTimes().size())
-            LogTools.warn("size of key frames are not matched : (given) " + keyFrameTimes.size() + ", (output) " + solution.getKeyFrameTimes().size());
-         if (solution.getSolutionQuality() < 0)
-            LogTools.warn("a key frame can not be accepted.");
-
          trajectoryTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
 
-         wholeBodyTrajectoryPublisher.publish(solution.getSuggestedControllerMessage());
+         if (planningResult == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            wholeBodyTrajectoryPublisher.publish(solution.getSuggestedControllerMessage());
+         }
+         else
+         {
+            LogTools.warn("planning result is not good. " + planningResult);
+         }
+
          deactivateKinematicsToolboxModule();
       }
    }

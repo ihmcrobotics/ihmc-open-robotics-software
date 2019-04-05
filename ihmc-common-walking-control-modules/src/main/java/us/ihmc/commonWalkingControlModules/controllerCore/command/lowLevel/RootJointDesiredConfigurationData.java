@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly, RootJointDesiredConfigurationDataBasics
 {
@@ -27,12 +28,9 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
       desiredAcceleration.reshape(0, 0);
    }
 
-   @Override
-   public void set(RootJointDesiredConfigurationDataReadOnly other)
+   public void set(RootJointDesiredConfigurationData other)
    {
-      desiredConfiguration.set(other.getDesiredConfiguration());
-      desiredVelocity.set(other.getDesiredVelocity());
-      desiredAcceleration.set(other.getDesiredAcceleration());
+      RootJointDesiredConfigurationDataBasics.super.set(other);
    }
 
    /**
@@ -136,5 +134,29 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
    public DenseMatrix64F getDesiredAcceleration()
    {
       return desiredAcceleration;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof RootJointDesiredConfigurationData)
+      {
+         RootJointDesiredConfigurationData other = (RootJointDesiredConfigurationData) obj;
+         if (!MatrixTools.equals(desiredConfiguration, other.desiredConfiguration))
+            return false;
+         if (!MatrixTools.equals(desiredVelocity, other.desiredVelocity))
+            return false;
+         if (!MatrixTools.equals(desiredAcceleration, other.desiredAcceleration))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }

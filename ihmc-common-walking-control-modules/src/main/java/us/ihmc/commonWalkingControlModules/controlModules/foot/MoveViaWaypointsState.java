@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyPoseController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -83,7 +85,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      if (!poseController.handleTrajectoryCommand(command.getSE3Trajectory()))
+      SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+      se3Trajectory.setSequenceId(command.getSequenceId());
+
+      if (!poseController.handleTrajectoryCommand(se3Trajectory))
       {
          poseController.holdCurrent();
       }
@@ -215,5 +220,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    public void onExit()
    {
       poseController.onExit();
+   }
+
+   @Override
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return poseController.pollStatusToReport();
    }
 }

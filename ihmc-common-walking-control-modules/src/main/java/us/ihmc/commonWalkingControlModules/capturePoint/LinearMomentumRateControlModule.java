@@ -5,6 +5,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
@@ -25,15 +26,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -80,8 +79,8 @@ public class LinearMomentumRateControlModule
    private final FramePoint2D capturePoint = new FramePoint2D();
    private final CapturePointCalculator capturePointCalculator;
 
-   private final FramePoint2D desiredCapturePoint = new FramePoint2D();
-   private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
+   private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
+   private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
 
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
@@ -133,8 +132,9 @@ public class LinearMomentumRateControlModule
    private boolean keepCoPInsideSupportPolygon;
    private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep.class);
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming.class);
+   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final TDoubleArrayList swingDurations = new TDoubleArrayList();
+   private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
@@ -208,8 +208,8 @@ public class LinearMomentumRateControlModule
    public void setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput input)
    {
       this.omega0 = input.getOmega0();
-      this.desiredCapturePoint.setIncludingFrame(input.getDesiredCapturePoint());
-      this.desiredCapturePointVelocity.setIncludingFrame(input.getDesiredCapturePointVelocity());
+      this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
+      this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
@@ -222,10 +222,15 @@ public class LinearMomentumRateControlModule
       {
          this.footsteps.add().set(input.getFootsteps().get(i));
       }
-      this.footstepTimings.clear();
-      for (int i = 0; i < input.getFootstepTimings().size(); i++)
+      this.swingDurations.reset();
+      for (int i = 0; i < input.getSwingDurations().size(); i++)
       {
-         this.footstepTimings.add().set(input.getFootstepTimings().get(i));
+         this.swingDurations.add(input.getSwingDurations().get(i));
+      }
+      this.transferDurations.reset();
+      for (int i = 0; i < input.getTransferDurations().size(); i++)
+      {
+         this.transferDurations.add(input.getTransferDurations().size());
       }
       this.finalTransferDuration = input.getFinalTransferDuration();
       this.initializeForStanding = input.getInitializeForStanding();
@@ -373,7 +378,7 @@ public class LinearMomentumRateControlModule
          icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
          for (int i = 0; i < footsteps.size(); i++)
          {
-            icpOptimizationController.addFootstepToPlan(footsteps.get(i), footstepTimings.get(i));
+            icpOptimizationController.addFootstepToPlan(footsteps.get(i), swingDurations.get(i), transferDurations.get(i));
          }
       }
 
@@ -479,7 +484,7 @@ public class LinearMomentumRateControlModule
       return success;
    }
 
-   private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FramePoint2DBasics desiredCapturePoint,
+   private static boolean checkInputs(FramePoint2DReadOnly capturePoint, FixedFramePoint2DBasics desiredCapturePoint,
                                       FixedFrameVector2DBasics desiredCapturePointVelocity, FixedFramePoint2DBasics perfectCoP,
                                       FixedFramePoint2DBasics perfectCMP)
    {
