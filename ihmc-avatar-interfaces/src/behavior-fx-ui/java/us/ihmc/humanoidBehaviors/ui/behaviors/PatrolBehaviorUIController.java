@@ -90,7 +90,6 @@ public class PatrolBehaviorUIController extends Group
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
          uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
          BehaviorUI.ORIENTATION_EDITOR.activate(latestWaypoint);
-         uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
@@ -105,7 +104,6 @@ public class PatrolBehaviorUIController extends Group
          teleopUpdateWaypoints();
 
          uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-         uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
@@ -138,14 +136,12 @@ public class PatrolBehaviorUIController extends Group
                   if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint position: {}", i);
-                     uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.SNAPPED_POSITION_EDITOR.activateForSinglePoint(waypoints.get(i));
 
                   }
                   else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
                   {
                      LogTools.debug("Editing patrol waypoint orientation: {}", i);
-                     uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
                      BehaviorUI.ORIENTATION_EDITOR.activateForSingleUse(waypoints.get(i));
                   }
                }

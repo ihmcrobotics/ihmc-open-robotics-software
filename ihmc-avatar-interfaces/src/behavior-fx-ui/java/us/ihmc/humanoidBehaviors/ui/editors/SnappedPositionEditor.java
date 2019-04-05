@@ -57,7 +57,6 @@ public class SnappedPositionEditor
       positionEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
          messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
       });
    }
 
