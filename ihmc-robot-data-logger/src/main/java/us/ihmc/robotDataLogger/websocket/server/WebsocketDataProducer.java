@@ -175,11 +175,11 @@ public class WebsocketDataProducer implements DataProducer
          try
          {
             int numberOfRegistryBuffers = nextBufferID;  // Next buffer ID is incremented the last time a registry was added
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize, numberOfRegistryBuffers));
    
-            channel = b.bind(port).sync().channel();
+            channel = serverBootstrap.bind(port).sync().channel();
    
             if(autoDiscoverable)
             {
