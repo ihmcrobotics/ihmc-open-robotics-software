@@ -10,6 +10,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
@@ -35,6 +36,8 @@
 								<CheckBox fx:id="hideNamespaces" onAction="#updateTree" text="Hide Namespaces" />
 								<ChoiceBox fx:id="statusFilter" />
 								<Text text="Status Filter" />
+								<Region HBox.hgrow="ALWAYS" />
+								<Button onAction="#loadFromFile" text="Load" />
 							</children>
 							<opaqueInsets>
 								<Insets right="10.0" />

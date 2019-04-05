@@ -327,12 +327,20 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons,
                                                                      registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(soleZUpFrames, icpOptimizationParameters,
-                                                                                       walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
-                                                                                       VISUALIZE, registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
-                                                                          bipedSupportPolygons, soleZUpFrames, contactableFeet, yoNamePrefix, VISUALIZE,
-                                                                          registry, yoGraphicsListRegistry);
+      if (walkingControllerParameters != null)
+      {
+         reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(soleZUpFrames, icpOptimizationParameters,
+                                                                                          walkingControllerParameters.getSteppingParameters(), yoNamePrefix,
+                                                                                          VISUALIZE, registry, yoGraphicsListRegistry);
+         planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, icpOptimizationParameters,
+                                                                             bipedSupportPolygons, soleZUpFrames, contactableFeet, yoNamePrefix, VISUALIZE,
+                                                                             registry, yoGraphicsListRegistry);
+      }
+      else
+      {
+         reachabilityConstraintHandler = null;
+         planarRegionConstraintProvider = null;
+      }
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -458,7 +466,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetPlanarRegionConstraint();
 
       solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
-      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+      if (reachabilityConstraintHandler != null)
+      {
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+      }
 
       if (planarRegionConstraintProvider != null)
       {
@@ -497,7 +508,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetPlanarRegionConstraint();
 
       solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
-      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+      if (reachabilityConstraintHandler != null)
+      {
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
+      }
 
       if (planarRegionConstraintProvider != null)
          planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport();
@@ -529,7 +543,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetPlanarRegionConstraint();
 
       solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
-      solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, upcomingFootstep));
+      if (reachabilityConstraintHandler != null)
+      {
+         solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, upcomingFootstep));
+      }
 
       if (planarRegionConstraintProvider != null)
       {
@@ -766,7 +783,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          submitFootstepTaskConditionsToSolver(omega0, includeFootsteps);
 
          solver.resetReachabilityConstraint();
-         solver.addReachabilityPolygon(reachabilityConstraintHandler.updateReachabilityConstraint());
+         if (reachabilityConstraintHandler != null)
+         {
+            solver.addReachabilityPolygon(reachabilityConstraintHandler.updateReachabilityConstraint());
+         }
       }
       else
       {
@@ -927,7 +947,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstep, unclippedFootstepSolution, wasFootstepAdjusted());
+      if (reachabilityConstraintHandler != null)
+      {
+         reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstep, unclippedFootstepSolution, wasFootstepAdjusted());
+      }
    }
 
    private void computeTimeInCurrentState(double currentTime)
