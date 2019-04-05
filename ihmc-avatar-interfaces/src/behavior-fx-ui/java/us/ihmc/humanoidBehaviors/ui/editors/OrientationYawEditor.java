@@ -135,10 +135,9 @@ public class OrientationYawEditor
    {
       if (!event.isConsumed() && event.isStillSincePress())
       {
-         LogTools.debug("mouseClicked {} t: {}", event.toString(),
-                        MathTools.roundToSignificantFigures(Conversions.nanosecondsToSeconds(LocalDateTime.now().getNano()), 5));
          if (activeEditor.peekActivated())
          {
+            LogTools.debug("consume mouseClicked");
             event.consume();
             if (event.getButton() == MouseButton.PRIMARY)
             {

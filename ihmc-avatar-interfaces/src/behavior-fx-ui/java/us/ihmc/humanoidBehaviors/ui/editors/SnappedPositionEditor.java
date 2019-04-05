@@ -133,9 +133,9 @@ public class SnappedPositionEditor
    {
       if (!event.isConsumed() && event.isStillSincePress())
       {
-         LogTools.debug("{} mouseClicked", getClass().getSimpleName());
          if (activeEditor.peekActivated())
          {
+            LogTools.debug("consume mouseClicked");
             event.consume();
             if (event.getButton() == MouseButton.PRIMARY)
             {
