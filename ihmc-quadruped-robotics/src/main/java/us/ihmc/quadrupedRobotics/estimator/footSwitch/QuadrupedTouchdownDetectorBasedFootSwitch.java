@@ -4,15 +4,16 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorB
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
 {
@@ -25,7 +26,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final YoBoolean trustTouchdownDetectors;
    private final WrenchCalculator wrenchCalculator;
 
-   private final YoFixedFrameWrench measuredWrench;
+   private final YoFrameVector3D measuredForce;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
                                                     double totalRobotWeight, YoVariableRegistry parentRegistry)
@@ -45,8 +46,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
 
-      measuredWrench = new YoFixedFrameWrench(robotQuadrant.getCamelCaseName() + "_MeasuredWrench", null,
-                                              ReferenceFrame.getWorldFrame(), registry);
+      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", null,
+                                          ReferenceFrame.getWorldFrame(), registry);
    }
 
    public YoBoolean getControllerSetFootSwitch()
@@ -63,7 +64,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void updateMeasurement()
    {
       wrenchCalculator.calculate();
-      measuredWrench.setMatchingFrame(wrenchCalculator.getWrench());
+      measuredForce.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
    }
 
    @Override
@@ -81,8 +82,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public double computeFootLoadPercentage()
    {
-      measuredWrench.checkExpressedInFrameMatch(ReferenceFrame.getWorldFrame());
-      return Math.abs(measuredWrench.getLinearPartZ()) / totalRobotWeight;
+      measuredForce.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      return Math.abs(measuredForce.getZ()) / totalRobotWeight;
    }
 
    @Override
