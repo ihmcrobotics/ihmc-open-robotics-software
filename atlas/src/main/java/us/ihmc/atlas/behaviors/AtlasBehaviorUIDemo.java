@@ -130,8 +130,6 @@ public class AtlasBehaviorUIDemo extends Application
    {
       super.stop();
 
-      ui.stop();
-
       Platform.exit();
    }
 

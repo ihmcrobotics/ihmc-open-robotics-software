@@ -58,8 +58,7 @@ public class PatrolBehaviorUIController extends Group
       this.behaviorMessager = behaviorMessager;
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
-      footstepPlanGraphic.start();
-      getChildren().add(footstepPlanGraphic.getNode());
+      getChildren().add(footstepPlanGraphic);
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);

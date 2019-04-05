@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
-import javafx.animation.AnimationTimer;
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -21,9 +22,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
-public class FootstepPlanGraphic extends AnimationTimer
+public class FootstepPlanGraphic extends Group
 {
    private final MeshView meshView = new MeshView();
+   private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -39,6 +41,10 @@ public class FootstepPlanGraphic extends AnimationTimer
          defaultFoothold.update();
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
+
+      getChildren().addAll(meshView);
+
+      animationTimer.start();
    }
 
    public void generateMeshes(ArrayList<Pair<RobotSide, Pose3D>> message)
@@ -91,18 +97,12 @@ public class FootstepPlanGraphic extends AnimationTimer
       }
    }
 
-   @Override
-   public void handle(long now)
+   private void handle(long now)
    {
       synchronized (this)
       {
          meshView.setMesh(mesh);
          meshView.setMaterial(material);
       }
-   }
-
-   public MeshView getNode()
-   {
-      return meshView;
    }
 }

@@ -37,8 +37,6 @@ public class AtlasBehaviorUI extends Application
    {
       super.stop();
 
-      ui.stop();
-
       Platform.exit();
    }
 
