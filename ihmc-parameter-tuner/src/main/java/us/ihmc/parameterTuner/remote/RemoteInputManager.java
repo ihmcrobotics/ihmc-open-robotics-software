@@ -24,6 +24,7 @@ import us.ihmc.parameterTuner.guiElements.main.ChangeCollector;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 
 public class RemoteInputManager implements ParameterGuiInterface
 {
@@ -41,15 +42,27 @@ public class RemoteInputManager implements ParameterGuiInterface
 
    public RemoteInputManager()
    {
-      updateListener = new ParameterUpdateListener();
-      YoVariableClient client = new YoVariableClient(updateListener);
+      this(null);
+   }
 
+   public RemoteInputManager(String serverAddress)
+   {
+      System.out.println("making manager");
+      updateListener = new ParameterUpdateListener();
       updateListener.addConnectionListener(connected -> {
          this.connected.set(connected);
          Platform.runLater(() -> reconnect.setDisable(connected));
       });
 
-      client.startWithHostSelector();
+      YoVariableClient client = new YoVariableClient(updateListener);
+      if (serverAddress == null)
+      {
+         client.startWithHostSelector();
+      }
+      else
+      {
+         client.start(serverAddress, DataServerSettings.DEFAULT_PORT);
+      }
       waitForConnection();
 
       reconnect.setOnAction(event -> {
