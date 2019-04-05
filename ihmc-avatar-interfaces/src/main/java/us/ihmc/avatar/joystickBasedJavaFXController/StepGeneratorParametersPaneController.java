@@ -1,12 +1,10 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingDuration;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingSwingHeight;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
-import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
+import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -26,20 +24,29 @@ public class StepGeneratorParametersPaneController
    @FXML
    private Slider trajectoryDurationSlider;
 
+   private final JoystickStepParametersProperty stepParametersProperty = new JoystickStepParametersProperty(this, "stepParameters");
+   
+   
    public StepGeneratorParametersPaneController()
    {
    }
 
    public void initialize(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters)
    {
-      swingHeightSlider.setValue(0.025);
-      swingDurationSlider.setValue(walkingControllerParameters.getDefaultSwingTime());
-      transferDurationSlider.setValue(walkingControllerParameters.getDefaultTransferTime());
+      JoystickStepParameters initialParameters = new JoystickStepParameters();
+      initialParameters.set(walkingControllerParameters);
+      initialParameters.setSwingHeight(0.025);
+      stepParametersProperty.set(initialParameters);
+
       trajectoryDurationSlider.setValue(1.0);
       swingHeightSlider.setLabelFormatter(StringConverterTools.metersToRoundedCentimeters());
-      messager.bindBidirectional(WalkingSwingHeight, swingHeightSlider.valueProperty(), createConverter(), true);
-      messager.bindBidirectional(WalkingSwingDuration, swingDurationSlider.valueProperty(), createConverter(), true);
-      messager.bindBidirectional(WalkingTransferDuration, transferDurationSlider.valueProperty(), createConverter(), true);
+      
+
+      stepParametersProperty.bindBidirectionalSwingHeightThreshold(swingHeightSlider.valueProperty());
+      stepParametersProperty.bindBidirectionalSwingDurationThreshold(swingDurationSlider.valueProperty());
+      stepParametersProperty.bindBidirectionalTransferDurationThreshold(transferDurationSlider.valueProperty());
+      
+      messager.bindBidirectional(StepGeneratorJavaFXTopics.SteppingParameters, stepParametersProperty, true);
       messager.bindBidirectional(WalkingTrajectoryDuration, trajectoryDurationSlider.valueProperty(), createConverter(), true);
    }
 

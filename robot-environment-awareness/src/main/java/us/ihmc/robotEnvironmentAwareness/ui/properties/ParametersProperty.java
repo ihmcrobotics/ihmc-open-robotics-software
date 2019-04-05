@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
 {
    private final Map<InvalidationListener, Field> fieldInvalidationListeners = new HashMap<>();
+   @SuppressWarnings("rawtypes")
    private final Map<InvalidationListener, EnumField> enumFieldInvalidationListeners = new HashMap<>();
 
    public ParametersProperty()
@@ -58,7 +59,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       field.addListener(binding);
    }
 
-   protected<E extends Enum<E>> void bindFieldBidirectionalToEnumProperty(Property<E> property, EnumField<E> field)
+   protected <E extends Enum<E>> void bindFieldBidirectionalToEnumProperty(Property<E> property, EnumField<E> field)
    {
       EnumBidirectionalBind<E> binding = new EnumBidirectionalBind<>(property, field);
       property.setValue(field.getEnum(getValue()));
@@ -213,8 +214,6 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          set(parameters, value.intValue());
       }
    }
-
-
 
    protected class EnumField<E extends Enum<E>> implements Observable, EnumGetter<E, T>, EnumSetter<E, T>
    {
@@ -385,7 +384,6 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
       booleanProperty.setValue(getNumberAsBoolean(field.getNumber(getValue())));
    }
 
-
    private class BooleanBidirectionalBind implements InvalidationListener
    {
       private final Property<Boolean> booleanProperty;
@@ -432,6 +430,7 @@ public abstract class ParametersProperty<T> extends SimpleObjectProperty<T>
          throw new RuntimeException("Unhandled number to set as boolean: " + intValue);
    }
 
+   @SuppressWarnings("rawtypes")
    @Override
    protected void fireValueChangedEvent()
    {
