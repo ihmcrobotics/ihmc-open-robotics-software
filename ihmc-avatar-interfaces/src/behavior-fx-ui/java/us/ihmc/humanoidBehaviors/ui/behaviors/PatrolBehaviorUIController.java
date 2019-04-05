@@ -47,6 +47,9 @@ public class PatrolBehaviorUIController extends Group
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private FootstepPlanGraphic footstepPlanGraphic;
 
+   private SnappedPositionEditor snappedPositionEditor;
+   private OrientationYawEditor orientationYawEditor;
+
    private FXUIStateMachine waypointPlacementStateMachine;
 
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
@@ -57,6 +60,9 @@ public class PatrolBehaviorUIController extends Group
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       footstepPlanGraphic.start();
       getChildren().add(footstepPlanGraphic.getNode());
+
+      snappedPositionEditor = new SnappedPositionEditor(sceneNode);
+      orientationYawEditor = new OrientationYawEditor(sceneNode);
 
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
          executorService.submit(() -> {
@@ -79,7 +85,7 @@ public class PatrolBehaviorUIController extends Group
       {
          PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
-         new OrientationYawEditor(sceneNode, latestWaypoint, exitType -> waypointPlacementStateMachine.transition(exitType));
+         orientationYawEditor.edit(latestWaypoint, exitType -> waypointPlacementStateMachine.transition(exitType));
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
@@ -103,7 +109,7 @@ public class PatrolBehaviorUIController extends Group
    {
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
-      new SnappedPositionEditor(sceneNode, waypointGraphic, exitType -> waypointPlacementStateMachine.transition(exitType));
+      snappedPositionEditor.edit(waypointGraphic, exitType -> waypointPlacementStateMachine.transition(exitType));
    }
 
    private final void mouseClicked(MouseEvent event)
@@ -123,7 +129,7 @@ public class PatrolBehaviorUIController extends Group
                {
                   LogTools.debug("Editing patrol waypoint position: {}", i);
                   placeWaypoints.setDisable(true);
-                  new SnappedPositionEditor(sceneNode, waypoints.get(i), exitType ->
+                  snappedPositionEditor.edit(waypoints.get(i), exitType ->
                   {
                      teleopUpdateWaypoints();
                      placeWaypoints.setDisable(false);
@@ -133,7 +139,7 @@ public class PatrolBehaviorUIController extends Group
                {
                   LogTools.debug("Editing patrol waypoint orientation: {}", i);
                   placeWaypoints.setDisable(true);
-                  new OrientationYawEditor(sceneNode, waypoints.get(i), exitType ->
+                  orientationYawEditor.edit(waypoints.get(i), exitType ->
                   {
                      teleopUpdateWaypoints();
                      placeWaypoints.setDisable(false);

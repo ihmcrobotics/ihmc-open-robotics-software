@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public class SnappedPositionEditor
 {
    private final Node sceneNode;
-   private final Consumer<FXUIStateTransitionTrigger> onExit;
+   private final PrivateAnimationTimer positioningAnimationTimer;
 
    // these are necessary to keep a consistent reference
    private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
@@ -31,11 +31,17 @@ public class SnappedPositionEditor
    private final Notification mouseRightClicked = new Notification();
 
    private PositionEditable selectedGraphic;
-   private PrivateAnimationTimer positioningAnimationTimer;
+   private Consumer<FXUIStateTransitionTrigger> onExit;
 
-   public SnappedPositionEditor(Node sceneNode, PositionEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   public SnappedPositionEditor(Node sceneNode)
    {
       this.sceneNode = sceneNode;
+
+      positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
+   }
+
+   public void edit(PositionEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   {
       this.selectedGraphic = selectedGraphic;
       this.onExit = onExit;
 
@@ -45,7 +51,6 @@ public class SnappedPositionEditor
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
       this.selectedGraphic.setMouseTransparent(true);
 
-      positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
       positioningAnimationTimer.start();
    }
 
