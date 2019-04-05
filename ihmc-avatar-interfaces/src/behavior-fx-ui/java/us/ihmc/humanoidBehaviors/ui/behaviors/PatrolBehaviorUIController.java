@@ -121,12 +121,11 @@ public class PatrolBehaviorUIController extends Group
    {
       if (!event.isConsumed() && event.isStillSincePress())
       {
-         LogTools.debug("mouseClicked {} t: {}", event.toString(),
-                        MathTools.roundToSignificantFigures(Conversions.nanosecondsToSeconds(LocalDateTime.now().getNano()), 5));
          if (activeEditor.get() == null)
          {
             if (event.getButton() == MouseButton.PRIMARY)
             {
+               LogTools.debug("consume mouseClicked");
                event.consume();
                PickResult pickResult = event.getPickResult();
                Node intersectedNode = pickResult.getIntersectedNode();
