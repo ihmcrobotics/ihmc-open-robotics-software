@@ -9,6 +9,8 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       return 0.5;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepLength()
    {
       return 0.45;
