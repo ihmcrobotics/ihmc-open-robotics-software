@@ -139,7 +139,6 @@ public class BehaviorUI
       private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
 
       public static final Topic<Object> ActiveEditor = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveEditor"));
-      public static final Topic<FXUIEditableGraphic> SelectedGraphic = Root.child(UI).topic(apiFactory.createTypedTopicTheme("SelectedGraphic"));
       public static final Topic<FXUIStateMachine> ActiveStateMachine = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveStateMachine"));
 
       public static final MessagerAPI create()

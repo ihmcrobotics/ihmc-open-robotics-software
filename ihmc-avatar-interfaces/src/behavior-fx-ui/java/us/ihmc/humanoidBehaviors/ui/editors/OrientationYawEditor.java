@@ -62,7 +62,6 @@ public class OrientationYawEditor
       orientationEditorStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
          messager.submitMessage(BehaviorUI.API.ActiveEditor, null);
-         messager.submitMessage(BehaviorUI.API.SelectedGraphic, null);
       });
    }
 
