@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
@@ -11,13 +12,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
@@ -25,11 +26,9 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PatrolBehaviorUIController extends Group
 {
@@ -41,8 +40,8 @@ public class PatrolBehaviorUIController extends Group
    @FXML private TextField remoteCurrentState;
 
    private JavaFXMessager uiMessager;
+   private SubScene sceneNode;
    private Messager behaviorMessager;
-   private AtomicReference<Object> activeEditor;
 
    private ArrayList<PatrolWaypointGraphic> waypoints = new ArrayList<>();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
@@ -50,9 +49,10 @@ public class PatrolBehaviorUIController extends Group
 
    private FXUIStateMachine waypointPlacementStateMachine;
 
-   public void init(JavaFXMessager uiMessager, Node sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(JavaFXMessager uiMessager, SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.uiMessager = uiMessager;
+      this.sceneNode = sceneNode;
       this.behaviorMessager = behaviorMessager;
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
@@ -70,17 +70,9 @@ public class PatrolBehaviorUIController extends Group
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
                                              index -> Platform.runLater(() -> remoteCurrentWaypointIndex.setText(index.toString())));
 
-      activeEditor = uiMessager.createInput(BehaviorUI.API.ActiveEditor, null);
-      uiMessager.registerTopicListener(BehaviorUI.API.ActiveEditor, value ->
-      {
-         if (value == null) // update the waypoint when any editor exits, may be a better way to do this
-         {
-            teleopUpdateWaypoints();
-         }
-      });
-
       waypointPlacementStateMachine = new FXUIStateMachine(uiMessager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
       {
+         placeWaypoints.setDisable(true);
          removeAllWaypointGraphics();
          goToNextWaypointPositionEdit();
       });
@@ -88,8 +80,7 @@ public class PatrolBehaviorUIController extends Group
       {
          PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
-         uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
-         BehaviorUI.ORIENTATION_EDITOR.activate(latestWaypoint);
+         new OrientationYawEditor(sceneNode, latestWaypoint, exitType -> waypointPlacementStateMachine.transition(exitType));
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
@@ -103,7 +94,7 @@ public class PatrolBehaviorUIController extends Group
 
          teleopUpdateWaypoints();
 
-         uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, null);
+         placeWaypoints.setDisable(false);
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
@@ -113,36 +104,41 @@ public class PatrolBehaviorUIController extends Group
    {
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypoints.size());
-      uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.SNAPPED_POSITION_EDITOR);
-      BehaviorUI.SNAPPED_POSITION_EDITOR.activate(waypointGraphic);
+      new SnappedPositionEditor(sceneNode, waypointGraphic, exitType -> waypointPlacementStateMachine.transition(exitType));
    }
 
    private final void mouseClicked(MouseEvent event)
    {
-      if (!event.isConsumed() && event.isStillSincePress())
+      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null)
       {
-         if (activeEditor.get() == null)
+         if (event.getButton() == MouseButton.PRIMARY)
          {
-            if (event.getButton() == MouseButton.PRIMARY)
+            LogTools.debug("consume mouseClicked");
+            event.consume();
+            PickResult pickResult = event.getPickResult();
+            Node intersectedNode = pickResult.getIntersectedNode();
+
+            for (int i = 0; i < waypoints.size(); i++)
             {
-               LogTools.debug("consume mouseClicked");
-               event.consume();
-               PickResult pickResult = event.getPickResult();
-               Node intersectedNode = pickResult.getIntersectedNode();
-
-               for (int i = 0; i < waypoints.size(); i++)
+               if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
                {
-                  if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
+                  LogTools.debug("Editing patrol waypoint position: {}", i);
+                  placeWaypoints.setDisable(true);
+                  new SnappedPositionEditor(sceneNode, waypoints.get(i), exitType ->
                   {
-                     LogTools.debug("Editing patrol waypoint position: {}", i);
-                     BehaviorUI.SNAPPED_POSITION_EDITOR.activateForSinglePoint(waypoints.get(i));
-
-                  }
-                  else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
+                     teleopUpdateWaypoints();
+                     placeWaypoints.setDisable(false);
+                  }); // TODO handle right click?
+               }
+               else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
+               {
+                  LogTools.debug("Editing patrol waypoint orientation: {}", i);
+                  placeWaypoints.setDisable(true);
+                  new OrientationYawEditor(sceneNode, waypoints.get(i), exitType ->
                   {
-                     LogTools.debug("Editing patrol waypoint orientation: {}", i);
-                     BehaviorUI.ORIENTATION_EDITOR.activateForSingleUse(waypoints.get(i));
-                  }
+                     teleopUpdateWaypoints();
+                     placeWaypoints.setDisable(false);
+                  });
                }
             }
          }
@@ -184,10 +180,10 @@ public class PatrolBehaviorUIController extends Group
       waypoints.remove(waypoint);
    }
 
-   @FXML public void placeWaypoints()
+   @FXML
+   public void placeWaypoints()
    {
       uiMessager.submitMessage(BehaviorUI.API.ActiveStateMachine, waypointPlacementStateMachine);
-
       waypointPlacementStateMachine.start();
    }
 

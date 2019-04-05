@@ -17,14 +17,13 @@ import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.model.interfaces.FXUIEditableGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -43,9 +42,7 @@ public class BehaviorUI
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
-   // Editors
-   public static SnappedPositionEditor SNAPPED_POSITION_EDITOR;
-   public static OrientationYawEditor ORIENTATION_EDITOR;
+   public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    private final LivePlanarRegionsGraphic planarRegionsGraphic;
    private final JavaFXRemoteRobotVisualizer robotVisualizer;
@@ -98,9 +95,6 @@ public class BehaviorUI
       planarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, robotModel);
       planarRegionsGraphic.start();
 
-      SNAPPED_POSITION_EDITOR = new SnappedPositionEditor(messager, subScene);
-      ORIENTATION_EDITOR = new OrientationYawEditor(messager, subScene);
-
       view3dFactory.addNodeToView(planarRegionsGraphic.getRoot());
       view3dFactory.addNodeToView(patrolBehaviorUIController);
 
@@ -132,13 +126,25 @@ public class BehaviorUI
       ExceptionTools.handle(() -> messager.closeMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
+   public static void claimEditing(Object claimingEditor)
+   {
+      if (BehaviorUI.ACTIVE_EDITOR != null)
+      {
+         throw new RuntimeException("Only one editor may be active at a time.");
+      }
+      else
+      {
+         BehaviorUI.ACTIVE_EDITOR = claimingEditor;
+         LogTools.debug("editor activated: {}", claimingEditor.getClass().getSimpleName());
+      }
+   }
+
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       private static final Category Root = apiFactory.createRootCategory("Behavior");
       private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
 
-      public static final Topic<Object> ActiveEditor = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveEditor"));
       public static final Topic<FXUIStateMachine> ActiveStateMachine = Root.child(UI).topic(apiFactory.createTypedTopicTheme("ActiveStateMachine"));
 
       public static final MessagerAPI create()
