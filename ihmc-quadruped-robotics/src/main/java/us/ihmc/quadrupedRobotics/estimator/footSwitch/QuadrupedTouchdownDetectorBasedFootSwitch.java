@@ -59,7 +59,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       necessaryTouchdownDetectors.addTouchdownDetector(touchdownDetector);
    }
 
-   private void updateMeasurement()
+   @Override
+   public void updateMeasurement()
    {
       wrenchCalculator.calculate();
       measuredWrench.setMatchingFrame(wrenchCalculator.getWrench());
@@ -68,8 +69,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public boolean hasFootHitGround()
    {
-      updateMeasurement();
-
       necessaryTouchdownDetectors.update();
       touchdownDetected.update(necessaryTouchdownDetectors.hasTouchedDown());
 
@@ -82,7 +81,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public double computeFootLoadPercentage()
    {
-      updateMeasurement();
       measuredWrench.checkExpressedInFrameMatch(ReferenceFrame.getWorldFrame());
       return Math.abs(measuredWrench.getLinearPartZ()) / totalRobotWeight;
    }

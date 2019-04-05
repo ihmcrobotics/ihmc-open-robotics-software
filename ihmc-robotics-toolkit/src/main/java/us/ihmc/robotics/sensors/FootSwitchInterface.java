@@ -7,6 +7,9 @@ import us.ihmc.mecano.spatial.Wrench;
 // TODO Nuke that interface
 public interface FootSwitchInterface
 {
+   default void updateMeasurement()
+   {}
+
    public abstract boolean hasFootHitGround();
    
    public abstract double computeFootLoadPercentage();
