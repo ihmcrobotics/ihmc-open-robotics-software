@@ -47,7 +47,6 @@ public class RemoteInputManager implements ParameterGuiInterface
 
    public RemoteInputManager(String serverAddress)
    {
-      System.out.println("making manager");
       updateListener = new ParameterUpdateListener();
       updateListener.addConnectionListener(connected -> {
          this.connected.set(connected);
