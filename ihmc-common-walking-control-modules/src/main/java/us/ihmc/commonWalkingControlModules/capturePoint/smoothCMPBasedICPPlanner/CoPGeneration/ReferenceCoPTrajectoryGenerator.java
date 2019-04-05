@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CoPPointPlanningParamete
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
@@ -303,8 +303,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.defaultTransferTime = defaultTransferTime;
    }
 
-   @Override
-   public void initializeParameters(SmoothCMPPlannerParameters parameters)
+   public void initializeParameters(ICPPlannerParameters parameters)
    {
       safeDistanceFromCoPToSupportEdges.set(parameters.getCoPSafeDistanceAwayFromSupportEdges());
       numberOfPointsPerFoot.set(parameters.getNumberOfCoPWayPointsPerFoot());

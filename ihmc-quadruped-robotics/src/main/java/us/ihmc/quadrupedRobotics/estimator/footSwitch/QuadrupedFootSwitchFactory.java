@@ -89,7 +89,7 @@ public class QuadrupedFootSwitchFactory
          wrenchCalculatorPairList.add(estimatedWrenchWeight, estimatedTorqueBasedWrenchCalculator);
          wrenchCalculatorPairList.add(desiredWrenchWeight, desiredTorqueBasedWrenchCalculator);
 
-         WeightedAverageWrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(robotQuadrant.getShortName(), registry, wrenchCalculatorPairList);
+         WrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(robotQuadrant.getShortName(), registry, wrenchCalculatorPairList);
 
          QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactableFoot,
                                                                                                               weightedAverageWrenchCalculator, totalRobotWeight,
@@ -104,7 +104,7 @@ public class QuadrupedFootSwitchFactory
             footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
-         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(weightedAverageWrenchCalculator, robotQuadrant, registry);
+         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(estimatedTorqueBasedWrenchCalculator, robotQuadrant, registry);
          footSwitch.addTouchdownDetector(estimatedForceBasedTouchDownDetection);
 
          footSwitches.set(robotQuadrant, footSwitch);
