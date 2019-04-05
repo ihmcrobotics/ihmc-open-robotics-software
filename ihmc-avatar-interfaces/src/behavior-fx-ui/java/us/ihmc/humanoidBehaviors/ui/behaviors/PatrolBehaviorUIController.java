@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
@@ -12,6 +11,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,6 +25,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -87,6 +89,7 @@ public class PatrolBehaviorUIController extends Group
          PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
          latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
          uiMessager.submitMessage(BehaviorUI.API.ActiveEditor, BehaviorUI.ORIENTATION_EDITOR);
+         BehaviorUI.ORIENTATION_EDITOR.activate(latestWaypoint);
          uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, latestWaypoint);
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
@@ -118,13 +121,15 @@ public class PatrolBehaviorUIController extends Group
 
    private final void mouseClicked(MouseEvent event)
    {
-      if (event.isStillSincePress())
+      if (!event.isConsumed() && event.isStillSincePress())
       {
-         LogTools.debug("{} mouseClicked", getClass().getSimpleName());
+         LogTools.debug("mouseClicked {} t: {}", event.toString(),
+                        MathTools.roundToSignificantFigures(Conversions.nanosecondsToSeconds(LocalDateTime.now().getNano()), 5));
          if (activeEditor.get() == null)
          {
             if (event.getButton() == MouseButton.PRIMARY)
             {
+               event.consume();
                PickResult pickResult = event.getPickResult();
                Node intersectedNode = pickResult.getIntersectedNode();
 
@@ -141,7 +146,7 @@ public class PatrolBehaviorUIController extends Group
                   {
                      LogTools.debug("Editing patrol waypoint orientation: {}", i);
                      uiMessager.submitMessage(BehaviorUI.API.SelectedGraphic, waypoints.get(i));
-                     BehaviorUI.ORIENTATION_EDITOR.activate();
+                     BehaviorUI.ORIENTATION_EDITOR.activateForSingleUse(waypoints.get(i));
                   }
                }
             }
