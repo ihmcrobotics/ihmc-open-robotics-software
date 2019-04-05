@@ -61,7 +61,6 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
 
    private final YoBoolean enableBodyPitchOscillation = new YoBoolean("enableBodyPitchOscillation", registry);
-   private final YoDouble timeStartingOscillation = new YoDouble("timeStartingOscillation", registry);
    private final DoubleParameter bodyPitchOscillationMagnitude = new DoubleParameter("bodyPitchOscillationMagnitude", registry, Math.toRadians(0.0));
    private final DoubleParameter bodyPitchOscillationFrequency = new DoubleParameter("bodyPitchOscillationFrequency", registry, 0.25);
    private final YoFunctionGenerator pitchOscillationGenerator = new YoFunctionGenerator("bodyPitchFunctionGenerator", registry);
