@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public final class LoadBearingCommand implements Command<LoadBearingCommand, LoadBearingMessage>
 {
+   private long sequenceId;
    /** If set to true this will load the contact point. Otherwise the rigid body will stop bearing load. */
    private boolean load = false;
 
@@ -42,6 +43,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    @Override
    public void set(LoadBearingCommand other)
    {
+      sequenceId = other.sequenceId;
       load = other.getLoad();
       coefficientOfFriction = other.getCoefficientOfFriction();
       bodyFrameToContactFrame.set(other.getBodyFrameToContactFrame());
@@ -51,6 +53,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    @Override
    public void setFromMessage(LoadBearingMessage message)
    {
+      sequenceId = message.getSequenceId();
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();
       message.getBodyFrameToContactFrame().get(bodyFrameToContactFrame);
@@ -60,6 +63,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    @Override
    public void clear()
    {
+      sequenceId = 0;
       load = false;
       coefficientOfFriction = 0.0;
       bodyFrameToContactFrame.setToZero();
@@ -82,5 +86,16 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    public Class<LoadBearingMessage> getMessageClass()
    {
       return LoadBearingMessage.class;
+   }
+
+   public void setSequenceId(long sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

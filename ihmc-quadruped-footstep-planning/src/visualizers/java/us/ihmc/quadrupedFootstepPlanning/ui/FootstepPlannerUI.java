@@ -34,6 +34,7 @@ import static us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.F
 public class FootstepPlannerUI
 {
    private static final boolean VERBOSE = true;
+   private static final boolean includeProcessView = true;
 
    private final JavaFXMessager messager;
    private final Stage primaryStage;
@@ -154,7 +155,7 @@ public class FootstepPlannerUI
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, ShowBodyPathTopic, ComputePathTopic, BodyPathDataTopic);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
 //      this.graphRenderer = new NodeOccupancyMapRenderer(messager);
-      this.footstepPlannerProcessViewer = new FootstepPlannerProcessViewer(messager);
+      this.footstepPlannerProcessViewer = includeProcessView ? new FootstepPlannerProcessViewer(messager) : null;
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
@@ -164,7 +165,8 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
 //      view3dFactory.addNodeToView(graphRenderer.getRoot());
-      view3dFactory.addNodeToView(footstepPlannerProcessViewer.getRoot());
+      if (includeProcessView)
+         view3dFactory.addNodeToView(footstepPlannerProcessViewer.getRoot());
 
       if(fullQuadrupedRobotModelFactory == null)
       {
@@ -207,7 +209,8 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
 //      graphRenderer.start();
-      footstepPlannerProcessViewer.start();
+      if (footstepPlannerProcessViewer != null)
+         footstepPlannerProcessViewer.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());
@@ -242,7 +245,8 @@ public class FootstepPlannerUI
       dataExporter.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      footstepPlannerProcessViewer.stop();
+      if (footstepPlannerProcessViewer != null)
+         footstepPlannerProcessViewer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();

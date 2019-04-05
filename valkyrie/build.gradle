@@ -28,7 +28,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
    compile group: "us.ihmc", name: "IHMCRosControl", version: "0.5.0", changing: true
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
@@ -63,26 +63,31 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: "source"
 }
 
-applicationName = "IHMCValkyrieAPI"
-mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
-applicationDefaultJvmArgs = ["-Xmx4g"]
+applicationName = "IHMCValkyrieJoystickApplication"
+mainClassName = "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication"
+
+task deployOCUApplications(dependsOn: installDist) {
+   doLast {
+      def ocuApplications = "ihmc_apps/valkyrie"
+      def home = new File(System.properties["user.home"])
+      def dest = new File(home, ocuApplications)
+      dest.deleteDir();
+      dest.mkdirs();
+      copy {
+         from "${buildDir}/install/" + applicationName
+         into dest
+      }
+
+      execute("chmod +x " + dest + "/bin/" + applicationName)
+
+      println "-------------------------------------------------------------------------"
+      println "------- Deployed files to: " + dest.getPath() + " -------"
+      println "-------------------------------------------------------------------------"
+   }
+}
 
 if (ihmc.isBuildRoot())
 {
-   startScripts {
-      outputs.upToDateWhen { false }
-
-      doLast {
-         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCValkyrieGazeboController")
-         simUnixScriptGazebo.text = unixScript.text.replace("IHMCValkyrieAPI", "IHMCValkyrieGazeboController").replace("us.ihmc.valkyrie.ValkyrieROSAPISimulator", "us.ihmc.valkyrie.gazebo.ValkyrieGazeboControllerFactory")
-         simUnixScriptGazebo.setExecutable(true)
-      }
-   }
-
-   applicationDistribution.from(startScripts.outputDir) {
-      into "bin"
-   }
-
    remotes {
       valkyrieRealtimeComputer {
          host = project.hasProperty("valkyrie_link_ip") ? "${valkyrie_link_ip}" : "invalid"

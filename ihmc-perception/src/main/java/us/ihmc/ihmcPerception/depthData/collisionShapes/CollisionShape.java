@@ -1,5 +1,6 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
+import us.ihmc.euclid.shape.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 
@@ -18,4 +19,6 @@ public abstract class CollisionShape
    }
 
    public abstract boolean contains(Point3D point);
+
+   public abstract Shape3D<?> getOrCreateShape3D();
 }

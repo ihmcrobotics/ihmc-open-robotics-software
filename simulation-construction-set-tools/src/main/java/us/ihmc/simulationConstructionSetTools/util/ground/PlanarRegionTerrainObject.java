@@ -139,7 +139,8 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private Graphics3DObject setupLinkGraphics()
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, appearance);
+      double thickness = Math.max(allowablePenetrationThickness, 1e-4);
+      Graphics3DObjectTools.addPlanarRegion(graphics3DObject, planarRegion, thickness, appearance);
       return graphics3DObject;
    }
 }

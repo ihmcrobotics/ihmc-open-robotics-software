@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class WaypointBasedTrajectoryCommand
       implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
 {
+   private long sequenceId;
    /** This is the unique hash code of the end-effector to be solved for. */
    private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
@@ -33,6 +34,7 @@ public class WaypointBasedTrajectoryCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       endEffectorHashCode = 0;
       endEffector = null;
       waypointTimes.clear();
@@ -46,6 +48,8 @@ public class WaypointBasedTrajectoryCommand
    public void set(WaypointBasedTrajectoryCommand other)
    {
       clear();
+
+      sequenceId = other.sequenceId;
 
       endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
@@ -75,6 +79,7 @@ public class WaypointBasedTrajectoryCommand
    {
       clear();
 
+      sequenceId = message.getSequenceId();
       endEffectorHashCode = message.getEndEffectorHashCode();
       if (rigidBodyNamedBasedHashMap == null)
          endEffector = null;
@@ -148,5 +153,11 @@ public class WaypointBasedTrajectoryCommand
    public boolean isCommandValid()
    {
       return getNumberOfWaypoints() > 0;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

@@ -47,6 +47,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -105,6 +106,7 @@ public class AtlasAllocationTest
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
       allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
+      allocationProfiler.excludeAllocationsInsideMethod(LogTools.class.getName() + ".warn");
       
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 

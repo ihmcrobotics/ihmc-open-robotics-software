@@ -8,5 +8,5 @@ vis_graph_with_a_star_timeout 5.0
 quadruped_start_position -0.087 -1.0 0.001
 quadruped_goal_position 11.125 10.000 0.001
 quadruped_start_yaw 1.5707
-quadruped_planner_status test
-quadruped_timeout 20.0
+quadruped_timeout 30.0
+quadruped_planner_status dev

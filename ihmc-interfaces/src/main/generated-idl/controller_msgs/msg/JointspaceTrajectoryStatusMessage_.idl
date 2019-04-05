@@ -1,0 +1,60 @@
+#ifndef __controller_msgs__msg__JointspaceTrajectoryStatusMessage__idl__
+#define __controller_msgs__msg__JointspaceTrajectoryStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * The trajectory input was received and accepted, the execution just started.
+       */
+      const octet TRAJECTORY_EXECUTION_STATUS_STARTED =
+      0;
+
+      /**
+       * The trajectory input was received, accepted, and its execution just finished.
+       */
+      const octet TRAJECTORY_EXECUTION_STATUS_COMPLETED =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * The walking controller uses this message to report when it completed the execution of a trajectory message.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::JointspaceTrajectoryStatusMessage_")
+      struct JointspaceTrajectoryStatusMessage
+      {
+        /**
+         * Unique ID of the trajectory message this status refers to.
+         */
+        unsigned long sequence_id;
+        /**
+         * Refers to the names of the joints that executed the trajectory.
+         */
+        sequence<string> joint_names;
+        /**
+         * The current status for the trajectory execution.
+         */
+        @defaultValue(value=255)
+        octet trajectory_execution_status;
+        /**
+         * Time in trajectory in seconds.
+         */
+        double timestamp;
+        /**
+         * The desired positions of the joints as sent to the controller.
+         */
+        sequence<double> desired_joint_positions;
+        /**
+         * The positions of where the joints actually arrived when the trajectory finished.
+         */
+        sequence<double> actual_joint_positions;
+      };
+    };
+  };
+};
+
+#endif
