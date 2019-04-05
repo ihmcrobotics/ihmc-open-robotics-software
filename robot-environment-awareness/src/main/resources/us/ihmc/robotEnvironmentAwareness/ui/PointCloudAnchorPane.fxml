@@ -28,7 +28,7 @@
                   <VBox>
                      <children>
                         <Label text="Number of scans:" />
-                        <Slider fx:id="scanHistorySizeSlider" blockIncrement="1.0" majorTickUnit="50.0" max="1000.0" minorTickCount="1" prefHeight="38.0" prefWidth="492.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" />
+                        <Slider fx:id="scanHistorySizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="150.0" minorTickCount="4" prefHeight="38.0" prefWidth="492.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50.0" />
                      </children>
                   </VBox>
                </children>
