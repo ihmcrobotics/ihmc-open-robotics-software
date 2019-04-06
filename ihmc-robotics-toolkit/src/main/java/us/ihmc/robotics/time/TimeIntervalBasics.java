@@ -1,6 +1,6 @@
 package us.ihmc.robotics.time;
 
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 
 public interface TimeIntervalBasics extends TimeIntervalReadOnly
 {
@@ -21,12 +21,16 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
       setInterval(Double.NaN, Double.NaN);
    }
 
-   void setInterval(double startTime, double endTime);
+   default void setInterval(double startTime, double endTime)
+   {
+      setStartTime(startTime);
+      setEndTime(endTime);
+      checkInterval();
+   }
 
    default void set(TimeIntervalReadOnly timeInterval)
    {
       setInterval(timeInterval.getStartTime(), timeInterval.getEndTime());
-      checkInterval();
    }
 
    default TimeIntervalBasics shiftInterval(double shiftTime)
@@ -35,13 +39,10 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
       return this;
    }
 
-   default boolean epsilonEquals(TimeInterval other, double epsilon)
-   {
-      return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
-   }
 
-   default boolean intervalContains(double time)
+   @Override
+   default String toString()
    {
-      return MathTools.intervalContains(time, getStartTime(), getEndTime());
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
    }
 }
