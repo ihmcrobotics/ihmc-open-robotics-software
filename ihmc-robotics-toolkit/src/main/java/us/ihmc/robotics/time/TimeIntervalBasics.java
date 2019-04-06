@@ -39,10 +39,4 @@ public interface TimeIntervalBasics extends TimeIntervalReadOnly
       return this;
    }
 
-
-   @Override
-   default String toString()
-   {
-      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
-   }
 }

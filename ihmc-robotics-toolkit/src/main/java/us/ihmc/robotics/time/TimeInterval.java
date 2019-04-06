@@ -1,5 +1,7 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+
 public class TimeInterval implements TimeIntervalBasics
 {
    private double startTime;
@@ -47,5 +49,11 @@ public class TimeInterval implements TimeIntervalBasics
    public void setEndTime(double endTime)
    {
       this.endTime = endTime;
+   }
+
+   @Override
+   public String toString()
+   {
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
    }
 }
