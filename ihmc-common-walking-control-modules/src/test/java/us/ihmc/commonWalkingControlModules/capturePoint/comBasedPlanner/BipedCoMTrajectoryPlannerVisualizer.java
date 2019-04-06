@@ -790,21 +790,9 @@ public class BipedCoMTrajectoryPlannerVisualizer
       combinedFeet.update();
    }
 
-   private interface StepGetter
+   interface StepGetter
    {
       List<BipedTimedStep> getSteps(SideDependentList<MovingReferenceFrame> soleFrames, Graphics3DObject graphics3DObject);
-   }
-
-   @Test
-   public void testFancySteps()
-   {
-      new BipedCoMTrajectoryPlannerVisualizer(BipedCoMTrajectoryPlannerVisualizer::createFancySteps);
-   }
-
-   @Test
-   public void testRunningSteps()
-   {
-      new BipedCoMTrajectoryPlannerVisualizer(BipedCoMTrajectoryPlannerVisualizer::createSteps);
    }
 
    public static void main(String[] args)
