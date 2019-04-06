@@ -1,16 +1,17 @@
 package us.ihmc.quadrupedRobotics.planning.icp;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class QuadrupedContactSequenceUpdaterTest
       double nominalWidth = 0.5;
 
       QuadrantDependentList<MovingReferenceFrame> soleFrames = DCMPlanningTestTools.createSimpleSoleFrames(nominalLength, nominalWidth);
-      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20);
+      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20, new YoVariableRegistry("registry"), null);
 
       List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -70,7 +71,7 @@ public class QuadrupedContactSequenceUpdaterTest
       double nominalWidth = 0.5;
 
       QuadrantDependentList<MovingReferenceFrame> soleFrames = DCMPlanningTestTools.createSimpleSoleFrames(nominalLength, nominalWidth);
-      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20);
+      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20, new YoVariableRegistry("registry"), null);
 
       List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -161,8 +162,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(0.0 - timeInPhase, contactSequence.get(0).getTimeInterval().getStartTime(), epsilon);
-      assertEquals(0.5 - timeInPhase, contactSequence.get(0).getTimeInterval().getEndTime(), epsilon);
+      assertEquals(0.0, contactSequence.get(0).getTimeInterval().getStartTime(), epsilon);
+      assertEquals(0.5, contactSequence.get(0).getTimeInterval().getEndTime(), epsilon);
 
       // test second contact state
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(1).getContactState());
@@ -176,8 +177,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(0.5 - timeInPhase, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.0 - timeInPhase, contactSequence.get(1).getTimeInterval().getEndTime(), epsilon);
+      assertEquals(0.5, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
+      assertEquals(1.0, contactSequence.get(1).getTimeInterval().getEndTime(), epsilon);
 
       // test final contact state
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(2).getContactState());
@@ -194,7 +195,7 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            contactSequence.get(2).getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, -nominalWidth / 2.0, 0.0),
                                                            contactSequence.get(2).getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.0 - timeInPhase, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
+      assertEquals(1.0, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
 
    }
@@ -209,7 +210,7 @@ public class QuadrupedContactSequenceUpdaterTest
       double currentTime = 13.7;
 
       QuadrantDependentList<MovingReferenceFrame> soleFrames = DCMPlanningTestTools.createSimpleSoleFrames(nominalLength, nominalWidth);
-      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20);
+      QuadrupedContactSequenceUpdater contactSequenceUpdater = new QuadrupedContactSequenceUpdater(soleFrames, 4, 20, new YoVariableRegistry("registry"), null);
 
       List<RobotQuadrant> currentFeetInContact = new ArrayList<>();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -263,8 +264,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(0.0, firstContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(0.5, firstContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime, firstContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 0.5, firstContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       // test second contact state
       QuadrupedContactPhase secondContactPhase = contactSequence.get(1);
@@ -279,8 +280,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(0.5, secondContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(0.75, secondContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 0.5, secondContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 0.75, secondContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase thirdContactPhase = contactSequence.get(2);
       assertEquals(ContactState.IN_CONTACT, thirdContactPhase.getContactState());
@@ -291,8 +292,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            thirdContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            thirdContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(0.75, thirdContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.0, thirdContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 0.75, thirdContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.0, thirdContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase fourthContactPhase = contactSequence.get(3);
       assertEquals(ContactState.IN_CONTACT, fourthContactPhase.getContactState());
@@ -306,8 +307,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            fourthContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            fourthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(1.0, fourthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.1, fourthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.0, fourthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.1, fourthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase fifthContactPhase = contactSequence.get(4);
       assertEquals(ContactState.IN_CONTACT, fifthContactPhase.getContactState());
@@ -319,8 +320,8 @@ public class QuadrupedContactSequenceUpdaterTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            fifthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
 
-      assertEquals(1.1, fifthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.25, fifthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.1, fifthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.25, fifthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase sixthContactPhase = contactSequence.get(5);
       assertEquals(ContactState.IN_CONTACT, sixthContactPhase.getContactState());
@@ -334,8 +335,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            sixthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            sixthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.25, sixthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.35, sixthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.25, sixthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.35, sixthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase seventhContactPhase = contactSequence.get(6);
       assertEquals(ContactState.IN_CONTACT, seventhContactPhase.getContactState());
@@ -346,8 +347,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            seventhContactPhase.getSolePosition(RobotQuadrant.FRONT_LEFT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            seventhContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.35, seventhContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.6, seventhContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime +1.35, seventhContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.6, seventhContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase eighthContactPhase = contactSequence.get(7);
       assertEquals(ContactState.IN_CONTACT, eighthContactPhase.getContactState());
@@ -361,8 +362,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            eighthContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            eighthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.6, eighthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.85, eighthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.6, eighthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.85, eighthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       QuadrupedContactPhase ninthContactPhase = contactSequence.get(8);
       assertEquals(ContactState.IN_CONTACT, ninthContactPhase.getContactState());
@@ -379,7 +380,7 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            ninthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.75 * stepLength, nominalWidth / 2.0, 0.0),
                                                            ninthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(1.85, ninthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.85, ninthContactPhase.getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, ninthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       double timeInPhase = 0.25;
@@ -400,8 +401,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(firstContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(-timeInPhase, firstContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(0.5 - timeInPhase, firstContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime, firstContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 0.5, firstContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       // test second contact state
       secondContactPhase = contactSequence.get(1);
@@ -416,8 +417,8 @@ public class QuadrupedContactSequenceUpdaterTest
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.FRONT_RIGHT));
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_LEFT));
       assertTrue(secondContactPhase.getFeetInContact().contains(RobotQuadrant.HIND_RIGHT));
-      assertEquals(0.5 - timeInPhase, secondContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(0.75 - timeInPhase, secondContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 0.5, secondContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 0.75, secondContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       thirdContactPhase = contactSequence.get(2);
       assertEquals(ContactState.IN_CONTACT, thirdContactPhase.getContactState());
@@ -428,8 +429,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            thirdContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            thirdContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(0.75 - timeInPhase, thirdContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.0 - timeInPhase, thirdContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 0.75, thirdContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.0, thirdContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       fourthContactPhase = contactSequence.get(3);
       assertEquals(ContactState.IN_CONTACT, fourthContactPhase.getContactState());
@@ -443,8 +444,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            fourthContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            fourthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(1.0 - timeInPhase, fourthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.1 - timeInPhase, fourthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.0, fourthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.1, fourthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       fifthContactPhase = contactSequence.get(4);
       assertEquals(ContactState.IN_CONTACT, fifthContactPhase.getContactState());
@@ -456,8 +457,8 @@ public class QuadrupedContactSequenceUpdaterTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0, nominalWidth / 2.0, 0.0),
                                                            fifthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
 
-      assertEquals(1.1 - timeInPhase, fifthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.25 - timeInPhase, fifthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.1, fifthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.25, fifthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       sixthContactPhase = contactSequence.get(5);
       assertEquals(ContactState.IN_CONTACT, sixthContactPhase.getContactState());
@@ -471,8 +472,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            sixthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            sixthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.25 - timeInPhase, sixthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.35 - timeInPhase, sixthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.25, sixthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.35, sixthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       seventhContactPhase = contactSequence.get(6);
       assertEquals(ContactState.IN_CONTACT, seventhContactPhase.getContactState());
@@ -483,8 +484,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            seventhContactPhase.getSolePosition(RobotQuadrant.FRONT_LEFT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            seventhContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.35 - timeInPhase, seventhContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.6 - timeInPhase, seventhContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.35, seventhContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.6, seventhContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       eighthContactPhase = contactSequence.get(7);
       assertEquals(ContactState.IN_CONTACT, eighthContactPhase.getContactState());
@@ -498,8 +499,8 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            eighthContactPhase.getSolePosition(RobotQuadrant.FRONT_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.25 * stepLength, -nominalWidth / 2.0, 0.0),
                                                            eighthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
-      assertEquals(1.6 - timeInPhase, eighthContactPhase.getTimeInterval().getStartTime(), epsilon);
-      assertEquals(1.85 - timeInPhase, eighthContactPhase.getTimeInterval().getEndTime(), epsilon);
+      assertEquals(currentTime + 1.6, eighthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.85, eighthContactPhase.getTimeInterval().getEndTime(), epsilon);
 
       ninthContactPhase = contactSequence.get(8);
       assertEquals(ContactState.IN_CONTACT, ninthContactPhase.getContactState());
@@ -516,7 +517,7 @@ public class QuadrupedContactSequenceUpdaterTest
                                                            ninthContactPhase.getSolePosition(RobotQuadrant.HIND_RIGHT), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(-nominalLength / 2.0 + 1.75 * stepLength, nominalWidth / 2.0, 0.0),
                                                            ninthContactPhase.getSolePosition(RobotQuadrant.HIND_LEFT), epsilon);
-      assertEquals(1.85 - timeInPhase, ninthContactPhase.getTimeInterval().getStartTime(), epsilon);
+      assertEquals(currentTime + 1.85, ninthContactPhase.getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, ninthContactPhase.getTimeInterval().getEndTime(), epsilon);
    }
 
