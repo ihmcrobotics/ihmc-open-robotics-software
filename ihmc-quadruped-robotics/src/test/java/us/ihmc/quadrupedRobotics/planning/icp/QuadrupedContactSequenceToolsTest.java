@@ -13,8 +13,8 @@ import us.ihmc.robotics.time.TimeInterval;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class QuadrupedContactSequenceToolsTest
 {
@@ -44,12 +44,14 @@ public class QuadrupedContactSequenceToolsTest
          List<RobotQuadrant> feetInContact = getRandomFeetInContact(random);
          QuadrantDependentList<FramePoint3D> solePositions = getRandomSolePositions(random, nominalWidth, nominalLength);
 
+         QuadrupedContactSequenceTools.setDebug(true);
          QuadrupedContactSequenceTools.trimPastContactSequences(contactSequence, currentTime, feetInContact, solePositions);
 
          int sequenceIndex = 0;
          while (sequenceIndex < contactSequenceExpected.size())
          {
-            if (contactSequenceExpected.get(sequenceIndex).getTimeInterval().getStartTime() > currentTime)
+            if (contactSequenceExpected.get(sequenceIndex).getTimeInterval().getStartTime() >= currentTime ||
+                  contactSequenceExpected.get(sequenceIndex).getTimeInterval().getEndTime() < currentTime)
                contactSequenceExpected.remove(sequenceIndex);
             else
                sequenceIndex++;
@@ -67,31 +69,43 @@ public class QuadrupedContactSequenceToolsTest
          while (contactSequenceExpected.size() > phasesToKeep + 1)
             contactSequenceExpected.remove(0);
 
-         QuadrupedContactPhase lastContactPhase = contactSequenceExpected.getLast();
-         if (QuadrupedContactSequenceTools.isEqualContactState(lastContactPhase.getFeetInContact(), feetInContact))
+         if (contactSequenceExpected.isEmpty())
          {
-            // extend current contact phase
-            QuadrupedContactPhase contactPhase = lastContactPhase;
-            contactPhase.setSolePositions(solePositions);
-         }
-         else
-         {
-            // end previous contact phase
-            lastContactPhase.getTimeInterval().setEndTime(currentTime);
-            contactSequenceExpected.remove(0);
-
             QuadrupedContactPhase contactPhase = contactSequenceExpected.add();
-            contactPhase.getTimeInterval().setStartTime(currentTime);
+            contactPhase.getTimeInterval().setInterval(currentTime, currentTime);
             contactPhase.setFeetInContact(feetInContact);
             contactPhase.setSolePositions(solePositions);
 
             contactPhase.update();
          }
+         else
+         {
+            QuadrupedContactPhase lastContactPhase = contactSequenceExpected.getLast();
+            if (QuadrupedContactSequenceTools.isEqualContactState(lastContactPhase.getFeetInContact(), feetInContact))
+            {
+               // extend current contact phase
+               QuadrupedContactPhase contactPhase = lastContactPhase;
+               contactPhase.setSolePositions(solePositions);
+            }
+            else
+            {
+               // end previous contact phase
+               lastContactPhase.getTimeInterval().setEndTime(currentTime);
+               contactSequenceExpected.remove(0);
 
-         assertEquals(contactSequenceExpected.size(), contactSequence.size());
+               QuadrupedContactPhase contactPhase = contactSequenceExpected.add();
+               contactPhase.getTimeInterval().setInterval(currentTime, currentTime);
+               contactPhase.setFeetInContact(feetInContact);
+               contactPhase.setSolePositions(solePositions);
+
+               contactPhase.update();
+            }
+         }
+
+         assertEquals("iter " + iter + " failed.", contactSequenceExpected.size(), contactSequence.size());
          for (int i = 0; i < contactSequenceExpected.size(); i++)
          {
-            DCMPlanningTestTools.assertQuadrupedContactPhasesEqual(contactSequenceExpected.get(i), contactSequence.get(i), epsilon);
+            DCMPlanningTestTools.assertQuadrupedContactPhasesEqual("iter " + iter + " failed.", contactSequenceExpected.get(i), contactSequence.get(i), epsilon);
          }
       }
    }
@@ -157,17 +171,15 @@ public class QuadrupedContactSequenceToolsTest
          QuadrupedContactPhase phase = contactSequence.add();
          packRandomContactPhase(phase, random, startTime, duration, nominalWidth, nominalLength);
 
-         startTime = phase.getTimeInterval().getStartTime();
+         startTime = phase.getTimeInterval().getEndTime();
       }
 
       return contactSequence;
    }
 
-   private void packRandomContactPhase(QuadrupedContactPhase phase, Random random, double lastStartTime, double duration, double nominalWidth,
+   private void packRandomContactPhase(QuadrupedContactPhase phase, Random random, double startTime, double duration, double nominalWidth,
                                        double nominalLength)
    {
-      double phaseDifference = RandomNumbers.nextDouble(random, 0.0, 0.5);
-      double startTime = lastStartTime + phaseDifference;
       double endTime = startTime + duration;
       phase.setTimeInterval(new TimeInterval(startTime, endTime));
 
