@@ -1,19 +1,19 @@
 package us.ihmc.atlas.networkProcessor.modules.mocap;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import optiTrack.MocapMarker;
 import optiTrack.MocapRigidBody;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToPelvisFrameConverter;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -24,7 +24,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 @Disabled
 public class MocapToPelvisFrameConverterTest
@@ -46,7 +45,6 @@ public class MocapToPelvisFrameConverterTest
          ThreadTools.sleepForever();
       }
 
-      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -55,8 +53,8 @@ public class MocapToPelvisFrameConverterTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      ReferenceFrame pelvisFrame = ReferenceFrame.constructFrameWithUnchangingTranslationFromParent("pelvisFrame", ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 0.0, 0.0));
-      ReferenceFrame mocapFrame = ReferenceFrame.constructFrameWithUnchangingTranslationFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, 1.0));
+      ReferenceFrame pelvisFrame = ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent("pelvisFrame", ReferenceFrame.getWorldFrame(), new Vector3D(1.0, 0.0, 0.0));
+      ReferenceFrame mocapFrame = ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), new Vector3D(0.0, 0.0, 1.0));
       MocapRigidBody markerRigidBody = createMocapRigidBody(pelvisFrame, mocapFrame);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();

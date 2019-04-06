@@ -47,9 +47,9 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotPhysicalProperties;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
@@ -72,7 +72,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
       {
-         PrintTools.info(AtlasJointMap.class, "Running with torque and velocity limits disabled.");
+         LogTools.info("Running with torque and velocity limits disabled.");
       }
    }
 
