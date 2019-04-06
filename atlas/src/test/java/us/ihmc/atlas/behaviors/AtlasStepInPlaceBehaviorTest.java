@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
+@SuppressWarnings("unused")
 @Tag("humanoid-behaviors")
 public class AtlasStepInPlaceBehaviorTest
 {
