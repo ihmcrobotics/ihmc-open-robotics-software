@@ -21,9 +21,13 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
 
    private final WrenchCalculator wrenchCalculator;
 
-   public ForceBasedTouchDownDetection(WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry)
+   private final boolean dontDetectTouchdownIfAtJointLimit;
+
+   public ForceBasedTouchDownDetection(WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant,
+                                       boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry parentRegistry)
    {
       this.wrenchCalculator = wrenchCalculator;
+      this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
       String prefix = robotQuadrant.getCamelCaseName() + name;
       registry = new YoVariableRegistry(prefix);
 
@@ -46,7 +50,10 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       footForce.setIncludingFrame(wrenchCalculator.getWrench().getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ());
-      isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
+      if (dontDetectTouchdownIfAtJointLimit && wrenchCalculator.isTorquingIntoJointLimit())
+         isInContact.set(false);
+      else
+         isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
    }
 
    public void reset()

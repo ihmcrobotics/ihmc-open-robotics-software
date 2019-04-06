@@ -3,9 +3,11 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -18,6 +20,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
 {
+
    private static final int defaultGlitchWindow = 10;
 
    private final ContactablePlaneBody foot;
@@ -74,7 +77,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       necessaryTouchdownDetectors.update();
       touchdownDetected.update(necessaryTouchdownDetectors.hasTouchedDown());
 
-      if(trustTouchdownDetectors.getBooleanValue())
+      if (trustTouchdownDetectors.getBooleanValue())
          return touchdownDetected.getBooleanValue();
       else
          return controllerThinksHasTouchedDown.getBooleanValue();
@@ -127,4 +130,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       necessaryTouchdownDetectors.reset();
       touchdownDetected.set(false);
    }
+
+
 }

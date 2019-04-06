@@ -18,6 +18,8 @@ import java.util.List;
 
 public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 {
+   private static final double jointEpsilon = 5e-2;
+
    private final Wrench wrench = new Wrench();
 
    private final DenseMatrix64F linearPartOfJacobian = new DenseMatrix64F(3, 3);
@@ -33,9 +35,12 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    private final DenseMatrix64F jointTorques = new DenseMatrix64F(3, 1);
 
    private final GeometricJacobian footJacobian;
+   private final List<OneDoFJointBasics> joints;
    private final List<JointTorqueProvider> jointTorqueProviders;
 
    private final String prefix;
+
+   private boolean isTorquingIntoJoint = false;
 
    public JointTorqueBasedWrenchCalculator(String prefix, FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame,
                                            List<JointTorqueProvider> jointTorqueProviders)
@@ -45,6 +50,8 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       RigidBodyBasics body = robotModel.getRootBody();
       RigidBodyBasics foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
+
+      joints = robotModel.getLegJointsList(robotQuadrant);
 
       wrench.setToZero(ReferenceFrame.getWorldFrame());
 
@@ -63,7 +70,11 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    public void calculate()
    {
       for(int i = 0; i < jointTorqueProviders.size(); i++)
+      {
          jointTorques.set(i, 0, jointTorqueProviders.get(i).getTorque());
+         if (isTorquingIntoJointLimit(joints.get(i), jointTorqueProviders.get(i).getTorque()))
+            isTorquingIntoJoint = true;
+      }
 
       footJacobian.compute();
       DenseMatrix64F jacobianMatrix = footJacobian.getJacobianMatrix();
@@ -95,6 +106,25 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    public String getName()
    {
       return prefix + "JointTorqueWrenchCalculator";
+   }
+
+   private boolean isTorquingIntoJointLimit(OneDoFJointBasics joint, double torque)
+   {
+      double q = joint.getQ();
+      double jointLimitLower = joint.getJointLimitLower();
+      double jointLimitUpper = joint.getJointLimitUpper();
+
+      if (q > jointLimitUpper - jointEpsilon)
+         return Math.signum(torque) > 0.0;
+      else if (q < jointLimitLower + jointEpsilon)
+         return Math.signum(torque) < 0.0;
+      return false;
+   }
+
+   @Override
+   public boolean isTorquingIntoJointLimit()
+   {
+      return isTorquingIntoJoint;
    }
 
    public interface JointTorqueProvider

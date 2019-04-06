@@ -86,6 +86,18 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
       return wrench;
    }
 
+   @Override
+   public boolean isTorquingIntoJointLimit()
+   {
+      for (int i = 0; i < wrenchCalculators.size(); i++)
+      {
+         if (wrenchCalculators.get(i).isTorquingIntoJointLimit())
+            return true;
+      }
+
+      return false;
+   }
+
    public String getName()
    {
       return getClass().getSimpleName();
