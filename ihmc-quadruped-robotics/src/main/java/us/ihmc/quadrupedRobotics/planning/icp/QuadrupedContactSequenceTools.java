@@ -98,7 +98,7 @@ public class QuadrupedContactSequenceTools
 
       if (contactSequenceToPack.isEmpty())
       { // if there aren't any past sequences, add the current one in.
-         addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime);
+         addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime, currentTime);
       }
       else
       { // there are some contact phases that are currently in progress
@@ -117,23 +117,20 @@ public class QuadrupedContactSequenceTools
             else
             { // end the previous contact phase and add a new one for the current state
                contactSequenceToPack.remove(i);
-               addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime);
-
-               if (debug)
-                  throw new RuntimeException("This phase should have been removed already.");
+               addCurrentStateAsAContactPhase(contactSequenceToPack, currentFeetInContact, currentSolePositions, currentTime, currentTime);
             }
          }
       }
    }
 
    public static void addCurrentStateAsAContactPhase(RecyclingArrayList<QuadrupedContactPhase> contactSequenceToPack, List<RobotQuadrant> currentFeetInContact,
-                                                     QuadrantDependentList<? extends FramePoint3DReadOnly> solePositions, double currentTime)
+                                                     QuadrantDependentList<? extends FramePoint3DReadOnly> solePositions, double currentTime, double endTime)
    {
       QuadrupedContactPhase contactPhase = contactSequenceToPack.add();
       contactPhase.reset();
       contactPhase.setFeetInContact(currentFeetInContact);
       contactPhase.setSolePositions(solePositions);
-      contactPhase.getTimeInterval().setStartTime(currentTime);
+      contactPhase.getTimeInterval().setInterval(currentTime, endTime);
       contactPhase.update();
    }
 

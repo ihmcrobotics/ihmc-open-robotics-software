@@ -61,6 +61,8 @@ public class DCMPlanningTestTools
 
    public static void assertTimeIntervalsEqual(String message, TimeInterval expected, TimeInterval actual, double epsilon)
    {
+      if (!Double.isFinite(actual.getEndTime()))
+         throw new RuntimeException("Exception.");
       assertEquals(message, expected.getStartTime(), actual.getStartTime(), epsilon);
       assertEquals(message, expected.getEndTime(), actual.getEndTime(), epsilon);
    }
