@@ -17,13 +17,18 @@ public class DCMPlanningTestTools
 {
    public static void assertQuadrupedContactPhasesEqual(QuadrupedContactPhase expected, QuadrupedContactPhase actual, double epsilon)
    {
-      assertTimeIntervalsEqual(expected.getTimeInterval(), actual.getTimeInterval(), epsilon);
+      assertQuadrupedContactPhasesEqual("", expected, actual, epsilon);
+   }
 
-      assertEquals(expected.getFeetInContact().size(), actual.getFeetInContact().size(), epsilon);
+   public static void assertQuadrupedContactPhasesEqual(String message, QuadrupedContactPhase expected, QuadrupedContactPhase actual, double epsilon)
+   {
+      assertTimeIntervalsEqual(message, expected.getTimeInterval(), actual.getTimeInterval(), epsilon);
+
+      assertEquals(message, expected.getFeetInContact().size(), actual.getFeetInContact().size(), epsilon);
       for (RobotQuadrant robotQuadrant : expected.getFeetInContact())
       {
-         assertTrue(actual.getFeetInContact().contains(robotQuadrant));
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expected.getSolePosition(robotQuadrant), actual.getSolePosition(robotQuadrant), epsilon);
+         assertTrue(message, actual.getFeetInContact().contains(robotQuadrant));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(message, expected.getSolePosition(robotQuadrant), actual.getSolePosition(robotQuadrant), epsilon);
       }
    }
 
@@ -51,8 +56,13 @@ public class DCMPlanningTestTools
 
    public static void assertTimeIntervalsEqual(TimeInterval expected, TimeInterval actual, double epsilon)
    {
-      assertEquals(expected.getStartTime(), actual.getStartTime(), epsilon);
-      assertEquals(expected.getEndTime(), actual.getEndTime(), epsilon);
+      assertTimeIntervalsEqual("", expected, actual, epsilon);
+   }
+
+   public static void assertTimeIntervalsEqual(String message, TimeInterval expected, TimeInterval actual, double epsilon)
+   {
+      assertEquals(message, expected.getStartTime(), actual.getStartTime(), epsilon);
+      assertEquals(message, expected.getEndTime(), actual.getEndTime(), epsilon);
    }
 
    static QuadrantDependentList<MovingReferenceFrame> createSimpleSoleFrames(double nominalLength, double nominalWidth)
