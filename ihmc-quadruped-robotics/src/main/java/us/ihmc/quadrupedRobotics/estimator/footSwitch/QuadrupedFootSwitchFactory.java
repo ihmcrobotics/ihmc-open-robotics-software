@@ -104,8 +104,12 @@ public class QuadrupedFootSwitchFactory
             footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
-         ForceBasedTouchDownDetection estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(estimatedTorqueBasedWrenchCalculator, robotQuadrant, registry);
+
+         TouchdownDetector estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(estimatedTorqueBasedWrenchCalculator, robotQuadrant, registry);
+         TouchdownDetector footVelocityBasedTouchDownDetection = new FootVelocityBasedTouchDownDetection(fullRobotModel.get().getSoleFrame(robotQuadrant),
+                                                                                                         robotQuadrant, registry);
          footSwitch.addTouchdownDetector(estimatedForceBasedTouchDownDetection);
+         footSwitch.addTouchdownDetector(footVelocityBasedTouchDownDetection);
 
          footSwitches.set(robotQuadrant, footSwitch);
       }
