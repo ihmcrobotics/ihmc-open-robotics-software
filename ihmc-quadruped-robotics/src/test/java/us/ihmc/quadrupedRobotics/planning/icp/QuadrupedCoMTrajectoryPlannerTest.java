@@ -108,6 +108,8 @@ public class QuadrupedCoMTrajectoryPlannerTest
          feetInContact.add(quadrant);
 
       planner.initializeForStanding();
+      planner.setInitialCenterOfMassState(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight), new FrameVector3D());
+
 
       FramePoint3D expectedDesiredDCM = new FramePoint3D();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -141,14 +143,17 @@ public class QuadrupedCoMTrajectoryPlannerTest
       contactStates.get(RobotQuadrant.HIND_RIGHT).set(ContactState.IN_CONTACT);
       contactStates.get(RobotQuadrant.HIND_LEFT).set(ContactState.IN_CONTACT);
 
+      // add the step in, and do the initial transfer
       planner.addStepToSequence(step);
       planner.initializeForStepping(contactStates);
+      planner.setInitialCenterOfMassState(planner.getDesiredCoMPosition(), planner.getDesiredCoMVelocity());
 
       for (; time.getDoubleValue() < 0.5; time.add(0.05))
       {
          planner.computeSetpoints(time.getDoubleValue(), feetInContact);
       }
 
+      // remove the front left foot, since it is the one that's stepping, and compute the step trajectory
       feetInContact.remove(RobotQuadrant.FRONT_LEFT);
 
       for (; time.getDoubleValue() < 1.5; time.add(0.05))
@@ -156,15 +161,13 @@ public class QuadrupedCoMTrajectoryPlannerTest
          planner.computeSetpoints(time.getDoubleValue(), feetInContact);
       }
 
+      // update the foot positions, since we just finished the step
       MovingReferenceFrame newSoleFrame = new TranslationMovingReferenceFrame("newSoleFrame", ReferenceFrame.getWorldFrame());
       ((TranslationMovingReferenceFrame) newSoleFrame).updateTranslation(step.getGoalPosition());
       soleFrames.put(RobotQuadrant.FRONT_LEFT, newSoleFrame);
 
       feetInContact.add(RobotQuadrant.FRONT_LEFT);
-      for (; time.getDoubleValue() < 1.0; time.add(0.05))
-      {
-         planner.computeSetpoints(time.getDoubleValue(), feetInContact);
-      }
+
 
       FramePoint3D finalDCM = new FramePoint3D();
 
@@ -185,16 +188,24 @@ public class QuadrupedCoMTrajectoryPlannerTest
       finalDCM.addZ(nominalHeight);
       FrameVector3DReadOnly zero = new FrameVector3D();
 
+      planner.initializeForStanding();
+      planner.setInitialCenterOfMassState(planner.getDesiredCoMPosition(), planner.getDesiredCoMVelocity());
+
       for (; time.getDoubleValue() < 100.0; time.add(0.5))
       {
          planner.computeSetpoints(time.getDoubleValue(), feetInContact);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredDCMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredDCMVelocity(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredCoMPosition(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredCoMVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zero, planner.getDesiredCoMAcceleration(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalDCM, planner.getDesiredVRPPosition(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredDCMPosition(), epsilon);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredDCMVelocity(), epsilon);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredVRPPosition(), epsilon);
+
+         // give a bunch of extra convergence time before starting to check this
+         if (time.getDoubleValue() > 3.0)
+         {
+            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals("time = " + time.getDoubleValue(), finalDCM, planner.getDesiredCoMPosition(), 0.01);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMVelocity(), 0.01);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("time = " + time.getDoubleValue(), zero, planner.getDesiredCoMAcceleration(), 0.01);
+         }
       }
    }
 
