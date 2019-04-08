@@ -76,7 +76,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackLinearForce;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FramePoint3D currentPosition = new FramePoint3D();
 
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D currentLinearVelocity = new FrameVector3D();
@@ -317,12 +316,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackLinearAcceleration.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackLinearAcceleration.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackLinearAcceleration.reset();
-      }
+      rateLimitedFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
@@ -412,12 +406,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearForce.setIncludingFrame(desiredLinearForce);
       yoFeedbackLinearForce.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackLinearForce.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackLinearForce.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackLinearForce.reset();
-      }
+      rateLimitedFeedbackLinearForce.changeFrame(trajectoryFrame);
       rateLimitedFeedbackLinearForce.update();
       desiredLinearForce.setIncludingFrame(rateLimitedFeedbackLinearForce);
 
@@ -457,9 +446,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
-      currentPosition.setToZero(controlFrame);
-      currentPosition.changeFrame(worldFrame);
-      yoCurrentPosition.setIncludingFrame(currentPosition);
+      yoCurrentPosition.setToZero(controlFrame);
       yoCurrentPosition.changeFrame(trajectoryFrame);
 
       desiredPosition.setIncludingFrame(yoDesiredPosition);
@@ -501,16 +488,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
-      currentLinearVelocity.changeFrame(worldFrame);
-      yoCurrentLinearVelocity.setIncludingFrame(currentLinearVelocity);
+      yoCurrentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
       yoCurrentLinearVelocity.changeFrame(trajectoryFrame);
 
-      desiredLinearVelocity.setIncludingFrame(yoDesiredLinearVelocity);
-      desiredLinearVelocity.changeFrame(worldFrame);
-
-      feedbackTermToPack.setToZero(worldFrame);
-      feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      feedbackTermToPack.setToZero(trajectoryFrame);
+      feedbackTermToPack.sub(yoDesiredLinearVelocity, yoCurrentLinearVelocity);
       feedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());

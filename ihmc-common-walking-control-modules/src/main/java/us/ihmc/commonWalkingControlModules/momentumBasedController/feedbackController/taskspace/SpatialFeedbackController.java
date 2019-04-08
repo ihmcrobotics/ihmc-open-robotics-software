@@ -90,7 +90,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FramePose3D currentPose = new FramePose3D();
    private final FramePose3D desiredPose = new FramePose3D();
 
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
@@ -375,12 +374,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
       yoFeedbackAcceleration.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackAcceleration.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackAcceleration.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackAcceleration.reset();
-      }
+      rateLimitedFeedbackAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackAcceleration.getLinearPart());
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAcceleration.getAngularPart());
@@ -423,12 +417,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackVelocity.setIncludingFrame(desiredAngularVelocity, desiredLinearVelocity);
       yoFeedbackVelocity.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackVelocity.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackVelocity.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackVelocity.reset();
-      }
+      rateLimitedFeedbackVelocity.changeFrame(trajectoryFrame);
       rateLimitedFeedbackVelocity.update();
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackVelocity.getLinearPart());
       desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackVelocity.getAngularPart());
@@ -491,12 +480,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoFeedbackWrench.setIncludingFrame(desiredAngularTorque, desiredLinearForce);
       yoFeedbackWrench.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackWrench.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackWrench.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackWrench.reset();
-      }
+      rateLimitedFeedbackWrench.changeFrame(trajectoryFrame);
       rateLimitedFeedbackWrench.update();
       desiredLinearForce.setIncludingFrame(rateLimitedFeedbackWrench.getLinearPart());
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackWrench.getAngularPart());
@@ -548,9 +532,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    {
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
 
-      currentPose.setToZero(controlFrame);
-      currentPose.changeFrame(worldFrame);
-      yoCurrentPose.setIncludingFrame(currentPose);
+      yoCurrentPose.setToZero(controlFrame);
       yoCurrentPose.changeFrame(trajectoryFrame);
       yoCurrentPose.getOrientation().getRotationVector(yoCurrentRotationVector);
 
@@ -615,22 +597,13 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       ReferenceFrame trajectoryFrame = yoDesiredPose.getReferenceFrame();
 
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentLinearVelocity.setIncludingFrame(currentTwist.getLinearPart());
-      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
-      currentLinearVelocity.changeFrame(worldFrame);
-      currentAngularVelocity.changeFrame(worldFrame);
-      yoCurrentVelocity.setIncludingFrame(currentAngularVelocity, currentLinearVelocity);
-      yoCurrentVelocity.changeFrame(trajectoryFrame);
+      yoCurrentVelocity.setIncludingFrame(currentTwist.getAngularPart(), currentTwist.getLinearPart());
+      yoCurrentVelocity.changeFrame(trajectoryFrame); // TODO: should this be a twist?
 
-      desiredLinearVelocity.setIncludingFrame(yoDesiredVelocity.getLinearPart());
-      desiredAngularVelocity.setIncludingFrame(yoDesiredVelocity.getAngularPart());
-      desiredLinearVelocity.changeFrame(worldFrame);
-      desiredAngularVelocity.changeFrame(worldFrame);
-
-      linearFeedbackTermToPack.setToZero(worldFrame);
-      angularFeedbackTermToPack.setToZero(worldFrame);
-      linearFeedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
-      angularFeedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
+      linearFeedbackTermToPack.setToZero(trajectoryFrame);
+      angularFeedbackTermToPack.setToZero(trajectoryFrame);
+      linearFeedbackTermToPack.sub(yoDesiredVelocity.getLinearPart(), yoCurrentVelocity.getLinearPart());
+      angularFeedbackTermToPack.sub(yoDesiredVelocity.getAngularPart(), yoCurrentVelocity.getAngularPart());
       linearFeedbackTermToPack.changeFrame(controlFrame);
       angularFeedbackTermToPack.changeFrame(controlFrame);
       selectionMatrix.applyLinearSelection(linearFeedbackTermToPack);

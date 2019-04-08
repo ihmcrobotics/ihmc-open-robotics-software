@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
@@ -64,14 +63,9 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackLinearAcceleration;
    private final FrameVector3DBasics yoAchievedLinearAcceleration;
 
-   private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FramePoint3D currentPosition = new FramePoint3D();
-
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
-   private final FrameVector3D currentLinearVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardLinearVelocity = new FrameVector3D();
 
-   private final FrameVector3D achievedLinearAcceleration = new FrameVector3D();
    private final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
 
@@ -228,12 +222,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackLinearAcceleration.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackLinearAcceleration.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackLinearAcceleration.reset();
-      }
+      rateLimitedFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
@@ -266,12 +255,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       yoFeedbackLinearVelocity.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackLinearVelocity.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackLinearVelocity.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackLinearVelocity.reset();
-      }
+      rateLimitedFeedbackLinearVelocity.changeFrame(trajectoryFrame);
       rateLimitedFeedbackLinearVelocity.update();
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackLinearVelocity);
 
@@ -306,12 +290,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackLinearAcceleration.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackLinearAcceleration.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackLinearAcceleration.reset();
-      }
+      rateLimitedFeedbackLinearAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
@@ -330,10 +309,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    public void computeAchievedAcceleration()
    {
       SpatialForceReadOnly achievedMomentumRate = centroidalMomentumHandler.getMomentumRate();
-      achievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
-      achievedLinearAcceleration.changeFrame(worldFrame);
-      achievedLinearAcceleration.scale(1.0 / totalRobotMass);
-      yoAchievedLinearAcceleration.setIncludingFrame(achievedLinearAcceleration);
+      yoAchievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
+      yoAchievedLinearAcceleration.scale(1.0 / totalRobotMass);
       yoAchievedLinearAcceleration.changeFrame(yoDesiredPosition.getReferenceFrame());
    }
 
@@ -353,16 +330,11 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
-      currentPosition.setToZero(centerOfMassFrame);
-      currentPosition.changeFrame(worldFrame);
-      yoCurrentPosition.setIncludingFrame(currentPosition);
+      yoCurrentPosition.setToZero(centerOfMassFrame);
       yoCurrentPosition.changeFrame(trajectoryFrame);
 
-      desiredPosition.setIncludingFrame(yoDesiredPosition);
-      desiredPosition.changeFrame(worldFrame);
-
-      feedbackTermToPack.setToZero(worldFrame);
-      feedbackTermToPack.sub(desiredPosition, currentPosition);
+      feedbackTermToPack.setToZero(trajectoryFrame);
+      feedbackTermToPack.sub(yoDesiredPosition, yoCurrentPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
 
@@ -391,16 +363,11 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    {
       ReferenceFrame trajectoryFrame = yoDesiredPosition.getReferenceFrame();
 
-      currentLinearVelocity.setIncludingFrame(centroidalMomentumHandler.getCenterOfMassVelocity());
-      currentLinearVelocity.changeFrame(worldFrame);
-      yoCurrentLinearVelocity.setIncludingFrame(currentLinearVelocity);
+      yoCurrentLinearVelocity.setIncludingFrame(centroidalMomentumHandler.getCenterOfMassVelocity());
       yoCurrentLinearVelocity.changeFrame(trajectoryFrame);
 
-      desiredLinearVelocity.setIncludingFrame(yoDesiredLinearVelocity);
-      desiredLinearVelocity.changeFrame(worldFrame);
-
-      feedbackTermToPack.setToZero(worldFrame);
-      feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      feedbackTermToPack.setToZero(trajectoryFrame);
+      feedbackTermToPack.sub(yoDesiredLinearVelocity, yoCurrentLinearVelocity);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       // TODO: there is an inconsistency here between this feedback controller and the point feedback controller:
