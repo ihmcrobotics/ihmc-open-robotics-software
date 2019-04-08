@@ -15,15 +15,14 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
    private final DoubleField swingHeight = new DoubleField(JoystickStepParameters::getSwingHeight, JoystickStepParameters::setSwingHeight);
    private final DoubleField swingDuration = new DoubleField(JoystickStepParameters::getSwingDuration, JoystickStepParameters::setSwingDuration);
    private final DoubleField transferDuration = new DoubleField(JoystickStepParameters::getTransferDuration, JoystickStepParameters::setTransferDuration);
-   private final DoubleField defaultStepLength = new DoubleField(JoystickStepParameters::getDefaultStepLength, JoystickStepParameters::setDefaultStepLength);
    private final DoubleField maxStepLength = new DoubleField(JoystickStepParameters::getMaxStepLength, JoystickStepParameters::setMaxStepLength);
    private final DoubleField defaultStepWidth = new DoubleField(JoystickStepParameters::getDefaultStepWidth, JoystickStepParameters::setDefaultStepWidth);
    private final DoubleField minStepWidth = new DoubleField(JoystickStepParameters::getMinStepWidth, JoystickStepParameters::setMinStepWidth);
    private final DoubleField maxStepWidth = new DoubleField(JoystickStepParameters::getMaxStepWidth, JoystickStepParameters::setMaxStepWidth);
    private final DoubleField turnStepWidth = new DoubleField(JoystickStepParameters::getTurnStepWidth, JoystickStepParameters::setTurnStepWidth);
-   private final DoubleField turnMaxAngleInwards = new DoubleField(JoystickStepParameters::getTurnMaxAngleInward,
+   private final DoubleField turnMaxAngleInward = new DoubleField(JoystickStepParameters::getTurnMaxAngleInward,
                                                                    JoystickStepParameters::setTurnMaxAngleInward);
-   private final DoubleField turnMaxAngleOutwards = new DoubleField(JoystickStepParameters::getTurnMaxAngleOutward,
+   private final DoubleField turnMaxAngleOutward = new DoubleField(JoystickStepParameters::getTurnMaxAngleOutward,
                                                                     JoystickStepParameters::setTurnMaxAngleOutward);
 
    public JoystickStepParametersProperty(Object bean, String name)
@@ -31,59 +30,54 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       super(bean, name, new JoystickStepParameters());
    }
 
-   public void bindBidirectionalSwingHeightThreshold(Property<? extends Number> property)
+   public void bindBidirectionalSwingHeight(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, swingHeight);
    }
 
-   public void bindBidirectionalSwingDurationThreshold(Property<? extends Number> property)
+   public void bindBidirectionalSwingDuration(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, swingDuration);
    }
 
-   public void bindBidirectionalTransferDurationThreshold(Property<? extends Number> property)
+   public void bindBidirectionalTransferDuration(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, transferDuration);
    }
 
-   public void bindBidirectionalDefaultStepLengthThreshold(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, defaultStepLength);
-   }
-
-   public void bindBidirectionalMaxStepLengthThreshold(Property<? extends Number> property)
+   public void bindBidirectionalMaxStepLength(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxStepLength);
    }
 
-   public void bindBidirectionalDefaultStepWidthThreshold(Property<? extends Number> property)
+   public void bindBidirectionalDefaultStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, defaultStepWidth);
    }
 
-   public void bindBidirectionalMinStepWidthThreshold(Property<? extends Number> property)
+   public void bindBidirectionalMinStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minStepWidth);
    }
 
-   public void bindBidirectionalMaxStepWidthThreshold(Property<? extends Number> property)
+   public void bindBidirectionalMaxStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxStepWidth);
    }
 
-   public void bindBidirectionalTurnStepWidthThreshold(Property<? extends Number> property)
+   public void bindBidirectionalTurnStepWidth(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, turnStepWidth);
    }
 
-   public void bindBidirectionalTurnMaxAngleInwardsThreshold(Property<? extends Number> property)
+   public void bindBidirectionalTurnMaxAngleInward(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, turnMaxAngleInwards);
+      bindFieldBidirectionalToNumberProperty(property, turnMaxAngleInward);
    }
 
-   public void bindBidirectionalTurnMaxAngleOutwardsThreshold(Property<? extends Number> property)
+   public void bindBidirectionalTurnMaxAngleOutward(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, turnMaxAngleOutwards);
+      bindFieldBidirectionalToNumberProperty(property, turnMaxAngleOutward);
    }
 
    @Override
@@ -102,7 +96,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
    {
       private double swingHeight;
       private double swingDuration, transferDuration;
-      private double defaultStepLength, maxStepLength;
+      private double maxStepLength;
       private double defaultStepWidth, minStepWidth, maxStepWidth;
       private double turnStepWidth, turnMaxAngleInward, turnMaxAngleOutward;
 
@@ -127,7 +121,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
 
          SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
          swingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
-         defaultStepLength = steppingParameters.getDefaultStepLength();
          maxStepLength = steppingParameters.getMaxStepLength();
          defaultStepWidth = steppingParameters.getInPlaceWidth();
          minStepWidth = steppingParameters.getMinStepWidth();
@@ -143,7 +136,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          swingHeight = other.swingHeight;
          swingDuration = other.swingDuration;
          transferDuration = other.transferDuration;
-         defaultStepLength = other.defaultStepLength;
          maxStepLength = other.maxStepLength;
          defaultStepWidth = other.defaultStepWidth;
          minStepWidth = other.minStepWidth;
@@ -166,11 +158,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       public void setTransferDuration(double transferDuration)
       {
          this.transferDuration = transferDuration;
-      }
-
-      public void setDefaultStepLength(double defaultStepLength)
-      {
-         this.defaultStepLength = defaultStepLength;
       }
 
       public void setMaxStepLength(double maxStepLength)
@@ -223,11 +210,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          return transferDuration;
       }
 
-      public double getDefaultStepLength()
-      {
-         return defaultStepLength;
-      }
-
       public double getMaxStepLength()
       {
          return maxStepLength;
@@ -271,7 +253,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          parameters.setSwingHeight(ScannerTools.readNextDouble(scanner, parameters.getSwingHeight()));
          parameters.setSwingDuration(ScannerTools.readNextDouble(scanner, parameters.getSwingDuration()));
          parameters.setTransferDuration(ScannerTools.readNextDouble(scanner, parameters.getTransferDuration()));
-         parameters.setDefaultStepLength(ScannerTools.readNextDouble(scanner, parameters.getDefaultStepLength()));
          parameters.setMaxStepLength(ScannerTools.readNextDouble(scanner, parameters.getMaxStepLength()));
          parameters.setDefaultStepWidth(ScannerTools.readNextDouble(scanner, parameters.getDefaultStepWidth()));
          parameters.setMinStepWidth(ScannerTools.readNextDouble(scanner, parameters.getMinStepWidth()));
@@ -286,10 +267,9 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       @Override
       public String toString()
       {
-         return "swing height: " + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", default step length: "
-               + defaultStepLength + ", max step length: " + maxStepLength + "default step width: " + defaultStepWidth + ", min step width: " + minStepWidth
-               + ", max step width: " + maxStepWidth + ", turn step width: " + turnStepWidth + ", turn max angle inward: " + turnMaxAngleInward
-               + ", turn max angle outward: " + turnMaxAngleOutward;
+         return "swing height: " + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: "
+               + maxStepLength + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
+               + ", turn step width: " + turnStepWidth + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
       }
    }
 }
