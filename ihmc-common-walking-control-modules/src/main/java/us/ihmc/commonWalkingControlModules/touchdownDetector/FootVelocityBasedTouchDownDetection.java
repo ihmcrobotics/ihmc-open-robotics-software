@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
 {
-   private final String name = getClass().getSimpleName();
+   private final String name = "VelTchdwnDetect";
    private final YoVariableRegistry registry ;
 
    private final MovingReferenceFrame soleFrame;
@@ -25,11 +25,11 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    public FootVelocityBasedTouchDownDetection(MovingReferenceFrame soleFrame, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
-      String prefix = robotQuadrant.getCamelCaseName() + name;
+      String prefix = robotQuadrant.getShortName() + name;
       registry = new YoVariableRegistry(prefix);
 
       isInContact = new YoBoolean(prefix + "IsInContact", registry);
-      speedThreshold = new DoubleParameter(prefix + "FootSpeedThreshold", registry, 0.1);
+      speedThreshold = new DoubleParameter(prefix + "FootSpeedThreshold", registry, 0.3);
       measuredSpeed = new YoDouble(prefix + "MeasuredSpeed", registry);
 
       parentRegistry.addChild(registry);
@@ -59,6 +59,6 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    @Override
    public String getName()
    {
-      return getClass().getSimpleName();
+      return name;
    }
 }
