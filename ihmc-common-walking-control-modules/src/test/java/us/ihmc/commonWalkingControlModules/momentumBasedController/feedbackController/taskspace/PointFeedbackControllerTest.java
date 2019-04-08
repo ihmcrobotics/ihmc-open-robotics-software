@@ -12,7 +12,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.NormOps;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -30,7 +29,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -50,12 +48,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testConvergence() throws Exception
