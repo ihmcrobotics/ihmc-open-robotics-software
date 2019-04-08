@@ -136,6 +136,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    private static final double lidar_spindle_velocity = 2.183;
 
+   @SuppressWarnings("unused")
    private static final String lidarPoseLink = "hokuyo_link";
    private static final String lidarJointName = "hokuyo_joint";
    private static final String lidarBaseFrame = multisense_namespace + "/head";
@@ -341,12 +342,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftTrunkIMUSensor;
    }
 
-   public static String getRearPelvisIMUSensor()
+   public String getRearPelvisIMUSensor()
    {
       return rearPelvisIMUSensor;
    }
 
-   public static String getMiddlePelvisIMUSensor()
+   public String getMiddlePelvisIMUSensor()
    {
       return middlePelvisIMUSensor;
    }

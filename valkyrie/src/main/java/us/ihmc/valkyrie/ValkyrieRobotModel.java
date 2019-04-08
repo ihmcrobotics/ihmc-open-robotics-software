@@ -45,7 +45,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -93,6 +93,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ValkyrieCalibrationParameters calibrationParameters;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
+   @SuppressWarnings("unchecked")
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
    private final RobotTarget target;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
@@ -462,15 +463,15 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public LogSettings getLogSettings()
+   public DataServerSettings getLogSettings()
    {
       if (target == RobotTarget.REAL_ROBOT)
       {
-         return LogSettings.VALKYRIE_JSC;
+         return new DataServerSettings(true, "ValkyrieJSCGUI");
       }
       else
       {
-         return LogSettings.SIMULATION;
+         return new DataServerSettings(false, "SimulationGUI");
       }
    }
 

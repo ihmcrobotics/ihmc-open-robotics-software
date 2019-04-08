@@ -1,11 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
 
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class AtlasSensorInformationTest
 {
    @Test
