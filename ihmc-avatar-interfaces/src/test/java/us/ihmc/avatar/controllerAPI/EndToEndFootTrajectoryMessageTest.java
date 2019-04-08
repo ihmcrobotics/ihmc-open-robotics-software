@@ -606,7 +606,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          assertTrue(success);
       }
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
       return footTrajectoryPoints;
    }

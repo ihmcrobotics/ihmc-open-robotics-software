@@ -1,6 +1,8 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.*;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -54,11 +56,9 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.SettableTimestampProvider;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReaderFactory;
@@ -146,8 +146,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create network servers/clients
        */
       double diagnosticControllerDT = robotModel.getEstimatorDT();
-      yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY),
-                                              robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
+      yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
 
       /*
        * Create sensor reader

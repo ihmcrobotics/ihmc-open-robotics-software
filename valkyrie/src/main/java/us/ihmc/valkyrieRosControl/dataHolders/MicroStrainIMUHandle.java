@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
@@ -29,8 +28,8 @@ public class MicroStrainIMUHandle implements IMUHandle
    private boolean isAngularRateValid = false;
    private boolean isOrientationQuaternionValid = false;
 
-   private RotationMatrix quaternionConversionMatrix = new RotationMatrix();
-   private final RotationMatrix orientationMatrix = new RotationMatrix();
+//   private RotationMatrix quaternionConversionMatrix = new RotationMatrix();
+//   private final RotationMatrix orientationMatrix = new RotationMatrix();
    
    private MicrostrainFilterType filterTypeToReturn = MicrostrainFilterType.COMPLIMENTARY_FILTER;
 

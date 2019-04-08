@@ -1,12 +1,11 @@
 package us.ihmc.valkyrie.obstacleCourse;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseTrialsTerrainTest;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -61,11 +60,10 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
 
-   @Override
    @Test
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
-      super.testTrialsTerrainSlopeScript();
+      super.testTrialsTerrainSlopeScript(0.05);
    }
 
    /**

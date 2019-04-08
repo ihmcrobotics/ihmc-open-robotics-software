@@ -7,8 +7,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.AvatarEndToEndForwardDynamicsCalculatorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class AtlasEndToEndForwardDynamicsCalculatorTest extends AvatarEndToEndForwardDynamicsCalculatorTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
