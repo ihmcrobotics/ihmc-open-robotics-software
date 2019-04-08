@@ -210,7 +210,7 @@ public class QuadrupedSimulationFactory
       }
       else
       {
-         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get());
+         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), footSwitches);
       }
 
       if (this.sensorReaderWrapper != null)
@@ -494,10 +494,10 @@ public class QuadrupedSimulationFactory
 
       setupYoRegistries();
       createPushRobotController();
-      createSensorReader();
       createContactableFeet();
       createContactablePlaneBodies();
       createFootSwitches();
+      createSensorReader();
       createRealtimeRos2Node();
       createControllerManager();
       createStateEstimator();
