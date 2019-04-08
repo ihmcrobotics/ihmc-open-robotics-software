@@ -50,7 +50,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
       trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
 
-      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", null,
+      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", "",
                                           ReferenceFrame.getWorldFrame(), registry);
    }
 

@@ -69,12 +69,7 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    @Override
    public void calculate()
    {
-      for(int i = 0; i < jointTorqueProviders.size(); i++)
-      {
-         jointTorques.set(i, 0, jointTorqueProviders.get(i).getTorque());
-         if (isTorquingIntoJointLimit(joints.get(i), jointTorqueProviders.get(i).getTorque()))
-            isTorquingIntoJoint = true;
-      }
+      isTorquingIntoJoint = isTorquingIntoJointLimitInternal();
 
       footJacobian.compute();
       DenseMatrix64F jacobianMatrix = footJacobian.getJacobianMatrix();
@@ -86,14 +81,9 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       CommonOps.multTransA(-1.0, linearJacobianInverse, jointTorques, footLinearForce);
       CommonOps.multTransA(-1.0, angularJacobianInverse, jointTorques, footAngularForce);
 
-
       wrench.setToZero(footJacobian.getJacobianFrame());
-      wrench.setLinearPartX(footLinearForce.get(0));
-      wrench.setLinearPartY(footLinearForce.get(1));
-      wrench.setLinearPartZ(footLinearForce.get(2));
-      wrench.setAngularPartX(footAngularForce.get(0));
-      wrench.setAngularPartY(footAngularForce.get(1));
-      wrench.setAngularPartZ(footAngularForce.get(2));
+      wrench.getLinearPart().set(footLinearForce);
+      wrench.getAngularPart().set(footAngularForce);
    }
 
    @Override
@@ -105,7 +95,19 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
    @Override
    public String getName()
    {
-      return prefix + "JointTorqueWrenchCalculator";
+      return prefix + "JntTorqWrnchCalc";
+   }
+
+   private boolean isTorquingIntoJointLimitInternal()
+   {
+      for(int i = 0; i < jointTorqueProviders.size(); i++)
+      {
+         jointTorques.set(i, 0, jointTorqueProviders.get(i).getTorque());
+         if (isTorquingIntoJointLimit(joints.get(i), jointTorqueProviders.get(i).getTorque()))
+            return true;
+      }
+
+      return false;
    }
 
    private boolean isTorquingIntoJointLimit(OneDoFJointBasics joint, double torque)
@@ -114,9 +116,9 @@ public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
       double jointLimitLower = joint.getJointLimitLower();
       double jointLimitUpper = joint.getJointLimitUpper();
 
-      if (q > jointLimitUpper - jointEpsilon)
+      if (q > jointLimitUpper)
          return Math.signum(torque) > 0.0;
-      else if (q < jointLimitLower + jointEpsilon)
+      else if (q < jointLimitLower)
          return Math.signum(torque) < 0.0;
       return false;
    }
