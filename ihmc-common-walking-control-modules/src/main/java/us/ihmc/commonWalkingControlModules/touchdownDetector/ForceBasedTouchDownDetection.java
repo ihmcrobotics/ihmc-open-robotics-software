@@ -11,12 +11,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForceBasedTouchDownDetection implements TouchdownDetector
 {
-   private final String name = getClass().getSimpleName();
+   private final String name = "ForceTchdwnDetect";
    private final YoVariableRegistry registry ;
 
    private final YoBoolean isInContact;
    private final DoubleProvider zForceThreshold;
    private final YoDouble measuredZForce;
+   private final YoBoolean isTorquingIntoJointLimit;
    private final FrameVector3D footForce = new FrameVector3D();
 
    private final WrenchCalculator wrenchCalculator;
@@ -28,12 +29,13 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    {
       this.wrenchCalculator = wrenchCalculator;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
-      String prefix = robotQuadrant.getCamelCaseName() + name;
+      String prefix = robotQuadrant.getShortName() + name;
       registry = new YoVariableRegistry(prefix);
 
-      isInContact = new YoBoolean(prefix + "isInContact", registry);
+      isInContact = new YoBoolean(prefix + "IsInContact", registry);
       zForceThreshold = new DoubleParameter(prefix + "zForceThreshold", registry, 40.0);
-      measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
+      measuredZForce = new YoDouble(prefix + "MeasuredZForce", registry);
+      isTorquingIntoJointLimit = new YoBoolean(prefix + "IsTorquingIntoJointLimit", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -50,7 +52,8 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       footForce.setIncludingFrame(wrenchCalculator.getWrench().getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ());
-      if (dontDetectTouchdownIfAtJointLimit && wrenchCalculator.isTorquingIntoJointLimit())
+      isTorquingIntoJointLimit.set(wrenchCalculator.isTorquingIntoJointLimit());
+      if (dontDetectTouchdownIfAtJointLimit && isTorquingIntoJointLimit.getBooleanValue())
          isInContact.set(false);
       else
          isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
