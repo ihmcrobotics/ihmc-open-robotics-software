@@ -42,10 +42,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -187,18 +186,23 @@ public class WholeBodyInverseDynamicsSolver
       yoAchievedMomentumRateAngular.setMatchingFrame(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateAngular.setIncludingFrame(yoAchievedMomentumRateAngular);
 
-
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
          // TODO Since switch to Mecano: need to update the inverse dynamics to update the rigid-body accelerations, kinda dumb.
-//         rigidBodyAccelerationProvider.compute();
-         inverseDynamicsCalculator.compute();
+         //         rigidBodyAccelerationProvider.compute();
+         inverseDynamicsCalculator.compute(jointAccelerations);
 
          dynamicsMatrixCalculator.compute();
          DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
 
-         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.ACCELERATION, jointAccelerations);
-         MultiBodySystemTools.insertJointsState(controlledOneDoFJoints, JointStateType.EFFORT, tauSolution);
+         for (int jointIndex = 0; jointIndex < controlledOneDoFJoints.length; jointIndex++)
+         {
+            OneDoFJointBasics joint = controlledOneDoFJoints[jointIndex];
+            int jointAccelerationIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
+            JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
+            jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
+         }
       }
       else
       {
@@ -208,12 +212,21 @@ public class WholeBodyInverseDynamicsSolver
             inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenchSolution.get(rigidBody));
          }
 
-         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.ACCELERATION, jointAccelerations);
-         inverseDynamicsCalculator.compute();
-         MultiBodySystemTools.insertJointsState(jointsToOptimizeFor, JointStateType.EFFORT, inverseDynamicsCalculator.getJointTauMatrix());
+         inverseDynamicsCalculator.compute(jointAccelerations);
+
+         for (OneDoFJointBasics joint : controlledOneDoFJoints)
+         {
+            int jointIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
+            JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+            jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
+            jointDesiredOutput.setDesiredTorque(inverseDynamicsCalculator.getComputedJointTau(joint).get(0));
+         }
       }
 
-      updateLowLevelData();
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAcceleration(jointAccelerations, 0);
+
+      jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
 
       if (rootJoint != null)
       {
@@ -224,10 +237,10 @@ public class WholeBodyInverseDynamicsSolver
          yoResidualRootJointTorque.setMatchingFrame(residualRootJointTorque);
       }
 
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); jointIndex++)
       {
-         OneDoFJointBasics joint = controlledOneDoFJoints[i];
-         jointAccelerationsSolution.get(joint).set(joint.getQdd());
+         OneDoFJointBasics joint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
+         jointAccelerationsSolution.get(joint).set(lowLevelOneDoFJointDesiredDataHolder.getDesiredJointAcceleration(jointIndex));
       }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);
@@ -246,16 +259,6 @@ public class WholeBodyInverseDynamicsSolver
             lowLevelOneDoFJointDesiredDataHolder.setResetJointIntegrators(joint, jointDesiredOutputOther.peekResetIntegratorsRequest());
          }
       }
-   }
-
-   private void updateLowLevelData()
-   {
-      if (rootJoint != null)
-         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
-
-      jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    public void submitInverseDynamicsCommandList(InverseDynamicsCommandList inverseDynamicsCommandList)
@@ -290,7 +293,8 @@ public class WholeBodyInverseDynamicsSolver
          case EXTERNAL_WRENCH:
             optimizationControlModule.submitExternalWrenchCommand((ExternalWrenchCommand) command);
             if (USE_DYNAMIC_MATRIX_CALCULATOR)
-               dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(), ((ExternalWrenchCommand) command).getExternalWrench());
+               dynamicsMatrixCalculator.setExternalWrench(((ExternalWrenchCommand) command).getRigidBody(),
+                                                          ((ExternalWrenchCommand) command).getExternalWrench());
             break;
          case CONTACT_WRENCH:
             optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
