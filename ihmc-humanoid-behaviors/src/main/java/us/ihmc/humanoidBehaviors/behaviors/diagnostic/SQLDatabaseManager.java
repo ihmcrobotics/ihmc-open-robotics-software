@@ -1,22 +1,22 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 
 public class SQLDatabaseManager
 {
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
    private Connection databaseConnection;
 
    private boolean connected = false;
-   private boolean shutdown = false;
+   private boolean shutdownThread = false;
 
    private final String databaseURL;
 
@@ -26,7 +26,7 @@ public class SQLDatabaseManager
    private final String database_port;
    private final String database_name;
 
-   ConcurrentLinkedQueue<String> statements = new ConcurrentLinkedQueue<String>();
+   ConcurrentLinkedQueue<PreparedStatement> statements = new ConcurrentLinkedQueue<PreparedStatement>();
 
    public SQLDatabaseManager()
    {
@@ -66,20 +66,33 @@ public class SQLDatabaseManager
 
    }
 
+   public boolean isConnected()
+   {
+      return connected;
+   }
+
    private void update()
    {
-      /*
-       * if(connected && !shutdown) { if() try { isNewDataAvailable = true;
-       * while (isNewDataAvailable) { updateInsertPreparedStatement();
-       * timeSeriesInsertPreparedStatement.addBatch(); batchCount++; if
-       * (batchCount >= BATCHES_BEFORE_EXECUTE) {
-       * executionTimer.startMeasurement();
-       * timeSeriesInsertPreparedStatement.executeBatch();
-       * executionTimer.stopMeasurement(); batchCount = 0; } isNewDataAvailable
-       * = true; } } catch (SQLException e) {
-       * LogTools.error("Error executing database update!");
-       * e.printStackTrace(); } }
-       */
+      System.out.println("starting thread");
+      while (!shutdownThread)
+      {
+         PreparedStatement stmt;
+         while ((stmt = statements.poll()) != null)
+         {
+            try
+            {
+               System.out.println("processing thread statements " + shutdownThread);
+               stmt.executeUpdate();
+               stmt.close();
+            }
+            catch (SQLException e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }
+
+      System.out.println("stopping thread");
 
    }
 
@@ -101,7 +114,8 @@ public class SQLDatabaseManager
       }
       catch (Exception e)
       {
-         System.err.println(e.getClass().getName() + ": " + e.getMessage());
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
       }
       return false;
    }
@@ -111,12 +125,12 @@ public class SQLDatabaseManager
       try
       {
          //LogTools.info("Beginning database thread shutdown...");
-         //   finalizeRecording();
-
-        // LogTools.info("Closing database connection...");
+         Thread.sleep(1000);
+         shutdownThread = true;
+         // LogTools.info("Closing database connection...");
          databaseConnection.close();
       }
-      catch (SQLException e)
+      catch (Exception e)
       {
          //LogTools.error("Error closing database connections");
          e.printStackTrace();
@@ -124,53 +138,117 @@ public class SQLDatabaseManager
       }
    }
 
-   /*
-    * private void finalizeRecording() throws SQLException { shutdown = true;
-    * LogTools.info("Processing remaining buffered data..."); synchronized
-    * (timeSeriesInsertPreparedStatement) { while (isNewDataAvailable) {
-    * updateInsertPreparedStatement(); isNewDataAvailable = true; }
-    * timeSeriesInsertPreparedStatement.executeBatch(); }
-    * LogTools.info("All data processed, safe to finish shut down."); }
-    */
-
    public Operator saveOperator(String operatorName)
    {
-      sqlUpdate("INSERT INTO operators (name) VALUES (" + operatorName + ");");
-      //Operator returnOperator = getOperator(operatorName);
 
-     // if (returnOperator != null)
-      //   return returnOperator;
+      //first check to make sure operator does not exist
+      Operator returnOperator = getOperator(operatorName);
+
+      if (returnOperator != null)
+      {
+         return returnOperator;
+      }
+
+      //if it does not exist, create it and then return it. 
+
+      sqlUpdate("INSERT INTO operators (name) VALUES ('" + operatorName + "');");
+      returnOperator = getOperator(operatorName);
+
+      if (returnOperator != null)
+         return returnOperator;
       return null;
    }
 
-   public boolean saveRun(Run run)
+   public Task saveTask(String taskName)
    {
-      return sqlUpdate("INSERT INTO runs (id,operator,task,is_successful,notes,log_file,date,time) VALUES (" + run.runID + "," + run.operatorID + ","
-            + run.taskID + "," + run.successful + "," + run.notes + "," + run.logFile + "," + run.date + "," + run.time + ");");
+
+      //first check to make sure operator does not exist
+      Task returnTask = getTask(taskName);
+
+      if (returnTask != null)
+      {
+         return returnTask;
+      }
+
+      //if it does not exist, create it and then return it. 
+
+      sqlUpdate("INSERT INTO tasks (name) VALUES ('" + taskName + "');");
+      returnTask = getTask(taskName);
+
+      if (returnTask != null)
+         return returnTask;
+      return null;
    }
 
-   public boolean saveRunEvent(RunEvent runEvent)
+   public Run saveRun(Run run)
    {
-      return sqlUpdate("INSERT INTO run_events (run_id,event_name,event_time_in_seconds,is_successful) VALUES (" + runEvent.runID + "," + runEvent.eventName
-            + "," + runEvent.runTime + "," + runEvent.successful + ");");
+
+      try
+      {
+
+         PreparedStatement st = databaseConnection.prepareStatement("INSERT INTO runs (operator,task,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING id;");
+         st.setInt(1, run.operatorID);
+         st.setInt(2, run.taskID);
+         st.setBoolean(3, run.successful);
+         st.setString(4, run.notes);
+         st.setString(5, run.logFile);
+         st.setObject(6, run.date);
+         st.setObject(7, run.time);
+
+         ResultSet lastUpdate = st.executeQuery();
+
+         lastUpdate.next();
+         int lastUpdateID = lastUpdate.getInt(1);
+
+         st.close();
+         return getRun(lastUpdateID);
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+      }
+      return null;
+
    }
 
-   public boolean saveTask(Task run)
+   public boolean saveRunEvent(RunEvent run)
    {
-      return sqlUpdate("INSERT INTO tasks (id,name) VALUES (" + run.taskID + "," + run.name + ");");
+      System.out.println("making run event");
+      try
+      {
+
+         PreparedStatement st = databaseConnection.prepareStatement("INSERT INTO run_events (run_id,event_name,event_time_in_seconds,is_successful) VALUES (?,?,?,?)");
+         st.setInt(1, run.runID);
+         st.setString(2, run.eventName);
+         st.setFloat(3, run.runTime);
+         st.setBoolean(4, run.successful);
+         statements.add(st);
+         System.out.println("done making run event");
+         return true;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+      }
+
+      return false;
+
    }
 
    public Operator getOperator(String name)
    {
       Statement stmt = null;
-      Operator returnedOperator = new Operator();
+      Operator returnedOperator = null;
       try
       {
          stmt = databaseConnection.createStatement();
 
-         ResultSet rs = stmt.executeQuery("SELECT * FROM operators WHERE name = " + name + ";");
+         ResultSet rs = stmt.executeQuery("SELECT * FROM operators WHERE name = '" + name + "';");
          while (rs.next())
          {
+            returnedOperator = new Operator();
             returnedOperator.operatorID = rs.getInt("id");
             returnedOperator.name = rs.getString("name");
          }
@@ -180,9 +258,100 @@ public class SQLDatabaseManager
       }
       catch (Exception e)
       {
-         System.err.println(e.getClass().getName() + ": " + e.getMessage());
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+
       }
       return null;
+   }
+
+   public Task getTask(String name)
+   {
+      Statement stmt = null;
+      Task returnedTask = null;
+      try
+      {
+         stmt = databaseConnection.createStatement();
+
+         ResultSet rs = stmt.executeQuery("SELECT * FROM tasks WHERE name = '" + name + "';");
+         while (rs.next())
+         {
+            returnedTask = new Task();
+            returnedTask.taskID = rs.getInt("id");
+            returnedTask.name = rs.getString("name");
+         }
+         rs.close();
+         stmt.close();
+         return returnedTask;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+
+      }
+      return null;
+   }
+
+   public Run getRun(int runId)
+   {
+      Statement stmt = null;
+      Run returnedRun = null;
+      try
+      {
+         stmt = databaseConnection.createStatement();
+
+         ResultSet rs = stmt.executeQuery("SELECT * FROM runs WHERE id = " + runId + ";");
+         while (rs.next())
+         {
+            returnedRun = new Run(rs.getInt("operator"), rs.getInt("task"));
+            returnedRun.runID = rs.getInt("id");
+            returnedRun.successful = rs.getBoolean("is_successful");
+            returnedRun.notes = rs.getString("notes");
+            returnedRun.logFile = rs.getString("log_file");
+            returnedRun.date = rs.getObject("date", LocalDate.class);
+            returnedRun.time = rs.getObject("time", LocalTime.class);
+         }
+         rs.close();
+         stmt.close();
+         return returnedRun;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+
+      }
+      return null;
+   }
+
+   public boolean updateRun(Run run)
+   {
+      PreparedStatement st = null;
+      try
+      {
+         st = databaseConnection.prepareStatement("UPDATE runs set " + "operator = ?, " + "task = ?, " + "is_successful = ?, " + "notes = ?, "
+               + "log_file = ?, " + "date = ?," + "time = ? " + " WHERE id = ?;");
+         st.setInt(1, run.operatorID);
+         st.setInt(2, run.taskID);
+         st.setBoolean(3, run.successful);
+         st.setString(4, run.notes);
+         st.setString(5, run.logFile);
+         st.setObject(6, run.date);
+         st.setObject(7, run.time);
+         st.setObject(8, run.runID);
+
+         st.executeUpdate();
+
+         st.close();
+         return true;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName());
+         e.printStackTrace();
+      }
+      return false;
    }
 
    public class Operator
@@ -193,14 +362,23 @@ public class SQLDatabaseManager
 
    public class Run
    {
+      public Run(int operatorID, int TaskID)
+      {
+         this.operatorID = operatorID;
+
+         this.taskID = TaskID;
+         date = LocalDate.now();
+         time = LocalTime.now();
+      }
+
       public int runID;
       public int operatorID;
       public int taskID;
       public boolean successful;
       public String notes;
       public String logFile;
-      public Date date;
-      public Time time;
+      public LocalDate date;
+      public LocalTime time;
    }
 
    public class RunEvent
@@ -220,7 +398,53 @@ public class SQLDatabaseManager
    public static void main(String[] args)
    {
       SQLDatabaseManager test = new SQLDatabaseManager();
-      System.out.println("MY ID NUMBER IS "+test.saveOperator("john").operatorID);
+      String userName = "matt";
+      String taskName = "Open Door Task2";
+
+      System.out.println("adding in user " + userName);
+      Operator returnedOperator = test.saveOperator(userName);
+      System.out.println("MY ID NUMBER IS " + returnedOperator.operatorID);
+
+      //make a task
+      System.out.println("adding in task " + taskName);
+      Task returnedTask = test.saveTask(taskName);
+      System.out.println("MY Task ID NUMBER IS " + returnedTask.taskID);
+
+      //make a task
+      System.out.println("adding in Run 1");
+      Run newRun = test.new Run(returnedOperator.operatorID, returnedTask.taskID);
+      newRun.notes = "test run";
+      newRun.logFile = "test run log number";
+
+      newRun.successful = true;
+      Run lastRun = test.saveRun(newRun);
+      System.out.println("MY Run ID NUMBER IS " + lastRun.runID);
+
+      Run returnedRun = test.getRun(lastRun.runID);
+      System.out.println(returnedRun.runID + " " + returnedRun.notes);
+      returnedRun.notes = "new notes";
+
+      test.updateRun(returnedRun);
+
+      Run returnedRun2 = test.getRun(lastRun.runID);
+      System.out.println(returnedRun2.notes);
+
+      RunEvent event = test.new RunEvent();
+      event.runID = lastRun.runID;
+      event.eventName = "walk to door";
+      event.runTime = 10;
+      event.successful = true;
+
+      test.saveRunEvent(event);
+
+      RunEvent event2 = test.new RunEvent();
+      event2.runID = lastRun.runID;
+      event2.eventName = "plan to door";
+      event2.runTime = 9;
+      event2.successful = true;
+
+      test.saveRunEvent(event2);
+
    }
 
 }
