@@ -45,14 +45,16 @@ public class ExampleParameterServer
       }
    }
 
-   private void createVariables(int variablesPerType, YoVariableRegistry registry)
+   private void createVariables(int variablesPerType, YoVariableRegistry parent)
    {
       for (int i = 0; i < variablesPerType; i++)
       {
+         YoVariableRegistry registry = new YoVariableRegistry("Registry" + i);
          new BooleanParameter("BooleanParameter" + i, registry);
          new DoubleParameter("DoubleParameter" + i, registry);
          new IntegerParameter("IntegerParameter" + i, registry);
          new EnumParameter<>("EnumParameter" + i, registry, SomeEnum.class, true);
+         parent.addChild(registry);
       }
    }
 

@@ -58,8 +58,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       simulationTestingParameters.setKeepSCSUp(false);
    }
 
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
-
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Test
@@ -89,7 +87,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    @Test
    public void testWalkingWithArmsHoldingInFeetFrame() throws Exception
    {
-      Random random = new Random(564654L);
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -136,7 +133,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       double timePerWaypoint = 0.5;
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
-      double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
 
       SideDependentList<OneDoFJointBasics[]> armsJoints = new SideDependentList<>();
       SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();

@@ -67,6 +67,7 @@ public class QuadrupedStandController implements EventState
    public void onEntry()
    {
       bodyOrientationManager.setDesiredFrameToHoldPosition(supportFrame);
+      bodyOrientationManager.enableBodyPitchOscillation();
 
       // initialize feedback controllers
       balanceManager.initializeForStanding();
@@ -79,6 +80,7 @@ public class QuadrupedStandController implements EventState
    @Override
    public void onExit()
    {
+      bodyOrientationManager.disableBodyPitchOscillation();
       balanceManager.disableBodyXYControl();
    }
 }
