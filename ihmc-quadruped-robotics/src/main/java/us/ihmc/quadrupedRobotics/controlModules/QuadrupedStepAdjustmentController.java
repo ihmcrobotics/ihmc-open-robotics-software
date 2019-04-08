@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -52,6 +53,8 @@ public class QuadrupedStepAdjustmentController
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final LinearInvertedPendulumModel lipModel;
 
+   private final QuadrupedFootControlModuleParameters footControlModuleParameters;
+
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
    private final YoDouble controllerTime;
@@ -65,6 +68,7 @@ public class QuadrupedStepAdjustmentController
       this.controllerToolbox = controllerToolbox;
       this.controllerTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.lipModel = controllerToolbox.getLinearInvertedPendulumModel();
+      this.footControlModuleParameters = controllerToolbox.getFootControlModuleParameters();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -123,8 +127,24 @@ public class QuadrupedStepAdjustmentController
       for (int i = 0; i < activeSteps.size(); i++)
       {
          YoQuadrupedTimedStep activeStep = activeSteps.get(i);
+
+         double stepDuration = activeStep.getTimeInterval().getDuration();
+         double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
+         double timeInStep = Math.max(controllerTime.getDoubleValue() - activeStep.getTimeInterval().getStartTime(), 0.0);
+
+         double fractionRemaining = timeRemainingInStep / stepDuration;
+         double fractionThrough = timeInStep / stepDuration;
+
+         boolean rightTimeForAdjustment = fractionRemaining > footControlModuleParameters.getMinimumStepAdjustmentFractionRemaining() &&
+               fractionThrough > footControlModuleParameters.getFractionThroughSwingForAdjustment();
+
+         if (!rightTimeForAdjustment)
+            continue;
+
          QuadrupedStep adjustedStep = adjustedActiveSteps.add();
          adjustedStep.set(activeStep);
+
+
 
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
@@ -149,8 +169,6 @@ public class QuadrupedStepAdjustmentController
                double adjustmentMultiplier;
                if (useTimeBasedStepAdjustment.getValue())
                {
-                  // FIXME
-                  double timeRemainingInStep = Math.max(activeStep.getTimeInterval().getEndTime() - controllerTime.getDoubleValue(), 0.0);
                   recursionMultiplier.set(Math.exp(-timeRemainingInStep * lipModel.getNaturalFrequency()));
                   adjustmentMultiplier = minimumFootstepMultiplier.getValue() + (1.0 - minimumFootstepMultiplier.getValue()) * recursionMultiplier.getDoubleValue();
                }

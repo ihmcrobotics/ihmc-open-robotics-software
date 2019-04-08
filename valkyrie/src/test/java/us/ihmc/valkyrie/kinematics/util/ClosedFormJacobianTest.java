@@ -1,14 +1,11 @@
 package us.ihmc.valkyrie.kinematics.util;
 
 //~--- non-JDK imports --------------------------------------------------------
-
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 

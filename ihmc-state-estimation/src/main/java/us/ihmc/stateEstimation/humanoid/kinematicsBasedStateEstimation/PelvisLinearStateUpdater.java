@@ -9,6 +9,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -94,16 +95,17 @@ public class PelvisLinearStateUpdater
    private final BooleanProvider useGroundReactionForcesToComputeCenterOfMassVelocity;
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
 
-   private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBodyBasics, YoDouble>();
+   private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<>();
    private final DoubleProvider forceZInPercentThresholdToFilterFoot;
 
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
-   private final Map<RigidBodyBasics, Wrench> footWrenches = new LinkedHashMap<RigidBodyBasics, Wrench>();
+   private final Map<RigidBodyBasics, FixedFrameVector3DBasics> footForces = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, Wrench> footWrenches = new LinkedHashMap<>();
    private final DoubleProvider delayTimeBeforeTrustingFoot;
    private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
-   private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<RigidBodyBasics>();
-   private final List<RigidBodyBasics> listOfUnTrustedFeet = new ArrayList<RigidBodyBasics>();
+   private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<>();
+   private final List<RigidBodyBasics> listOfUnTrustedFeet = new ArrayList<>();
 
    private final ReferenceFrame rootJointFrame;
    private final Map<RigidBodyBasics, ReferenceFrame> footFrames;
@@ -241,6 +243,7 @@ public class PelvisLinearStateUpdater
          YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
 
+         footForces.put(foot, new FrameVector3D(worldFrame));
          footWrenches.put(foot, new Wrench());
       }
    }
@@ -536,23 +539,27 @@ public class PelvisLinearStateUpdater
          RigidBodyBasics foot = feet.get(i);
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
-         totalForceZ += footWrench.getLinearPartZ();
+         FixedFrameVector3DBasics footForce = footForces.get(foot);
+         footForce.setMatchingFrame(footWrench.getLinearPart());
+         totalForceZ += footForce.getZ();
       }
 
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
-         Wrench footWrench = footWrenches.get(foot);
-         footForcesZInPercentOfTotalForce.get(foot).set(footWrench.getLinearPartZ() / totalForceZ);
+         FixedFrameVector3DBasics footForce = footForces.get(foot);
+         YoDouble footLoad = footForcesZInPercentOfTotalForce.get(foot);
+         footLoad.set(footForce.getZ() / totalForceZ);
 
          double percentForce = forceZInPercentThresholdToFilterFoot.getValue();
-         percentForce = MathTools.clamp(percentForce, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
-         if (footForcesZInPercentOfTotalForce.get(foot).getDoubleValue() < percentForce)
-         {
-            numberOfEndEffectorsTrusted--;
-            areFeetTrusted.get(foot).set(false);
 
-            return numberOfEndEffectorsTrusted;
+         percentForce = MathTools.clamp(percentForce, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
+
+         if (footLoad.getDoubleValue() < percentForce)
+         {
+            if (numberOfEndEffectorsTrusted > 1)
+               numberOfEndEffectorsTrusted--;
+            areFeetTrusted.get(foot).set(false);
          }
       }
 

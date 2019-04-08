@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -55,7 +56,7 @@ public class WebsocketDataProducer implements DataProducer
    private final int port;
    
    private final Object lock = new Object();
-   private Channel ch = null;
+   private Channel channel = null;
    
    private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
    
@@ -96,12 +97,22 @@ public class WebsocketDataProducer implements DataProducer
       {
          try
          {
-            broadcastSender.stop();
-            broadcaster.stop();
-            ch.close().sync();
+            if (broadcastSender != null)
+               broadcastSender.stop();
+            if (broadcaster != null)
+               broadcaster.stop();
             
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            if (channel != null)
+            {
+               ChannelFuture closeFuture = channel.close();
+               closeFuture.sync();
+            }
+
+            if (bossGroup != null)
+               bossGroup.shutdownGracefully();
+
+            if (workerGroup != null)
+               workerGroup.shutdownGracefully();
          }
          catch (InterruptedException e)
          {
@@ -164,11 +175,11 @@ public class WebsocketDataProducer implements DataProducer
          try
          {
             int numberOfRegistryBuffers = nextBufferID;  // Next buffer ID is incremented the last time a registry was added
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
              .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize, numberOfRegistryBuffers));
    
-            ch = b.bind(port).sync().channel();
+            channel = serverBootstrap.bind(port).sync().channel();
    
             if(autoDiscoverable)
             {
