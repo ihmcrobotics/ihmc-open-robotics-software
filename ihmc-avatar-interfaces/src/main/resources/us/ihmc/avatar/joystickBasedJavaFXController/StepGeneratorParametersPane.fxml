@@ -53,7 +53,7 @@
                   <Spinner fx:id="turnMaxAngleOutwardSpinner" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                </children>
             </GridPane>
-            <ImageView fitHeight="250.0" fitWidth="349.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="controlLayoutImageView" fitHeight="250.0" fitWidth="349.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@XBoxOneControllerStepMapping_kick.png" />
                </image>

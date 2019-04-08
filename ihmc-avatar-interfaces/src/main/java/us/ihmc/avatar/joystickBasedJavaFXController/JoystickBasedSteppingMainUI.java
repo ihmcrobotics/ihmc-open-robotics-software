@@ -111,6 +111,7 @@ public class JoystickBasedSteppingMainUI
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
    {
       stepGeneratorJavaFXController.setActiveSecondaryControlOption(activeSecondaryControlOption);
+      stepGeneratorParametersPaneController.updateImageLayout(activeSecondaryControlOption);
    }
 
    public void start() throws IOException
