@@ -6,11 +6,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
+import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.log.LogTools;
 
 public class StepGeneratorParametersPaneController
 {
@@ -37,6 +41,10 @@ public class StepGeneratorParametersPaneController
    private Spinner<Double> turnMaxAngleInwardSpinner;
    @FXML
    private Spinner<Double> turnMaxAngleOutwardSpinner;
+   private final Image kickImageLayout = new Image(getClass().getResourceAsStream("XBoxOneControllerStepMapping_kick.png"));
+   private final Image punchImageLayout = new Image(getClass().getResourceAsStream("XBoxOneControllerStepMapping_punch.png"));
+   @FXML
+   private ImageView controlLayoutImageView;
 
    private final JoystickStepParametersProperty stepParametersProperty = new JoystickStepParametersProperty(this, "stepParameters");
 
@@ -79,6 +87,22 @@ public class StepGeneratorParametersPaneController
 
       messager.bindBidirectional(StepGeneratorJavaFXTopics.SteppingParameters, stepParametersProperty, true);
       messager.bindBidirectional(WalkingTrajectoryDuration, trajectoryDurationSlider.valueProperty(), createConverter(), true);
+   }
+
+   public void updateImageLayout(SecondaryControlOption option)
+   {
+      switch (option)
+      {
+      case KICK:
+         controlLayoutImageView.setImage(kickImageLayout);
+         break;
+      case PUNCH:
+         controlLayoutImageView.setImage(punchImageLayout);
+         break;
+      default:
+         LogTools.error("Unhandled option: " + option);
+         break;
+      }
    }
 
    private PropertyToMessageTypeConverter<Double, Number> createConverter()
