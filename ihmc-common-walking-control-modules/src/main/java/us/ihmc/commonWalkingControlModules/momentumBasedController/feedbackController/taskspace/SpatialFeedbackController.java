@@ -598,7 +598,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       controlFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
       yoCurrentVelocity.setIncludingFrame(currentTwist.getAngularPart(), currentTwist.getLinearPart());
-      yoCurrentVelocity.changeFrame(trajectoryFrame); // TODO: should this be a twist?
+      yoCurrentVelocity.changeFrame(trajectoryFrame);
 
       linearFeedbackTermToPack.setToZero(trajectoryFrame);
       angularFeedbackTermToPack.setToZero(trajectoryFrame);
