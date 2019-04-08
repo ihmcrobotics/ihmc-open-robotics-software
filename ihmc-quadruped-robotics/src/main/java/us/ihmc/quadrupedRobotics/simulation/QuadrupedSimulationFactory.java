@@ -55,6 +55,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -141,6 +142,7 @@ public class QuadrupedSimulationFactory
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
+   private RobotMotionStatusHolder robotMotionStatusFromController;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
@@ -276,6 +278,7 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+         stateEstimatorFactory.setRobotMotionStatusFromControllerHolder(robotMotionStatusFromController);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
 
          FloatingRootJointRobot simulationRobot = sdfRobot.get();
@@ -311,6 +314,7 @@ public class QuadrupedSimulationFactory
 
    public void createControllerManager()
    {
+      robotMotionStatusFromController = new RobotMotionStatusHolder();
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
@@ -318,7 +322,7 @@ public class QuadrupedSimulationFactory
                                                                                        contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
-                                                                                       fallDetectionParameters.get());
+                                                                                       fallDetectionParameters.get(), robotMotionStatusFromController);
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {

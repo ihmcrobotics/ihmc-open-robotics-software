@@ -11,6 +11,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,6 +33,7 @@ public class QuadrupedRuntimeEnvironment
    private final QuadrupedSitDownParameters sitDownParameters;
    private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
    private final QuadrupedFallDetectionParameters fallDetectionParameters;
+   private final RobotMotionStatusHolder robotMotionStatusHolder;
 
    private final double gravityZ;
 
@@ -47,7 +49,8 @@ public class QuadrupedRuntimeEnvironment
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
                                       double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
-                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters, QuadrupedFallDetectionParameters fallDetectionParameters)
+                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
+                                      QuadrupedFallDetectionParameters fallDetectionParameters, RobotMotionStatusHolder robotMotionStatusHolder)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -66,6 +69,7 @@ public class QuadrupedRuntimeEnvironment
       this.sitDownParameters = sitDownParameters;
       this.privilegedConfigurationParameters = privilegedConfigurationParameters;
       this.fallDetectionParameters = fallDetectionParameters;
+      this.robotMotionStatusHolder = robotMotionStatusHolder;
    }
 
    public double getControlDT()
@@ -151,5 +155,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedFallDetectionParameters getFallDetectionParameters()
    {
       return fallDetectionParameters;
+   }
+
+   public RobotMotionStatusHolder getRobotMotionStatusHolder()
+   {
+      return robotMotionStatusHolder;
    }
 }
