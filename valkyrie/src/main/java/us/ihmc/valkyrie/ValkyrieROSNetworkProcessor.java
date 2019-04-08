@@ -11,7 +11,6 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -44,7 +43,7 @@ public class ValkyrieROSNetworkProcessor
          networkProcessorParameters.enableROSAPICommunicator(true);
          networkProcessorParameters.enableControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsPlanningToolbox(true);
-         DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
+         new DRCNetworkProcessor(robotModel, networkProcessorParameters);
 //         new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPICommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
       }
       else
