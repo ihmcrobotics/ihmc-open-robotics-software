@@ -82,11 +82,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final RateLimitedYoMutableFrameVector3D rateLimitedFeedbackAngularTorque;
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
-   private final FrameQuaternion currentOrientation = new FrameQuaternion();
    private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
 
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
-   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
 
    private final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
@@ -332,12 +330,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setIncludingFrame(desiredAngularAcceleration);
       yoFeedbackAngularAcceleration.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackAngularAcceleration.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackAngularAcceleration.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackAngularAcceleration.reset();
-      }
+      rateLimitedFeedbackAngularAcceleration.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularAcceleration.update();
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAngularAcceleration);
 
@@ -368,12 +361,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setIncludingFrame(desiredAngularVelocity);
       yoFeedbackAngularVelocity.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackAngularVelocity.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackAngularVelocity.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackAngularVelocity.reset();
-      }
+      rateLimitedFeedbackAngularVelocity.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularVelocity.update();
       desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackAngularVelocity);
 
@@ -425,12 +413,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularTorque.setIncludingFrame(desiredAngularTorque);
       yoFeedbackAngularTorque.changeFrame(trajectoryFrame);
-      // If the trajectory frame changed reset the rate limited variable
-      if (rateLimitedFeedbackAngularTorque.getReferenceFrame() != trajectoryFrame)
-      {
-         rateLimitedFeedbackAngularTorque.setReferenceFrame(trajectoryFrame);
-         rateLimitedFeedbackAngularTorque.reset();
-      }
+      rateLimitedFeedbackAngularTorque.changeFrame(trajectoryFrame);
       rateLimitedFeedbackAngularTorque.update();
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackAngularTorque);
 
@@ -468,9 +451,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    {
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
 
-      currentOrientation.setToZero(endEffectorFrame);
-      currentOrientation.changeFrame(worldFrame);
-      yoCurrentOrientation.setIncludingFrame(currentOrientation);
+      yoCurrentOrientation.setToZero(endEffectorFrame);
       yoCurrentOrientation.changeFrame(trajectoryFrame);
       yoCurrentOrientation.getRotationVector(yoCurrentRotationVector);
 
@@ -515,16 +496,11 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       ReferenceFrame trajectoryFrame = yoDesiredOrientation.getReferenceFrame();
 
       endEffectorFrame.getTwistRelativeToOther(controlBaseFrame, currentTwist);
-      currentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
-      currentAngularVelocity.changeFrame(worldFrame);
-      yoCurrentAngularVelocity.setIncludingFrame(currentAngularVelocity);
+      yoCurrentAngularVelocity.setIncludingFrame(currentTwist.getAngularPart());
       yoCurrentAngularVelocity.changeFrame(trajectoryFrame);
 
-      desiredAngularVelocity.setIncludingFrame(yoDesiredAngularVelocity);
-      desiredAngularVelocity.changeFrame(worldFrame);
-
-      feedbackTermToPack.setToZero(worldFrame);
-      feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
+      feedbackTermToPack.setToZero(trajectoryFrame);
+      feedbackTermToPack.sub(yoDesiredAngularVelocity, yoCurrentAngularVelocity);
       feedbackTermToPack.changeFrame(endEffectorFrame);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
