@@ -1,9 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.graphics.live;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import javafx.animation.AnimationTimer;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Callback;
