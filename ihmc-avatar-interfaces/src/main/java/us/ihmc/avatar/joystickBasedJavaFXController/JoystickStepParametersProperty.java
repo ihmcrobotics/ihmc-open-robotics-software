@@ -1,13 +1,13 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
 
 import javafx.beans.property.Property;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.jOctoMap.tools.ScannerTools;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class JoystickStepParametersProperty extends ParametersProperty<JoystickStepParameters>
@@ -20,10 +20,9 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
    private final DoubleField minStepWidth = new DoubleField(JoystickStepParameters::getMinStepWidth, JoystickStepParameters::setMinStepWidth);
    private final DoubleField maxStepWidth = new DoubleField(JoystickStepParameters::getMaxStepWidth, JoystickStepParameters::setMaxStepWidth);
    private final DoubleField turnStepWidth = new DoubleField(JoystickStepParameters::getTurnStepWidth, JoystickStepParameters::setTurnStepWidth);
-   private final DoubleField turnMaxAngleInward = new DoubleField(JoystickStepParameters::getTurnMaxAngleInward,
-                                                                   JoystickStepParameters::setTurnMaxAngleInward);
+   private final DoubleField turnMaxAngleInward = new DoubleField(JoystickStepParameters::getTurnMaxAngleInward, JoystickStepParameters::setTurnMaxAngleInward);
    private final DoubleField turnMaxAngleOutward = new DoubleField(JoystickStepParameters::getTurnMaxAngleOutward,
-                                                                    JoystickStepParameters::setTurnMaxAngleOutward);
+                                                                   JoystickStepParameters::setTurnMaxAngleOutward);
 
    public JoystickStepParametersProperty(Object bean, String name)
    {
@@ -245,23 +244,41 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          return turnMaxAngleOutward;
       }
 
-      public static JoystickStepParameters parse(String parametersAsString)
+      public static JoystickStepParameters parseFromPropertyMap(Map<String, String> properties, JoystickStepParameters defaultParameters)
       {
-         parametersAsString = parametersAsString.replace(",", "");
-         Scanner scanner = new Scanner(parametersAsString);
-         JoystickStepParameters parameters = new JoystickStepParameters();
-         parameters.setSwingHeight(ScannerTools.readNextDouble(scanner, parameters.getSwingHeight()));
-         parameters.setSwingDuration(ScannerTools.readNextDouble(scanner, parameters.getSwingDuration()));
-         parameters.setTransferDuration(ScannerTools.readNextDouble(scanner, parameters.getTransferDuration()));
-         parameters.setMaxStepLength(ScannerTools.readNextDouble(scanner, parameters.getMaxStepLength()));
-         parameters.setDefaultStepWidth(ScannerTools.readNextDouble(scanner, parameters.getDefaultStepWidth()));
-         parameters.setMinStepWidth(ScannerTools.readNextDouble(scanner, parameters.getMinStepWidth()));
-         parameters.setMaxStepWidth(ScannerTools.readNextDouble(scanner, parameters.getMaxStepWidth()));
-         parameters.setTurnStepWidth(ScannerTools.readNextDouble(scanner, parameters.getTurnStepWidth()));
-         parameters.setTurnMaxAngleInward(ScannerTools.readNextDouble(scanner, parameters.getTurnMaxAngleInward()));
-         parameters.setTurnMaxAngleOutward(ScannerTools.readNextDouble(scanner, parameters.getTurnMaxAngleOutward()));
-         scanner.close();
-         return parameters;
+         JoystickStepParameters parsed = new JoystickStepParameters();
+         parsed.setSwingHeight(extractDoubleProperty(properties, "SwingHeight", defaultParameters.getSwingHeight()));
+         parsed.setSwingDuration(extractDoubleProperty(properties, "SwingDuration", defaultParameters.getSwingDuration()));
+         parsed.setTransferDuration(extractDoubleProperty(properties, "TransferDuration", defaultParameters.getTransferDuration()));
+         parsed.setMaxStepLength(extractDoubleProperty(properties, "MaxStepLength", defaultParameters.getMaxStepLength()));
+         parsed.setDefaultStepWidth(extractDoubleProperty(properties, "DefaultStepWidth", defaultParameters.getDefaultStepWidth()));
+         parsed.setMinStepWidth(extractDoubleProperty(properties, "MinStepWidth", defaultParameters.getMinStepWidth()));
+         parsed.setMaxStepWidth(extractDoubleProperty(properties, "MaxStepWidth", defaultParameters.getMaxStepWidth()));
+         parsed.setTurnStepWidth(extractDoubleProperty(properties, "TurnStepWidth", defaultParameters.getTurnStepWidth()));
+         parsed.setTurnMaxAngleInward(extractDoubleProperty(properties, "TurnMaxAngleInward", defaultParameters.getTurnMaxAngleInward()));
+         parsed.setTurnMaxAngleOutward(extractDoubleProperty(properties, "TurnMaxAngleOutward", defaultParameters.getTurnMaxAngleOutward()));
+         return parsed;
+      }
+
+      private static double extractDoubleProperty(Map<String, String> properties, String propertyName, double defaultValue)
+      {
+         return Double.parseDouble(properties.getOrDefault(propertyName, Double.toString(defaultValue)));
+      }
+
+      public static Map<String, String> exportToPropertyMap(JoystickStepParameters parametersToExport)
+      {
+         Map<String, String> properties = new HashMap<>();
+         properties.put("SwingHeight", Double.toString(parametersToExport.getSwingHeight()));
+         properties.put("SwingDuration", Double.toString(parametersToExport.getSwingDuration()));
+         properties.put("TransferDuration", Double.toString(parametersToExport.getTransferDuration()));
+         properties.put("MaxStepLength", Double.toString(parametersToExport.getMaxStepLength()));
+         properties.put("DefaultStepWidth", Double.toString(parametersToExport.getDefaultStepWidth()));
+         properties.put("MinStepWidth", Double.toString(parametersToExport.getMinStepWidth()));
+         properties.put("MaxStepWidth", Double.toString(parametersToExport.getMaxStepWidth()));
+         properties.put("TurnStepWidth", Double.toString(parametersToExport.getTurnStepWidth()));
+         properties.put("TurnMaxAngleInward", Double.toString(parametersToExport.getTurnMaxAngleInward()));
+         properties.put("TurnMaxAngleOutward", Double.toString(parametersToExport.getTurnMaxAngleOutward()));
+         return properties;
       }
 
       @Override

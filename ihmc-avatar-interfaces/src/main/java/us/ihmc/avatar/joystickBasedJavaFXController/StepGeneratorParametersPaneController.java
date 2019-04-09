@@ -2,28 +2,21 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
-import org.ojalgo.netio.BufferedInputStreamReader;
+import java.util.function.Function;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -34,6 +27,8 @@ import us.ihmc.log.LogTools;
 
 public class StepGeneratorParametersPaneController
 {
+   @FXML
+   private TextField newProfileTextField;
    @FXML
    private ListView<String> profileListView;
    @FXML
@@ -67,32 +62,47 @@ public class StepGeneratorParametersPaneController
    private final JoystickStepParameters defaultParameters = new JoystickStepParameters();
    private final JoystickStepParametersProperty stepParametersProperty = new JoystickStepParametersProperty(this, "stepParameters");
 
-   private List<String> userProfileNames;
-   private File workingDirectory;
+   private UserProfileManager<JoystickStepParameters> userProfileManager;
 
    public StepGeneratorParametersPaneController()
    {
    }
 
-   public void initialize(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, File workingDirectory) throws IOException
+   public void initialize(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, String workingDirectoryPath) throws IOException
    {
-      this.workingDirectory = workingDirectory;
       defaultParameters.set(walkingControllerParameters);
       defaultParameters.setSwingHeight(0.025);
       JoystickStepParameters initialParameters = new JoystickStepParameters(defaultParameters);
 
-      userProfileNames = readUserProfileNames(workingDirectory);
-      profileListView.setItems(FXCollections.observableArrayList(userProfileNames));
-      profileListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>()
+      userProfileManager = new UserProfileManager<JoystickStepParameters>(workingDirectoryPath,
+                                                                          initialParameters,
+                                                                          JoystickStepParameters::parseFromPropertyMap,
+                                                                          JoystickStepParameters::exportToPropertyMap);
+
+      profileListView.setItems(FXCollections.observableArrayList(userProfileManager.getUserProfileNames()));
+      profileListView.setCellFactory(ListViewTools.cellFactoryForDragAndDropReorder(Function.identity()));
+      MenuItem deleteMenuItem = new MenuItem("Delete");
+      deleteMenuItem.setOnAction(e -> deleteSelectedProfile());
+
+      profileListView.setCellFactory(ListViewTools.cellFactoryForMouseRightClickContextMenu(profileListView.getCellFactory(), deleteMenuItem));
+      profileListView.getSelectionModel().selectedItemProperty().addListener((ChangeListener<String>) (observable, oldProfileName, newProfileName) ->
       {
-         @Override
-         public void changed(ObservableValue<? extends String> observable, String oldProfileName, String newProfileName)
-         {
-            JoystickStepParameters parameters = stepParametersProperty.get();
-            LogTools.info("Saving into " + oldProfileName + " parameters: " + parameters);
-            saveProfileParameter(workingDirectory, oldProfileName, parameters);
-            stepParametersProperty.setValue(loadProfileParameters(workingDirectory, newProfileName, defaultParameters));
-         }
+         JoystickStepParameters currentParameters = stepParametersProperty.get();
+         userProfileManager.saveProfile(oldProfileName, currentParameters);
+         JoystickStepParameters newParameters = userProfileManager.loadProfile(newProfileName);
+         stepParametersProperty.setValue(newParameters);
+      });
+
+      if (!profileListView.getItems().isEmpty())
+      {
+         profileListView.getSelectionModel().select(0);
+         initialParameters.set(userProfileManager.loadProfile(profileListView.getItems().get(0)));
+      }
+
+      newProfileTextField.setOnKeyPressed(event ->
+      {
+         if (event.getCode() == KeyCode.ENTER)
+            addProfile();
       });
 
       stepParametersProperty.set(initialParameters);
@@ -127,9 +137,29 @@ public class StepGeneratorParametersPaneController
       messager.bindBidirectional(WalkingTrajectoryDuration, trajectoryDurationSlider.valueProperty(), createConverter(), true);
    }
 
+   @FXML
+   private void addProfile()
+   {
+      String newUserProfileName = newProfileTextField.textProperty().get();
+
+      if (newUserProfileName.isEmpty())
+         return;
+
+      profileListView.getItems().add(newUserProfileName);
+      profileListView.getSelectionModel().select(newUserProfileName);
+      newProfileTextField.clear();
+   }
+
+   private void deleteSelectedProfile()
+   {
+      String profileToDelete = profileListView.getSelectionModel().getSelectedItem();
+      profileListView.getItems().remove(profileToDelete);
+   }
+
    public void close()
    {
-      saveUserProfileNames(workingDirectory, userProfileNames);
+      userProfileManager.saveProfile(profileListView.getSelectionModel().getSelectedItem(), stepParametersProperty.get());
+      userProfileManager.close(profileListView.getItems());
    }
 
    public void updateImageLayout(SecondaryControlOption option)
@@ -146,149 +176,6 @@ public class StepGeneratorParametersPaneController
          LogTools.error("Unhandled option: " + option);
          break;
       }
-   }
-
-   private static List<String> readUserProfileNames(File workingDirectory)
-   {
-      File userProfileNamesFile = new File(workingDirectory, JoystickBasedSteppingMainUI.userProfilesFilename);
-      List<String> userProfileNameList = new ArrayList<>();
-      Scanner scanner;
-      try
-      {
-         scanner = new Scanner(userProfileNamesFile);
-      }
-      catch (FileNotFoundException e)
-      {
-         LogTools.error("User profiles file not found");
-         return userProfileNameList;
-      }
-
-      scanner.useDelimiter(Pattern.compile(","));
-
-      while (scanner.hasNext())
-      {
-         String next = scanner.next();
-         next = next.replaceAll(" ", "").replaceAll("\n", "").replaceAll("\r", "");
-         userProfileNameList.add(next);
-      }
-
-      scanner.close();
-      return userProfileNameList;
-   }
-
-   private static void saveUserProfileNames(File workingDirectory, List<String> userProfileNames)
-   {
-      File userProfileNamesFile = new File(workingDirectory, JoystickBasedSteppingMainUI.userProfilesFilename);
-      FileWriter fileWriter = null;
-
-      try
-      {
-         fileWriter = new FileWriter(userProfileNamesFile);
-         for (int i = 0; i < userProfileNames.size(); i++)
-         {
-            if (i > 0)
-               fileWriter.write(", ");
-            String userProfileName = userProfileNames.get(i);
-            fileWriter.write(userProfileName);
-         }
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Encountered problem saving profile names.", e);
-      }
-      finally
-      {
-         try
-         {
-            if (fileWriter != null)
-               fileWriter.close();
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Encountered problem saving profile names.", e);
-         }
-      }
-   }
-
-   private static JoystickStepParameters loadProfileParameters(File workingDirectory, String userProfileName, JoystickStepParameters defaultParameters)
-   {
-      if (userProfileName == null)
-         return defaultParameters;
-
-      JoystickStepParameters loadedParameters;
-
-      File userParameterFile = createParameterFile(workingDirectory, userProfileName);
-      if (!userParameterFile.exists())
-      {
-         loadedParameters = new JoystickStepParameters(defaultParameters);
-         saveProfileParameter(workingDirectory, userProfileName, loadedParameters);
-      }
-      else
-      {
-         try
-         {
-            BufferedInputStreamReader reader = new BufferedInputStreamReader(new FileInputStream(userParameterFile));
-            loadedParameters = JoystickStepParameters.parse(reader.readLine());
-            reader.close();
-         }
-         catch (FileNotFoundException e)
-         {
-            throw new RuntimeException("Should not get there as the file existence has been verified already.", e);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Encountered problem loading " + userProfileName, e);
-         }
-      }
-      return loadedParameters;
-   }
-
-   private static void saveProfileParameter(File workingDirectory, String userProfileName, JoystickStepParameters parameters)
-   {
-      if (userProfileName == null)
-         return;
-
-      File userParameterFile = createParameterFile(workingDirectory, userProfileName);
-      if (!userParameterFile.exists())
-      {
-         try
-         {
-            userParameterFile.createNewFile();
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException("Encountered problem saving " + userProfileName, e);
-         }
-      }
-
-      FileWriter fileWriter = null;
-      try
-      {
-         fileWriter = new FileWriter(userParameterFile);
-         fileWriter.write(parameters.toString());
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Encountered problem saving " + userProfileName, e);
-      } finally
-      {
-         if (fileWriter != null)
-         {
-            try
-            {
-               fileWriter.close();
-            }
-            catch (IOException e)
-            {
-               throw new RuntimeException("Encountered problem saving " + userProfileName, e);
-            }
-         }
-      }
-   }
-
-   private static File createParameterFile(File workingDirectory, String userProfileName)
-   {
-      return new File(workingDirectory, userProfileName + ".txt");
    }
 
    private PropertyToMessageTypeConverter<Double, Number> createConverter()
