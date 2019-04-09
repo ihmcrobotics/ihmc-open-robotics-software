@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -96,7 +95,6 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       return 5;
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
@@ -104,7 +102,6 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalking();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
@@ -112,7 +109,6 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testTwoIndependentSteps();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
@@ -134,7 +130,6 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalkingInitialTransfer();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
@@ -142,6 +137,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       super.testPauseWalkingForwardInitialTransfer();
    }
 
+   @Override
    @Test
    public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
    {
