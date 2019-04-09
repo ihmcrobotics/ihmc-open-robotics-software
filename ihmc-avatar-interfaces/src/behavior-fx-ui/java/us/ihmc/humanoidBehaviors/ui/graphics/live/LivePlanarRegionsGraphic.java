@@ -19,9 +19,9 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, DRCRobotModel robotModel)
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), LIDARBasedREAModule.ROS2_ID, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID, this::acceptPlanarRegions);
 
       animationTimer.start();
    }

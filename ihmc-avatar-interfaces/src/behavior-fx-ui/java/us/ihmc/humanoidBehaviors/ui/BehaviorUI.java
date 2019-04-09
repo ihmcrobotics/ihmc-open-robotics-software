@@ -86,7 +86,7 @@ public class BehaviorUI
       directRobotUIController.init(ros2Node, robotModel);
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);
-      view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, robotModel));
+      view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node));
       view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
       mainPane.setCenter(subSceneWrappedInsidePane);
