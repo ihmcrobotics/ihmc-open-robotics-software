@@ -27,6 +27,7 @@ import us.ihmc.robotDataLogger.interfaces.DataProducer;
 import us.ihmc.robotDataLogger.interfaces.RegistryPublisher;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotDataLogger.logger.LogAliveListener;
 import us.ihmc.robotDataLogger.util.HandshakeHashCalculator;
 import us.ihmc.robotDataLogger.websocket.server.discovery.DataServerLocationBroadcastSender;
 
@@ -52,7 +53,8 @@ public class WebsocketDataProducer implements DataProducer
    private final String name;
    private final LogModelProvider logModelProvider;
    private final VariableChangedListener variableChangedListener;
-   
+   private final LogAliveListener logAliveListener;
+
    private final int port;
    
    private final Object lock = new Object();
@@ -80,11 +82,13 @@ public class WebsocketDataProducer implements DataProducer
 
    private int nextBufferID = 0;
 
-   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener, DataServerSettings dataServerSettings)
+   public WebsocketDataProducer(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener,
+                                LogAliveListener logAliveListener, DataServerSettings dataServerSettings)
    {
       this.name = name;
       this.logModelProvider = logModelProvider;
       this.variableChangedListener = variableChangedListener;
+      this.logAliveListener = logAliveListener;
       this.port = dataServerSettings.getPort();
       this.log = dataServerSettings.isLogSession();
       this.autoDiscoverable = dataServerSettings.isAutoDiscoverable();
@@ -177,8 +181,9 @@ public class WebsocketDataProducer implements DataProducer
             int numberOfRegistryBuffers = nextBufferID;  // Next buffer ID is incremented the last time a registry was added
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, maximumBufferSize, numberOfRegistryBuffers));
-   
+                           .childHandler(new WebsocketDataServerInitializer(logServerContent, broadcaster, variableChangedListener, logAliveListener,
+                                                                            maximumBufferSize, numberOfRegistryBuffers));
+
             channel = serverBootstrap.bind(port).sync().channel();
    
             if(autoDiscoverable)

@@ -52,7 +52,9 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
    private volatile long latestTimestamp;
    
    private final SummaryProvider summaryProvider = new SummaryProvider();
-   
+
+   private final LogWatcher logWatcher = new LogWatcher();
+
    @Deprecated
    /**
     * A thread scheduler is not necessary anymore. This function is left in for backwards compatibility.
@@ -152,7 +154,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
 
       this.dt = dt;
 
-      this.dataProducer = new WebsocketDataProducer(mainClazz, logModelProvider, this, dataServerSettings);
+      this.dataProducer = new WebsocketDataProducer(mainClazz, logModelProvider, this, logWatcher, dataServerSettings);
       addCameras(config, dataServerSettings);
       
    }
@@ -302,6 +304,7 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
       publisher.update(timestamp);
       updateChangedVariables(registry);
 
+      logWatcher.update(timestamp);
    }
 
    private void updateChangedVariables(YoVariableRegistry rootRegistry)
@@ -404,4 +407,8 @@ public class YoVariableServer implements RobotVisualizer, VariableChangedListene
       return latestTimestamp;
    }
 
+   public boolean isLogging()
+   {
+      return logWatcher.isLogging();
+   }
 }
