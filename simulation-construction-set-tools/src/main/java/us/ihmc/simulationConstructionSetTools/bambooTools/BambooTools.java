@@ -1,21 +1,32 @@
 package us.ihmc.simulationConstructionSetTools.bambooTools;
 
-import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.lang3.SystemUtils;
+
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class BambooTools
 {
@@ -26,6 +37,8 @@ public class BambooTools
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "C:/videos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
+
+   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
    private static boolean WRITE_LOG_FILE_ON_SUCCESS = false;
 
@@ -150,8 +163,21 @@ public class BambooTools
       String videoFilename = dateTimeString + "_" + videoName + ".mp4";
 
       LogTools.debug(videoFilename);
-      
-      File videoFile = scs.createVideo(directoryName + videoFilename);
+
+      Future<File> future = THREAD_POOL.submit(() -> scs.createVideo(directoryName + videoFilename));
+      File videoFile;
+      try
+      {
+         videoFile = future.get(5, TimeUnit.MINUTES);
+      }
+      catch (InterruptedException | ExecutionException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (TimeoutException e)
+      {
+         throw new RuntimeException("Video creation timed out after 5 min.");
+      }
 
       String dataFilename = directoryName + dateTimeString + ".data.gz";
 
