@@ -25,11 +25,11 @@ public class SearchForDoorBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<DoorLocationPacket> publisher;
 
 
-   public SearchForDoorBehavior(String robotName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SearchForDoorBehavior(String robotName,String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(robotName, "SearchForDoor", ros2Node);
+      super(robotName, yoNamePrefix, ros2Node);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
-      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, "SearchForDoorFiducial1", ros2Node, yoGraphicsListRegistry);
+      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix+"SearchForDoorFiducial1", ros2Node, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
 
@@ -84,9 +84,9 @@ public class SearchForDoorBehavior extends AbstractBehavior
          Point3D location = new Point3D();
          Quaternion orientation = new Quaternion();
          pose.get(location, orientation);
-        // publishUIPositionCheckerPacket(location,orientation);
+         publishUIPositionCheckerPacket(location,orientation);
 
-         setDoorLocation(pose);
+       //  setDoorLocation(pose);
       }
       
 
@@ -113,7 +113,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    {
       recievedNewDoorLocation = true;
       publishTextToSpeech("Recieved Door Location From UI");
-      //setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
+      setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
 
 
 
@@ -127,7 +127,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
       publisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
       
       
-      publishUIPositionCheckerPacket(pose.getPosition(), pose.getOrientation());
+      //publishUIPositionCheckerPacket(pose.getPosition(), pose.getOrientation());
       
    }
 
