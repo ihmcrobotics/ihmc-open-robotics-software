@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.AvatarDoubleStepTest;
@@ -33,7 +32,6 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSide();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
@@ -41,7 +39,6 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowSameSideAfterFirstSep();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
@@ -49,7 +46,6 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
       super.testTwoStepsInARowLongTransferSameSide();
    }
 
-   @Tag("allocation-slow")
    @Test
    @Override
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
