@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -11,20 +14,43 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<AnchorPane minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorParametersPaneController">
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="227.0" prefWidth="1442.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorParametersPaneController">
    <children>
       <HBox layoutX="27.923828125" layoutY="3.0" maxWidth="1.7976931348623157E308" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <ListView fx:id="profileListView" editable="true" prefHeight="200.0" prefWidth="200.0" />
+            <VBox>
+               <children>
+                  <ListView fx:id="profileListView" editable="true" prefHeight="200.0" prefWidth="200.0">
+                     <tooltip>
+                        <Tooltip prefWidth="150.0" text="List of profiles. Reorder list with drag-and-drop. The first profile in this list is the one loaded at startup. Profiles are automatically saved upon switching and closing this app." wrapText="true" />
+                     </tooltip>
+                  </ListView>
+                  <HBox>
+                     <children>
+                        <TextField fx:id="newProfileTextField">
+                           <tooltip>
+                              <Tooltip text="Enter name of new profile. Press Enter to add new profile." />
+                           </tooltip>
+                        </TextField>
+                        <Button fx:id="addProfileButton" mnemonicParsing="false" onAction="#addProfile" text="+">
+                           <tooltip>
+                              <Tooltip text="Add new profile." />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
             <GridPane hgap="10.0" HBox.hgrow="ALWAYS">
                <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="165.0" minWidth="10.0" prefWidth="114.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="157.0" minWidth="10.0" prefWidth="105.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="152.0" minWidth="10.0" prefWidth="110.0" />
+                  <ColumnConstraints hgrow="NEVER" maxWidth="97.0" minWidth="10.0" prefWidth="97.0" />
+                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
                </columnConstraints>
                <rowConstraints>
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -33,7 +59,7 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Slider fx:id="swingHeightSlider" majorTickUnit="0.05" max="0.35" min="0.025" minorTickCount="4" showTickLabels="true" showTickMarks="true" value="0.125" GridPane.columnIndex="5" />
+                  <Slider fx:id="swingHeightSlider" majorTickUnit="0.05" max="0.35" min="0.025" minorTickCount="4" prefHeight="38.0" prefWidth="200.0" showTickLabels="true" showTickMarks="true" value="0.125" GridPane.columnIndex="5" />
                   <Label text="Swing height" GridPane.columnIndex="4" />
                   <Label text="Swing time" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                   <Slider fx:id="swingDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.6" prefHeight="38.0" prefWidth="127.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
@@ -57,7 +83,7 @@
                   <Label text="Trajectory time" GridPane.columnIndex="4" GridPane.rowIndex="3" />
                </children>
             </GridPane>
-            <ImageView fx:id="controlLayoutImageView" fitHeight="250.0" fitWidth="349.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="controlLayoutImageView" fitHeight="227.0" fitWidth="381.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@XBoxOneControllerStepMapping_kick.png" />
                </image>

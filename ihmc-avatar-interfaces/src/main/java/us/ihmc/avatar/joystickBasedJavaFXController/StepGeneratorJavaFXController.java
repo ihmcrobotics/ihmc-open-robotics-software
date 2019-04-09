@@ -64,6 +64,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -163,21 +164,30 @@ public class StepGeneratorJavaFXController
          @Override
          public void handle(long now)
          {
-            JoystickStepParameters stepParameters = stepParametersReference.get();
-            continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(), stepParameters.getTransferDuration());
-            continuousStepGenerator.update(Double.NaN);
-
-            List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
-            ObservableList<Node> children = rootNode.getChildren();
-
-            if (!continuousStepGenerator.isWalking())
+            try
             {
-               children.clear();
+               JoystickStepParameters stepParameters = stepParametersReference.get();
+               continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(), stepParameters.getTransferDuration());
+               continuousStepGenerator.update(Double.NaN);
+
+               List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
+               ObservableList<Node> children = rootNode.getChildren();
+
+               if (!continuousStepGenerator.isWalking())
+               {
+                  children.clear();
+               }
+               else if (footstepsToVisualize != null)
+               {
+                  children.clear();
+                  children.addAll(footstepsToVisualize);
+               }
             }
-            else if (footstepsToVisualize != null)
+            catch (Throwable e)
             {
-               children.clear();
-               children.addAll(footstepsToVisualize);
+               e.printStackTrace();
+               LogTools.error("Caught exception, stopping animation timer.");
+               stop();
             }
          }
       };
