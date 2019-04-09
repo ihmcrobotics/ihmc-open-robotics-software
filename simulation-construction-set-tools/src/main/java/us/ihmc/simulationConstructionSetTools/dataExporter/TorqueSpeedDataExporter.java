@@ -127,8 +127,16 @@ public class TorqueSpeedDataExporter implements ActionListener
             if (optionsPanel.saveMatlabData())
             {
                System.out.println("Saving data in Matlab format");
-               saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
-               System.out.println("Done Saving Data in Matlab format");
+               try
+               {
+                  saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
+                  System.out.println("Done Saving Data in Matlab format");
+               }
+               catch(OutOfMemoryError exception)
+               {
+                  System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+                  exception.printStackTrace();
+               }
             }
 
             if (optionsPanel.createSpreadSheet())
