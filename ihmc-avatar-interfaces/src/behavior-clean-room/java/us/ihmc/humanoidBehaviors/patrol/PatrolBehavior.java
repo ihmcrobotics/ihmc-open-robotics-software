@@ -95,7 +95,7 @@ public class PatrolBehavior
       factory.addTransition(WALK, Lists.newArrayList(PLAN, STOP), this::transitionFromWalk);
       stateMachine = factory.getFactory().build(STOP);
 
-      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, robotModel.getSimpleRobotName(), LIDARBasedREAModule.ROS2_ID);
+      planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
