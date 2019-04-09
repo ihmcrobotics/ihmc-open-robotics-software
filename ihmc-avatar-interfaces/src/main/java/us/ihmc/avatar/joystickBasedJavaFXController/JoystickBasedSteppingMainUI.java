@@ -1,5 +1,6 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
+import java.io.File;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -34,8 +35,13 @@ import us.ihmc.ros2.Ros2Node;
 
 public class JoystickBasedSteppingMainUI
 {
+   public static final String defaultWorkingDirectoryPath = System.getProperty("user.home") + "/.ihmc/joystick_step_app/";
+   public final static String userProfilesFilename = "profiles.txt";
+
    private final Stage primaryStage;
    private final BorderPane mainPane;
+
+   private final File workingDirectory;
 
    private final JavaFXRobotVisualizer robotVisualizer;
    private final StepGeneratorJavaFXController stepGeneratorJavaFXController;
@@ -53,8 +59,22 @@ public class JoystickBasedSteppingMainUI
                                       SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {
+      this(robotName, primaryStage, ros2Node, null, fullRobotModelFactory, walkingControllerParameters, kickMessenger, punchMessenger, lowLevelMessenger,
+           footPolygons);
+   }
+
+   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, String workingDirectoryPath,
+                                      FullHumanoidRobotModelFactory fullRobotModelFactory, WalkingControllerParameters walkingControllerParameters,
+                                      HumanoidRobotKickMessenger kickMessenger, HumanoidRobotPunchMessenger punchMessenger,
+                                      RobotLowLevelMessenger lowLevelMessenger, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
+         throws Exception
+   {
       this.primaryStage = primaryStage;
       xBoxOneJavaFXController = new XBoxOneJavaFXController(messager);
+      if (workingDirectoryPath == null)
+         workingDirectoryPath = defaultWorkingDirectoryPath;
+      workingDirectory = new File(workingDirectoryPath);
+      workingDirectory.mkdirs();
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -69,12 +89,16 @@ public class JoystickBasedSteppingMainUI
       mainPane.setCenter(subScene);
 
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           PlanarRegionsListMessage.class,
+                                           REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
 
@@ -94,12 +118,19 @@ public class JoystickBasedSteppingMainUI
          }
       };
 
-      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName, messager, walkingControllerParameters, ros2Node, robotVisualizer,
-                                                                        kickMessenger, punchMessenger, lowLevelMessenger, footPolygons);
+      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName,
+                                                                        messager,
+                                                                        walkingControllerParameters,
+                                                                        ros2Node,
+                                                                        robotVisualizer,
+                                                                        kickMessenger,
+                                                                        punchMessenger,
+                                                                        lowLevelMessenger,
+                                                                        footPolygons);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
       messager.startMessager();
-      stepGeneratorParametersPaneController.initialize(messager, walkingControllerParameters);
+      stepGeneratorParametersPaneController.initialize(messager, walkingControllerParameters, workingDirectory);
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setScene(new Scene(mainPane, 800, 600));
@@ -136,6 +167,7 @@ public class JoystickBasedSteppingMainUI
       xBoxOneJavaFXController.stop();
       robotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
+      stepGeneratorParametersPaneController.close();
       cameraTracking.stop();
       planarRegionsViewer.stop();
       ThreadTools.sleep(100); // Give some time to send the message.:
