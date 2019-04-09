@@ -12,6 +12,9 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.RunEvent;
 import us.ihmc.ros2.Ros2Node;
 
 public class BasicTimingBehavior extends AbstractBehavior
@@ -25,8 +28,8 @@ public class BasicTimingBehavior extends AbstractBehavior
 
    public final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    public final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
-   public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket= new AtomicReference<>(null);
-   
+   public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket = new AtomicReference<>(null);
+   public SQLDatabaseManager dataBase;
 
    public BasicTimingBehavior(String robotName, Ros2Node ros2Node)
    {
@@ -34,23 +37,21 @@ public class BasicTimingBehavior extends AbstractBehavior
 
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
       createSubscriber(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator, footstepPlanningRequestPacket::set);
- 
-      createSubscriber(FootstepStatusMessage.class  , controllerSubGenerator, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class  , controllerSubGenerator, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class   , controllerSubGenerator, armTrajectoryMessage::set);
+
+      createSubscriber(FootstepStatusMessage.class, controllerSubGenerator, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerSubGenerator, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerSubGenerator, armTrajectoryMessage::set);
       createSubscriber(FootstepDataListMessage.class, controllerSubGenerator, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class   , controllerSubGenerator, walkingStatusMessage::set);
-      
-      createSubscriber(FootstepStatusMessage.class  , controllerPubGenerator, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class  , controllerPubGenerator, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class   , controllerPubGenerator, armTrajectoryMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerSubGenerator, walkingStatusMessage::set);
+
+      createSubscriber(FootstepStatusMessage.class, controllerPubGenerator, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerPubGenerator, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerPubGenerator, armTrajectoryMessage::set);
       createSubscriber(FootstepDataListMessage.class, controllerPubGenerator, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class   , controllerPubGenerator, walkingStatusMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerPubGenerator, walkingStatusMessage::set);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
-      
-
-
+      dataBase = new SQLDatabaseManager();
    }
 
    public void clean()
@@ -63,10 +64,8 @@ public class BasicTimingBehavior extends AbstractBehavior
       armTrajectoryMessage.set(null);
       footstepDataListMessage.set(null);
       walkingStatusMessage.set(null);
-     
    }
-   
-   
+
    @Override
    public void doControl()
    {
@@ -118,27 +117,23 @@ public class BasicTimingBehavior extends AbstractBehavior
    public void onBehaviorEntered()
    {
 
-
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
 
    }
 
@@ -146,14 +141,17 @@ public class BasicTimingBehavior extends AbstractBehavior
    public void onBehaviorExited()
    {
 
-
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
+   }
+
+   public void saveEvent(int runID, String eventName, double eventTime)
+   {
+      dataBase.saveRunEvent(dataBase.new RunEvent(runID, eventName, (float) eventTime, true));
    }
 
 }

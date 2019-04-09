@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -41,13 +42,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       STOPPED,
       SETUP_ROBOT,
       //clear planar regions and look down, then up only come here after a failed plan
-      SEARCHING_FOR_DOOR,//search for general door location
+      SEARCHING_FOR_DOOR, //search for general door location
       //if distance to door < approach point location skip this step.
       //walk to general door location... point offseet from door approach location
       //search for door precise location
       WALKING_TO_DOOR, //if failed jump to clear state
-      SEARCHING_FOR_DOOR_FINAL,//search for door handle
-      OPEN_DOOR,// in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
+      SEARCHING_FOR_DOOR_FINAL, //search for door handle
+      OPEN_DOOR, // in paralelle run the detect open door behavior if open door is not detected, go back to search for door 
       SET_UP_ROBOT_FOR_DOOR_WALK,
       WAITING_FOR_USER_CONFIRMATION,
       WALK_THROUGH_DOOR,
@@ -71,26 +72,28 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    //this hold all the primitive behaviors that get used across most behaviors.
    private final AtlasPrimitiveActions atlasPrimitiveActions;
-
+   private SleepBehavior sleepBehavior;
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
-   
-  // private BasicTimingBehavior basicTimingBehavior;
 
-   public WalkThroughDoorBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                                  HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                  AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
+   // private BasicTimingBehavior basicTimingBehavior;
+
+   public WalkThroughDoorBehavior(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+                                  FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                  WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
+      sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-  //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
+      //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
-      searchForDoorBehavior = new SearchForDoorBehavior(robotName, ros2Node, yoGraphicsListRegistry);
+      searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
       openDoorBehavior = new OpenDoorBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      
+
       //setup publisher for sending door location to UI
       setupStateMachine();
    }
@@ -100,7 +103,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       //should constantly be searching for door and updating its location here
       super.doControl();
-    //  basicTimingBehavior.doControl();
+      //  basicTimingBehavior.doControl();
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+      publishTextToSpeech("Entering Walk Through Door behavior");
+
+      super.onBehaviorEntered();
    }
 
    @Override
@@ -109,7 +120,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //reset the robot in case it is in a wierd configuration before the behavior starts
       BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior);
 
-      
       //if there are hands, close them
       BehaviorAction setup = new BehaviorAction(atlasPrimitiveActions.leftHandDesiredConfigurationBehavior,
                                                 atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
@@ -125,6 +135,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
+         }
+
+         @Override
+         public void doTransitionIntoAction()
+         {
+            publishTextToSpeech("Setting up robot for Walk Through Door behavior");
+
+            super.doTransitionIntoAction();
          }
       };
 
@@ -145,8 +163,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             super.doTransitionOutOfAction();
             //found the door location, inform the UI of its location
 
-            
-
          }
       };
 
@@ -157,7 +173,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          {
             super.doTransitionOutOfAction();
             //found the door location, inform the UI of its location
-           
 
          }
 
@@ -230,11 +245,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
+      BehaviorAction doneState = new BehaviorAction(sleepBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
+            sleepBehavior.setSleepTime(3000);
             publishTextToSpeech("Finished Walking Through Door");
          }
       };
@@ -338,6 +354,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    @Override
    public void onBehaviorExited()
    {
+      publishTextToSpeech("Leaving Walk Through Door behavior");
 
    }
 

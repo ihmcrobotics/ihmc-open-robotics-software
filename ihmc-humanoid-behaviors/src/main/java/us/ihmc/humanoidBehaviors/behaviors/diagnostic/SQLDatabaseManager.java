@@ -248,9 +248,8 @@ public class SQLDatabaseManager
          ResultSet rs = stmt.executeQuery("SELECT * FROM operators WHERE name = '" + name + "';");
          while (rs.next())
          {
-            returnedOperator = new Operator();
+            returnedOperator = new Operator(rs.getString("name"));
             returnedOperator.operatorID = rs.getInt("id");
-            returnedOperator.name = rs.getString("name");
          }
          rs.close();
          stmt.close();
@@ -276,9 +275,7 @@ public class SQLDatabaseManager
          ResultSet rs = stmt.executeQuery("SELECT * FROM tasks WHERE name = '" + name + "';");
          while (rs.next())
          {
-            returnedTask = new Task();
-            returnedTask.taskID = rs.getInt("id");
-            returnedTask.name = rs.getString("name");
+            returnedTask = new Task(rs.getString("name"));
          }
          rs.close();
          stmt.close();
@@ -356,6 +353,10 @@ public class SQLDatabaseManager
 
    public class Operator
    {
+      public Operator(String name)
+      {
+         this.name = name;
+      }
       public int operatorID;
       public String name;
    }
@@ -383,6 +384,13 @@ public class SQLDatabaseManager
 
    public class RunEvent
    {
+      public RunEvent(int runID, String eventName, float runTime, boolean successfull)
+      {
+         this.runID = runID;
+         this.eventName= eventName;
+         this.runTime = runTime;
+         this.successful = successfull;
+      }
       public int runID;
       public String eventName;
       public float runTime;
@@ -391,6 +399,10 @@ public class SQLDatabaseManager
 
    public class Task
    {
+      public Task(String taskName)
+      {
+         this.name = taskName;
+      }
       public int taskID;
       public String name;
    }
@@ -398,19 +410,19 @@ public class SQLDatabaseManager
    public static void main(String[] args)
    {
       SQLDatabaseManager test = new SQLDatabaseManager();
-      String userName = "matt";
-      String taskName = "Open Door Task2";
+      //String userName = "matt";
+      String taskName = "Walk Through Door";
 
-      System.out.println("adding in user " + userName);
-      Operator returnedOperator = test.saveOperator(userName);
-      System.out.println("MY ID NUMBER IS " + returnedOperator.operatorID);
+     // System.out.println("adding in user " + userName);
+     // Operator returnedOperator = test.saveOperator(userName);
+      //System.out.println("MY ID NUMBER IS " + returnedOperator.operatorID);
 
       //make a task
       System.out.println("adding in task " + taskName);
       Task returnedTask = test.saveTask(taskName);
       System.out.println("MY Task ID NUMBER IS " + returnedTask.taskID);
 
-      //make a task
+/*      //make a task
       System.out.println("adding in Run 1");
       Run newRun = test.new Run(returnedOperator.operatorID, returnedTask.taskID);
       newRun.notes = "test run";
@@ -443,7 +455,7 @@ public class SQLDatabaseManager
       event2.runTime = 9;
       event2.successful = true;
 
-      test.saveRunEvent(event2);
+      test.saveRunEvent(event2);*/
 
    }
 

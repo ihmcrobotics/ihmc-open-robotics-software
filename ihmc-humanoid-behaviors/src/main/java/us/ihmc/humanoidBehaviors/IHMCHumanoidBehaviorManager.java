@@ -32,6 +32,8 @@ import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkThroughDoorBehaviorWithTiming;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehaviorOld;
@@ -250,12 +252,19 @@ public class IHMCHumanoidBehaviorManager
                                                                wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                             new WalkThroughDoorBehavior(robotName,"Human", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                          wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
       
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR,
                              new DoorTimingBehavior(robotName, yoTime,ros2Node,true));
-
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
+                             new WalkThroughDoorBehaviorWithTiming(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                                                         wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR,
+                             new WalkTimingBehavior(robotName, yoTime,ros2Node,true));
+      
+      
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS, new PartialFootholdBehavior(robotName, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION, new TestICPOptimizationBehavior(robotName, ros2Node, referenceFrames, yoTime));
