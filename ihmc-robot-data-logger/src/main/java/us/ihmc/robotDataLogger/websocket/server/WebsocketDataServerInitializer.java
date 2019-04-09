@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.robotDataLogger.logger.LogAliveListener;
 
 /**
  * Initializes a connection
@@ -22,15 +23,19 @@ class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
    private final DataServerServerContent logServerContent;
    private final WebsocketDataBroadcaster broadcaster;
    private final VariableChangedListener variableChangedListener;
+   private final LogAliveListener logAliveListener;
    private final int dataSize;
    private final int numberOfRegistryBuffers;
-   
-   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster, VariableChangedListener variableChangedListener, int dataSize, int numberOfRegistryBuffers)
+
+   public WebsocketDataServerInitializer(DataServerServerContent logServerContent, WebsocketDataBroadcaster broadcaster,
+                                         VariableChangedListener variableChangedListener, LogAliveListener logAliveListener, int dataSize,
+                                         int numberOfRegistryBuffers)
    {
       this.logServerContent = logServerContent;
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
       this.variableChangedListener = variableChangedListener;
+      this.logAliveListener = logAliveListener;
       this.numberOfRegistryBuffers = numberOfRegistryBuffers;
    }
 
@@ -45,7 +50,7 @@ class WebsocketDataServerInitializer extends ChannelInitializer<SocketChannel>
       pipeline.addLast(new HttpObjectAggregator(65536));
       pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
       pipeline.addLast(new HTTPDataServerDescriptionServer(logServerContent));
-      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize, numberOfRegistryBuffers, variableChangedListener));
+      pipeline.addLast(new WebsocketDataServerFrameHandler(broadcaster, dataSize, numberOfRegistryBuffers, variableChangedListener, logAliveListener));
    }
 
 }
