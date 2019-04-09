@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
 import us.ihmc.ekf.filter.FilterTools;
+import us.ihmc.ekf.filter.FilterTools.ProccessNoiseModel;
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.ekf.filter.sensor.Sensor;
@@ -110,6 +111,8 @@ public class LeggedRobotEKF implements StateEstimatorController
                          SensorOutputMapReadOnly processedSensorOutput, double dt, double gravity, Map<String, String> jointGroups,
                          YoGraphicsListRegistry graphicsListRegistry, List<OneDoFJointBasics> referenceJoints)
    {
+      FilterTools.proccessNoiseModel = ProccessNoiseModel.ONLY_ACCELERATION_VARIANCE;
+
       this.processedSensorOutput = processedSensorOutput;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
