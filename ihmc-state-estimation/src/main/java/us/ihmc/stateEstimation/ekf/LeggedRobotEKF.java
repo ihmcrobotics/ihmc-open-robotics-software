@@ -12,11 +12,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commons.Conversions;
 import us.ihmc.ekf.filter.FilterTools;
+import us.ihmc.ekf.filter.FilterTools.ProccessNoiseModel;
 import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.ekf.filter.sensor.Sensor;
 import us.ihmc.ekf.filter.sensor.implementations.AngularVelocitySensor;
 import us.ihmc.ekf.filter.sensor.implementations.JointPositionSensor;
+import us.ihmc.ekf.filter.sensor.implementations.JointVelocitySensor;
 import us.ihmc.ekf.filter.sensor.implementations.LinearAccelerationSensor;
 import us.ihmc.ekf.filter.state.implementations.JointState;
 import us.ihmc.ekf.filter.state.implementations.PoseState;
@@ -83,6 +85,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    private final List<IMUSensorReadOnly> linearAccelerationSensorOutputs = new ArrayList<>();
    private final SensorOutputMapReadOnly processedSensorOutput;
    private final List<JointPositionSensor> jointPositionSensors = new ArrayList<>();
+   private final List<JointVelocitySensor> jointVelocitySensors = new ArrayList<>();
    private final List<FootWrenchSensorUpdater> footWrenchSensorUpdaters = new ArrayList<>();
    private final List<ForceSensorDataReadOnly> forceSensorOutputs = new ArrayList<>();
    private final List<ReferenceFrame> forceSensorMeasurementFrames = new ArrayList<>();
@@ -108,6 +111,8 @@ public class LeggedRobotEKF implements StateEstimatorController
                          SensorOutputMapReadOnly processedSensorOutput, double dt, double gravity, Map<String, String> jointGroups,
                          YoGraphicsListRegistry graphicsListRegistry, List<OneDoFJointBasics> referenceJoints)
    {
+      FilterTools.proccessNoiseModel = ProccessNoiseModel.ONLY_ACCELERATION_VARIANCE;
+
       this.processedSensorOutput = processedSensorOutput;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
@@ -200,6 +205,9 @@ public class LeggedRobotEKF implements StateEstimatorController
          JointPositionSensor jointPositionSensor = new JointPositionSensor(jointName, parameterGroup, dt, registry);
          jointPositionSensors.add(jointPositionSensor);
          sensors.add(jointPositionSensor);
+         JointVelocitySensor jointVelocitySensor = new JointVelocitySensor(jointName, parameterGroup, dt, registry);
+         jointVelocitySensors.add(jointVelocitySensor);
+         sensors.add(jointVelocitySensor);
          yoJointAngles.add(new YoDouble("q_" + jointName + "_ekf", registry));
          yoJointVelocities.add(new YoDouble("qd_" + jointName + "_ekf", registry));
       }
@@ -252,6 +260,8 @@ public class LeggedRobotEKF implements StateEstimatorController
       {
          double jointPositionMeasurement = processedSensorOutput.getJointPositionProcessedOutput(referenceJoints.get(jointIdx));
          jointPositionSensors.get(jointIdx).setJointPositionMeasurement(jointPositionMeasurement);
+         double jointVelocityMeasurement = processedSensorOutput.getJointVelocityProcessedOutput(referenceJoints.get(jointIdx));
+         jointVelocitySensors.get(jointIdx).setJointVelocityMeasurement(jointVelocityMeasurement);
       }
 
       for (int imuIdx = 0; imuIdx < angularVelocitySensors.size(); imuIdx++)
@@ -300,6 +310,14 @@ public class LeggedRobotEKF implements StateEstimatorController
       rootState.initialize(rootJointTransform, rootTwist);
 
       stateEstimator.reset();
+      for (int i = 0; i < linearAccelerationSensors.size(); i++)
+      {
+         linearAccelerationSensors.get(i).resetBias();
+      }
+      for (int i = 0; i < angularVelocitySensors.size(); i++)
+      {
+         angularVelocitySensors.get(i).resetBias();
+      }
    }
 
    @Override
