@@ -20,16 +20,25 @@ public class ROS2Callback<T>
 
    public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
    {
+      this(ros2Node,
+           messageType,
+           robotName,
+           identifier.getModuleTopicQualifier(),
+           identifier.deriveIOTopicQualifierForSubscriber(ros2Node.getName()),
+           messageCallback);
+   }
+
+   public ROS2Callback(Ros2Node ros2Node, Class<T> messageType, String robotName, String moduleTopicQualifier, ROS2TopicQualifier ioTopicQualifier,
+                       Consumer<T> messageCallback)
+   {
       this.messageCallback = messageCallback;
-      ExceptionTools.handle(() ->
-                            {
-                               return ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
-                                                                  this::nullOmissionCallback,
-                                                                  ROS2Tools.generateDefaultTopicName(messageType,
-                                                                                                     robotName,
-                                                                                                     identifier.getModuleTopicQualifier(),
-                                                                                                     identifier.deriveIOTopicQualifier(ros2Node.getName())));
-                            }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(() -> ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType),
+                                                              this::nullOmissionCallback,
+                                                              ROS2Tools.generateDefaultTopicName(messageType,
+                                                                                                 robotName,
+                                                                                                 moduleTopicQualifier,
+                                                                                                 ioTopicQualifier)),
+                            DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    private void nullOmissionCallback(Subscriber<T> subscriber)
