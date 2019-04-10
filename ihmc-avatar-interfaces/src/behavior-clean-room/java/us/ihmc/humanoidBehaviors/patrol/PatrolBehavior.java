@@ -76,6 +76,7 @@ public class PatrolBehavior
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
+   private final AtomicReference<Boolean> loop;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -109,6 +110,7 @@ public class PatrolBehavior
       });
 
       waypoints = messager.createInput(API.Waypoints);
+      loop = messager.createInput(API.Loop, false);
 
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
@@ -228,7 +230,14 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         return PLAN;
+         if (!loop.get() && goalWaypointIndex.get() + 1 >= waypoints.get().size())
+         {
+            return STOP;
+         }
+         else
+         {
+            return PLAN;
+         }
       }
 
       return null;
@@ -241,7 +250,9 @@ public class PatrolBehavior
          ArrayList<Pose3D> latestWaypoints = waypoints.get();      // access and store these early
          int nextGoalWaypointIndex = goalWaypointIndex.get() + 1;  // to make thread-safe
          if (nextGoalWaypointIndex >= latestWaypoints.size())
+         {
             nextGoalWaypointIndex = 0;
+         }
          goalWaypointIndex.set(nextGoalWaypointIndex);
       }
    }
@@ -293,6 +304,9 @@ public class PatrolBehavior
 
       /** Input: When received, the robot stops walking and waits forever. */
       public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
+
+      /** Input: Toggle looping through waypoints. */
+      public static final Topic<Boolean> Loop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Loop"));
 
       /** Output: to visualize the current robot path plan. */
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan = Root.child(Patrol)

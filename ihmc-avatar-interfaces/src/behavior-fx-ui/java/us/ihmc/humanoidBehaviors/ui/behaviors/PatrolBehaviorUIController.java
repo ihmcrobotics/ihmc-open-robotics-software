@@ -6,6 +6,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
@@ -38,6 +39,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private Button pauseWalking;
    @FXML private TextField remoteCurrentWaypointIndex;
    @FXML private TextField remoteCurrentState;
+   @FXML private CheckBox loopThroughWaypoints;
 
    private JavaFXMessager uiMessager;
    private SubScene sceneNode;
@@ -205,5 +207,10 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void stopWalking()
    {
       behaviorMessager.submitMessage(PatrolBehavior.API.Stop, new Object());
+   }
+
+   @FXML public void loopThroughWaypoints()
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.Loop, loopThroughWaypoints.isSelected());
    }
 }

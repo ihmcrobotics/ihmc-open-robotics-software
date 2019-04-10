@@ -66,6 +66,7 @@ public class DirectRobotUIController
                                                                     FlatGroundPlanarRegionPublisher.ROS2_ID);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));
+      enableSupportRegions.setSelected(true);
    }
 
    @FXML
