@@ -5,6 +5,9 @@ import static us.ihmc.robotics.Assert.*;
 import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.robotics.numericalMethods.GradientDescentModule;
+import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 public class GradientDescentTest
