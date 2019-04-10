@@ -57,6 +57,7 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
@@ -251,6 +252,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       copyJointDesiredsToJoints();
 
       requestedControllerStateReference.set(null);
+   }
+
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerToolbox.getControllerFailedBoolean();
    }
 
    @Override
