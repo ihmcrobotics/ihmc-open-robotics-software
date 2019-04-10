@@ -64,7 +64,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            publishTextToSpeack("Joint Angles Movement");
+            publishTextToSpeech("Joint Angles Movement");
          }
       };
 
@@ -90,7 +90,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      publishTextToSpeack(description);
+      publishTextToSpeech(description);
 
       FramePose3D point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 

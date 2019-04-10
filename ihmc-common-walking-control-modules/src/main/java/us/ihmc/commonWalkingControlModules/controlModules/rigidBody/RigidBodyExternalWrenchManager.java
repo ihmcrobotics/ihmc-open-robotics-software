@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Collection;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.lists.RecyclingArrayDeque;

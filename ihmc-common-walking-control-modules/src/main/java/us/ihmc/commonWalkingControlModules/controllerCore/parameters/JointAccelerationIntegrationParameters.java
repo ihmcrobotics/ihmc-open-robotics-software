@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
+import us.ihmc.euclid.interfaces.Settable;
 
-public class JointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
+public class JointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly, Settable<JointAccelerationIntegrationParameters>
 {
    private double positionBreakFrequency;
    private double velocityBreakFrequency;
@@ -51,6 +52,17 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    {
       maxPositionError = Double.NaN;
       maxVelocity = Double.NaN;
+   }
+
+   /**
+    * Sets the parameters of this to the values of the parameters of other.
+    *
+    * @param other the other set of parameters. Not modified.
+    */
+   @Override
+   public void set(JointAccelerationIntegrationParameters other)
+   {
+      set((JointAccelerationIntegrationParametersReadOnly) other);
    }
 
    /**

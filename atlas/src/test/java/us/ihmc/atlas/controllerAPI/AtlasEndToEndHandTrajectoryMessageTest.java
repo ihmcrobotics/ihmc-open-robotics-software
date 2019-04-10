@@ -1,6 +1,6 @@
 package us.ihmc.atlas.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +13,10 @@ import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -148,7 +147,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       String handName = fullRobotModel.getHand(robotSide).getName();
       String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
       String varname = handName + "ErrorRotationVector";
-      Vector3D rotationError = findVector3d(nameSpace, varname, scs);
+      Vector3D rotationError = EndToEndTestTools.findVector3D(nameSpace, varname, scs);
 
       /*
        * Checking the tracking error should be enough.

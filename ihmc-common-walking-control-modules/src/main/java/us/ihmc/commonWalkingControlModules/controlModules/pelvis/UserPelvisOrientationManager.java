@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyOrientationController;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -49,7 +51,9 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command)
    {
-      return orientationController.handleTrajectoryCommand(command.getSO3Trajectory());
+      SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
+      so3Trajectory.setSequenceId(command.getSequenceId());
+      return orientationController.handleTrajectoryCommand(so3Trajectory);
    }
 
    @Override
@@ -79,5 +83,10 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    public FrameQuaternionReadOnly getDesiredOrientation()
    {
       return orientationController.getDesiredOrientation();
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      return orientationController.pollStatusToReport();
    }
 }

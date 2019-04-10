@@ -14,7 +14,6 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
@@ -22,6 +21,7 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -51,11 +51,11 @@ public class JoystickBasedGraspingMainUI
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
-      PrintTools.info(""+getClass().getResource(getClass().getSimpleName()));
-      PrintTools.info(""+getClass().getSimpleName());
-      PrintTools.info(""+getClass());
-      PrintTools.info(""+getClass().getName());
-      PrintTools.info(""+getClass().getResource(getClass().getName()));
+      LogTools.info(""+getClass().getResource(getClass().getSimpleName()));
+      LogTools.info(""+getClass().getSimpleName());
+      LogTools.info(""+getClass());
+      LogTools.info(""+getClass().getName());
+      LogTools.info(""+getClass().getResource(getClass().getName()));
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
 

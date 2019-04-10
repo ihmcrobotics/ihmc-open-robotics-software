@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

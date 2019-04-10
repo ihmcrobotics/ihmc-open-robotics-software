@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
@@ -165,30 +163,18 @@ public class BalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      ICPPlannerInterface icpPlanner;
       SideDependentList<MovingReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
-      if (!icpPlannerParameters.useSmoothCMPPlanner())
-      {
-         ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-         icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                       midFeetZUpFrame, soleZUpFrames, registry, yoGraphicsListRegistry);
-         smoothCMPPlanner = null;
-      }
-      else
-      {
-         MomentumTrajectoryHandler momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
-         smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet,
-                                                         icpPlannerParameters.getNumberOfFootstepsToConsider(), momentumTrajectoryHandler, yoTime, registry,
-                                                         yoGraphicsListRegistry, controllerToolbox.getGravityZ());
-         smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
-         icpPlanner = smoothCMPPlanner;
-      }
+      momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
+      smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, soleZUpFrames, contactableFeet, momentumTrajectoryHandler, yoTime,
+                                                      registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ(), icpPlannerParameters);
+      smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
 
-      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, soleZUpFrames);
+      ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(smoothCMPPlanner, soleZUpFrames,
+                                                                                                             icpPlannerParameters,
+                                                                                                             angularMomentumModifierParameters);
       parentRegistry.addChild(icpWrapper.getYoVariableRegistry());
 
       this.icpPlanner = icpWrapper;
-      this.icpPlanner.initializeParameters(icpPlannerParameters, angularMomentumModifierParameters);
       this.icpPlanner.setOmega0(controllerToolbox.getOmega0());
       this.icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
@@ -196,7 +182,6 @@ public class BalanceManager
       {
          CenterOfMassTrajectoryHandler comTrajectoryHandler = walkingMessageHandler.getComTrajectoryHandler();
          double dt = controllerToolbox.getControlDT();
-         momentumTrajectoryHandler = walkingMessageHandler.getMomentumTrajectoryHandler();
          precomputedICPPlanner = new PrecomputedICPPlanner(dt, comTrajectoryHandler, momentumTrajectoryHandler, registry, yoGraphicsListRegistry);
          precomputedICPPlanner.setOmega0(controllerToolbox.getOmega0());
          precomputedICPPlanner.setMass(totalMass);
@@ -204,7 +189,6 @@ public class BalanceManager
       }
       else
       {
-         momentumTrajectoryHandler = null;
          precomputedICPPlanner = null;
       }
       blendICPTrajectories.set(true);
@@ -427,8 +411,8 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setInitializeForStanding(initializeForStanding);
       linearMomentumRateControlModuleInput.setInitializeForTransfer(initializeForTransfer);
       linearMomentumRateControlModuleInput.setInitializeForSingleSupport(initializeForSingleSupport);
-      linearMomentumRateControlModuleInput.setFootsteps(footsteps);
-      linearMomentumRateControlModuleInput.setFootstepTimings(footstepTimings);
+      linearMomentumRateControlModuleInput.setFromFootsteps(footsteps);
+      linearMomentumRateControlModuleInput.setFromFootstepTimings(footstepTimings);
       linearMomentumRateControlModuleInput.setFinalTransferDuration(finalTransferDuration);
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
@@ -835,5 +819,10 @@ public class BalanceManager
       footstepSolution.set(output.getFootstepSolution());
       footstepWasAdjusted = output.getFootstepWasAdjusted();
       usingStepAdjustment = output.getUsingStepAdjustment();
+   }
+
+   public TaskspaceTrajectoryStatusMessage pollPelvisXYTranslationStatusToReport()
+   {
+      return pelvisICPBasedTranslationManager.pollStatusToReport();
    }
 }

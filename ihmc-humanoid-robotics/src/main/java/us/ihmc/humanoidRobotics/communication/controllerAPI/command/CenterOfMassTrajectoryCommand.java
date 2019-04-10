@@ -7,6 +7,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajectoryCommand, CenterOfMassTrajectoryMessage>, FrameBasedCommand<CenterOfMassTrajectoryMessage>
 {
+   private long sequenceId;
    private final EuclideanTrajectoryControllerCommand euclideanTrajectory = new EuclideanTrajectoryControllerCommand();
 
    public CenterOfMassTrajectoryCommand()
@@ -20,26 +21,29 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    }
 
    @Override
-   public void setFromMessage(CenterOfMassTrajectoryMessage message)
+   public void set(CenterOfMassTrajectoryCommand other)
    {
-      euclideanTrajectory.setFromMessage(message.getEuclideanTrajectory());
+      sequenceId = other.sequenceId;
+      euclideanTrajectory.set(other.euclideanTrajectory);
    }
 
    @Override
-   public void set(CenterOfMassTrajectoryCommand other)
+   public void setFromMessage(CenterOfMassTrajectoryMessage message)
    {
-      euclideanTrajectory.set(other.euclideanTrajectory);
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, CenterOfMassTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       euclideanTrajectory.set(resolver, message.getEuclideanTrajectory());
    }
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       euclideanTrajectory.clear();
    }
 
@@ -88,5 +92,11 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    public double getExecutionTime()
    {
       return euclideanTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

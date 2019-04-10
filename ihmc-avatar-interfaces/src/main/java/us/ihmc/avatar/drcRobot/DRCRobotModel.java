@@ -16,7 +16,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -56,7 +56,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
                                                                                   RealtimeRos2Node realtimeRos2Node,
                                                                                   CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
-   public abstract LogSettings getLogSettings();
+   public abstract DataServerSettings getLogSettings();
 
    public abstract LogModelProvider getLogModelProvider();
 

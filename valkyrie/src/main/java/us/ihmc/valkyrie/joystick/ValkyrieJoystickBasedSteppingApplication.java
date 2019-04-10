@@ -8,9 +8,9 @@ import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
@@ -26,9 +26,9 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
    {
       String robotTargetString = getParameters().getNamed().getOrDefault("robotTarget", "REAL_ROBOT");
       RobotTarget robotTarget = RobotTarget.valueOf(robotTargetString);
-      PrintTools.info("-------------------------------------------------------------------");
-      PrintTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
-      PrintTools.info("-------------------------------------------------------------------");
+      LogTools.info("-------------------------------------------------------------------");
+      LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
+      LogTools.info("-------------------------------------------------------------------");
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, false, "DEFAULT", null, false, true);
       String robotName = robotModel.getSimpleRobotName();
       ValkyriePunchMessenger kickAndPunchMessenger = new ValkyriePunchMessenger(robotName, ros2Node);
