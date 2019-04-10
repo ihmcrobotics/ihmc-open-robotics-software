@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="124.0" prefWidth="666.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController">
     <children>
         <GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" vgap="5.0">
             <children>
@@ -18,9 +18,9 @@
                 <Spinner fx:id="waypointIndex" amountToStepBy="1" editable="true" initialValue="0" max="500" min="0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                 <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" prefWidth="130.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 <Label prefWidth="130.0" text="Going to waypoint: " GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                <TextField fx:id="remoteCurrentWaypointIndex" prefWidth="90.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                <TextField fx:id="remoteCurrentWaypointIndex" prefWidth="50.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                 <Label prefWidth="130.0" text="State: " GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                <TextField fx:id="remoteCurrentState" prefWidth="200.0" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                <TextField fx:id="remoteCurrentState" GridPane.columnIndex="5" GridPane.rowIndex="2" />
             </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -28,7 +28,7 @@
             <ColumnConstraints />
             <ColumnConstraints />
             <ColumnConstraints />
-            <ColumnConstraints />
+            <ColumnConstraints fillWidth="false" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints />

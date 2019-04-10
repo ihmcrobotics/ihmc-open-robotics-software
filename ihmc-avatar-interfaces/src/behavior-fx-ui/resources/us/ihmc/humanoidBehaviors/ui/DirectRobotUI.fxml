@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="242.0" prefWidth="796.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController">
 	<children>
-		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="132.0" prefWidth="721.0" vgap="5.0">
+		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="186.0" prefWidth="562.0" vgap="5.0">
 			<children>
 				<Label style="-fx-font-weight: bold" text="Robot control" />
 				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -25,24 +25,25 @@
 				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
       				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-				<Label prefHeight="17.0" prefWidth="149.0" style="-fx-font-weight: bold" text="Flat ground region" GridPane.columnIndex="4" />
-            <Label text="Enable flat ground region" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-            <CheckBox fx:id="enableFlatGroundRegion" onAction="#sendFlatGroundRegionParameters" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+				<Label style="-fx-font-weight: bold" text="Flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <Label prefHeight="30.0" prefWidth="136.0" text="Enable flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <CheckBox fx:id="enableFlatGroundRegion" onAction="#sendFlatGroundRegionParameters" GridPane.columnIndex="3" GridPane.rowIndex="5" />
 			</children>
          <columnConstraints>
             <ColumnConstraints />
             <ColumnConstraints />
-            <ColumnConstraints maxWidth="157.0" minWidth="10.0" prefWidth="135.0" />
-            <ColumnConstraints maxWidth="95.0" minWidth="10.0" prefWidth="65.0" />
-			 <ColumnConstraints maxWidth="-Infinity" minWidth="10.0" prefWidth="145.0" />
-			 <ColumnConstraints maxWidth="95.0" minWidth="10.0" prefWidth="65.0" />
-            <ColumnConstraints maxWidth="0.0" minWidth="0.0" prefWidth="0.0" />
+            <ColumnConstraints maxWidth="149.0" minWidth="135.0" prefWidth="139.0" />
+            <ColumnConstraints maxWidth="120.0" minWidth="106.0" prefWidth="112.0" />
+			 <ColumnConstraints />
+			 <ColumnConstraints />
+            <ColumnConstraints />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
+            <RowConstraints maxHeight="32.0" minHeight="16.0" prefHeight="27.0" />
             <RowConstraints />
          </rowConstraints>
 		</GridPane>
