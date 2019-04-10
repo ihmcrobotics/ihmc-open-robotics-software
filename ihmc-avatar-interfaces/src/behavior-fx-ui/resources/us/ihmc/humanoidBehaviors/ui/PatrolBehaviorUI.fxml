@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
@@ -21,6 +22,8 @@
                 <TextField fx:id="remoteCurrentWaypointIndex" prefWidth="50.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                 <Label prefWidth="130.0" text="State: " GridPane.columnIndex="4" GridPane.rowIndex="2" />
                 <TextField fx:id="remoteCurrentState" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+            <Label prefHeight="17.0" text="Loop" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
+            <CheckBox fx:id="loopThroughWaypoints" onAction="#loopThroughWaypoints" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -35,6 +38,7 @@
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
