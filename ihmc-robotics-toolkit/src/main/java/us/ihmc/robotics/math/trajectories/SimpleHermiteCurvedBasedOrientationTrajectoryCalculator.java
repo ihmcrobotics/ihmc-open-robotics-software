@@ -333,7 +333,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       cumulativeBeziersDDot[3] = 6.0 * t * cube(oneOverT);
    }
 
-   private void convertToAngularVelocity(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3D angularVelocityToPack)
+   private static void convertToAngularVelocity(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3D angularVelocityToPack)
    {// w = qDot * q^-1
       Vector4D tempConvertVector4D = new Vector4D();
 
@@ -344,7 +344,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       angularVelocityToPack.scale(2.0);
    }
 
-   private void convertToAngularAcceleration(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector4DReadOnly qDDot, Vector3D angularAccelerationToPack)
+   private static void convertToAngularAcceleration(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector4DReadOnly qDDot, Vector3D angularAccelerationToPack)
    { // w = qDDot * q^-1 + qDot * qDot^-1
       Vector4D tempConvertVector4D = new Vector4D();
 
