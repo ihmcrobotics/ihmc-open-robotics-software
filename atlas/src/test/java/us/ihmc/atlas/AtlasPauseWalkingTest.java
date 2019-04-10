@@ -1,13 +1,10 @@
 package us.ihmc.atlas;
 
-import org.junit.jupiter.api.Test;
-
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
 {
@@ -93,54 +90,5 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    public int getNumberOfFootsteps()
    {
       return 5;
-   }
-
-   @Test
-   @Override
-   public void testPauseWalking() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalking();
-   }
-
-   @Test
-   @Override
-   public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoIndependentSteps();
-   }
-
-   @Test
-   @Override
-   public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
-   {
-      super.testStartSecondStepWhileTransitioningToStand();
-   }
-
-   @Test
-   @Override
-   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingForward();
-   }
-
-   @Test
-   @Override
-   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingInitialTransfer();
-   }
-
-   @Test
-   @Override
-   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingForwardInitialTransfer();
-   }
-
-   @Override
-   @Test
-   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingInitialTransferOneStep();
    }
 }
