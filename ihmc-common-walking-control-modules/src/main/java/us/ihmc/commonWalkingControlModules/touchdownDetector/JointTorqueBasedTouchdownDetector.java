@@ -11,10 +11,13 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private final OneDoFJointBasics joint;
    private final YoDouble jointTorque;
    private final YoDouble torqueThreshold;
+   private final YoDouble torqueForSureThreshold;
    private final YoBoolean touchdownDetected;
+   private final YoBoolean touchdownForSureDetected;
 
    private final boolean dontDetectTouchdownIfAtJointLimit;
    private double signum;
+   private double forSureSignum;
 
    public JointTorqueBasedTouchdownDetector(OneDoFJointBasics joint, YoVariableRegistry registry)
    {
@@ -34,7 +37,9 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
 
       jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
       torqueThreshold = new YoDouble(joint.getName() + "_touchdownTorqueThreshold", registry);
+      torqueForSureThreshold = new YoDouble(joint.getName() + "_touchdownTorqueForSureThreshold", registry);
       touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetected", registry);
+      touchdownForSureDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownForSureDetected", registry);
    }
 
    /**
@@ -51,10 +56,22 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       signum = Math.signum(torqueThreshold);
    }
 
+   public void setTorqueForSureThreshold(double torqueThreshold)
+   {
+      this.torqueForSureThreshold.set(torqueThreshold);
+      forSureSignum = Math.signum(torqueThreshold);
+   }
+
    @Override
    public boolean hasTouchedDown()
    {
       return touchdownDetected.getBooleanValue();
+   }
+
+   @Override
+   public boolean hasForSureTouchedDown()
+   {
+      return touchdownForSureDetected.getBooleanValue();
    }
 
    private boolean isAtJointLimit()
@@ -69,17 +86,21 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    public void update()
    {
       double threshold = torqueThreshold.getDoubleValue() * signum;
+      double forSureThreshold = torqueForSureThreshold.getDoubleValue() * forSureSignum;
       double torque = joint.getTau() * signum;
+      double forSureTorque = joint.getTau() * forSureSignum;
 
       jointTorque.set(joint.getTau());
 
       if (dontDetectTouchdownIfAtJointLimit && isAtJointLimit())
       {
          touchdownDetected.set(false);
+         touchdownForSureDetected.set(false);
       }
       else
       {
          touchdownDetected.set(torque > threshold);
+         touchdownForSureDetected.set(forSureTorque > forSureThreshold);
       }
    }
 
@@ -88,6 +109,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    {
       jointTorque.set(0.0);
       touchdownDetected.set(false);
+      touchdownForSureDetected.set(false);
    }
 
    @Override

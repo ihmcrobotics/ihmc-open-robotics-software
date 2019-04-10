@@ -46,6 +46,12 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    }
 
    @Override
+   public boolean hasForSureTouchedDown()
+   {
+      return false;
+   }
+
+   @Override
    public void update()
    {
       footVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());

@@ -121,6 +121,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       OutputWriter outputWriter = new SimulatedQuadrupedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList, CONTROL_DT);
 
       QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold = new QuadrantDependentList<>(20.0, 20.0, -20.0, -20.0);
+      QuadrantDependentList<Double> kneeTorqueTouchdownForSureDetectionThreshold = new QuadrantDependentList<>(75.0, 75.0, -75.0, -75.0);
 
       simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(CONTROL_DT);
@@ -141,6 +142,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialOffset(initialOffset.get());
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setKneeTorqueTouchdownDetectionThreshold(kneeTorqueTouchdownDetectionThreshold);
+      simulationFactory.setKneeTorqueTouchdownForSureDetectionThreshold(kneeTorqueTouchdownForSureDetectionThreshold);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(useNetworking.get());

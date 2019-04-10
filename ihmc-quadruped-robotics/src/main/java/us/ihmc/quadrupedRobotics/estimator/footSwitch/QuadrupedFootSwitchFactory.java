@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
+import org.omg.SendingContext.RunTime;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.*;
 import us.ihmc.commons.PrintTools;
@@ -43,6 +44,7 @@ public class QuadrupedFootSwitchFactory
    private final RequiredFactoryField<JointDesiredOutputListReadOnly> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
    private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
+   private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueForSureTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
 
    private final OptionalFactoryField<Boolean> useKneeTorqueTouchdown = new OptionalFactoryField<>("useKneeTorqueTouchdown");
 
@@ -102,6 +104,7 @@ public class QuadrupedFootSwitchFactory
             jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH),
                                                                                       dontDetectTouchdownIfAtJointLimit, registry);
             jointTorqueBasedTouchdownDetector.setTorqueThreshold(kneeTorqueTouchdownThreshold.get().get(robotQuadrant));
+            jointTorqueBasedTouchdownDetector.setTorqueForSureThreshold(kneeTorqueForSureTouchdownThreshold.get().get(robotQuadrant));
             footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
@@ -220,6 +223,11 @@ public class QuadrupedFootSwitchFactory
    public void setKneeTouchdownThresholds(QuadrantDependentList<Double> kneeTouchdownThresholds)
    {
       this.kneeTorqueTouchdownThreshold.set(kneeTouchdownThresholds);
+   }
+
+   public void setKneeForSureTouchdownThresholds(QuadrantDependentList<Double> kneeTouchdownThresholds)
+   {
+      this.kneeTorqueForSureTouchdownThreshold.set(kneeTouchdownThresholds);
    }
 
    public void setSimulatedRobot(FloatingRootJointRobot simulatedRobot)
