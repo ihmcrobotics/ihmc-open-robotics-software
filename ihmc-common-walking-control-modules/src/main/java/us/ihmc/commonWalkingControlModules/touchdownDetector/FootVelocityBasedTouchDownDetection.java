@@ -9,6 +9,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
 {
@@ -19,8 +20,9 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
 
    private final YoBoolean isInContact;
    private final DoubleProvider speedThreshold;
+   private final DoubleProvider zVelocityThreshold;
    private final YoDouble measuredSpeed;
-   private final FrameVector3D footVelocity = new FrameVector3D();
+   private final YoFrameVector3D footVelocity;
 
    public FootVelocityBasedTouchDownDetection(MovingReferenceFrame soleFrame, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry)
    {
@@ -29,7 +31,9 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
       registry = new YoVariableRegistry(prefix);
 
       isInContact = new YoBoolean(prefix + "IsInContact", registry);
-      speedThreshold = new DoubleParameter(prefix + "FootSpeedThreshold", registry, 0.3);
+      speedThreshold = new DoubleParameter(prefix + "FootSpeedThreshold", registry, 0.8);
+      zVelocityThreshold = new DoubleParameter(prefix + "FootZVelocityThreshold", registry, 0.2);
+      footVelocity = new YoFrameVector3D(prefix + "FootVelocity", ReferenceFrame.getWorldFrame(), registry);
       measuredSpeed = new YoDouble(prefix + "MeasuredSpeed", registry);
 
       parentRegistry.addChild(registry);
@@ -45,9 +49,10 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    public void update()
    {
       footVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
-      footVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       measuredSpeed.set(footVelocity.length());
-      isInContact.set(measuredSpeed.getDoubleValue() < speedThreshold.getValue());
+      boolean totalSpeedLowEnough = measuredSpeed.getDoubleValue() < speedThreshold.getValue();
+      boolean zVelocitySlowEnough = Math.abs(footVelocity.getZ()) < zVelocityThreshold.getValue();
+      isInContact.set(totalSpeedLowEnough && zVelocitySlowEnough);
    }
 
    public void reset()
