@@ -14,6 +14,9 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DG
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class DivergentComponentOfMotionController
 {
@@ -29,6 +32,8 @@ public class DivergentComponentOfMotionController
    private final ParameterizedPID3DGains dcmPositionGains;
    private final DoubleParameter vrpPositionRateLimitParameter = new DoubleParameter("vrpPositionRateLimit", registry, Double.MAX_VALUE);
 
+   private final YoFrameVector3D vrpControllerEffort;
+
    private final RateLimitedYoFramePoint yoLimitedVrpPositionSetpoint;
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
@@ -40,6 +45,8 @@ public class DivergentComponentOfMotionController
       this.comZUpFrame = comZUpFrame;
       this.controlDT = controlDT;
       this.lipModel = lipModel;
+
+      vrpControllerEffort = new YoFrameVector3D("vrpControllerEffort", comZUpFrame, registry);
 
       vrpPositionSetpoint = new FramePoint3D();
       cmpPositionSetpoint = new FramePoint3D();
@@ -85,17 +92,20 @@ public class DivergentComponentOfMotionController
          pidController[i].setProportionalGain(dcmPositionGains.getProportionalGains()[i]);
          pidController[i].setIntegralGain(dcmPositionGains.getIntegralGains()[i]);
          pidController[i].setMaxIntegralError(dcmPositionGains.getIntegralGains()[i]);
+         pidController[i].setMaximumOutputLimit(dcmPositionGains.getMaximumFeedback());
       }
 
       double omega = lipModel.getNaturalFrequency();
 
-      double xEffort = pidController[0].compute(this.dcmPositionEstimate.getX(), this.dcmPositionSetpoint.getX(), 0, 0, controlDT);
-      double yEffort = pidController[1].compute(this.dcmPositionEstimate.getY(), this.dcmPositionSetpoint.getY(), 0, 0, controlDT);
-      double zEffort = pidController[2].compute(this.dcmPositionEstimate.getZ(), this.dcmPositionSetpoint.getZ(), 0, 0, controlDT);
+      vrpControllerEffort.setX(pidController[0].compute(this.dcmPositionEstimate.getX(), this.dcmPositionSetpoint.getX(), 0, 0, controlDT));
+      vrpControllerEffort.setY(pidController[1].compute(this.dcmPositionEstimate.getY(), this.dcmPositionSetpoint.getY(), 0, 0, controlDT));
+      vrpControllerEffort.setZ(pidController[2].compute(this.dcmPositionEstimate.getZ(), this.dcmPositionSetpoint.getZ(), 0, 0, controlDT));
 
-      vrpPositionSetpoint.setX(this.dcmPositionEstimate.getX() - 1 / omega * (this.dcmVelocitySetpoint.getX() + xEffort));
-      vrpPositionSetpoint.setY(this.dcmPositionEstimate.getY() - 1 / omega * (this.dcmVelocitySetpoint.getY() + yEffort));
-      vrpPositionSetpoint.setZ(this.dcmPositionEstimate.getZ() - 1 / omega * (this.dcmVelocitySetpoint.getZ() + zEffort));
+      vrpPositionSetpoint.sub(this.dcmVelocitySetpoint, vrpControllerEffort);
+      vrpPositionSetpoint.scaleAdd(-1.0 / omega, this.dcmPositionEstimate);
+//      vrpPositionSetpoint.setX(this.dcmPositionEstimate.getX() - 1 / omega * (this.dcmVelocitySetpoint.getX() + xEffort));
+//      vrpPositionSetpoint.setY(this.dcmPositionEstimate.getY() - 1 / omega * (this.dcmVelocitySetpoint.getY() + yEffort));
+//      vrpPositionSetpoint.setZ(this.dcmPositionEstimate.getZ() - 1 / omega * (this.dcmVelocitySetpoint.getZ() + zEffort));
 
       yoLimitedVrpPositionSetpoint.update(vrpPositionSetpoint);
 

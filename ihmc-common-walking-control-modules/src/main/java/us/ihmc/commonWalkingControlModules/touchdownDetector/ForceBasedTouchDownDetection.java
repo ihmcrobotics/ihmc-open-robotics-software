@@ -37,7 +37,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       isInContact = new YoBoolean(prefix + "IsInContact", registry);
       isDefinitelyInContact = new YoBoolean(prefix + "IsDefinitelyInContact", registry);
       zForceThreshold = new DoubleParameter(prefix + "zForceThreshold", registry, 40.0);
-      zForceForSureThreshold = new DoubleParameter(prefix + "zForceForSureThreshold", registry, 150.0);
+      zForceForSureThreshold = new DoubleParameter(prefix + "zForceForSureThreshold", registry, 450.0);
       measuredZForce = new YoDouble(prefix + "MeasuredZForce", registry);
       isTorquingIntoJointLimit = new YoBoolean(prefix + "IsTorquingIntoJointLimit", registry);
 
