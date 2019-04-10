@@ -21,13 +21,13 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Override
    public double getPelvisOffsetHeight()
    {
-      return 0.055;
+      return -0.05;
    }
 
    @Override
    public double getStepHeightOffset()
    {
-      return 0.02;
+      return 0.0;
    }
 
    @Override

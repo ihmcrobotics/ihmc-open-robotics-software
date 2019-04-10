@@ -104,8 +104,10 @@ public class YoVariableLoggerDispatcher implements DataServerDiscoveryListener
     */
    private void finishedLog(Announcement request)
    {
+      LogTools.info("Finishing Log.");
       synchronized (lock)
       {
+         LogTools.info("Removing log session.");
          HashAnnouncement hashRequest = new HashAnnouncement(request);
          activeLogSessions.remove(hashRequest);
          LogTools.info("Logging session for " + request.getNameAsString() + " has finished.");

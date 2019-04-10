@@ -1,16 +1,19 @@
 package us.ihmc.avatar;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,9 +28,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import static us.ihmc.robotics.Assert.*;
-
-@Tag("humanoid-flat-ground-2")
 public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -67,6 +67,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @Tag("humanoid-flat-ground-2")
    @Test
    public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
    {
@@ -121,7 +122,6 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4 * stepDuration + 3.0));
    }
 
-
    @Tag("allocation-slow")
    @Test
    public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
@@ -144,6 +144,7 @@ public abstract class AvatarDoubleStepTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0));
    }
 
+   @Tag("humanoid-flat-ground-2")
    @Test
    public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
    {

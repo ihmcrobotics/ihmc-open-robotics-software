@@ -34,7 +34,7 @@ public class WholeBodyTrajectoryPointCalculator
    private final List<KinematicsToolboxOutputStatus> keyFrames = new ArrayList<KinematicsToolboxOutputStatus>();
    private final TDoubleArrayList keyFrameTimes = new TDoubleArrayList();
    private TDoubleArrayList normalizedWaypointTimes = new TDoubleArrayList();
-   
+
    private final TrajectoryPointOptimizer trajectoryPointOptimizer;
    private static final int numberOfIterationsToOptimizeWaypointTimes = 100;
    private static final double initialJointVelocity = 0.0;
@@ -61,20 +61,12 @@ public class WholeBodyTrajectoryPointCalculator
          jointNameToTrajectoryHolderMap.put(jointName, new OneDoFJointTrajectoryHolder());
    }
 
-   private void clear()
+   public void clear()
    {
       keyFrames.clear();
       keyFrameTimes.clear();
       for (String jointName : jointNames)
          jointNameToTrajectoryHolderMap.get(jointName).clear();
-   }
-
-   public void addInitialConfiguration(KinematicsToolboxOutputStatus initialConfiguration)
-   {
-      clear();
-
-      keyFrames.add(initialConfiguration);
-      keyFrameTimes.add(0.0);
    }
 
    public void addKeyFrames(List<KinematicsToolboxOutputStatus> solutionKeyFrames, TDoubleArrayList solutionKeyFrameTimes)
@@ -181,7 +173,7 @@ public class WholeBodyTrajectoryPointCalculator
    {
       for (String jointName : jointNames)
          jointNameToTrajectoryHolderMap.get(jointName).computeVelocityBounds(searchingTimeTick);
-      if(SAVE_TRAJECTORY_DATA)
+      if (SAVE_TRAJECTORY_DATA)
          saveJointPositionAndVelocity(searchingTimeTick);
    }
 
@@ -203,13 +195,15 @@ public class WholeBodyTrajectoryPointCalculator
          KinematicsToolboxOutputStatus keyFrameSolution = robotConfigurations.get(i);
          for (String jointName : jointNames)
          {
-            float wayPointVelocity = (float) jointNameToTrajectoryHolderMap.get(jointName).getWaypointVelocity(i + 1);
+            float wayPointVelocity = (float) jointNameToTrajectoryHolderMap.get(jointName).getWaypointVelocity(i);
             keyFrameSolution.getDesiredJointVelocities().add(wayPointVelocity);
          }
       }
       solution.getKeyFrameTimes().clear();
       for (int i = 0; i < robotConfigurations.size(); i++)
-         solution.getKeyFrameTimes().add(keyFrameTimes.get(i + 1));
+      {
+         solution.getKeyFrameTimes().add(keyFrameTimes.get(i));
+      }
    }
 
    private int findTrajectoryIndex(double time)
@@ -225,7 +219,7 @@ public class WholeBodyTrajectoryPointCalculator
       }
       return indexOfTrajectory;
    }
-   
+
    private void saveJointPositionAndVelocity(double searchingTimeTick)
    {
       int numberOfTicks = (int) (keyFrameTimes.get(keyFrameTimes.size() - 1) / searchingTimeTick);
@@ -350,7 +344,7 @@ public class WholeBodyTrajectoryPointCalculator
       {
          return velocities.get(i);
       }
-      
+
       public Trajectory getTrajectory(int i)
       {
          return trajectories.get(i);
