@@ -79,7 +79,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    private FootstepNodeSnapData doShiftFromNearCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
    {
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());
+      collisionDetector.checkForCollision(footstepNode, null, snapTransform.getTranslationZ());
+      BodyCollisionData collisionData = collisionDetector.getCollisionData(footstepNode);
       double distanceOfClosestPointInFront = collisionData.getDistanceOfClosestPointInFront();
       double distanceOfClosestPointInBack = collisionData.getDistanceOfClosestPointInBack();
 
@@ -107,7 +108,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if(collisionDetector == null)
          return false;
 
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());
+      collisionDetector.checkForCollision(footstepNode, null, snapTransform.getTranslationZ());
+      BodyCollisionData collisionData = collisionDetector.getCollisionData(footstepNode);
       return !Double.isNaN(collisionData.getDistanceOfClosestPointInFront()) || !Double.isNaN(collisionData.getDistanceOfClosestPointInBack());
    }
 

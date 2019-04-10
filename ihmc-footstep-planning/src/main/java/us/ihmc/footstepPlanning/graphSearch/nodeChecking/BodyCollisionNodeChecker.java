@@ -38,8 +38,9 @@ public class BodyCollisionNodeChecker extends FootstepNodeChecker
       }
 
       double height = snapper.getSnapData(node).getSnapTransform().getTranslationZ();
-      BodyCollisionData collisionData = collisionDetector.checkForCollision(node, height);
-      boolean collisionDetected = collisionData.isCollisionDetected();
+
+      FootstepNode grandparentNode = graph.hasParentNode(previousNode) ? graph.getParentNode(previousNode) : null;
+      boolean collisionDetected = collisionDetector.checkForCollision(node, grandparentNode, height);
       if(collisionDetected)
          rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
       return !collisionDetected;

@@ -150,6 +150,11 @@ public class FootstepGraph
          throw new RuntimeException("Node has not been added to graph yet.");
    }
 
+   public boolean hasParentNode(FootstepNode node)
+   {
+      return incomingBestEdge.containsKey(node);
+   }
+
    public FootstepNode getParentNode(FootstepNode node)
    {
       return incomingBestEdge.get(node).getStartNode();
