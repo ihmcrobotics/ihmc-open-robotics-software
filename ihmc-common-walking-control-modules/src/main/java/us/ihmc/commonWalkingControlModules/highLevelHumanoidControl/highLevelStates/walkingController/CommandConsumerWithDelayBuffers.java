@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -161,7 +161,7 @@ public class CommandConsumerWithDelayBuffers
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
-         PrintTools.error("Tried to add " + command.getClass() + " to the delay queue, but the queue was full. Try increasing the queue size");
+         LogTools.error("Tried to add {} to the delay queue, but the queue was full. Try increasing the queue size", command.getClass().getSimpleName());
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
@@ -227,6 +227,7 @@ public class CommandConsumerWithDelayBuffers
     * @param commandClassToFlush the command class
     * @deprecated Use {@link #clearCommands(Class<C>)} instead
     */
+   @Deprecated
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
    {
       clearCommands(commandClassToFlush);

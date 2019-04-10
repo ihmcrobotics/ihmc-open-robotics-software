@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -94,7 +93,6 @@ public class KinematicsPlanningToolboxOutputConverter
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
-      double firstTimeOffset = keyFrameTimes.get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -108,19 +106,21 @@ public class KinematicsPlanningToolboxOutputConverter
 
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = keyFrameTimes.get(i) - firstTimeOffset;
-         orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
+         double time = keyFrameTimes.get(i);
+         orientationCalculator.appendTrajectoryPoint(time, desiredOrientation);
+
       }
 
+      orientationCalculator.useSecondOrderInitialGuess();
       orientationCalculator.compute();
 
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      for (int i = 1; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D desiredAngularVelocity = new Vector3D();
 
          double time = keyFrameTimes.get(i);
 
-         orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
+         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(time);
@@ -143,8 +143,8 @@ public class KinematicsPlanningToolboxOutputConverter
 
       EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
+      euclideanTrajectoryPointCalculator.clear();
       orientationCalculator.clear();
-      double firstTimeOffset = keyFrameTimes.get(0);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -161,17 +161,17 @@ public class KinematicsPlanningToolboxOutputConverter
          desiredPositions[i] = new Point3D(desiredPosition);
          desiredOrientations[i] = new Quaternion(desiredOrientation);
 
-         double time = keyFrameTimes.get(i) - firstTimeOffset;
+         double time = keyFrameTimes.get(i);
          euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPosition));
-         orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
+         orientationCalculator.appendTrajectoryPoint(time, desiredOrientation);
       }
 
+      orientationCalculator.useSecondOrderInitialGuess();
       orientationCalculator.compute();
-      euclideanTrajectoryPointCalculator.compute(keyFrameTimes.get(numberOfTrajectoryPoints - 1) - firstTimeOffset);
+      euclideanTrajectoryPointCalculator.compute(keyFrameTimes.get(numberOfTrajectoryPoints - 1));
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-      trajectoryPoints.addTimeOffset(firstTimeOffset);
 
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      for (int i = 1; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D desiredLinearVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = new Vector3D();
@@ -179,7 +179,7 @@ public class KinematicsPlanningToolboxOutputConverter
          trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
          double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
-         orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
+         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,
@@ -204,7 +204,7 @@ public class KinematicsPlanningToolboxOutputConverter
       for (String jointName : armJointNames)
       {
          OneDoFTrajectoryPointList trajectoryPoints = new OneDoFTrajectoryPointList();
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         for (int i = 1; i < numberOfTrajectoryPoints; i++)
          {
             KinematicsToolboxOutputStatus keyFrame = solution.get().getRobotConfigurations().get(i);
 

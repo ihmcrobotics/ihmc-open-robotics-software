@@ -64,7 +64,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
-@Tag("allocation-slow")
 public class AtlasAllocationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -112,6 +111,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -127,6 +127,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow-2")
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
@@ -155,6 +156,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringPelvisMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(42884L);
@@ -177,6 +179,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsWithPelvisUserControl() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -202,6 +205,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringArmMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -222,6 +226,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringChestMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);

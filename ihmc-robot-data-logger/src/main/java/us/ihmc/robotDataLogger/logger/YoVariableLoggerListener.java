@@ -9,6 +9,12 @@ import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import us.ihmc.commons.Conversions;
@@ -321,7 +327,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
       {
-         videoDataLogger.close();
+         closeVideo(videoDataLogger);
       }
 
       if (!connected)
@@ -389,6 +395,24 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          tempDirectory.renameTo(finalDirectory);
 
          doneListener.accept(request);
+      }
+   }
+
+   private final ExecutorService executor = Executors.newCachedThreadPool();
+   private void closeVideo(VideoDataLoggerInterface videoDataLogger)
+   {
+      Future<?> future = executor.submit(() -> videoDataLogger.close());
+      try
+      {
+         future.get(5, TimeUnit.SECONDS);
+      }
+      catch (InterruptedException | ExecutionException e)
+      {
+         e.printStackTrace();
+      }
+      catch (TimeoutException e)
+      {
+         LogTools.info("Closing video stream timed out after 5s.");
       }
    }
 
