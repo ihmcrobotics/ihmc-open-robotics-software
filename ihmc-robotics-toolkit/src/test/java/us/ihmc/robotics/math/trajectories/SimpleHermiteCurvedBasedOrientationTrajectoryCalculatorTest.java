@@ -1,4 +1,6 @@
-package us.ihmc.manipulation.planning.gradientDescent;
+package us.ihmc.robotics.math.trajectories;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
@@ -10,14 +12,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.SimpleHermiteCurvedBasedOrientationTrajectoryCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class HermiteCurvedBasedOrientationTrajectoryCalculatorTest
+public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculatorTest
 {
    @Test
-   public void testOldOne()
+   public void compareWithHermiteCurvedBasedOrientationTrajectoryGenerator()
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(0612L);
@@ -47,6 +47,8 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculatorTest
       trajCalculator.setTrajectoryTime(endIntegrationTime - startIntegrationTime);
       trajCalculator.setInitialConditions(initialOrientation, initialAngularVelocity);
       trajCalculator.setFinalConditions(finalOrientation, finalAngularVelocity);
+      trajCalculator.setConvertingAngularVelocity(true);
+      trajCalculator.setConvertingAngularAcceleration(true);
       trajCalculator.setNumberOfRevolutions(0);
       trajCalculator.initialize();
 
@@ -63,7 +65,10 @@ public class HermiteCurvedBasedOrientationTrajectoryCalculatorTest
          trajCalculator.getAngularVelocity(angularVelocity);
          trajCalculator.getAngularAcceleration(angularAcceleration);
 
-         System.out.println(time + " " + currentAngularAcceleration + " " + angularAcceleration);
+         boolean angularVelocityEquals = currentAngularVelocity.epsilonEquals(angularVelocity, 0.001);
+         boolean angularAccelerationEquals = currentAngularAcceleration.epsilonEquals(angularAcceleration, 0.001);
+         assertTrue(angularVelocityEquals, "result is to far from the result of the original trajectory generator.");
+         assertTrue(angularAccelerationEquals, "result is to far from the result of the original trajectory generator.");
       }
    }
 }
