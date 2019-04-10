@@ -56,41 +56,6 @@ public class SO3TrajectoryPointCalculatorTest
    }
 
    @Test
-   public void testCompareComputation()
-   {
-      System.out.println("\n## testCompareComputation");
-      SO3TrajectoryPointCalculator trajectoryPointCalculator = new SO3TrajectoryPointCalculator();
-
-      int numberOfPoints = 20;
-      double trajectoryTime = 2.0;
-      generateRandomOrientations(trajectoryTime, numberOfPoints, true);
-
-      System.out.println("use Hermite");
-      trajectoryPointCalculator.clear();
-      for (int i = 0; i < numberOfPoints; i++)
-         trajectoryPointCalculator.appendTrajectoryPoint(times.get(i), orientations.get(i));
-
-      long startHermite = System.nanoTime();
-      trajectoryPointCalculator.useSecondOrderInitialGuess();
-      trajectoryPointCalculator.compute();
-      long timeHermite = System.nanoTime() - startHermite;
-
-      System.out.println("use simple Hermite");
-      trajectoryPointCalculator.clear();
-      for (int i = 0; i < numberOfPoints; i++)
-         trajectoryPointCalculator.appendTrajectoryPoint(times.get(i), orientations.get(i));
-
-      long startSimpleHermite = System.nanoTime();
-      trajectoryPointCalculator.useSecondOrderInitialGuess();
-      trajectoryPointCalculator.computeFast();
-      long timeSimpleHermite = System.nanoTime() - startSimpleHermite;
-
-      System.out.println("Hermite Computation time is " + Conversions.nanosecondsToSeconds(timeHermite));
-      System.out.println("Sime Hermite Computation time is " + Conversions.nanosecondsToSeconds(timeSimpleHermite));
-      
-   }
-
-   @Test
    public void testBestWayToCalculateInitialGuess()
    {
       System.out.println("\n## testBestWayToCalculateInitialGuess");
@@ -158,7 +123,10 @@ public class SO3TrajectoryPointCalculatorTest
       for (int i = 0; i < numberOfPoints; i++)
          trajectoryPointCalculator.appendTrajectoryPoint(times.get(i), orientations.get(i));
 
+      long start = System.nanoTime();
       trajectoryPointCalculator.useSecondOrderInitialGuess();
-      trajectoryPointCalculator.computeFast();
+      trajectoryPointCalculator.compute();
+      long computingTime = System.nanoTime() - start;
+      System.out.println("computation time for the " + numberOfPoints + " way points, " + Conversions.nanosecondsToSeconds(computingTime));
    }
 }

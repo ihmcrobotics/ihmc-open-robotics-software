@@ -6,9 +6,6 @@ import java.util.List;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -19,7 +16,6 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
 import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SO3TrajectoryPointCalculator
 {
@@ -35,15 +31,6 @@ public class SO3TrajectoryPointCalculator
    private final TDoubleArrayList times = new TDoubleArrayList();
    private final List<QuaternionBasics> orientations = new ArrayList<>();
    private final List<Vector3DBasics> angularVelocities = new ArrayList<>();
-
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private static final int maximumNumberOfWayPoint = 100;
-
-   private final MultipleWaypointsOrientationTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("trajectoryGenerator",
-                                                                                                                                           maximumNumberOfWayPoint,
-                                                                                                                                           worldFrame,
-                                                                                                                                           registry);
 
    private final SimpleHermiteCurvedBasedOrientationTrajectoryCalculator trajectoryCalculator = new SimpleHermiteCurvedBasedOrientationTrajectoryCalculator();
 
@@ -98,7 +85,7 @@ public class SO3TrajectoryPointCalculator
          for (int j = 0; j < 3; j++)
             defaultInitialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
 
-      SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
+      SingleQueryFunction function = new SO3TrajectoryPointOptimizerCostFunction();
       double defaultQuery = function.getQuery(defaultInitialAngularVelocitiesInDoubleArray);
 
       for (int i = 1; i < times.size() - 1; i++)
@@ -153,47 +140,6 @@ public class SO3TrajectoryPointCalculator
 
    /**
     * This computation is using @link SimpleHermiteCurvedBasedOrientationTrajectoryGenerator to get query.
-    */
-   public void computeFast()
-   {
-      if (times.size() != orientations.size())
-         throw new RuntimeException("size are not matched. (times) " + times.size() + ", (orientations) " + orientations.size());
-
-      if (MathTools.epsilonEquals(times.get(0), 0.0, 10E-5))
-         times.replace(0, 0.0);
-
-      int numberOfPoints = times.size();
-
-      TDoubleArrayList initialAngularVelocitiesInDoubleArray = new TDoubleArrayList();
-      for (int i = 1; i < numberOfPoints - 1; i++)
-         for (int j = 0; j < 3; j++)
-            initialAngularVelocitiesInDoubleArray.add(angularVelocities.get(i).getElement(j));
-
-      SingleQueryFunction function = new FastSO3TrajectoryPointOptimizerCostFunction();
-      GradientDescentModule optimizer = new GradientDescentModule(function, initialAngularVelocitiesInDoubleArray);
-      optimizer.setMaximumIterations(maxIterations);
-      optimizer.setConvergenceThreshold(convergenceThreshold);
-      optimizer.setStepSize(optimizerStepSize);
-      optimizer.setPerturbationSize(optimizerPerturbationSize);
-
-      List<Vector3DBasics> initialAngularVelocities = new ArrayList<>();
-      for (int i = 0; i < numberOfPoints; i++)
-         initialAngularVelocities.add(new Vector3D(angularVelocities.get(i)));
-
-      int numberOfIterationToSolve = optimizer.run();
-
-      if (debug)
-      {
-         System.out.println("# initial query " + function.getQuery(initialAngularVelocitiesInDoubleArray));
-         System.out.println("# iteration is " + numberOfIterationToSolve);
-         System.out.println("# final query is " + optimizer.getOptimalQuery());
-         System.out.println("# computation time is " + optimizer.getComputationTime());
-      }
-      updateTrajectoryPoints();
-   }
-
-   /**
-    * This computation is using @link HermiteCurveBasedOrientationTrajectoryGenerator to get query.
     */
    public void compute()
    {
@@ -250,85 +196,7 @@ public class SO3TrajectoryPointCalculator
       return trajectoryPoints.getTrajectoryPoint(i);
    }
 
-   private void updateTrajectoryGenerator()
-   {
-      trajectoryGenerator.clear();
-      for (int i = 0; i < times.size(); i++)
-      {
-         trajectoryGenerator.appendWaypoint(times.get(i), orientations.get(i), angularVelocities.get(i));
-      }
-      trajectoryGenerator.initialize();
-   }
-
-   public void computeTrajectory(double time)
-   {
-      updateTrajectoryGenerator();
-      trajectoryGenerator.compute(time);
-   }
-
-   public QuaternionBasics getOrientation()
-   {
-      FrameQuaternion orientation = new FrameQuaternion();
-      trajectoryGenerator.getOrientation(orientation);
-      return orientation;
-   }
-
-   public Vector3DBasics getAngularVelocity()
-   {
-      FrameVector3D angularVelocity = new FrameVector3D();
-      trajectoryGenerator.getAngularVelocity(angularVelocity);
-      return angularVelocity;
-   }
-
-   public Vector3DBasics getAngularAcceleration()
-   {
-      FrameVector3D angularAcceleration = new FrameVector3D();
-      trajectoryGenerator.getAngularAcceleration(angularAcceleration);
-      return angularAcceleration;
-   }
-
    private class SO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
-   {
-      @Override
-      public double getQuery(TDoubleArrayList values)
-      {
-         int numberOfPoints = times.size();
-         int optimalSolutionIndex = 0;
-         for (int i = 1; i < numberOfPoints - 1; i++)
-         {
-            for (int j = 0; j < 3; j++)
-            {
-               angularVelocities.get(i).setElement(j, values.get(optimalSolutionIndex));
-               optimalSolutionIndex++;
-            }
-         }
-
-         updateTrajectoryGenerator();
-
-         int numberOfTicks = (int) (times.get(times.size() - 1) / velocitOptimizerDT);
-         double time = 0.0;
-         double cost = 0.0;
-
-         for (int i = 0; i < numberOfTicks; i++)
-         {
-            trajectoryGenerator.compute(time);
-
-            FrameVector3D angularAcceleration = new FrameVector3D();
-            trajectoryGenerator.getAngularAcceleration(angularAcceleration);
-            double squareOfAcceleration = 0;
-            for (int j = 0; j < 3; j++)
-            {
-               squareOfAcceleration += angularAcceleration.getElement(j) * angularAcceleration.getElement(j);
-            }
-            cost += squareOfAcceleration * velocitOptimizerDT;
-            time += velocitOptimizerDT;
-         }
-
-         return cost;
-      }
-   }
-
-   private class FastSO3TrajectoryPointOptimizerCostFunction implements SingleQueryFunction
    {
       @Override
       public double getQuery(TDoubleArrayList values)
