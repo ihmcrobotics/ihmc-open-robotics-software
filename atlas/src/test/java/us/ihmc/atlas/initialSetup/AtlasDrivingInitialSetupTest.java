@@ -1,6 +1,6 @@
 package us.ihmc.atlas.initialSetup;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,8 +13,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -52,7 +50,7 @@ public class AtlasDrivingInitialSetupTest
          
          for (RobotSide robotSide : RobotSide.values())
          {
-            for (LegJointName jointName : LegJointName.values)
+            for (LegJointName jointName : jointMap.getLegJointNames())
             {
                String key = jointMap.getLegJointName(robotSide, jointName);
                if (key == null)

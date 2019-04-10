@@ -9,6 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.stateMachine.extra.EventState;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedStandController implements EventState
@@ -67,6 +68,7 @@ public class QuadrupedStandController implements EventState
    public void onEntry()
    {
       bodyOrientationManager.setDesiredFrameToHoldPosition(supportFrame);
+      bodyOrientationManager.enableBodyPitchOscillation();
 
       // initialize feedback controllers
       balanceManager.initializeForStanding();
@@ -74,11 +76,14 @@ public class QuadrupedStandController implements EventState
       bodyOrientationManager.initialize();
 
       feetManager.requestFullContact();
+      this.controllerToolbox.getRuntimeEnvironment().getRobotMotionStatusHolder().setCurrentRobotMotionStatus(RobotMotionStatus.STANDING);
    }
 
    @Override
    public void onExit()
    {
+      bodyOrientationManager.disableBodyPitchOscillation();
       balanceManager.disableBodyXYControl();
+      this.controllerToolbox.getRuntimeEnvironment().getRobotMotionStatusHolder().setCurrentRobotMotionStatus(RobotMotionStatus.STANDING);
    }
 }

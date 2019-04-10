@@ -8,7 +8,6 @@ import com.jme3.math.Transform;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
@@ -62,7 +61,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -88,8 +87,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public final static boolean SCALE_ATLAS = false;
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
-
-   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
 
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -148,18 +145,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints)
    {
       this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPointsn)
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
@@ -191,10 +188,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
-      if (USE_SMOOTH_CMP_PLANNER)
-         capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
-      else
-         capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
+      capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
 
       planarRegionFootstepPlannerParameters = new AtlasPlanarRegionFootstepPlannerParameters();
 
@@ -401,9 +395,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if ((target == RobotTarget.SCS) && AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
+      if (AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
       {
-         return new SimulationRosClockPPSTimestampOffsetProvider();
+         if (target == RobotTarget.SCS)
+         {
+            return new SimulationRosClockPPSTimestampOffsetProvider();
+         }
       }
 
       return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
@@ -460,17 +457,17 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public LogSettings getLogSettings()
+   public DataServerSettings getLogSettings()
    {
 
       switch (target)
       {
       case REAL_ROBOT:
-         return LogSettings.ATLAS_IAN;
+         return new DataServerSettings(true, "AtlasGUI");
       case GAZEBO:
       case SCS:
       default:
-         return LogSettings.SIMULATION;
+         return new DataServerSettings(false, "SimulationGUI");
       }
    }
 

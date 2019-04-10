@@ -200,8 +200,10 @@
                             </registry>
                         </registry>
                         <registry name="BalanceManager">
+                            <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
                             <registry name="PelvisICPBasedTranslationManager">
-<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+								<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                             </registry>
                         </registry>
                     </registry>

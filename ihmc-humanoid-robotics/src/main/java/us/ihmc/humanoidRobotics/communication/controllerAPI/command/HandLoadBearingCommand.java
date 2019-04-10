@@ -6,6 +6,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, HandLoadBearingMessage>
 {
+   private long sequenceId;
    private RobotSide robotSide;
 
    private boolean useJointspaceCommand = false;
@@ -27,6 +28,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    @Override
    public void set(HandLoadBearingCommand other)
    {
+      sequenceId = other.sequenceId;
       loadBearingCommand.set(other.loadBearingCommand);
       robotSide = other.robotSide;
       executionDelayTime = other.getExecutionDelayTime();
@@ -37,6 +39,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    @Override
    public void setFromMessage(HandLoadBearingMessage message)
    {
+      sequenceId = message.getSequenceId();
       loadBearingCommand.setFromMessage(message.getLoadBearingMessage());
       executionDelayTime = message.getExecutionDelayTime();
       robotSide = RobotSide.fromByte(message.getRobotSide());
@@ -65,6 +68,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    @Override
    public void clear()
    {
+      sequenceId = 0;
       loadBearingCommand.clear();
       robotSide = null;
       useJointspaceCommand = false;
@@ -142,5 +146,11 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
    public boolean isDelayedExecutionSupported()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

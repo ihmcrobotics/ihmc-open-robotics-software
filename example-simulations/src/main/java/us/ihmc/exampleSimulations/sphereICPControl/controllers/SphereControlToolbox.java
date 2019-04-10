@@ -2,7 +2,6 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -13,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
@@ -137,7 +135,6 @@ public class SphereControlToolbox
    private FootstepTestHelper footstepTestHelper;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private ContinuousCMPICPPlannerParameters capturePointPlannerParameters;
    private SmoothCMPPlannerParameters smoothICPPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
 
@@ -157,6 +154,7 @@ public class SphereControlToolbox
       double omega = Math.sqrt(gravity / desiredHeight);
       omega0.set(omega);
 
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
       setupFeetFrames(gravity, yoGraphicsListRegistry);
 
       capturePointVelocityAlpha.set(0.5);
@@ -210,12 +208,9 @@ public class SphereControlToolbox
          }
       });
 
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
-
       twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
-      capturePointPlannerParameters = createICPPlannerParameters();
       smoothICPPlannerParameters = createNewICPPlannerParameters();
       icpOptimizationParameters = createICPOptimizationParameters();
 
@@ -366,11 +361,6 @@ public class SphereControlToolbox
    public SideDependentList<FramePose3D> getFootPosesAtTouchdown()
    {
       return footPosesAtTouchdown;
-   }
-
-   public ContinuousCMPICPPlannerParameters getCapturePointPlannerParameters()
-   {
-      return capturePointPlannerParameters;
    }
 
    public SmoothCMPPlannerParameters getNewCapturePointPlannerParameters()
@@ -605,61 +595,12 @@ public class SphereControlToolbox
       icp.set(capturePoint2d, 0.0);
    }
 
-   private ContinuousCMPICPPlannerParameters createICPPlannerParameters()
-   {
-      return new ContinuousCMPICPPlannerParameters()
-      {
-         @Override
-         public int getNumberOfCoPWayPointsPerFoot()
-         {
-            return 2;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
-         {
-            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
-
-            Vector2D entryBounds = new Vector2D(0.0, 0.03);
-            Vector2D exitBounds = new Vector2D(-0.04, 0.08);
-
-            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-            copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
-            copForwardOffsetBounds.put(exitCoPName, exitBounds);
-
-            return copForwardOffsetBounds;
-         }
-
-         /**{@inheritDoc} */
-         @Override
-         public CoPPointName getExitCoPName()
-         {
-            return exitCoPName;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
-         {
-            EnumMap<CoPPointName, Vector2D> copOffsets;
-
-            Vector2D entryOffset = new Vector2D(0.0, -0.005);
-            Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
-
-            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
-            copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
-            copOffsets.put(exitCoPName, exitOffset);
-
-            return copOffsets;
-         }
-      };
-   }
-
    private SmoothCMPPlannerParameters createNewICPPlannerParameters()
    {
       return new SphereSmoothCMPPlannerParameters();
    }
 
-   private class SphereSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
+   public static class SphereSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       public SphereSmoothCMPPlannerParameters()
       {

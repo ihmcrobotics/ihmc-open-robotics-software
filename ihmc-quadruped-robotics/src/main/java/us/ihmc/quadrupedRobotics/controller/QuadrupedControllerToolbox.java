@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
@@ -176,6 +177,13 @@ public class QuadrupedControllerToolbox
    public void updateSupportPolygon()
    {
       supportPolygon.updateUsingContactStates(footContactStates);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (footContactStates.get(robotQuadrant).inContact())
+            contactStates.get(robotQuadrant).set(ContactState.IN_CONTACT);
+         else
+            contactStates.get(robotQuadrant).set(ContactState.NO_CONTACT);
+      }
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()
@@ -233,7 +241,7 @@ public class QuadrupedControllerToolbox
       return controllerFailed;
    }
 
-   public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
+   public MovingReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
    {
       return referenceFrames.getSoleFrame(robotQuadrant);
    }

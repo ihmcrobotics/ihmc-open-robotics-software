@@ -15,6 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasRobotModelFactory
@@ -33,7 +34,7 @@ public class AtlasRobotModelFactory
       return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), RobotTarget.SCS, false, null);
    }
 
-   public static AtlasRobotModel createDefaultRobotModel(FootContactPoints simulationContactPoints)
+   public static AtlasRobotModel createDefaultRobotModel(FootContactPoints<RobotSide> simulationContactPoints)
    {
       return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), RobotTarget.SCS, false, simulationContactPoints);
    }
@@ -43,7 +44,7 @@ public class AtlasRobotModelFactory
       return createDRCRobotModel(robotVersion.toString(), RobotTarget.SCS, false, null);
    }
 
-   public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion, FootContactPoints simulationContactPoints)
+   public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion, FootContactPoints<RobotSide> simulationContactPoints)
    {
       return createDRCRobotModel(robotVersion.toString(), RobotTarget.SCS, false, simulationContactPoints);
    }
@@ -54,7 +55,7 @@ public class AtlasRobotModelFactory
    }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, RobotTarget runningOnRealRobot, boolean headless,
-         FootContactPoints simulationContactPoints)
+         FootContactPoints<RobotSide> simulationContactPoints)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
