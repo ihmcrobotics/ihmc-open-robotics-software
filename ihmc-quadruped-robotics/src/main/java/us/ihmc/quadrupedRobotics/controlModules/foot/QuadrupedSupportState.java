@@ -266,6 +266,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private void updateIsFootSlippingEstimate()
    {
       footVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
+      footVelocity.checkReferenceFrameMatch(worldFrame);
 
       double inPlaneVelocity = Math.sqrt(MathTools.square(footVelocity.getX()) + MathTools.square(footVelocity.getY()));
       footPlanarVelocity.set(inPlaneVelocity);
