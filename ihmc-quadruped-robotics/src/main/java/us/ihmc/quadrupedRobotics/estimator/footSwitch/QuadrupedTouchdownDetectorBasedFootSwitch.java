@@ -53,11 +53,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
                                           ReferenceFrame.getWorldFrame(), registry);
    }
 
-   public YoBoolean getControllerSetFootSwitch()
-   {
-      return controllerThinksHasTouchedDown;
-   }
-
    public void addTouchdownDetector(TouchdownDetector touchdownDetector)
    {
       necessaryTouchdownDetectors.addTouchdownDetector(touchdownDetector);
@@ -76,7 +71,10 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       necessaryTouchdownDetectors.update();
       touchdownDetected.update(necessaryTouchdownDetectors.hasTouchedDown());
 
-      if (trustTouchdownDetectorsInSwing.getBooleanValue())
+      boolean thinksInSupport = controllerThinksHasTouchedDown.getBooleanValue();
+      if (thinksInSupport && trustTouchdownDetectorsInSupport.getBooleanValue())
+         return touchdownDetected.getBooleanValue();
+      else if (!thinksInSupport && trustTouchdownDetectorsInSwing.getBooleanValue())
          return touchdownDetected.getBooleanValue();
       else
          return controllerThinksHasTouchedDown.getBooleanValue();
