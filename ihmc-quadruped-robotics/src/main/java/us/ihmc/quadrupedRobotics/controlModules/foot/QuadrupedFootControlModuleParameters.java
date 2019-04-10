@@ -58,11 +58,11 @@ public class QuadrupedFootControlModuleParameters
 
    private final DoubleProvider minimumTimeInSupportState = new DoubleParameter("minimumTimeInSupportState", finalRegistry, 0.05);
 
-   private final DoubleProvider footVelocityThresholdForSlipping = new DoubleParameter("footVelocityThresholdForSlipping", finalRegistry, 0.10);
-   private final DoubleProvider footVelocityThresholdForNotSlipping = new DoubleParameter("footVelocityThresholdForNotSlipping", finalRegistry, 0.05);
+   private final DoubleProvider footVelocityThresholdForSlipping = new DoubleParameter("footVelocityThresholdForSlipping", finalRegistry, 0.25);
+   private final DoubleProvider footVelocityThresholdForNotSlipping = new DoubleParameter("footVelocityThresholdForNotSlipping", finalRegistry, 0.1);
 
-   private final DoubleProvider coefficientOfFrictionWhenSlipping = new DoubleParameter("coefficientOfFrictionWhenSlipping", finalRegistry, 1.0);
-   private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 1.0);
+   private final DoubleProvider coefficientOfFrictionWhenSlipping = new DoubleParameter("coefficientOfFrictionWhenSlipping", finalRegistry, 0.6);
+   private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 0.9);
 
 
 
