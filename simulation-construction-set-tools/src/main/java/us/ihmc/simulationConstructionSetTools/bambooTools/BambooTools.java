@@ -136,8 +136,28 @@ public class BambooTools
          }
       }
    }
-   
-   
+
+   /**
+    * Internal method wrapping {@link #createVideoWithDateTimeAndNameInternal(String, SimulationConstructionSet, boolean, String)} with a timeout.
+    * @see #createVideoWithDateTimeAndNameInternal
+    */
+   private static File[] createVideoWithDateTimeAndName(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
+   {
+      Future<File[]> future = THREAD_POOL.submit(() -> createVideoWithDateTimeAndNameInternal(rootDirectory, scs, writeData, videoName));
+      try
+      {
+         return future.get(5, TimeUnit.MINUTES);
+      }
+      catch (InterruptedException | ExecutionException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (TimeoutException e)
+      {
+         throw new RuntimeException("Video creation timed out after 5 min.");
+      }
+   }
+
    /**
     * Internal method that calls on scs to create video and data
     * @param rootDirectory - directory to store the video and data
@@ -146,7 +166,7 @@ public class BambooTools
     * @param videoName - the name of the video (does not include date,time, and extension yet)
     * @return File handles to the directory, video file, and the data file, in that order. Access to the file handle does not mean the file was created successfully. 
     */
-   private static File[] createVideoWithDateTimeAndName(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
+   private static File[] createVideoWithDateTimeAndNameInternal(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
    {
       String dateString = FormattingTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";
@@ -164,20 +184,7 @@ public class BambooTools
 
       LogTools.debug(videoFilename);
 
-      Future<File> future = THREAD_POOL.submit(() -> scs.createVideo(directoryName + videoFilename));
-      File videoFile;
-      try
-      {
-         videoFile = future.get(5, TimeUnit.MINUTES);
-      }
-      catch (InterruptedException | ExecutionException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (TimeoutException e)
-      {
-         throw new RuntimeException("Video creation timed out after 5 min.");
-      }
+      File videoFile = scs.createVideo(directoryName + videoFilename);
 
       String dataFilename = directoryName + dateTimeString + ".data.gz";
 
