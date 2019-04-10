@@ -60,7 +60,6 @@ public class FakeREAModule
    private void acceptCustomRegion(PlanarRegionsListMessage message)
    {
       PlanarRegionsList newRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
-      LogTools.info("Accepting regions: {}", newRegions);
 
       synchronized (this)
       {
