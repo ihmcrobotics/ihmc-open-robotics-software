@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -16,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -34,6 +36,7 @@ public class RemoteRobotControllerInterface
 
    private final ArrayList<TypedNotification<WalkingStatusMessage>> walkingCompletedNotifications = new ArrayList<>();
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+   private final ROS2Input<HighLevelStateChangeStatusMessage> controllerState;
 
    public RemoteRobotControllerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -50,11 +53,27 @@ public class RemoteRobotControllerInterface
                          HighLevelHumanoidControllerFactory.ROS2_ID,
                          this::acceptWalkingStatus);
 
+      controllerState = new ROS2Input<>(ros2Node,
+                                        HighLevelStateChangeStatusMessage.class,
+                                        robotModel.getSimpleRobotName(),
+                                        HighLevelHumanoidControllerFactory.ROS2_ID,
+                                        this::acceptStatusChange);
+
       YoVariableRegistry registry = new YoVariableRegistry("swingOver");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(robotModel.getWalkingControllerParameters(),
                                                                                               registry,
                                                                                               yoGraphicsListRegistry);
+   }
+
+   private boolean acceptStatusChange(HighLevelStateChangeStatusMessage message)
+   {
+      HighLevelControllerName fromState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      HighLevelControllerName toState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+      if (fromState == null) fromState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+      if (toState == null) toState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+      LogTools.debug("Controller state: {} to {}", fromState.name(), toState.name());
+      return true;
    }
 
    private void acceptWalkingStatus(WalkingStatusMessage message)
@@ -136,5 +155,10 @@ public class RemoteRobotControllerInterface
       PauseWalkingMessage pause = new PauseWalkingMessage();
       pause.setPause(true);
       pausePublisher.publish(pause);
+   }
+
+   public HighLevelControllerName latestControllerState()
+   {
+      return HighLevelControllerName.fromByte(controllerState.getLatest().getEndHighLevelControllerName());
    }
 }
