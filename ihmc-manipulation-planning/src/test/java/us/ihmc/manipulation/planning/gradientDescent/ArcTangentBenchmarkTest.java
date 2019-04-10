@@ -12,7 +12,7 @@ import us.ihmc.commons.Conversions;
  * Follow the benchmark for Math.Atan2(x, y);
  * Riven atan operation is using lookup-table.
  */
-public class InverseOfTangentComputationTest
+public class ArcTangentBenchmarkTest
 {
    @Test
    public void compareMathAtan()
