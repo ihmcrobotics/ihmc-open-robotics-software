@@ -12,9 +12,9 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.RunEvent;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.RunEvent;
 import us.ihmc.ros2.Ros2Node;
 
 public class TimingBehaviorHelper extends AbstractBehavior
@@ -29,7 +29,7 @@ public class TimingBehaviorHelper extends AbstractBehavior
    public final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    public final AtomicReference<WalkingStatusMessage> walkingStatusMessage = new AtomicReference<>(null);
    public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket = new AtomicReference<>(null);
-   public SQLDatabaseManager dataBase;
+   public SQLBehaviorDatabaseManager dataBase;
 
    public TimingBehaviorHelper(String robotName, Ros2Node ros2Node)
    {
@@ -51,7 +51,7 @@ public class TimingBehaviorHelper extends AbstractBehavior
       createSubscriber(WalkingStatusMessage.class, controllerPubGenerator, walkingStatusMessage::set);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
-      dataBase = new SQLDatabaseManager();
+      dataBase = new SQLBehaviorDatabaseManager();
    }
 
    public void clean()

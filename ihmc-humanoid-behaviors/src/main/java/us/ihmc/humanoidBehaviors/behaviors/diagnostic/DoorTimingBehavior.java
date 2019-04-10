@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Operator;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Run;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Task;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Operator;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Run;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Task;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;

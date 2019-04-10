@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class SQLDatabaseManager
+public class SQLBehaviorDatabaseManager
 {
    private final boolean DEBUG = false;
    private Connection databaseConnection;
@@ -28,7 +28,7 @@ public class SQLDatabaseManager
 
    ConcurrentLinkedQueue<PreparedStatement> statements = new ConcurrentLinkedQueue<PreparedStatement>();
 
-   public SQLDatabaseManager()
+   public SQLBehaviorDatabaseManager()
    {
       this.databaseUsername = "shadylady";
       this.databasePassword = "ShadyLady";
@@ -61,7 +61,7 @@ public class SQLDatabaseManager
          thread.setDaemon(true);
          thread.start();
          connected = true;
-         Runtime.getRuntime().addShutdownHook(new Thread(SQLDatabaseManager.this::shutdown));
+         Runtime.getRuntime().addShutdownHook(new Thread(SQLBehaviorDatabaseManager.this::shutdown));
       }
 
    }
@@ -409,7 +409,7 @@ public class SQLDatabaseManager
 
    public static void main(String[] args)
    {
-      SQLDatabaseManager test = new SQLDatabaseManager();
+      SQLBehaviorDatabaseManager test = new SQLBehaviorDatabaseManager();
       //String userName = "matt";
       String taskName = "Walk Through Door";
 

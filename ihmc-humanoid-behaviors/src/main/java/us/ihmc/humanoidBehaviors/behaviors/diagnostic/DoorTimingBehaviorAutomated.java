@@ -13,7 +13,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class WalkThroughDoorBehaviorWithTiming extends AbstractBehavior
+public class DoorTimingBehaviorAutomated extends AbstractBehavior
 {
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
@@ -21,7 +21,7 @@ public class WalkThroughDoorBehaviorWithTiming extends AbstractBehavior
    private final DoorTimingBehavior doorTimingBehavior;
 
 
-   public WalkThroughDoorBehaviorWithTiming(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+   public DoorTimingBehaviorAutomated(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
                                             HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
                                             AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
