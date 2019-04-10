@@ -128,6 +128,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownDetectionThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownDetectionThreshold");
+   private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownForSureDetectionThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownForSureDetectionThreshold");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<HighLevelControllerName> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
@@ -252,6 +253,7 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
+      footSwitchFactory.setKneeForSureTouchdownThresholds(kneeTorqueTouchdownForSureDetectionThreshold.get());
 
       footSwitches = footSwitchFactory.createFootSwitches();
    }
@@ -487,6 +489,7 @@ public class QuadrupedSimulationFactory
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
       useLocalCommunicator.setDefaultValue(false);
       kneeTorqueTouchdownDetectionThreshold.setDefaultValue(new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0));
+      kneeTorqueTouchdownForSureDetectionThreshold.setDefaultValue(new QuadrantDependentList<>(75.0, 75.0, 75.0, 75.0));
       createYoVariableServer.setDefaultValue(false);
 
 
@@ -733,6 +736,11 @@ public class QuadrupedSimulationFactory
    public void setKneeTorqueTouchdownDetectionThreshold(QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold)
    {
       this.kneeTorqueTouchdownDetectionThreshold.set(kneeTorqueTouchdownDetectionThreshold);
+   }
+
+   public void setKneeTorqueTouchdownForSureDetectionThreshold(QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold)
+   {
+      this.kneeTorqueTouchdownForSureDetectionThreshold.set(kneeTorqueTouchdownDetectionThreshold);
    }
 
    public void setUseStateEstimator(boolean useStateEstimator)
