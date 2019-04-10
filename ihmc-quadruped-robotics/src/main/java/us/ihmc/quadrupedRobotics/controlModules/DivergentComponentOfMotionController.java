@@ -101,7 +101,7 @@ public class DivergentComponentOfMotionController
       vrpControllerEffort.setY(pidController[1].compute(this.dcmPositionEstimate.getY(), this.dcmPositionSetpoint.getY(), 0, 0, controlDT));
       vrpControllerEffort.setZ(pidController[2].compute(this.dcmPositionEstimate.getZ(), this.dcmPositionSetpoint.getZ(), 0, 0, controlDT));
 
-      vrpPositionSetpoint.sub(this.dcmVelocitySetpoint, vrpControllerEffort);
+      vrpPositionSetpoint.add(this.dcmVelocitySetpoint, vrpControllerEffort);
       vrpPositionSetpoint.scaleAdd(-1.0 / omega, this.dcmPositionEstimate);
 //      vrpPositionSetpoint.setX(this.dcmPositionEstimate.getX() - 1 / omega * (this.dcmVelocitySetpoint.getX() + xEffort));
 //      vrpPositionSetpoint.setY(this.dcmPositionEstimate.getY() - 1 / omega * (this.dcmVelocitySetpoint.getY() + yEffort));
