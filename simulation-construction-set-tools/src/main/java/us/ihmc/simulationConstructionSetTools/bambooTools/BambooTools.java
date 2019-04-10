@@ -136,7 +136,8 @@ public class BambooTools
          }
       }
    }
-
+   
+   
    /**
     * Internal method wrapping {@link #createVideoWithDateTimeAndNameInternal(String, SimulationConstructionSet, boolean, String)} with a timeout.
     * @see #createVideoWithDateTimeAndNameInternal
@@ -183,7 +184,7 @@ public class BambooTools
       String videoFilename = dateTimeString + "_" + videoName + ".mp4";
 
       LogTools.debug(videoFilename);
-
+      
       File videoFile = scs.createVideo(directoryName + videoFilename);
 
       String dataFilename = directoryName + dateTimeString + ".data.gz";
