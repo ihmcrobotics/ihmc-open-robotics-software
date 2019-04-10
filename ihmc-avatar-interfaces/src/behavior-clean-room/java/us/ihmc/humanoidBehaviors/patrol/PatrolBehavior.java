@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.state.EnhancedStateMachineFactory;
 import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -247,6 +248,11 @@ public class PatrolBehavior
 
    private void pollInterrupts()
    {
+      if (remoteRobotControllerInterface.latestControllerState() != HighLevelControllerName.WALKING) // STOP if robot falls
+      {
+         stopNotification.set();
+      }
+
       stopNotification.poll();         // poll both at the same time to handle race condition
       overrideGoToWaypointNotification.poll();
    }
