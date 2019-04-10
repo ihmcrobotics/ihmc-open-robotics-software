@@ -306,7 +306,13 @@ public class QuadrupedControllerInputProviderTest
       }
 
       @Override
-      public boolean trustFootSwitches()
+      public boolean trustFootSwitchesInSwing()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean trustFootSwitchesInSupport()
       {
          return true;
       }
