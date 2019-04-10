@@ -1,8 +1,8 @@
 package us.ihmc.communication;
 
-import us.ihmc.ros2.Ros2Node;
-
 import java.util.concurrent.atomic.AtomicReference;
+
+import us.ihmc.ros2.Ros2Node;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
@@ -16,10 +16,25 @@ public class ROS2Input<T>
 
    public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
-      this(ros2Node, messageType, robotName, identifier, message -> true);
+      this(ros2Node, messageType, robotName, identifier, null, message -> true);
+   }
+   
+   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue)
+   {
+      this(ros2Node, messageType, robotName, identifier, initialValue, message -> true);
+   }
+   
+   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
+   {
+      this(ros2Node, messageType, robotName, identifier, null, messageFilter);
    }
 
-   public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
+   public ROS2Input(Ros2Node ros2Node, 
+                    Class<T> messageType, 
+                    String robotName, 
+                    ROS2ModuleIdentifier identifier,
+                    T initialValue, 
+                    MessageFilter<T> messageFilter)
    {
       atomicReference = new AtomicReference<>(ROS2Tools.newMessageInstance(messageType));
       this.messageFilter = messageFilter;

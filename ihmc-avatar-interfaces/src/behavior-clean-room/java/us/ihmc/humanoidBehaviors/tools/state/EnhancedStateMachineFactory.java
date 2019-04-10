@@ -1,12 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools.state;
 
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This factory helps by adding complete do nothing state implementations for every enum value
@@ -57,6 +58,11 @@ public class EnhancedStateMachineFactory<K extends Enum<K>>
                throw new RuntimeException("Invalid transition to " + transitionTo + ". Options are " + toOptions);
             }
 
+            if (transitionTo == value)
+            {
+               LogTools.debug("Transition {} -> {}", from.name(), transitionTo.name());
+            }
+            
             return transitionTo == value; // must use == for null safety
          });
       }
