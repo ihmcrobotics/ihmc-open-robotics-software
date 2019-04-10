@@ -112,7 +112,7 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.useSecondOrderInitialGuess();
-      orientationCalculator.computeFast();
+      orientationCalculator.compute();
 
       for (int i = 1; i < numberOfTrajectoryPoints; i++)
       {
@@ -167,7 +167,7 @@ public class KinematicsPlanningToolboxOutputConverter
       }
 
       orientationCalculator.useSecondOrderInitialGuess();
-      orientationCalculator.computeFast();
+      orientationCalculator.compute();
       euclideanTrajectoryPointCalculator.compute(keyFrameTimes.get(numberOfTrajectoryPoints - 1));
       FrameEuclideanTrajectoryPointList trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -19,8 +18,6 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
  */
 public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 {
-   private static final boolean useEfficientAtan2 = false;
-
    private double trajectoryTime;
    private int numberOfRevolutions;
 
@@ -43,7 +40,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 
    private boolean convertAngularVelocity = false;
    private boolean convertAngularAcceleration = true;
-   
+
    Quaternion qProduct = new Quaternion();
 
    Vector4D qDot = new Vector4D();
@@ -172,17 +169,16 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
       delta.setAndScale(TOverThree, wb);
       controlRotations[3].set(delta);
    }
-   
+
    public void setConvertingAngularVelocity(boolean use)
    {
       convertAngularVelocity = use;
    }
-   
+
    public void setConvertingAngularAcceleration(boolean use)
    {
       convertAngularAcceleration = use;
    }
-
 
    public void compute(double time)
    {
@@ -383,40 +379,7 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    {
       // Expensive guy.
       Vector3D tempLogExpVector3D = new Vector3D();
-      if (useEfficientAtan2)
-      {
-         if (q.containsNaN())
-         {
-            tempLogExpVector3D.setToNaN();
-            return tempLogExpVector3D;
-         }
-
-         double qx = q.getX();
-         double qy = q.getY();
-         double qz = q.getZ();
-         double qs = q.getS();
-
-         double uNorm = Math.sqrt(EuclidCoreTools.normSquared(qx, qy, qz));
-
-         if (uNorm > EPS)
-         {
-            double angle = 2.0 * Riven.atan2(uNorm, qs) / uNorm;
-            tempLogExpVector3D.setX(qx * angle);
-            tempLogExpVector3D.setY(qy * angle);
-            tempLogExpVector3D.setZ(qz * angle);
-         }
-         else
-         {
-            double sign = Math.signum(qs);
-            tempLogExpVector3D.setX(sign * qx);
-            tempLogExpVector3D.setY(sign * qy);
-            tempLogExpVector3D.setZ(sign * qz);
-         }
-      }
-      else
-      {
-         q.getRotationVector(tempLogExpVector3D);
-      }
+      q.getRotationVector(tempLogExpVector3D);
 
       return tempLogExpVector3D;
    }
@@ -434,83 +397,5 @@ public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
    public void getAngularAcceleration(Vector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.set(currentAngularAcceleration);
-   }
-
-   public static final class Riven
-   {
-      /**
-       * @param bitsPerDimension is an accuracy parameter (ATAN2_BITS).
-       * The default value is 7.
-       * If we use 7 bits per dimension, that means 2^7 (128) values for each dimension.
-       * Consequently, 128 * 128 entries are in lookup-table.
-       * The accuracy might be around (1/128) in general.
-       */
-      private static final int ATAN2_BITS = 12;
-
-      private static final int ATAN2_BITS2 = ATAN2_BITS << 1;
-      private static final int ATAN2_MASK = ~(-1 << ATAN2_BITS2);
-      private static final int ATAN2_COUNT = ATAN2_MASK + 1;
-      private static final int ATAN2_DIM = (int) Math.sqrt(ATAN2_COUNT);
-
-      private static final float INV_ATAN2_DIM_MINUS_1 = 1.0f / (ATAN2_DIM - 1);
-
-      private static final float[] atan2 = new float[ATAN2_COUNT];
-
-      static
-      {
-         for (int i = 0; i < ATAN2_DIM; i++)
-         {
-            for (int j = 0; j < ATAN2_DIM; j++)
-            {
-               float x0 = (float) i / ATAN2_DIM;
-               float y0 = (float) j / ATAN2_DIM;
-
-               atan2[j * ATAN2_DIM + i] = (float) Math.atan2(y0, x0);
-            }
-         }
-      }
-
-      public static final double atan2(double y, double x)
-      {
-         double add, mul;
-
-         if (x < 0.0f)
-         {
-            if (y < 0.0f)
-            {
-               x = -x;
-               y = -y;
-
-               mul = 1.0f;
-            }
-            else
-            {
-               x = -x;
-               mul = -1.0f;
-            }
-            add = -3.141592653f;
-            //add = -Math.PI;
-         }
-         else
-         {
-            if (y < 0.0f)
-            {
-               y = -y;
-               mul = -1.0f;
-            }
-            else
-            {
-               mul = 1.0f;
-            }
-            add = 0.0f;
-         }
-
-         double invDiv = 1.0f / (((x < y) ? y : x) * INV_ATAN2_DIM_MINUS_1);
-
-         int xi = (int) (x * invDiv);
-         int yi = (int) (y * invDiv);
-
-         return (atan2[yi * ATAN2_DIM + xi] + add) * mul;
-      }
    }
 }
