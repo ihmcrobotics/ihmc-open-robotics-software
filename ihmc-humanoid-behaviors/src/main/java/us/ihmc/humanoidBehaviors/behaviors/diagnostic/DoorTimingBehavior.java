@@ -4,7 +4,7 @@ import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTim
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Operator;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Run;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.Task;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
@@ -19,7 +19,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
    public boolean operatorInControl = false;
    public boolean doorIsOpen = false;
    public double armTrajectoryTime = 0;
-   protected BasicTimingBehavior timingBehavior;
+   protected TimingBehaviorHelper timingBehavior;
 
    private YoDouble totalTimeFindingDoor;
    private YoDouble totalTimePlanning;
@@ -61,7 +61,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       super(robotName, "DoorTimingBehaviorStates", DoorTimingBehaviorStates.class, yoTime, ros2Node);
       this.operatorInControl = userControlled;
 
-      timingBehavior = new BasicTimingBehavior(robotName, ros2Node);
+      timingBehavior = new TimingBehaviorHelper(robotName, ros2Node);
 
       totalTimeFindingDoor = new YoDouble("totalTimeFindingDoor", registry);
 

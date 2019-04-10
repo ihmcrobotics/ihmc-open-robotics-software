@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTim
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLDatabaseManager.RunEvent;
 import us.ihmc.ros2.Ros2Node;
 
-public class BasicTimingBehavior extends AbstractBehavior
+public class TimingBehaviorHelper extends AbstractBehavior
 {
    public final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>(null);
    public final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
@@ -31,7 +31,7 @@ public class BasicTimingBehavior extends AbstractBehavior
    public final AtomicReference<FootstepPlanningRequestPacket> footstepPlanningRequestPacket = new AtomicReference<>(null);
    public SQLDatabaseManager dataBase;
 
-   public BasicTimingBehavior(String robotName, Ros2Node ros2Node)
+   public TimingBehaviorHelper(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
 
