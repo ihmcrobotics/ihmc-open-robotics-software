@@ -27,15 +27,22 @@ public class FlatGroundPlanarRegionPublisher
 {
    public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("flat_ground_planar_region_publisher",
                                                                                ROS2Tools.FLAT_GROUND_REGION_PUBLISHER);
+   public static final int FLAT_GROUND_REGION_ID = 1996; // 7 = yellow, 6 = green
+
    private final ExceptionPrintingThreadScheduler scheduler;
-   private final PlanarRegionsListMessage flatRegionMessage;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
+
+   private final PlanarRegionsListMessage flatRegionMessage;
+   private final PlanarRegionsListMessage emptyRegionMessage; // empty region required to clear
+   private PlanarRegionsListMessage regionMessageToPublish;
 
    public FlatGroundPlanarRegionPublisher()
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2_ID.getNodeName());
 
       flatRegionMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(createFlatGroundRegion()));
+      emptyRegionMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(createEmptyRegion()));
+      regionMessageToPublish = emptyRegionMessage;
 
       scheduler = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
 
@@ -45,25 +52,24 @@ public class FlatGroundPlanarRegionPublisher
                                           PlanarRegionsListMessage.class,
                                           null,
                                           LIDARBasedREAModule.ROS2_ID.qualifyMore(LIDARBasedREAModule.CUSTOM_REGION_QUALIFIER));
-
-      scheduler.schedule(this::publish, 500, TimeUnit.MILLISECONDS);
+      scheduler.schedule(this::publish, 1, TimeUnit.SECONDS);
    }
 
    private void acceptParameters(FlatGroundPlanarRegionParametersMessage message)
    {
       if (message.getEnable())
       {
-         scheduler.schedule(this::publish, 500, TimeUnit.MILLISECONDS);
+         regionMessageToPublish = flatRegionMessage;
       }
       else
       {
-         scheduler.shutdown();
+         regionMessageToPublish = emptyRegionMessage;
       }
    }
 
    private void publish()
    {
-      publisher.publish(flatRegionMessage);
+      publisher.publish(regionMessageToPublish);
    }
 
    private PlanarRegion createFlatGroundRegion()
@@ -77,7 +83,14 @@ public class FlatGroundPlanarRegionPublisher
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       transformToWorld.setTranslationZ(-0.0001);
       PlanarRegion planarRegion = new PlanarRegion(transformToWorld, convexPolygon);
-      planarRegion.setRegionId(1780);
+      planarRegion.setRegionId(FLAT_GROUND_REGION_ID);
+      return planarRegion;
+   }
+
+   private PlanarRegion createEmptyRegion()
+   {
+      PlanarRegion planarRegion = new PlanarRegion();
+      planarRegion.setRegionId(FLAT_GROUND_REGION_ID);
       return planarRegion;
    }
 }

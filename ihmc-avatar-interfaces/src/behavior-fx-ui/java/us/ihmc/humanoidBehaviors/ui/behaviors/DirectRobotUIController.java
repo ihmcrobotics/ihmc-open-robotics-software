@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.FlatGroundPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -13,6 +14,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.humanoidBehaviors.tools.FlatGroundPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
@@ -25,11 +27,13 @@ public class DirectRobotUIController
    @FXML private Button standPrep;
    @FXML private Button shutdown;
    @FXML private CheckBox enableSupportRegions;
+   @FXML private CheckBox enableFlatGroundRegion;
    @FXML private Spinner<Double> supportRegionScale;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
+   private IHMCROS2Publisher<FlatGroundPlanarRegionParametersMessage> flatGroundRegionParametersPublisher;
 
    public void init(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -55,6 +59,11 @@ public class DirectRobotUIController
                                                                     ROS2Tools.getTopicNameGenerator(robotModel.getSimpleRobotName(),
                                                                                                     ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER,
                                                                                                     ROS2TopicQualifier.INPUT));
+
+      flatGroundRegionParametersPublisher = new IHMCROS2Publisher<>(ros2Node,
+                                                                    FlatGroundPlanarRegionParametersMessage.class,
+                                                                    null,
+                                                                    FlatGroundPlanarRegionPublisher.ROS2_ID);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, 2.0, 0.1));
    }
@@ -98,5 +107,13 @@ public class DirectRobotUIController
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
+   }
+
+   @FXML
+   public void sendFlatGroundRegionParameters()
+   {
+      FlatGroundPlanarRegionParametersMessage message = new FlatGroundPlanarRegionParametersMessage();
+      message.setEnable(enableFlatGroundRegion.isSelected());
+      flatGroundRegionParametersPublisher.publish(message);
    }
 }
