@@ -32,7 +32,7 @@ import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkThroughDoorBehaviorWithTiming;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehaviorAutomated;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
@@ -258,7 +258,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR,
                              new DoorTimingBehavior(robotName, yoTime,ros2Node,true));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
-                             new WalkThroughDoorBehaviorWithTiming(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                             new DoorTimingBehaviorAutomated(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                          wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
       
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR,
