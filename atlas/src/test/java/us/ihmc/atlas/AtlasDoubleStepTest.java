@@ -1,11 +1,8 @@
 package us.ihmc.atlas;
 
-import org.junit.jupiter.api.Test;
-
 import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasDoubleStepTest extends AvatarDoubleStepTest
 {
@@ -23,33 +20,5 @@ public class AtlasDoubleStepTest extends AvatarDoubleStepTest
    public String getSimpleRobotName()
    {
       return robotModel.getSimpleRobotName();
-   }
-
-   @Test
-   @Override
-   public void testTwoStepsInARowSameSide() throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoStepsInARowSameSide();
-   }
-
-   @Test
-   @Override
-   public void testTwoStepsInARowSameSideAfterFirstSep() throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoStepsInARowSameSideAfterFirstSep();
-   }
-
-   @Test
-   @Override
-   public void testTwoStepsInARowLongTransferSameSide() throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoStepsInARowLongTransferSameSide();
-   }
-
-   @Test
-   @Override
-   public void testTwoStepsStandingInBetween() throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoStepsStandingInBetween();
    }
 }
