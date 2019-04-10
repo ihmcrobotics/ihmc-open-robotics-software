@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior.RoughTerrainOperatorTimingBehaviorStates;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrainOperatorTimingBehaviorStates>
 {
 
-   protected BasicTimingBehavior timingBehavior;
+   protected TimingBehaviorHelper timingBehavior;
 
    private YoDouble totalPlanningTime;;
    private YoDouble totalWalkTime;;
@@ -25,7 +25,7 @@ public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrai
    public RoughTerrainTimingBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node)
    {
       super(robotName, "RoughTerrainOperatorTimingBehavior", RoughTerrainOperatorTimingBehaviorStates.class, yoTime, ros2Node);
-      timingBehavior = new BasicTimingBehavior(robotName, ros2Node);
+      timingBehavior = new TimingBehaviorHelper(robotName, ros2Node);
       totalPlanningTime = new YoDouble("totalPlanningTime", registry);
       totalWalkTime = new YoDouble("totalWalkTime", registry);
 

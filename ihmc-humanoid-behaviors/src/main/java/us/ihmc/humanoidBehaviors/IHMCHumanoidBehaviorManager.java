@@ -39,7 +39,7 @@ import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavi
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehaviorOld;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
@@ -242,7 +242,7 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new BasicTimingBehavior(robotName, ros2Node));
+      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new TimingBehaviorHelper(robotName, ros2Node));
       
       dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName,yoTime, ros2Node));
       
