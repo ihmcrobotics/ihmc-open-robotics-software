@@ -3,11 +3,8 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -27,7 +24,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
    private final GlitchFilteredYoBoolean touchdownDetected;
-   private final YoBoolean trustTouchdownDetectors;
+   private final YoBoolean trustTouchdownDetectorsInSwing;
+   private final YoBoolean trustTouchdownDetectorsInSupport;
    private final WrenchCalculator wrenchCalculator;
 
    private final YoFrameVector3D measuredForce;
@@ -48,7 +46,8 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.totalRobotWeight = totalRobotWeight;
       yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
-      trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
+      trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing", registry);
+      trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport", registry);
 
       measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", "",
                                           ReferenceFrame.getWorldFrame(), registry);
@@ -77,7 +76,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       necessaryTouchdownDetectors.update();
       touchdownDetected.update(necessaryTouchdownDetectors.hasTouchedDown());
 
-      if (trustTouchdownDetectors.getBooleanValue())
+      if (trustTouchdownDetectorsInSwing.getBooleanValue())
          return touchdownDetected.getBooleanValue();
       else
          return controllerThinksHasTouchedDown.getBooleanValue();
@@ -119,9 +118,15 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
    {
-      this.trustTouchdownDetectors.set(trustFootSwitch);
+      this.trustTouchdownDetectorsInSwing.set(trustFootSwitch);
+   }
+
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
+   {
+      this.trustTouchdownDetectorsInSupport.set(trustFootSwitch);
    }
 
    @Override
