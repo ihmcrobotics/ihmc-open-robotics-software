@@ -9,11 +9,11 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -135,7 +135,7 @@ public class ValkyrieRosControlLowLevelController
       if (jointCommandCalculator != null)
          jointCommandCalculator.subtractTorqueOffset(torqueOffset);
       else
-         PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
+         LogTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
    }
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)

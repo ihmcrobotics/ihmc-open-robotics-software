@@ -35,6 +35,7 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
    private final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
+   private final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromController = new RequiredFactoryField<>("robotMotionStatusFromController");
 
    public StateEstimatorController createStateEstimator()
    {
@@ -45,8 +46,6 @@ public class QuadrupedStateEstimatorFactory
       RigidBodyBasics estimationLink = fullRobotModel.get().getRootBody();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
-      RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
-      robotMotionStatusFromController.setCurrentRobotMotionStatus(RobotMotionStatus.IN_MOTION);
       CenterOfPressureDataHolder centerOfPressureDataHolder = null;
 
       Map<RigidBodyBasics, ContactablePlaneBody> feetMap = new HashMap<RigidBodyBasics, ContactablePlaneBody>();
@@ -66,7 +65,7 @@ public class QuadrupedStateEstimatorFactory
       StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
                                                                                      sensorOutputMapReadOnly.get(), centerOfMassDataHolder.get(),
                                                                                      imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
-                                                                                     centerOfPressureDataHolder, robotMotionStatusFromController, feetMap, yoGraphicsListRegistry.get());
+                                                                                     centerOfPressureDataHolder, robotMotionStatusFromController.get(), feetMap, yoGraphicsListRegistry.get());
 
       FactoryTools.disposeFactory(this);
 
@@ -121,5 +120,10 @@ public class QuadrupedStateEstimatorFactory
    public void setCenterOfMassDataHolder(CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.centerOfMassDataHolder.set(centerOfMassDataHolder);
+   }
+
+   public void setRobotMotionStatusFromControllerHolder(RobotMotionStatusHolder robotMotionStatusFromControllerHolder)
+   {
+      this.robotMotionStatusFromController.set(robotMotionStatusFromControllerHolder);
    }
 }

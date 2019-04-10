@@ -8,8 +8,8 @@ import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -31,8 +31,6 @@ import us.ihmc.commons.allocations.AllocationRecord;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -56,8 +54,8 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
@@ -66,7 +64,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
-@Tag("allocation-slow")
 public class AtlasAllocationTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -114,6 +111,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -129,6 +127,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow-2")
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
@@ -157,6 +156,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringPelvisMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(42884L);
@@ -179,6 +179,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsWithPelvisUserControl() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -204,6 +205,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringArmMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);
@@ -224,6 +226,7 @@ public class AtlasAllocationTest
    }
 
    @Test
+   @Tag("allocation-slow")
    public void testForAllocationsDuringChestMotion() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(4281284L);

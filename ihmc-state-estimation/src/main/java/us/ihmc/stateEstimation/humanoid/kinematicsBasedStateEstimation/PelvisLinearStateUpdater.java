@@ -557,7 +557,8 @@ public class PelvisLinearStateUpdater
 
          if (footLoad.getDoubleValue() < percentForce)
          {
-            numberOfEndEffectorsTrusted--;
+            if (numberOfEndEffectorsTrusted > 1)
+               numberOfEndEffectorsTrusted--;
             areFeetTrusted.get(foot).set(false);
          }
       }
