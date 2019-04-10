@@ -205,11 +205,12 @@ public class SO3TrajectoryPointCalculator
          int optimalSolutionIndex = 0;
          for (int i = 1; i < numberOfPoints - 1; i++)
          {
-            for (int j = 0; j < 3; j++)
-            {
-               angularVelocities.get(i).setElement(j, values.get(optimalSolutionIndex));
-               optimalSolutionIndex++;
-            }
+            angularVelocities.get(i).setX(values.get(optimalSolutionIndex));
+            optimalSolutionIndex++;
+            angularVelocities.get(i).setY(values.get(optimalSolutionIndex));
+            optimalSolutionIndex++;
+            angularVelocities.get(i).setZ(values.get(optimalSolutionIndex));
+            optimalSolutionIndex++;
          }
 
          int numberOfTicks = (int) (times.get(times.size() - 1) / velocitOptimizerDT);
