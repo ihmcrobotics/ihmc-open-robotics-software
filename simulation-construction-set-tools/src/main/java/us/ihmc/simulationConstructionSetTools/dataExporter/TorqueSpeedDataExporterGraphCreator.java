@@ -33,17 +33,23 @@ public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreato
    {
       for (PinJoint pinJoint : pinJoints)
       {
+         DataBufferEntry position = dataBuffer.getEntry(pinJoint.getQYoVariable());
          DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
          DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
 
          String timeLabel = "time [s]";
+         String positionLabel = position.getVariableName() + " [rad]";
          String torqueLabel = torque.getVariableName() + " [Nm]";
          String speedLabel = speed.getVariableName() + " [rad/s]";
-         String torqueSpeedTitle = torque.getVariableName() + "_Vs_" + speed.getVariableName();
 
+         String torqueSpeedTitle = torque.getVariableName() + "_Vs_" + speed.getVariableName();
+         String torquePositionTitle = torque.getVariableName() + "_Vs_" + position.getVariableName();
+
+         createDataVsTimeGraph(directory, fileHeader, position, createJPG, createPDF, timeLabel, positionLabel, Color.black);
          createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF, timeLabel, torqueLabel, Color.black);
          createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF, timeLabel, speedLabel, Color.black);
          createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF, torqueSpeedTitle, speedLabel, torqueLabel, Color.black);
+         createDataOneVsDataTwoGraph(directory, fileHeader, position, torque, createJPG, createPDF, torquePositionTitle, positionLabel, torqueLabel, Color.black);
       }
    }
 

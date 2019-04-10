@@ -1,6 +1,6 @@
 package us.ihmc.atlas.rrtWalkingpathtest;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -9,33 +9,27 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
+import us.ihmc.log.LogTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
 import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -47,23 +41,12 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private DRCBehaviorTestHelper drcBehaviorTestHelper;
-
-   private CommunicationBridge communicationBridge;
-   private YoDouble yoTime;
-
-   private FullHumanoidRobotModel fullRobotModel;
-   private HumanoidRobotDataReceiver robotDataReceiver;
-   private HumanoidFloatingRootJointRobot robot;
-   private static final boolean DEBUG = false;
 
    Point3D goalState;
    Point3D initialState;
@@ -72,7 +55,6 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      fullRobotModel = getRobotModel().createFullRobotModel();
    }
 
    @AfterEach
@@ -89,9 +71,6 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       {
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
-         communicationBridge = null;
-         yoTime = null;
-         fullRobotModel = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -164,8 +143,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          drcSimulationTestHelper.destroySimulation();
       }
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), environment);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation(getSimpleRobotName());
 
@@ -212,7 +190,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
 
       rrtPlanner.expandTreeGoal(2000);
-      PrintTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
+      LogTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
 
       simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -223,7 +201,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      PrintTools.info("shortcut optimized path has "+rrtPlanner.getOptimalPath().size()+" nodes");
+      LogTools.info("shortcut optimized path has "+rrtPlanner.getOptimalPath().size()+" nodes");
 
 
       // footstep
@@ -294,7 +272,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
 
 
-      PrintTools.info("END!!");
+      LogTools.info("END!!");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);

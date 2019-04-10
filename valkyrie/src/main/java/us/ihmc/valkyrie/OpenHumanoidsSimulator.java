@@ -19,15 +19,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,7 +43,6 @@ public class OpenHumanoidsSimulator
    private static final String DEFAULT_TF_PREFIX = null;
    private SDFEnvironment environment = null;
    private AvatarSimulation avatarSimulation;
-   private boolean rosShutDown = false;
 
    class RosIPABAPISubscriber extends AbstractRosTopicSubscriber<std_msgs.String>
    {
@@ -67,9 +63,10 @@ public class OpenHumanoidsSimulator
 	public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
 			boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points) throws IOException
 	{
-		this(model, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz, extra_sim_points, Collections.<Class>emptySet());
+		this(model, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz, extra_sim_points, Collections.emptySet());
 	}
 
+   @SuppressWarnings("rawtypes")
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
@@ -225,7 +222,7 @@ public class OpenHumanoidsSimulator
    {
 	   parseArguments(args);
 
-	   OpenHumanoidsSimulator sim = new OpenHumanoidsSimulator(robotModel, DRCObstacleCourseStartingLocation.DEFAULT, DEFAULT_PREFIX + "/" + ROBOT_NAME, DEFAULT_TF_PREFIX, false, false, extra_sim_points);
+	   new OpenHumanoidsSimulator(robotModel, DRCObstacleCourseStartingLocation.DEFAULT, DEFAULT_PREFIX + "/" + ROBOT_NAME, DEFAULT_TF_PREFIX, false, false, extra_sim_points);
    }
 }
 

@@ -38,7 +38,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -48,7 +47,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -59,6 +57,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -160,7 +159,7 @@ public class WalkingControllerTest
       walkingController.initialize();
 
       // measure multiple ticks
-      PrintTools.info("Starting to loop.");
+      LogTools.info("Starting to loop.");
       int tickCount = 0;
       while (yoTime.getDoubleValue() < totalTime || profile)
       {
@@ -171,17 +170,17 @@ public class WalkingControllerTest
          {
             if (tickCount % (int) (4.0 / controlDT) == 0)
             {
-               PrintTools.info("Sending Steps");
+               LogTools.info("Sending Steps");
                sendFootsteps();
             }
             if (tickCount % (int) (4.0 / controlDT) == (int) (2.0 / controlDT))
             {
-               PrintTools.info("Sending Chest Trajectory");
+               LogTools.info("Sending Chest Trajectory");
                sendChestTrajectory();
             }
             if (tickCount % (int) (4.0 / controlDT) == (int) (3.0 / controlDT))
             {
-               PrintTools.info("Sending Arm Trajectory");
+               LogTools.info("Sending Arm Trajectory");
                sendArmTrajectory();
             }
          }
@@ -586,7 +585,6 @@ public class WalkingControllerTest
          scs = null;
       }
 
-      ReferenceFrameTools.clearWorldFrameTree();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 }

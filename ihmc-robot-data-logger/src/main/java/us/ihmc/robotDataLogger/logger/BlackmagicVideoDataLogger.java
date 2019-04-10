@@ -127,8 +127,11 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
       {
          try
          {
+            LogTools.info("Stopping capture.");
             capture.stopCapture();
+            LogTools.info("Closing writer.");
             timestampWriter.close();
+            LogTools.info("Done.");
          }
          catch (IOException e)
          {

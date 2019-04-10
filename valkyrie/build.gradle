@@ -78,8 +78,6 @@ task deployOCUApplications(dependsOn: installDist) {
          into dest
       }
 
-      execute("chmod +x " + dest + "/bin/" + applicationName)
-
       println "-------------------------------------------------------------------------"
       println "------- Deployed files to: " + dest.getPath() + " -------"
       println "-------------------------------------------------------------------------"

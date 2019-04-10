@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.Yaml;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -20,7 +20,6 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -63,8 +62,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
-         robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
+   private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
 
    /* package private */ final YoDouble masterScaleFactor = new YoDouble("masterScaleFactor", registry);
 
@@ -220,7 +218,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       }
       catch (Exception e)
       {
-         PrintTools.error(this, "Could not load stand prep set points.");
+         LogTools.error("Could not load stand prep set points.");
          setPointMap = null;
       }
    }

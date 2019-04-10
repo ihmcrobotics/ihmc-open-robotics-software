@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -85,8 +85,6 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final FramePoint3D averagePosition = new FramePoint3D();
    private final FrameVector3D referenceAverageToFootPosition = new FrameVector3D();
    private final FrameVector3D currentAverageToFootPosition = new FrameVector3D();
-   private final Twist footTwist = new Twist();
-   private final FrameVector3D footLinearVelocity = new FrameVector3D();
 
    private final double estimatorDT;
 
@@ -181,9 +179,8 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBodyBasics foot = allFeet.get(i);
-         foot.getBodyFixedFrame().getTwistOfFrame(footTwist);
-         footLinearVelocity.setIncludingFrame(footTwist.getLinearPart());
-         currentFootLinearVelocities.get(foot).set(footLinearVelocity.length());
+         TwistReadOnly footTwist = foot.getBodyFixedFrame().getTwistOfFrame();
+         currentFootLinearVelocities.get(foot).set(footTwist.getLinearPart().length());
       }
    }
 
