@@ -81,6 +81,7 @@ public class PatrolBehavior
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
    private final AtomicReference<Boolean> loop;
+   private final AtomicReference<Boolean> swingOvers;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -116,6 +117,7 @@ public class PatrolBehavior
 
       waypoints = messager.createInput(API.Waypoints);
       loop = messager.createInput(API.Loop, false);
+      swingOvers = messager.createInput(API.SwingOvers, false);
 
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
@@ -207,7 +209,8 @@ public class PatrolBehavior
       messager.submitMessage(API.CurrentState, WALK.name());
       reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
       walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
+                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
+                                                                    swingOvers.get());
 
       REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       clearMessage.setRequestClear(true);
@@ -320,6 +323,9 @@ public class PatrolBehavior
 
       /** Input: Toggle looping through waypoints. */
       public static final Topic<Boolean> Loop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Loop"));
+
+      /** Input: Toggle swinging over planar regions. */
+      public static final Topic<Boolean> SwingOvers = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("SwingOvers"));
 
       /** Output: to visualize the current robot path plan. */
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan = Root.child(Patrol)

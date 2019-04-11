@@ -91,11 +91,15 @@ public class RemoteRobotControllerInterface
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutput,
-                                                              HumanoidReferenceFrames humanoidReferenceFrames)
+                                                              HumanoidReferenceFrames humanoidReferenceFrames,
+                                                              boolean swingOverPlanarRegions)
    {
 
       FootstepDataListMessage footsteps = footstepPlanningToolboxOutput.getFootstepDataList();
-//      footsteps = calculateSwingOverTrajectoryExpansions(footsteps, humanoidReferenceFrames, footstepPlanningToolboxOutput.getPlanarRegionsList());
+      if (swingOverPlanarRegions)
+      {
+         footsteps = calculateSwingOverTrajectoryExpansions(footsteps, humanoidReferenceFrames, footstepPlanningToolboxOutput.getPlanarRegionsList());
+      }
 
       LogTools.debug("Tasking {} footstep(s) to the robot", footsteps.getFootstepDataList().size());
 
