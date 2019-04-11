@@ -27,18 +27,19 @@ public class WeightedAverageWrenchCalculator implements WrenchCalculator
 
    private final Wrench wrench = new Wrench();
 
-   public WeightedAverageWrenchCalculator(String prefix, YoVariableRegistry registry, PairList<DoubleProvider, WrenchCalculator> wrenchCalculatorPairs)
+   public WeightedAverageWrenchCalculator(String prefix, String variableSuffix, YoVariableRegistry registry, PairList<DoubleProvider,
+         WrenchCalculator> wrenchCalculatorPairs)
    {
       wrench.setToZero(ReferenceFrame.getWorldFrame());
 
-      averageAngularForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageAngularForce", ReferenceFrame.getWorldFrame(), registry);
-      averageLinearForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageLinearForce", ReferenceFrame.getWorldFrame(), registry);
+      averageAngularForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageAngularForce" + variableSuffix, ReferenceFrame.getWorldFrame(), registry);
+      averageLinearForce = new WeightedAverageYoFrameVector3D(prefix + "_WeightedAverageLinearForce" + variableSuffix, ReferenceFrame.getWorldFrame(), registry);
 
       for (ImmutablePair<DoubleProvider, WrenchCalculator> wrenchCalculatorPair : wrenchCalculatorPairs)
       {
          WrenchCalculator wrenchCalculator = wrenchCalculatorPair.getRight();
-         YoFrameVector3D linearForce = new YoFrameVector3D(wrenchCalculator.getName() + "LinearForce", ReferenceFrame.getWorldFrame(), registry);
-         YoFrameVector3D angularForce = new YoFrameVector3D(wrenchCalculator.getName() + "AngularForce", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameVector3D linearForce = new YoFrameVector3D(wrenchCalculator.getName() + "LinearForce" + variableSuffix, ReferenceFrame.getWorldFrame(), registry);
+         YoFrameVector3D angularForce = new YoFrameVector3D(wrenchCalculator.getName() + "AngularForce" + variableSuffix, ReferenceFrame.getWorldFrame(), registry);
 
          linearForces.put(wrenchCalculator, linearForce);
          angularForces.put(wrenchCalculator, angularForce);

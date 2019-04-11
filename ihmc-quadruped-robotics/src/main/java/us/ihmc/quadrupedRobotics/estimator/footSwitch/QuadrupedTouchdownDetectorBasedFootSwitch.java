@@ -10,6 +10,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
@@ -20,6 +21,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
    private static final int defaultGlitchWindow = 10;
 
+   private final IntegerProvider glitchWindowSize;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
@@ -30,26 +32,22 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
    private final YoFrameVector3D measuredForce;
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
-                                                    double totalRobotWeight, YoVariableRegistry parentRegistry)
-   {
-      this(robotQuadrant, foot, wrenchCalculator, defaultGlitchWindow, totalRobotWeight, parentRegistry);
-   }
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
-                                                    int glitchWindow, double totalRobotWeight, YoVariableRegistry parentRegistry)
+   public QuadrupedTouchdownDetectorBasedFootSwitch(String variableSuffix, RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
+                                                    IntegerProvider glitchWindowSize, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
-      super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
+      super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch" + variableSuffix, parentRegistry);
 
       this.foot = foot;
       this.wrenchCalculator = wrenchCalculator;
+      this.glitchWindowSize = glitchWindowSize;
       this.totalRobotWeight = totalRobotWeight;
-      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-      touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
-      trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing", registry);
-      trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport", registry);
+      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", variableSuffix, foot.getSoleFrame(), registry);
+      touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected" + variableSuffix, registry, defaultGlitchWindow);
+      trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing" + variableSuffix, registry);
+      trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport" + variableSuffix, registry);
 
-      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", "",
+      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", variableSuffix,
                                           ReferenceFrame.getWorldFrame(), registry);
    }
 
@@ -61,6 +59,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public void updateMeasurement()
    {
+      touchdownDetected.setWindowSize(glitchWindowSize.getValue());
       wrenchCalculator.calculate();
       measuredForce.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
    }

@@ -19,9 +19,9 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private double signum;
    private double forSureSignum;
 
-   public JointTorqueBasedTouchdownDetector(OneDoFJointBasics joint, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, YoVariableRegistry registry)
    {
-      this(joint, false, registry);
+      this(suffix, joint, false, registry);
    }
 
    /**
@@ -30,16 +30,16 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
     *                                          false-positive touchdown signals given by simulated torques at joint limits
     * @param registry
     */
-   public JointTorqueBasedTouchdownDetector(OneDoFJointBasics joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
+   public JointTorqueBasedTouchdownDetector(String suffix, OneDoFJointBasics joint, boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry registry)
    {
       this.joint = joint;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
 
-      jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
-      torqueThreshold = new YoDouble(joint.getName() + "_touchdownTorqueThreshold", registry);
-      torqueForSureThreshold = new YoDouble(joint.getName() + "_touchdownTorqueForSureThreshold", registry);
-      touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetected", registry);
-      touchdownForSureDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownForSureDetected", registry);
+      jointTorque = new YoDouble(joint.getName() + "_torqueUsedForTouchdownDetection" + suffix, registry);
+      torqueThreshold = new YoDouble(joint.getName() + "_touchdownTorqueThreshold" + suffix, registry);
+      torqueForSureThreshold = new YoDouble(joint.getName() + "_touchdownTorqueForSureThreshold" + suffix, registry);
+      touchdownDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownDetected" + suffix, registry);
+      touchdownForSureDetected = new YoBoolean(joint.getName() + "_torqueBasedTouchdownForSureDetected" + suffix, registry);
    }
 
    /**

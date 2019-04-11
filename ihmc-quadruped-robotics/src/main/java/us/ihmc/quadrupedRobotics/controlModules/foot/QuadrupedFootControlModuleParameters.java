@@ -39,6 +39,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider percentPastSwingForDone = new DoubleParameter("percentPastSwingForDone", finalRegistry, 0.0);
    private final DoubleProvider minHeightDifferenceForObstacleClearance = new DoubleParameter("minHeightDifferenceForObstacleClearance", finalRegistry, 0.04);
    private final DoubleProvider minPhaseThroughSwingForContact = new DoubleParameter("minPhaseThroughSwingForContact", finalRegistry, 0.8);
+   private final DoubleProvider fractionOfSwingForBlending = new DoubleParameter("fractionOfSwingForBlending", finalRegistry, 0.8);
 
    private final BooleanProvider isSwingSpeedUpEnabled = new BooleanParameter("isSwingSpeedUpEnabled", finalRegistry, false);
    private final DoubleProvider minSwingTimeForDisturbanceRecovery = new DoubleParameter("minSwingTimeForDisturbanceRecovery", finalRegistry, 0.2);
@@ -105,6 +106,11 @@ public class QuadrupedFootControlModuleParameters
    public double getFractionThroughSwingForAdjustment()
    {
       return fractionThroughSwingForAdjustment.getValue();
+   }
+
+   public double getFractionOfSwingForBlending()
+   {
+      return fractionOfSwingForBlending.getValue();
    }
 
    public double getStepGoalOffsetZParameter()
