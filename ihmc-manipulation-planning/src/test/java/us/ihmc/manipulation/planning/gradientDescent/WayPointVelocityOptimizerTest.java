@@ -10,6 +10,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
+import us.ihmc.robotics.numericalMethods.GradientDescentModule;
+import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class WayPointVelocityOptimizerTest
 {

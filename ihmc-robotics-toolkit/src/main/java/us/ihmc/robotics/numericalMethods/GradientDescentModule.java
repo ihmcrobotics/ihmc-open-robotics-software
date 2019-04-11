@@ -1,6 +1,7 @@
-package us.ihmc.manipulation.planning.gradientDescent;
+package us.ihmc.robotics.numericalMethods;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 
 /**
@@ -9,7 +10,7 @@ import us.ihmc.commons.MathTools;
 public class GradientDescentModule
 {
    private final boolean DEBUG = false;
-   
+
    // internal
    private SingleQueryFunction function;
    private final int dimension;
@@ -19,6 +20,7 @@ public class GradientDescentModule
    private boolean solved;
    private TDoubleArrayList optimalInput;
    private double optimalQuery;
+   private double computationTime;
 
    // params
    private TDoubleArrayList inputUpperLimit;
@@ -27,6 +29,7 @@ public class GradientDescentModule
    private int maximumIterations = 1000;
    private double alpha = -10;
    private double perturb = 0.001;
+   private int reducingStepSizeRatio = 2;
 
    public GradientDescentModule(SingleQueryFunction function, TDoubleArrayList initial)
    {
@@ -40,16 +43,19 @@ public class GradientDescentModule
       {
          this.initialInput.add(initial.get(i));
          this.optimalInput.add(0.0);
-         this.inputUpperLimit.add(Double.MAX_VALUE);
-         this.inputLowerLimit.add(-Double.MIN_VALUE);
+         this.inputUpperLimit.add(Double.POSITIVE_INFINITY);
+         this.inputLowerLimit.add(Double.NEGATIVE_INFINITY);
       }
    }
 
    private void reduceStepSize()
    {
-      alpha = alpha * 0.1;
+      alpha = alpha / reducingStepSizeRatio;
    }
 
+   /**
+    * default value is 1000.
+    */
    public void setMaximumIterations(int value)
    {
       maximumIterations = value;
@@ -69,22 +75,63 @@ public class GradientDescentModule
          inputLowerLimit.add(limit.get(i));
    }
 
+   /**
+    * default value is 10E-10.
+    */
+   public void setConvergenceThreshold(double value)
+   {
+      deltaThreshold = value;
+   }
+
+   /**
+    * default value is 1.
+    */
+   public void setStepSize(double value)
+   {
+      if (value > 0)
+         alpha = -value;
+      else
+         alpha = value;
+   }
+
+   /**
+    * default value is 0.001.
+    */
+   public void setPerturbationSize(double value)
+   {
+      if (value > 0)
+         perturb = value;
+      else
+         perturb = -value;
+   }
+
+   public void setReducingStepSizeRatio(int value)
+   {
+      reducingStepSizeRatio = value;
+   }
+
    public int run()
    {
+      long startTime = System.nanoTime();
       solved = false;
-      optimalQuery = Double.MAX_VALUE;
 
       int iteration = 0;
       TDoubleArrayList pastInput = new TDoubleArrayList();
       for (int i = 0; i < dimension; i++)
          pastInput.add(initialInput.get(i));
+
+      optimalQuery = function.getQuery(pastInput);
+
+      double pastQuery = 0;
+      double newQuery = 0;
+
       for (int i = 0; i < maximumIterations; i++)
       {
+         long curTime = System.nanoTime();
          iteration++;
-         double pastQuery = function.getQuery(pastInput);
+         pastQuery = optimalQuery;
 
          double tempSignForPerturb = 1.0;
-
          TDoubleArrayList gradient = new TDoubleArrayList();
          for (int j = 0; j < dimension; j++)
          {
@@ -115,29 +162,36 @@ public class GradientDescentModule
             optimalInput.add(MathTools.clamp(input, inputLowerLimit.get(j), inputUpperLimit.get(j)));
          }
 
-         optimalQuery = function.getQuery(optimalInput);
+         newQuery = function.getQuery(optimalInput);
 
-         if (optimalQuery > pastQuery)
+         if (newQuery > pastQuery)
          {
             reduceStepSize();
             optimalInput.clear();
             for (int j = 0; j < dimension; j++)
                optimalInput.add(pastInput.get(j));
          }
+         else
+         {
+            optimalQuery = newQuery;
+            double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
 
-         double delta = Math.abs((pastQuery - optimalQuery) / optimalQuery);
+            if (DEBUG)
+            {
+               double iterationComputationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - curTime);
+               System.out.println("iterations is " + i + " " + optimalQuery + " " + alpha + " " + delta + " " + iterationComputationTime);
+            }
 
-         if (DEBUG)
-            System.out.println("GradientDescentModule " + i + " " + optimalQuery + " " + optimalInput.get(0) + " " + gradient.get(0) + " " + delta);
-
-         if (delta < deltaThreshold)
-            break;
+            if (delta < deltaThreshold)
+               break;
+         }
 
          pastInput.clear();
          for (int j = 0; j < dimension; j++)
             pastInput.add(optimalInput.get(j));
       }
 
+      computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       return iteration;
    }
 
@@ -154,5 +208,10 @@ public class GradientDescentModule
    public double getOptimalQuery()
    {
       return optimalQuery;
+   }
+
+   public double getComputationTime()
+   {
+      return computationTime;
    }
 }

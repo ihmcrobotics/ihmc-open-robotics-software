@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -145,7 +146,17 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       drcBehaviorTestHelper.dispatchBehavior(behavior);
 
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      double waitingTimeForPlanning = 3.0;
+      double waitingTick = 0.01;
+      for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
+      {
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            break;
+         }
+      }
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
@@ -215,7 +226,17 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       drcBehaviorTestHelper.dispatchBehavior(behavior);
 
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      double waitingTimeForPlanning = 3.0;
+      double waitingTick = 0.01;
+      for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
+      {
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            break;
+         }
+      }
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
