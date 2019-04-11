@@ -131,7 +131,7 @@ task createAllStartScripts() {
       // just a placeholder
    }
 }
-def scripts = ['behavior-backpack'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorBackpack'
+def scripts = ['behavior-module'       : 'us.ihmc.atlas.behaviors.AtlasBehaviorModule'
 ]
 scripts.each() { scriptName, className ->
    def t = tasks.create(name: scriptName, type: CreateStartScripts) {
