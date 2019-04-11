@@ -15,6 +15,7 @@ import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 
@@ -33,7 +34,7 @@ public class OrientationYawEditor
    private final TypedNotification<Point3D> mouseClickedOrientation = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
 
-   private OrientationEditable selectedGraphic;
+   private PoseEditable selectedGraphic;
    private Consumer<FXUIStateTransitionTrigger> onExit;
 
    public OrientationYawEditor(SubScene sceneNode)
@@ -43,7 +44,7 @@ public class OrientationYawEditor
       orientationAnimationTimer = new PrivateAnimationTimer(this::handleOrientation);
    }
 
-   public void edit(OrientationEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   public void edit(PoseEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
    {
       this.selectedGraphic = selectedGraphic;
       this.onExit = onExit;
@@ -126,7 +127,7 @@ public class OrientationYawEditor
       Line3D line = getPickRay(sceneNode.getCamera(), event);
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);  // TODO link to planar region normal
-      Point3D pointOnPlane = new Point3D();    // using 0.0 as ground for now
+      Point3D pointOnPlane = selectedGraphic.getPosition();
 
       return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
    }

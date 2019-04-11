@@ -3,12 +3,14 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 
-public class PatrolWaypointGraphic extends Group implements PositionEditable, OrientationEditable
+public class PatrolWaypointGraphic extends Group implements PoseEditable
 {
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
@@ -43,5 +45,11 @@ public class PatrolWaypointGraphic extends Group implements PositionEditable, Or
    public OrientationGraphic getOrientationGraphic()
    {
       return orientationGraphic;
+   }
+
+   @Override
+   public Point3D getPosition()
+   {
+      return snappedPositionGraphic.getPosition();
    }
 }
