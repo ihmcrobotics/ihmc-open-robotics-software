@@ -18,9 +18,6 @@ import us.ihmc.humanoidBehaviors.tools.FlatGroundPlanarRegionPublisher;
 
 public class AtlasNetworkProcessor
 {
-   private static final boolean ENABLE_BEHAVIOR_MODULE = false;
-   private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = false;
-   private static final boolean ENABLE_MOCAP_MODULE = false;
 
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -50,15 +47,15 @@ public class AtlasNetworkProcessor
 
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
 
-        networkModuleParams.enableUiModule(true);
-        networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
+        networkModuleParams.enableUiModule(false);
+        networkModuleParams.enableBehaviorModule(false);
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(false);
         networkModuleParams.setDrillDetectionModuleEnabled(false);
         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
         networkModuleParams.enableHeightQuadTreeToolbox(false);
-        networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
-        networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
+        networkModuleParams.enableKinematicsToolboxVisualizer(false);
+        networkModuleParams.enableMocapModule(false);
         networkModuleParams.enableKinematicsToolboxVisualizer(false);
         networkModuleParams.enableFootstepPlanningToolbox(false);
         networkModuleParams.enableKinematicsToolbox(true);
@@ -68,7 +65,6 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
         networkModuleParams.enableAutoREAStateUpdater(true);
         networkModuleParams.enableWalkingPreviewToolbox(true);
-
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 
         URI rosuri = NetworkParameters.getROSURI();
@@ -116,7 +112,6 @@ public class AtlasNetworkProcessor
     	  networkModuleParams.enableLocalControllerCommunicator(false);
 
     	  new DRCNetworkProcessor(model, networkModuleParams);
-    	  new FlatGroundPlanarRegionPublisher();
       }
       else
       {
