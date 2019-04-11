@@ -50,6 +50,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
@@ -71,8 +72,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = true;
-
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
 
@@ -381,8 +380,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
          pathPlanningStagesInProgress.put(planner, plannerGoal);
 
-         if (debug)
-            PrintTools.info("Just started up planning path objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+         LogTools.debug("Just started up planning path objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -412,8 +410,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
          stepPlanningStagesInProgress.put(planner, plannerGoal);
 
-         if (debug)
-            PrintTools.info("Just started up planning step objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+         LogTools.debug("Just started up planning step objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -437,8 +434,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupPathPlanningStage(stageFinished);
 
-      if (debug)
-         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its path.");
+      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its path.");
    }
 
    @Override
@@ -458,8 +454,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupStepPlanningStage(stageFinished);
 
-      if (debug)
-         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
+      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
    }
 
    public void processRequest(FootstepPlanningRequestPacket request)
@@ -557,10 +552,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (visibilityGraphsParameters != null)
          this.visibilityGraphsParameters.set(visibilityGraphsParameters);
 
-      if (debug)
-      {
-         PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
-      }
+      LogTools.debug("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
 
       if (requestedPlannerType != null)
       {
@@ -648,8 +640,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       plannerTime.add(Conversions.millisecondsToSeconds(tickDurationMs));
       if (plannerTime.getDoubleValue() > 1000.0)
       {
-         if (debug)
-            PrintTools.info("Hard timeout at " + plannerTime.getDoubleValue());
+         LogTools.debug("Hard timeout at " + plannerTime.getDoubleValue());
          reportPlannerFailed(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION);
          return;
       }
@@ -1114,7 +1105,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void wakeUp()
    {
-      if (debug)
          PrintTools.debug(this, "Waking up");
 
       initialize.set(true);
@@ -1123,8 +1113,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void sleep()
    {
-      if (debug)
-         PrintTools.debug(this, "Going to sleep");
+      LogTools.debug("Going to sleep");
 
       cancelAllActiveStages();
       cleanupAllPlanningStages();
@@ -1141,7 +1130,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       sleep();
 
-      if (debug)
-         PrintTools.debug(this, "Destroyed");
+      LogTools.debug("Destroyed");
    }
 }
