@@ -57,7 +57,7 @@ public class RemoteRobotControllerInterface
                                         HighLevelStateChangeStatusMessage.class,
                                         robotModel.getSimpleRobotName(),
                                         HighLevelHumanoidControllerFactory.ROS2_ID,
-                                        null, this::acceptStatusChange);
+                                        this::acceptStatusChange);
 
       YoVariableRegistry registry = new YoVariableRegistry("swingOver");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
