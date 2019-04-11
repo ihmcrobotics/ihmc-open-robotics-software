@@ -699,7 +699,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             concatenateFootstepPlans();
             setStepHeightsForFlatGround();
 
-            if(footstepPlan.get().getNumberOfSteps() > new FootstepDataListMessage().getFootstepDataList().capacity())
+            if(footstepPlan.get() == null || footstepPlan.get().getNumberOfSteps() > new FootstepDataListMessage().getFootstepDataList().capacity())
             {
                reportPlannerFailed(FootstepPlanningResult.PLANNER_FAILED);
                stepStatus = FootstepPlanningResult.PLANNER_FAILED;
