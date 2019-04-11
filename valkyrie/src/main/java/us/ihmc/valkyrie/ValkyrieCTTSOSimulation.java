@@ -20,8 +20,10 @@ public class ValkyrieCTTSOSimulation
    private static final String JSC_JERSEY_BARRIERS_NARROW   = "20190220_172417_Jersey_Barriers_JSC_60cm";
    private static final String JSC_JERSEY_BARRIERS_WIDE     = "20190220_172417_Jersey_Barriers_JSC_78cm";
    private static final String JSC_CINDERS                  = "20190220_172417_EOD_Cinders";
+   private static final String JSC_JERSEY_KNEE_17           = "20190402_114002_Jersey_17_KneeCollision";
+   private static final String JSC_JERSEY_KNEE_18           = "20190402_113344_Jersey_18_KneeCollision";
 
-   private static final String DATA_SET_TO_USE = JSC_CINDERS;
+   private static final String DATA_SET_TO_USE = JSC_JERSEY_KNEE_17;
 
    public static void main(String[] args)
    {
