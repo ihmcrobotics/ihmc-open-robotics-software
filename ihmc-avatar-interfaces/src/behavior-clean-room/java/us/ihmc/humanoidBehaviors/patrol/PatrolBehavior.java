@@ -1,25 +1,17 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.PLAN;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.STOP;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.WALK;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.google.common.collect.Lists;
-
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ROS2ModuleIdentifier;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -44,6 +36,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.ros2.Ros2Node;
+
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
 
 /**
  * Walk through a list of waypoints in order, looping forever.
@@ -260,10 +259,8 @@ public class PatrolBehavior
 
    private void pollInterrupts()
    {
-      HighLevelControllerName controllerState = remoteRobotControllerInterface.latestControllerState();
-      if (controllerState != HighLevelControllerName.WALKING) // STOP if robot falls
+      if (remoteRobotControllerInterface.latestControllerState() != HighLevelControllerName.WALKING) // STOP if robot falls
       {
-         LogTools.debug("Stopping from robot state: {}", controllerState.name());
          stopNotification.set();
       }
 
