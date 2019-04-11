@@ -53,10 +53,14 @@ public class RemoteRobotControllerInterface
                          HighLevelHumanoidControllerFactory.ROS2_ID,
                          this::acceptWalkingStatus);
 
+      HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
+      initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
+      initialState.setEndHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       controllerState = new ROS2Input<>(ros2Node,
                                         HighLevelStateChangeStatusMessage.class,
                                         robotModel.getSimpleRobotName(),
                                         HighLevelHumanoidControllerFactory.ROS2_ID,
+                                        initialState,
                                         this::acceptStatusChange);
 
       YoVariableRegistry registry = new YoVariableRegistry("swingOver");
@@ -70,10 +74,8 @@ public class RemoteRobotControllerInterface
    {
       HighLevelControllerName fromState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
       HighLevelControllerName toState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
-      if (fromState == null) fromState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-      if (toState == null) toState = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-      LogTools.debug("Controller state: {} to {}", fromState.name(), toState.name());
-      return true;
+      LogTools.debug("Controller state: {} to {}", fromState == null ? fromState : fromState.name(), toState == null ? toState : toState.name());
+      return toState != null;
    }
 
    private void acceptWalkingStatus(WalkingStatusMessage message)
