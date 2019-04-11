@@ -17,20 +17,35 @@ public class AtlasBehaviorModule
    public static final AtlasRobotVersion ATLAS_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
 
+   private MultiStageFootstepPlanningModule multiStageFootstepPlanningModule;
+   private FlatGroundPlanarRegionPublisher flatGroundPlanarRegionPublisher;
+
    public AtlasBehaviorModule()
    {
-      new Thread(() -> {
-         LogTools.info("Creating footstep toolbox");
-         new MultiStageFootstepPlanningModule(createRobotModel(), null, false, DomainFactory.PubSubImplementation.FAST_RTPS);
-      }).start();
 
-      new Thread(() -> {
-         LogTools.info("Creating flat ground region publisher");
-         new FlatGroundPlanarRegionPublisher();
-      }).start();
+      new Thread(() ->
+                 {
+                    LogTools.info("Creating footstep toolbox");
+                    multiStageFootstepPlanningModule = new MultiStageFootstepPlanningModule(createRobotModel(),
+                                                                                            null,
+                                                                                            false,
+                                                                                            DomainFactory.PubSubImplementation.FAST_RTPS);
+                 }).start();
+
+      new Thread(() ->
+                 {
+                    LogTools.info("Creating flat ground region publisher");
+                    flatGroundPlanarRegionPublisher = new FlatGroundPlanarRegionPublisher();
+                 }).start();
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createForBackpack(createRobotModel());
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+                                                      {
+                                                         multiStageFootstepPlanningModule.destroy();
+                                                         flatGroundPlanarRegionPublisher.shutdown();
+                                                      }));
    }
 
    private AtlasRobotModel createRobotModel()
