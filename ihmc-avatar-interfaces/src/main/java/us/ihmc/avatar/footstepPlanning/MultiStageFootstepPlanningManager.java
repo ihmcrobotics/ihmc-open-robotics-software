@@ -720,7 +720,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                isDonePlanningSteps.set(true);
             }
 
-            sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
+            String message = "Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString();
+            LogTools.debug(message);
+            sendMessageToUI(message);
          }
       }
 
@@ -1105,7 +1107,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void wakeUp()
    {
-         PrintTools.debug(this, "Waking up");
+      LogTools.debug("Waking up");
 
       initialize.set(true);
       waitingForPlanningRequest.set(true);
