@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -19,6 +20,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -64,6 +66,7 @@ public class PatrolBehavior
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
@@ -99,6 +102,7 @@ public class PatrolBehavior
       stateMachine = factory.getFactory().build(STOP);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
@@ -204,6 +208,11 @@ public class PatrolBehavior
       reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
       walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
                                                                     remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
+
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
+      // TODO wait?
    }
 
    private void doWalkStateAction(double timeInState)
