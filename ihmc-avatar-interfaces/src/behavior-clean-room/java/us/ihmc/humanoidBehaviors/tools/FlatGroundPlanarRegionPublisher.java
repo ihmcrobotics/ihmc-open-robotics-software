@@ -93,4 +93,9 @@ public class FlatGroundPlanarRegionPublisher
       planarRegion.setRegionId(FLAT_GROUND_REGION_ID);
       return planarRegion;
    }
+
+   public void shutdown()
+   {
+      scheduler.shutdown();
+   }
 }
