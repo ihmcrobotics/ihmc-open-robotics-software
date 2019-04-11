@@ -40,6 +40,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private TextField remoteCurrentWaypointIndex;
    @FXML private TextField remoteCurrentState;
    @FXML private CheckBox loopThroughWaypoints;
+   @FXML private CheckBox swingOverPlanarRegions;
 
    private JavaFXMessager uiMessager;
    private SubScene sceneNode;
@@ -212,5 +213,10 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void loopThroughWaypoints()
    {
       behaviorMessager.submitMessage(PatrolBehavior.API.Loop, loopThroughWaypoints.isSelected());
+   }
+
+   @FXML public void swingOverPlanarRegions()
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.SwingOvers, swingOverPlanarRegions.isSelected());
    }
 }
