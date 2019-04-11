@@ -55,7 +55,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
             * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
             */
-   public double swing_height_;
+   public double swing_height_ = -1.0;
    /**
             * In case the trajectory type is set to TRAJECTORY_TYPE_DEFAULT or TRAJECTORY_TYPE_OBSTACLE_CLEARANCE, custom waypoint proportions
             * can be requested. These proportions encode the xy positions of the swing trajectory's two waypoints. A proportion of 0.0 and 1.0 will

@@ -31,12 +31,20 @@ public interface SteppingParameters extends FootstepParameters
    public abstract double getMaxSwingHeightFromStanceFoot();
 
    /**
-    * Returns the minimum swing height from the stance foot for this robot. It is also the default swing height
-    * used in the controller unless a different value is specified.
+    * Returns the minimum swing height from the stance foot for this robot
     */
    public default double getMinSwingHeightFromStanceFoot()
    {
       return 0.1;
+   }
+
+   /**
+    * Default swing height used by the controller. If a swing height is not specified or lies outside of the allowable range,
+    * this value is used.
+    */
+   public default double getDefaultSwingHeightFromStanceFoot()
+   {
+      return getMinSwingHeightFromStanceFoot();
    }
 
    public default double getTurningStepWidth()
