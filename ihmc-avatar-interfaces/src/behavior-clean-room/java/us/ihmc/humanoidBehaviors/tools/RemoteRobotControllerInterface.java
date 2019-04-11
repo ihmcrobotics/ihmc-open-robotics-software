@@ -55,7 +55,7 @@ public class RemoteRobotControllerInterface
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
-      initialState.setEndHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
+      initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       controllerState = new ROS2Input<>(ros2Node,
                                         HighLevelStateChangeStatusMessage.class,
                                         robotModel.getSimpleRobotName(),
@@ -93,7 +93,9 @@ public class RemoteRobotControllerInterface
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutput,
                                                               HumanoidReferenceFrames humanoidReferenceFrames)
    {
-      FootstepDataListMessage footsteps = calculateSwingOverTrajectoryExpansions(footstepPlanningToolboxOutput, humanoidReferenceFrames);
+
+      FootstepDataListMessage footsteps = footstepPlanningToolboxOutput.getFootstepDataList();
+//      footsteps = calculateSwingOverTrajectoryExpansions(footsteps, humanoidReferenceFrames, footstepPlanningToolboxOutput.getPlanarRegionsList());
 
       LogTools.debug("Tasking {} footstep(s) to the robot", footsteps.getFootstepDataList().size());
 
@@ -104,8 +106,9 @@ public class RemoteRobotControllerInterface
       return walkingCompletedNotification;
    }
 
-   private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutput,
-                                                                          HumanoidReferenceFrames humanoidReferenceFrames)
+   private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepDataListMessage footsteps,
+                                                                          HumanoidReferenceFrames humanoidReferenceFrames,
+                                                                          PlanarRegionsListMessage messagePlanarRegionsList)
    {
       LogTools.debug("Calculating swing over planar regions...");
 
@@ -115,8 +118,7 @@ public class RemoteRobotControllerInterface
       FramePose3D stanceFootPose = new FramePose3D();
       FramePose3D swingStartPose = new FramePose3D();
       FramePose3D swingEndPose = new FramePose3D();
-      FootstepDataListMessage footsteps = footstepPlanningToolboxOutput.getFootstepDataList();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlanningToolboxOutput.getPlanarRegionsList());
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(messagePlanarRegionsList);
 
       RobotSide firstSwingFoot = RobotSide.fromByte(footsteps.getFootstepDataList().get(0).getRobotSide());
       stanceFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(firstSwingFoot));
