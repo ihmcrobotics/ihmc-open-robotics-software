@@ -27,15 +27,16 @@ public class RemoteSyncedRobotModel
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
 
-      robotConfigurationData = new ROS2Input<>(ros2Node,
-                                               RobotConfigurationData.class,
-                                               robotModel.getSimpleRobotName(),
-                                               HighLevelHumanoidControllerFactory.ROS2_ID,
-                                               message ->
-                                               {
-                                                  FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
-                                                  return true;
-                                               });
+      robotConfigurationData = new ROS2Input<RobotConfigurationData>(ros2Node,
+                                                                       RobotConfigurationData.class,
+                                                                       robotModel.getSimpleRobotName(),
+                                                                       HighLevelHumanoidControllerFactory.ROS2_ID,
+                                                                       message ->
+                                                                       {
+                                                                          FullRobotModelUtils.checkJointNameHash(jointNameHash,
+                                                                                                                 message.getJointNameHash());
+                                                                          return true;
+                                                                       });
    }
 
    public FullHumanoidRobotModel pollFullRobotModel()
