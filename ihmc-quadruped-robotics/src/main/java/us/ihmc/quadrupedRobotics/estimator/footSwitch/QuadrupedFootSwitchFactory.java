@@ -116,7 +116,7 @@ public class QuadrupedFootSwitchFactory
 
 
          TouchdownDetector forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(suffix.get(), weightedAverageWrenchCalculator, robotQuadrant,
-                                                                                                    dontDetectTouchdownIfAtJointLimit, zForceThreshold, zForceForSureThreshold, registry);
+                                                                                           dontDetectTouchdownIfAtJointLimit, zForceThreshold, zForceForSureThreshold, registry);
          footSwitch.addTouchdownDetector(forceBasedTouchDownDetection);
 
 

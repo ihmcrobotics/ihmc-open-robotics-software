@@ -253,8 +253,6 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
-      footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
-      footSwitchFactory.setKneeForSureTouchdownThresholds(kneeTorqueTouchdownForSureDetectionThreshold.get());
       footSwitchFactory.setVariableSuffix("Controller");
 
       controllerFootSwitches = footSwitchFactory.createFootSwitches();
@@ -270,8 +268,6 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(factoryRegistry);
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
-      footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
-      footSwitchFactory.setKneeForSureTouchdownThresholds(kneeTorqueTouchdownForSureDetectionThreshold.get());
       footSwitchFactory.setVariableSuffix("StateEstimator");
 
       stateEstimatorFootSwitches = footSwitchFactory.createFootSwitches();
