@@ -183,7 +183,7 @@ task deploy(dependsOn: installDist) {
                put(from: from + it, into: directory + "/lib")
             }
 
-            execute("chmod +x " + directory + "/bin/behavior-backpack")
+            execute("chmod +x " + directory + "/bin/behavior-module")
 
             execute("echo " + project.version + " > " + directory + "/version.txt")
          }
