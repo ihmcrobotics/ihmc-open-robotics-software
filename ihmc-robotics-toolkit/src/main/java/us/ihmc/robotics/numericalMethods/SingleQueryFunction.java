@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.gradientDescent;
+package us.ihmc.robotics.numericalMethods;
 
 import gnu.trove.list.array.TDoubleArrayList;
 
