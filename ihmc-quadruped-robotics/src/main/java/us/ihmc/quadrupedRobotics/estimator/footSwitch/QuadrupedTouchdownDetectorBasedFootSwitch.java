@@ -13,6 +13,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -31,6 +32,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final WrenchCalculator wrenchCalculator;
 
    private final YoFrameVector3D measuredForce;
+   private final YoDouble footLoadPercentage;
 
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(String variableSuffix, RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
@@ -46,6 +48,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected" + variableSuffix, registry, defaultGlitchWindow);
       trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing" + variableSuffix, registry);
       trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport" + variableSuffix, registry);
+      footLoadPercentage = new YoDouble(robotQuadrant.getCamelCaseName() + "FootLoadPercentage" + variableSuffix, registry);
 
       measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", variableSuffix,
                                           ReferenceFrame.getWorldFrame(), registry);
@@ -60,15 +63,13 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void updateMeasurement()
    {
       touchdownDetected.setWindowSize(glitchWindowSize.getValue());
+
       wrenchCalculator.calculate();
       measuredForce.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
-   }
 
-   @Override
-   public boolean hasFootHitGround()
-   {
       for (int i = 0; i < touchdownDetectors.size(); i++)
          touchdownDetectors.get(i).update();
+
 
       boolean hasTouchedDown = true;
       for (int i = 0; i < touchdownDetectors.size(); i++)
@@ -86,6 +87,12 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
       touchdownDetected.update(hasTouchedDown);
 
+      footLoadPercentage.set(Math.max(measuredForce.getZ(), 0.0) / totalRobotWeight);
+   }
+
+   @Override
+   public boolean hasFootHitGround()
+   {
       boolean thinksInSupport = controllerThinksHasTouchedDown.getBooleanValue();
       if (thinksInSupport && trustTouchdownDetectorsInSupport.getBooleanValue())
          return touchdownDetected.getBooleanValue();
@@ -98,8 +105,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public double computeFootLoadPercentage()
    {
-      measuredForce.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      return Math.abs(measuredForce.getZ()) / totalRobotWeight;
+      return footLoadPercentage.getDoubleValue();
    }
 
    @Override
