@@ -144,7 +144,8 @@ public class QuadrupedSimulationFactory
    private RobotMotionStatusHolder robotMotionStatusFromController;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
-   private QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private QuadrantDependentList<FootSwitchInterface> controllerFootSwitches;
+   private QuadrantDependentList<FootSwitchInterface> stateEstimatorFootSwitches;
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeRos2Node realtimeRos2Node;
@@ -211,7 +212,7 @@ public class QuadrupedSimulationFactory
       }
       else
       {
-         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), footSwitches);
+         sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get(), stateEstimatorFootSwitches);
       }
 
       if (this.sensorReaderWrapper != null)
@@ -254,8 +255,26 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
       footSwitchFactory.setKneeForSureTouchdownThresholds(kneeTorqueTouchdownForSureDetectionThreshold.get());
+      footSwitchFactory.setVariableSuffix("Controller");
 
-      footSwitches = footSwitchFactory.createFootSwitches();
+      controllerFootSwitches = footSwitchFactory.createFootSwitches();
+   }
+
+   private void createStateEstimatorFootSwitches()
+   {
+      QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
+      footSwitchFactory.setFootContactableBodies(contactableFeet);
+      footSwitchFactory.setFullRobotModel(fullRobotModel.get());
+      footSwitchFactory.setJointDesiredOutputList(jointDesiredOutputList.get());
+      footSwitchFactory.setGravity(gravity.get());
+      footSwitchFactory.setSimulatedRobot(sdfRobot.get());
+      footSwitchFactory.setYoVariableRegistry(factoryRegistry);
+      footSwitchFactory.setFootSwitchType(footSwitchType.get());
+      footSwitchFactory.setKneeTouchdownThresholds(kneeTorqueTouchdownDetectionThreshold.get());
+      footSwitchFactory.setKneeForSureTouchdownThresholds(kneeTorqueTouchdownForSureDetectionThreshold.get());
+      footSwitchFactory.setVariableSuffix("StateEstimator");
+
+      stateEstimatorFootSwitches = footSwitchFactory.createFootSwitches();
    }
 
    private void createStateEstimator()
@@ -267,7 +286,7 @@ public class QuadrupedSimulationFactory
          QuadrupedStateEstimatorFactory stateEstimatorFactory = new QuadrupedStateEstimatorFactory();
          stateEstimatorFactory.setEstimatorDT(controlDT.get());
          stateEstimatorFactory.setFootContactableBodies(contactableFeet);
-         stateEstimatorFactory.setFootSwitches(footSwitches);
+         stateEstimatorFactory.setFootSwitches(stateEstimatorFootSwitches);
          stateEstimatorFactory.setFullRobotModel(fullRobotModel.get());
          stateEstimatorFactory.setGravity(gravity.get());
          stateEstimatorFactory.setSensorInformation(sensorInformation.get());
@@ -316,7 +335,8 @@ public class QuadrupedSimulationFactory
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
                                                                                        yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
-                                                                                       contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
+                                                                                       contactablePlaneBodies, centerOfMassDataHolder, controllerFootSwitches,
+                                                                                       stateEstimatorFootSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
                                                                                        fallDetectionParameters.get(), robotMotionStatusFromController);
@@ -500,6 +520,7 @@ public class QuadrupedSimulationFactory
       createContactableFeet();
       createContactablePlaneBodies();
       createFootSwitches();
+      createStateEstimatorFootSwitches();
       createSensorReader();
       createRealtimeRos2Node();
       createControllerManager();

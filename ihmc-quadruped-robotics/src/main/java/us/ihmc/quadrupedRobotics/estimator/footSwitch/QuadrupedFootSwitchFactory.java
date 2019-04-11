@@ -19,7 +19,9 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -38,27 +40,40 @@ public class QuadrupedFootSwitchFactory
 {
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
-   private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>(
-         "footContactableBodies");
+   private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>( "footContactableBodies");
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<JointDesiredOutputListReadOnly> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
-   private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
-   private final RequiredFactoryField<QuadrantDependentList<Double>> kneeTorqueForSureTouchdownThreshold = new RequiredFactoryField<>("kneeTorqueTouchdownThreshold");
 
+   private final OptionalFactoryField<String> suffix = new OptionalFactoryField<>("suffix");
+
+   private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueTouchdownThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownThreshold");
+   private final OptionalFactoryField<QuadrantDependentList<Double>> kneeTorqueForSureTouchdownThreshold = new OptionalFactoryField<>("kneeTorqueTouchdownThreshold");
    private final OptionalFactoryField<Boolean> useKneeTorqueTouchdown = new OptionalFactoryField<>("useKneeTorqueTouchdown");
+   private final OptionalFactoryField<Boolean> useFootVelocityTouchdown = new OptionalFactoryField<>("useFootVelocityTouchdown");
 
    // Used to create the ground contact point based foot switches.
    private final OptionalFactoryField<FloatingRootJointRobot> simulatedRobot = new OptionalFactoryField<>("simulatedRobot");
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
+   protected YoVariableRegistry registry;
 
    private void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
-      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight", registry, 1.0);
-      DoubleParameter desiredWrenchWeight = new DoubleParameter("desiredWrenchAverageWeight", registry, 0.0);
+      DoubleParameter estimatedWrenchWeight = new DoubleParameter("estimatedWrenchAverageWeight" + suffix.get(), registry, 1.0);
+      DoubleParameter desiredWrenchWeight = new DoubleParameter("desiredWrenchAverageWeight" + suffix.get(), registry, 0.0);
+
+      DoubleParameter zForceThreshold = new DoubleParameter("ForceTchdwnDetectzForceThreshold" + suffix.get(), registry, 40.0);
+      DoubleParameter zForceForSureThreshold = new DoubleParameter("ForceTchdwnDetectzForceForSureThreshold" + suffix.get(), registry, 450.0);
+
+      DoubleProvider speedThreshold = null;
+      DoubleProvider zVelocityThreshold = null;
+      if (useFootVelocityTouchdown.get())
+      {
+         speedThreshold = new DoubleParameter("VelTchdwnDetectFootSpeedThreshold" + suffix.get(), registry, 0.8);
+         zVelocityThreshold = new DoubleParameter("VelTchdwnDetectFootZVelocityThreshold" + suffix.get(), registry, 0.2);
+      }
+      IntegerProvider touchdownGlitchWindowSize = new IntegerParameter("touchdownGlitchWindowSize" + suffix.get(), registry, 10);
 
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -93,28 +108,34 @@ public class QuadrupedFootSwitchFactory
          wrenchCalculatorPairList.add(estimatedWrenchWeight, estimatedTorqueBasedWrenchCalculator);
          wrenchCalculatorPairList.add(desiredWrenchWeight, desiredTorqueBasedWrenchCalculator);
 
-         WrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(robotQuadrant.getShortName(), registry, wrenchCalculatorPairList);
+         WrenchCalculator weightedAverageWrenchCalculator = new WeightedAverageWrenchCalculator(robotQuadrant.getShortName(), suffix.get(), registry, wrenchCalculatorPairList);
 
-         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, contactableFoot,
-                                                                                                              weightedAverageWrenchCalculator, totalRobotWeight,
+         QuadrupedTouchdownDetectorBasedFootSwitch footSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(suffix.get(), robotQuadrant, contactableFoot,
+                                                                                                              weightedAverageWrenchCalculator, touchdownGlitchWindowSize, totalRobotWeight,
                                                                                                               registry);
+
+
+         TouchdownDetector forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(suffix.get(), weightedAverageWrenchCalculator, robotQuadrant,
+                                                                                                    dontDetectTouchdownIfAtJointLimit, zForceThreshold, zForceForSureThreshold, registry);
+         footSwitch.addTouchdownDetector(forceBasedTouchDownDetection);
+
+
          if (useKneeTorqueTouchdown.get())
          {
-            JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
-            jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH),
+            JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(suffix.get(), fullRobotModel.get().getLegJoint(robotQuadrant, LegJointName.KNEE_PITCH),
                                                                                       dontDetectTouchdownIfAtJointLimit, registry);
             jointTorqueBasedTouchdownDetector.setTorqueThreshold(kneeTorqueTouchdownThreshold.get().get(robotQuadrant));
             jointTorqueBasedTouchdownDetector.setTorqueForSureThreshold(kneeTorqueForSureTouchdownThreshold.get().get(robotQuadrant));
+
             footSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          }
 
-
-         TouchdownDetector estimatedForceBasedTouchDownDetection = new ForceBasedTouchDownDetection(weightedAverageWrenchCalculator, robotQuadrant,
-                                                                                                    dontDetectTouchdownIfAtJointLimit, registry);
-         TouchdownDetector footVelocityBasedTouchDownDetection = new FootVelocityBasedTouchDownDetection(fullRobotModel.get().getSoleFrame(robotQuadrant),
-                                                                                                         robotQuadrant, registry);
-         footSwitch.addTouchdownDetector(estimatedForceBasedTouchDownDetection);
-         footSwitch.addTouchdownDetector(footVelocityBasedTouchDownDetection);
+         if (useFootVelocityTouchdown.get())
+         {
+            TouchdownDetector footVelocityBasedTouchDownDetection = new FootVelocityBasedTouchDownDetection(suffix.get(), fullRobotModel.get().getSoleFrame(robotQuadrant),
+                                                                                                            robotQuadrant, speedThreshold, zVelocityThreshold, registry);
+            footSwitch.addTouchdownDetector(footVelocityBasedTouchDownDetection);
+         }
 
          footSwitches.set(robotQuadrant, footSwitch);
       }
@@ -157,9 +178,13 @@ public class QuadrupedFootSwitchFactory
 
    public QuadrantDependentList<FootSwitchInterface> createFootSwitches()
    {
-      useKneeTorqueTouchdown.setDefaultValue(true);
+      useKneeTorqueTouchdown.setDefaultValue(false);
+      useFootVelocityTouchdown.setDefaultValue(false);
+      suffix.setDefaultValue("");
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
+
+      registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry" + suffix.get());
 
       yoVariableRegistry.get().addChild(registry);
 
@@ -200,6 +225,12 @@ public class QuadrupedFootSwitchFactory
       this.footContactableBodies.set(footContactableBodies);
    }
 
+   public void setUseFootVelocityTouchdown(boolean useFootVelocityTouchdown)
+   {
+      this.useFootVelocityTouchdown.set(useFootVelocityTouchdown);
+   }
+
+
    public void setUseKneeTorqueTouchdown(boolean useKneeTorqueTouchdown)
    {
       this.useKneeTorqueTouchdown.set(useKneeTorqueTouchdown);
@@ -233,6 +264,11 @@ public class QuadrupedFootSwitchFactory
    public void setSimulatedRobot(FloatingRootJointRobot simulatedRobot)
    {
       this.simulatedRobot.set(simulatedRobot);
+   }
+
+   public void setVariableSuffix(String suffix)
+   {
+      this.suffix.set(suffix);
    }
 
    private class JointDesiredOutputTorqueProvider implements JointTorqueProvider

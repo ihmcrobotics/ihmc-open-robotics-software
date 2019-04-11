@@ -26,20 +26,22 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
 
    private final boolean dontDetectTouchdownIfAtJointLimit;
 
-   public ForceBasedTouchDownDetection(WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant,
-                                       boolean dontDetectTouchdownIfAtJointLimit, YoVariableRegistry parentRegistry)
+   public ForceBasedTouchDownDetection(String suffix, WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant,
+                                       boolean dontDetectTouchdownIfAtJointLimit, DoubleProvider zForceThreshold, DoubleProvider zForceForSureThreshold,
+                                       YoVariableRegistry parentRegistry)
    {
       this.wrenchCalculator = wrenchCalculator;
       this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
+      this.zForceThreshold = zForceThreshold;
+      this.zForceForSureThreshold = zForceForSureThreshold;
       String prefix = robotQuadrant.getShortName() + name;
       registry = new YoVariableRegistry(prefix);
 
-      isInContact = new YoBoolean(prefix + "IsInContact", registry);
-      isDefinitelyInContact = new YoBoolean(prefix + "IsDefinitelyInContact", registry);
-      zForceThreshold = new DoubleParameter(prefix + "zForceThreshold", registry, 40.0);
-      zForceForSureThreshold = new DoubleParameter(prefix + "zForceForSureThreshold", registry, 450.0);
-      measuredZForce = new YoDouble(prefix + "MeasuredZForce", registry);
-      isTorquingIntoJointLimit = new YoBoolean(prefix + "IsTorquingIntoJointLimit", registry);
+      isInContact = new YoBoolean(prefix + "IsInContact" + suffix, registry);
+      isDefinitelyInContact = new YoBoolean(prefix + "IsDefinitelyInContact" + suffix, registry);
+
+      measuredZForce = new YoDouble(prefix + "MeasuredZForce" + suffix, registry);
+      isTorquingIntoJointLimit = new YoBoolean(prefix + "IsTorquingIntoJointLimit" + suffix, registry);
 
       parentRegistry.addChild(registry);
    }

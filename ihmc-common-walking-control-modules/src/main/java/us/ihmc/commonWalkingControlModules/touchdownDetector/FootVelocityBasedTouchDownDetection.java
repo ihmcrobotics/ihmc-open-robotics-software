@@ -24,17 +24,18 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    private final YoDouble measuredSpeed;
    private final YoFrameVector3D footVelocity;
 
-   public FootVelocityBasedTouchDownDetection(MovingReferenceFrame soleFrame, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry)
+   public FootVelocityBasedTouchDownDetection(String suffix, MovingReferenceFrame soleFrame, RobotQuadrant robotQuadrant, DoubleProvider speedThreshold,
+                                              DoubleProvider zVelocityThreshold, YoVariableRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
+      this.speedThreshold = speedThreshold;
+      this.zVelocityThreshold = zVelocityThreshold;
       String prefix = robotQuadrant.getShortName() + name;
       registry = new YoVariableRegistry(prefix);
 
-      isInContact = new YoBoolean(prefix + "IsInContact", registry);
-      speedThreshold = new DoubleParameter(prefix + "FootSpeedThreshold", registry, 0.8);
-      zVelocityThreshold = new DoubleParameter(prefix + "FootZVelocityThreshold", registry, 0.2);
-      footVelocity = new YoFrameVector3D(prefix + "FootVelocity", ReferenceFrame.getWorldFrame(), registry);
-      measuredSpeed = new YoDouble(prefix + "MeasuredSpeed", registry);
+      isInContact = new YoBoolean(prefix + "IsInContact" + suffix, registry);
+      footVelocity = new YoFrameVector3D(prefix + "FootVelocity" + suffix, ReferenceFrame.getWorldFrame(), registry);
+      measuredSpeed = new YoDouble(prefix + "MeasuredSpeed" + suffix, registry);
 
       parentRegistry.addChild(registry);
    }
