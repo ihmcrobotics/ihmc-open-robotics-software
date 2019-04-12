@@ -1,6 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools;
 
-import controller_msgs.msg.dds.*;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -18,11 +25,6 @@ import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
-
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static us.ihmc.communication.ROS2Tools.*;
 
 /**
  * Taken mostly from us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter
@@ -80,12 +82,23 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
       SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
-      settableFootstepPlannerParameters.setWiggleInsideDelta(0.015);
-      settableFootstepPlannerParameters.setMinimumDistanceFromCliffBottoms(0.02);
+      settableFootstepPlannerParameters.setMinimumDistanceFromCliffBottoms(0.1);
+      settableFootstepPlannerParameters.setCliffHeightToAvoid(0.05);
+      settableFootstepPlannerParameters.setMaximumStepReach(0.3);
+      settableFootstepPlannerParameters.setMaximumStepWidth(0.4);
+      settableFootstepPlannerParameters.setMaximumStepYaw(0.4);
+      settableFootstepPlannerParameters.setMaximumStepZ(0.25);
+      settableFootstepPlannerParameters.setMaximumXYWiggleDistance(0.05);
+      settableFootstepPlannerParameters.setMaximumYawWiggle(0.13);
+      settableFootstepPlannerParameters.setMinimumFootholdPercent(0.9);
+      settableFootstepPlannerParameters.setMinimumStepLength(-0.4);
+      settableFootstepPlannerParameters.setMinimumStepWidth(0.15);
+      settableFootstepPlannerParameters.setMinimumStepYaw(0.0);
+      settableFootstepPlannerParameters.setMinimumSurfaceInclineRadians(0.78);
+      settableFootstepPlannerParameters.setMinXClearanceFromStance(0.0);
+      settableFootstepPlannerParameters.setMinYClearanceFromStance(0.0);
+      settableFootstepPlannerParameters.setWiggleInsideDelta(0.04);
       settableFootstepPlannerParameters.setRejectIfCannotFullyWiggleInside(true);
-      settableFootstepPlannerParameters.setMaximumXYWiggleDistance(0.07);
-      settableFootstepPlannerParameters.setMaximumStepZ(0.3);
-      settableFootstepPlannerParameters.setMaximumStepWidth(0.55);
       settableFootstepPlannerParameters.setIdealFootstepLength(0.20);
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
