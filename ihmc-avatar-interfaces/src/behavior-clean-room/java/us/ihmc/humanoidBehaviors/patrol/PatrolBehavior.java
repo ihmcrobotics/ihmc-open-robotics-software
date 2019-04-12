@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -17,6 +16,7 @@ import com.google.common.collect.Lists;
 
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
@@ -212,9 +212,9 @@ public class PatrolBehavior
                                                                     remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
                                                                     swingOvers.get());
 
-      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-      clearMessage.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearMessage);
+//      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+//      clearMessage.setRequestClear(true);
+//      reaStateRequestPublisher.publish(clearMessage);
       // TODO wait?
    }
 
