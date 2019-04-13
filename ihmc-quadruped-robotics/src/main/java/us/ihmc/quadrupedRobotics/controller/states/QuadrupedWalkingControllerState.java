@@ -241,7 +241,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       tempPoint.setToZero(controllerToolbox.getSoleReferenceFrame(quadrant));
       groundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
 
-      step.getGoalPosition(tempPoint);
+      tempPoint.setIncludingFrame(step.getReferenceFrame(), step.getGoalPosition());
       tempPoint.changeFrame(worldFrame);
       upcomingGroundPlanePositions.get(quadrant).setMatchingFrame(tempPoint);
 
@@ -259,7 +259,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getDesiredStepInterval().setEndTime(step.getTimeInterval().getEndTime());
       footstepStatusMessage.getActualStepInterval().setStartTime(currentTime);
       footstepStatusMessage.getActualStepInterval().setEndTime(Double.NaN);
-      step.getGoalPosition(footstepStatusMessage.getDesiredTouchdownPositionInWorld());
+      footstepStatusMessage.getDesiredTouchdownPositionInWorld().set(step.getGoalPosition());
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
       controllerToolbox.getFallDetector().setNextFootstep(quadrant, step);
@@ -520,7 +520,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         boolean legLoaded = feetManager.getContactState(robotQuadrant).isLoadingBearing();
+         boolean legLoaded = feetManager.getContactState(robotQuadrant).isLoadBearing();
          if (legLoaded && legJointNames.get(robotQuadrant).contains(jointName))
             return true;
       }

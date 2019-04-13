@@ -346,7 +346,7 @@ public abstract class FootstepPlannerDataSetTest
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
-            finalSteps.put(step.getRobotQuadrant(), step.getGoalPosition());
+            finalSteps.put(step.getRobotQuadrant(), new Point3D(step.getGoalPosition()));
       }
 
       return finalSteps;

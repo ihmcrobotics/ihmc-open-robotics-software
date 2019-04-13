@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -24,7 +25,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class CapturePointToolsTest
@@ -32,7 +35,7 @@ public class CapturePointToolsTest
    int nTests = 20;
    Random random = new Random();
    YoVariableRegistry registry = new YoVariableRegistry("");
-   
+
    private static final double EPSILON = 10e-6;
 
    @AfterEach
@@ -371,7 +374,7 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0), icpToCheck);
 
-         
+
          EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0), icpToCheck, 1e-8);
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
@@ -512,6 +515,95 @@ public class CapturePointToolsTest
          computedCapturePointVelocity.scale(omega0);
 
          EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, desiredCapturePointAcceleration, 1e-10);
+      }
+   }
+
+   @Test
+   public void testComputeDesiredCentroidalMomentumPivot()
+   {
+      YoFramePoint3D capturePointPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D capturePointVelocity = new YoFrameVector3D("2", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D centroidalMomentumPivot = new YoFramePoint3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D computedCentroidalMomentumPivot = new YoFramePoint3D("7", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D capturePointPosition2D = new YoFramePoint2D("4", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector2D capturePointVelocity2D = new YoFrameVector2D("5", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D centroidalMomentumPivot2D = new YoFramePoint2D("6", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint2D computedCentroidalMomentumPivot2D = new YoFramePoint2D("8", ReferenceFrame.getWorldFrame(), registry);
+
+
+      for (int i = 0; i < nTests; i++)
+      {
+         capturePointPosition.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         capturePointVelocity.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         capturePointPosition2D.set(EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         capturePointVelocity2D.set(EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame(), 10.0));
+
+         double omega0 = 0.5;
+
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(capturePointPosition, capturePointVelocity, omega0, centroidalMomentumPivot);
+         CapturePointTools.computeDesiredCentroidalMomentumPivot(capturePointPosition2D, capturePointVelocity2D, omega0, centroidalMomentumPivot2D);
+
+         computedCentroidalMomentumPivot.set(capturePointVelocity);
+         computedCentroidalMomentumPivot2D.set(capturePointVelocity2D);
+         computedCentroidalMomentumPivot.scale(-1.0 / omega0);
+         computedCentroidalMomentumPivot2D.scale(-1.0 / omega0);
+         computedCentroidalMomentumPivot.add(capturePointPosition);
+         computedCentroidalMomentumPivot2D.add(capturePointPosition2D);
+
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCentroidalMomentumPivot, centroidalMomentumPivot, 1e-10);
+         EuclidCoreTestTools.assertTuple2DEquals("", computedCentroidalMomentumPivot2D, centroidalMomentumPivot2D, 1e-10);
+      }
+   }
+
+   @Test
+   public void testComputeDesiredCapturePoint()
+   {
+      YoFramePoint3D centerOfMassPosition = new YoFramePoint3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("2", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D capturePointPosition = new YoFramePoint3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoint3D computedCapturePointPosition = new YoFramePoint3D("7", ReferenceFrame.getWorldFrame(), registry);
+
+
+      for (int i = 0; i < nTests; i++)
+      {
+         centerOfMassPosition.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         centerOfMassVelocity.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+
+         double omega0 = 0.5;
+
+         CapturePointTools.computeDesiredCapturePointPosition(centerOfMassPosition, centerOfMassVelocity, omega0, capturePointPosition);
+
+         computedCapturePointPosition.set(centerOfMassVelocity);
+         computedCapturePointPosition.scale(1.0 / omega0);
+         computedCapturePointPosition.add(centerOfMassPosition);
+
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointPosition, capturePointPosition, 1e-10);
+      }
+   }
+
+   @Test
+   public void testComputeDesiredCapturePointVelocity2()
+   {
+      YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D centerOfMassAcceleration = new YoFrameVector3D("2", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D capturePointVelocity = new YoFrameVector3D("3", ReferenceFrame.getWorldFrame(), registry);
+      YoFrameVector3D computedCapturePointVelocity= new YoFrameVector3D("7", ReferenceFrame.getWorldFrame(), registry);
+
+
+      for (int i = 0; i < nTests; i++)
+      {
+         centerOfMassAcceleration.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+         centerOfMassAcceleration.set(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 10.0));
+
+         double omega0 = 0.5;
+
+         CapturePointTools.computeDesiredCapturePointVelocity(centerOfMassVelocity, centerOfMassAcceleration, omega0, capturePointVelocity);
+
+         computedCapturePointVelocity.set(centerOfMassAcceleration);
+         computedCapturePointVelocity.scale(1.0 / omega0);
+         computedCapturePointVelocity.add(centerOfMassVelocity);
+
+         EuclidCoreTestTools.assertTuple3DEquals("", computedCapturePointVelocity, capturePointVelocity, 1e-10);
       }
    }
 
