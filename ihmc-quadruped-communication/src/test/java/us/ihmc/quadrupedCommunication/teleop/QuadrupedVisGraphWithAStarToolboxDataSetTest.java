@@ -42,7 +42,6 @@ public class QuadrupedVisGraphWithAStarToolboxDataSetTest extends FootstepPlanne
    public static void main(String[] args) throws Exception
    {
       QuadrupedVisGraphWithAStarToolboxDataSetTest test = new QuadrupedVisGraphWithAStarToolboxDataSetTest();
-      String prefix = "unitTestDataSets/test/";
       VISUALIZE = true;
       test.setup();
       test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
