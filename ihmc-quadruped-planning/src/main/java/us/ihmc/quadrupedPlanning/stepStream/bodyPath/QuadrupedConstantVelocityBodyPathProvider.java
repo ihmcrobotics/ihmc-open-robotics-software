@@ -166,7 +166,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
    private void setStartConditionsFromFootstepStatus()
    {
-      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
+//      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestStartStatusMessage();
+      QuadrupedFootstepStatusMessage latestStatusMessage = getLatestCompleteStatusMessage();
       if (latestStatusMessage == null)
          return;
 
