@@ -7,9 +7,11 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.AmbientLight;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
@@ -53,6 +55,16 @@ public class JoystickBasedSteppingMainUI
                                       SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {
+      this(robotName, primaryStage, ros2Node, null, fullRobotModelFactory, walkingControllerParameters, kickMessenger, punchMessenger, lowLevelMessenger,
+           footPolygons);
+   }
+
+   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, Ros2Node ros2Node, String workingDirectoryPath,
+                                      FullHumanoidRobotModelFactory fullRobotModelFactory, WalkingControllerParameters walkingControllerParameters,
+                                      HumanoidRobotKickMessenger kickMessenger, HumanoidRobotPunchMessenger punchMessenger,
+                                      RobotLowLevelMessenger lowLevelMessenger, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
+         throws Exception
+   {
       this.primaryStage = primaryStage;
       xBoxOneJavaFXController = new XBoxOneJavaFXController(messager);
 
@@ -63,18 +75,23 @@ public class JoystickBasedSteppingMainUI
       mainPane = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
+      setupSceneLighting(view3dFactory);
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
 
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           PlanarRegionsListMessage.class,
+                                           REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
 
@@ -94,12 +111,19 @@ public class JoystickBasedSteppingMainUI
          }
       };
 
-      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName, messager, walkingControllerParameters, ros2Node, robotVisualizer,
-                                                                        kickMessenger, punchMessenger, lowLevelMessenger, footPolygons);
+      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(robotName,
+                                                                        messager,
+                                                                        walkingControllerParameters,
+                                                                        ros2Node,
+                                                                        robotVisualizer,
+                                                                        kickMessenger,
+                                                                        punchMessenger,
+                                                                        lowLevelMessenger,
+                                                                        footPolygons);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
       messager.startMessager();
-      stepGeneratorParametersPaneController.initialize(messager, walkingControllerParameters);
+      stepGeneratorParametersPaneController.initialize(messager, walkingControllerParameters, workingDirectoryPath);
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setScene(new Scene(mainPane, 800, 600));
@@ -108,9 +132,25 @@ public class JoystickBasedSteppingMainUI
       start();
    }
 
+   private void setupSceneLighting(View3DFactory view3dFactory)
+   {
+      // TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ i
+      double ambientValue = 0.7;
+      double pointValue = 0.2;
+      double pointDistance = 1000.0;
+      Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
+      view3dFactory.addNodeToView(new AmbientLight(ambientColor));
+      Color indoorColor = Color.color(pointValue, pointValue, pointValue);
+      view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
+      view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
+      view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
+      view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
+   }
+
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
    {
       stepGeneratorJavaFXController.setActiveSecondaryControlOption(activeSecondaryControlOption);
+      stepGeneratorParametersPaneController.updateImageLayout(activeSecondaryControlOption);
    }
 
    public void start() throws IOException
@@ -135,6 +175,7 @@ public class JoystickBasedSteppingMainUI
       xBoxOneJavaFXController.stop();
       robotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
+      stepGeneratorParametersPaneController.close();
       cameraTracking.stop();
       planarRegionsViewer.stop();
       ThreadTools.sleep(100); // Give some time to send the message.:
