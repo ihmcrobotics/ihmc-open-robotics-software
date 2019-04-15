@@ -23,6 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -79,7 +80,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final boolean hasFootForceSensors;
 
    public ForceSensorStateUpdater(SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-         StateEstimatorParameters stateEstimatorParameters, double gravity, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentreRegistry)
+                                  StateEstimatorParameters stateEstimatorParameters, double gravity, RobotMotionStatusHolder robotMotionStatusHolder,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
       inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
@@ -205,8 +207,13 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
-            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", bodies, forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance,
-                  torqueAppearance);
+            wrenchVisualizer = new WrenchVisualizer("ForceSensorData",
+                                                    bodies,
+                                                    forceVizScaling,
+                                                    yoGraphicsListRegistry,
+                                                    registry,
+                                                    forceAppearance,
+                                                    torqueAppearance);
          }
       }
       else
