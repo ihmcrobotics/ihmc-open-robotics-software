@@ -23,11 +23,13 @@
 				<Label prefHeight="17.0" prefWidth="135.0" text="Enable support regions" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 				<Label text="Support regions scale" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-      				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-				<Label style="-fx-font-weight: bold" text="Flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-            <Label prefHeight="30.0" prefWidth="136.0" text="Enable flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-            <CheckBox fx:id="enableFlatGroundRegion" onAction="#sendFlatGroundRegionParameters" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+				<Label style="-fx-font-weight: bold" text="REA" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+				<!--				<Label style="-fx-font-weight: bold" text="Flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="4" />-->
+<!--            <Label prefHeight="30.0" prefWidth="136.0" text="Enable flat ground region" GridPane.columnIndex="2" GridPane.rowIndex="5" />-->
+<!--            <CheckBox fx:id="enableFlatGroundRegion" onAction="#sendFlatGroundRegionParameters" GridPane.columnIndex="3" GridPane.rowIndex="5" />-->
 			</children>
          <columnConstraints>
             <ColumnConstraints />
