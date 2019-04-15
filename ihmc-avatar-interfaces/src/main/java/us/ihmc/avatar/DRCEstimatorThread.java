@@ -173,7 +173,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (forceSensorDataHolderForEstimator != null)
          {
-            forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly,
+            forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(),
+                                                                  sensorOutputMapReadOnly,
                                                                   forceSensorDataHolderForEstimator,
                                                                   stateEstimatorParameters,
                                                                   gravity,
