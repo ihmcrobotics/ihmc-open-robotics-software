@@ -111,7 +111,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    @Test
    public void testWalkingDownSlope() throws IOException
    {
-      walkSlope(0.2, getWalkingDownSlopePosition());
+      walkSlope(0.1, getWalkingDownSlopePosition());
    }
 
    @Test
