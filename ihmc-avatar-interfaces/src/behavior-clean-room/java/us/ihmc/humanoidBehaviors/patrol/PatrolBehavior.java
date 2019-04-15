@@ -212,9 +212,9 @@ public class PatrolBehavior
                                                                     remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
                                                                     swingOvers.get());
 
-//      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-//      clearMessage.setRequestClear(true);
-//      reaStateRequestPublisher.publish(clearMessage);
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
       // TODO wait?
    }
 

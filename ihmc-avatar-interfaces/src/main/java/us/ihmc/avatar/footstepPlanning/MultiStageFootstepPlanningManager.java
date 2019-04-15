@@ -293,7 +293,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       stepPlanningStagesInProgress.remove(planningStage);
       planningStage.destroyStageRunnable();
-      stepPlanningTasks.remove(planningStage).cancel(true);
+      ScheduledFuture<?> planningTask = stepPlanningTasks.remove(planningStage);
+      if (planningTask != null)
+         planningTask.cancel(true);
       stepPlanningStagePool.add(planningStage);
 
       return planningStage;
@@ -454,7 +456,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupStepPlanningStage(stageFinished);
 
-      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
+      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its steps in " + stageFinished.getPlanningDuration() + " s and a result " + stepPlanningResult + ".");
    }
 
    public void processRequest(FootstepPlanningRequestPacket request)
@@ -472,6 +474,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
       latestFootstepPlannerParametersReference.set(parameters);
+      LogTools.info("Received new set of footstep planner parameters.");
    }
 
    public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
