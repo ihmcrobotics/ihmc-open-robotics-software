@@ -7,10 +7,13 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 {
+   private static volatile boolean printed = false;
+
    private double idealFootstepWidth = 0.22; // unused?
    private double idealFootstepLength = 0.3; // unused?
    private double maxStepLength = 0.35;
@@ -34,9 +37,10 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 
    public AtlasFootstepPlannerParameters()
    {
+      Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
       try
       {
-         File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
+         File configurationFile = parametersPath.toFile();
          configurationFile.getParentFile().mkdirs();
          configurationFile.createNewFile();
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
@@ -57,11 +61,21 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
          maxXYWiggle = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner", maxXYWiggle);
          maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
          wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
+
+         if (!printed)
+         {
+            printed = true;
+            LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
+         }
       }
       catch (IOException e)
       {
-         LogTools.warn("Could not load parameters from {}", Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME));
-         e.printStackTrace();
+         if (!printed)
+         {
+            printed = true;
+            LogTools.error(e.getMessage());
+            LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
+         }
       }
    }
 
