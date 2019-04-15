@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
@@ -79,12 +80,12 @@ public class PatrolBehavior
 
    private final Notification stopNotification = new Notification();
    private final Notification overrideGoToWaypointNotification = new Notification();
+   private final TypedNotification<OperatorPlanReviewResult> planReviewResult = new TypedNotification<>();
 
    private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
-   private TypedNotification<OperatorPlanReviewResult> planReviewResult;
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
    private final AtomicReference<Boolean> loop;
@@ -208,14 +209,7 @@ public class PatrolBehavior
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.read().getFootstepPlanningResult()).validForExecution())
          {
-            if (planReview.get())
-            {
-               return REVIEW;
-            }
-            else
-            {
-               return WALK;
-            }
+            return REVIEW;
          }
          else
          {
