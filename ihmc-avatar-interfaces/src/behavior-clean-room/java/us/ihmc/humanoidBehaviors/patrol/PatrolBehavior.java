@@ -1,9 +1,5 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.PLAN;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.STOP;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.WALK;
-
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,6 +43,8 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.ros2.Ros2Node;
 
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
+
 /**
  * Walk through a list of waypoints in order, looping forever.
  */
@@ -58,7 +56,15 @@ public class PatrolBehavior
       STOP,
       /** Request and wait for footstep planner result */
       PLAN,
+      /** Optional user review of footstep plan. */
+      REVIEW,
       /** Walking towards goal waypoint */
+      WALK
+   }
+
+   public enum OperatorPlanReviewResult
+   {
+      REPLAN,
       WALK
    }
 
@@ -78,10 +84,12 @@ public class PatrolBehavior
 
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
+   private TypedNotification<OperatorPlanReviewResult> planReviewResult;
 
    private final AtomicReference<ArrayList<Pose3D>> waypoints;
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
+   private final AtomicReference<Boolean> planReview;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -95,7 +103,10 @@ public class PatrolBehavior
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
-      factory.addTransition(PLAN, Lists.newArrayList(WALK, STOP, PLAN), this::transitionFromPlan);
+      factory.addTransition(PLAN, Lists.newArrayList(REVIEW, WALK, STOP, PLAN), this::transitionFromPlan);
+      factory.getStateMap().get(REVIEW).setOnEntry(this::onReviewStateEntry);
+      factory.getStateMap().get(REVIEW).setDoAction(this::onReviewStateAction);
+      factory.addTransition(REVIEW, Lists.newArrayList(WALK, PLAN, STOP), this::transitionFromReview);
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
@@ -114,10 +125,14 @@ public class PatrolBehavior
          LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
          overrideGoToWaypointNotification.set();
       });
+      messager.registerTopicListener(API.PlanReviewResult, message -> {
+         planReviewResult.add(message);
+      });
 
       waypoints = messager.createInput(API.Waypoints);
       loop = messager.createInput(API.Loop, false);
       swingOvers = messager.createInput(API.SwingOvers, false);
+      planReview = messager.createInput(API.PlanReviewEnabled, false);
 
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
@@ -193,7 +208,14 @@ public class PatrolBehavior
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.read().getFootstepPlanningResult()).validForExecution())
          {
-            return WALK;
+            if (planReview.get())
+            {
+               return REVIEW;
+            }
+            else
+            {
+               return WALK;
+            }
          }
          else
          {
@@ -204,18 +226,60 @@ public class PatrolBehavior
       return null;
    }
 
+   private void onReviewStateEntry()
+   {
+      messager.submitMessage(API.CurrentState, REVIEW.name());
+      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
+   }
+
+   private void onReviewStateAction(double timeInState)
+   {
+      pollInterrupts();
+      planReviewResult.poll();
+   }
+
+   private PatrolBehaviorState transitionFromReview(double timeInState)
+   {
+      if (stopNotification.read())
+      {
+         return STOP;
+      }
+      else if (overrideGoToWaypointNotification.read())
+      {
+         if (goalWaypointInBounds())
+         {
+            return PLAN;
+         }
+         else
+         {
+            return STOP;
+         }
+      }
+      else if (!planReview.get()) // if review is disabled, proceed
+      {
+         return WALK;
+      }
+      else if (planReviewResult.hasNext())
+      {
+         if (planReviewResult.read() == OperatorPlanReviewResult.REPLAN)
+         {
+            return PLAN;
+         }
+         else if (planReviewResult.read() == OperatorPlanReviewResult.WALK)
+         {
+            return WALK;
+         }
+      }
+
+      return null;
+   }
+
    private void onWalkStateEntry()
    {
       messager.submitMessage(API.CurrentState, WALK.name());
-      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
       walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
                                                                     remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
                                                                     swingOvers.get());
-
-      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
-      clearMessage.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearMessage);
-      // TODO wait?
    }
 
    private void doWalkStateAction(double timeInState)
@@ -327,15 +391,23 @@ public class PatrolBehavior
       /** Input: Toggle swinging over planar regions. */
       public static final Topic<Boolean> SwingOvers = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("SwingOvers"));
 
+      /** Input: Enable/disable human plan review before walking. */
+      public static final Topic<Boolean> PlanReviewEnabled = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewEnabled"));
+
+      /** Input: Enable/disable human plan review before walking. */
+      public static final Topic<OperatorPlanReviewResult> PlanReviewResult
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewResult"));
+
       /** Output: to visualize the current robot path plan. */
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan = Root.child(Patrol)
-                                                                                              .topic(apiFactory.createTypedTopicTheme("CurrentFootstepPlan"));
+      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentFootstepPlan"));
 
       /** Output: to visualize the current state. */
       public static final Topic<String> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
 
       /** Output: to visualize the current waypoint status. TODO clean me up */
-      public static final Topic<Integer> CurrentWaypointIndexStatus = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
+      public static final Topic<Integer> CurrentWaypointIndexStatus
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
 
       public static final MessagerAPI create()
       {
