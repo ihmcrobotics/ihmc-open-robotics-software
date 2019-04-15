@@ -19,8 +19,9 @@ import us.ihmc.log.LogTools;
 
 public class UserProfileManager<T>
 {
+   public static final String fileExtension = ".ini";
    public static final String defaultWorkingDirectoryPath = System.getProperty("user.home") + "/.ihmc/joystick_step_app/";
-   public final static String userProfilesFilename = "profiles.txt";
+   public final static String userProfilesFilename = "profiles" + fileExtension;
 
    private final T defaultParameters;
    private final File workingDirectory;
@@ -61,7 +62,7 @@ public class UserProfileManager<T>
       List<File> parameterFiles = Arrays.asList(workingDirectory.listFiles(filename -> !filename.getName().equals(userProfilesFilename)));
       for (File parameterFile : parameterFiles)
       {
-         String profileName = parameterFile.getName().replaceAll(".txt", "");
+         String profileName = parameterFile.getName().replaceAll(fileExtension, "");
 
          if (!userProfileNames.contains(profileName))
             parameterFile.deleteOnExit();
@@ -216,7 +217,7 @@ public class UserProfileManager<T>
 
    private static File createParameterFile(File workingDirectory, String userProfileName)
    {
-      return new File(workingDirectory, userProfileName + ".txt");
+      return new File(workingDirectory, userProfileName + fileExtension);
    }
 
    public static interface PropertyMapParser<T>
