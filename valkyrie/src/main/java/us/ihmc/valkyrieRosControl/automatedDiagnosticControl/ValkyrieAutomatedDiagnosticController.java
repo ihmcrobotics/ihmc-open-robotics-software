@@ -307,7 +307,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       registry.addChild(stateEstimator.getYoVariableRegistry());
 
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly,
+      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
+                                                            sensorOutputMapReadOnly,
                                                             forceSensorDataHolderToUpdate,
                                                             stateEstimatorParameters,
                                                             gravityMagnitude,

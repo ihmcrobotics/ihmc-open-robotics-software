@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -59,6 +60,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
+   private final SideDependentList<EndEffectorWrenchEstimator> footWrenchEstimators;
 
    private final SideDependentList<YoFrameVector3D> footForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector3D> footTorqueCalibrationOffsets;
@@ -79,9 +81,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final boolean hasWristForceSensors;
    private final boolean hasFootForceSensors;
 
-   public ForceSensorStateUpdater(SensorOutputMapReadOnly sensorOutputMapReadOnly, ForceSensorDataHolder forceSensorDataHolderToUpdate,
-                                  StateEstimatorParameters stateEstimatorParameters, double gravity, RobotMotionStatusHolder robotMotionStatusHolder,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentreRegistry)
+   public ForceSensorStateUpdater(FloatingJointBasics rootJoint, SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                  ForceSensorDataHolder forceSensorDataHolderToUpdate, StateEstimatorParameters stateEstimatorParameters, double gravity,
+                                  RobotMotionStatusHolder robotMotionStatusHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                  YoVariableRegistry parentreRegistry)
    {
       this.gravity = Math.abs(gravity);
       inputForceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
@@ -99,12 +102,19 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       if (hasFootForceSensors)
       {
          footForceSensorDefinitions = new SideDependentList<>();
+         footWrenchEstimators = new SideDependentList<>();
          SideDependentList<String> footForceSensorNames = stateEstimatorParameters.getFootForceSensorNames();
 
          for (RobotSide robotSide : RobotSide.values)
          {
             ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(robotSide));
             footForceSensorDefinitions.put(robotSide, forceSensorDefinition);
+            footWrenchEstimators.put(robotSide,
+                                     new EndEffectorWrenchEstimator(forceSensorDefinition.getSensorName(),
+                                                                    rootJoint.getSuccessor(),
+                                                                    forceSensorDefinition.getRigidBody(),
+                                                                    forceSensorDefinition.getSensorFrame(),
+                                                                    registry));
          }
 
          footForceCalibrationOffsets = new SideDependentList<>();
@@ -138,6 +148,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       else
       {
          footForceSensorDefinitions = null;
+         footWrenchEstimators = null;
          footForceCalibrationOffsets = null;
          footTorqueCalibrationOffsets = null;
          calibrateFootForceSensors = null;
@@ -314,6 +325,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          tempWrench.getAngularPart().sub(tempTorque);
 
          outputForceSensorDataHolder.setForceSensorValue(footForceSensorDefinition, tempWrench);
+
+         footWrenchEstimators.get(robotSide).calculate();
       }
    }
 

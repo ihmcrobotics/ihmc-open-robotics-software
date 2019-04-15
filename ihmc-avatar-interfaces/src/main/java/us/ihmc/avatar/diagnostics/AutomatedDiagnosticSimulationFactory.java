@@ -203,8 +203,14 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                             footSwitchMap, null, robotMotionStatusHolder, bipedFeetMap, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
 
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters,
-                                                            gravitationalAcceleration, robotMotionStatusHolder, null, simulationRegistry);
+      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
+                                                            sensorOutputMapReadOnly,
+                                                            forceSensorDataHolderToUpdate,
+                                                            stateEstimatorParameters,
+                                                            gravitationalAcceleration,
+                                                            robotMotionStatusHolder,
+                                                            null,
+                                                            simulationRegistry);
 
       return sensorReader.getSensorOutputMapReadOnly();
    }
