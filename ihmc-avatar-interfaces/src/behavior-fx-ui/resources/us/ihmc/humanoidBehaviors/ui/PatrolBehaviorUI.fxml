@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController">
     <children>
@@ -26,6 +27,15 @@
             <CheckBox fx:id="loopThroughWaypoints" onAction="#loopThroughWaypoints" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Label text="Swing overs" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <CheckBox fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <Label text="Plan review" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <CheckBox fx:id="operatorPlanReview" onAction="#operatorPlanReview" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+            <Label text="Plan Review" GridPane.columnIndex="4" GridPane.rowIndex="3">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <Button fx:id="replan" onAction="#replan" text="Re-plan" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+            <Button fx:id="sendPlan" onAction="#sendPlan" text="Continue" GridPane.columnIndex="5" GridPane.rowIndex="4" />
             </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -40,6 +50,7 @@
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
+            <RowConstraints minHeight="10.0" prefHeight="20.0" />
             <RowConstraints minHeight="10.0" prefHeight="20.0" />
             <RowConstraints minHeight="10.0" prefHeight="20.0" />
             <RowConstraints />

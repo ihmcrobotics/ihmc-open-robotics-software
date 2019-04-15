@@ -12,18 +12,15 @@ import com.google.common.collect.Lists;
 
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
@@ -51,7 +48,7 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
-   enum PatrolBehaviorState
+   public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
       STOP,
@@ -73,7 +70,6 @@ public class PatrolBehavior
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
-   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
@@ -115,7 +111,6 @@ public class PatrolBehavior
       stateMachine = factory.getFactory().build(STOP);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
@@ -146,7 +141,7 @@ public class PatrolBehavior
 
    private void onStopStateEntry()
    {
-      messager.submitMessage(API.CurrentState, STOP.name());
+      messager.submitMessage(API.CurrentState, STOP);
 
       remoteRobotControllerInterface.pauseWalking();
    }
@@ -168,7 +163,7 @@ public class PatrolBehavior
 
    private void onPlanStateEntry()
    {
-      messager.submitMessage(API.CurrentState, PLAN.name());
+      messager.submitMessage(API.CurrentState, PLAN);
 
       remoteFootstepPlannerInterface.abortPlanning();
 
@@ -222,7 +217,7 @@ public class PatrolBehavior
 
    private void onReviewStateEntry()
    {
-      messager.submitMessage(API.CurrentState, REVIEW.name());
+      messager.submitMessage(API.CurrentState, REVIEW);
       reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
    }
 
@@ -270,7 +265,7 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
-      messager.submitMessage(API.CurrentState, WALK.name());
+      messager.submitMessage(API.CurrentState, WALK);
       walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
                                                                     remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
                                                                     swingOvers.get());
@@ -397,7 +392,7 @@ public class PatrolBehavior
             = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentFootstepPlan"));
 
       /** Output: to visualize the current state. */
-      public static final Topic<String> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
+      public static final Topic<PatrolBehaviorState> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
 
       /** Output: to visualize the current waypoint status. TODO clean me up */
       public static final Topic<Integer> CurrentWaypointIndexStatus

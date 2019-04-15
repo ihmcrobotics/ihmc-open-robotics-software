@@ -17,6 +17,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
@@ -41,6 +43,9 @@ public class PatrolBehaviorUIController extends Group
    @FXML private TextField remoteCurrentState;
    @FXML private CheckBox loopThroughWaypoints;
    @FXML private CheckBox swingOverPlanarRegions;
+   @FXML private CheckBox operatorPlanReview;
+   @FXML private Button replan;
+   @FXML private Button sendPlan;
 
    private JavaFXMessager uiMessager;
    private SubScene sceneNode;
@@ -73,7 +78,25 @@ public class PatrolBehaviorUIController extends Group
          });
       });
 
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> Platform.runLater(() -> remoteCurrentState.setText(state)));
+      Platform.runLater(() ->
+      {
+         replan.setDisable(true);
+         sendPlan.setDisable(true);
+      });
+      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> Platform.runLater(() ->
+      {
+         remoteCurrentState.setText(state.name());
+         if (state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected())
+         {
+            replan.setDisable(false);
+            sendPlan.setDisable(false);
+         }
+         else
+         {
+            replan.setDisable(true);
+            sendPlan.setDisable(true);
+         }
+      }));
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
                                              index -> Platform.runLater(() -> remoteCurrentWaypointIndex.setText(index.toString())));
 
@@ -218,5 +241,20 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void swingOverPlanarRegions()
    {
       behaviorMessager.submitMessage(PatrolBehavior.API.SwingOvers, swingOverPlanarRegions.isSelected());
+   }
+
+   @FXML public void operatorPlanReview()
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewEnabled, operatorPlanReview.isSelected());
+   }
+
+   @FXML public void replan()
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewResult, OperatorPlanReviewResult.REPLAN);
+   }
+
+   @FXML public void sendPlan()
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewResult, OperatorPlanReviewResult.WALK);
    }
 }
