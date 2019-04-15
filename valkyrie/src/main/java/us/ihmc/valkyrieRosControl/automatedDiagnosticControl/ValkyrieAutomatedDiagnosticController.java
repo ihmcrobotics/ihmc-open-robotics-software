@@ -289,7 +289,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
          FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix, contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
-                                                                                   footForceSensorForEstimator, null, totalRobotWeight, null, registry);
+                                                                                   footForceSensorForEstimator, totalRobotWeight, null, registry);
          footSwitchMap.put(rigidBody, footSwitchInterface);
 
       }

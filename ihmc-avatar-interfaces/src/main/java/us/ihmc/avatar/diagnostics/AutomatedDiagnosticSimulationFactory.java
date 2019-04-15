@@ -190,8 +190,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
          FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix, contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
-                                                                                   footForceSensorForEstimator, null, totalRobotWeight, null,
-                                                                                   simulationRegistry);
+                                                                                   footForceSensorForEstimator, totalRobotWeight, null, simulationRegistry);
          footSwitchMap.put(rigidBody, footSwitchInterface);
       }
 
