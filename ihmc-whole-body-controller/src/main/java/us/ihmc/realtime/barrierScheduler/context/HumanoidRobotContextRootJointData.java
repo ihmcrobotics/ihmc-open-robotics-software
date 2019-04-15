@@ -1,7 +1,11 @@
 package us.ihmc.realtime.barrierScheduler.context;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -15,6 +19,10 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
    private final Vector3D rootJointAngularVelocity = new Vector3D();
    private final Vector3D rootJointAngularAcceleration = new Vector3D();
 
+   private final Point3D rootJointLocation = new Point3D();
+   private final Vector3D rootJointLinearVelocity = new Vector3D();
+   private final Vector3D rootJointLinearAcceleration = new Vector3D();
+
    /**
     * Called by the update methods in the {@link us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.UniBinding} when receiving data from another task.
     *
@@ -26,6 +34,9 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       this.rootJointOrientation.set(src.rootJointOrientation);
       this.rootJointAngularVelocity.set(src.rootJointAngularVelocity);
       this.rootJointAngularAcceleration.set(src.rootJointAngularAcceleration);
+      this.rootJointLocation.set(src.rootJointLocation);
+      this.rootJointLinearVelocity.set(src.rootJointLinearVelocity);
+      this.rootJointLinearAcceleration.set(src.rootJointLinearAcceleration);
    }
 
    public void setRootJointOrientation(QuaternionReadOnly other)
@@ -58,6 +69,36 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       this.rootJointAngularAcceleration.set(other);
    }
 
+   public void setRootJointLocation(Tuple3DReadOnly other)
+   {
+      this.rootJointLocation.set(other);
+   }
+
+   public void setRootJointLocation(double x, double y, double z)
+   {
+      this.rootJointLocation.set(x, y, z);
+   }
+
+   public void setRootJointLinearVelocity(Tuple3DReadOnly other)
+   {
+      this.rootJointLinearVelocity.set(other);
+   }
+
+   public void setRootJointLinearVelocity(double x, double y, double z)
+   {
+      this.rootJointLinearVelocity.set(x, y, z);
+   }
+
+   public void setRootJointLinearAcceleration(Tuple3DReadOnly other)
+   {
+      this.rootJointLinearAcceleration.set(other);
+   }
+
+   public void setRootJointLinearAcceleration(double x, double y, double z)
+   {
+      this.rootJointLinearAcceleration.set(x, y, z);
+   }
+
    public void getRootJointOrientation(Quaternion orientationToPack)
    {
       orientationToPack.set(this.rootJointOrientation);
@@ -86,5 +127,35 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
    public void getRootJointAngularAcceleration(Vector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.set(this.rootJointAngularAcceleration);
+   }
+
+   public Point3DReadOnly getRootJointLocation()
+   {
+      return rootJointLocation;
+   }
+
+   public Vector3DReadOnly getRootJointLinearVelocity()
+   {
+      return rootJointLinearVelocity;
+   }
+
+   public Vector3DReadOnly getRootJointLinearAcceleration()
+   {
+      return rootJointLinearAcceleration;
+   }
+
+   public void getRootJointLocation(Tuple3DBasics locationToPack)
+   {
+      locationToPack.set(rootJointLocation);
+   }
+
+   public void getRootJointLinearVelocity(Tuple3DBasics linearVelocityToPack)
+   {
+      linearVelocityToPack.set(rootJointLinearVelocity);
+   }
+
+   public void getRootJointLinearAcceleration(Tuple3DBasics linearAccelerationToPack)
+   {
+      linearAccelerationToPack.set(rootJointLinearAcceleration);
    }
 }
