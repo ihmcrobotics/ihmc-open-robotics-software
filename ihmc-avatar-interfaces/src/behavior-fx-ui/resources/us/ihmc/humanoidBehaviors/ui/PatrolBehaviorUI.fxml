@@ -25,7 +25,7 @@
             <Label prefHeight="17.0" text="Loop" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
             <CheckBox fx:id="loopThroughWaypoints" onAction="#loopThroughWaypoints" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <Label text="Swing overs" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            <CheckBox  fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <CheckBox fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="2" GridPane.rowIndex="5" />
             </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -40,8 +40,8 @@
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="20.0" />
+            <RowConstraints minHeight="10.0" prefHeight="20.0" />
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
