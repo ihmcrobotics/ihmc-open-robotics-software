@@ -197,7 +197,7 @@ public class QuadrupedStepAdjustmentController
          }
          limitedInstantaneousStepAdjustment.update();
 
-         activeStep.getGoalPosition(tempPoint);
+         tempPoint.setIncludingFrame(activeStep.getReferenceFrame(), activeStep.getGoalPosition());
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(limitedInstantaneousStepAdjustment);
          crossoverProjection.project(tempPoint, robotQuadrant);

@@ -57,6 +57,8 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -98,6 +100,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final YoBoolean hasControllerFailed = new YoBoolean("hasControllerFailed", registry);
 
    private final List<KinematicsToolboxOutputStatus> previewFrames = new ArrayList<>();
+
+   private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
    private final List<Updatable> updatables = new ArrayList<>();
 
@@ -147,7 +151,10 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
-      walkingController = new WalkingHighLevelHumanoidController(walkingInputManager, walkingOutputManager, managerFactory, walkingControllerParameters,
+      walkingController = new WalkingHighLevelHumanoidController(walkingInputManager,
+                                                                 walkingOutputManager,
+                                                                 managerFactory,
+                                                                 walkingControllerParameters,
                                                                  controllerToolbox);
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
@@ -165,8 +172,15 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       RigidBodyBasics elevator = fullRobotModel.getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
-                                                                            gravityZ, controlDT, walkingParentRegistry, yoGraphicsListRegistry);
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames,
+                                                                            contactableFeet,
+                                                                            elevator,
+                                                                            walkingControllerParameters,
+                                                                            yoTime,
+                                                                            gravityZ,
+                                                                            controlDT,
+                                                                            walkingParentRegistry,
+                                                                            yoGraphicsListRegistry);
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -203,8 +217,19 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      return new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, previewTime, gravityZ, omega0, feet, integrationDT,
-                                                    Collections.emptyList(), allContactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      return new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                    referenceFrames,
+                                                    footSwitches,
+                                                    null,
+                                                    previewTime,
+                                                    gravityZ,
+                                                    omega0,
+                                                    feet,
+                                                    integrationDT,
+                                                    Collections.emptyList(),
+                                                    allContactableBodies,
+                                                    yoGraphicsListRegistry,
+                                                    jointsToIgnore);
    }
 
    private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -214,10 +239,16 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
-                                                                              defaultInitialTransferTime, defaultFinalTransferTime,
-                                                                              controllerToolbox.getContactableFeet(), walkingOutputManager, previewTime,
-                                                                              yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
+                                                                              defaultSwingTime,
+                                                                              defaultTouchdownTime,
+                                                                              defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime,
+                                                                              controllerToolbox.getContactableFeet(),
+                                                                              walkingOutputManager,
+                                                                              previewTime,
+                                                                              yoGraphicsListRegistry,
+                                                                              controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
    }
 
@@ -229,9 +260,14 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       FeedbackControllerSettings feedbackControllerSettings = walkingControllerParameters.getFeedbackControllerSettings();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(integrationDT, gravityZ, fullRobotModel.getRootJoint(), controlledJoints,
-                                                                                       controllerToolbox.getCenterOfMassFrame(), momentumOptimizationSettings,
-                                                                                       yoGraphicsListRegistry, registry);
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(integrationDT,
+                                                                                       gravityZ,
+                                                                                       fullRobotModel.getRootJoint(),
+                                                                                       controlledJoints,
+                                                                                       controllerToolbox.getCenterOfMassFrame(),
+                                                                                       momentumOptimizationSettings,
+                                                                                       yoGraphicsListRegistry,
+                                                                                       registry);
 
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       controlCoreToolbox.setFeedbackControllerSettings(feedbackControllerSettings);
@@ -252,7 +288,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
                                                        contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i),
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                            additionaContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
@@ -280,7 +317,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint,
+      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData,
+                                                                      rootJoint,
                                                                       FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
       for (JointBasics joint : fullRobotModel.getElevator().childrenSubtreeIterable())
@@ -317,8 +355,13 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
          initializeInternal();
          WalkingControllerPreviewInputCommand command = toolboxInputManager.pollNewestCommand(WalkingControllerPreviewInputCommand.class);
          FootstepDataListCommand foostepCommand = command.getFoostepCommand();
-         taskExecutor.submit(new FootstepListPreviewTask(fullRobotModel.getRootJoint(), foostepCommand, walkingInputManager, walkingOutputManager,
-                                                         controllerToolbox.getFootContactStates(), managerFactory.getOrCreateBalanceManager(), footSwitches));
+         taskExecutor.submit(new FootstepListPreviewTask(fullRobotModel.getRootJoint(),
+                                                         foostepCommand,
+                                                         walkingInputManager,
+                                                         walkingOutputManager,
+                                                         controllerToolbox.getFootContactStates(),
+                                                         managerFactory.getOrCreateBalanceManager(),
+                                                         footSwitches));
       }
       else
       {
@@ -353,7 +396,16 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
       linearMomentumRateControlModule.computeAchievedCMP();
 
-      MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator(integrationDT);
+      rootJoint.setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
+      JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
+
+      for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
+      {
+         JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
+      }
+
+      integrator.setIntegrationDT(integrationDT);
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
       if (!(taskExecutor.getCurrentTask() instanceof WalkingPreviewResetTask))
