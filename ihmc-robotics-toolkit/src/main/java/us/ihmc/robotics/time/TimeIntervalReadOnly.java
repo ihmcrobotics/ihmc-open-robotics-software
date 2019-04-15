@@ -23,6 +23,11 @@ public interface TimeIntervalReadOnly
       return MathTools.intervalContains(time, getStartTime(), getEndTime());
    }
 
+   default boolean epsilonContains(double time, double epsilon)
+   {
+      return MathTools.intervalContains(time, getStartTime() - epsilon, getEndTime() + epsilon);
+   }
+
    default void checkInterval()
    {
       checkInterval(this);
