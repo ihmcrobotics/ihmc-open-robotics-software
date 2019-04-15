@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -13,6 +15,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
@@ -97,7 +100,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
     * compute piecewise constant center of pressure plan given the upcoming contact states
     * @param timedContactSequence contact sequence (input)
     */
-   public void initializeTrajectory(QuadrupedTimedContactSequence timedContactSequence)
+   public void initializeTrajectory(QuadrupedTimedContactSequence timedContactSequence, List<QuadrupedTimedStep> stepSequence)
    {
       if (timedContactSequence.size() < 1)
       {
@@ -120,6 +123,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
          QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition, weightDistributionCalculator);
          QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+
+
+
          normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
          normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -183,21 +189,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return copPositionsAtStartOfInterval.get(interval);
    }
 
-   public QuadrantDependentList<MutableDouble> getNormalizedPressureAtStartOfInterval(int interval)
-   {
-      return normalizedPressureAtStartOfInterval.get(interval);
-   }
-
-   public double getNormalizedPressureContributedByInitialContacts(int interval)
-   {
-      return normalizedPressureContributedByInitialContacts.get(interval).doubleValue();
-   }
-
-   public double getNormalizedPressureContributedByQueuedSteps(int interval)
-   {
-      return normalizedPressureContributedByQueuedSteps.get(interval).doubleValue();
-   }
-
    public ArrayList<MutableDouble> getTimeAtStartOfInterval()
    {
       return timeAtStartOfInterval;
@@ -208,18 +199,39 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return copPositionsAtStartOfInterval;
    }
 
-   public ArrayList<QuadrantDependentList<MutableDouble>> getNormalizedPressureAtStartOfInterval()
-   {
-      return normalizedPressureAtStartOfInterval;
-   }
+   private void
 
-   public ArrayList<MutableDouble> getNormalizedPressureContributedByInitialContacts()
+   private void computeCoPOffset(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions, FrameVector3D copOffsetToPack)
    {
-      return normalizedPressureContributedByInitialContacts;
-   }
+      int numberOfLeftFeetInContact = 0;
+      int numberOfRightFeetInContact = 0;
+      int numberOfFrontFeetInContact = 0;
+      int numberOfHindFeetInContact = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
+         {
+            if (robotQuadrant.isQuadrantInFront())
+               numberOfFrontFeetInContact++;
+            else
+               numberOfHindFeetInContact++;
+            if (robotQuadrant.isQuadrantOnLeftSide())
+               numberOfLeftFeetInContact++;
+            else
+               numberOfRightFeetInContact++;
+         }
+      }
 
-   public ArrayList<MutableDouble> getNormalizedPressureContributedByQueuedSteps()
-   {
-      return normalizedPressureContributedByQueuedSteps;
+      if (numberOfLeftFeetInContact > 0 && numberOfRightFeetInContact > 0)
+      {
+         if (numberOfLeftFeetInContact > numberOfRightFeetInContact)
+         { // left side has more feet in contact, so shift a little to the right
+
+         }
+         else if (numberOfRightFeetInContact > numberOfLeftFeetInContact)
+         { // right side has more feet in contact, so shift a little to the left
+
+         }
+      }
    }
 }
