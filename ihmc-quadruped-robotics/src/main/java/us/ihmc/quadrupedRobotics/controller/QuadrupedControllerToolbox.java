@@ -130,6 +130,14 @@ public class QuadrupedControllerToolbox
 
          footContactStates.put(robotQuadrant, planeContactState);
          contactStates.put(robotQuadrant, contactState);
+         planeContactState.attachContactChangeListener(changed ->
+                                                       {
+                                                          if (((YoBoolean) changed).getBooleanValue())
+                                                             contactState.set(ContactState.IN_CONTACT);
+                                                          else
+                                                             contactState.set(ContactState.NO_CONTACT);
+                                                       });
+
       }
 
       if (yoGraphicsListRegistry != null)
@@ -177,13 +185,6 @@ public class QuadrupedControllerToolbox
    public void updateSupportPolygon()
    {
       supportPolygon.updateUsingContactStates(footContactStates);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (footContactStates.get(robotQuadrant).inContact())
-            contactStates.get(robotQuadrant).set(ContactState.IN_CONTACT);
-         else
-            contactStates.get(robotQuadrant).set(ContactState.NO_CONTACT);
-      }
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()
