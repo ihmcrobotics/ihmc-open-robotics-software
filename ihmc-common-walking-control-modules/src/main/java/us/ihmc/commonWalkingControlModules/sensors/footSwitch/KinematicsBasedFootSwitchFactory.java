@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.sensors.ContactSensor;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -33,8 +32,8 @@ public class KinematicsBasedFootSwitchFactory implements FootSwitchFactory
 
    @Override
    public FootSwitchInterface newFootSwitch(String namePrefix, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet,
-                                            ForceSensorDataReadOnly footForceSensor, ContactSensor footContactSensor, double totalRobotWeight,
-                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+                                            ForceSensorDataReadOnly footForceSensor, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                            YoVariableRegistry registry)
    {
       if (contactThresholdHeight == null)
          contactThresholdHeight = new DoubleParameter("ContactThresholdHeight", registry, defaultContactThresholdHeight);
