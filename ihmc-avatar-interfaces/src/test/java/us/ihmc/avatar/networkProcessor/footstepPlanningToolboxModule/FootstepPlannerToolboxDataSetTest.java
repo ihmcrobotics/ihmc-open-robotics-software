@@ -220,7 +220,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                               if (!dataset.hasPlannerInput())
                                                                  return false;
                                                               return dataset.getPlannerInput().getStepPlannerIsInDevelopment() && dataset.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                         .containsFlag(getTimeoutFlag());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -382,7 +382,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if(dataset.getPlannerInput().hasStartOrientation())
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
       if(dataset.getPlannerInput().hasGoalOrientation())
-        messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -428,7 +428,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    private String assertPlansAreValid(String datasetName, FootstepPlanningResult expectedResult, FootstepPlanningResult actualResult,
-                                        FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
+                                      FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
    {
       String errorMessage = "";
 

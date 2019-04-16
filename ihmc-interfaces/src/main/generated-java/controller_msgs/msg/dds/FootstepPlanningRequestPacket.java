@@ -15,6 +15,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = (byte) 0;
    public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = (byte) 1;
+   /**
+          * The recommended planner type
+          */
    public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = (byte) 2;
    public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = (byte) 3;
    public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 4;
@@ -23,16 +26,49 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Initial stance foot side
+            */
    public byte initial_stance_robot_side_ = (byte) 255;
+   /**
+            * Stance foot sole frame z up position, z must be correct
+            */
    public us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
+   /**
+            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            */
    public us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
+   /**
+            * Goal mid feet z up position
+            */
    public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
+   /**
+            * Goal mid feet z up orientation, only the "yaw" is considered
+            */
    public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
+   /**
+            * Footstep planner type, see above
+            */
    public byte requested_footstep_planner_type_ = (byte) 255;
+   /**
+            * Timeout in seconds
+            */
    public double timeout_;
+   /**
+            * Max body path length if using body path
+            */
    public double horizon_length_;
+   /**
+            * Planar regions to use, if you don't want to assume flat ground
+            */
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
+   /**
+            * Explicitly tell the planner to use flat ground
+            */
    public boolean assume_flat_ground_;
+   /**
+            * Set this id to keep track of your request
+            */
    public int planner_request_id_ = -1;
 
    public FootstepPlanningRequestPacket()
@@ -88,85 +124,136 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       return sequence_id_;
    }
 
+   /**
+            * Initial stance foot side
+            */
    public void setInitialStanceRobotSide(byte initial_stance_robot_side)
    {
       initial_stance_robot_side_ = initial_stance_robot_side;
    }
+   /**
+            * Initial stance foot side
+            */
    public byte getInitialStanceRobotSide()
    {
       return initial_stance_robot_side_;
    }
 
 
+   /**
+            * Stance foot sole frame z up position, z must be correct
+            */
    public us.ihmc.euclid.tuple3D.Point3D getStanceFootPositionInWorld()
    {
       return stance_foot_position_in_world_;
    }
 
 
+   /**
+            * Stance foot sole frame z up orientation, only the "yaw" is considered
+            */
    public us.ihmc.euclid.tuple4D.Quaternion getStanceFootOrientationInWorld()
    {
       return stance_foot_orientation_in_world_;
    }
 
 
+   /**
+            * Goal mid feet z up position
+            */
    public us.ihmc.euclid.tuple3D.Point3D getGoalPositionInWorld()
    {
       return goal_position_in_world_;
    }
 
 
+   /**
+            * Goal mid feet z up orientation, only the "yaw" is considered
+            */
    public us.ihmc.euclid.tuple4D.Quaternion getGoalOrientationInWorld()
    {
       return goal_orientation_in_world_;
    }
 
+   /**
+            * Footstep planner type, see above
+            */
    public void setRequestedFootstepPlannerType(byte requested_footstep_planner_type)
    {
       requested_footstep_planner_type_ = requested_footstep_planner_type;
    }
+   /**
+            * Footstep planner type, see above
+            */
    public byte getRequestedFootstepPlannerType()
    {
       return requested_footstep_planner_type_;
    }
 
+   /**
+            * Timeout in seconds
+            */
    public void setTimeout(double timeout)
    {
       timeout_ = timeout;
    }
+   /**
+            * Timeout in seconds
+            */
    public double getTimeout()
    {
       return timeout_;
    }
 
+   /**
+            * Max body path length if using body path
+            */
    public void setHorizonLength(double horizon_length)
    {
       horizon_length_ = horizon_length;
    }
+   /**
+            * Max body path length if using body path
+            */
    public double getHorizonLength()
    {
       return horizon_length_;
    }
 
 
+   /**
+            * Planar regions to use, if you don't want to assume flat ground
+            */
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
    {
       return planar_regions_list_message_;
    }
 
+   /**
+            * Explicitly tell the planner to use flat ground
+            */
    public void setAssumeFlatGround(boolean assume_flat_ground)
    {
       assume_flat_ground_ = assume_flat_ground;
    }
+   /**
+            * Explicitly tell the planner to use flat ground
+            */
    public boolean getAssumeFlatGround()
    {
       return assume_flat_ground_;
    }
 
+   /**
+            * Set this id to keep track of your request
+            */
    public void setPlannerRequestId(int planner_request_id)
    {
       planner_request_id_ = planner_request_id;
    }
+   /**
+            * Set this id to keep track of your request
+            */
    public int getPlannerRequestId()
    {
       return planner_request_id_;
