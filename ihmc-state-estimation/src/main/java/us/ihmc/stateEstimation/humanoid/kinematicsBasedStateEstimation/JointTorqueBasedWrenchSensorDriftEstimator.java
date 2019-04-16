@@ -36,24 +36,30 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
 
    private final DoubleParameter initializationDuration;
    private final DoubleParameter biasFilterBreakFrequency;
-   private final double updateDT;
+   private final DoubleParameter minJacobianDeterminant;
 
    public JointTorqueBasedWrenchSensorDriftEstimator(FloatingJointBasics rootJoint, double updateDT, RobotMotionStatusHolder robotMotionStatusHolder,
                                                      Collection<ForceSensorDefinition> forceSensorDefinitions,
                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder, YoVariableRegistry parentRegistry)
    {
-      this.updateDT = updateDT;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.forceSensorDefinitions = new ArrayList<>(forceSensorDefinitions);
-      initializationDuration = new DoubleParameter("initializationDurationWrenchSensorDriftEstimator", registry, 5.0);
-      biasFilterBreakFrequency = new DoubleParameter("wrenchBiasFilterBreakFrequency", "", registry, 10.0);
-      double filterAlphaProvider = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency.getValue(), updateDT);
+      initializationDuration = new DoubleParameter("initializationDurationWrenchSensorDriftEstimator", registry, 10.0);
+      biasFilterBreakFrequency = new DoubleParameter("wrenchBiasFilterBreakFrequency", "", registry, 0.5);
+      minJacobianDeterminant = new DoubleParameter("wrenchBiasEstimatorMinJacobianDet", registry, 0.05);
+      DoubleProvider filterAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency.getValue(), updateDT);
 
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
          ForceSensorDataReadOnly forceSensorData = forceSensorDataHolder.get(forceSensorDefinition);
          wrenchSensorDrifInfoMap.put(forceSensorDefinition,
-                                     new WrenchSensorDriftInfo(rootJoint, forceSensorDefinition, forceSensorData, () -> filterAlphaProvider, registry));
+                                     new WrenchSensorDriftInfo(rootJoint,
+                                                               updateDT,
+                                                               forceSensorDefinition,
+                                                               forceSensorData,
+                                                               filterAlphaProvider,
+                                                               minJacobianDeterminant,
+                                                               registry));
       }
 
       parentRegistry.addChild(registry);
@@ -78,7 +84,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
       {
          WrenchSensorDriftInfo wrenchSensorDriftInfo = wrenchSensorDrifInfoMap.get(forceSensorDefinitions.get(sensorIndex));
          wrenchSensorDriftInfo.reset();
-         wrenchSensorDriftInfo.setInitializationWindowSize((int) (initializationDuration.getValue() / updateDT));
+         wrenchSensorDriftInfo.setInitializationDuration(initializationDuration.getValue());
       }
    }
 
@@ -102,14 +108,20 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
       private final YoBoolean isInitialized;
       private final Wrench measuredWrench = new Wrench();
       private final SpatialVector spatialVector = new SpatialVector();
+      private final DoubleProvider minJacobianDeterminant;
 
-      private int initializationWindowSize;
-      private int currentInitializationTick = 0;
+      private double initializationAlpha;
+      private double initializationDuration;
+      private double currentTimeInInitialization;
+      private final double updateDT;
 
-      public WrenchSensorDriftInfo(FloatingJointBasics rootJoint, ForceSensorDefinition forceSensorDefinition, ForceSensorDataReadOnly forceSensorData,
-                                   DoubleProvider alphaProvider, YoVariableRegistry registry)
+      public WrenchSensorDriftInfo(FloatingJointBasics rootJoint, double updateDT, ForceSensorDefinition forceSensorDefinition,
+                                   ForceSensorDataReadOnly forceSensorData, DoubleProvider alphaProvider, DoubleProvider minJacobianDeterminant,
+                                   YoVariableRegistry registry)
       {
+         this.updateDT = updateDT;
          this.forceSensorData = forceSensorData;
+         this.minJacobianDeterminant = minJacobianDeterminant;
          String name = forceSensorDefinition.getSensorName() + "JointTorqueWrench";
          RigidBodyBasics endEffector = forceSensorDefinition.getRigidBody();
          ReferenceFrame wrenchMeasurementFrame = forceSensorDefinition.getSensorFrame();
@@ -121,39 +133,48 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
          isInitialized = new YoBoolean(forceSensorDefinition.getSensorName() + "DriftEstimatorInitialized", registry);
       }
 
-      public void setInitializationWindowSize(int initializationWindowSize)
+      public void setInitializationDuration(double initializationDuration)
       {
-         this.initializationWindowSize = initializationWindowSize;
+         this.initializationDuration = initializationDuration;
+         initializationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / initializationDuration, updateDT);
       }
 
       public void reset()
       {
          isInitialized.set(false);
          initialOffset.setToZero();
-         currentInitializationTick = 0;
+         currentTimeInInitialization = 0.0;
+         estimatedDriftBias.setToZero();
          estimatedDriftBiasFiltered.reset();
+         estimatedDriftBiasFiltered.update();
       }
 
       public void update()
       {
+         endEffectorWrenchEstimator.calculate();
+
+         if (Math.abs(endEffectorWrenchEstimator.getJacobianDeterminant()) < minJacobianDeterminant.getValue())
+         {
+            // Singular configuration, the estimator output is not be accurate.
+            return;
+         }
+
+         forceSensorData.getWrench(measuredWrench);
+
          if (!isInitialized.getValue())
          {
-            currentInitializationTick++;
+            currentTimeInInitialization += updateDT;
 
-            endEffectorWrenchEstimator.calculate();
-            forceSensorData.getWrench(measuredWrench);
             spatialVector.setIncludingFrame(endEffectorWrenchEstimator.getExternalWrench());
             spatialVector.sub(measuredWrench);
-            spatialVector.scale(1.0 / initializationWindowSize);
-            initialOffset.add(spatialVector);
+            initialOffset.getAngularPart().interpolate(spatialVector.getAngularPart(), initialOffset.getAngularPart(), initializationAlpha);
+            initialOffset.getLinearPart().interpolate(spatialVector.getLinearPart(), initialOffset.getLinearPart(), initializationAlpha);
 
-            if (currentInitializationTick >= initializationWindowSize)
+            if (currentTimeInInitialization >= initializationDuration)
                isInitialized.set(true);
          }
          else
          {
-            endEffectorWrenchEstimator.calculate();
-            forceSensorData.getWrench(measuredWrench);
             estimatedDriftBias.set(measuredWrench);
             estimatedDriftBias.sub(endEffectorWrenchEstimator.getExternalWrench());
             estimatedDriftBias.add(initialOffset);
@@ -163,7 +184,7 @@ public class JointTorqueBasedWrenchSensorDriftEstimator
 
       public SpatialVectorReadOnly getEstimatedDriftBias()
       {
-         return estimatedDriftBias;
+         return estimatedDriftBiasFiltered;
       }
    }
 }

@@ -1,8 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,11 +13,14 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class EndEffectorWrenchEstimator
 {
    private final String name;
+   private final YoDouble jacobianDeterminant;
    private final YoFixedFrameWrench appliedWrench;
    private final WrenchReadOnly externalWrench;
    private final JointTorqueProvider jointTorqueProvider;
@@ -29,8 +30,6 @@ public class EndEffectorWrenchEstimator
    private final DenseMatrix64F jacobianTranspose;
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(6, 1);
    private final OneDoFJointBasics[] joints;
-
-   private final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.general(6, 6);
 
    public EndEffectorWrenchEstimator(String prefix, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
                                      YoVariableRegistry registry)
@@ -46,6 +45,7 @@ public class EndEffectorWrenchEstimator
 
       appliedWrench = new YoFixedFrameWrench(name, endEffector.getBodyFixedFrame(), wrenchMeasurementFrame, registry);
       externalWrench = MecanoFactories.newWrenchReadOnly(() -> -1.0, appliedWrench);
+      jacobianDeterminant = new YoDouble(name + "JacobianDet", registry);
 
       joints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
 
@@ -72,11 +72,15 @@ public class EndEffectorWrenchEstimator
          jointTorqueMatrix.set(i, 0, jointTorqueProvider.getJointTorque(joints[i]));
 
       CommonOps.transpose(geometricJacobianCalculator.getJacobianMatrix(), jacobianTranspose);
-
-      linearSolver.setA(jacobianTranspose);
-      linearSolver.solve(jointTorqueMatrix, wrenchMatrix);
+      jacobianDeterminant.set(CommonOps.det(jacobianTranspose));
+      NativeCommonOps.solveCheck(jacobianTranspose, jointTorqueMatrix, wrenchMatrix);
 
       appliedWrench.set(wrenchMatrix);
+   }
+
+   public double getJacobianDeterminant()
+   {
+      return jacobianDeterminant.getValue();
    }
 
    public WrenchReadOnly getAppliedWrench()
