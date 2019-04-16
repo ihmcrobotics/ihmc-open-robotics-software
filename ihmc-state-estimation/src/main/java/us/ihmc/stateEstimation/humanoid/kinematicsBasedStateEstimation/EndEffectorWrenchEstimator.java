@@ -12,6 +12,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -19,7 +20,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class EndEffectorWrenchEstimator
 {
    private final String name;
-   private final YoFixedFrameWrench wrench;
+   private final YoFixedFrameWrench appliedWrench;
+   private final WrenchReadOnly externalWrench;
    private final JointTorqueProvider jointTorqueProvider;
 
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
@@ -36,13 +38,14 @@ public class EndEffectorWrenchEstimator
       this(prefix, base, endEffector, wrenchMeasurementFrame, OneDoFJointReadOnly::getTau, registry);
    }
 
-   public EndEffectorWrenchEstimator(String prefix, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
+   public EndEffectorWrenchEstimator(String name, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
                                      JointTorqueProvider jointTorqueProvider, YoVariableRegistry registry)
    {
+      this.name = name;
       this.jointTorqueProvider = jointTorqueProvider;
 
-      name = prefix + getClass().getSimpleName();
-      wrench = new YoFixedFrameWrench(name, endEffector.getBodyFixedFrame(), wrenchMeasurementFrame, registry);
+      appliedWrench = new YoFixedFrameWrench(name, endEffector.getBodyFixedFrame(), wrenchMeasurementFrame, registry);
+      externalWrench = MecanoFactories.newWrenchReadOnly(() -> -1.0, appliedWrench);
 
       joints = MultiBodySystemTools.createOneDoFJointPath(base, endEffector);
 
@@ -66,19 +69,24 @@ public class EndEffectorWrenchEstimator
       geometricJacobianCalculator.reset();
 
       for (int i = 0; i < joints.length; i++)
-         jointTorqueMatrix.set(i, 0, -jointTorqueProvider.getJointTorque(joints[i]));
+         jointTorqueMatrix.set(i, 0, jointTorqueProvider.getJointTorque(joints[i]));
 
       CommonOps.transpose(geometricJacobianCalculator.getJacobianMatrix(), jacobianTranspose);
 
       linearSolver.setA(jacobianTranspose);
       linearSolver.solve(jointTorqueMatrix, wrenchMatrix);
 
-      wrench.set(wrenchMatrix);
+      appliedWrench.set(wrenchMatrix);
    }
 
-   public WrenchReadOnly getWrench()
+   public WrenchReadOnly getAppliedWrench()
    {
-      return wrench;
+      return appliedWrench;
+   }
+
+   public WrenchReadOnly getExternalWrench()
+   {
+      return externalWrench;
    }
 
    public String getName()
