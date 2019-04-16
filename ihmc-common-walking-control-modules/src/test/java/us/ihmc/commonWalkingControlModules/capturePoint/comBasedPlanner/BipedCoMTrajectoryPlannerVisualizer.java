@@ -239,9 +239,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
       scs.setCameraFix(7.5, 0.0, 0.5);
       scs.setCameraPosition(-2.0, 9.5, 6.0);
 
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-      simulationOverheadPlotterFactory.createOverheadPlotter();
+      if (scsParameters.getCreateGUI())
+      {
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         simulationOverheadPlotterFactory.createOverheadPlotter();
+      }
 
       scs.startOnAThread();
       simulate();
