@@ -14,7 +14,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.humanoidBehaviors.tools.FlatGroundPlanarRegionPublisher;
 
 public class AtlasNetworkProcessor
 {
