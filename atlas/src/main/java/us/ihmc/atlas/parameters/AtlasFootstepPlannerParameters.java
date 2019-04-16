@@ -6,11 +6,14 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 {
+   private static volatile boolean printed = false;
+
    private double idealFootstepWidth = 0.22; // unused?
    private double idealFootstepLength = 0.3; // unused?
    private double maxStepLength = 0.35;
@@ -34,11 +37,11 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 
    public AtlasFootstepPlannerParameters()
    {
-      try
+      Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
+
+      if (Files.exists(parametersPath))
       {
-         File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
+         File configurationFile = parametersPath.toFile();
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
 
          maxStepLength = filePropertyHelper.loadDoubleProperty("maxStepLength", maxStepLength);
@@ -57,11 +60,20 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
          maxXYWiggle = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner", maxXYWiggle);
          maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
          wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
+
+         if (!printed)
+         {
+            printed = true;
+            LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
+         }
       }
-      catch (IOException e)
+      else
       {
-         LogTools.warn("Could not load parameters from {}", Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME));
-         e.printStackTrace();
+         if (!printed)
+         {
+            printed = true;
+            LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
+         }
       }
    }
 
