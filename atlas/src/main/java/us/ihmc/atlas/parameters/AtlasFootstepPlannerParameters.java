@@ -7,6 +7,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -38,11 +39,10 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    public AtlasFootstepPlannerParameters()
    {
       Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
-      try
+
+      if (Files.exists(parametersPath))
       {
          File configurationFile = parametersPath.toFile();
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
          FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
 
          maxStepLength = filePropertyHelper.loadDoubleProperty("maxStepLength", maxStepLength);
@@ -68,12 +68,11 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
             LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
          }
       }
-      catch (IOException e)
+      else
       {
          if (!printed)
          {
             printed = true;
-            LogTools.error(e.getMessage());
             LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
          }
       }
