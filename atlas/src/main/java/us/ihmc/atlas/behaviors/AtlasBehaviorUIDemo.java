@@ -4,41 +4,27 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.commons.collections4.ListUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
-import us.ihmc.humanoidBehaviors.tools.FlatGroundPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
-import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Runs self contained behavior demo.
@@ -64,11 +50,6 @@ public class AtlasBehaviorUIDemo extends Application
          new Thread(() -> {
             LogTools.info("Creating bipedal support region publisher");
             new BipedalSupportPlanarRegionPublisher(createRobotModel()).start();
-         }).start();
-
-         new Thread(() -> {
-            LogTools.info("Creating flat ground region publisher");
-            new FlatGroundPlanarRegionPublisher();
          }).start();
       }
 

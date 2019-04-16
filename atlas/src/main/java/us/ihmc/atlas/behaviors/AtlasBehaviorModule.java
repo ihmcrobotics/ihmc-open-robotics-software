@@ -5,12 +5,8 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.FlatGroundPlanarRegionPublisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasBehaviorModule
 {
@@ -18,11 +14,9 @@ public class AtlasBehaviorModule
    private static final RobotTarget ATLAS_TARGET = RobotTarget.SCS;
 
    private MultiStageFootstepPlanningModule multiStageFootstepPlanningModule;
-   private FlatGroundPlanarRegionPublisher flatGroundPlanarRegionPublisher;
 
    public AtlasBehaviorModule()
    {
-
       new Thread(() ->
                  {
                     LogTools.info("Creating footstep toolbox");
@@ -32,19 +26,12 @@ public class AtlasBehaviorModule
                                                                                             DomainFactory.PubSubImplementation.FAST_RTPS);
                  }).start();
 
-      new Thread(() ->
-                 {
-                    LogTools.info("Creating flat ground region publisher");
-                    flatGroundPlanarRegionPublisher = new FlatGroundPlanarRegionPublisher();
-                 }).start();
-
       LogTools.info("Creating behavior module");
       BehaviorModule.createForBackpack(createRobotModel());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
                                                       {
                                                          multiStageFootstepPlanningModule.destroy();
-                                                         flatGroundPlanarRegionPublisher.shutdown();
                                                       }));
    }
 
