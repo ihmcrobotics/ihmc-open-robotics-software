@@ -169,7 +169,7 @@ public class QuadrupedBodyTeleopManager
          se3Trajectory.getLinearSelectionMatrix().setYSelected(true);
       }
       */
-      trajectoryPointMessage.setTime(desiredTime);
+      trajectoryPointMessage.setTime(desiredTime + timestamp.getDoubleValue());
    }
 
 }
