@@ -341,10 +341,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
          LogTools.debug("Estimator going to {}", requestedMode);
 
-//         if (drcStateEstimator != null)
+         if (drcStateEstimator != null)
             drcStateEstimator.requestStateEstimatorMode(requestedMode);
-//         if (ekfStateEstimator != null)
-//            ekfStateEstimator.requestStateEstimatorMode(requestedMode);
+         if (ekfStateEstimator != null)
+            ekfStateEstimator.requestStateEstimatorMode(requestedMode);
       });
    }
 
