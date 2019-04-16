@@ -43,6 +43,7 @@ import us.ihmc.ros2.Ros2Node;
 public class LIDARBasedREAModule
 {
    public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("REA_module", ROS2Tools.REA_MODULE);
+   public static final String CUSTOM_REGION_QUALIFIER = "/custom_region";
 
    private static final String ocTreeTimeReport = "OcTree update took: ";
    private static final String reportOcTreeStateTimeReport = "Reporting OcTree state took: ";

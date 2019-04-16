@@ -21,9 +21,14 @@ public class ROS2ModuleIdentifier
       this.moduleTopicQualifier = moduleTopicQualifier;
    }
 
-   public ROS2TopicQualifier deriveIOTopicQualifier(String localNodeName)
+   public ROS2TopicQualifier deriveIOTopicQualifierForSubscriber(String localNodeName)
    {
       return localNodeName.endsWith(moduleNodeName) ? ROS2TopicQualifier.INPUT : ROS2TopicQualifier.OUTPUT;
+   }
+
+   public ROS2TopicQualifier deriveIOTopicQualifierForPublisher(String localNodeName)
+   {
+      return localNodeName.endsWith(moduleNodeName) ? ROS2TopicQualifier.OUTPUT : ROS2TopicQualifier.INPUT;
    }
 
    /**
@@ -42,5 +47,10 @@ public class ROS2ModuleIdentifier
    public String getModuleTopicQualifier()
    {
       return moduleTopicQualifier;
+   }
+
+   public ROS2ModuleIdentifier qualifyMore(String moduleTopicQualifierPostfix)
+   {
+      return new ROS2ModuleIdentifier(moduleNodeName, moduleTopicQualifier + moduleTopicQualifierPostfix);
    }
 }
