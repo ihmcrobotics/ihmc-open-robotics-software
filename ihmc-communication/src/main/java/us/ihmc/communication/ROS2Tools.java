@@ -44,7 +44,6 @@ public class ROS2Tools
    public static final String XBOX_TELEOP_TOOLBOX = "/toolbox/teleop/xbox_teleop";
 
    public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
-   public static final String FLAT_GROUND_REGION_PUBLISHER = "/flat_ground_region_publisher";
    public static final String BEHAVIOR_MODULE = "/behavior";
    public static final String REA_MODULE = "/rea";
 
