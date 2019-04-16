@@ -31,7 +31,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   private static final double bodyShiftDuration = 0.1;
+   private static final double bodyShiftDuration = 0.6;
    private static final double comShiftDuration = 1.0;
 
    @BeforeEach
@@ -236,10 +236,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
-      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
-      runMovingBody(initialBodyHeight, orientationShift, -orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift , orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift, orientationShift, -orientationShift, orientationShift, heightDelta, orientationDelta);
       runMovingBody(initialBodyHeight - heightShift, -orientationShift, -orientationShift, -orientationShift, heightDelta, orientationDelta);
-      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
       runMovingBody(initialBodyHeight, 0.0, 0.0, 0.0, heightDelta, orientationDelta);
    }
 

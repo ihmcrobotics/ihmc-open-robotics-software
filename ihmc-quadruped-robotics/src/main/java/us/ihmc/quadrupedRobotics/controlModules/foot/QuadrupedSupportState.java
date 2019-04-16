@@ -153,6 +153,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       footBarelyLoaded.set(false);
       isFootSlipping.set(false);
+
+      updateHoldPositionSetpoints();
    }
 
 
