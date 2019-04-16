@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pubsub.DomainFactory;
 
 public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
@@ -37,7 +38,7 @@ public class VisGraphWithAStarToolboxDataSetTest extends FootstepPlannerToolboxD
       test.pubSubImplementation = DomainFactory.PubSubImplementation.INTRAPROCESS;
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, "20171216_111326_CrossoverPlatforms");
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171216_111326_CrossoverPlatforms);
 
       ThreadTools.sleepForever();
       test.tearDown();
