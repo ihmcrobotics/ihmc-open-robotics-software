@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -336,7 +337,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber -> {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
+         LogTools.debug("Estimator recieved message: controller going to {}", HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
+         LogTools.debug("Estimator going to {}", requestedMode);
 
          if (drcStateEstimator != null)
             drcStateEstimator.requestStateEstimatorMode(requestedMode);
