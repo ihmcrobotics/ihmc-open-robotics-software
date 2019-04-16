@@ -245,6 +245,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       if (atomicOperationMode.get() != null)
       {
          operatingMode.set(atomicOperationMode.getAndSet(null));
+         LogTools.debug("Estimator went to {}", operatingMode.getEnumValue());
       }
 
       jointStateUpdater.updateJointState();
