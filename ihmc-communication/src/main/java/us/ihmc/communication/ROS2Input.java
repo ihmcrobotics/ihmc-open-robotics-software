@@ -18,22 +18,22 @@ public class ROS2Input<T>
    {
       this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), message -> true);
    }
-   
+
    public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue)
    {
       this(ros2Node, messageType, robotName, identifier, initialValue, message -> true);
    }
-   
+
    public ROS2Input(Ros2Node ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
    {
       this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), messageFilter);
    }
 
-   public ROS2Input(Ros2Node ros2Node, 
-                    Class<T> messageType, 
-                    String robotName, 
+   public ROS2Input(Ros2Node ros2Node,
+                    Class<T> messageType,
+                    String robotName,
                     ROS2ModuleIdentifier identifier,
-                    T initialValue, 
+                    T initialValue,
                     MessageFilter<T> messageFilter)
    {
       atomicReference = new AtomicReference<>(initialValue);
