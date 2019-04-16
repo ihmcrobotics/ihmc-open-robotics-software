@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * This factory helps by adding complete do nothing state implementations for every enum value
  * and providing a one to many state transition condition.
  */
-public class EnhancedStateMachineFactory<K extends Enum<K>>
+public class EnumBasedStateMachineFactory<K extends Enum<K>>
 {
    private final Class<K> keyType;
    private final StateMachineFactory<K, State> factory;
@@ -24,7 +24,7 @@ public class EnhancedStateMachineFactory<K extends Enum<K>>
     *
     * @param keyType
     */
-   public EnhancedStateMachineFactory(Class<K> keyType)
+   public EnumBasedStateMachineFactory(Class<K> keyType)
    {
       factory = new StateMachineFactory<>(keyType);
       this.keyType = keyType;
