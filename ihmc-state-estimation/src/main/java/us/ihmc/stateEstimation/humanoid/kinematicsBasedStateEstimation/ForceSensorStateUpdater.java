@@ -17,6 +17,7 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -60,10 +61,11 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
    private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
-   private final SideDependentList<EndEffectorWrenchEstimator> footWrenchEstimators;
+   private final JointTorqueBasedWrenchSensorDriftEstimator footWrenchSensorDriftEstimator;
 
    private final SideDependentList<YoFrameVector3D> footForceCalibrationOffsets;
    private final SideDependentList<YoFrameVector3D> footTorqueCalibrationOffsets;
+   private final SideDependentList<YoFixedFrameWrench> unbiasedFootWrenches;
 
    private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
 
@@ -102,23 +104,17 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       if (hasFootForceSensors)
       {
          footForceSensorDefinitions = new SideDependentList<>();
-         footWrenchEstimators = new SideDependentList<>();
          SideDependentList<String> footForceSensorNames = stateEstimatorParameters.getFootForceSensorNames();
 
          for (RobotSide robotSide : RobotSide.values)
          {
             ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(footForceSensorNames.get(robotSide));
             footForceSensorDefinitions.put(robotSide, forceSensorDefinition);
-            footWrenchEstimators.put(robotSide,
-                                     new EndEffectorWrenchEstimator(forceSensorDefinition.getSensorName(),
-                                                                    rootJoint.getSuccessor(),
-                                                                    forceSensorDefinition.getRigidBody(),
-                                                                    forceSensorDefinition.getSensorFrame(),
-                                                                    registry));
          }
 
          footForceCalibrationOffsets = new SideDependentList<>();
          footTorqueCalibrationOffsets = new SideDependentList<>();
+         unbiasedFootWrenches = new SideDependentList<>();
 
          calibrateFootForceSensors = new YoBoolean("calibrateFootForceSensors", registry);
          calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
@@ -143,15 +139,34 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 
             footForceCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
             footTorqueCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
+
+            unbiasedFootWrenches.put(robotSide, new YoFixedFrameWrench(namePrefix + "UnbiasedFootWrench", measurementFrame, measurementFrame, registry));
+         }
+
+         if (stateEstimatorParameters.createFootWrenchSensorDriftEstimator())
+         {
+            double updateDT = stateEstimatorParameters.getEstimatorDT();
+
+            footWrenchSensorDriftEstimator = new JointTorqueBasedWrenchSensorDriftEstimator(rootJoint,
+                                                                                            updateDT,
+                                                                                            robotMotionStatusHolder,
+                                                                                            footForceSensorDefinitions.values(),
+                                                                                            inputForceSensorDataHolder,
+                                                                                            registry);
+         }
+         else
+         {
+            footWrenchSensorDriftEstimator = null;
          }
       }
       else
       {
          footForceSensorDefinitions = null;
-         footWrenchEstimators = null;
          footForceCalibrationOffsets = null;
          footTorqueCalibrationOffsets = null;
          calibrateFootForceSensors = null;
+         unbiasedFootWrenches = null;
+         footWrenchSensorDriftEstimator = null;
       }
 
       if (hasWristForceSensors)
@@ -283,6 +298,9 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 
    public void initialize()
    {
+      if (footWrenchSensorDriftEstimator != null)
+         footWrenchSensorDriftEstimator.reset();
+
       updateForceSensorState();
    }
 
@@ -310,7 +328,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       {
          calibrateFootForceSensors.set(false);
          calibrateFootForceSensors();
+         footWrenchSensorDriftEstimator.reset();
       }
+
+      footWrenchSensorDriftEstimator.update();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -324,9 +345,10 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          tempWrench.getLinearPart().sub(tempForce);
          tempWrench.getAngularPart().sub(tempTorque);
 
-         outputForceSensorDataHolder.setForceSensorValue(footForceSensorDefinition, tempWrench);
+         unbiasedFootWrenches.get(robotSide).set(tempWrench);
+         unbiasedFootWrenches.get(robotSide).sub(footWrenchSensorDriftEstimator.getSensortDriftBias(footForceSensorDefinition));
 
-         footWrenchEstimators.get(robotSide).calculate();
+         outputForceSensorDataHolder.setForceSensorValue(footForceSensorDefinition, tempWrench);
       }
    }
 
