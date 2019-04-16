@@ -13,7 +13,9 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -140,6 +142,24 @@ public abstract class QuadrupedToolboxModule
 
       registerExtraSubscribers(realtimeRos2Node);
       realtimeRos2Node.spin();
+   }
+
+   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   {
+      rootRegistry.addChild(registry);
+      if (rootGraphicsListRegistry != null)
+      {
+         ArrayList<YoGraphicsList> graphicsLists = new ArrayList<>();
+         ArrayList<ArtifactList> artifactsLists = new ArrayList<>();
+
+         yoGraphicsListRegistry.getRegisteredYoGraphicsLists(graphicsLists);
+         yoGraphicsListRegistry.getRegisteredArtifactLists(artifactsLists);
+
+         for (YoGraphicsList graphicsList : graphicsLists)
+            rootGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+         for (ArtifactList artifactList : artifactsLists)
+            rootGraphicsListRegistry.registerArtifactList(artifactList);
+      }
    }
 
    protected void setTimeWithoutInputsBeforeGoingToSleep(double time)
