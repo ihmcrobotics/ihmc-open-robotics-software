@@ -8,7 +8,7 @@ import java.util.function.DoublePredicate;
 /**
  * Allows the user to ignore inapplicable methods and utilize lambdas if desired.
  */
-public class FriendlyState implements State
+public class MutableState implements State
 {
    private Runnable onEntry;
    private DoubleConsumer doAction;

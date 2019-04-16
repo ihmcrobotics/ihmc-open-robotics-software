@@ -17,10 +17,10 @@ public class EnhancedStateMachineFactory<K extends Enum<K>>
 {
    private final Class<K> keyType;
    private final StateMachineFactory<K, State> factory;
-   private final HashMap<K, FriendlyState> stateMap;
+   private final HashMap<K, MutableState> stateMap;
 
    /**
-    * Create default name and registry. Initialize with all enum values as a FriendlyState.
+    * Create default name and registry. Initialize with all enum values as a MutableState.
     *
     * @param keyType
     */
@@ -34,9 +34,9 @@ public class EnhancedStateMachineFactory<K extends Enum<K>>
       stateMap = new HashMap<>();
       for (K value : EnumSet.allOf(keyType))
       {
-         FriendlyState friendlyState = new FriendlyState();
-         getFactory().addState(value, friendlyState);
-         getStateMap().put(value, friendlyState);
+         MutableState mutableState = new MutableState();
+         getFactory().addState(value, mutableState);
+         getStateMap().put(value, mutableState);
       }
    }
 
@@ -73,7 +73,7 @@ public class EnhancedStateMachineFactory<K extends Enum<K>>
       return factory;
    }
 
-   public HashMap<K, FriendlyState> getStateMap()
+   public HashMap<K, MutableState> getStateMap()
    {
       return stateMap;
    }
