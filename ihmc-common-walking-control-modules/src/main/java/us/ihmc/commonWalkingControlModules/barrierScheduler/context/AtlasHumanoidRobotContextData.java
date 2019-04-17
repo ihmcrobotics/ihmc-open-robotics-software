@@ -1,11 +1,9 @@
-package us.ihmc.atlas.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.realtime.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.realtime.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;

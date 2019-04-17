@@ -1,6 +1,5 @@
-package us.ihmc.atlas.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import us.ihmc.realtime.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;

@@ -1,4 +1,4 @@
-package us.ihmc.realtime.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
