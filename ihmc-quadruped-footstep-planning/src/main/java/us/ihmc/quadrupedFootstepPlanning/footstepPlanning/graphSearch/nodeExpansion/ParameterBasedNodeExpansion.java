@@ -7,7 +7,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -40,7 +39,11 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      RobotQuadrant nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
+      RobotQuadrant nextQuadrant;
+      if (xGaitSettings.getEndPhaseShift() > 180.0)
+         nextQuadrant = movingQuadrant.getNextReversedRegularGaitSwingQuadrant();
+      else
+         nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
 
       int oldXIndex = node.getXIndex(nextQuadrant);
       int oldYIndex = node.getYIndex(nextQuadrant);
@@ -53,7 +56,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
       nodeOrientation.transform(clearanceVector);
 
-      for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepReach(); movingX += FootstepNode.gridSizeXY)
+      for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepLength(); movingX += FootstepNode.gridSizeXY)
       {
          for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += FootstepNode.gridSizeXY)
          {

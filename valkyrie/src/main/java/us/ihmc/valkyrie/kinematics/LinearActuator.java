@@ -7,9 +7,6 @@ public class LinearActuator
    private double position;
    private double velocity;
    private double effort;
-   private double positionCommand;
-   private double velocityCommand;
-   private double effortCommand;
 
    public LinearActuator(String name)
    {

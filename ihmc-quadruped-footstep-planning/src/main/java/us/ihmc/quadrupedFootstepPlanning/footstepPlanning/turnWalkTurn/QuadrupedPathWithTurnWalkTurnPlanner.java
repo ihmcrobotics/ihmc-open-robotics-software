@@ -1,22 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
-import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarGroundPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PlanarRegionBasedPointFootSnapper;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,7 +35,7 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    private final PlanarRegionBasedPointFootSnapper planarRegionSnapper;
 
 
-   public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForQuadrupedFootstepPlanner waypointPathPlanner, YoQuadrupedXGaitSettings xGaitSettings,
+   public QuadrupedPathWithTurnWalkTurnPlanner(WaypointsForQuadrupedFootstepPlanner waypointPathPlanner, QuadrupedXGaitSettingsBasics xGaitSettings,
                                                YoDouble timestamp, PointFootSnapperParameters pointFootSnapperParameters,
                                                QuadrupedReferenceFrames referenceFrames, YoGraphicsListRegistry graphicsListRegistry,
                                                YoVariableRegistry parentRegistry)

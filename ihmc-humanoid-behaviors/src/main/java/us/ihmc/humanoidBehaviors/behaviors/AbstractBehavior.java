@@ -63,8 +63,8 @@ public abstract class AbstractBehavior implements RobotController
    private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
    protected final String robotName;
 
-   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
-   private final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+   protected final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   protected final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
 
    protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
    protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
@@ -191,7 +191,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
-      publishTextToSpeack("Aborting Behavior");
+      publishTextToSpeech("Aborting Behavior");
 
       for (BehaviorService behaviorService : behaviorsServices)
       {
@@ -210,7 +210,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void pause()
    {
-      publishTextToSpeack("Pausing Behavior");
+      publishTextToSpeech("Pausing Behavior");
       isPaused.set(true);
 
       for (BehaviorService behaviorService : behaviorsServices)
@@ -229,7 +229,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void resume()
    {
-      publishTextToSpeack("Resuming Behavior");
+      publishTextToSpeech("Resuming Behavior");
       isPaused.set(false);
       isPaused.set(false);
 
@@ -241,7 +241,7 @@ public abstract class AbstractBehavior implements RobotController
       onBehaviorResumed();
    }
 
-   public void publishTextToSpeack(String textToSpeak)
+   public void publishTextToSpeech(String textToSpeak)
    {
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }

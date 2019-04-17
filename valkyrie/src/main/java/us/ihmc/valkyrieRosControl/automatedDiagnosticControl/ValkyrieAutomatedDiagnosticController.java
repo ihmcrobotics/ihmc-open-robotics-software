@@ -1,6 +1,8 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.*;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -43,6 +45,7 @@ import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -54,11 +57,9 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.SettableTimestampProvider;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReaderFactory;
@@ -146,8 +147,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create network servers/clients
        */
       double diagnosticControllerDT = robotModel.getEstimatorDT();
-      yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY),
-                                              robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
+      yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
 
       /*
        * Create sensor reader
@@ -298,15 +298,23 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
+      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.UNKNOWN);
       StateEstimatorController stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
                                                                                      sensorOutputMapReadOnly, centerOfMassDataHolderToUpdate,
                                                                                      imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
-                                                                                     new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
+                                                                                     robotMotionStatusHolder, bipedFeetMap, yoGraphicsListRegistry);
 
       registry.addChild(stateEstimator.getYoVariableRegistry());
 
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters, gravityMagnitude,
-                                                            yoGraphicsListRegistry, registry);
+      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
+                                                            sensorOutputMapReadOnly,
+                                                            forceSensorDataHolderToUpdate,
+                                                            stateEstimatorParameters,
+                                                            gravityMagnitude,
+                                                            robotMotionStatusHolder,
+                                                            yoGraphicsListRegistry,
+                                                            registry);
 
       return stateEstimator;
    }

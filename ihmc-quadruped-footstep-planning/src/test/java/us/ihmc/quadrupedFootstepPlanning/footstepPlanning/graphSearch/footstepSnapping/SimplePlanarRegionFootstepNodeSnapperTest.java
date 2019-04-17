@@ -1,344 +1,438 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertEquals;
 
 public class SimplePlanarRegionFootstepNodeSnapperTest
 {
-   private final Random random = new Random(1209L);
-   private final double epsilon = 1e-8;
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(new DefaultFootstepPlannerParameters());
-   private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
-
-   private static final int iters = 100;
-
-   @BeforeEach
-   public void setup()
-   {
-      unitSquare.addVertex(-0.5, -0.5);
-      unitSquare.addVertex(0.5, -0.5);
-      unitSquare.addVertex(-0.5, 0.5);
-      unitSquare.addVertex(0.5, 0.5);
-      unitSquare.update();
-   }
-
    @Test
-   public void testIdentity()
+   public void testSnapToFlatSquare()
    {
-      double frontLeftX = -0.3;
-      double frontLeftY = 2.2;
-      double frontRightX = -0.35;
-      double frontRightY = 1.9;
-      double hindLeftX = -0.85;
-      double hindLeftY = 2.1;
-      double hindRightX = -0.8;
-      double hindRightY = 1.8;
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
+      double squareHeight = 4.6994;
+      double epsilon = 1e-6;
 
-      QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
-      QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.0, 0.0, squareHeight);
+      generator.addRectangle(10.0, 10.0);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-         nodeTransforms.put(robotQuadrant, nodeTransform);
-         transformsToWorld.put(robotQuadrant, transformToWorld);
-      }
-
-      doAFullFootholdTest(transformsToWorld, nodeToSnap);
-   }
-
-   @Test
-   public void testVerticalTranslation()
-   {
-      double frontLeftX = 2.5;
-      double frontLeftY = -0.5;
-      double frontRightX = 2.3;
-      double frontRightY = -0.9;
-      double hindLeftX = 1.5;
-      double hindLeftY = -0.4;
-      double hindRightX = 1.4;
-      double hindRightY = -0.8;
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
-
-      QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
-      QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         transformToWorld.setTranslationZ(-1.0);
-
-         nodeTransforms.put(robotQuadrant, nodeTransform);
-         transformsToWorld.put(robotQuadrant, transformToWorld);
-      }
-
-      doAFullFootholdTest(transformsToWorld, nodeToSnap);
-   }
-
-   @Test
-   public void testSimpleRotation()
-   {
-      double frontLeftX = 0.25;
-      double frontLeftY = 0.25;
-      double frontRightX = 0.25;
-      double frontRightY = -0.25;
-      double hindLeftX = -0.25;
-      double hindLeftY = 0.25;
-      double hindRightX = -0.25;
-      double hindRightY = -0.25;
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
-
-      QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
-      QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-
-         nodeTransforms.put(robotQuadrant, nodeTransform);
-         transformsToWorld.put(robotQuadrant, transformToWorld);
-      }
-
-      doAFullFootholdTest(transformsToWorld, nodeToSnap);
-   }
-
-   @Test
-   public void testSimpleTranslationAndRotation()
-   {
-      double frontLeftX = 1.1;
-      double frontLeftY = 0.0;
-      double frontRightX = 1.1;
-      double frontRightY = -0.5;
-      double hindLeftX = 0.1;
-      double hindLeftY = 0.0;
-      double hindRightX = 0.1;
-      double hindRightY = -0.5;
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
-
-      QuadrantDependentList<RigidBodyTransform> nodeTransforms = new QuadrantDependentList<>();
-      QuadrantDependentList<RigidBodyTransform> transformsToWorld = new QuadrantDependentList<>();
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
-
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-         transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-         transformToWorld.setTranslationZ(-1.0);
-
-         nodeTransforms.put(robotQuadrant, nodeTransform);
-         transformsToWorld.put(robotQuadrant, transformToWorld);
-      }
-
-      doAFullFootholdTest(transformsToWorld, nodeToSnap);
-   }
-
-
-   @Test
-   public void testSimpleTranslationAndRotation2()
-   {
-      double frontLeftX = 1.1;
-      double frontLeftY = 0.0;
-
-      double frontRightX = 1.1;
-      double frontRightY = -0.5;
-      double hindLeftX = 0.1;
-      double hindLeftY = 0.0;
-      double hindRightX = 0.1;
-      double hindRightY = -0.5;
-
-      ConvexPolygon2D groundPlane = new ConvexPolygon2D();
-      groundPlane.addVertex(2.0, 2.0);
-      groundPlane.addVertex(2.0, -2.0);
-      groundPlane.addVertex(-2.0, -2.0);
-      groundPlane.addVertex(-2.0, 2.0);
-      groundPlane.update();
-      PlanarRegion groundPlaneRegion = new PlanarRegion(new RigidBodyTransform(), groundPlane);
-
-      ConvexPolygon2D smallRegions = new ConvexPolygon2D();
-      smallRegions.addVertex(0.2, 0.2);
-      smallRegions.addVertex(0.2, -0.2);
-      smallRegions.addVertex(-0.2, 0.2);
-      smallRegions.addVertex(-0.2, -0.2);
-      smallRegions.update();
-
-      FramePose3D frontLeftPose = new FramePose3D();
-      frontLeftPose.setPosition(1.05, 0.05, 0.16);
-      frontLeftPose.setOrientationYawPitchRoll(Math.toRadians(5.0), Math.toRadians(5.0), Math.toRadians(5.0));
-      RigidBodyTransform frontLeftTransform = new RigidBodyTransform();
-      frontLeftPose.get(frontLeftTransform);
-//      frontLeftTransform.invert();
-
-      PlanarRegion frontLeftRegion = new PlanarRegion(frontLeftTransform, smallRegions);
-
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-      planarRegionsList.addPlanarRegion(groundPlaneRegion);
-      planarRegionsList.addPlanarRegion(frontLeftRegion);
-
-
-
-      FootstepNode nodeToSnap = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftX, frontLeftY, frontRightX, frontRightY, hindLeftX, hindLeftY, hindRightX,
-                                                 hindRightY, frontLeftX - hindRightX, frontLeftY - hindRightY);
-
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(new DefaultFootstepPlannerParameters());
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
       snapper.setPlanarRegions(planarRegionsList);
 
-      RigidBodyTransform transform = new RigidBodyTransform();
-      Point3D frontLeftInPlanarFrame = new Point3D(frontLeftX, frontLeftY, frontLeftRegion.getPlaneZGivenXY(frontLeftX, frontLeftY));
-      frontLeftRegion.getTransformToWorld(transform);
-      transform.inverseTransform(frontLeftInPlanarFrame);
-      assertEquals(frontLeftInPlanarFrame.getZ(), 0.0, 1e-5);
+      int xIndex = -3;
+      int yIndex = 5;
 
-
-
-      double snappedX = nodeToSnap.getX(RobotQuadrant.FRONT_LEFT);
-      double snappedY = nodeToSnap.getY(RobotQuadrant.FRONT_LEFT);
-
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToSnap.getXIndex(RobotQuadrant.FRONT_LEFT), nodeToSnap.getYIndex(RobotQuadrant.FRONT_LEFT));
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(xIndex, yIndex);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
-      Point3D snappedPoint = new Point3D(snappedX, snappedY, 0.0);
-      snapTransform.transform(snappedPoint);
 
+      Assertions.assertFalse(snapTransform.hasRotation());
 
-      Point3D snappedPointExpected = new Point3D(snappedX, snappedY, frontLeftRegion.getPlaneZGivenXY(snappedX, snappedY));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(snappedPointExpected, snappedPoint, FootstepNode.gridSizeXY);
+      Vector3D expectedSnapTransform = new Vector3D();
+      expectedSnapTransform.set(0.0, 0.0, squareHeight);
+      Assertions.assertTrue(snapTransform.getTranslationVector().epsilonEquals(expectedSnapTransform, epsilon));
    }
 
    @Test
-   public void testRandomFullFootholds()
+   public void testSnapToAngledSquare()
    {
-      RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
+      double squareHeightAtOrigin = 3.909;
+      double squareRoll = 0.33;
+      double squarePitch = -0.2;
+      double epsilon = 1e-6;
 
-      for (int i = 0; i < iters; i++)
-      {
-         QuadrantDependentList<RigidBodyTransform> regionToWorldTransforms = new QuadrantDependentList<>();
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.0, 0.0, squareHeightAtOrigin);
+      generator.rotate(new Quaternion(0.0, squareRoll, squarePitch));
+      generator.addRectangle(10.0, 10.0);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-         FootstepNode node = FootstepPlanningRandomTools.createRandomFootstepNode(random, 5.0);
-
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, node, nodeToWorldTransform);
-
-            RigidBodyTransform regionToWorldTransform = new RigidBodyTransform(nodeToWorldTransform);
-            double xRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
-            double yRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
-            regionToWorldTransform.setRotationEuler(xRotation, yRotation, 0.0);
-            regionToWorldTransform.setTranslationZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
-
-            regionToWorldTransforms.put(robotQuadrant, regionToWorldTransform);
-         }
-
-         doAFullFootholdTest(regionToWorldTransforms, node);
-      }
-   }
-
-   private void doAFullFootholdTest(QuadrantDependentList<RigidBodyTransform> regionToWorldFrameTransforms, FootstepNode nodeToSnap)
-   {
-      QuadrantDependentList<Point2D> footPositions = new QuadrantDependentList<>();
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         RigidBodyTransform nodeTransform = new RigidBodyTransform();
-         FootstepNodeTools.getNodeTransformToWorld(robotQuadrant, nodeToSnap, nodeTransform);
-
-         Point2D footPosition = new Point2D();
-         footPosition.applyTransform(nodeTransform, false);
-
-         footPositions.put(robotQuadrant, footPosition);
-      }
-
-      List<PlanarRegion> planarRegions = createPlanarRegion(regionToWorldFrameTransforms, footPositions);
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
       snapper.setPlanarRegions(planarRegionsList);
 
+      int xIndex = 4;
+      int yIndex = -2;
+      double x = xIndex * FootstepNode.gridSizeXY;
+      double y = yIndex * FootstepNode.gridSizeXY;
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToSnap.getXIndex(robotQuadrant), nodeToSnap.getYIndex(robotQuadrant));
-         PlanarRegionsListPointSnapperTest
-               .assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(), regionToWorldFrameTransforms.get(robotQuadrant));
-      }
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+      Assertions.assertFalse(snapTransform.hasRotation());
+
+      PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(0);
+      double heightAtPoint = planarRegion.getPlaneZGivenXY(x, y);
+
+      Vector3D expectedSnapTransform = new Vector3D();
+      expectedSnapTransform.set(0.0, 0.0, heightAtPoint);
+      Assertions.assertTrue(snapTransform.getTranslationVector().epsilonEquals(expectedSnapTransform, epsilon));
    }
 
-   private List<PlanarRegion> createPlanarRegion(QuadrantDependentList<RigidBodyTransform> regionToWorldFrameTransforms,
-                                                 QuadrantDependentList<Point2D> footPositions)
+   @Test
+   public void testSnapperSnapsToHighestRegion()
    {
-      List<PlanarRegion> planarRegionList = new ArrayList<>();
+      Random random = new Random(399);
+      double epsilon = 1e-6;
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      double highestRegionHeight = 100.22;
+      double highestRegionPitch = 0.2;
+      double highestRegionRoll = -0.15;
+
+      generator.translate(0.0, 0.0, highestRegionHeight);
+      generator.rotate(new Quaternion(0.0, highestRegionPitch, highestRegionRoll));
+      generator.addRectangle(10.0, 10.0);
+
+      for (int i = 0; i < 10; i++)
       {
-         ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
-         RigidBodyTransform worldToRegionTransform = new RigidBodyTransform(regionToWorldFrameTransforms.get(robotQuadrant));
-         worldToRegionTransform.invert();
-
-         Point2DReadOnly vertex = footPositions.get(robotQuadrant);
-         double zHeight = getPlaneZGivenXY(regionToWorldFrameTransforms.get(robotQuadrant), vertex.getX(), vertex.getY());
-         Vector4D transformPoint = new Vector4D(vertex.getX(), vertex.getY(), zHeight, 1.0);
-         worldToRegionTransform.transform(transformPoint);
-         planarRegionPolygon.addVertex(transformPoint.getX(), transformPoint.getY());
-         planarRegionPolygon.update();
-
-         planarRegionList.add(new PlanarRegion(regionToWorldFrameTransforms.get(robotQuadrant), planarRegionPolygon));
+         generator.identity();
+         generator.translate(0.0, 0.0, EuclidCoreRandomTools.nextDouble(random, -50.0, highestRegionHeight - 10.0));
+         generator.rotate(new Quaternion(0.0, EuclidCoreRandomTools.nextDouble(random, 0.2), EuclidCoreRandomTools.nextDouble(random, 0.2)));
+         generator.addRectangle(10.0, 10.0);
       }
 
-      return planarRegionList;
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      snapper.setPlanarRegions(planarRegionsList);
+
+      int xIndex = 7;
+      int yIndex = -10;
+      double x = xIndex * FootstepNode.gridSizeXY;
+      double y = yIndex * FootstepNode.gridSizeXY;
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+      Assertions.assertFalse(snapTransform.hasRotation());
+
+      PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(0);
+      double heightAtPoint = planarRegion.getPlaneZGivenXY(x, y);
+
+      Vector3D expectedSnapTransform = new Vector3D();
+      expectedSnapTransform.set(0.0, 0.0, heightAtPoint);
+      Assertions.assertTrue(snapTransform.getTranslationVector().epsilonEquals(expectedSnapTransform, epsilon));
    }
 
-   // taken from PlanarRegion, should probably be made a public static method
-   public double getPlaneZGivenXY(RigidBodyTransform planeToWorldTransform, double xWorld, double yWorld)
+   @Test
+   public void testTryingToProjectFromFarAway()
    {
-      // The three components of the plane origin
-      double x0 = planeToWorldTransform.getM03();
-      double y0 = planeToWorldTransform.getM13();
-      double z0 = planeToWorldTransform.getM23();
-      // The three components of the plane normal
-      double a = planeToWorldTransform.getM02();
-      double b = planeToWorldTransform.getM12();
-      double c = planeToWorldTransform.getM22();
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(1.0, 1.0);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      // Given the plane equation: a*x + b*y + c*z + d = 0, with d = -(a*x0 + b*y0 + c*z0), we find z:
-      double z = a / c * (x0 - xWorld) + b / c * (y0 - yWorld) + z0;
-      return z;
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      snapper.setPlanarRegions(planarRegionsList);
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(1000, 1);
+      Assertions.assertTrue(snapData == FootstepNodeSnapData.emptyData());
+
+      snapData = snapper.snapFootstepNode(1, 1000);
+      Assertions.assertTrue(snapData == FootstepNodeSnapData.emptyData());
+   }
+
+   @Test
+   public void testProjectingIntoFlatSquare()
+   {
+      double epsilon = 1e-6;
+      int squareCellHalfWidth = 10;
+
+      double extraSquareWidth = 0.001;
+      double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + extraSquareWidth);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      snapper.setPlanarRegions(planarRegionsList);
+
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double expectedTranslation = projectionDistance - extraSquareWidth;
+
+      // test snapping on front edge
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(squareCellHalfWidth, 2);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on back edge
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, 3);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on left edge
+      snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-left corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-right corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-left corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-right corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), epsilon));
+   }
+
+   @Test
+   public void testSnapFromOutsideOfRegion()
+   {
+      double epsilon = 1e-6;
+      int squareCellHalfWidth = 10;
+
+      double widthShrinkAmount = - 0.5 * FootstepNode.gridSizeXY + 0.001;
+      double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + widthShrinkAmount);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      double projectionDistance = 0.0;
+      TestParameters parameters = new TestParameters(projectionDistance);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      double expectedTranslation = - widthShrinkAmount;
+
+      // test snapping on front edge
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(squareCellHalfWidth, 2);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on back edge
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, 3);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on left edge
+      snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-left corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-right corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-left corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-right corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), epsilon));
+   }
+
+   @Test
+   public void testSnapAndProjectFromOutsideOfRegion()
+   {
+      double epsilon = 1e-6;
+      int squareCellHalfWidth = 10;
+      double projectionDistance = 0.015;
+
+      // NOTE: this test will likely fail if FootstepNode.gridSizeXY is changed to be smaller than projectionDistance
+      double widthShrinkAmount = - 0.5 * FootstepNode.gridSizeXY + projectionDistance + 0.001;
+      double expectedTranslation = - widthShrinkAmount + projectionDistance;
+      double squareWidth = 2 * (squareCellHalfWidth * FootstepNode.gridSizeXY + widthShrinkAmount);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      TestParameters parameters = new TestParameters(projectionDistance);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      // test snapping on front edge
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(squareCellHalfWidth, 2);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on back edge
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, 3);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, 0.0), epsilon));
+
+      // test snapping on left edge
+      snapData = snapper.snapFootstepNode(1, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on right edge
+      snapData = snapper.snapFootstepNode(2, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-left corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on front-right corner
+      snapData = snapper.snapFootstepNode(squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(-expectedTranslation, expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-left corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, -expectedTranslation, 0.0), epsilon));
+
+      // test snapping on back-right corner
+      snapData = snapper.snapFootstepNode(-squareCellHalfWidth, -squareCellHalfWidth);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, expectedTranslation, 0.0), epsilon));
+   }
+
+   @Test
+   public void testProjectingIntoRolledSquare()
+   {
+      double epsilon = 1e-6;
+      double rollAngle = Math.toRadians(30.0);
+      int squareCellPlanarHalfWidth = 10;
+      double extraSquareWidth = 0.001;
+      double squareWidth = 2.0 * extraSquareWidth + 2.0 * (squareCellPlanarHalfWidth * FootstepNode.gridSizeXY) / Math.cos(rollAngle);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.rotate(rollAngle, Axis.X);
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      snapper.setPlanarRegions(planarRegionsList);
+
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(rollAngle);
+
+      PlanarRegion region = planarRegionsList.getPlanarRegion(0);
+
+      // test snapping on left edge
+      int xIndex = 1;
+      int yIndex = squareCellPlanarHalfWidth;
+      double x = xIndex * FootstepNode.gridSizeXY;
+      double y = yIndex * FootstepNode.gridSizeXY;
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      double regionHeight = region.getPlaneZGivenXY(x + translationVector.getX(), y + translationVector.getY());
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, - expectedTranslation, regionHeight), epsilon));
+
+      // test snapping on left edge
+      xIndex = 3;
+      yIndex = - squareCellPlanarHalfWidth;
+      x = xIndex * FootstepNode.gridSizeXY;
+      y = yIndex * FootstepNode.gridSizeXY;
+
+      snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      regionHeight = region.getPlaneZGivenXY(x + translationVector.getX(), y + translationVector.getY());
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(0.0, expectedTranslation, regionHeight), epsilon));
+   }
+
+   @Test
+   public void testProjectingIntoPitchedSquare()
+   {
+      double epsilon = 1e-6;
+      double pitchAngle = Math.toRadians(30.0);
+      int squareCellPlanarHalfWidth = 10;
+      double extraSquareWidth = 0.001;
+      double squareWidth = 2.0 * extraSquareWidth + 2.0 * (squareCellPlanarHalfWidth * FootstepNode.gridSizeXY) / Math.cos(pitchAngle);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.rotate(pitchAngle, Axis.Y);
+      generator.addRectangle(squareWidth, squareWidth);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      snapper.setPlanarRegions(planarRegionsList);
+
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(pitchAngle);
+
+      PlanarRegion region = planarRegionsList.getPlanarRegion(0);
+
+      // test snapping on front edge
+      int xIndex = squareCellPlanarHalfWidth;
+      int yIndex = -2;
+      double x = xIndex * FootstepNode.gridSizeXY;
+      double y = yIndex * FootstepNode.gridSizeXY;
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      Vector3DReadOnly translationVector = snapData.getSnapTransform().getTranslationVector();
+      double regionHeight = region.getPlaneZGivenXY(x + translationVector.getX(), y + translationVector.getY());
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(- expectedTranslation, 0.0, regionHeight), epsilon));
+
+      // test snapping on back edge
+      xIndex = - squareCellPlanarHalfWidth;
+      yIndex = 0;
+      x = xIndex * FootstepNode.gridSizeXY;
+      y = yIndex * FootstepNode.gridSizeXY;
+
+      snapData = snapper.snapFootstepNode(xIndex, yIndex);
+      translationVector = snapData.getSnapTransform().getTranslationVector();
+      regionHeight = region.getPlaneZGivenXY(x + translationVector.getX(), y + translationVector.getY());
+      Assertions.assertTrue(translationVector.epsilonEquals(new Vector3D(expectedTranslation, 0.0, regionHeight), epsilon));
+   }
+
+   private class TestParameters extends DefaultFootstepPlannerParameters
+   {
+      final double projectionDistance;
+
+      TestParameters(double projectionDistance)
+      {
+         this.projectionDistance = projectionDistance;
+      }
+
+      @Override
+      public double getProjectInsideDistance()
+      {
+         return projectionDistance;
+      }
    }
 }

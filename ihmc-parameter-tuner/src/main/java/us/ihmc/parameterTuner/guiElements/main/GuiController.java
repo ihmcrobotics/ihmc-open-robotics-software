@@ -61,6 +61,8 @@ public class GuiController
    private final List<GuiRegistry> allRegistries = new ArrayList<>();
    private final BooleanProperty rootRegistriesChanged = new SimpleBooleanProperty();
 
+   private final ParameterFileLoader loader = new ParameterFileLoader();
+
    public void initialize()
    {
       searchFieldParameters.textProperty().addListener(observable -> updateTree());
@@ -162,6 +164,7 @@ public class GuiController
       Map<String, Tuner> tunerMap = ParameterTuningTools.createTunerMap(registries);
       tuningTabManager.setTunerMap(tunerMap);
       tree.setRegistries(registries, tunerMap);
+      loader.setTunerMap(tunerMap);
       updateTree();
 
       changeCollector = new ChangeCollector();
@@ -234,5 +237,11 @@ public class GuiController
    public void close()
    {
       tuningTabManager.close();
+   }
+
+   @FXML
+   public void loadFromFile()
+   {
+      loader.load(tree.getScene());
    }
 }

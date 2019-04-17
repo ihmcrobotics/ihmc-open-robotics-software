@@ -4,17 +4,15 @@ import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
@@ -41,12 +39,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * Initial capacity for the lists used in this command. It is to prevent memory allocation at the
     * beginning of the control.
     */
-   private final int initialCapacity = 15;
-   /**
-    * The list of the joint names ordered as the {@link #joints} list. It is useful for when passing
-    * the command to another thread that uses a different instance of the same robot
-    */
-   private final List<String> jointNames = new ArrayList<>(initialCapacity);
+   private static final int initialCapacity = 15;
    /** The list of joints for which desired velocities are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
@@ -60,7 +53,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * The list of weights to use for each joint. The list follows the same ordering as the
     * {@link #joints} list. A higher weight means higher priority of the joint task.
     */
-   private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -81,36 +74,32 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
-         jointNames.add(other.jointNames.get(i));
-         weights.add().setValue(other.getWeight(i));
+         weights.add(other.getWeight(i));
       }
       desiredVelocities.set(other.desiredVelocities);
    }
 
    /**
-    * Clears the internal memory. This action does not generate garbage, the data is simply 'marked'
-    * as cleared but the memory will be recycled when setting up that command after calling this
-    * method.
+    * Clears the internal memory. This action does not generate garbage, the data is simply 'marked' as
+    * cleared but the memory will be recycled when setting up that command after calling this method.
     */
    public void clear()
    {
       joints.clear();
-      jointNames.clear();
       desiredVelocities.clear();
-      weights.clear();
+      weights.reset();
    }
 
    /**
     * Adds a joint to be controlled to this command.
     * <p>
-    * The joint is added at the last position, i.e. at the index
-    * {@code i == this.getNumberOfJoints()}. Note that it is registered as a hard constraint. It is
-    * highly recommended to set the weight afterwards or simply use
-    * {@link #addJoint(OneDoFJointBasics, double, double)} instead.
+    * The joint is added at the last position, i.e. at the index {@code i == this.getNumberOfJoints()}.
+    * Note that it is registered as a hard constraint. It is highly recommended to set the weight
+    * afterwards or simply use {@link #addJoint(OneDoFJointBasics, double, double)} instead.
     * </p>
     * 
     * @param joint the joint to be controlled.
-    * @param desiredAcceleration the joint velocity to be achieved in the next control tick.
+    * @param desiredVelocity the joint velocity to be achieved in the next control tick.
     */
    public void addJoint(OneDoFJointBasics joint, double desiredVelocity)
    {
@@ -120,19 +109,17 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    /**
     * Adds a joint to be controlled to this command.
     * <p>
-    * The joint is added at the last position, i.e. at the index
-    * {@code i == this.getNumberOfJoints()}.
+    * The joint is added at the last position, i.e. at the index {@code i == this.getNumberOfJoints()}.
     * </p>
     * 
     * @param joint the joint to be controlled.
-    * @param desiredAcceleration the joint velocity to be achieved in the next control tick.
+    * @param desiredVelocity the joint velocity to be achieved in the next control tick.
     * @param weight positive value that denotes the priority of the joint task.
     */
    public void addJoint(OneDoFJointBasics joint, double desiredVelocity, double weight)
    {
       joints.add(joint);
-      jointNames.add(joint.getName());
-      weights.add().setValue(weight);
+      weights.add(weight);
       DenseMatrix64F jointDesiredVelocity = desiredVelocities.add();
       jointDesiredVelocity.reshape(1, 1);
       jointDesiredVelocity.set(0, 0, desiredVelocity);
@@ -141,36 +128,34 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    /**
     * Adds a joint to be controlled to this command.
     * <p>
-    * The joint is added at the last position, i.e. at the index
-    * {@code i == this.getNumberOfJoints()}. Note that it is registered as a hard constraint. It is
-    * highly recommended to set the weight afterwards.
+    * The joint is added at the last position, i.e. at the index {@code i == this.getNumberOfJoints()}.
+    * Note that it is registered as a hard constraint. It is highly recommended to set the weight
+    * afterwards.
     * </p>
     * 
     * @param joint the joint to be controlled.
-    * @param desiredAcceleration the joint velocity to be achieved in the next control tick. It is
-    *           expected to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}.
-    *           Not modified.
+    * @param desiredVelocity the joint velocity to be achieved in the next control tick. It is expected
+    *           to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}. Not
+    *           modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
    public void addJoint(JointBasics joint, DenseMatrix64F desiredVelocity)
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
-      jointNames.add(joint.getName());
       desiredVelocities.add().set(desiredVelocity);
    }
 
    /**
     * Adds a joint to be controlled to this command.
     * <p>
-    * The joint is added at the last position, i.e. at the index
-    * {@code i == this.getNumberOfJoints()}.
+    * The joint is added at the last position, i.e. at the index {@code i == this.getNumberOfJoints()}.
     * </p>
     * 
     * @param joint the joint to be controlled.
-    * @param desiredAcceleration the joint velocity to be achieved in the next control tick. It is
-    *           expected to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}.
-    *           Not modified.
+    * @param desiredVelocity the joint velocity to be achieved in the next control tick. It is expected
+    *           to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}. Not
+    *           modified.
     * @param weight positive value that denotes the priority of the joint task.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
@@ -178,8 +163,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
-      jointNames.add(joint.getName());
-      weights.add().setValue(weight);
+      weights.add(weight);
       desiredVelocities.add().set(desiredVelocity);
    }
 
@@ -206,9 +190,9 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * </p>
     * 
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
-    * @param desiredVelocity the joint velocity to be achieved in the next control tick. It is
-    *           expected to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}.
-    *           Not modified.
+    * @param desiredVelocity the joint velocity to be achieved in the next control tick. It is expected
+    *           to be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}. Not
+    *           modified.
     * @throws RuntimeException if the {@code desiredVelocity} is not a N-by-1 vector.
     */
    public void setDesiredVelocity(int jointIndex, DenseMatrix64F desiredVelocity)
@@ -218,28 +202,8 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    }
 
    /**
-    * This method changes the internal references to each joint in this command to the joints
-    * contained in the map from joint name to {@code InverseDynamicsJoint}.
-    * <p>
-    * This is useful when passing the command to another thread which may hold onto a different
-    * instance of the same robot.
-    * </p>
-    * 
-    * @param nameToJointMap the map from joint names to the new joints that this command should
-    *           refer to. Not modified.
-    * @throws RuntimeException if the given map does not have all this command's joints.
-    */
-   public void retrieveJointsFromName(Map<String, ? extends JointBasics> nameToJointMap)
-   {
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         joints.set(i, nameToJointMap.get(jointNames.get(i)));
-      }
-   }
-
-   /**
-    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard constraint.
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will be
+    * treated as a hard constraint.
     * <p>
     * This is usually undesired as with improper commands setup as hard constraints the optimization
     * problem can simply be impossible to solve.
@@ -259,7 +223,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     */
    public void setWeight(int jointIndex, double weight)
    {
-      weights.get(jointIndex).setValue(weight);
+      weights.set(jointIndex, weight);
    }
 
    /**
@@ -270,7 +234,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    public void setWeight(double weight)
    {
       for (int jointIdx = 0; jointIdx < joints.size(); jointIdx++)
-         weights.get(jointIdx).setValue(weight);
+         weights.set(jointIdx, weight);
    }
 
    private void checkConsistency(JointBasics joint, DenseMatrix64F desiredVelocity)
@@ -284,8 +248,8 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * Note that the joints in this command should all be setup either as hard or soft constraints.
     * </p>
     * 
-    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
-    *         is it should be part of the optimization objective.
+    * @return {@code true} if this command should be considered as a hard constraint, {@code false} is
+    *         it should be part of the optimization objective.
     * @throws RuntimeException if not all the joints in this command are setup as hard constraints.
     */
    public boolean isHardConstraint()
@@ -317,7 +281,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     */
    public double getWeight(int jointIndex)
    {
-      return weights.get(jointIndex).doubleValue();
+      return weights.get(jointIndex);
    }
 
    /**
@@ -352,19 +316,8 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    }
 
    /**
-    * Gets the name of the {@code jointIndex}<sup>th</sup> joint in this command.
-    * 
-    * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
-    * @return the joint name.
-    */
-   public String getJointName(int jointIndex)
-   {
-      return jointNames.get(jointIndex);
-   }
-
-   /**
-    * Gets the desired velocity associated with the {@code jointIndex}<sup>th</sup> joint of
-    * this command.
+    * Gets the desired velocity associated with the {@code jointIndex}<sup>th</sup> joint of this
+    * command.
     *
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return the N-by-1 desired velocity where N is the joint number of degrees of freedom.
@@ -393,6 +346,37 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.JOINTSPACE;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointspaceVelocityCommand)
+      {
+         JointspaceVelocityCommand other = (JointspaceVelocityCommand) object;
+
+         if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+         }
+         if (!desiredVelocities.equals(other.desiredVelocities))
+            return false;
+         if (!weights.equals(other.weights))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    public String toString()

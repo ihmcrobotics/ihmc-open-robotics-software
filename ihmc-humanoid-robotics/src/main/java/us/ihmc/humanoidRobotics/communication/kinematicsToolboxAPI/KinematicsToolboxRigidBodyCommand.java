@@ -15,6 +15,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsToolboxRigidBodyCommand, KinematicsToolboxRigidBodyMessage>
 {
+   private long sequenceId;
    /** This is the unique hash code of the end-effector to be solved for. */
    private int endEffectorHashCode;
    /** This is the end-effector to be solved for. */
@@ -28,6 +29,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public void clear()
    {
+      sequenceId = 0;
       endEffectorHashCode = 0;
       endEffector = null;
       desiredPose.setToNaN(ReferenceFrame.getWorldFrame());
@@ -39,6 +41,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public void set(KinematicsToolboxRigidBodyCommand other)
    {
+      sequenceId = other.sequenceId;
       endEffectorHashCode = other.endEffectorHashCode;
       endEffector = other.endEffector;
       desiredPose.setIncludingFrame(other.desiredPose);
@@ -56,6 +59,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    public void set(KinematicsToolboxRigidBodyMessage message, Map<Integer, RigidBodyBasics> rigidBodyHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
+      sequenceId = message.getSequenceId();
       endEffectorHashCode = message.getEndEffectorHashCode();
       if (rigidBodyHashMap == null)
          endEffector = null;
@@ -78,11 +82,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
 
       if (referenceFrameResolver != null)
       {
-         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularSelection.getSelectionFrameId());
-         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearSelection.getSelectionFrameId());
+         ReferenceFrame angularSelectionFrame = referenceFrameResolver.getReferenceFrame(angularSelection.getSelectionFrameId());
+         ReferenceFrame linearSelectionFrame = referenceFrameResolver.getReferenceFrame(linearSelection.getSelectionFrameId());
          selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(angularWeight.getWeightFrameId());
-         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrameFromHashCode(linearWeight.getWeightFrameId());
+         ReferenceFrame angularWeightFrame = referenceFrameResolver.getReferenceFrame(angularWeight.getWeightFrameId());
+         ReferenceFrame linearWeightFrame = referenceFrameResolver.getReferenceFrame(linearWeight.getWeightFrameId());
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
       }
    }
@@ -122,5 +126,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    public boolean isCommandValid()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

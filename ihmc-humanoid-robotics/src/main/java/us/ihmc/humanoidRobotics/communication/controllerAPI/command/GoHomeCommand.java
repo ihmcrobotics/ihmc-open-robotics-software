@@ -21,6 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
 {
+   private long sequenceId;
    private final SideDependentList<EnumMap<HumanoidBodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(HumanoidBodyPart.class);
    private final EnumMap<HumanoidBodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(HumanoidBodyPart.class);
    private double trajectoryTime = 1.0;
@@ -55,6 +56,8 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    @Override
    public void clear()
    {
+      sequenceId = 0;
+
       for (HumanoidBodyPart bodyPart : HumanoidBodyPart.values)
       {
          if (bodyPart.isRobotSideNeeded())
@@ -76,6 +79,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    public void setFromMessage(GoHomeMessage message)
    {
       clear();
+      sequenceId = message.getSequenceId();
       executionDelayTime = message.getExecutionDelayTime();
       trajectoryTime = message.getTrajectoryTime();
 
@@ -96,6 +100,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    public void set(GoHomeCommand other)
    {
       clear();
+      sequenceId = other.sequenceId;
       trajectoryTime = other.trajectoryTime;
       executionDelayTime = other.getExecutionDelayTime();
 
@@ -219,5 +224,11 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    public boolean isDelayedExecutionSupported()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

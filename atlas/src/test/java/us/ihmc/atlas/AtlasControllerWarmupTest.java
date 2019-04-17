@@ -6,13 +6,11 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.warmup.HumanoidControllerWarumupTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.robotics.Assert;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class AtlasControllerWarmupTest

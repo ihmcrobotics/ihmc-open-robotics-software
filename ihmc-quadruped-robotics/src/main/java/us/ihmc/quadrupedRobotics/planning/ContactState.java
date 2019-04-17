@@ -4,7 +4,7 @@ public enum ContactState
 {
    IN_CONTACT, NO_CONTACT;
 
-   public boolean isLoadingBearing()
+   public boolean isLoadBearing()
    {
       switch (this)
       {

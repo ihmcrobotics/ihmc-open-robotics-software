@@ -242,8 +242,7 @@ public class RigidBodyPositionControlHelper
       desiredVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       feedForwardAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
 
-      feedbackControlCommand.set(desiredPosition, desiredVelocity);
-      feedbackControlCommand.setFeedForwardAction(feedForwardAcceleration);
+      feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, feedForwardAcceleration);
       feedbackControlCommand.setGains(gains);
 
       // This will improve the tracking with respect to moving trajectory frames.

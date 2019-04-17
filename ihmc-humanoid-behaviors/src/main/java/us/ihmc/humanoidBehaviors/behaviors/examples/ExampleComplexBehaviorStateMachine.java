@@ -62,7 +62,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("Starting Example Behavior");
+      publishTextToSpeech("Starting Example Behavior");
       super.onBehaviorEntered();
    }
 
@@ -82,7 +82,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Enabling Lidar");
+            publishTextToSpeech("Enabling Lidar");
             // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
          }
       };
@@ -92,7 +92,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Resetting Robot");
+            publishTextToSpeech("Resetting Robot");
             super.setBehaviorInput();
          }
       };
@@ -102,7 +102,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Setting Up Robot Pose");
+            publishTextToSpeech("Setting Up Robot Pose");
          }
       };
 
@@ -111,7 +111,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Doing Whole Body Behavior");
+            publishTextToSpeech("Doing Whole Body Behavior");
             FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
 

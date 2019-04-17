@@ -1,0 +1,7 @@
+start_position 0.0 0.0 0.0 
+goal_position 4.0 0.0 0.0
+start_yaw 0.0
+goal_yaw 0.0
+
+quadruped_planner_status dev
+quadruped_timeout 10.0

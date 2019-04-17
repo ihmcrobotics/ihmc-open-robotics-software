@@ -1,15 +1,10 @@
 package us.ihmc.atlas;
 
-import org.junit.jupiter.api.Test;
-
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
 {
@@ -95,57 +90,5 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    public int getNumberOfFootsteps()
    {
       return 5;
-   }
-
-   @Tag("allocation-slow")
-   @Test
-   @Override
-   public void testPauseWalking() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalking();
-   }
-
-   @Tag("allocation-slow")
-   @Test
-   @Override
-   public void testTwoIndependentSteps()throws SimulationExceededMaximumTimeException
-   {
-      super.testTwoIndependentSteps();
-   }
-
-   @Tag("allocation-slow")
-   @Test
-   @Override
-   public void testStartSecondStepWhileTransitioningToStand()throws SimulationExceededMaximumTimeException
-   {
-      super.testStartSecondStepWhileTransitioningToStand();
-   }
-
-   @Test
-   @Override
-   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingForward();
-   }
-
-   @Test
-   @Override
-   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingInitialTransfer();
-   }
-
-   @Tag("allocation-slow")
-   @Test
-   @Override
-   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingForwardInitialTransfer();
-   }
-
-   @Test
-   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
-   {
-      super.testPauseWalkingInitialTransferOneStep();
    }
 }

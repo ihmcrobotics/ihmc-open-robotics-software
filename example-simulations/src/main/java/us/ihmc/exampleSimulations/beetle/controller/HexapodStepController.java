@@ -110,7 +110,12 @@ public class HexapodStepController
          footInShinFrame.changeFrame(shinRigidBody.getBodyFixedFrame());
          shinRigidBodies.set(robotSextant, shinRigidBody);
          rigidBodiesToControl[i] = shinRigidBody;
-         swingTrajectoryGenerators.set(robotSextant, new TwoWaypointSwingGenerator(name, 0.02, groundClearance.getDoubleValue(), registry, yoGraphicsListRegistry));
+
+         double minSwingHeight = 0.02;
+         double maxSwingHeight = groundClearance.getDoubleValue();
+         double defaultSwingHeight = 0.02;
+
+         swingTrajectoryGenerators.set(robotSextant, new TwoWaypointSwingGenerator(name, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry, yoGraphicsListRegistry));
 
          YoFramePoint3D desiredPosition = new YoFramePoint3D(name + "desiredPosition", ReferenceFrame.getWorldFrame(), registry);
          desiredPositions.set(robotSextant, desiredPosition);
@@ -270,8 +275,7 @@ public class HexapodStepController
       currentPositions.get(robotSextant).set(currentPosition);
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = spatialFeedbackControlCommands.get(robotSextant);
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
 
       PlaneContactStateCommand contactState = contactStateUpdaters.get(robotSextant).getNotInContactState();

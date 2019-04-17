@@ -27,17 +27,49 @@
                 <Label text="Stance width" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <Label text="Step ground clearance" GridPane.halignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                <Label text="Step duration" GridPane.halignment="RIGHT" GridPane.columnIndex="3"  GridPane.rowIndex="1" />
-                <Label text="End double support duration" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                <Label text="End phase shift" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3" />
 
                 <Spinner fx:id="stanceLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <Spinner fx:id="stanceWidth" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                 <Spinner fx:id="stepGroundClearance" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
-                <Spinner fx:id="stepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="1" editable="true"/>
-                <Spinner fx:id="endDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2" editable="true"/>
-                <Spinner fx:id="endPhaseShift" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3" editable="true"/>
+                <Spinner fx:id="endPhaseShift" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="4" editable="true"/>
+                <ComboBox fx:id="quadrupedSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="5" editable="true"/>
+
+                <Label text="Step duration" GridPane.columnIndex="4"  GridPane.rowIndex="1" />
+                <Label text="End double support duration" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+                <Label text="Max Speed" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+
+                <Label text="Amble Slow" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                <Label text="Amble Medium" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                <Label text="Amble Fast" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+
+                <Label text="Trot Slow" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="6" />
+                <Label text="Trot Medium" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="7" />
+                <Label text="Trot Fast" GridPane.halignment="RIGHT" GridPane.columnIndex="3" GridPane.rowIndex="8" />
+
+                <Spinner fx:id="ambleSlowStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="2" editable="true"/>
+                <Spinner fx:id="ambleSlowEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="2" editable="true"/>
+                <Spinner fx:id="ambleSlowMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="2" editable="true"/>
+
+                <Spinner fx:id="ambleMediumStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="3" editable="true"/>
+                <Spinner fx:id="ambleMediumEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="3" editable="true"/>
+                <Spinner fx:id="ambleMediumMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="3" editable="true"/>
+
+                <Spinner fx:id="ambleFastStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="4" editable="true"/>
+                <Spinner fx:id="ambleFastEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="4" editable="true"/>
+                <Spinner fx:id="ambleFastMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="4" editable="true"/>
+
+                <Spinner fx:id="trotSlowStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="6" editable="true"/>
+                <Spinner fx:id="trotSlowEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="6" editable="true"/>
+                <Spinner fx:id="trotSlowMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="6" editable="true"/>
+
+                <Spinner fx:id="trotMediumStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="7" editable="true"/>
+                <Spinner fx:id="trotMediumEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="7" editable="true"/>
+                <Spinner fx:id="trotMediumMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="7" editable="true"/>
+
+                <Spinner fx:id="trotFastStepDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="4" GridPane.rowIndex="8" editable="true"/>
+                <Spinner fx:id="trotFastEndDoubleSupportDuration" GridPane.halignment="RIGHT" GridPane.columnIndex="5" GridPane.rowIndex="8" editable="true"/>
+                <Spinner fx:id="trotFastMaxSpeed" GridPane.halignment="RIGHT" GridPane.columnIndex="6" GridPane.rowIndex="8" editable="true"/>
 
             </children>
         </GridPane>

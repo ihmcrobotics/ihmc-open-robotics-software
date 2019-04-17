@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -7,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
@@ -14,13 +16,16 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
-import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.geometry.GroundPlaneEstimator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,6 +35,7 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 public class QuadrupedBodyOrientationManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
@@ -54,10 +60,16 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredAbsoluteYawVelocity = new FrameVector3D();
    private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
 
+   private final YoBoolean enableBodyPitchOscillation = new YoBoolean("enableBodyPitchOscillation", registry);
+   private final DoubleParameter bodyPitchOscillationMagnitude = new DoubleParameter("bodyPitchOscillationMagnitude", registry, Math.toRadians(0.0));
+   private final DoubleParameter bodyPitchOscillationFrequency = new DoubleParameter("bodyPitchOscillationFrequency", registry, 0.25);
+   private final YoFunctionGenerator pitchOscillationGenerator = new YoFunctionGenerator("bodyPitchFunctionGenerator", registry);
+
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
    private final Vector3DReadOnly bodyAngularWeight;
 
@@ -65,6 +77,8 @@ public class QuadrupedBodyOrientationManager
    {
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
+
+      pitchOscillationGenerator.setMode(YoFunctionGeneratorMode.SINE);
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
       bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
@@ -95,6 +109,12 @@ public class QuadrupedBodyOrientationManager
 
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    public void initialize()
@@ -212,6 +232,15 @@ public class QuadrupedBodyOrientationManager
    {
       offsetBodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
 
+      pitchOscillationGenerator.setAmplitude(bodyPitchOscillationMagnitude.getValue());
+      pitchOscillationGenerator.setFrequency(bodyPitchOscillationFrequency.getValue());
+      double pitchOffset;
+      if (enableBodyPitchOscillation.getBooleanValue())
+         pitchOffset = pitchOscillationGenerator.getValue(robotTimestamp.getDoubleValue());
+      else
+         pitchOffset = 0.0;
+
+
       desiredBodyOrientation.setToZero(desiredFrameToHold);
       desiredBodyOrientation.changeFrame(worldFrame);
 
@@ -220,18 +249,34 @@ public class QuadrupedBodyOrientationManager
       handleAbsoluteYawOrientationCommand();
 
       double bodyOrientationYaw = desiredBodyOrientation.getYaw();
-      double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
+      double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw) + pitchOffset;
       double bodyOrientationRoll = desiredBodyOrientation.getRoll();
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
 
       feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredBodyAngularAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredBodyOrientation, desiredBodyAngularVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
       yoBodyOrientationSetpoint.set(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
       yoBodyAngularAccelerationSetpoint.set(desiredBodyAngularAcceleration);
+   }
+
+   public void enableBodyPitchOscillation()
+   {
+      enableBodyPitchOscillation.set(true);
+      pitchOscillationGenerator.setAmplitude(bodyPitchOscillationMagnitude.getValue());
+      pitchOscillationGenerator.setFrequency(bodyPitchOscillationFrequency.getValue());
+   }
+
+   public void disableBodyPitchOscillation()
+   {
+      enableBodyPitchOscillation.set(false);
    }
 
    private void handleAbsoluteYawOrientationCommand()

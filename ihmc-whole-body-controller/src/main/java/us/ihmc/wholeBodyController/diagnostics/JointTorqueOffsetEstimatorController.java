@@ -141,7 +141,11 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          exportTorqueOffsets();
       }
 
-      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(oneDoFJoints);
+      for (int jointIndex = 0; jointIndex < oneDoFJoints.size(); jointIndex++)
+      {
+         OneDoFJointBasics joint = oneDoFJoints.get(jointIndex);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, joint.getTau());
+      }
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {

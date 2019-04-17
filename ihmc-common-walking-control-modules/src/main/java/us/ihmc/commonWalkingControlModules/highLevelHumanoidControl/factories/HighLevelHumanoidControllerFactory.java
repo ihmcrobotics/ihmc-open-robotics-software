@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -33,6 +34,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessa
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -63,6 +65,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
+   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier("ihmc_controller", ROS2Tools.HUMANOID_CONTROL_MODULE);
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -200,7 +204,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       if (controllerToolbox != null)
       {
-         System.out.println("In createdQueuedControllerCommandGenerator");
+         LogTools.info("Creating queued controller command generator");
 
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -350,9 +354,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
                                         YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                        ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputList lowLevelControllerOutput, JointBasics... jointsToIgnore)
+                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, JointDesiredOutputList lowLevelControllerOutput,
+                                        JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -379,9 +383,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
-                                                                 yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies,
-                                                                 yoGraphicsListRegistry, jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0,
+                                                                 feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)

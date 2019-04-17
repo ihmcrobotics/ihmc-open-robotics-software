@@ -1,6 +1,5 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -9,14 +8,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -35,11 +30,13 @@ public class AtlasRemoteFootstepPlannerUI extends Application
 
    private FootstepPlannerUI ui;
 
+   private MultiStageFootstepPlanningModule planningModule;
+
    @Override
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-      DRCRobotModel previewRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
+      DRCRobotModel previewModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
 
       RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
@@ -49,14 +46,14 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messager.startMessager();
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager, drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewRobotModel,
+                                              drcRobotModel.getVisibilityGraphsParameters(), drcRobotModel, previewModel,
                                               drcRobotModel.getContactPointParameters(), drcRobotModel.getWalkingControllerParameters());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.show();
 
       if (launchPlannerToolbox)
       {
-         new MultiStageFootstepPlanningModule(drcRobotModel, null, false);
+         planningModule = new MultiStageFootstepPlanningModule(drcRobotModel, null, false);
       }
    }
 
@@ -69,38 +66,16 @@ public class AtlasRemoteFootstepPlannerUI extends Application
       messageConverter.destroy();
       ui.stop();
 
+      if (planningModule != null)
+      {
+         planningModule.destroy();
+      }
+
       Platform.exit();
    }
 
    public static void main(String[] args)
    {
       launch(args);
-   }
-
-   private class AtlasLowLevelMessenger implements RobotLowLevelMessenger
-   {
-      private final IHMCRealtimeROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
-
-      public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
-      {
-         lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class,
-                                                           ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
-      }
-
-      @Override
-      public void sendFreezeRequest()
-      {
-         AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-         message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.FREEZE.toByte());
-         lowLevelModePublisher.publish(message);
-      }
-
-      @Override
-      public void sendStandRequest()
-      {
-         AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-         message.setRequestedAtlasLowLevelControlMode(AtlasLowLevelControlMode.STAND_PREP.toByte());
-         lowLevelModePublisher.publish(message);
-      }
    }
 }

@@ -6,24 +6,24 @@ import java.util.List;
 import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
 import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import org.junit.jupiter.api.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.allocations.AllocationProfiler;
 import us.ihmc.commons.allocations.AllocationRecord;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
+import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -61,8 +61,6 @@ public class GenericQuadrupedAllocationTest
       allocationProfiler.excludeAllocationsInsideClass(MeshDataGenerator.class.getName());
       allocationProfiler.excludeAllocationsInsideClass(JMEGraphicsObject.class.getName());
 
-      // TODO: fix these!
-      allocationProfiler.excludeAllocationsInsideClass(StatusMessageOutputManager.class.getName());
       // These methods are "safe" as they will only allocate to increase their capacity.
       allocationProfiler.excludeAllocationsInsideMethod(DenseMatrix64F.class.getName() + ".reshape");
       allocationProfiler.excludeAllocationsInsideMethod(TIntArrayList.class.getName() + ".ensureCapacity");
@@ -76,6 +74,8 @@ public class GenericQuadrupedAllocationTest
       // Ignore the following methods as they are related to printouts.
       allocationProfiler.excludeAllocationsInsideMethod(Throwable.class.getName() + ".printStackTrace");
       allocationProfiler.excludeAllocationsInsideMethod(PrintTools.class.getName() + ".print");
+      allocationProfiler.excludeAllocationsInsideClass(LogTools.class.getName());
+      allocationProfiler.excludeAllocationsInsideMethod(Class.class.getName() + ".getSimpleName");
 
       setup();
    }

@@ -12,6 +12,8 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic;
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.StartPositionTopic;
 
+import java.util.ArrayList;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.AmbientLight;
@@ -46,6 +48,10 @@ import us.ihmc.footstepPlanning.ui.viewers.NodeCheckerRenderer;
 import us.ihmc.footstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.footstepPlanning.ui.viewers.VisibilityGraphsRenderer;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -54,8 +60,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -230,7 +238,9 @@ public class FootstepPlannerUI
       }
       else
       {
+         recursivelyModifyGraphics(previewModelFactory.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
          walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
+         walkingPreviewVisualizer.getRootNode().setMouseTransparent(true);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
          mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
          walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
@@ -268,6 +278,41 @@ public class FootstepPlannerUI
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
+   }
+
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
+   {
+      if (joint == null)
+         return;
+      LinkDescription link = joint.getLink();
+      if (link == null)
+         return;
+      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
+
+      if (linkGraphics != null)
+      {
+         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+
+         if (graphics3dInstructions == null)
+            return;
+
+         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
+         {
+            if (primitive instanceof Graphics3DInstruction)
+            {
+               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
+               modelInstruction.setAppearance(ghostApperance);
+            }
+         }
+      }
+
+      if (joint.getChildrenJoints() == null)
+         return;
+
+      for (JointDescription child : joint.getChildrenJoints())
+      {
+         recursivelyModifyGraphics(child, ghostApperance);
+      }
    }
 
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)

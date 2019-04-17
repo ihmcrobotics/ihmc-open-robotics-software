@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertArrayEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -11,7 +12,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.NormOps;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -23,15 +23,12 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityA
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -51,12 +48,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
 
    @Test
    public void testConvergence() throws Exception
@@ -102,8 +93,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(50.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -191,8 +181,7 @@ public final class PointFeedbackControllerTest
       gains.setDerivativeGains(5.0);
       pointFeedbackControlCommand.setGains(gains);
       pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
-      pointFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
-      pointFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame));
+      pointFeedbackControlCommand.setInverseDynamics(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
       pointFeedbackController.setEnabled(true);
 
@@ -337,10 +326,8 @@ public final class PointFeedbackControllerTest
          pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
 
-         pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-         pointFeedbackControlCommand.setFeedForwardAction(feedForwardLinearAcceleration);
-         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
-         spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);

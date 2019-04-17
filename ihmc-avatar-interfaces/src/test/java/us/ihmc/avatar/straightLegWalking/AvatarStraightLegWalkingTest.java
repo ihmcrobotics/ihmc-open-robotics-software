@@ -1,6 +1,6 @@
 package us.ihmc.avatar.straightLegWalking;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -45,8 +43,6 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-
-   private static double simulationTime = 10.0;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -79,8 +75,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    {
 //      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       setupCamera();
@@ -147,8 +142,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(cinderBlockFieldEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), cinderBlockFieldEnvironment);
       drcSimulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
       ThreadTools.sleep(1000);
@@ -177,8 +171,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       //footsteps.setDefaultTransferDuration(0.5);
       //footsteps.setDefaultSwingDuration(1.0);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(stairsEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stairsEnvironment);
       drcSimulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
       ThreadTools.sleep(1000);
@@ -200,8 +193,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       setupCamera();
@@ -258,8 +250,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       double starterLength = 0.35;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -363,8 +354,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       double starterLength = 0.35;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -477,8 +467,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       double starterLength = 0.35;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, 0.0);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -550,6 +539,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose3D>> cinderBlockPoses)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
+      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
 
       int numberOfColumns = cinderBlockPoses.get(0).size();
 

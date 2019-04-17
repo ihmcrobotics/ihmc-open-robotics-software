@@ -160,12 +160,30 @@ public class DataExporterExcelWorkbookCreator
 
          addHeaderEntry(dataSheet, column, "Joint");
          String jointName = joint.getName();
-         addStringToSheet(dataSheet, column++, row, jointName);
+         addStringToSheet(dataSheet, column++, row, jointName); 
+         
+         addHeaderEntry(dataSheet, column, "Min joint position [rad]");
+         addNumberToSheet(dataSheet, column++, row, position.getMin());
+         
+         addHeaderEntry(dataSheet, column, "Max joint position [rad]");
+         addNumberToSheet(dataSheet, column++, row, position.getMax());
 
+         addHeaderEntry(dataSheet, column, "Min joint speed [rad / s]");
+         addNumberToSheet(dataSheet, column++, row, speed.getMin());
+         
+         addHeaderEntry(dataSheet, column, "Max joint speed [rad / s]");
+         addNumberToSheet(dataSheet, column++, row, speed.getMax());
+         
+         addHeaderEntry(dataSheet, column, "Min joint torque [Nm]");
+         addNumberToSheet(dataSheet, column++, row, torque.getMin());
+
+         addHeaderEntry(dataSheet, column, "Max joint torque [Nm]");
+         addNumberToSheet(dataSheet, column++, row, torque.getMax());
+ 
          addHeaderEntry(dataSheet, column, "Range of Motion [rad]");
          double rangeOfMotion = position.getMax() - position.getMin();
          addNumberToSheet(dataSheet, column++, row, rangeOfMotion);
-
+         
          addHeaderEntry(dataSheet, column, "Max unsigned speed [rad / s]");
          double maxUnsignedSpeed = Math.max(Math.abs(speed.getMax()), Math.abs(speed.getMin()));
          addNumberToSheet(dataSheet, column++, row, maxUnsignedSpeed);
