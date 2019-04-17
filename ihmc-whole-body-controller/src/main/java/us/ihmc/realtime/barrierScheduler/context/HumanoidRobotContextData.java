@@ -17,6 +17,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
  */
 public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>
 {
+   /** Serves to synchronize the controller time to the estimator time. The estimator sets this, the controller reads it. */
+   private long timestamp = Long.MIN_VALUE;
+   /** Serves to inform the estimator that the controller ran and populated the desired values in this context. Set by the controller. */
+   private boolean controllerRan = false;
+   /** Serves to inform the controller that the estimator ran and populated the estimated values in this context. Set by the estimator. */
+   private boolean estimatorRan = false;
+
    private final HumanoidRobotContextJointData processedJointData;
 
    private final ForceSensorDataHolder forceSensorDataHolder;
@@ -54,6 +61,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    @Override
    public void copyFrom(HumanoidRobotContextData src)
    {
+      this.timestamp = src.timestamp;
+
       this.processedJointData.copyFrom(src.processedJointData);
 
       this.forceSensorDataHolder.set(src.forceSensorDataHolder);
@@ -73,5 +82,35 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       {
          this.jointDesiredOutputList.getJointDesiredOutput(i).set(src.jointDesiredOutputList.getJointDesiredOutput(i));
       }
+   }
+
+   public long getTimestamp()
+   {
+      return timestamp;
+   }
+
+   public void setTimestamp(long timestamp)
+   {
+      this.timestamp = timestamp;
+   }
+
+   public void setControllerRan(boolean controllerRan)
+   {
+      this.controllerRan = controllerRan;
+   }
+
+   public boolean getControllerRan()
+   {
+      return controllerRan;
+   }
+
+   public void setEstimatorRan(boolean estimatorRan)
+   {
+      this.estimatorRan = estimatorRan;
+   }
+
+   public boolean getEstimatorRan()
+   {
+      return estimatorRan;
    }
 }
