@@ -31,7 +31,16 @@ import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class constructs a UI for behavior operation.
@@ -56,6 +65,28 @@ public class BehaviorUI
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
+      YoVariableRegistry registry = new YoVariableRegistry("vrui");
+      ParameterLoaderHelper.loadParameters(getClass(), ClassLoader.getSystemClassLoader().getResourceAsStream("vrParameters.xml"), registry);
+      YoVariableServer yoVariableServer = new YoVariableServer(robotModel.getSimpleRobotName() + getClass().getSimpleName(),
+                                                               null,
+                                                               new DataServerSettings(false),
+                                                               0.01);
+      yoVariableServer.setMainRegistry(registry, null, null);
+      try
+      {
+         yoVariableServer.start();
+      }
+      catch(Throwable e)
+      {
+         e.printStackTrace();
+      }
+      PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+      PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("YoVariableUpdate");
+      AtomicLong timestamp = new AtomicLong();
+      updateScheduler.schedule(() -> {
+         yoVariableServer.update(timestamp.getAndAdd(10000));
+      }, 10, TimeUnit.MILLISECONDS);
+
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
       loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
@@ -63,7 +94,7 @@ public class BehaviorUI
       mainPane = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addCameraController(0.05, 2000.0,true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       {
          /** TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ is released */

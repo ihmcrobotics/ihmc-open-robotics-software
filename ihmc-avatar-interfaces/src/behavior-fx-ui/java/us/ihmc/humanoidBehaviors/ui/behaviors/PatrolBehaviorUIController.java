@@ -196,7 +196,7 @@ public class PatrolBehaviorUIController extends Group
 
    private PatrolWaypointGraphic createWaypointGraphic()
    {
-      PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic();
+      PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic(waypoints.size());
       getChildren().add(waypoint);
       waypoints.add(waypoint);
       return waypoint;
