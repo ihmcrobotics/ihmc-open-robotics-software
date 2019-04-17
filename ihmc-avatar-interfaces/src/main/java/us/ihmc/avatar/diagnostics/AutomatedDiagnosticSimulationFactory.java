@@ -39,7 +39,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -144,7 +143,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = null;
-      RawJointSensorDataHolderMap rawJointSensorDataHolderMap = null;
       JointDesiredOutputList estimatorDesiredJointDataHolder = null;
 
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
@@ -152,8 +150,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
             sensorProcessingConfiguration);
-      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
-            estimatorDesiredJointDataHolder, simulationRegistry);
+      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, estimatorDesiredJointDataHolder, simulationRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);

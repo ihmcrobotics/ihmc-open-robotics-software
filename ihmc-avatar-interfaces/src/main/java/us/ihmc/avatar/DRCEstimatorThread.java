@@ -31,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSenso
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.realtime.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -55,7 +54,6 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -142,11 +140,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       IMUDefinition[] imuDefinitions = estimatorFullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = estimatorFullRobotModel.getForceSensorDefinitions();
-      RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap = threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap();
       JointDesiredOutputList estimatorDesiredJointDataHolder = threadDataSynchronizer.getEstimatorDesiredJointDataHolder();
 
-      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorContactSensorHolder, estimatorRawJointSensorDataHolderMap,
-                                estimatorDesiredJointDataHolder, estimatorRegistry);
+      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorContactSensorHolder, estimatorDesiredJointDataHolder,
+                                estimatorRegistry);
 
       sensorReader = sensorReaderFactory.getSensorReader();
 
