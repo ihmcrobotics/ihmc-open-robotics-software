@@ -322,7 +322,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
       {
          calibrateFootForceSensors.set(false);
          calibrateFootForceSensors();
-         footWrenchSensorDriftEstimator.reset();
+         if (footWrenchSensorDriftEstimator != null)
+            footWrenchSensorDriftEstimator.reset();
       }
 
       if (footWrenchSensorDriftEstimator != null)
