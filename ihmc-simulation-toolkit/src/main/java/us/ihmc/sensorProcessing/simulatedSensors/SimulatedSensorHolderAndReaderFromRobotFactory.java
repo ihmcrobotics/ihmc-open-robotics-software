@@ -15,7 +15,6 @@ import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -48,8 +47,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    @Override
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
-                     ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
-                     JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     ContactSensorHolder contactSensorHolder, JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -90,6 +88,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
    }
 
+   @Override
    public SimulatedSensorHolderAndReader getSensorReader()
    {
       return simulatedSensorHolderAndReader;
@@ -175,11 +174,13 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
    }
 
+   @Override
    public StateEstimatorSensorDefinitions getStateEstimatorSensorDefinitions()
    {
       return stateEstimatorSensorDefinitions;
    }
 
+   @Override
    public boolean useStateEstimator()
    {
       return true;
