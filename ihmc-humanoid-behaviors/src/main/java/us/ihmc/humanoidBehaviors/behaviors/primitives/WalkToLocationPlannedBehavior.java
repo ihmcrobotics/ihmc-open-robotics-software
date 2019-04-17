@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -44,6 +45,9 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final YoDouble yoTime;
    private boolean setupComplete = false;
    private boolean goalLocationChanged = false;
+   
+   private  FootstepPlannerType footStepPlannerToUse =  FootstepPlannerType.A_STAR;
+   private boolean assumeFlatGround = false;
 
 
    public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
@@ -88,6 +92,16 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       publishTextToSpeech("New Goal Target Recieved");
       currentGoalPose.set(targetPoseInWorld);
       goalLocationChanged=true;
+   }
+   
+   public void setFootStepPlanner( FootstepPlannerType footStepPlannerToUse)
+   {
+      this.footStepPlannerToUse = footStepPlannerToUse;
+   }
+   
+   public void setAssumeFlatGround(boolean assumeFlatGround)
+   {
+      this.assumeFlatGround = assumeFlatGround;
    }
 
    @Override
@@ -136,7 +150,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             if (currentGoalPose.get() == null)
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), stanceFootPose, initialStanceSide);
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), stanceFootPose, initialStanceSide,footStepPlannerToUse, assumeFlatGround);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
          
