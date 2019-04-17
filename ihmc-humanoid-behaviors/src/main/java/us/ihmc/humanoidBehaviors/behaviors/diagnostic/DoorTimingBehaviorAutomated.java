@@ -41,10 +41,9 @@ public class DoorTimingBehaviorAutomated extends AbstractBehavior
       pipeLine.clearAll();
 
       BehaviorAction walkThroughDoor = new BehaviorAction(walkThroughDoorBehavior,doorTimingBehavior);
-      //BehaviorAction timingBehavior = new BehaviorAction(doorTimingBehavior);
-
       pipeLine.requestNewStage();
       pipeLine.submitSingleTaskStage(walkThroughDoor);
+      
      // pipeLine.submitTaskForPallelPipesStage(doorTimingBehavior, timingBehavior);
    }
 

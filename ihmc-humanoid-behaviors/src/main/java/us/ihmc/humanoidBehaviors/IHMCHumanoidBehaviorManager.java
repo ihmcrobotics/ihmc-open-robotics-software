@@ -37,6 +37,7 @@ import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehaviorOld;
+import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
@@ -285,6 +286,8 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
                              new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50_AND_TURN,
+                             new WalkToFiducialAndTurnBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService,fullRobotModel));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN,
                              new WalkOverTerrainStateMachineBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames));
 

@@ -52,6 +52,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+   
+   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
+   
+   private boolean assumeFlatGround = false;
 
    public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
@@ -66,9 +70,11 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
 
-   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
+   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerType footStepPlannerToUse, boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
+      this.assumeFlatGround = assumeFlatGround;
+      this.footStepPlannerToUse = footStepPlannerToUse;
       this.initialStanceSide = initialStanceSide;
       this.initialStanceFootPose.setIncludingFrame(initialStanceFootPose);
       this.initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -125,7 +131,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             planId.increment();
             FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
-                                                                                                                    goalPose, FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                                    goalPose, footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+            request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
             {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
