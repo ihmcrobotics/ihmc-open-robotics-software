@@ -1,5 +1,9 @@
 package us.ihmc.realtime.barrierScheduler.context;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -8,16 +12,11 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>
 {
-   private final HumanoidRobotContextJointData rawJointData;
    private final HumanoidRobotContextJointData processedJointData;
 
    private final ForceSensorDataHolder forceSensorDataHolder;
@@ -28,11 +27,10 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private final ArrayList<RigidBodyBasics> robotFeet;
    private final Map<String, FramePoint2D> copPoints = new HashMap<>();
 
-   HumanoidRobotContextData(HumanoidRobotContextJointData rawJointData, HumanoidRobotContextJointData processedJointData,
-                            ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                            JointDesiredOutputList jointDesiredOutputList)
+   protected HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
+                                      CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
+                                      JointDesiredOutputList jointDesiredOutputList)
    {
-      this.rawJointData = rawJointData;
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
 
@@ -56,7 +54,6 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    @Override
    public void copyFrom(HumanoidRobotContextData src)
    {
-      this.rawJointData.copyFrom(src.rawJointData);
       this.processedJointData.copyFrom(src.processedJointData);
 
       this.forceSensorDataHolder.set(src.forceSensorDataHolder);
