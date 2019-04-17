@@ -26,6 +26,7 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerS
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@SuppressWarnings("unused")
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {
    private final DiagnosticsWhenHangingControllerState diagnosticsWhenHangingController;

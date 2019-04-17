@@ -15,32 +15,29 @@ import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 
 public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 {
-   private static QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
-
-   static
-   {
-      networkModuleParameters.enableFootstepPlanningModule(true);
-      networkModuleParameters.enableStepTeleopModule(true);
-      networkModuleParameters.enableBodyTeleopModule(true);
-      networkModuleParameters.enableBodyHeightTeleopModule(true);
-   }
-
-   public GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation pubSubImplementation)
+   public GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation pubSubImplementation, QuadrupedNetworkModuleParameters networkModuleParameters)
    {
       this(new GenericQuadrupedModelFactory(), new GenericQuadrupedPhysicalProperties().getNominalBodyHeight(), new DefaultFootstepPlannerParameters(),
-           new GenericQuadrupedXGaitSettings(),
-           new GenericQuadrupedPointFootSnapperParameters(), pubSubImplementation);
+           new GenericQuadrupedXGaitSettings(), new GenericQuadrupedPointFootSnapperParameters(), pubSubImplementation, networkModuleParameters);
    }
 
    public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, double nominalHeight, FootstepPlannerParameters footstepPlannerParameters,
                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                                           DomainFactory.PubSubImplementation pubSubImplementation)
+                                           DomainFactory.PubSubImplementation pubSubImplementation, QuadrupedNetworkModuleParameters networkModuleParameters)
    {
       super(robotModel, networkModuleParameters, nominalHeight, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, pubSubImplementation);
    }
 
    public static void main(String[] args)
    {
-      new GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation.INTRAPROCESS);
+      QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
+
+      networkModuleParameters.enableFootstepPlanningModule(true);
+      networkModuleParameters.enableStepTeleopModule(true);
+      networkModuleParameters.enableBodyTeleopModule(true);
+      networkModuleParameters.enableBodyHeightTeleopModule(true);
+      networkModuleParameters.enableXBoxModule(true);
+
+      new GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation.INTRAPROCESS, networkModuleParameters);
    }
 }

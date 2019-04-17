@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -48,6 +49,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsPlanningToolboxModule kinematicsPlanningToolboxModule;
 
+   private final FramePose3D desiredFramePose = new FramePose3D();
    private Point2D doorLocation;
 
    @BeforeEach
@@ -123,12 +125,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       RobotSide robotSide = RobotSide.RIGHT;
 
       List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
-      FramePose3D desiredFramePose = new FramePose3D();
-      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
-      desiredFramePose.appendYawRotation(Math.PI);
-      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
-      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
-
+      defineDesiredFramePoseToDoorKnob(envrionment);
       Pose3D desiredPose = new Pose3D(desiredFramePose);
 
       FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
@@ -149,7 +146,17 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       drcBehaviorTestHelper.dispatchBehavior(behavior);
 
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      double waitingTimeForPlanning = 3.0;
+      double waitingTick = 0.01;
+      for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
+      {
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            break;
+         }
+      }
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
@@ -197,11 +204,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       RobotSide robotSide = RobotSide.RIGHT;
 
       List<Pose3DReadOnly> desiredPoses = new ArrayList<>();
-      FramePose3D desiredFramePose = new FramePose3D();
-      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
-      desiredFramePose.appendYawRotation(Math.PI);
-      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
-      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
+      defineDesiredFramePoseToDoorKnob(envrionment);
 
       Pose3D desiredPose = new Pose3D(desiredFramePose);
 
@@ -223,7 +226,17 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       drcBehaviorTestHelper.dispatchBehavior(behavior);
 
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime() + 1.0);
+      double waitingTimeForPlanning = 3.0;
+      double waitingTick = 0.01;
+      for (int i = 0; i < (int) waitingTimeForPlanning / waitingTick; i++)
+      {
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(waitingTick);
+         if (behavior.getPlanningResult() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(behavior.getTrajectoryTime());
+            break;
+         }
+      }
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
@@ -236,6 +249,14 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   private void defineDesiredFramePoseToDoorKnob(ValkyrieEODObstacleCourseEnvironment envrionment)
+   {
+      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
+      desiredFramePose.appendYawRotation(Math.PI);
+      desiredFramePose.appendPitchRotation(0.5 * Math.PI);
+      desiredFramePose.appendYawRotation(-0.2 * Math.PI);
+   }
+
    private void setupKinematicsPlanningToolboxModule() throws IOException
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -243,12 +264,16 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
                                                                             PubSubImplementation.INTRAPROCESS);
    }
 
-   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3D pose)
+   private static Graphics3DObject createEndEffectorKeyFrameVisualization(Pose3DReadOnly pose)
    {
       Graphics3DObject object = new Graphics3DObject();
       object.transform(new RigidBodyTransform(pose.getOrientation(), pose.getPosition()));
       object.addSphere(0.01);
       object.addCylinder(0.1, 0.005, YoAppearance.Blue());
+      RigidBodyTransform transformZToY = new RigidBodyTransform();
+      transformZToY.appendRollRotation(Math.PI / 2);
+      object.transform(transformZToY);
+      object.addCylinder(0.1, 0.005, YoAppearance.Green());
 
       return object;
    }

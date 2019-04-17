@@ -35,6 +35,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -125,11 +126,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private void setUpMomentum() throws SimulationExceededMaximumTimeException
    {
-      // enable the use of body momentum in the controller
-      YoBoolean allowUpperBodyMomentumInSingleSupport = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
-      allowUpperBodyMomentumInSingleSupport.set(true);
-      YoBoolean allowUsingHighMomentumWeight = (YoBoolean) drcSimulationTestHelper.getYoVariable("allowUsingHighMomentumWeight");
-      allowUsingHighMomentumWeight.set(true);
+      drcSimulationTestHelper.getYoVariable("LinearMomentumRateWeightX").setValueFromDouble(0.5);
+      drcSimulationTestHelper.getYoVariable("LinearMomentumRateWeightY").setValueFromDouble(0.5);
 
       // bring the arms in a stretched position
       for (RobotSide robotSide : RobotSide.values)
@@ -848,7 +846,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             break;
 
          // check if the found support polygon is close to the actual one
-         FrameConvexPolygon2D foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
+         FrameConvexPolygon2DReadOnly foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
          FrameConvexPolygon2D actualSupport = new FrameConvexPolygon2D(foundSupport.getReferenceFrame(), Vertex2DSupplier.asVertex2DSupplier(newContactPoints));
          double epsilon = 5.0; // cm^2
          boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) * 10000 < epsilon;
@@ -917,6 +915,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          {
             PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName);
             ankleJoint.setVelocityLimits(qd_max, b_vel_limit);
+            ankleJoint.setDamping(0.05);
          }
          else
          {

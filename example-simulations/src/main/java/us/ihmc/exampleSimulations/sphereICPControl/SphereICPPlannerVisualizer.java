@@ -3,7 +3,6 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
@@ -14,9 +13,8 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -30,9 +28,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.exampleSimulations.sphereICPControl.controllers.SphereControlToolbox.SphereSmoothCMPPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -98,8 +96,7 @@ public class SphereICPPlannerVisualizer
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
    private ReferenceFrame midFeetZUpFrame;
 
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
@@ -108,7 +105,7 @@ public class SphereICPPlannerVisualizer
    private BipedSupportPolygons bipedSupportPolygons;
 
    private final SimulationConstructionSet scs;
-   private final ContinuousCMPBasedICPPlanner icpPlanner;
+   private final SmoothCMPBasedICPPlanner icpPlanner;
 
    private final YoDouble yoTime;
    private final double dt = 0.006;
@@ -146,6 +143,8 @@ public class SphereICPPlannerVisualizer
    private final YoFrameVector2D centerOfMassVelocity = new YoFrameVector2D("centerOfMassVelocity", worldFrame, registry);
 
    private final double omega0 = 3.4;
+   private final double mass = 100.0;
+   private final double gravity = 9.81;
 
    private final BagOfBalls cmpTrack, icpTrack;
    private final int simulatedTicksPerGraphicUpdate = 16;
@@ -208,7 +207,7 @@ public class SphereICPPlannerVisualizer
             for (RobotSide robotSide : RobotSide.values)
             {
                soleFrames.get(robotSide).update();
-               ankleZUpFrames.get(robotSide).update();
+               soleZUpFrames.get(robotSide).update();
             }
             midFeetZUpFrame.update();
          }
@@ -621,14 +620,14 @@ public class SphereICPPlannerVisualizer
       return footsteps;
    }
 
-   private ContinuousCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+   private SmoothCMPBasedICPPlanner setupPlanner(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          double xToAnkle = 0.0;
          double yToAnkle = 0.0;
-         double zToAnkle = 0.084;
+         double zToAnkle = 0.0;
          List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
@@ -667,74 +666,23 @@ public class SphereICPPlannerVisualizer
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
-         ankleFrames.put(robotSide, ankleFrame);
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
-      ContinuousCMPICPPlannerParameters capturePointPlannerParameters = createICPPlannerParameters();
+      SmoothCMPPlannerParameters capturePointPlannerParameters = new SphereSmoothCMPPlannerParameters();
 
-      ContinuousCMPBasedICPPlanner icpPlanner = new ContinuousCMPBasedICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters.getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
-//      CapturePointPlannerAdapter icpPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry, yoGraphicsListRegistry, dt, soleFrames, bipedSupportPolygons);
+      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons, soleZUpFrames, contactableFeet, null, yoTime, registry,
+                                                                         yoGraphicsListRegistry, gravity, capturePointPlannerParameters);
       icpPlanner.setOmega0(omega0);
-      icpPlanner.initializeParameters(capturePointPlannerParameters);
+      icpPlanner.setFinalTransferDuration(1.0);
       return icpPlanner;
-   }
-
-   private ContinuousCMPICPPlannerParameters createICPPlannerParameters()
-   {
-      return new ContinuousCMPICPPlannerParameters()
-      {
-         @Override
-         public int getNumberOfCoPWayPointsPerFoot()
-         {
-            return 2;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPForwardOffsetBoundsInFoot()
-         {
-            EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds;
-
-            Vector2D entryBounds = new Vector2D(0.0, 0.03);
-            Vector2D exitBounds = new Vector2D(-0.04, 0.08);
-
-            copForwardOffsetBounds = new EnumMap<>(CoPPointName.class);
-            copForwardOffsetBounds.put(CoPPointName.ENTRY_COP, entryBounds);
-            copForwardOffsetBounds.put(exitCoPName, exitBounds);
-
-            return copForwardOffsetBounds;
-         }
-
-         /**{@inheritDoc} */
-         @Override
-         public CoPPointName getExitCoPName()
-         {
-            return exitCoPName;
-         }
-
-         @Override
-         public EnumMap<CoPPointName, Vector2D> getCoPOffsetsInFootFrame()
-         {
-            EnumMap<CoPPointName, Vector2D> copOffsets;
-
-            Vector2D entryOffset = new Vector2D(0.0, -0.005);
-            Vector2D exitOffset = new Vector2D(0.0, 0.015); //FIXME 0.025);
-
-            copOffsets = new EnumMap<CoPPointName, Vector2D>(CoPPointName.class);
-            copOffsets.put(CoPPointName.ENTRY_COP, entryOffset);
-            copOffsets.put(exitCoPName, exitOffset);
-
-            return copOffsets;
-         }
-      };
    }
 
    public static void main(String[] args)

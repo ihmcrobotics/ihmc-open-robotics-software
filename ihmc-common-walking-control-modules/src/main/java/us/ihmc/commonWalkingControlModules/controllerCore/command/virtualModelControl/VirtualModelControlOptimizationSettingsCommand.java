@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
-public class VirtualModelControlOptimizationSettingsCommand implements InverseDynamicsCommand<VirtualModelControlOptimizationSettingsCommand>,
-      InverseKinematicsCommand<VirtualModelControlOptimizationSettingsCommand>, VirtualModelControlCommand<VirtualModelControlOptimizationSettingsCommand>
+public class VirtualModelControlOptimizationSettingsCommand implements VirtualModelControlCommand<VirtualModelControlOptimizationSettingsCommand>
 {
    private double rhoMin = Double.NaN;
    private double rhoWeight = Double.NaN;
@@ -350,5 +347,49 @@ public class VirtualModelControlOptimizationSettingsCommand implements InverseDy
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.OPTIMIZATION_SETTINGS;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualModelControlOptimizationSettingsCommand)
+      {
+         VirtualModelControlOptimizationSettingsCommand other = (VirtualModelControlOptimizationSettingsCommand) object;
+         if (Double.compare(rhoMin, other.rhoMin) != 0)
+            return false;
+         if (Double.compare(rhoWeight, other.rhoWeight) != 0)
+            return false;
+         if (Double.compare(rhoRateWeight, other.rhoRateWeight) != 0)
+            return false;
+         if (centerOfPressureWeight.containsNaN() ^ other.centerOfPressureWeight.containsNaN())
+            return false;
+         if (!centerOfPressureWeight.containsNaN() && !centerOfPressureWeight.equals(other.centerOfPressureWeight))
+            return false;
+         if (centerOfPressureRateWeight.containsNaN() ^ other.centerOfPressureRateWeight.containsNaN())
+            return false;
+         if (!centerOfPressureRateWeight.containsNaN() && !centerOfPressureRateWeight.equals(other.centerOfPressureRateWeight))
+            return false;
+         if (Double.compare(momentumRateWeight, other.momentumRateWeight) != 0)
+            return false;
+         if (Double.compare(momentumAccelerationWeight, other.momentumAccelerationWeight) != 0)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": rho min: " + rhoMin + ", rho weight: " + rhoWeight + ", rho rate weight: " + rhoRateWeight + ", CoP weight: "
+            + centerOfPressureWeight + ", CoP rate weight: " + centerOfPressureRateWeight + ", momentum rate weight: " + momentumRateWeight
+            + ", momentum acceleration weight: " + momentumAccelerationWeight;
    }
 }

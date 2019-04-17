@@ -12,14 +12,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedWaypointBasedBodyPathProvider;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapper;
 import us.ihmc.quadrupedPlanning.stepStream.bodyPath.QuadrupedBodyPathPlan;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
-import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,7 +32,7 @@ public class QuadrupedXGaitStepCalculator
    private final YoDouble minimumStepClearance = new YoDouble("minimumStepClearance", registry);
    private final YoDouble timestamp;
 
-   private final YoQuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final Vector3D desiredPlanarVelocity = new Vector3D();
    private final DoubleProvider firstStepDelay;
 
@@ -56,7 +56,7 @@ public class QuadrupedXGaitStepCalculator
 
    private final RecyclingArrayList<QuadrupedTimedOrientedStep> completeStepSequence = new RecyclingArrayList<>(QuadrupedTimedOrientedStep::new);
 
-   public QuadrupedXGaitStepCalculator(YoQuadrupedXGaitSettings xGaitSettings, YoDouble timestamp, QuadrupedReferenceFrames referenceFrames,
+   public QuadrupedXGaitStepCalculator(QuadrupedXGaitSettingsBasics xGaitSettings, YoDouble timestamp, QuadrupedReferenceFrames referenceFrames,
                                        DoubleProvider firstStepDelay, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.xGaitSettings = xGaitSettings;
@@ -251,7 +251,7 @@ public class QuadrupedXGaitStepCalculator
          RobotQuadrant thisStepQuadrant = pastStepOnSameEnd.getRobotQuadrant().getAcrossBodyQuadrant();
          thisStep.setRobotQuadrant(thisStepQuadrant);
          computeStepTimeInterval(thisStep, pastStepOnSameEnd, pastStepOnOppositeEnd, xGaitSettings);
-         TimeInterval thisTimeInterval = thisStep.getTimeInterval();
+         TimeIntervalBasics thisTimeInterval = thisStep.getTimeInterval();
          if (currentTime > thisTimeInterval.getStartTime())
             thisTimeInterval.shiftInterval(currentTime - thisTimeInterval.getStartTime());
 
@@ -379,7 +379,7 @@ public class QuadrupedXGaitStepCalculator
             return false;
 
          stepPosition.changeFrame(worldFrame);
-         step.getGoalPosition(stepPosition);
+         stepPosition.set(step.getGoalPosition());
          stepPosition.changeFrame(xGaitRectangleFrame);
 
          RobotQuadrant quadrant = step.getRobotQuadrant();

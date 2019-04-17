@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPTimeFreezerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -42,11 +42,12 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private final YoDouble cmpOffsetAlphaFilter;
 
-   private final SideDependentList<ReferenceFrame> soleZUpFrames;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
-   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<ReferenceFrame> soleZUpFrames)
+   public ICPPlannerWithAngularMomentumOffsetWrapper(ICPPlannerInterface icpPlanner, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                                     ICPTimeFreezerParameters icpTimeFreezerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters)
    {
-      super(icpPlanner);
+      super(icpPlanner, icpTimeFreezerParameters);
 
       this.soleZUpFrames = soleZUpFrames;
 
@@ -69,14 +70,12 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
       angularMomentumRateForwardGain = new YoDouble(namePrefix + "AngularMomentumRateForwardGain", registry);
       angularMomentumRateLateralGain = new YoDouble(namePrefix + "AngularMomentumRateLateralGain", registry);
+
+      initializeAngularMomentumParameters(angularMomentumModifierParameters);
    }
 
-
-   @Override
-   public void initializeParameters(ICPPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters)
+   private void initializeAngularMomentumParameters(ICPAngularMomentumModifierParameters angularMomentumModifierParameters)
    {
-      super.initializeParameters(icpPlannerParameters);
-
       if (angularMomentumModifierParameters != null)
       {
          modifyICPPlanByAngularMomentum.set(angularMomentumModifierParameters.getModifyICPPlanByAngularMomentumRate());
@@ -94,6 +93,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    private final FrameVector3D desiredICPAcceleration = new FrameVector3D();
 
    // TODO have this guy account for the desired difference between the CMP and CoP.
+   @Override
    public void modifyDesiredICPForAngularMomentum(FramePoint3D copEstimate, RobotSide supportSide)
    {
       super.getDesiredCentroidalMomentumPivotPosition(desiredCMPPosition);

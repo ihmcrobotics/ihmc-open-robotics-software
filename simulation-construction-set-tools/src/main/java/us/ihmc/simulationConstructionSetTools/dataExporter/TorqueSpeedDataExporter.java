@@ -21,6 +21,7 @@ public class TorqueSpeedDataExporter implements ActionListener
    private final DataExporterExcelWorkbookCreator excelWorkbookCreator;
 
    private final Class<?> rootClassForDirectory;
+   private String rootDirectoryOverride = null;
 
    public TorqueSpeedDataExporter(SimulationConstructionSet scs, Robot robot)
    {
@@ -43,11 +44,25 @@ public class TorqueSpeedDataExporter implements ActionListener
 
       this.rootClassForDirectory = rootClassForDirectory;
    }
+   
+   public void setRootDirectory(String rootDirectory)
+   {
+      this.rootDirectoryOverride = rootDirectory;
+   }
 
    @Override
    public void actionPerformed(ActionEvent e)
    {
-      File simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
+      File rootDirectory;
+
+      if (rootDirectoryOverride != null)
+      {
+         rootDirectory = new File(rootDirectoryOverride);
+      }
+      else
+      {
+         rootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
+      }
 
       // Stop the sim and disable the GUI:
       scs.stop();
@@ -64,9 +79,9 @@ public class TorqueSpeedDataExporter implements ActionListener
       scs.gotoInPointNow();
 
       // confirm directory structure is correct
-      if (simulationRootDirectory == null)
+      if (rootDirectory == null)
          return;
-      File simulationDataAndVideoDirectory = DataExporterDirectoryFinder.findSimulationDataAndVideoRootLocation(simulationRootDirectory, subdirectoryName);
+      File simulationDataAndVideoDirectory = DataExporterDirectoryFinder.findSimulationDataAndVideoRootLocation(rootDirectory, subdirectoryName);
       if (simulationDataAndVideoDirectory == null)
          return;
 
@@ -81,7 +96,7 @@ public class TorqueSpeedDataExporter implements ActionListener
 
       if (!optionsPanel.isCancelled())
       {
-         if (optionsPanel.saveData() || optionsPanel.createSpreadSheet() || optionsPanel.createGraphsJPG() || optionsPanel.createGraphsPDF()
+         if (optionsPanel.saveData() || optionsPanel.saveMatlabData() || optionsPanel.createSpreadSheet() || optionsPanel.createGraphsJPG() || optionsPanel.createGraphsPDF()
                  || optionsPanel.createVideo() || optionsPanel.tagCode())
          {
             tagName = optionsPanel.tagName();
@@ -107,6 +122,21 @@ public class TorqueSpeedDataExporter implements ActionListener
                System.out.println("Saving data");
                saveDataFile(dataAndVideosTagDirectory, tagName);
                System.out.println("Done Saving Data");
+            }
+            
+            if (optionsPanel.saveMatlabData())
+            {
+               System.out.println("Saving data in Matlab format");
+               try
+               {
+                  saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
+                  System.out.println("Done Saving Data in Matlab format");
+               }
+               catch(OutOfMemoryError exception)
+               {
+                  System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+                  exception.printStackTrace();
+               }
             }
 
             if (optionsPanel.createSpreadSheet())
@@ -144,6 +174,12 @@ public class TorqueSpeedDataExporter implements ActionListener
    {
       File file = new File(directory, fileHeader + ".data.gz");
       scs.writeData(file);
+   }
+
+   private void saveMatlabDataFile(File directory, String fileHeader)
+   {
+      File file = new File(directory, fileHeader + ".m");
+      scs.writeMatlabData("all", file);
    }
 
    /**

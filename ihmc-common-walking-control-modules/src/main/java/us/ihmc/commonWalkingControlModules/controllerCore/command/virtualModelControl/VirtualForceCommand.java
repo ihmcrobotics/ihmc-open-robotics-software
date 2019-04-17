@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
@@ -66,9 +68,6 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    /** The end-effector is the rigid-body to be controlled. */
    private RigidBodyBasics endEffector;
 
-   private String baseName;
-   private String endEffectorName;
-
    /**
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
@@ -83,15 +82,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void set(VirtualForceCommand other)
    {
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearForce.set(other.desiredLinearForce);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
-
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredLinearForce.set(other.desiredLinearForce);
    }
 
    /**
@@ -105,8 +100,6 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       command.getLinearSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
-      baseName = command.getBaseName();
-      endEffectorName = command.getEndEffectorName();
 
       command.getControlFramePoseIncludingFrame(controlFramePose);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
@@ -128,8 +121,6 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       this.base = base;
       this.endEffector = endEffector;
 
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
@@ -269,6 +260,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       this.selectionMatrix.set(selectionMatrix);
    }
 
+   public Vector3DBasics getDesiredLinearForce()
+   {
+      return desiredLinearForce;
+   }
+
    /**
     * Packs the control frame and desired linear force held in this command.
     * <p>
@@ -331,6 +327,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       getDesiredLinearForce(desiredLinearForceToPack);
    }
 
+   public FramePose3DBasics getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
    /**
     * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this
     * command.
@@ -344,6 +345,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
     *           Modified.
     */
+   @Override
    public void getControlFrame(PoseReferenceFrame controlFrameToPack)
    {
       controlFramePose.changeFrame(controlFrameToPack.getParent());
@@ -372,6 +374,11 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    {
       positionToPack.setIncludingFrame(controlFramePose.getPosition());
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
+   }
+
+   public SelectionMatrix3D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    /** {@inheritDoc} */
@@ -405,23 +412,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public RigidBodyBasics getEndEffector()
    {
       return endEffector;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
    }
 
    /**
@@ -436,10 +429,38 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualForceCommand)
+      {
+         VirtualForceCommand other = (VirtualForceCommand) object;
+
+         if (!controlFramePose.equals(other.controlFramePose))
+            return false;
+         if (!desiredLinearForce.equals(other.desiredLinearForce))
+            return false;
+         if (!selectionMatrix.equals(other.selectionMatrix))
+            return false;
+         if (base != other.base)
+            return false;
+         if (endEffector != other.endEffector)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + desiredLinearForce;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearForce;
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import net.java.games.input.Event;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -90,7 +90,7 @@ public class XBoxOneJavaFXController
       }
       catch (JoystickNotFoundException e)
       {
-         PrintTools.warn("Could not reconnect joystick, try again.");
+         LogTools.warn("Could not reconnect joystick, try again.");
       }
    }
 

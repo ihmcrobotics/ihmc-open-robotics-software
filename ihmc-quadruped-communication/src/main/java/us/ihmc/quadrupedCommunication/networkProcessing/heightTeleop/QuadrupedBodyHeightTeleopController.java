@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.heightTeleop;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -13,6 +15,8 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
    private final QuadrupedBodyHeightTeleopManager teleopManager;
 
    private final AtomicReference<HighLevelStateChangeStatusMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
+
 
    public QuadrupedBodyHeightTeleopController(double initialBodyHeight, OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                               YoVariableRegistry parentRegistry)
@@ -31,6 +35,12 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
    {
       controllerStateChangeMessage.set(message);
    }
+
+   public void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      steppingStateChangeMessage.set(message);
+   }
+
 
    public void setDesiredBodyHeight(double desiredBodyHeight)
    {
@@ -58,6 +68,12 @@ public class QuadrupedBodyHeightTeleopController extends QuadrupedToolboxControl
       if (controllerStateChangeMessage.get() == null)
          return false;
 
-      return controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING;
+      if (controllerStateChangeMessage.get().getEndHighLevelControllerName() != HighLevelStateChangeStatusMessage.WALKING)
+         return true;
+
+      if (steppingStateChangeMessage.get() == null)
+         return false;
+
+      return steppingStateChangeMessage.get().getEndQuadrupedSteppingStateEnum() != QuadrupedSteppingStateEnum.STAND.toByte();
    }
 }

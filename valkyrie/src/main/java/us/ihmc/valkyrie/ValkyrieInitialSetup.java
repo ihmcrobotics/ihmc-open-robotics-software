@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,10 +86,9 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       robot.setPositionInWorld(positionInWorld);
 
       FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
-      double[] yawPitchRoll = new double[3];
-      frameOrientation.getYawPitchRoll(yawPitchRoll);
-      yawPitchRoll[0] = initialYaw;
-      frameOrientation.setYawPitchRoll(yawPitchRoll);
+      YawPitchRoll yawPitchRoll = new YawPitchRoll(frameOrientation);
+      yawPitchRoll.setYaw(initialYaw);
+      frameOrientation.set(yawPitchRoll);
 
       robot.setOrientation(frameOrientation);
       robot.update();

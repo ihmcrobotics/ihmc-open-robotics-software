@@ -1,218 +1,124 @@
 package us.ihmc.robotics.math.trajectories.generators;
 
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math3.util.Precision;
+
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class OneDoFTrajectoryPointCalculator
 {
-   private static final double EPSILON = 1.0e-7;
-   private final OneDoFTrajectoryPointList trajectory = new OneDoFTrajectoryPointList();
-   private final YoPolynomial polynomial = new YoPolynomial("polynomial", 6, new YoVariableRegistry("Dummy"));
+   private static final int maxIterations = 2000;
+   private final TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(1);
 
-   public OneDoFTrajectoryPointCalculator()
-   {
-      clear();
-   }
+   private final OneDoFTrajectoryPointList trajectory = new OneDoFTrajectoryPointList();
+
+   private final TDoubleArrayList positions = new TDoubleArrayList();
+   private final TDoubleArrayList velocities = new TDoubleArrayList();
+   private final TDoubleArrayList times = new TDoubleArrayList();
 
    public void clear()
    {
+      positions.clear();
+      times.clear();
+      velocities.clear();
       trajectory.clear();
-   }
-
-   public void appendTrajectoryPoint(OneDoFTrajectoryPointBasics trajectoryPoint)
-   {
-      trajectory.addTrajectoryPoint(trajectoryPoint);
    }
 
    public void appendTrajectoryPoint(double position)
    {
-      appendTrajectoryPoint(Double.NaN, position);
+      positions.add(position);
    }
 
    public void appendTrajectoryPoint(double time, double position)
    {
-      appendTrajectoryPoint(time, position, Double.NaN);
+      positions.add(position);
+      times.add(time);
    }
 
-   public void appendTrajectoryPoint(double time, double position, double velocity)
+   public void compute(double trajectoryTime)
    {
-      trajectory.addTrajectoryPoint(time, position, velocity);
-   }
-
-   public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
-   {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
-      if (numberOfTrajectoryPoints == 0)
-         throw new RuntimeException("There is no trajectory point.");
-
-      if (numberOfTrajectoryPoints == 1)
+      if (!velocities.isEmpty())
       {
-         trajectory.getTrajectoryPoint(0).setTime(trajectoryTime);
-         return;
+         throw new RuntimeException("Was already computed. Need to clear and readd points before computing again.");
       }
 
-      double totalLength = 0.0;
+      TDoubleArrayList startPosition = new TDoubleArrayList(new double[] {positions.get(0)});
+      TDoubleArrayList startVelocity = new TDoubleArrayList(new double[] {0.0});
+      TDoubleArrayList finalPosition = new TDoubleArrayList(new double[] {positions.get(positions.size() - 1)});
+      TDoubleArrayList finalVelocity = new TDoubleArrayList(new double[] {0.0});
 
-      for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
-         totalLength += Math.abs(trajectory.getTrajectoryPoint(i + 1).getPosition() - trajectory.getTrajectoryPoint(i).getPosition());
-
-      trajectory.getTrajectoryPoint(0).setTime(firstTrajectoryPointTime);
-      trajectory.getTrajectoryPoint(trajectory.getNumberOfTrajectoryPoints() - 1).setTime(firstTrajectoryPointTime + trajectoryTime);
-      double time = firstTrajectoryPointTime;
-
-      if (totalLength > EPSILON * getNumberOfTrajectoryPoints())
+      List<TDoubleArrayList> waypoints = new ArrayList<>();
+      for (int i = 1; i < positions.size() - 1; i++)
       {
-         for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
-         {
-            double subLength = Math.abs(trajectory.getTrajectoryPoint(i).getPosition() - trajectory.getTrajectoryPoint(i - 1).getPosition());
-            time += trajectoryTime * (subLength / totalLength);
-            trajectory.getTrajectoryPoint(i).setTime(time);
-         }
+         waypoints.add(new TDoubleArrayList(new double[] {positions.get(i)}));
+      }
+
+      trajectoryPointOptimizer.setEndPoints(startPosition, startVelocity, finalPosition, finalVelocity);
+      trajectoryPointOptimizer.setWaypoints(waypoints);
+
+      if (times.isEmpty())
+      {
+         computeIncludingTimes();
       }
       else
       {
-         for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
-         {
-            time += trajectoryTime / getNumberOfTrajectoryPoints();
-            trajectory.getTrajectoryPoint(i).setTime(time);
-         }
+         computeForFixedTime(trajectoryTime);
+      }
+      
+      times.clear();
+      times.add(0.0);
+      velocities.add(0.0);
+      TDoubleArrayList velocityToPack = new TDoubleArrayList();
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         times.add(trajectoryPointOptimizer.getWaypointTime(i) * trajectoryTime);
+         trajectoryPointOptimizer.getWaypointVelocity(velocityToPack, i);
+         velocities.add(velocityToPack.get(0) / trajectoryTime);
+      }
+      times.add(trajectoryTime);
+      velocities.add(0.0);
+
+      for (int i = 0; i < positions.size(); i++)
+      {
+         double time = times.get(i);
+         double position = positions.get(i);
+         double velocity = velocities.get(i);
+         trajectory.addTrajectoryPoint(time, position, velocity);
       }
    }
 
-   public void computeTrajectoryPointVelocities(boolean startAndFinishWithZeroVelocity)
+   private void computeForFixedTime(double trajectoryTime)
    {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
-      if (numberOfTrajectoryPoints < 3)
-         throw new RuntimeException("Need at least 3 trajectory points.");
-
-      OneDoFTrajectoryPoint firstTrajectoryPoint;
-      OneDoFTrajectoryPoint secondTrajectoryPoint;
-      OneDoFTrajectoryPoint thirdTrajectoryPoint;
-
-      if (startAndFinishWithZeroVelocity)
+      if (times.size() != positions.size())
       {
-         trajectory.getTrajectoryPoint(0).setVelocity(0.0);
-         trajectory.getTrajectoryPoint(numberOfTrajectoryPoints - 1).setVelocity(0.0);
-
-         if (numberOfTrajectoryPoints == 3)
-         {
-            firstTrajectoryPoint = trajectory.getTrajectoryPoint(0);
-            secondTrajectoryPoint = trajectory.getTrajectoryPoint(1);
-            thirdTrajectoryPoint = trajectory.getTrajectoryPoint(2);
-            secondTrajectoryPoint
-                  .setVelocity(compute2ndTrajectoryPointVelocityWithVelocityConstraint(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint));
-            return;
-         }
+         throw new RuntimeException("If providing times provide one for each position waypoint!");
       }
-      else
+      if (!Precision.equals(times.get(0), 0.0, Double.MIN_VALUE))
       {
-         firstTrajectoryPoint = trajectory.getTrajectoryPoint(0);
-         secondTrajectoryPoint = trajectory.getTrajectoryPoint(1);
-         thirdTrajectoryPoint = trajectory.getTrajectoryPoint(2);
-         firstTrajectoryPoint
-               .setVelocity(computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.FIRST));
-
-         firstTrajectoryPoint = trajectory.getTrajectoryPoint(numberOfTrajectoryPoints - 3);
-         secondTrajectoryPoint = trajectory.getTrajectoryPoint(numberOfTrajectoryPoints - 2);
-         thirdTrajectoryPoint = trajectory.getTrajectoryPoint(numberOfTrajectoryPoints - 1);
-         thirdTrajectoryPoint
-               .setVelocity(computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.THIRD));
+         throw new RuntimeException("First time must be zero. Offset your trajectory later!");
+      }
+      if (!Precision.equals(times.get(times.size() - 1), trajectoryTime, Double.MIN_VALUE))
+      {
+         throw new RuntimeException("Last waypoint time must match the trajectory time!");
       }
 
-      for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
-      {
-         firstTrajectoryPoint = trajectory.getTrajectoryPoint(i - 1);
-         secondTrajectoryPoint = trajectory.getTrajectoryPoint(i);
-         thirdTrajectoryPoint = trajectory.getTrajectoryPoint(i + 1);
-         secondTrajectoryPoint
-               .setVelocity(computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.SECOND));
-      }
+      TDoubleArrayList waypointTimes = new TDoubleArrayList(times.subList(1, times.size() - 1));
+      waypointTimes.transformValues(time -> time / trajectoryTime);
+      trajectoryPointOptimizer.computeForFixedTime(waypointTimes);
+
    }
 
-   public boolean shouldVelocityBeZero(OneDoFTrajectoryPointBasics firstTrajectoryPoint, OneDoFTrajectoryPointBasics secondTrajectoryPoint)
+   private void computeIncludingTimes()
    {
-      double deltaPosition = Math.abs(secondTrajectoryPoint.getPosition() - firstTrajectoryPoint.getPosition());
-      double deltaTime = Math.abs(secondTrajectoryPoint.getTime() - firstTrajectoryPoint.getTime());
-      return MathTools.epsilonEquals(0.0, deltaPosition / deltaTime, 1.0e-7);
-   }
-
-   private double compute2ndTrajectoryPointVelocityWithVelocityConstraint(OneDoFTrajectoryPointBasics firstTrajectoryPoint,
-                                                                          OneDoFTrajectoryPointBasics secondTrajectoryPoint,
-                                                                          OneDoFTrajectoryPointBasics thirdTrajectoryPoint)
-   {
-      double t0 = firstTrajectoryPoint.getTime();
-      double z0 = firstTrajectoryPoint.getPosition();
-      double zd0 = firstTrajectoryPoint.getVelocity();
-
-      double tIntermediate = secondTrajectoryPoint.getTime();
-      double zIntermediate = secondTrajectoryPoint.getPosition();
-
-      double tf = thirdTrajectoryPoint.getTime();
-      double zf = thirdTrajectoryPoint.getPosition();
-      double zdf = thirdTrajectoryPoint.getVelocity();
-
-      if (MathTools.epsilonEquals(tf, t0, EPSILON))
-         return 0.0;
-      else if (MathTools.epsilonEquals(t0, tIntermediate, EPSILON))
-         tIntermediate += 0.001 * (tf - t0);
-      else if (MathTools.epsilonEquals(tIntermediate, tf, EPSILON))
-         tIntermediate -= 0.001 * (tf - t0);
-
-      polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
-      polynomial.compute(tIntermediate);
-
-      return polynomial.getVelocity();
-   }
-
-   private enum TrajectoryPoint
-   {
-      FIRST, SECOND, THIRD
-   };
-
-   private double computeTrajectoryPointVelocity(OneDoFTrajectoryPointBasics firstTrajectoryPoint, OneDoFTrajectoryPointBasics secondTrajectoryPoint,
-                                                 OneDoFTrajectoryPointBasics thirdTrajectoryPoint, TrajectoryPoint trajectoryPointToComputeVelocityOf)
-   {
-      double t0 = firstTrajectoryPoint.getTime();
-      double z0 = firstTrajectoryPoint.getPosition();
-
-      double tIntermediate = secondTrajectoryPoint.getTime();
-      double zIntermediate = secondTrajectoryPoint.getPosition();
-
-      double tf = thirdTrajectoryPoint.getTime();
-      double zf = thirdTrajectoryPoint.getPosition();
-
-      if (MathTools.epsilonEquals(tf, t0, EPSILON))
-         return 0.0;
-      else if (MathTools.epsilonEquals(t0, tIntermediate, EPSILON))
-         tIntermediate += 0.001 * (tf - t0);
-      else if (MathTools.epsilonEquals(tIntermediate, tf, EPSILON))
-         tIntermediate -= 0.001 * (tf - t0);
-
-      polynomial.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tf, z0, zIntermediate, zf);
-      switch (trajectoryPointToComputeVelocityOf)
-      {
-      case FIRST:
-         polynomial.compute(t0);
-         break;
-      case SECOND:
-         polynomial.compute(tIntermediate);
-         break;
-      case THIRD:
-         polynomial.compute(tf);
-      default:
-         break;
-      }
-
-      return polynomial.getVelocity();
+      trajectoryPointOptimizer.compute(maxIterations);
    }
 
    public int getNumberOfTrajectoryPoints()
    {
-      return trajectory.getNumberOfTrajectoryPoints();
+      return positions.size();
    }
 
    public OneDoFTrajectoryPointList getTrajectoryData()

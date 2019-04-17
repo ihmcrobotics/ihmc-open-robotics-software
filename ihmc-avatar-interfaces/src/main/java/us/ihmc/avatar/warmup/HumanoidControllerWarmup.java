@@ -7,22 +7,16 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -49,7 +43,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -85,9 +78,8 @@ public abstract class HumanoidControllerWarmup
 
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
-   private WalkingHighLevelHumanoidController walkingController;
-   private WholeBodyControllerCore controllerCore;
-   private JointDesiredOutputList controllerOutput;
+
+   private WalkingControllerState walkingControllerState;
 
    private final List<Runnable> tickListeners = new ArrayList<>();
 
@@ -98,8 +90,7 @@ public abstract class HumanoidControllerWarmup
 
       setupController();
       controllerToolbox.initialize();
-      walkingController.initialize();
-      controllerCore.initialize();
+      walkingControllerState.initialize();
    }
 
    protected abstract void runWarmup();
@@ -142,10 +133,7 @@ public abstract class HumanoidControllerWarmup
    {
       // (1) do control and compute desired accelerations
       controllerToolbox.update();
-      walkingController.doAction();
-      ControllerCoreCommand coreCommand = walkingController.getControllerCoreCommand();
-      controllerCore.submitControllerCoreCommand(coreCommand);
-      controllerCore.compute();
+      walkingControllerState.doAction(Double.NaN);
 
       // (2) integrate accelerations in full robot model
       integrate();
@@ -177,7 +165,7 @@ public abstract class HumanoidControllerWarmup
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = oneDoFJoints[i];
-         JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
+         JointDesiredOutputReadOnly jointDesireds = walkingControllerState.getOutputForLowLevelController().getJointDesiredOutput(joint);
 
          if (jointDesireds == null)
          {
@@ -198,7 +186,7 @@ public abstract class HumanoidControllerWarmup
          }
       }
 
-      RootJointDesiredConfigurationDataReadOnly rootJointOutput = controllerCore.getOutputForRootJoint();
+      RootJointDesiredConfigurationDataReadOnly rootJointOutput = walkingControllerState.getOutputForRootJoint();
       DenseMatrix64F desiredAcceleration = rootJointOutput.getDesiredAcceleration();
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
@@ -236,30 +224,7 @@ public abstract class HumanoidControllerWarmup
       rootJoint.setJointTwist(rootJointTwist);
    }
 
-   private void createControllerCore(YoVariableRegistry walkingControllerRegistry)
-   {
-      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
-      JointBasics[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, walkingControllerRegistry);
-      toolbox.setupForInverseDynamicsSolver(contactableBodies);
-
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
-      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
-
-      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      controllerOutput = new JointDesiredOutputList(fullRobotModel.getControllableOneDoFJoints());
-      controllerCore = new WholeBodyControllerCore(toolbox, template, controllerOutput, walkingControllerRegistry);
-   }
-
-   private void createWalkingControllerAndSetUpManagerFactory(YoVariableRegistry walkingControllerParent, YoVariableRegistry managerFactoryParent)
+   private void createWalkingControllerAndSetUpManagerFactory(YoVariableRegistry managerFactoryParent)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
@@ -294,10 +259,10 @@ public abstract class HumanoidControllerWarmup
 
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
+      JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
-                                                                                                    yoTime, gravityZ, omega0, feet, controlDT, null,
-                                                                                                    contactableBodies, yoGraphicsListRegistry);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, yoTime, gravityZ, omega0, feet, controlDT,
+                                                                 null, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -314,10 +279,8 @@ public abstract class HumanoidControllerWarmup
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
 
-      walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 controllerToolbox);
-      walkingControllerParent.addChild(walkingController.getYoVariableRegistry());
-      walkingControllerParent.getParent().addChild(controllerToolbox.getYoVariableRegistry());
+      walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox,
+                                                          robotModel.getHighLevelControllerParameters(), robotModel.getWalkingControllerParameters());
    }
 
    @SuppressWarnings("unchecked")
@@ -332,16 +295,14 @@ public abstract class HumanoidControllerWarmup
       YoVariableRegistry drcMomentumBasedController = new YoVariableRegistry("DRCMomentumBasedController");
       YoVariableRegistry humanoidHighLevelControllerManager = new YoVariableRegistry("HumanoidHighLevelControllerManager");
       YoVariableRegistry highLevelHumanoidControllerFactory = new YoVariableRegistry("HighLevelHumanoidControllerFactory");
-      YoVariableRegistry walkingControllerState = new YoVariableRegistry("WalkingControllerState");
       registry.addChild(drcControllerThread);
       drcControllerThread.addChild(drcMomentumBasedController);
       drcMomentumBasedController.addChild(humanoidHighLevelControllerManager);
-      humanoidHighLevelControllerManager.addChild(walkingControllerState);
       humanoidHighLevelControllerManager.addChild(highLevelHumanoidControllerFactory);
 
-      createWalkingControllerAndSetUpManagerFactory(walkingControllerState, highLevelHumanoidControllerFactory);
-      createControllerCore(walkingControllerState);
-      walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
+      createWalkingControllerAndSetUpManagerFactory(highLevelHumanoidControllerFactory);
+      humanoidHighLevelControllerManager.addChild(walkingControllerState.getYoVariableRegistry());
+      humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
       {

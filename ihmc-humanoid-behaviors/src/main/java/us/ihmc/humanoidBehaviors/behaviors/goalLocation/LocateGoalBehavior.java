@@ -35,13 +35,13 @@ public class LocateGoalBehavior extends AbstractBehavior
          double yaw = Math.toDegrees(foundFiducialPose.getYaw()), pitch = Math.toDegrees(foundFiducialPose.getPitch()),
                roll = Math.toDegrees(foundFiducialPose.getRoll());
 
-         publishTextToSpeack(String.format("Target object located at [%s, %s, %s], rotation (%s, %s, %s)", decimalFormat.format(x), decimalFormat.format(y),
+         publishTextToSpeech(String.format("Target object located at [%s, %s, %s], rotation (%s, %s, %s)", decimalFormat.format(x), decimalFormat.format(y),
                                            decimalFormat.format(z), decimalFormat.format(yaw), decimalFormat.format(pitch), decimalFormat.format(roll)));
          done.set(true);
       }
       else
       {
-         publishTextToSpeack("Target object not located");
+         publishTextToSpeech("Target object not located");
          done.set(false);
       }
    }

@@ -4,12 +4,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
 {
    private RigidBodyBasics rigidBody;
-   private String rigidBodyName;
    private final Wrench externalWrenchAppliedOnRigidBody = new Wrench();
 
    public ExternalWrenchCommand()
@@ -19,7 +19,6 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    public void setRigidBody(RigidBodyBasics rigidBody)
    {
       this.rigidBody = rigidBody;
-      rigidBodyName = rigidBody.getName();
    }
 
    public void set(RigidBodyBasics rigidBody, WrenchReadOnly externalWrench)
@@ -34,12 +33,7 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
       return rigidBody;
    }
 
-   public String getRigidBodyName()
-   {
-      return rigidBodyName;
-   }
-
-   public WrenchReadOnly getExternalWrench()
+   public WrenchBasics getExternalWrench()
    {
       return externalWrenchAppliedOnRigidBody;
    }
@@ -48,7 +42,6 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    public void set(ExternalWrenchCommand other)
    {
       rigidBody = other.rigidBody;
-      rigidBodyName = other.rigidBodyName;
       externalWrenchAppliedOnRigidBody.setIncludingFrame(other.externalWrenchAppliedOnRigidBody);
    }
 
@@ -56,5 +49,33 @@ public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWre
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.EXTERNAL_WRENCH;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof ExternalWrenchCommand)
+      {
+         ExternalWrenchCommand other = (ExternalWrenchCommand) object;
+         if (rigidBody != other.rigidBody)
+            return false;
+         if (!externalWrenchAppliedOnRigidBody.equals(other.externalWrenchAppliedOnRigidBody))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": body: " + rigidBody + ", wrench: " + externalWrenchAppliedOnRigidBody;
    }
 }

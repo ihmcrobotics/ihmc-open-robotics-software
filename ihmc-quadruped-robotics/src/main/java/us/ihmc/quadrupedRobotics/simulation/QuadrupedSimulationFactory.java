@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.simulation;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -25,7 +26,7 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
-import us.ihmc.quadrupedRobotics.estimator.SimulatedQuadrupedFootSwitchFactory;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors.SDFQuadrupedPerfectSimulatedSensor;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
@@ -51,8 +52,10 @@ import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
@@ -139,6 +142,7 @@ public class QuadrupedSimulationFactory
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
+   private RobotMotionStatusHolder robotMotionStatusFromController;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
    private QuadrantDependentList<FootSwitchInterface> footSwitches;
@@ -244,9 +248,10 @@ public class QuadrupedSimulationFactory
 
    private void createFootSwitches()
    {
-      SimulatedQuadrupedFootSwitchFactory footSwitchFactory = new SimulatedQuadrupedFootSwitchFactory();
+      QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
       footSwitchFactory.setFootContactableBodies(contactableFeet);
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
+      footSwitchFactory.setJointDesiredOutputList(jointDesiredOutputList.get());
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(factoryRegistry);
@@ -273,7 +278,15 @@ public class QuadrupedSimulationFactory
          stateEstimatorFactory.setStateEstimatorParameters(stateEstimatorParameters.get());
          stateEstimatorFactory.setCenterOfMassDataHolder(centerOfMassDataHolder);
          stateEstimatorFactory.setYoGraphicsListRegistry(yoGraphicsListRegistry);
+         stateEstimatorFactory.setRobotMotionStatusFromControllerHolder(robotMotionStatusFromController);
          stateEstimator = stateEstimatorFactory.createStateEstimator();
+
+         FloatingRootJointRobot simulationRobot = sdfRobot.get();
+         StateChangedListener<HighLevelControllerName> reinilizator = QuadrupedSimulationFactory.createSimulationStateEstimatorReinilizator(HighLevelControllerName.STAND_READY,
+                                                                                                                                                stateEstimator,
+                                                                                                                                                () -> simulationRobot.getRootJoint()
+                                                                                                                                                                     .getJointTransform3D());
+         controllerManager.registerHighLevelStateChangedListener(reinilizator);
          factoryRegistry.addChild(stateEstimator.getYoVariableRegistry());
       }
       else
@@ -301,6 +314,7 @@ public class QuadrupedSimulationFactory
 
    public void createControllerManager()
    {
+      robotMotionStatusFromController = new RobotMotionStatusHolder();
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
@@ -308,7 +322,7 @@ public class QuadrupedSimulationFactory
                                                                                        contactablePlaneBodies, centerOfMassDataHolder, footSwitches,
                                                                                        gravity.get(), highLevelControllerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
-                                                                                       fallDetectionParameters.get());
+                                                                                       fallDetectionParameters.get(), robotMotionStatusFromController);
 
       if(controlMode.get() == QuadrupedControlMode.POSITION)
       {
@@ -489,9 +503,9 @@ public class QuadrupedSimulationFactory
       createContactableFeet();
       createContactablePlaneBodies();
       createFootSwitches();
-      createStateEstimator();
       createRealtimeRos2Node();
       createControllerManager();
+      createStateEstimator();
       createControllerNetworkSubscriber();
       createPoseCommunicator();
       setupYoVariableServer();
@@ -797,5 +811,39 @@ public class QuadrupedSimulationFactory
       {
          realtimeRos2Node.destroy();
       }
+   }
+
+   /**
+    * <b>For simulation only!</b>
+    * <p>
+    * Creates a listener to be attached to the controller. The listener will trigger when the
+    * controller state machine enters {@code controllerStateTrigger} for the first time. When
+    * triggering, the state estimator position estimation is reinilization to the actual one using the
+    * given supplier.
+    * </p>
+    * 
+    * @param controllerStateTrigger the enum value that should trigger the reinitialization.
+    * @param stateEstimator the instance of the state estimator to be automatically reinitialized.
+    * @param actualRootJointTransformSupplier the supplier of the root joint transofmr of the simulated robot.
+    * @return the reinitializator.
+    */
+   public static StateChangedListener<HighLevelControllerName> createSimulationStateEstimatorReinilizator(HighLevelControllerName controllerStateTrigger,
+                                                                                                          StateEstimatorController stateEstimator,
+                                                                                                          Supplier<RigidBodyTransform> actualRootJointTransformSupplier)
+   {
+      return new StateChangedListener<HighLevelControllerName>()
+      {
+         private boolean reinitilizeEstimator = true;
+   
+         @Override
+         public void stateChanged(HighLevelControllerName from, HighLevelControllerName to)
+         {
+            if (reinitilizeEstimator && to == controllerStateTrigger)
+            {
+               stateEstimator.initializeEstimator(actualRootJointTransformSupplier.get());
+               reinitilizeEstimator = false;
+            }
+         }
+      };
    }
 }

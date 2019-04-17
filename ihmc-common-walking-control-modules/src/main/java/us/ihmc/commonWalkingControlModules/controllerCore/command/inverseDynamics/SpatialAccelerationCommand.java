@@ -8,15 +8,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
@@ -55,23 +56,24 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    private final Vector3D desiredLinearAcceleration = new Vector3D();
    /**
-    * It defines the desired angular acceleration of the control frame, with respect to the base.
-    * The vector is expressed in the control frame.
+    * It defines the desired angular acceleration of the control frame, with respect to the base. The
+    * vector is expressed in the control frame.
     */
    private final Vector3D desiredAngularAcceleration = new Vector3D();
 
    /**
-    * The Weight matrix describes the qp weights used for optimization. All weights are initially set to NaN. If the weights are NaN the controller will use the default weights.
-    * A higher weight means a higher priority of this task.
+    * The Weight matrix describes the qp weights used for optimization. All weights are initially set
+    * to NaN. If the weights are NaN the controller will use the default weights. A higher weight means
+    * a higher priority of this task.
     */
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
    /**
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * <p>
-    * If the selection frame is not set, it is assumed that the selection frame is equal to the
-    * control frame.
+    * If the selection frame is not set, it is assumed that the selection frame is equal to the control
+    * frame.
     * </p>
     */
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
@@ -87,10 +89,6 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * Intermediate base located between the {@code base} and {@code endEffector}. It can be null.
     */
    private RigidBodyBasics optionalPrimaryBase;
-
-   private String baseName;
-   private String endEffectorName;
-   private String optionalPrimaryBaseName;
 
    /**
     * Flag to indicate whether or not to custom scale the weights below the intermediate base
@@ -121,29 +119,25 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public void set(SpatialAccelerationCommand other)
    {
-      setWeightMatrix(other.weightMatrix);
+      controlFramePose.setIncludingFrame(other.controlFramePose);
+      desiredLinearAcceleration.set(other.desiredLinearAcceleration);
+      desiredAngularAcceleration.set(other.desiredAngularAcceleration);
 
+      weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
       endEffector = other.getEndEffector();
-      baseName = other.baseName;
-      endEffectorName = other.endEffectorName;
 
       optionalPrimaryBase = other.optionalPrimaryBase;
-      optionalPrimaryBaseName = other.optionalPrimaryBaseName;
       scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
       secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
-
-      controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredAngularAcceleration.set(other.desiredAngularAcceleration);
-      desiredLinearAcceleration.set(other.desiredLinearAcceleration);
    }
 
    /**
     * Specifies the rigid-body to be controlled, i.e. {@code endEffector}.
     * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints that
+    * can be used to control the end-effector.
     * </p>
     * 
     * @param base the rigid-body located right before the first joint to be used for controlling the
@@ -154,26 +148,23 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       this.base = base;
       this.endEffector = endEffector;
-
-      baseName = base.getName();
-      endEffectorName = endEffector.getName();
    }
 
    /**
     * Intermediate base located between the {@code base} and {@code endEffector}.
     * <p>
-    * This parameter is optional. If provided, it is used to improve singularity avoidance by
-    * applying a privileged joint configuration to the kinematic chain going from
-    * {@code primaryBase} to {@code endEffector}.
+    * This parameter is optional. If provided, it is used to improve singularity avoidance by applying
+    * a privileged joint configuration to the kinematic chain going from {@code primaryBase} to
+    * {@code endEffector}.
     * </p>
     * <p>
     * Here is an example of application: {@code endEffector == leftHand},
     * {@code base == rootJoint.getPredecessor()} such that to control the {@code leftHand}, the
-    * controller core uses the arm joints, the spine joints, and also the non-actuated floating
-    * joint. If {@code primaryBase == chest}, as soon as the left arm comes close to a singular
-    * configuration such as a straight elbow, the privileged configuration framework will help
-    * bending the elbow. This reduces the time needed to escape the singular configuration. It also
-    * prevents unfortunate situation where the elbow would try to bend past the joint limit.
+    * controller core uses the arm joints, the spine joints, and also the non-actuated floating joint.
+    * If {@code primaryBase == chest}, as soon as the left arm comes close to a singular configuration
+    * such as a straight elbow, the privileged configuration framework will help bending the elbow.
+    * This reduces the time needed to escape the singular configuration. It also prevents unfortunate
+    * situation where the elbow would try to bend past the joint limit.
     * </p>
     * 
     * @param primaryBase the rigid-body to use as the primary base. Optional.
@@ -181,17 +172,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public void setPrimaryBase(RigidBodyBasics primaryBase)
    {
       optionalPrimaryBase = primaryBase;
-      optionalPrimaryBaseName = primaryBase.getName();
    }
 
    /**
     * Indicates that we would like to custom scale the weights on the joints in the kinematic chain
     * below the {@code primaryBase} when controlling the {@code endEffector}.
     *
-    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the
-    *           joints below the primary base. Optional.
-    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary
-    *           base. Optional.
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
+    *           below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
+    *           Optional.
     */
    public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
@@ -202,13 +192,13 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    /**
     * Sets the desired acceleration to submit for the optimization to zero.
     * <p>
-    * This is useful when the end-effector is in contact with the environment. Its acceleration has
-    * to be set to zero so it can exert the required wrench.
+    * This is useful when the end-effector is in contact with the environment. Its acceleration has to
+    * be set to zero so it can exert the required wrench.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -233,9 +223,9 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * especially if only part of the angular acceleration is to be controlled.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -244,12 +234,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
-    * @param desiredSpatialAcceleration the desired end-effector acceleration with respect to the
-    *           base and expressed in the control frame.
-    * @throws ReferenceFrameMismatchException if the {@code desiredSpatialAcceleration} is not setup
-    *            as follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
-    *            {@code baseFrame = base.getBodyFixedFrame()},
-    *            {@code expressedInFrame = controlFrame}.
+    * @param desiredSpatialAcceleration the desired end-effector acceleration with respect to the base
+    *           and expressed in the control frame.
+    * @throws ReferenceFrameMismatchException if the {@code desiredSpatialAcceleration} is not setup as
+    *            follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
+    *            {@code baseFrame = base.getBodyFixedFrame()}, {@code expressedInFrame = controlFrame}.
     */
    public void setSpatialAcceleration(ReferenceFrame controlFrame, SpatialAccelerationReadOnly desiredSpatialAcceleration)
    {
@@ -274,9 +263,9 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * origin of the {@code controlFrame}. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -292,7 +281,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} or
     *            {@code desiredLinearAcceleration} is not expressed in control frame.
     */
-   public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration, FrameVector3D desiredLinearAcceleration)
+   public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector3DReadOnly desiredAngularAcceleration,
+                                      FrameVector3DReadOnly desiredLinearAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularAcceleration);
       controlFrame.checkReferenceFrameMatch(desiredLinearAcceleration);
@@ -304,30 +294,31 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Sets the desired angular acceleration to submit for the optimization and also set the linear
-    * part to zero.
+    * Sets the desired angular acceleration to submit for the optimization and also set the linear part
+    * to zero.
     * <p>
     * The {@code desiredAngularAcceleration} has to define the desired angular acceleration of the
     * end-effector with respect to the base. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
-    * {@code endEffector.getBodyFixedFrame()}. </p*
+    * {@code endEffector.getBodyFixedFrame()}.
+    * </p>
     *
     * 
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
     * @param desiredAngularAcceleration the desired angular acceleration of the end-effector with
     *           respect to the base. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} is not expressed
-    *            in control frame.
+    * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} is not expressed in
+    *            control frame.
     */
-   public void setAngularAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration)
+   public void setAngularAcceleration(ReferenceFrame controlFrame, FrameVector3DReadOnly desiredAngularAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredAngularAcceleration);
 
@@ -339,16 +330,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Sets the desired linear acceleration to submit for the optimization and also set the angular
-    * part to zero.
+    * Sets the desired linear acceleration to submit for the optimization and also set the angular part
+    * to zero.
     * <p>
     * The {@code desiredLinearAcceleration} has to defined the desired linear acceleration of the
     * origin of the {@code controlFrame}. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
-    * The given {@code controlFrame} should be located at the point of interest and has to be
-    * attached to the end-effector. For instance, when controlling a foot, the {@code controlFrame}
-    * should be located somewhere on the sole of the foot.
+    * The given {@code controlFrame} should be located at the point of interest and has to be attached
+    * to the end-effector. For instance, when controlling a foot, the {@code controlFrame} should be
+    * located somewhere on the sole of the foot.
     * </p>
     * <p>
     * If no particular location on the end-effector is to controlled, then simply provide
@@ -359,10 +350,10 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           end-effector.
     * @param desiredLinearAcceleration the desired linear acceleration of the origin of the control
     *           frame with respect to the base. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code desiredLinearAcceleration} is not expressed
-    *            in control frame.
+    * @throws ReferenceFrameMismatchException if {@code desiredLinearAcceleration} is not expressed in
+    *            control frame.
     */
-   public void setLinearAcceleration(ReferenceFrame controlFrame, FrameVector3D desiredLinearAcceleration)
+   public void setLinearAcceleration(ReferenceFrame controlFrame, FrameVector3DReadOnly desiredLinearAcceleration)
    {
       controlFrame.checkReferenceFrameMatch(desiredLinearAcceleration);
 
@@ -397,8 +388,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * Convenience method that sets up the selection matrix by disabling the angular part of this
     * command and applying the given selection matrix to the linear part.
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
@@ -420,15 +411,15 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Convenience method that sets up the selection matrix by disabling the linear part of this
-    * command and applying the given selection matrix to the angular part.
+    * Convenience method that sets up the selection matrix by disabling the linear part of this command
+    * and applying the given selection matrix to the angular part.
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     * 
-    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this
-    *           command. Not modified.
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
+    *           Not modified.
     */
    public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
    {
@@ -439,13 +430,13 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    /**
     * Sets this command's selection matrix to the given one.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. It is initialized such that the controller will by default control
-    * all the end-effector DoFs.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector that
+    * are to be controlled. It is initialized such that the controller will by default control all the
+    * end-effector DoFs.
     * </p>
     * <p>
-    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
-    * selection frame is equal to the control frame.
+    * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the selection
+    * frame is equal to the control frame.
     * </p>
     * 
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
@@ -456,8 +447,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard constraint.
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will be
+    * treated as a hard constraint.
     * <p>
     * This is usually undesired as with improper commands setup as hard constraints the optimization
     * problem can simply be impossible to solve.
@@ -537,7 +528,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       this.weightMatrix.set(weightMatrix);
    }
-   
+
    /**
     * Sets the linear weights to use in the optimization problem for each individual degree of freedom.
     * <p>
@@ -546,8 +537,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
-    *           acceleration. Not modified.
+    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of
+    *           the desired acceleration. Not modified.
     */
    public void setLinearPartOfWeightMatrix(WeightMatrix3D linearWeightMatrix)
    {
@@ -555,15 +546,16 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Sets the angular weights to use in the optimization problem for each individual degree of freedom.
+    * Sets the angular weights to use in the optimization problem for each individual degree of
+    * freedom.
     * <p>
     * WARNING: It is not the value of each individual command's weight that is relevant to how the
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of the desired
-    *           acceleration. Not modified.
+    * @param angularWeightMatrix weight matrix holding the angular weights to use for each component of
+    *           the desired acceleration. Not modified.
     */
    public void setAngularPartOfWeightMatrix(WeightMatrix3D angularWeightMatrix)
    {
@@ -627,8 +619,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Sets the weights to use in the optimization problem for each translational degree of freedom
-    * to zero.
+    * Sets the weights to use in the optimization problem for each translational degree of freedom to
+    * zero.
     */
    public void setLinearWeightsToZero()
    {
@@ -642,8 +634,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * {@link SolverWeightLevels#HARD_CONSTRAINT}.
     * </p>
     * 
-    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
-    *         is it should be part of the optimization objective.
+    * @return {@code true} if this command should be considered as a hard constraint, {@code false} is
+    *         it should be part of the optimization objective.
     */
    public boolean isHardConstraint()
    {
@@ -651,13 +643,12 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
-    * this command.
+    * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with this
+    * command.
     * 
-    * @param destinationFrame the reference frame in which the weight matrix should be expressed
-    *           in.
-    * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is
-    *           stored in. Modified.
+    * @param destinationFrame the reference frame in which the weight matrix should be expressed in.
+    * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is stored
+    *           in. Modified.
     */
    public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
    {
@@ -676,11 +667,22 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
    /**
     * Sets the weightMatrixToPack to the weight matrix used in this command:
+    * 
     * @param weightMatrixToPack the weightMatrix To Pack. parameter is Modified
     */
    public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
    {
       weightMatrixToPack.set(weightMatrix);
+   }
+
+   public Vector3DBasics getDesiredLinearAcceleration()
+   {
+      return desiredLinearAcceleration;
+   }
+
+   public Vector3DBasics getDesiredAngularAcceleration()
+   {
+      return desiredAngularAcceleration;
    }
 
    /**
@@ -692,19 +694,19 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * </p>
     * 
     * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
-    * @param desiredSpatialAccelerationToPack the desired spatial acceleration of the end-effector
-    *           with respect to the base, expressed in the control frame. Modified.
+    * @param desiredSpatialAccelerationToPack the desired spatial acceleration of the end-effector with
+    *           respect to the base, expressed in the control frame. Modified.
     */
    public void getDesiredSpatialAcceleration(PoseReferenceFrame controlFrameToPack, SpatialAcceleration desiredSpatialAccelerationToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredSpatialAccelerationToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularAcceleration,
-                                           desiredLinearAcceleration);
+      desiredSpatialAccelerationToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack,
+                                                         desiredAngularAcceleration, desiredLinearAcceleration);
    }
 
    /**
-    * Packs the value of the desired spatial acceleration of the end-effector with respect to the
-    * base, expressed in the control frame.
+    * Packs the value of the desired spatial acceleration of the end-effector with respect to the base,
+    * expressed in the control frame.
     * <p>
     * The control frame can be obtained via {@link #getControlFrame(PoseReferenceFrame)}.
     * </p>
@@ -721,8 +723,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this
-    * command.
+    * Updates the given {@code PoseReferenceFrame} to match the control frame to use with this command.
     * <p>
     * The control frame is assumed to be attached to the end-effector.
     * </p>
@@ -745,17 +746,18 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * 
     * @param controlFramePoseToPack the pose of the control frame. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePose3D controlFramePoseToPack)
+   public void getControlFramePoseIncludingFrame(FramePose3DBasics controlFramePoseToPack)
    {
       controlFramePoseToPack.setIncludingFrame(controlFramePose);
    }
 
    /**
-    * Gets a read only view of the pose of the control frame expressed in {@code endEffector.getBodyFixedFrame()}.
+    * Gets a read only view of the pose of the control frame expressed in
+    * {@code endEffector.getBodyFixedFrame()}.
     *
     * @return the pose of the control frame.
     */
-   public FramePose3DReadOnly getControlFramePose()
+   public FramePose3DBasics getControlFramePose()
    {
       return controlFramePose;
    }
@@ -767,7 +769,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
-   public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
+   public void getControlFramePoseIncludingFrame(FramePoint3DBasics positionToPack, FrameOrientation3DBasics orientationToPack)
    {
       positionToPack.setIncludingFrame(controlFramePose.getPosition());
       orientationToPack.setIncludingFrame(controlFramePose.getOrientation());
@@ -784,11 +786,10 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with
-    * this command.
+    * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
+    * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed
-    *           in.
+    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
@@ -833,8 +834,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    /**
     * Gets the reference to the base of this command.
     * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints that
+    * can be used to control the end-effector.
     * </p>
     * 
     * @return the rigid-body located right before the first joint to be used for controlling the
@@ -846,20 +847,10 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the name of the base rigid-body.
-    * 
-    * @return the base's name.
-    */
-   public String getBaseName()
-   {
-      return baseName;
-   }
-
-   /**
     * Gets the reference to the end-effector of this command.
     * <p>
-    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be used to control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints that
+    * can be used to control the end-effector.
     * </p>
     * 
     * @return the rigid-body to be controlled.
@@ -870,21 +861,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the name of the end-effector rigid-body.
-    * 
-    * @return the end-effector's name.
-    */
-   public String getEndEffectorName()
-   {
-      return endEffectorName;
-   }
-
-   /**
     * Gets the reference to the primary base of this command.
     * <p>
-    * This parameter is optional. If provided, it is used to improve singularity avoidance by
-    * applying a privileged joint configuration to the kinematic chain going from
-    * {@code primaryBase} to {@code endEffector}.
+    * This parameter is optional. If provided, it is used to improve singularity avoidance by applying
+    * a privileged joint configuration to the kinematic chain going from {@code primaryBase} to
+    * {@code endEffector}.
     * </p>
     * 
     * @return the rigid-body to use as the primary base. Optional.
@@ -895,31 +876,21 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Gets the name of the primary base rigid-body.
-    * 
-    * @return the primary base's name.
-    */
-   public String getPrimaryBaseName()
-   {
-      return optionalPrimaryBaseName;
-   }
-
-   /**
     * Gets whether or not to scale the weights on the joints below the {@code primaryBase} when
-    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the
-    * joints in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more
-    * to control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use
-    * the joints before the {@code primaryBase} (such as the floating base) to control the
+    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the joints
+    * in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more to
+    * control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use the
+    * joints before the {@code primaryBase} (such as the floating base) to control the
     * {@code endEffector}.
     *
     * <p>
-    * This parameter is optional. If provided, it will scale the weights before the
-    * {@code primaryBase} by the factor defined in {@code secondaryTaskJointWeightScale} to control
-    * the {@code endEffector}.
+    * This parameter is optional. If provided, it will scale the weights before the {@code primaryBase}
+    * by the factor defined in {@code secondaryTaskJointWeightScale} to control the
+    * {@code endEffector}.
     * </p>
     *
-    * @return whether or not to scale the joints below the {@code primaryBase} (true) or not (false
-    *         and default).
+    * @return whether or not to scale the joints below the {@code primaryBase} (true) or not (false and
+    *         default).
     */
    public boolean scaleSecondaryTaskJointWeight()
    {
@@ -928,10 +899,10 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
    /**
     * Gets the scaling factor for the weights on the joints below the {@code primaryBase} when
-    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the
-    * joints in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more
-    * to control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use
-    * the joints before the {@code primaryBase} (such as the floating base) to control the
+    * controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will use the joints
+    * in the kinematic chain between the {@code primaryBase} and the {@code endEffector} more to
+    * control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use the
+    * joints before the {@code primaryBase} (such as the floating base) to control the
     * {@code endEffector}.
     *
     * <p>
@@ -947,8 +918,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
-    * Resets the secondary task joint weight scaling factor on the joints below the
-    * {@code primaryBase} to its default value.
+    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase}
+    * to its default value.
     */
    public void resetSecondaryTaskJointWeightScale()
    {
@@ -967,10 +938,49 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof SpatialAccelerationCommand)
+      {
+         SpatialAccelerationCommand other = (SpatialAccelerationCommand) object;
+
+         if (!controlFramePose.equals(other.controlFramePose))
+            return false;
+         if (!desiredLinearAcceleration.equals(other.desiredLinearAcceleration))
+            return false;
+         if (!desiredAngularAcceleration.equals(other.desiredAngularAcceleration))
+            return false;
+         if (!weightMatrix.equals(other.weightMatrix))
+            return false;
+         if (!selectionMatrix.equals(other.selectionMatrix))
+            return false;
+         if (base != other.base)
+            return false;
+         if (endEffector != other.endEffector)
+            return false;
+         if (optionalPrimaryBase != other.optionalPrimaryBase)
+            return false;
+         if (scaleSecondaryTaskJointWeight != other.scaleSecondaryTaskJointWeight)
+            return false;
+         if (secondaryTaskJointWeightScale != other.secondaryTaskJointWeightScale)
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + desiredLinearAcceleration + ", angular = " + desiredAngularAcceleration;
-      return ret;
+      return getClass().getSimpleName() + ": base = " + base + ", endEffector = " + endEffector + ", linear = " + desiredLinearAcceleration + ", angular = "
+            + desiredAngularAcceleration;
    }
 }

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -12,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -20,9 +21,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -70,13 +74,16 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final double gravity;
    private final RigidBodyBasics pelvis;
 
+   private final FramePoint3D statusDesiredPosition = new FramePoint3D();
+   private final FramePoint3D statusActualPosition = new FramePoint3D();
+   private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
 
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                                          YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
+      centerOfMassJacobian = new CenterOfMassJacobian(controllerToolbox.getFullRobotModel().getElevator(), worldFrame);
       pelvisFrame = referenceFrames.getPelvisFrame();
 
       gravity = controllerToolbox.getGravityZ();
@@ -148,12 +155,22 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command);
+      if (centerOfMassTrajectoryGenerator.handlePelvisTrajectoryCommand(command))
+      {
+         SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+         se3Trajectory.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(se3Trajectory);
+      }
    }
 
    public void handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command);
+      if (centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command))
+      {
+         EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+         euclideanTrajectory.setSequenceId(command.getSequenceId());
+         statusHelper.registerNewTrajectory(euclideanTrajectory);
+      }
    }
 
    @Override
@@ -204,8 +221,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          FeetManager feetManager)
    {
       solve(coMHeightPartialDerivatives, isInDoubleSupport);
+      statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
+      centerOfMassJacobian.reset();
       comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
@@ -228,7 +247,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       if (desiredICPVelocity.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
-            PrintTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
+            LogTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
          comXYAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
          desiredCMPcontainedNaN = true;
       }
@@ -307,5 +326,22 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    {
       centerOfMassHeightController.setGains(gains);
       coMHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
+   }
+
+   @Override
+   public TaskspaceTrajectoryStatusMessage pollStatusToReport()
+   {
+      centerOfMassTrajectoryGenerator.getCurrentDesiredHeight(statusDesiredPosition);
+      statusDesiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      statusDesiredPosition.setX(Double.NaN);
+      statusDesiredPosition.setY(Double.NaN);
+      if (controlPelvisHeightInsteadOfCoMHeight.getValue())
+         statusActualPosition.setIncludingFrame(pelvisPosition);
+      else
+         statusActualPosition.setIncludingFrame(comPosition);
+      statusActualPosition.setX(Double.NaN);
+      statusActualPosition.setY(Double.NaN);
+      
+      return statusHelper.pollStatusMessage(statusDesiredPosition, statusActualPosition);
    }
 }

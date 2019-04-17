@@ -1,7 +1,27 @@
 package us.ihmc.avatar.footstepPlanning;
 
-import controller_msgs.msg.dds.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
@@ -19,12 +39,19 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlannerObjective;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MultiStagePlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanner;
 import us.ihmc.pathPlanning.statistics.ListOfStatistics;
 import us.ihmc.pathPlanning.statistics.PlannerStatistics;
@@ -44,17 +71,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = true;
-
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
 
@@ -267,8 +285,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private PathPlanningStage cleanupPathPlanningStage(PathPlanningStage planningStage)
    {
       pathPlanningStagesInProgress.remove(planningStage);
+      ScheduledFuture<?> task = pathPlanningTasks.remove(planningStage);
+      if(task != null)
+         task.cancel(true);
+
       planningStage.destroyStageRunnable();
-      pathPlanningTasks.remove(planningStage).cancel(true);
       pathPlanningStagePool.add(planningStage);
 
       return planningStage;
@@ -278,7 +299,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       stepPlanningStagesInProgress.remove(planningStage);
       planningStage.destroyStageRunnable();
-      stepPlanningTasks.remove(planningStage).cancel(true);
+      ScheduledFuture<?> planningTask = stepPlanningTasks.remove(planningStage);
+      if (planningTask != null)
+         planningTask.cancel(true);
       stepPlanningStagePool.add(planningStage);
 
       return planningStage;
@@ -365,8 +388,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
          pathPlanningStagesInProgress.put(planner, plannerGoal);
 
-         if (debug)
-            PrintTools.info("Just started up planning path objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+         LogTools.debug("Just started up planning path objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -396,8 +418,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
          stepPlanningStagesInProgress.put(planner, plannerGoal);
 
-         if (debug)
-            PrintTools.info("Just started up planning step objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
+         LogTools.debug("Just started up planning step objective " + globalStepSequenceIndex.getIntegerValue() + " on stage " + planner.getStageId());
       }
    }
 
@@ -421,8 +442,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupPathPlanningStage(stageFinished);
 
-      if (debug)
-         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its path.");
+      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its path.");
    }
 
    @Override
@@ -442,8 +462,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       cleanupStepPlanningStage(stageFinished);
 
-      if (debug)
-         PrintTools.info("Stage " + stageFinished.getStageId() + " just finished planning its steps.");
+      LogTools.debug("Stage " + stageFinished.getStageId() + " just finished planning its steps in " + stageFinished.getPlanningDuration() + " s and a result " + stepPlanningResult + ".");
    }
 
    public void processRequest(FootstepPlanningRequestPacket request)
@@ -461,6 +480,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
       latestFootstepPlannerParametersReference.set(parameters);
+      LogTools.info("Received new set of footstep planner parameters.");
    }
 
    public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
@@ -541,10 +561,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       if (visibilityGraphsParameters != null)
          this.visibilityGraphsParameters.set(visibilityGraphsParameters);
 
-      if (debug)
-      {
-         PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
-      }
+      LogTools.debug("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
 
       if (requestedPlannerType != null)
       {
@@ -632,8 +649,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       plannerTime.add(Conversions.millisecondsToSeconds(tickDurationMs));
       if (plannerTime.getDoubleValue() > 1000.0)
       {
-         if (debug)
-            PrintTools.info("Hard timeout at " + plannerTime.getDoubleValue());
+         LogTools.debug("Hard timeout at " + plannerTime.getDoubleValue());
          reportPlannerFailed(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION);
          return;
       }
@@ -692,7 +708,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
             concatenateFootstepPlans();
             setStepHeightsForFlatGround();
 
-            if(footstepPlan.get().getNumberOfSteps() > new FootstepDataListMessage().getFootstepDataList().capacity())
+            if(footstepPlan.get() == null || footstepPlan.get().getNumberOfSteps() > new FootstepDataListMessage().getFootstepDataList().capacity())
             {
                reportPlannerFailed(FootstepPlanningResult.PLANNER_FAILED);
                stepStatus = FootstepPlanningResult.PLANNER_FAILED;
@@ -713,7 +729,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
                isDonePlanningSteps.set(true);
             }
 
-            sendMessageToUI("Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString());
+            String message = "Result of step planning: " + planId.getIntegerValue() + ", " + stepStatus.toString();
+            LogTools.debug(message);
+            sendMessageToUI(message);
          }
       }
 
@@ -1137,8 +1155,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void wakeUp()
    {
-      if (debug)
-         PrintTools.debug(this, "Waking up");
+      LogTools.debug("Waking up");
 
       initialize.set(true);
       waitingForPlanningRequest.set(true);
@@ -1146,14 +1163,16 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    public void sleep()
    {
-      if (debug)
-         PrintTools.debug(this, "Going to sleep");
+      LogTools.debug("Going to sleep");
 
       cancelAllActiveStages();
       cleanupAllPlanningStages();
 
-      for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
-         stepPlanningTasks.remove(planningTask).cancel(true);
+      if (!stepPlanningTasks.isEmpty())
+      {
+         for (FootstepPlanningStage planningTask : stepPlanningTasks.iterator())
+            stepPlanningTasks.remove(planningTask).cancel(true);
+      }
       waitingForPlanningRequest.set(false);
    }
 
@@ -1161,7 +1180,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    {
       sleep();
 
-      if (debug)
-         PrintTools.debug(this, "Destroyed");
+      LogTools.debug("Destroyed");
    }
 }

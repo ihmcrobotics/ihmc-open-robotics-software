@@ -20,6 +20,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.F
 import us.ihmc.quadrupedFootstepPlanning.ui.SimpleFootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapSequenceRenderer;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -57,9 +58,11 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
+      costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
       costBuilder.setIncludePitchAndRollCost(true);
@@ -92,6 +95,7 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesThisTickTopic, this::handleNodesThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.NodesRejectedThisTickTopic, this::handleNodesRejectedThisTick);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerThoughtPlaybackFractionTopic, this::handlePlaybackFraction);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
 
       rejectionReasonToShow = messager.createInput(FootstepPlannerMessagerAPI.RejectionReasonToShowTopic, QuadrupedFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_STEP);
       showNodesByRejectionReason = messager.createInput(FootstepPlannerMessagerAPI.ShowNodesRejectedByReasonTopic, false);

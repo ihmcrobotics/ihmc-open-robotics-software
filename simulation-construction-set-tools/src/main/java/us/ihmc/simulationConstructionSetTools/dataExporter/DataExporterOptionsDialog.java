@@ -18,7 +18,8 @@ class DataExporterOptionsDialog
 {
    private String tag;
    private final JCheckBox saveReadMeCheckBox = new JCheckBox("Save ReadMe");
-   private final JCheckBox saveDataCheckBox = new JCheckBox("Save Data");
+   private final JCheckBox saveSCSDataCheckBox = new JCheckBox("Save Data in SCS Format");
+   private final JCheckBox saveMatlabDataCheckBox = new JCheckBox("Save Data in Matlab Format");
    private final JCheckBox createSpreadSheetCheckBox = new JCheckBox("Create Torque & Speed Spreadsheet");
    private final JCheckBox createGraphsCheckBoxJPG = new JCheckBox("Create Torque & Speed Graph JPG");
    private final JCheckBox createGraphsCheckBoxPDF = new JCheckBox("Create Torque & Speed Graph PDF");
@@ -71,9 +72,14 @@ class DataExporterOptionsDialog
       saveReadMeCheckBox.setSelected(true);
       gridBagConstraints.gridy++;
       gridBagConstraints.gridwidth = 2;
-      panel.add(saveDataCheckBox, gridBagConstraints);
-      saveDataCheckBox.setSelected(true);
+      panel.add(saveSCSDataCheckBox, gridBagConstraints);
+      saveSCSDataCheckBox.setSelected(true);
 
+      gridBagConstraints.gridy++;
+      gridBagConstraints.gridwidth = 2;
+      panel.add(saveMatlabDataCheckBox, gridBagConstraints);
+      saveMatlabDataCheckBox.setSelected(false);
+      
       gridBagConstraints.gridy++;
       gridBagConstraints.gridwidth = 2;
       panel.add(createSpreadSheetCheckBox, gridBagConstraints);
@@ -151,7 +157,12 @@ class DataExporterOptionsDialog
 
    public boolean saveData()
    {
-      return saveDataCheckBox.isSelected();
+      return saveSCSDataCheckBox.isSelected();
+   }
+   
+   public boolean saveMatlabData()
+   {
+      return saveMatlabDataCheckBox.isSelected();
    }
 
    public boolean createSpreadSheet()

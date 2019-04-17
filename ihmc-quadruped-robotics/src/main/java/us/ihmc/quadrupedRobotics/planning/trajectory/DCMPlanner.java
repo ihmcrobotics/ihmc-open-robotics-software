@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -33,7 +34,7 @@ import java.util.List;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-public class DCMPlanner
+public class DCMPlanner implements DCMPlannerInterface
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -117,7 +118,7 @@ public class DCMPlanner
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
-      dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
+      dcmTrajectory.setupVisualizers(yoGraphicsListRegistry, POINT_SIZE);
 
       YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", perfectCMPPosition, 0.002, YoAppearance.BlueViolet());
 
@@ -137,7 +138,7 @@ public class DCMPlanner
       numberOfStepsInPlanner.set(0);
    }
 
-   public void setCoMHeight(double comHeight)
+   public void setNominalCoMHeight(double comHeight)
    {
       this.comHeight.set(comHeight);
    }
@@ -156,8 +157,8 @@ public class DCMPlanner
       dcmTrajectory.resetVariables();
    }
 
-   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly dcmPosition,
-                                     FrameVector3DReadOnly dcmVelocity)
+   public void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
+                                     FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
 
@@ -169,8 +170,8 @@ public class DCMPlanner
          // compute dcm trajectory
          computeDcmTrajectory(currentContactStates);
 
-         dcmPositionAtStartOfState.setMatchingFrame(dcmPosition);
-         dcmVelocityAtStartOfState.setMatchingFrame(dcmVelocity);
+         dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
+         dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
          timeAtStartOfState.set(controllerTime.getDoubleValue());
          computeTransitionTrajectory();
       }
@@ -290,6 +291,7 @@ public class DCMPlanner
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
    }
 
+
    private void runOutputDebugChecks()
    {
       if (desiredDCMPosition.containsNaN())
@@ -308,9 +310,10 @@ public class DCMPlanner
       finalDesiredDCMToPack.setMatchingFrame(finalDCM);
    }
 
-   public void getPerfectCMPPosition(FramePoint2D perfectCMPPositionToPack)
+   @Override
+   public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
    {
-      perfectCMPPositionToPack.setIncludingFrame(perfectCMPPosition);
+      desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
    }
 
    public double getFinalTime()

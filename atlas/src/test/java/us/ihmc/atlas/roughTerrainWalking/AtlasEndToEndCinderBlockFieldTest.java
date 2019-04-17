@@ -7,8 +7,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
@@ -24,7 +22,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    @Override
    public double getPelvisOffsetHeight()
    {
-      return 0.0;
+      return -0.05;
    }
 
    @Override
