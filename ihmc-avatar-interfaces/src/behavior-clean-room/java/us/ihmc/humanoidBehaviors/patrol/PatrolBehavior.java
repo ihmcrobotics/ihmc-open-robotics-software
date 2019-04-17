@@ -24,7 +24,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidBehaviors.tools.state.EnhancedStateMachineFactory;
 import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -39,6 +38,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
@@ -94,7 +94,7 @@ public class PatrolBehavior
 
       LogTools.debug("Initializing patrol behavior");
 
-      EnhancedStateMachineFactory<PatrolBehaviorState> factory = new EnhancedStateMachineFactory<>(PatrolBehaviorState.class);
+      EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
