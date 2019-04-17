@@ -5,7 +5,8 @@ import java.util.LinkedHashMap;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 
-public class RawJointSensorDataHolderMap extends LinkedHashMap<OneDoFJointBasics, RawJointSensorDataHolder>
+// TODO: move this to atlas specific code one switch to barrier scheduler is complete.
+public class RawJointSensorDataHolderMap extends LinkedHashMap<String, RawJointSensorDataHolder>
 {
    private static final long serialVersionUID = 743946164652993907L;
 
@@ -16,7 +17,10 @@ public class RawJointSensorDataHolderMap extends LinkedHashMap<OneDoFJointBasics
       for(OneDoFJointBasics joint : joints)
       {
          RawJointSensorDataHolder dataHolder = new RawJointSensorDataHolder(joint.getName());
-         put(joint, dataHolder);
+         if (put(joint.getName(), dataHolder) != null)
+         {
+            throw new RuntimeException("Have duplicate joint " + joint.getName());
+         }
       }
    }
 }
