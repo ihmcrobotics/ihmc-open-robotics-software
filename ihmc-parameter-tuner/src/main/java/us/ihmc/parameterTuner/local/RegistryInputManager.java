@@ -47,8 +47,6 @@ public class RegistryInputManager implements ParameterGuiInterface
    {
       this.registry = registry;
 
-      registry.getAllParameters()
-
       needsReloading.set();
    }
 
@@ -61,7 +59,7 @@ public class RegistryInputManager implements ParameterGuiInterface
 
    /** @inheritDoc */
    @Override
-   public List<GuiRegistry> getRegistriesCopy()
+   public List<GuiRegistry> getRegistriesCopy() // this one seems good
    {
       List<GuiRegistry> registriesCopy = new ArrayList<>();
       ArrayList<YoVariableRegistry> yoRegistries = registry.getChildren();
