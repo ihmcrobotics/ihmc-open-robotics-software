@@ -55,8 +55,8 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
    private final FramePose2D tempPose = new FramePose2D();
    private final QuaternionBasedTransform tempTransform = new QuaternionBasedTransform();
 
-   private static final int howFarBackToLook = 2;
-   private static final double inflationWeight = 2.0;
+   private static final int howFarBackToLook = 3;
+   private static final double inflationWeight = 1.0;
 
    public QuadrupedConstantVelocityBodyPathProvider(QuadrupedReferenceFrames referenceFrames, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                                     DoubleProvider firstStepDelay, YoDouble timestamp, YoVariableRegistry parentRegistry,
