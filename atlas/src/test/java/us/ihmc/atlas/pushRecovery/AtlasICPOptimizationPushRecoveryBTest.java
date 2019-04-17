@@ -101,7 +101,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
-      percentWeight = 0.13;
+      percentWeight = 0.125;
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
