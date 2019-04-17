@@ -151,6 +151,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
+   public boolean createFootWrenchSensorDriftEstimator()
+   {
+      return false;
+   }
+
    public abstract FootSwitchFactory getFootSwitchFactory();
 
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();

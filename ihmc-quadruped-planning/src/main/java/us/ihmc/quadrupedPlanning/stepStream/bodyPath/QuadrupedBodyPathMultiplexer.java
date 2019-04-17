@@ -26,7 +26,7 @@ public class QuadrupedBodyPathMultiplexer implements QuadrupedPlanarBodyPathProv
                                        YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       waypointBasedPath = new QuadrupedWaypointBasedBodyPathProvider(referenceFrames, timestamp, graphicsListRegistry, registry);
-      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, firstStepDelay, timestamp, registry);
+      joystickBasedPath = new QuadrupedConstantVelocityBodyPathProvider(referenceFrames, xGaitSettings, firstStepDelay, timestamp, registry, graphicsListRegistry);
       joystickBasedPath.setShiftPlanBasedOnStepAdjustment(true);
 
       parentRegistry.addChild(registry);
