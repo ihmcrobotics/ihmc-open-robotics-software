@@ -167,7 +167,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       deactivateAccelerationIntegrationInWBC = runtimeEnvironment.getHighLevelControllerParameters().deactivateAccelerationIntegrationInTheWBC();
 
       // Initialize input providers.
-      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), registry);
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), runtimeEnvironment.getControlDT(), registry);
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
       // step planner
@@ -285,6 +285,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getDesiredTouchdownPositionInWorld().add(balanceManager.getStepAdjustment(thisStepQuadrant));
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
+      stepMessageHandler.onTouchDown(thisStepQuadrant);
       stepMessageHandler.shiftPlanBasedOnStepAdjustment(balanceManager.getStepAdjustment(thisStepQuadrant));
 
       balanceManager.completedStep(thisStepQuadrant);
@@ -389,7 +390,9 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       }
 
       // update controller state machine
-      stateMachine.doActionAndTransition();
+      stateMachine.doTransitions();
+      stateMachine.doAction();
+//      stateMachine.doActionAndTransition();
 
       jointSpaceManager.compute();
 
@@ -453,6 +456,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       statusMessageOutputManager.reportStatusMessage(groundPlaneMessage);
    }
 
+   // FIXME does this do anything anymore?
    private void handleChangeInContactState()
    {
       // update accumulated step adjustment

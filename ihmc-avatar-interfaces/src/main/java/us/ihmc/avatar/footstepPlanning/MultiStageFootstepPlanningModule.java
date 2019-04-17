@@ -51,7 +51,6 @@ public class MultiStageFootstepPlanningModule
    private final RealtimeRos2Node realtimeRos2Node;
 
    private final ScheduledExecutorService executorService;
-   private ScheduledFuture<?> taskScheduled = null;
    private ScheduledFuture<?> yoVariableServerScheduled = null;
    private final int updatePeriodMilliseconds = 1;
 
@@ -156,11 +155,6 @@ public class MultiStageFootstepPlanningModule
 
    public void receivedPacket(ToolboxStateMessage message)
    {
-      if (taskScheduled != null)
-      {
-         return;
-      }
-
       switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
       {
       case WAKE_UP:

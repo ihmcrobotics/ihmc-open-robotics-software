@@ -282,8 +282,11 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    private PathPlanningStage cleanupPathPlanningStage(PathPlanningStage planningStage)
    {
       pathPlanningStagesInProgress.remove(planningStage);
+      ScheduledFuture<?> task = pathPlanningTasks.remove(planningStage);
+      if(task != null)
+         task.cancel(true);
+
       planningStage.destroyStageRunnable();
-      pathPlanningTasks.remove(planningStage).cancel(true);
       pathPlanningStagePool.add(planningStage);
 
       return planningStage;
