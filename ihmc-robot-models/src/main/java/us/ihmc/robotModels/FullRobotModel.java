@@ -151,7 +151,9 @@ public interface FullRobotModel
 
    /**
     * Returns all the ContactSensorDefinitions corresponding to each contact sensor attached to this robot.
+    * @deprecated
     */
+   @Deprecated
    ContactSensorDefinition[] getContactSensorDefinitions();
 
 
