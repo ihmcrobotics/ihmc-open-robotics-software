@@ -49,7 +49,7 @@ public class KinematicsBasedStateEstimatorFactory
    private RequiredFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new RequiredFactoryField<>("contactableBodiesFactoryField");
    private RequiredFactoryField<ForceSensorDataHolder> estimatorForceSensorDataHolderToUpdateField = new RequiredFactoryField<>("estimatorForceSensorDataHolderToUpdateField");
 
-   private RequiredFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField = new RequiredFactoryField<>("estimatorCenterOfMassDataHolderToUpdateField");
+   private OptionalFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField = new OptionalFactoryField<>("estimatorCenterOfMassDataHolderToUpdateField");
 
    private RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new RequiredFactoryField<>("centerOfPressureDataHolderFromControllerField");
    private RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new RequiredFactoryField<>("robotMotionStatusFromControllerField");
@@ -166,9 +166,12 @@ public class KinematicsBasedStateEstimatorFactory
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
 
       // Create the sensor readers and state estimator here:
+      CenterOfMassDataHolder estimatorCenterOfMassDataHolder = estimatorCenterOfMassDataHolderToUpdateField.hasValue()
+            ? estimatorCenterOfMassDataHolderToUpdateField.get()
+            : null;
       DRCKinematicsBasedStateEstimator estimator = new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure, stateEstimatorParameters,
                                                                                         sensorOutputMapReadOnlyField.get(),
-                                                                                        estimatorCenterOfMassDataHolderToUpdateField.get(),
+                                                                                        estimatorCenterOfMassDataHolder,
                                                                                         imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
                                                                                         centerOfPressureDataHolderFromControllerField.get(),
                                                                                         robotMotionStatusFromControllerField.get(), bipedFeetMap,
