@@ -65,6 +65,7 @@ public class FootVelocityBasedTouchDownDetection implements TouchdownDetector
    public void reset()
    {
       measuredSpeed.set(0.0);
+      footVelocity.setToZero();
       isInContact.set(false);
    }
 
