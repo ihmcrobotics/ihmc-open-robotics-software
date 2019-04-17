@@ -18,8 +18,6 @@ import java.util.List;
 
 public class JointTorqueBasedWrenchCalculator implements WrenchCalculator
 {
-   private static final double jointEpsilon = 5e-2;
-
    private final Wrench wrench = new Wrench();
 
    private final DenseMatrix64F linearPartOfJacobian = new DenseMatrix64F(3, 3);
