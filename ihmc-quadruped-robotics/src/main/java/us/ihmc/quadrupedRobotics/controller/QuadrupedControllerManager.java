@@ -217,6 +217,9 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
             runtimeEnvironment.getFootSwitches().get(robotQuadrant).setFootContactState(false);
             runtimeEnvironment.getEstimatorFootSwitches().get(robotQuadrant).setFootContactState(false);
          }
+         runtimeEnvironment.getFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+         runtimeEnvironment.getEstimatorFootSwitches().get(RobotQuadrant.HIND_RIGHT).setFootContactState(true);
+
          if (stateEstimatorModeSubscriber != null)
             stateEstimatorModeSubscriber.requestStateEstimatorMode(StateEstimatorMode.FROZEN);
          break;
@@ -263,11 +266,6 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       copyJointDesiredsToJoints();
 
       requestedControllerStateReference.set(null);
-   }
-
-   public YoBoolean getControllerFailedBoolean()
-   {
-      return controllerToolbox.getControllerFailedBoolean();
    }
 
    @Override

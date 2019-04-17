@@ -177,20 +177,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footAcceleration.setBodyFrame(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(soleFrame, footAcceleration);
       spatialAccelerationCommand.setLinearWeights(parameters.getSupportFootWeights());
-
-      /*
-      if (footSwitch.hasFootHitGround())
-      {
-         if (!footIsVerifiedAsLoaded && timeInState > minimumTimeInSupportState.getValue())
-         {
-            footIsVerifiedAsLoaded = true;
-
-            tempPoint.setToZero(soleFrame);
-            groundPlanePosition.setMatchingFrame(tempPoint);
-            upcomingGroundPlanePosition.setMatchingFrame(tempPoint);
-         }
-      }
-      */
+      
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(soleFrame);

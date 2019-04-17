@@ -86,7 +86,6 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
       this.xGaitSettings = xGaitSettings;
       this.timestamp = timestamp;
 
-      yoGraphicsListRegistry.registerYoGraphic("bodyPathProvider", new YoGraphicPosition("centerStartPoint", centerStartPoint.getYoX(), centerStartPoint.getYoY(), 0.05, YoAppearance.Red(), GraphicType.CROSS));
       parentRegistry.addChild(registry);
    }
 

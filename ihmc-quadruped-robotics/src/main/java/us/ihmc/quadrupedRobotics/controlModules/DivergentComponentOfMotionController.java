@@ -103,9 +103,6 @@ public class DivergentComponentOfMotionController
 
       vrpPositionSetpoint.add(this.dcmVelocitySetpoint, vrpControllerEffort);
       vrpPositionSetpoint.scaleAdd(-1.0 / omega, this.dcmPositionEstimate);
-//      vrpPositionSetpoint.setX(this.dcmPositionEstimate.getX() - 1 / omega * (this.dcmVelocitySetpoint.getX() + xEffort));
-//      vrpPositionSetpoint.setY(this.dcmPositionEstimate.getY() - 1 / omega * (this.dcmVelocitySetpoint.getY() + yEffort));
-//      vrpPositionSetpoint.setZ(this.dcmPositionEstimate.getZ() - 1 / omega * (this.dcmVelocitySetpoint.getZ() + zEffort));
 
       yoLimitedVrpPositionSetpoint.update(vrpPositionSetpoint);
 
