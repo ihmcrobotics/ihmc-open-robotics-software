@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -15,6 +16,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,19 +59,19 @@ public class PatrolBehavior
       /** Optional user review of footstep plan. */
       REVIEW,
       /** Walking towards goal waypoint */
-      WALK
+      WALK, WAIT
    }
 
    public enum OperatorPlanReviewResult
    {
-      REPLAN,
-      WALK
+      REPLAN, WALK
    }
 
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
@@ -107,21 +109,26 @@ public class PatrolBehavior
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
-      factory.addTransition(WALK, Lists.newArrayList(PLAN, STOP), this::transitionFromWalk);
+      factory.addTransition(WALK, Lists.newArrayList(WAIT, STOP), this::transitionFromWalk);
+      factory.getStateMap().get(WAIT).setOnEntry(this::onWaitStateEntry);
+      factory.addTransition(WAIT, Lists.newArrayList(PLAN, STOP), this::transitionFromWait);
       stateMachine = factory.getFactory().build(STOP);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
-      messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex -> {
+      messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex ->
+      {
          goalWaypointIndex.set(goToWaypointIndex);
          LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
          overrideGoToWaypointNotification.set();
       });
-      messager.registerTopicListener(API.PlanReviewResult, message -> {
+      messager.registerTopicListener(API.PlanReviewResult, message ->
+      {
          planReviewResult.add(message);
       });
 
@@ -266,9 +273,8 @@ public class PatrolBehavior
    private void onWalkStateEntry()
    {
       messager.submitMessage(API.CurrentState, WALK);
-      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
-                                                                    swingOvers.get());
+      walkingCompleted = remoteRobotControllerInterface
+            .requestWalk(footstepPlanResultNotification.read(), remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(), swingOvers.get());
    }
 
    private void doWalkStateAction(double timeInState)
@@ -287,7 +293,7 @@ public class PatrolBehavior
       {
          if (goalWaypointInBounds())
          {
-            return PLAN;
+            return WAIT; // TODO investigate this transition
          }
          else
          {
@@ -302,7 +308,7 @@ public class PatrolBehavior
          }
          else
          {
-            return PLAN;
+            return WAIT;
          }
       }
 
@@ -321,6 +327,38 @@ public class PatrolBehavior
          }
          goalWaypointIndex.set(nextGoalWaypointIndex);
       }
+   }
+
+   private void onWaitStateEntry()
+   {
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
+   }
+
+   private PatrolBehaviorState transitionFromWait(double timeInState)
+   {
+      if (stopNotification.read())
+      {
+         return STOP;
+      }
+      else if (overrideGoToWaypointNotification.read())
+      {
+         if (goalWaypointInBounds())
+         {
+            return PLAN; // TODO investigate this transition
+         }
+         else
+         {
+            return STOP;
+         }
+      }
+      else if (timeInState > 5.0)
+      {
+         return PLAN;
+      }
+
+      return null;
    }
 
    private void pollInterrupts()
