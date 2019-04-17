@@ -1,4 +1,4 @@
-package us.ihmc.realtime.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;

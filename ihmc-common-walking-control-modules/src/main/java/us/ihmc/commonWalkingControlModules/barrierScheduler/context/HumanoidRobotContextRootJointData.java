@@ -1,4 +1,4 @@
-package us.ihmc.realtime.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.tuple3D.Point3D;
