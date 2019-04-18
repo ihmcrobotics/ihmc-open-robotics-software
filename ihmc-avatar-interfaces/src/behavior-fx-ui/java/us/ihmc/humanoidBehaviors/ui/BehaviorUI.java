@@ -10,11 +10,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
@@ -82,9 +80,12 @@ public class BehaviorUI
       {
          e.printStackTrace();
       }
-      ExceptionPrintingThreadScheduler scheduler = new ExceptionPrintingThreadScheduler(getClass().getSimpleName() + "YoVariableServer");
+      PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+      PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("YoVariableUpdate");
       AtomicLong timestamp = new AtomicLong();
-      scheduler.schedule(() -> yoVariableServer.update(timestamp.getAndAdd(10000)), 17, TimeUnit.MILLISECONDS); // 60Hz should be plenty
+      updateScheduler.schedule(() -> {
+         yoVariableServer.update(timestamp.getAndAdd(10000));
+      }, 10, TimeUnit.MILLISECONDS);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
