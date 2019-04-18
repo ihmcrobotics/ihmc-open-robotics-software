@@ -71,7 +71,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultiStageFootstepPlanningManager implements PlannerCompletionCallback
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private static final int initialNumberOfPathStages = 1;
    private static final int initialNumberOfStepStages = 2;
@@ -1009,6 +1009,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
    private void sendMessageToUI(String message)
    {
+      if(debug)
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(message));
    }
 

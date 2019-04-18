@@ -176,6 +176,7 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
          currentTask = timingBehavior.dataBase.saveTask("Behavior Walk");
 
       }
+      System.out.println("********************************************** "+currentTask.taskID);
       currentRun = timingBehavior.dataBase.saveRun(timingBehavior.dataBase.new Run(operator.operatorID, currentTask.taskID));
 
       //save start time
