@@ -27,7 +27,7 @@ mainDependencies {
    compile group: "org.ros.rosjava_messages", name: "std_msgs", version: "0.5.9"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
    compile group: "us.ihmc", name: "IHMCRosControl", version: "0.5.0", changing: true
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
