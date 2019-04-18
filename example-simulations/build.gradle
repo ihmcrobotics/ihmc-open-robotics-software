@@ -27,7 +27,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
