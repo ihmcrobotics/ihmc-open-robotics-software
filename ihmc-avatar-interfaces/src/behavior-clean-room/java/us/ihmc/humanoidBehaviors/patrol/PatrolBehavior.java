@@ -52,6 +52,10 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
+
+   public static final double DISTANCE_TO_REQUIRE_PERCEPTION = 1.0;
+   public static final double TIME_TO_PERCEIVE = 20.0;
+
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
@@ -321,7 +325,8 @@ public class PatrolBehavior
                nextWaypointIndex = 0;
             }
             // next waypoint is far, gather more data to increase robustness
-            if (currentWaypointList.get(currentGoalWaypoint).getPositionDistance(currentWaypointList.get(nextWaypointIndex)) > 1.0)
+            if (currentWaypointList.get(currentGoalWaypoint).getPositionDistance(currentWaypointList.get(nextWaypointIndex))
+                  > DISTANCE_TO_REQUIRE_PERCEPTION)
             {
                return PERCEIVE;
             }
@@ -373,7 +378,7 @@ public class PatrolBehavior
             return STOP;
          }
       }
-      else if (timeInState > 5.0)
+      else if (timeInState > TIME_TO_PERCEIVE)
       {
          return PLAN;
       }
