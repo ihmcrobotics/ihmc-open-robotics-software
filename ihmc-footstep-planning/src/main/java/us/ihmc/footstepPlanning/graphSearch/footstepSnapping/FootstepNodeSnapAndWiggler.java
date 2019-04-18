@@ -202,8 +202,11 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    {
       wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
       wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
       wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
       wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
+      wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
    }
 
    private RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal)
