@@ -19,7 +19,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
