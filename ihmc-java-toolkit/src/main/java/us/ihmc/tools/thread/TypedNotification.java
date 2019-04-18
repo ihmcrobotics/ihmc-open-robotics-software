@@ -8,6 +8,8 @@ import us.ihmc.commons.exception.ExceptionTools;
  * The holder polls for notifications, with the option to block with #blockingPoll. Upon
  * polling a notification, it is cleared. After a poll, the value may be read later as
  * much as desired with #read.
+ * <p/>
+ * The Notification classes are to pass data to another thread. Sort of like a size 1 concurrent buffer.
  */
 public class TypedNotification<T>
 {

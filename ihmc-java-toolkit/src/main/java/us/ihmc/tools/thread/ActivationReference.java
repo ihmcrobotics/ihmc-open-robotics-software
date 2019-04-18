@@ -3,8 +3,13 @@ package us.ihmc.tools.thread;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * An atomic reference with one frame of history to give it has changed
- * on the latest call to get().
+ * An atomic reference with one frame of history to give it has changed on
+ * the latest call to get().
+ * <p/>
+ * The Activation/Activator classes are to set from another thread an object
+ * which has a persistent value, for instance "activating" some functionality.
+ * It is handy also that it provides access to if the value/activated-ness
+ * just changed, to assist when state transition action is needed.
  */
 public class ActivationReference<T>
 {
