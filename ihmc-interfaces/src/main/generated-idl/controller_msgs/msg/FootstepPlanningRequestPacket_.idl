@@ -22,6 +22,9 @@ module controller_msgs
       const octet FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP =
       1;
 
+      /**
+       * The recommended planner type
+       */
       const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
       2;
 
@@ -45,18 +48,51 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Initial stance foot side
+         */
         @defaultValue(value=255)
         octet initial_stance_robot_side;
+        /**
+         * Stance foot sole frame z up position, z must be correct
+         */
         geometry_msgs::msg::dds::Point stance_foot_position_in_world;
+        /**
+         * Stance foot sole frame z up orientation, only the "yaw" is considered
+         */
         geometry_msgs::msg::dds::Quaternion stance_foot_orientation_in_world;
+        /**
+         * Goal mid feet z up position
+         */
         geometry_msgs::msg::dds::Point goal_position_in_world;
+        /**
+         * Goal mid feet z up orientation, only the "yaw" is considered
+         */
         geometry_msgs::msg::dds::Quaternion goal_orientation_in_world;
+        /**
+         * Footstep planner type, see above
+         */
         @defaultValue(value=255)
         octet requested_footstep_planner_type;
+        /**
+         * Timeout in seconds
+         */
         double timeout;
+        /**
+         * Max body path length if using body path
+         */
         double horizon_length;
+        /**
+         * Planar regions to use, if you don't want to assume flat ground
+         */
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
+        /**
+         * Explicitly tell the planner to use flat ground
+         */
         boolean assume_flat_ground;
+        /**
+         * Set this id to keep track of your request
+         */
         @defaultValue(value=-1)
         long planner_request_id;
       };

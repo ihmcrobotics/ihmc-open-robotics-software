@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -85,6 +86,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    }
 
    private final FramePoint3D tempContactPointPosition = new FramePoint3D();
+
+   public void attachContactChangeListener(VariableChangedListener variableChangedListener)
+   {
+      inContact.addVariableChangedListener(variableChangedListener);
+   }
 
    @Override
    public void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack)

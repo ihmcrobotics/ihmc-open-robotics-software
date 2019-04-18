@@ -1,18 +1,30 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.comBasedPlanner;
 
-import org.junit.jupiter.api.Test;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -23,11 +35,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class BipedCoMTrajectoryPlannerVisualizer
 {
@@ -208,7 +220,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       simDuration = steps.get(steps.size() - 1).getTimeInterval().getEndTime() + extraSimDuration;
 
-      SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
+      SimulationConstructionSetParameters scsParameters = SimulationConstructionSetParameters.createFromSystemProperties();
+      scsParameters.setDataBufferSize(BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
 
       for (RobotSide robotSide : RobotSide.values)
@@ -226,9 +239,12 @@ public class BipedCoMTrajectoryPlannerVisualizer
       scs.setCameraFix(7.5, 0.0, 0.5);
       scs.setCameraPosition(-2.0, 9.5, 6.0);
 
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
-      simulationOverheadPlotterFactory.createOverheadPlotter();
+      if (scsParameters.getCreateGUI())
+      {
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         simulationOverheadPlotterFactory.createOverheadPlotter();
+      }
 
       scs.startOnAThread();
       simulate();

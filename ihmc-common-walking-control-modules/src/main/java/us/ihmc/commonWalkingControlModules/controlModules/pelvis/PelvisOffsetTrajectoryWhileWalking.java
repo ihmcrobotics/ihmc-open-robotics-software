@@ -147,7 +147,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       double pelvisYawSineMagnitude = pelvisYawAngleRatio.getDoubleValue() * stepAngle;
 
       // compute pelvis frequency
-      double initialPelvisDesiredYaw = desiredWalkingPelvisOffsetOrientation.getYaw().getDoubleValue(); // use to stitch together from the previous yaw
+      double initialPelvisDesiredYaw = desiredWalkingPelvisOffsetOrientation.getYaw(); // use to stitch together from the previous yaw
       double pelvisYawSineFrequency = 0.0;
       if (pelvisYawSineMagnitude != initialPelvisDesiredYaw)
          pelvisYawSineFrequency = 1.0 / (2.0 * Math.PI * transferDuration) * Math.asin(-initialPelvisDesiredYaw / pelvisYawSineMagnitude);
@@ -208,7 +208,7 @@ public class PelvisOffsetTrajectoryWhileWalking
          updatePelvisYaw();
       }
 
-      limitedDesiredWalkingPelvisOffsetOrientation.update(desiredWalkingPelvisOffsetOrientation.getFrameOrientation());
+      limitedDesiredWalkingPelvisOffsetOrientation.update(desiredWalkingPelvisOffsetOrientation);
    }
 
    public void addAngularOffset(FrameQuaternion orientationToPack)

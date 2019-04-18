@@ -465,6 +465,14 @@ public interface FootstepPlannerParameters
       return 0.0;
    }
 
+   /**
+    * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+    */
+   default double getFinalTurnProximity()
+   {
+      return 1.0;
+   }
+
    default FootstepPlannerCostParameters getCostParameters()
    {
       return new DefaultFootstepPlannerCostParameters();

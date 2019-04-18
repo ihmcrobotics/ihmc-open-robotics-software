@@ -15,6 +15,7 @@ package us.ihmc.robotics.stateMachine.core;
  * 
  * @author Sylvain
  */
+@FunctionalInterface
 public interface StateTransitionCondition
 {
    /**
