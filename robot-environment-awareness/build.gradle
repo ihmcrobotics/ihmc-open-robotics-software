@@ -21,8 +21,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid-shape", version: "0.11.0"
    compile group: "us.ihmc", name: "joctomap", version: "1.6.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
@@ -31,8 +31,8 @@ applicationDependencies {
    compile ihmc.sourceSetProject("main")
 
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
 }
 
