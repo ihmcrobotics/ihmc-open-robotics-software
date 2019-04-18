@@ -118,7 +118,7 @@ public class HexapodBodySpatialManager
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       desiredAngularVelocity.scale(controllerDt);
       double deltaYaw = desiredAngularVelocity.getZ();
-      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw().getDoubleValue() + deltaYaw);
+      yoDesiredBodyOrientation.setYaw(yoDesiredBodyOrientation.getYaw() + deltaYaw);
    }
 
    /**
