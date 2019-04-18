@@ -4,6 +4,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -69,14 +71,14 @@ public class SnapAndWiggleBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
+      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
+
+      if (snappedSoleTransform.getM22() < Math.cos(parameters.getMinimumSurfaceInclineRadians()))
       {
          rejectNode(nodeToExpand, previousNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
          return false;
       }
-
-      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
 
       boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, previousNode, footholdIntersection);
       if (!isEnoughArea)

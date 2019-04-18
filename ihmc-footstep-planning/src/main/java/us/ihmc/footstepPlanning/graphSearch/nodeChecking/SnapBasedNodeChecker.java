@@ -57,6 +57,14 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
+      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(node, snapTransform, snappedSoleTransform);
+      if (snappedSoleTransform.getM22() < Math.cos(parameters.getMinimumSurfaceInclineRadians()))
+      {
+         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return false;
+      }
+
       ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
