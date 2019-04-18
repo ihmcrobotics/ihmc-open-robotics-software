@@ -420,7 +420,6 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
 
-      publishTextToSpeech("requesting plan to " + finalGoalPose.get().getX() + "," + finalGoalPose.get().getY());
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
       planId.increment();

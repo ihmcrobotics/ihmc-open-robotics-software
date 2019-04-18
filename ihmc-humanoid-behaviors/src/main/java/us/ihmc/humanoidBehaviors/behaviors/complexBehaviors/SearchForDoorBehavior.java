@@ -68,9 +68,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
          tmpFP.appendPitchRotation(-tmpFP.getPitch());
          
          FramePose3D doorFrame = new FramePose3D(tmpFP);
-//         doorFrame.appendPitchRotation(-doorFrame.getPitch());
-         doorFrame.appendTranslation(-0.015875,.65405, -1.1684);
-        // doorFrame.changeFrame(ReferenceFrame.getWorldFrame());
+        // doorFrame.appendTranslation(-0.015875,.65405, -1.1684);
          
          
          Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());

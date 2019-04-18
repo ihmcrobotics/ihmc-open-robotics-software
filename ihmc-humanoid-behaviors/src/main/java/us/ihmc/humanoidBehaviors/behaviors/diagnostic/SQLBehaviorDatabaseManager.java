@@ -276,6 +276,7 @@ public class SQLBehaviorDatabaseManager
          while (rs.next())
          {
             returnedTask = new Task(rs.getString("name"));
+            returnedTask.taskID = rs.getInt("id");
          }
          rs.close();
          stmt.close();

@@ -140,7 +140,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          public void doTransitionIntoAction()
          {
-            publishTextToSpeech("Setting up robot for Walk Through Door behavior");
 
             super.doTransitionIntoAction();
          }

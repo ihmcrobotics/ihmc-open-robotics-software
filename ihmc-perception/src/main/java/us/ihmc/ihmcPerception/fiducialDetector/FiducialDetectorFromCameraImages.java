@@ -27,11 +27,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -181,15 +180,20 @@ public class FiducialDetectorFromCameraImages
 
    public void detectFromVideoPacket(VideoPacket videoPacket)
    {
-      BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
-      detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+      detect(videoPacket);
    }
 
    private JFrame frame;
    private ImageIcon image;
 
-   public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward)
+   public void detect(VideoPacket videoPacket)
    {
+      
+      
+      BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+    // videoPacket.getPosition(), videoPacket.getOrientation());
+      
+      
       //increase brightness for sim
       RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
@@ -211,17 +215,40 @@ public class FiducialDetectorFromCameraImages
       synchronized (expectedFiducialSizeChangedConch)
       {
          
-         setIntrinsicParameters(bufferedImage);
+         
+         //setIntrinsicParameters(bufferedImage);
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
-         cameraRigidPosition.set(cameraPositionInWorld);
+         if(false)
+         {
+            int height = bufferedImage.getHeight();
+            int width = bufferedImage.getWidth();
+
+            double fx = (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
+            double fy = (height / 2.0) / Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
+
+            intrinsicParameters.width = width;
+            intrinsicParameters.height = height;
+            intrinsicParameters.cx = width / 2.0;
+            intrinsicParameters.cy = height / 2.0;
+            intrinsicParameters.fx = fx;
+            intrinsicParameters.fy = fy;
+
+            detector.setIntrinsic(intrinsicParameters);
+         }
+         else
+         {
+         
+         detector.setIntrinsic(HumanoidMessageTools.toIntrinsicParameters(videoPacket.getIntrinsicParameters()));
+         } 
+         cameraRigidTransform.setRotation(videoPacket.getOrientation());
+         cameraRigidPosition.set(videoPacket.getPosition());
          cameraRigidTransform.setTranslation(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();
 
-         cameraPose.setOrientation(cameraOrientationInWorldXForward);
-         cameraPose.setPosition(cameraPositionInWorld);
+         cameraPose.setOrientation(videoPacket.getOrientation());
+         cameraPose.setPosition(videoPacket.getPosition());
 
          GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
@@ -296,7 +323,7 @@ public class FiducialDetectorFromCameraImages
 
    private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
 
-   private IntrinsicParameters setIntrinsicParameters(BufferedImage image)
+  /* private IntrinsicParameters setIntrinsicParameters(BufferedImage image)
    {
       int height = image.getHeight();
       int width = image.getWidth();
@@ -315,7 +342,7 @@ public class FiducialDetectorFromCameraImages
       this.targetIDHasBeenLocated.set(false);
 
       return intrinsicParameters;
-   }
+   }*/
 
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {

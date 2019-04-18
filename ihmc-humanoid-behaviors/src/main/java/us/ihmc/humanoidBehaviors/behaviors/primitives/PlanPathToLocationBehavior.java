@@ -153,7 +153,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            publishTextToSpeech("PlanPathToLocationBehavior: Waiting For Plan");
 
             sleepBehavior.setSleepTime(timeout);
          }
