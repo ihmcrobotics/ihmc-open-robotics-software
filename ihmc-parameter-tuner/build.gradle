@@ -17,7 +17,7 @@ mainDependencies {
    compile group: "org.apache.commons", name: "commons-math3", version: "3.3"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }

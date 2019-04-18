@@ -44,7 +44,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: "source"
    compile group: "us.ihmc", name: "ihmc-mocap", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"

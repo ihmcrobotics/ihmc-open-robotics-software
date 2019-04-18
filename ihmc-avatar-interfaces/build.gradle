@@ -70,7 +70,7 @@ behaviorCleanRoomDependencies {
 behaviorFxUiDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("behavior-clean-room")
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
    compile group: "us.ihmc", name: "ihmc-path-planning-visualizers", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
