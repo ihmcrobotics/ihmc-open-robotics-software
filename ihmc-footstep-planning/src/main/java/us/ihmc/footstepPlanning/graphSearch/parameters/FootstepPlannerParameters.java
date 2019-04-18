@@ -478,40 +478,6 @@ public interface FootstepPlannerParameters
       return new DefaultFootstepPlannerCostParameters();
    }
 
-   default SteppableRegionFilter getSteppableRegionFilter()
-   {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
-
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
-
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
-
-            return true;
-         }
-      };
-   }
-
-   default BodyCollisionRegionFilter getBodyCollisionRegionFilter()
-   {
-      return new BodyCollisionRegionFilter()
-      {
-         @Override
-         public boolean isPlanarRegionCollidable(PlanarRegion query, double groundHeight, double minHeight, double maxHeight)
-         {
-            if (query.getBoundingBox3dInWorld().getMaxZ() < minHeight + groundHeight)
-               return false;
-
-            return maxHeight + groundHeight > query.getBoundingBox3dInWorld().getMinZ();
-         }
-      };
-   }
-
    /**
     * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
     */
