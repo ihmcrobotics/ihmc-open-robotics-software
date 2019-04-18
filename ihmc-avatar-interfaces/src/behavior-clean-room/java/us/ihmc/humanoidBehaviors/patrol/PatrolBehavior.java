@@ -1,10 +1,12 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -14,7 +16,9 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,19 +61,21 @@ public class PatrolBehavior
       /** Optional user review of footstep plan. */
       REVIEW,
       /** Walking towards goal waypoint */
-      WALK
+      WALK,
+      /** Wait to gather perception data */
+      PERCEIVE
    }
 
    public enum OperatorPlanReviewResult
    {
-      REPLAN,
-      WALK
+      REPLAN, WALK
    }
 
    private final Messager messager;
    private final StateMachine<PatrolBehaviorState, State> stateMachine;
 
    private final ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
@@ -100,28 +106,39 @@ public class PatrolBehavior
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
-      factory.addTransition(PLAN, Lists.newArrayList(REVIEW, WALK, STOP, PLAN), this::transitionFromPlan);
+      factory.addTransition(PLAN, Lists.newArrayList(REVIEW, PLAN, STOP), this::transitionFromPlan);
       factory.getStateMap().get(REVIEW).setOnEntry(this::onReviewStateEntry);
       factory.getStateMap().get(REVIEW).setDoAction(this::onReviewStateAction);
       factory.addTransition(REVIEW, Lists.newArrayList(WALK, PLAN, STOP), this::transitionFromReview);
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
-      factory.addTransition(WALK, Lists.newArrayList(PLAN, STOP), this::transitionFromWalk);
+      factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, PLAN, STOP), this::transitionFromWalk);
+      factory.getStateMap().get(PERCEIVE).setOnEntry(this::onPerceiveStateEntry);
+      factory.addTransition(PERCEIVE, Lists.newArrayList(PLAN, STOP), this::transitionFromPerceive);
+      factory.getFactory().addStateChangedListener((from, to) ->
+                                                   {
+                                                      messager.submitMessage(API.CurrentState, to);
+                                                      LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+                                                   });
+      factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 
       planarRegionsList = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, null, LIDARBasedREAModule.ROS2_ID);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
-      messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex -> {
+      messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex ->
+      {
          goalWaypointIndex.set(goToWaypointIndex);
          LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
          overrideGoToWaypointNotification.set();
       });
-      messager.registerTopicListener(API.PlanReviewResult, message -> {
+      messager.registerTopicListener(API.PlanReviewResult, message ->
+      {
          planReviewResult.add(message);
       });
 
@@ -141,8 +158,6 @@ public class PatrolBehavior
 
    private void onStopStateEntry()
    {
-      messager.submitMessage(API.CurrentState, STOP);
-
       remoteRobotControllerInterface.pauseWalking();
    }
 
@@ -163,8 +178,6 @@ public class PatrolBehavior
 
    private void onPlanStateEntry()
    {
-      messager.submitMessage(API.CurrentState, PLAN);
-
       remoteFootstepPlannerInterface.abortPlanning();
 
       FramePose3D midFeetZUpPose = new FramePose3D();
@@ -217,7 +230,6 @@ public class PatrolBehavior
 
    private void onReviewStateEntry()
    {
-      messager.submitMessage(API.CurrentState, REVIEW);
       reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
    }
 
@@ -265,10 +277,8 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
-      messager.submitMessage(API.CurrentState, WALK);
-      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.read(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
-                                                                    swingOvers.get());
+      walkingCompleted = remoteRobotControllerInterface
+            .requestWalk(footstepPlanResultNotification.read(), remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(), swingOvers.get());
    }
 
    private void doWalkStateAction(double timeInState)
@@ -287,7 +297,8 @@ public class PatrolBehavior
       {
          if (goalWaypointInBounds())
          {
-            return PLAN;
+            remoteRobotControllerInterface.pauseWalking(); // TODO investigate this
+            return PERCEIVE;
          }
          else
          {
@@ -296,13 +307,28 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         if (!loop.get() && goalWaypointIndex.get() + 1 >= waypoints.get().size())
+         int currentGoalWaypoint = goalWaypointIndex.get();
+         int nextWaypointIndex = currentGoalWaypoint + 1;
+         ArrayList<Pose3D> currentWaypointList = waypoints.get();
+         if (!loop.get() && nextWaypointIndex >= currentWaypointList.size()) // stop if looping disabled
          {
             return STOP;
          }
          else
          {
-            return PLAN;
+            if (nextWaypointIndex >= currentWaypointList.size())
+            {
+               nextWaypointIndex = 0;
+            }
+            // next waypoint is far, gather more data to increase robustness
+            if (currentWaypointList.get(currentGoalWaypoint).getPositionDistance(currentWaypointList.get(nextWaypointIndex)) > 1.0)
+            {
+               return PERCEIVE;
+            }
+            else // next waypoint is close
+            {
+               return PLAN;
+            }
          }
       }
 
@@ -321,6 +347,38 @@ public class PatrolBehavior
          }
          goalWaypointIndex.set(nextGoalWaypointIndex);
       }
+   }
+
+   private void onPerceiveStateEntry()
+   {
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      reaStateRequestPublisher.publish(clearMessage);
+   }
+
+   private PatrolBehaviorState transitionFromPerceive(double timeInState)
+   {
+      if (stopNotification.read())
+      {
+         return STOP;
+      }
+      else if (overrideGoToWaypointNotification.read())
+      {
+         if (goalWaypointInBounds())
+         {
+            return PLAN; // TODO investigate this transition
+         }
+         else
+         {
+            return STOP;
+         }
+      }
+      else if (timeInState > 5.0)
+      {
+         return PLAN;
+      }
+
+      return null;
    }
 
    private void pollInterrupts()
