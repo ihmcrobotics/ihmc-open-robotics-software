@@ -1,10 +1,12 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
+import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 
 public class StepGeneratorJavaFXTopics
@@ -14,17 +16,15 @@ public class StepGeneratorJavaFXTopics
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("StepController"));
 
    private static final CategoryTheme WalkingController = apiFactory.createCategoryTheme("WalkingController");
-   private static final CategoryTheme Swing = apiFactory.createCategoryTheme("Swing");
-   private static final CategoryTheme Transfer = apiFactory.createCategoryTheme("Transfer");
    private static final CategoryTheme Trajectory = apiFactory.createCategoryTheme("Trajectory");
+   private static final CategoryTheme Stepping = apiFactory.createCategoryTheme("Stepping");
 
-   private static final TypedTopicTheme<Double> Height = apiFactory.createTypedTopicTheme("Height");
    private static final TypedTopicTheme<Double> Duration = apiFactory.createTypedTopicTheme("Duration");
+   private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
-   public static final Topic<Double> WalkingSwingHeight = Root.child(WalkingController).child(Swing).topic(Height);
-   public static final Topic<Double> WalkingSwingDuration = Root.child(WalkingController).child(Swing).topic(Duration);
-   public static final Topic<Double> WalkingTransferDuration = Root.child(WalkingController).child(Transfer).topic(Duration);
    public static final Topic<Double> WalkingTrajectoryDuration = Root.child(WalkingController).child(Trajectory).topic(Duration);
+
+   public static final Topic<JoystickStepParameters> SteppingParameters = Root.child(Stepping).topic(Parameters);
 
    static
    {

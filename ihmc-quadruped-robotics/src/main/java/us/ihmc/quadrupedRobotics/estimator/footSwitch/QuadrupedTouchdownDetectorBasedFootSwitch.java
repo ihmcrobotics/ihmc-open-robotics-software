@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -101,9 +102,11 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.setToZero();
+      WrenchReadOnly wrench = wrenchCalculator.getWrench();
       if (hasFootHitGround())
          footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
+      else
+         footWrenchToPack.setToZero(wrench.getReferenceFrame());
    }
 
    @Override

@@ -915,6 +915,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          {
             PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName);
             ankleJoint.setVelocityLimits(qd_max, b_vel_limit);
+            ankleJoint.setDamping(0.05);
          }
          else
          {

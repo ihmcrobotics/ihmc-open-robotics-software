@@ -97,7 +97,7 @@ public class QuadrupedFootControlModule
    {
       supportState.setControllerCoreMode(controllerCoreMode);
       swingState.setControllerCoreMode(controllerCoreMode);
-      moveViaWaypointsState.setControllerCoreMode(controllerCoreMode);  
+      moveViaWaypointsState.setControllerCoreMode(controllerCoreMode);
    }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
@@ -205,10 +205,8 @@ public class QuadrupedFootControlModule
    public void compute()
    {
       // Update foot state machine.
-      // Note Sylvain 2018/03/23: the controller is sensitive to the call order on the doAction and doTransitions.
-      // Inverting the ordering will break some tests, such as QuadrupedXGaitFlatGroundTrotTest.testTrottingInAForwardLeftCircle().
-      footStateMachine.doAction();
       footStateMachine.doTransitions();
+      footStateMachine.doAction();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

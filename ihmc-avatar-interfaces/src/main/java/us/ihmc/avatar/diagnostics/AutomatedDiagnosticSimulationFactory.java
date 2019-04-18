@@ -33,6 +33,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -189,13 +190,21 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          footSwitchMap.put(rigidBody, footSwitchInterface);
       }
 
+      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.UNKNOWN);
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,
                                                             centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration,
-                                                            footSwitchMap, null, new RobotMotionStatusHolder(), bipedFeetMap, null);
+                                                            footSwitchMap, null, robotMotionStatusHolder, bipedFeetMap, null);
       simulationRegistry.addChild(stateEstimator.getYoVariableRegistry());
 
-      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, stateEstimatorParameters,
-                                                            gravitationalAcceleration, null, simulationRegistry);
+      forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
+                                                            sensorOutputMapReadOnly,
+                                                            forceSensorDataHolderToUpdate,
+                                                            stateEstimatorParameters,
+                                                            gravitationalAcceleration,
+                                                            robotMotionStatusHolder,
+                                                            null,
+                                                            simulationRegistry);
 
       return sensorReader.getSensorOutputMapReadOnly();
    }

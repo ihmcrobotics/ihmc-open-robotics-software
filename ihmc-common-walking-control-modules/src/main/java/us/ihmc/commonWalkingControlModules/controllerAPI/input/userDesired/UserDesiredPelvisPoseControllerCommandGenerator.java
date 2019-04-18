@@ -113,7 +113,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
          }
       });
 
-      userDesiredPelvisPose.getOrientation().attachVariableChangedListener(new VariableChangedListener()
+      userDesiredPelvisPose.getYawPitchRoll().attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)

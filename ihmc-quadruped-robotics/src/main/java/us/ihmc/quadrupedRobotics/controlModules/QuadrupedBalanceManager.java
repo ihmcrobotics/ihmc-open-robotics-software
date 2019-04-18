@@ -376,6 +376,8 @@ public class QuadrupedBalanceManager
       dcmPlanner.getDesiredECMPPosition(perfectCMP);
       perfectCMP.changeFrame(worldFrame);
 
+
+
       /**
        * FIXME This is a hack 6/26/2018 Robert Griffin
        * The ICP plan is not being updated with the step adjustment. We approximate the step adjustment here by offsetting the final ICP and then projecting
@@ -385,6 +387,10 @@ public class QuadrupedBalanceManager
 
       double estimatedDesiredExponential = perfectCMP.distanceXY(finalICP2d) / perfectCMP.distanceXY(desiredICP2d);
       finalICP2d.scaleAdd(estimatedDesiredExponential, dcmError2d, finalICP2d);
+
+      if (actualICP2d.distance(finalICP2d) < 1.0e-10)
+         return Double.NaN;
+
       adjustedICPDynamicsLine.set(actualICP2d, finalICP2d);
       adjustedICPDynamicsLine.orthogonalProjection(desiredICP2d); // projects the desired icp onto this dynamics line
 
