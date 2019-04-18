@@ -204,7 +204,7 @@ public class QuadrupedBodyOrientationManager
          // trajectory hasn't been commanded, add current orientation as start point
          else
          {
-            desiredAbsoluteYawOrientation.setIncludingFrame(yoBodyOrientationSetpoint.getFrameOrientation());
+            desiredAbsoluteYawOrientation.setIncludingFrame(yoBodyOrientationSetpoint);
             desiredAbsoluteYawVelocity.setIncludingFrame(yoBodyAngularVelocitySetpoint);
 
             desiredAbsoluteYawOrientation.changeFrame(worldFrame);

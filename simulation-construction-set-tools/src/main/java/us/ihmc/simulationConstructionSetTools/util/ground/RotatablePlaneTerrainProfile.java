@@ -49,9 +49,9 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
    private final YoDouble filteredDesiredGroundRollAlpha = new YoDouble("filteredDesiredGroundRollAlpha", registry);
    
    private final YoFrameYawPitchRoll desiredGroundOrientation = new YoFrameYawPitchRoll("desiredGroundOrientation", ReferenceFrame.getWorldFrame(), registry);
-   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundYaw", "", registry, desiredGroundOrientation.getYaw(), filteredDesiredGroundYawAlpha, -Math.PI, Math.PI);
-   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundPitch = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundPitch", "", registry, desiredGroundOrientation.getPitch(), filteredDesiredGroundPitchAlpha, -Math.PI, Math.PI);
-   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundRoll = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundRoll", "", registry, desiredGroundOrientation.getRoll(), filteredDesiredGroundRollAlpha, -Math.PI, Math.PI);
+   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundYaw", "", registry, desiredGroundOrientation.getYoYaw(), filteredDesiredGroundYawAlpha, -Math.PI, Math.PI);
+   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundPitch = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundPitch", "", registry, desiredGroundOrientation.getYoPitch(), filteredDesiredGroundPitchAlpha, -Math.PI, Math.PI);
+   private final AlphaFilteredWrappingYoVariable filteredDesiredGroundRoll = new AlphaFilteredWrappingYoVariable("filteredDesiredGroundRoll", "", registry, desiredGroundOrientation.getYoRoll(), filteredDesiredGroundRollAlpha, -Math.PI, Math.PI);
    private final YoFrameYawPitchRoll filteredDesiredGroundOrientation = new YoFrameYawPitchRoll(filteredDesiredGroundYaw, filteredDesiredGroundPitch, filteredDesiredGroundRoll, ReferenceFrame.getWorldFrame());
 
    private YoFramePoint3D desiredGroundPosition = new YoFramePoint3D("desiredGroundPosition", WORLD_FRAME, registry);

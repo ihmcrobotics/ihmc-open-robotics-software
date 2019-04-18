@@ -1,12 +1,11 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
@@ -61,7 +60,7 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector3
       update(currentOrientationMatrix);
    }
 
-   public void update(FrameQuaternionReadOnly currentOrientation)
+   public void update(FrameOrientation3DReadOnly currentOrientation)
    {
       checkReferenceFrameMatch(currentOrientation);
 
@@ -69,13 +68,7 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector3
       update(currentOrientationMatrix);
    }
 
-   public void update(QuaternionReadOnly currentOrientation)
-   {
-      currentOrientationMatrix.set(currentOrientation);
-      update(currentOrientationMatrix);
-   }
-
-   public void update(AxisAngleReadOnly currentOrientation)
+   public void update(Orientation3DReadOnly currentOrientation)
    {
       currentOrientationMatrix.set(currentOrientation);
       update(currentOrientationMatrix);

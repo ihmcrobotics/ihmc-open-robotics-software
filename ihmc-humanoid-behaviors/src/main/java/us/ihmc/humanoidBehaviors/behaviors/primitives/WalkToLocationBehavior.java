@@ -221,7 +221,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       footsteps.clear();
       FramePose2D endPose = new FramePose2D(worldFrame);
       endPose.setPosition(new FramePoint2D(worldFrame, targetLocation.getX(), targetLocation.getY()));
-      endPose.setOrientation(new FrameOrientation2D(worldFrame, targetOrientation.getYaw().getDoubleValue()));
+      endPose.setOrientation(new FrameOrientation2D(worldFrame, targetOrientation.getYaw()));
 
       boolean computeFootstepsWithFlippedInitialTurnDirection = pathType.getAngle() != 0.0;
 

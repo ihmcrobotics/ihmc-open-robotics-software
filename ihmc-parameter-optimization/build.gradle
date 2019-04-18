@@ -12,7 +12,7 @@ ihmc {
 }
 
 mainDependencies {
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
 
