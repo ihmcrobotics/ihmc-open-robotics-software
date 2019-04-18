@@ -65,27 +65,27 @@ public class BehaviorUI
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
-      YoVariableRegistry registry = new YoVariableRegistry("vrui");
-      ParameterLoaderHelper.loadParameters(getClass(), ClassLoader.getSystemClassLoader().getResourceAsStream("vrParameters.xml"), registry);
-      YoVariableServer yoVariableServer = new YoVariableServer(robotModel.getSimpleRobotName() + getClass().getSimpleName(),
-                                                               null,
-                                                               new DataServerSettings(false),
-                                                               0.01);
-      yoVariableServer.setMainRegistry(registry, null, null);
-      try
-      {
-         yoVariableServer.start();
-      }
-      catch(Throwable e)
-      {
-         e.printStackTrace();
-      }
-      PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
-      PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("YoVariableUpdate");
-      AtomicLong timestamp = new AtomicLong();
-      updateScheduler.schedule(() -> {
-         yoVariableServer.update(timestamp.getAndAdd(10000));
-      }, 10, TimeUnit.MILLISECONDS);
+//      YoVariableRegistry registry = new YoVariableRegistry("vrui");
+//      ParameterLoaderHelper.loadParameters(getClass(), ClassLoader.getSystemClassLoader().getResourceAsStream("vrParameters.xml"), registry);
+//      YoVariableServer yoVariableServer = new YoVariableServer(robotModel.getSimpleRobotName() + getClass().getSimpleName(),
+//                                                               null,
+//                                                               new DataServerSettings(false),
+//                                                               0.01);
+//      yoVariableServer.setMainRegistry(registry, null, null);
+//      try
+//      {
+//         yoVariableServer.start();
+//      }
+//      catch(Throwable e)
+//      {
+//         e.printStackTrace();
+//      }
+//      PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+//      PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("YoVariableUpdate");
+//      AtomicLong timestamp = new AtomicLong();
+//      updateScheduler.schedule(() -> {
+//         yoVariableServer.update(timestamp.getAndAdd(10000));
+//      }, 10, TimeUnit.MILLISECONDS);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
