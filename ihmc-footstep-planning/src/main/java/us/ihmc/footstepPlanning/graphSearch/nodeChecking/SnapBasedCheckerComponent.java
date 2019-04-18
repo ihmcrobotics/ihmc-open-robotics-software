@@ -8,7 +8,10 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public interface SnapBasedCheckerComponent
 {
    void setFootstepGraph(FootstepGraph graph);
+
    void setPlanarRegions(PlanarRegionsList planarRegions);
+
    boolean isNodeValid(FootstepNode nodeToCheck, FootstepNode previousNode);
+
    BipedalFootstepPlannerNodeRejectionReason getRejectionReason();
 }
