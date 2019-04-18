@@ -18,5 +18,5 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
 }
