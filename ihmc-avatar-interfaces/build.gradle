@@ -36,7 +36,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness-visualizers", version: "source"
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"

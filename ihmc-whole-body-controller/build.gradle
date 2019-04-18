@@ -37,7 +37,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models", version: "source"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }
 
