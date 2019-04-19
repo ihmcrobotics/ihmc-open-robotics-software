@@ -36,7 +36,7 @@ public class ValidSnapChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       if (snapData.getSnapTransform().containsNaN())
       {
          if (DEBUG)

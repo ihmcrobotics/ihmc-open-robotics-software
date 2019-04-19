@@ -45,7 +45,7 @@ public class EnoughAreaSnapChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode nodeToCheck, FootstepNode previousNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(nodeToCheck);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
       ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(nodeToCheck.getRobotSide()).getArea();

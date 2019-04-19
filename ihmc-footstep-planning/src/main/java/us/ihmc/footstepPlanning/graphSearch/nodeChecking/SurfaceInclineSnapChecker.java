@@ -29,7 +29,7 @@ public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
    @Override
    public void setFootstepGraph(FootstepGraph graph)
    {
-      
+
    }
 
    @Override
@@ -41,7 +41,7 @@ public class SurfaceInclineSnapChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode nodeToCheck, FootstepNode previousNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(nodeToCheck);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
 
       RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(nodeToCheck, snapData.getSnapTransform(), snappedSoleTransform);
