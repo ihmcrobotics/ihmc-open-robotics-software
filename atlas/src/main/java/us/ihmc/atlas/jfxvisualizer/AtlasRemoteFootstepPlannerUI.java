@@ -23,7 +23,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
  */
 public class AtlasRemoteFootstepPlannerUI extends Application
 {
-   private static final boolean launchPlannerToolbox = false;
+   private static final boolean launchPlannerToolbox = true;
 
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
