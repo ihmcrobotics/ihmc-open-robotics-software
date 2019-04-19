@@ -113,10 +113,15 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          }
          break;
       case LOG_ACTIVE:
+         if (logAliveListener != null)
+         {
+            logAliveListener.receivedLogAliveCommand(false);
+         }
+         break;
       case LOG_ACTIVE_WITH_CAMERA:
          if (logAliveListener != null)
          {
-            logAliveListener.recievedLogAliveCommand();
+            logAliveListener.receivedLogAliveCommand(true);
          }
          break;
          default:

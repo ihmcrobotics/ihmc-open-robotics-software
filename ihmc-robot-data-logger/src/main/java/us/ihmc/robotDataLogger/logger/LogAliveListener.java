@@ -1,6 +1,7 @@
 package us.ihmc.robotDataLogger.logger;
 
+@FunctionalInterface
 public interface LogAliveListener
 {
-   void recievedLogAliveCommand();
+   void receivedLogAliveCommand(boolean camerasLogging);
 }
