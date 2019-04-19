@@ -10,9 +10,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
@@ -20,6 +22,7 @@ import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
+import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -65,27 +68,7 @@ public class BehaviorUI
 
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
-//      YoVariableRegistry registry = new YoVariableRegistry("vrui");
-//      ParameterLoaderHelper.loadParameters(getClass(), ClassLoader.getSystemClassLoader().getResourceAsStream("vrParameters.xml"), registry);
-//      YoVariableServer yoVariableServer = new YoVariableServer(robotModel.getSimpleRobotName() + getClass().getSimpleName(),
-//                                                               null,
-//                                                               new DataServerSettings(false),
-//                                                               0.01);
-//      yoVariableServer.setMainRegistry(registry, null, null);
-//      try
-//      {
-//         yoVariableServer.start();
-//      }
-//      catch(Throwable e)
-//      {
-//         e.printStackTrace();
-//      }
-//      PeriodicNonRealtimeThreadSchedulerFactory schedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
-//      PeriodicThreadScheduler updateScheduler = schedulerFactory.createPeriodicThreadScheduler("YoVariableUpdate");
-//      AtomicLong timestamp = new AtomicLong();
-//      updateScheduler.schedule(() -> {
-//         yoVariableServer.update(timestamp.getAndAdd(10000));
-//      }, 10, TimeUnit.MILLISECONDS);
+//      YoVariableRegistry registry = LocalParameterServer.create(getClass(), 16784);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -96,19 +79,7 @@ public class BehaviorUI
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(0.05, 2000.0,true);
       view3dFactory.addWorldCoordinateSystem(0.3);
-      {
-         /** TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ is released */
-         double ambientValue = 0.7;
-         double pointValue = 0.2;
-         double pointDistance = 1000.0;
-         Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
-         view3dFactory.addNodeToView(new AmbientLight(ambientColor));
-         Color indoorColor = Color.color(pointValue, pointValue, pointValue);
-         view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
-         view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
-      }
+      view3dFactory.addDefaultLighting();
       SubScene subScene = view3dFactory.getSubScene();
       Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
