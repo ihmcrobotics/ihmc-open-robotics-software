@@ -56,7 +56,6 @@ public class SearchForDoorBehavior extends AbstractBehavior
       {
 
          
-         //1.1684 down .65405 .2032" fiducial offset on door
                   
          FramePose3D tmpFP = new FramePose3D();
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
@@ -68,7 +67,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
          tmpFP.appendPitchRotation(-tmpFP.getPitch());
          
          FramePose3D doorFrame = new FramePose3D(tmpFP);
-        // doorFrame.appendTranslation(-0.015875,.65405, -1.1684);
+         doorFrame.appendTranslation(-0.015875,0.68183125, -1.1414125);
          
          
          Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());
@@ -84,7 +83,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
          pose.get(location, orientation);
          publishUIPositionCheckerPacket(location,orientation);
 
-       //  setDoorLocation(pose);
+         setDoorLocation(pose);
       }
       
 
@@ -110,11 +109,8 @@ public class SearchForDoorBehavior extends AbstractBehavior
    private void recievedDoorLocation(DoorLocationPacket doorLocationPacket)
    {
       recievedNewDoorLocation = true;
-      publishTextToSpeech("Recieved Door Location From UI");
-      setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
-
-
-
+      publishTextToSpeech("Recieved Door Location Confirmation From UI");
+      //setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
    }
    
    public void setDoorLocation(Pose3D pose)
