@@ -75,11 +75,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    private static final boolean ADD_LIMBO_BAR = false;
    private static final boolean ADD_CEILING = false;
 
-   private static final boolean ADD_FIDUCIAL_ABOVE_VALVE = false;
+   private static final boolean ADD_FIDUCIAL_ABOVE_VALVE = true;
    private static final boolean ADD_SOCCER_BALL = false;
    public static final double SOCCER_BALL_RADIUS = 0.0762;
 
-   private static final boolean ADD_FIDUCIAL_BOX_ROBOT = true;
+   private static final boolean ADD_FIDUCIAL_BOX_ROBOT = false;
 
    // private static final double FLOOR_THICKNESS = 0.001;
 
@@ -97,22 +97,22 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
 
-      //addCalibrationCube();
-      //combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
+      addCalibrationCube();
+      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
 
       // setUpPath2SmallCones(combinedTerrainObject);
-     // combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
-     // combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
 
       // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
-      //combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
-     // combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
+      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
+      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
 
-     // combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
-     // combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
-     // combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
-     // combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
-//
+      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
+
       if (setUpGround)
       {
          combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
@@ -1696,7 +1696,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    public static CombinedTerrainObject3D addFiducial(Vector3D position, double yaw, Fiducial fiducial)
    {
       YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(fiducial.getPathString());
-      double boxSideLength = .2032;
+      double boxSideLength = 1.0;
 
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
 

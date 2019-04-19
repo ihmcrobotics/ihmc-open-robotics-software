@@ -37,7 +37,6 @@ public abstract class ThreadedBehaviorService extends BehaviorService
       @Override
       public void run()
       {
-         System.out.println("********************* starting behavior service***************************");
          while (running)
          {
             if (!paused)
@@ -56,14 +55,12 @@ public abstract class ThreadedBehaviorService extends BehaviorService
    public void pause()
    {
       paused = true;
-      System.out.println("********************* pausing behavior service***************************");
    }
    
    @Override
    public void destroy()
    {
       running = false;
-      System.out.println("********************* stopping behavior service***************************");
    }
    
    public abstract void doThreadAction();
