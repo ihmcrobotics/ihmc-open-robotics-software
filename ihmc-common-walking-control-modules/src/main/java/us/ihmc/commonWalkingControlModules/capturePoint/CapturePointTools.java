@@ -85,7 +85,7 @@ public class CapturePointTools
 
    /**
     * Put the constant CMP in the middle of the two given footsteps.
-    * 
+    *
     * @param constantCMPToPack YoFramePoint that will be packed with the constant CMP location
     * @param firstFootstep FramePoint holding the position of the first footstep
     * @param secondFootstep FramePoint holding the position of the second footstep
@@ -99,7 +99,7 @@ public class CapturePointTools
 
    /**
     * Backward calculation of desired end of step capture point locations.
-    * 
+    *
     * @param cornerPointsToPack
     * @param constantCMPs
     * @param skipFirstCornerPoint whether the first is to be skipped or not. When in double support,
@@ -138,7 +138,7 @@ public class CapturePointTools
     * This method is to be used when in double support, or transfer. The difference with single
     * support is the presence of an additional constant CMP for the trailing foot for which the
     * corner point does not need to be computed and also that offsets the transfer/swing time index.
-    * 
+    *
     * @param cornerPointsToPack the ICP corner points computed by this method. Modified.
     * @param constantCMPs the constant CMPs already computed. Not modified.
     * @param swingTimes the swing time on a per step basis. Not modified.
@@ -243,7 +243,7 @@ public class CapturePointTools
     * transfer time and swing time on a per step basis.
     * <p>
     * This method is to be used when in single support, or swing.
-    * 
+    *
     * @param cornerPointsToPack the ICP corner points computed by this method. Modified.
     * @param constantCMPs the constant CMPs already computed. Not modified.
     * @param swingTimes the swing time on a per step basis. Not modified.
@@ -340,7 +340,7 @@ public class CapturePointTools
     * Backward calculation of the ICP corner points as the method
     * {@link #computeDesiredCornerPoints(List, List, double, double)} but considering two constant
     * CMPs per support: an entryCMP and an exitCMP.
-    * 
+    *
     * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
     * @param exitCornerPointsToPack the ICP exit corner points computed by this method. Modified.
     * @param entryCMPs the entry constant CMPs already computed. Not modified.
@@ -387,7 +387,7 @@ public class CapturePointTools
     * support is the presence of an additional pair of entry/exit CMPs for the trailing foot for
     * which the entry/exit corner points do not need to be computed and also that offsets the
     * transfer/swing time index.
-    * 
+    *
     * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
     * @param exitCornerPointsToPack the ICP exit corner points computed by this method. Modified.
     * @param entryCMPs the entry constant CMPs already computed. Not modified.
@@ -522,7 +522,7 @@ public class CapturePointTools
     * time on a per step basis.
     * <p>
     * This method is to be used when in single support, or swing.
-    * 
+    *
     * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
     * @param exitCornerPointsToPack the ICP exit corner points computed by this method. Modified.
     * @param entryCMPs the entry constant CMPs already computed. Not modified.
@@ -645,7 +645,7 @@ public class CapturePointTools
     * Given a desired capturePoint location and an initial position of the capture point, compute
     * the constant CMP that will drive the capture point from the initial position to the final
     * position.
-    * 
+    *
     * @param cmpToPack
     * @param finalDesiredCapturePoint
     * @param initialCapturePoint
@@ -663,10 +663,67 @@ public class CapturePointTools
    }
 
    /**
+    * Computes the desired Instantaneous Capture Point position by
+    * <p>
+    *    x<sup>ICP</sup> = x<sup>CoM</sup> + 1&frasl;&omega;  x&#775;<sup>CoM</sup>
+    * </p>
+    *
+    * @param desiredCenterOfMassPosition
+    * @param desiredCenterOfMassVelocity
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param desiredICPToPack
+    */
+   public static void computeDesiredCapturePointPosition(FramePoint3DReadOnly desiredCenterOfMassPosition, FrameVector3DReadOnly desiredCenterOfMassVelocity,
+                                                         double omega0, FixedFramePoint3DBasics desiredICPToPack)
+   {
+      desiredICPToPack.scaleAdd(1.0 / omega0, desiredCenterOfMassVelocity, desiredCenterOfMassPosition);
+   }
+
+   /**
+    * Computes the desired Instantaneous Capture Point position by
+    * <p>
+    *    x&#775;<sup>ICP</sup> = x&#775;<sup>CoM</sup> + 1&frasl;&omega;  x&#776;<sup>CoM</sup>
+    * </p>
+    *
+    * @param desiredCenterOfMassAcceleration
+    * @param desiredCenterOfMassAcceleration
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param desiredICPVelocityToPack
+    */
+   public static void computeDesiredCapturePointVelocity(FrameVector3DReadOnly desiredCenterOfMassVelocity, FrameVector3DReadOnly desiredCenterOfMassAcceleration,
+                                                         double omega0, FixedFrameVector3DBasics desiredICPVelocityToPack)
+   {
+      desiredICPVelocityToPack.scaleAdd(1.0 / omega0, desiredCenterOfMassAcceleration, desiredCenterOfMassVelocity);
+   }
+
+
+   /**
+    * Compute the desired capture point position at a given time.
+    * <p> x<sup>ICP</sup> = x<sup>CoM</sup> + (1 / &omega;) x&#775;<sup>CoM</sup> </p>
+    *
+    *
+    *
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param desiredCenterOfMassPosition desired center of mass position
+    * @param desiredCenterOfMassVelocity desired center of mass velocity
+    */
+   public static void computeDesiredCapturePointPosition(double omega0, FramePoint3DReadOnly desiredCenterOfMassPosition,
+                                                         FrameVector3DReadOnly desiredCenterOfMassVelocity, FixedFramePoint3DBasics desiredCapturePointToPack)
+   {
+      desiredCapturePointToPack.scaleAdd(-1.0 / omega0, desiredCenterOfMassVelocity, desiredCenterOfMassPosition);
+   }
+
+   /**
     * Compute the desired capture point position at a given time. x<sup>ICP<sub>des</sub></sup> =
     * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0
     * t</sup>)x<sup>CMP<sub>0</sub></sup>
-    * 
+    *
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
     *           biped.
@@ -685,32 +742,11 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point position at a given time. x<sup>ICP<sub>des</sub></sup> =
-    * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0
-    * t</sup>)x<sup>CMP<sub>0</sub></sup>
-    * 
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointToPack
-    */
-   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
-                                                         FramePoint3D desiredCapturePointToPack)
-   {
-      desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
-
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
-      else
-         desiredCapturePointToPack.set(initialCapturePoint);
-   }
-
-   /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w * e^{w*t} * ICP0 - p0 *
-    * w * e^{w*t}
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w * e^{w*t} * ICP0 - p0 * w * e^{w*t}
+    * <p>
+    *    ICPv_d = &omega; * e<sup>&omega; t</sup> * ICP<sub>d</sub> - p<sub>0</sub> * &omega; * e<sup>&omega; t</sup>
+    * </p>
     *
     * @param omega0 the natural frequency &omega; =
     *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
@@ -733,32 +769,6 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point velocity at a given time. ICPv_d = w * * e^{w*t} * ICP0 - p0
-    * * w * e^{w*t}
-    *
-    * @param omega0 the natural frequency &omega; =
-    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
-    *           biped.
-    * @param time
-    * @param initialCapturePoint
-    * @param initialCMP
-    * @param desiredCapturePointVelocityToPack
-    */
-   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3DReadOnly initialCapturePoint, FramePoint3DReadOnly initialCMP,
-                                                         FrameVector3D desiredCapturePointVelocityToPack)
-   {
-      desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
-
-      if (initialCapturePoint.distance(initialCMP) > EPSILON)
-      {
-         desiredCapturePointVelocityToPack.sub(initialCapturePoint, initialCMP);
-         desiredCapturePointVelocityToPack.scale(omega0 * Math.exp(omega0 * time));
-      }
-      else
-         desiredCapturePointVelocityToPack.setToZero();
-   }
-
-   /**
     * Compute the desired capture point acceleration given the desired capture point velocity
     *
     * @param omega0 the natural frequency &omega; =
@@ -768,7 +778,7 @@ public class CapturePointTools
     * @param desiredCapturePointAccelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, FrameVector3DReadOnly desiredCapturePointVelocity,
-                                                             YoFrameVector3D desiredCapturePointAccelerationToPack)
+                                                             FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
    {
       desiredCapturePointAccelerationToPack.setMatchingFrame(desiredCapturePointVelocity);
       desiredCapturePointAccelerationToPack.scale(omega0);
@@ -799,7 +809,29 @@ public class CapturePointTools
    }
 
    /**
-    * Computes the desired centroidal momentum pivot by, CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+    * Computes the desired centroidal momentum pivot by
+    * <p>
+    *    x<sup>CMP</sup> = x<sup>ICP</sup> - 1&frasl;&omega;  x&#775;<sup>ICP</sup>
+    * </p>
+    *
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param desiredCMPToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2DReadOnly desiredCapturePointPosition, FrameVector2DReadOnly desiredCapturePointVelocity,
+                                                            double omega0, FixedFramePoint2DBasics desiredCMPToPack)
+   {
+      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+   }
+
+   /**
+    * Computes the desired centroidal momentum pivot by
+    * <p>
+    *    x<sup>CMP</sup> = x<sup>ICP</sup> - 1&frasl;&omega;  x&#775;<sup>ICP</sup>
+    * </p>
     *
     * @param desiredCapturePointPosition
     * @param desiredCapturePointVelocity
@@ -832,19 +864,7 @@ public class CapturePointTools
       desiredCMPVelocityToPack.scaleAdd(-1.0 / omega0, desiredCapturePointAcceleration, desiredCapturePointVelocity);
    }
 
-   /**
-    * Computes the desired centroidal momentum pivot by, CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
-    *
-    * @param desiredCapturePointPosition
-    * @param desiredCapturePointVelocity
-    * @param omega0
-    * @param desiredCMPToPack
-    */
-   public static void computeDesiredCentroidalMomentumPivot(FramePoint2DReadOnly desiredCapturePointPosition, FrameVector2DReadOnly desiredCapturePointVelocity,
-                                                            double omega0, FixedFramePoint2DBasics desiredCMPToPack)
-   {
-      desiredCMPToPack.scaleAdd(-1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
-   }
+
 
    /**
     * Compute the distance along the capture point guide line from the current capture point

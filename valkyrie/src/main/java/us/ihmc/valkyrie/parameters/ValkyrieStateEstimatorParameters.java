@@ -398,4 +398,10 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    {
       return false;
    }
+
+   @Override
+   public boolean createFootWrenchSensorDriftEstimator()
+   {
+      return target == RobotTarget.REAL_ROBOT;
+   }
 }

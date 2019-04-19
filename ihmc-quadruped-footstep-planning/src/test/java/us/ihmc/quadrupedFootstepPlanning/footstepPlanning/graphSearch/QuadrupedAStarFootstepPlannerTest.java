@@ -38,9 +38,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.List;
-
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
@@ -273,7 +272,7 @@ public class QuadrupedAStarFootstepPlannerTest
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
-            finalSteps.put(step.getRobotQuadrant(), step.getGoalPosition());
+            finalSteps.put(step.getRobotQuadrant(), new Point3D(step.getGoalPosition()));
       }
 
       return finalSteps;

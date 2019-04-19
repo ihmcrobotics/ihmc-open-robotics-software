@@ -3,6 +3,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -16,6 +17,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop.QuadrupedStep
 import us.ihmc.quadrupedCommunication.networkProcessing.xBox.QuadrupedXBoxModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +60,14 @@ public class QuadrupedNetworkProcessor
       tryToStartModule(() -> setupBodyTeleopModule(robotModel, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupXBoxModule(robotModel, xGaitSettings, nominalHeight, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params, pubSubImplementation));
+   }
+
+   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   {
+      for (QuadrupedToolboxModule module : modules)
+      {
+         module.setRootRegistry(rootRegistry, rootGraphicsListRegistry);
+      }
    }
 
    public void setShiftPlanBasedOnStepAdjustment(boolean shift)

@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.toolbox;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -37,6 +38,11 @@ public class LinearInvertedPendulumModel
    public double getNaturalFrequency()
    {
       return omega0.getDoubleValue();
+   }
+
+   public DoubleProvider getYoNaturalFrequency()
+   {
+      return omega0;
    }
 
    private double computeNaturalFrequency()

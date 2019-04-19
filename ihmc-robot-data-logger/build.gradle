@@ -42,17 +42,17 @@ mainDependencies {
    compile group: "io.netty", name: "netty-all", version: "4.1.32.Final"
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
    compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
-   compile group: "us.ihmc", name: "mecano", version: "0.0.17"
-   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.17"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "mecano", version: "0.0.18"
+   compile group: "us.ihmc", name: "mecano-yovariables", version: "0.0.18"
    
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    

@@ -130,7 +130,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          QuadrupedTimedStep footstep = plan.getFootstep(i);
          Color regionColor = colors.get(footstep.getRobotQuadrant());
 
-         footstep.getGoalPosition(footPosition);
+         footPosition.set(footstep.getGoalPosition());
          footPosition.addZ(zOffset);
 
          meshBuilder.addSphere(RADIUS, footPosition, regionColor);

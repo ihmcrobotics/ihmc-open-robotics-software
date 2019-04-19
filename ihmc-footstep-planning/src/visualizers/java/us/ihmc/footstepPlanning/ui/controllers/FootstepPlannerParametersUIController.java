@@ -88,12 +88,11 @@ public class FootstepPlannerParametersUIController
 
    private static final double metersToPixel = 200;
 
-   private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
    public FootstepPlannerParametersUIController()
    {
-      File configurationFile = new File(CONFIGURATION_FILE_NAME);
+      File configurationFile = new File(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME);
       try
       {
          configurationFile.getParentFile().mkdirs();

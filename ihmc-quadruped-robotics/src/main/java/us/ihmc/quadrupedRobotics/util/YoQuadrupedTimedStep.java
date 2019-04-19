@@ -2,8 +2,9 @@ package us.ihmc.quadrupedRobotics.util;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.robotics.time.TimeInterval;
+import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.YoTimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -14,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoFramePoint3D;
 public class YoQuadrupedTimedStep extends QuadrupedTimedStep
 {
    private final YoEnum<RobotQuadrant> robotQuadrant;
-   private final YoTimeInterval timeInterval;
+   private final TimeIntervalBasics timeInterval;
    private final YoDouble groundClearance;
    private final YoFramePoint3D goalPosition;
 
@@ -40,13 +41,19 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    }
 
    @Override
-   public TimeInterval getTimeInterval()
+   public TimeIntervalBasics getTimeInterval()
    {
-      return this.timeInterval;
+      return timeInterval;
    }
 
    @Override
-   public Point3DBasics getGoalPosition()
+   public Point3DBasics getGoalPositionInternal()
+   {
+      return goalPosition;
+   }
+
+   @Override
+   public Point3DReadOnly getGoalPosition()
    {
       return goalPosition;
    }

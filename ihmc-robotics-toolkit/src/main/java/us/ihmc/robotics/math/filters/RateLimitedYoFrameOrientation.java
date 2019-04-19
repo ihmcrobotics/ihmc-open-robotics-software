@@ -91,8 +91,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
    public void update(YoFrameYawPitchRoll yoFrameVectorUnfiltered)
    {
       checkReferenceFrameMatch(yoFrameVectorUnfiltered);
-      update(yoFrameVectorUnfiltered.getYaw().getDoubleValue(), yoFrameVectorUnfiltered.getPitch().getDoubleValue(),
-             yoFrameVectorUnfiltered.getRoll().getDoubleValue());
+      update(yoFrameVectorUnfiltered.getYaw(), yoFrameVectorUnfiltered.getPitch(), yoFrameVectorUnfiltered.getRoll());
    }
 
    public void update(FrameQuaternion frameOrientationUnfiltered)
@@ -123,7 +122,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameYawPitchRoll
          return;
       }
 
-      quaternionFiltered.set(getFrameOrientation());
+      quaternionFiltered.set(this);
 
       if (quaternionFiltered.dot(quaternionUnfiltered) > 0.0)
       {

@@ -78,10 +78,10 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       stepTeleopManager.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
 
       stepTeleopManager.setEndDoubleSupportDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.AMBLE.getEndPhaseShift(), 0.05);
-      stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.AMBLE.getEndPhaseShift(), 0.35);
+      stepTeleopManager.setStepDuration(QuadrupedSpeed.MEDIUM, QuadrupedGait.AMBLE.getEndPhaseShift(), 0.3);
       //      stepTeleopManager.setStanceLength(1.00);
       stepTeleopManager.setStanceWidth(0.30);
-      stepTeleopManager.setStepGroundClearance(0.1);
+      stepTeleopManager.setStepGroundClearance(0.08);
       stepTeleopManager.setDesiredBodyHeight(comHeightForRoughTerrain);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
@@ -91,17 +91,17 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
-      conductor.addTimeLimit(variables.getYoTime(), 25.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
+      stepTeleopManager.setDesiredVelocity(0.4, 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 3.0));
       conductor.simulate();
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      stepTeleopManager.setDesiredVelocity(-0.5, 0.0, 0.0);
-      conductor.addTimeLimit(variables.getYoTime(), 25.0);
+      stepTeleopManager.setDesiredVelocity(-0.4, 0.0, 0.0);
+      conductor.addTimeLimit(variables.getYoTime(), 15.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();
 
@@ -111,7 +111,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
    @Test
    public void testWalkingDownSlope() throws IOException
    {
-      walkSlope(0.2, getWalkingDownSlopePosition());
+      walkSlope(0.1, getWalkingDownSlopePosition());
    }
 
    @Test

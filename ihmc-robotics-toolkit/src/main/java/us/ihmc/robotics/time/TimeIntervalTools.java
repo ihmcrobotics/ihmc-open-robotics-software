@@ -7,6 +7,20 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
+   public static boolean doIntervalsOverlap(TimeIntervalReadOnly intervalA, TimeIntervalReadOnly intervalB)
+   {
+      if (intervalA.intervalContains(intervalB.getStartTime()))
+         return true;
+
+      if (intervalA.intervalContains(intervalB.getEndTime()))
+         return true;
+
+      if (intervalB.intervalContains(intervalA.getStartTime()))
+         return true;
+
+      return intervalB.intervalContains(intervalB.getEndTime());
+   }
+
    static public void sortByStartTime(List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       sort((List<TimeIntervalProvider>) timeIntervalProviders, startTimeComparator);
