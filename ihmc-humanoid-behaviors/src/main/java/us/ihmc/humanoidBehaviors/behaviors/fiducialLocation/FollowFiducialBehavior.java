@@ -57,8 +57,13 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
 {
    enum FollowFiducialState
    {
-      WAIT, PLAN_FROM_DOUBLE_SUPPORT, PLAN_FROM_SINGLE_SUPPORT
+      WAIT, PLAN_FROM_DOUBLE_SUPPORT, PLAN_FROM_SINGLE_SUPPORT, FINAL_STEPS
    }
+
+   private boolean walkingComplete = false;
+
+   private static final double HOW_CLOSE_TO_COME_TO_GOAL_WHEN_WALKING = 1;
+   private static final double DISTANCE_TO_STOP_UPDATING_GOAL_PLAN = 1.5;
 
    private static final double defaultSwingTime = 2.2;
    private static final double defaultTransferTime = 0.5;
@@ -126,6 +131,36 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    protected FollowFiducialState configureStateMachineAndReturnInitialKey(StateMachineFactory<FollowFiducialState, BehaviorAction> factory)
    {
 
+      BehaviorAction finalSteps = new BehaviorAction()
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            publishTextToSpeech("********************Entering Final Steps State********************************");
+
+            super.setBehaviorInput();
+         }
+
+         @Override
+         public boolean isDone()
+         {
+            // TODO Auto-generated method stub
+            return doneWalking();
+         }
+
+         boolean doneWalking()
+         {
+            return (walkingStatus.get() != null) && (walkingStatus.get().getWalkingStatus() == WalkingStatus.COMPLETED.toByte());
+         }
+
+         @Override
+         public void doPostBehaviorCleanup()
+         {
+            walkingComplete = true;
+            super.doPostBehaviorCleanup();
+         }
+      };
+
       factory.setNamePrefix(getName() + "StateMachine").setRegistry(registry).buildYoClock(yoTime);
 
       factory.addState(FollowFiducialState.WAIT, waitState);
@@ -137,12 +172,33 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       StateTransitionCondition planFromDoubleSupportToWalking = (time) -> plannerResult.get() != null
             && FootstepPlanningResult.fromByte(plannerResult.get().getFootstepPlanningResult()).validForExecution();
 
+      factory.addState(FollowFiducialState.FINAL_STEPS, finalSteps);
+
       factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.WAIT, planFromDoubleSupportToWait);
       factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
       factory.addTransition(FollowFiducialState.WAIT, FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, t -> waitState.isDoneWaiting());
       factory.addTransition(FollowFiducialState.PLAN_FROM_SINGLE_SUPPORT, FollowFiducialState.WAIT, t -> planFromSingleSupportState.doneWalking());
 
+      factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.FINAL_STEPS, t -> closeToGoal());
+
       return FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT;
+   }
+
+   private boolean closeToGoal()
+   {
+      if ((walkingStatus.get() != null) && (walkingStatus.get().getWalkingStatus() == WalkingStatus.STARTED.toByte()))
+      {
+         if (finalGoalPose.get() != null)
+         {
+            FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(finalGoalPose.get());
+            goalPoseInMidFeetZUpFrame.changeFrame(referenceFrames.getMidFeetZUpFrame());
+            double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(goalPoseInMidFeetZUpFrame.getX()),
+                                                                                Math.abs(goalPoseInMidFeetZUpFrame.getY()));
+            double yawFromGoal = Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame.getYaw()));
+            return goalXYDistance < DISTANCE_TO_STOP_UPDATING_GOAL_PLAN;// && yawFromGoal < Math.toRadians(25.0);
+         }
+      }
+      return false;
    }
 
    @Override
@@ -153,6 +209,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       walkingStatus.set(null);
       currentGoalPose.set(null);
       plannerResult.set(null);
+      walkingComplete = false;
       fiducialDetectorBehaviorService.initialize();
       getStateMachine().initialize();
       super.onBehaviorEntered();
@@ -187,19 +244,23 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       super.doControl();
    }
 
-   // @Override
    public boolean isDone()
    {
-      if (finalGoalPose.get() != null)
-      {
-         FramePose3D goalPoseInMidFeetZUpFrame = new FramePose3D(finalGoalPose.get());
-         goalPoseInMidFeetZUpFrame.changeFrame(referenceFrames.getMidFeetZUpFrame());
-         double goalXYDistance = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(goalPoseInMidFeetZUpFrame.getX()),
-                                                                             Math.abs(goalPoseInMidFeetZUpFrame.getY()));
-         double yawFromGoal = Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame.getYaw()));
-         return goalXYDistance < 1.0;// && yawFromGoal < Math.toRadians(25.0);
-      }
-      return false;
+
+      return walkingComplete;
+      //TODO change to is done when walk is complete, and make it so goal location does not get closer that a set ammount and does not update when close
+      /*
+       * if (finalGoalPose.get() != null) { FramePose3D
+       * goalPoseInMidFeetZUpFrame = new FramePose3D(finalGoalPose.get());
+       * goalPoseInMidFeetZUpFrame.changeFrame(referenceFrames.
+       * getMidFeetZUpFrame()); double goalXYDistance =
+       * EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(
+       * goalPoseInMidFeetZUpFrame.getX()),
+       * Math.abs(goalPoseInMidFeetZUpFrame.getY())); double yawFromGoal =
+       * Math.abs(EuclidCoreTools.trimAngleMinusPiToPi(goalPoseInMidFeetZUpFrame
+       * .getYaw())); return goalXYDistance < 1.0;// && yawFromGoal <
+       * Math.toRadians(25.0); } return false;
+       */
    }
 
    class WaitState extends BehaviorAction
@@ -255,7 +316,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
          headTrajectoryPublisher.publish(headTrajectoryMessage);
       }
-      
+
       private void lookUp()
       {
          AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
@@ -466,7 +527,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       pointBetweenFeet.set(midFeetWorld.getPosition());
       vectorFromFeetToGoal.sub(goalPosition, pointBetweenFeet);
 
-      double shorterGoalLength = 2.0;
+      double shorterGoalLength = HOW_CLOSE_TO_COME_TO_GOAL_WHEN_WALKING;
 
       if (vectorFromFeetToGoal.length() > shorterGoalLength)
       {
