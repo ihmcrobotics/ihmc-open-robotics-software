@@ -52,8 +52,8 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode nodeToCheck, FootstepNode previousNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(nodeToCheck);
-      FootstepNodeSnapData previousSnapData = snapper.getSnapData(previousNode);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
+      FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(previousNode);
 
       RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
       RigidBodyTransform previousSnappedSoleTransform = new RigidBodyTransform();
@@ -119,7 +119,7 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
          FootstepNode grandparentNode = graph.getParentNode(previousNode);
          if (grandparentNode != null)
          {
-            FootstepNodeSnapData grandparentSnapData = snapper.getSnapData(grandparentNode);
+            FootstepNodeSnapData grandparentSnapData = snapper.snapFootstepNode(grandparentNode);
             if (grandparentSnapData == null)
                return true;
 
