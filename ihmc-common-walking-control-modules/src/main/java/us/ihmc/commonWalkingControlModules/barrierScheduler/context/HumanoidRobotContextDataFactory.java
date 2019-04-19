@@ -1,4 +1,4 @@
-package us.ihmc.realtime.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -12,25 +12,18 @@ import us.ihmc.tools.factories.RequiredFactoryField;
  */
 public class HumanoidRobotContextDataFactory
 {
-   private final RequiredFactoryField<HumanoidRobotContextJointData> rawJointData = new RequiredFactoryField<>("rawJointData");
-   private final RequiredFactoryField<HumanoidRobotContextJointData> processedJointData = new RequiredFactoryField<>("processedJointData");
-
-   private final RequiredFactoryField<ForceSensorDataHolder> forceSensorDataHolder = new RequiredFactoryField<>("forceSensorDataHolder");
-   private final RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolder = new RequiredFactoryField<>("centerOfPressureDataHolder");
-   private final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
-   private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
+   protected final RequiredFactoryField<HumanoidRobotContextJointData> processedJointData = new RequiredFactoryField<>("processedJointData");
+   protected final RequiredFactoryField<ForceSensorDataHolder> forceSensorDataHolder = new RequiredFactoryField<>("forceSensorDataHolder");
+   protected final RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolder = new RequiredFactoryField<>("centerOfPressureDataHolder");
+   protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
+   protected final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
 
    public HumanoidRobotContextData createHumanoidRobotContextData()
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      return new HumanoidRobotContextData(rawJointData.get(), processedJointData.get(), forceSensorDataHolder.get(),
-                                          centerOfPressureDataHolder.get(), robotMotionStatusHolder.get(), jointDesiredOutputList.get());
-   }
-
-   public void setRawJointData(HumanoidRobotContextJointData value)
-   {
-      this.rawJointData.set(value);
+      return new HumanoidRobotContextData(processedJointData.get(), forceSensorDataHolder.get(), centerOfPressureDataHolder.get(),
+                                          robotMotionStatusHolder.get(), jointDesiredOutputList.get());
    }
 
    public void setProcessedJointData(HumanoidRobotContextJointData value)

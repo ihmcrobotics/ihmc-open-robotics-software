@@ -49,7 +49,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -773,12 +772,6 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
-      {
-         return null;
-      }
-
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
@@ -1053,12 +1046,6 @@ public class VirtualModelControllerTestHelper
 
       @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
-      {
-         return null;
-      }
-
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
       }
@@ -1393,12 +1380,6 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
-      {
-         return null;
-      }
-
       private RigidBodyBasics createDifferential(String name, RigidBodyBasics parentBody, Vector3D jointOffset, Vector3D jointAxis)
       {
          String jointName;
@@ -1718,12 +1699,6 @@ public class VirtualModelControllerTestHelper
          return null;
       }
 
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
-      {
-         return null;
-      }
-
       private RigidBodyBasics createUpperArm(RigidBodyBasics parentBody)
       {
          RevoluteJoint joint = new RevoluteJoint("shoulderPitch_y", parentBody, new Vector3D(0.0, 0.0, 0.0), Y);
@@ -1954,12 +1929,6 @@ public class VirtualModelControllerTestHelper
 
       @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
-      {
-         return null;
-      }
-
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
       }
