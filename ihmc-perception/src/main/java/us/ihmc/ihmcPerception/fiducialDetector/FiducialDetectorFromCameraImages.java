@@ -194,7 +194,7 @@ public class FiducialDetectorFromCameraImages
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
                       IntrinsicParameters intrinsicParameters)
    {
-
+      detector.setIntrinsic(intrinsicParameters);
       //increase brightness for sim
       //RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
       //rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
@@ -295,7 +295,7 @@ public class FiducialDetectorFromCameraImages
       targetIDHasBeenLocatedFiltered.update();
    }
 
-   private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+  // private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
 
    /*
     * private IntrinsicParameters setIntrinsicParameters(BufferedImage image) {
