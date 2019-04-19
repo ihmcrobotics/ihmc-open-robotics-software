@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 /**
@@ -99,7 +100,7 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       this.rootJointLinearAcceleration.set(x, y, z);
    }
 
-   public void getRootJointOrientation(Quaternion orientationToPack)
+   public void getRootJointOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(this.rootJointOrientation);
    }
@@ -114,7 +115,7 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       return rootJointAngularVelocity;
    }
 
-   public void getRootJointAngularVelocity(Vector3D angularVelocityToPack)
+   public void getRootJointAngularVelocity(Tuple3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(this.rootJointAngularVelocity);
    }
@@ -124,7 +125,7 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       return rootJointAngularAcceleration;
    }
 
-   public void getRootJointAngularAcceleration(Vector3D angularAccelerationToPack)
+   public void getRootJointAngularAcceleration(Tuple3DBasics angularAccelerationToPack)
    {
       angularAccelerationToPack.set(this.rootJointAngularAcceleration);
    }
