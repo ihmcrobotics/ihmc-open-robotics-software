@@ -2,7 +2,6 @@ package us.ihmc.ihmcPerception.fiducialDetector;
 
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -197,8 +196,8 @@ public class FiducialDetectorFromCameraImages
    {
 
       //increase brightness for sim
-      RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
-      rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
+      //RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      //rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
       if (DEBUG)
       {
          if (frame == null)
