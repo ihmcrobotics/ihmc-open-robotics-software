@@ -383,7 +383,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
       touchdownTrajectory.initialize();
 
-      blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
+      blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, parameters.getFractionOfSwingForBlending() * duration);
       blendedSwingTrajectory.initialize();
    }
 

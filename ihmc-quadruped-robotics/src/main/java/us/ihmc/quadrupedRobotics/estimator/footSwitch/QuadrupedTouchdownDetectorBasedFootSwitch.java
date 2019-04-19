@@ -4,77 +4,99 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorB
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.WrenchCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
 {
+
    private static final int defaultGlitchWindow = 10;
 
+   private final IntegerProvider glitchWindowSize;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final YoFramePoint2D yoResolvedCoP;
    private final GlitchFilteredYoBoolean touchdownDetected;
-   private final YoBoolean trustTouchdownDetectors;
+   private final YoBoolean trustTouchdownDetectorsInSwing;
+   private final YoBoolean trustTouchdownDetectorsInSupport;
    private final WrenchCalculator wrenchCalculator;
 
    private final YoFrameVector3D measuredForce;
+   private final YoDouble footLoadPercentage;
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
-                                                    double totalRobotWeight, YoVariableRegistry parentRegistry)
-   {
-      this(robotQuadrant, foot, wrenchCalculator, defaultGlitchWindow, totalRobotWeight, parentRegistry);
-   }
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
-                                                    int glitchWindow, double totalRobotWeight, YoVariableRegistry parentRegistry)
+   public QuadrupedTouchdownDetectorBasedFootSwitch(String variableSuffix, RobotQuadrant robotQuadrant, ContactablePlaneBody foot, WrenchCalculator wrenchCalculator,
+                                                    IntegerProvider glitchWindowSize, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
-      super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
+      super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch" + variableSuffix, parentRegistry);
 
       this.foot = foot;
       this.wrenchCalculator = wrenchCalculator;
+      this.glitchWindowSize = glitchWindowSize;
       this.totalRobotWeight = totalRobotWeight;
-      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-      touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry, glitchWindow);
-      trustTouchdownDetectors = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrusted", registry);
+      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", variableSuffix, foot.getSoleFrame(), registry);
+      touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected" + variableSuffix, registry, defaultGlitchWindow);
+      trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing" + variableSuffix, registry);
+      trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport" + variableSuffix, registry);
+      footLoadPercentage = new YoDouble(robotQuadrant.getCamelCaseName() + "FootLoadPercentage" + variableSuffix, registry);
 
-      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", null,
+      measuredForce = new YoFrameVector3D(robotQuadrant.getCamelCaseName() + "_MeasuredForce", variableSuffix,
                                           ReferenceFrame.getWorldFrame(), registry);
-   }
-
-   public YoBoolean getControllerSetFootSwitch()
-   {
-      return controllerThinksHasTouchedDown;
    }
 
    public void addTouchdownDetector(TouchdownDetector touchdownDetector)
    {
-      necessaryTouchdownDetectors.addTouchdownDetector(touchdownDetector);
+      touchdownDetectors.add(touchdownDetector);
    }
 
    @Override
    public void updateMeasurement()
    {
+      touchdownDetected.setWindowSize(glitchWindowSize.getValue());
+
       wrenchCalculator.calculate();
       measuredForce.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
+
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+         touchdownDetectors.get(i).update();
+
+
+      boolean hasTouchedDown = true;
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+      {
+         if (touchdownDetectors.get(i).hasForSureTouchedDown())
+         {
+            break;
+         }
+         else if (!touchdownDetectors.get(i).hasTouchedDown())
+         {
+            hasTouchedDown = false;
+            break;
+         }
+      }
+
+      touchdownDetected.update(hasTouchedDown);
+
+      footLoadPercentage.set(Math.max(measuredForce.getZ(), 0.0) / totalRobotWeight);
    }
 
    @Override
    public boolean hasFootHitGround()
    {
-      necessaryTouchdownDetectors.update();
-      touchdownDetected.update(necessaryTouchdownDetectors.hasTouchedDown());
-
-      if(trustTouchdownDetectors.getBooleanValue())
+      boolean thinksInSupport = controllerThinksHasTouchedDown.getBooleanValue();
+      if (thinksInSupport && trustTouchdownDetectorsInSupport.getBooleanValue())
+         return touchdownDetected.getBooleanValue();
+      else if (!thinksInSupport && trustTouchdownDetectorsInSwing.getBooleanValue())
          return touchdownDetected.getBooleanValue();
       else
          return controllerThinksHasTouchedDown.getBooleanValue();
@@ -83,8 +105,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public double computeFootLoadPercentage()
    {
-      measuredForce.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      return Math.abs(measuredForce.getZ()) / totalRobotWeight;
+      return footLoadPercentage.getDoubleValue();
    }
 
    @Override
@@ -116,15 +137,25 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
    {
-      this.trustTouchdownDetectors.set(trustFootSwitch);
+      this.trustTouchdownDetectorsInSwing.set(trustFootSwitch);
+   }
+
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
+   {
+      this.trustTouchdownDetectorsInSupport.set(trustFootSwitch);
    }
 
    @Override
    public void reset()
    {
-      necessaryTouchdownDetectors.reset();
+      for (int i = 0; i < touchdownDetectors.size(); i++)
+         touchdownDetectors.get(i).reset();
+
       touchdownDetected.set(false);
    }
+
+
 }
