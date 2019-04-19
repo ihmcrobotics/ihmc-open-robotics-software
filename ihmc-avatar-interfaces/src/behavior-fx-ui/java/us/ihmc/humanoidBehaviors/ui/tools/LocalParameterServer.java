@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -16,6 +17,9 @@ public class LocalParameterServer
    private static final long PERIOD_MS = 17; // 60Hz should be plenty
 
    private final YoVariableRegistry registry;
+   private final Class<?> clazz;
+   private final String lowerCaseName;
+   private final int port;
 
    public static YoVariableRegistry create(Class<?> clazz, int port)
    {
@@ -23,10 +27,17 @@ public class LocalParameterServer
       return localParameterServer.getRegistry();
    }
 
-   private LocalParameterServer(Class<?> clazz, int port)
+   public LocalParameterServer(Class<?> clazz, int port)
    {
-      String lowerCaseName = clazz.getSimpleName().toLowerCase();
+      this.clazz = clazz;
+      this.port = port;
+      lowerCaseName = clazz.getSimpleName().toLowerCase();
       registry = new YoVariableRegistry(lowerCaseName);
+   }
+
+   public void start()
+   {
+      LogTools.info("Starting YoVariableServer on port {}", port);
       ParameterLoaderHelper.loadParameters(getClass(), clazz.getClassLoader().getResourceAsStream(lowerCaseName + "Parameters.xml"), registry);
       YoVariableServer yoVariableServer = new YoVariableServer(clazz.getSimpleName(),
                                                                null,
@@ -42,7 +53,7 @@ public class LocalParameterServer
       scheduler.schedule(() -> yoVariableServer.update(timestamp.getAndAdd(10000)), PERIOD_MS, TimeUnit.MILLISECONDS);
    }
 
-   private YoVariableRegistry getRegistry()
+   public YoVariableRegistry getRegistry()
    {
       return registry;
    }
