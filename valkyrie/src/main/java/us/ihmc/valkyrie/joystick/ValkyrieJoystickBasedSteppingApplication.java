@@ -25,6 +25,7 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
    public void start(Stage primaryStage) throws Exception
    {
       String robotTargetString = getParameters().getNamed().getOrDefault("robotTarget", "REAL_ROBOT");
+      String workingDirectory = getParameters().getNamed().get("workingDir");
       RobotTarget robotTarget = RobotTarget.valueOf(robotTargetString);
       LogTools.info("-------------------------------------------------------------------");
       LogTools.info("  -------- Loading parameters for RobotTarget: " + robotTarget + "  -------");
@@ -46,8 +47,16 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(footPolygon, footPolygon);
 
-      ui = new JoystickBasedSteppingMainUI(robotName, primaryStage, ros2Node, robotModel, walkingControllerParameters, null, kickAndPunchMessenger,
-                                           kickAndPunchMessenger, footPolygons);
+      ui = new JoystickBasedSteppingMainUI(robotName,
+                                           primaryStage,
+                                           ros2Node,
+                                           workingDirectory,
+                                           robotModel,
+                                           walkingControllerParameters,
+                                           null,
+                                           kickAndPunchMessenger,
+                                           kickAndPunchMessenger,
+                                           footPolygons);
       ui.setActiveSecondaryControlOption(SecondaryControlOption.PUNCH);
    }
 
@@ -62,8 +71,13 @@ public class ValkyrieJoystickBasedSteppingApplication extends Application
    }
 
    /**
+    * Argument options:
+    * <ul>
+    * <li>Selecting the robot target: for sim: {@code --robotTarget=SCS}, for hardware: {@code --robotTarget=REAL_ROBOT}.
+    * <li>Selecting the working directory (where the profiles are saved): {@code --workingDir=~/home/myWorkingDirectory}. If none provided the default is set to {@code "~/.ihmc/joystick_step_app/"}.
+    * </ul>
     * 
-    * @param args should either be {@code --robotTarget=SCS} or {@code --robotTarget=REAL_ROBOT}.
+    * @param args the array of arguments to use for this run.
     */
    public static void main(String[] args)
    {

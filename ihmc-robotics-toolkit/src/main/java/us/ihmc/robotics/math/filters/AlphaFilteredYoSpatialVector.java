@@ -14,8 +14,8 @@ public class AlphaFilteredYoSpatialVector extends YoFixedFrameSpatialVector
    public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, FrameVector3DReadOnly rawAngularPart, FrameVector3DReadOnly rawLinearPart)
    {
-      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawAngularPart),
-            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawLinearPart));
+      super(new AlphaFilteredYoFrameVector(namePrefix + "AngularPart", nameSuffix, registry, alphaAngularPart, rawAngularPart),
+            new AlphaFilteredYoFrameVector(namePrefix + "LinearPart", nameSuffix, registry, alphaLinearPart, rawLinearPart));
       this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) getAngularPart();
       this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) getLinearPart();
    }
@@ -23,8 +23,8 @@ public class AlphaFilteredYoSpatialVector extends YoFixedFrameSpatialVector
    public AlphaFilteredYoSpatialVector(String namePrefix, String nameSuffix, YoVariableRegistry registry, DoubleProvider alphaAngularPart,
                                        DoubleProvider alphaLinearPart, YoFixedFrameSpatialVector rawSpatialVector)
    {
-      super(new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),
-            new AlphaFilteredYoFrameVector(namePrefix, nameSuffix, registry, alphaLinearPart, rawSpatialVector.getLinearPart()));
+      super(new AlphaFilteredYoFrameVector(namePrefix + "AngularPart", nameSuffix, registry, alphaAngularPart, rawSpatialVector.getAngularPart()),
+            new AlphaFilteredYoFrameVector(namePrefix + "LinearPart", nameSuffix, registry, alphaLinearPart, rawSpatialVector.getLinearPart()));
       this.alphaFilteredAngularPart = (AlphaFilteredYoFrameVector) getAngularPart();
       this.alphaFilteredLinearPart = (AlphaFilteredYoFrameVector) getLinearPart();
    }

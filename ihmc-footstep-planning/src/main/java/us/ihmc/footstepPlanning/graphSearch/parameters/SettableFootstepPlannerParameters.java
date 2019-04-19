@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 public class SettableFootstepPlannerParameters implements FootstepPlannerParameters
 {
+   public static final String CONFIGURATION_FILE_NAME = "./saved-configurations/footstepPlannerParameters.txt";
+
    private double idealFootstepWidth;
    private double idealFootstepLength;
 

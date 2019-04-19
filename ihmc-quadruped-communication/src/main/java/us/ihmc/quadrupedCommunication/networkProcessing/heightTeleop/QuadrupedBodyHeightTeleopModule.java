@@ -47,6 +47,8 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
+                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
 
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredHeight.class, getSubscriberTopicNameGenerator(),
@@ -63,6 +65,12 @@ public class QuadrupedBodyHeightTeleopModule extends QuadrupedToolboxModule
    {
       if (heightTeleopController != null)
          heightTeleopController.processHighLevelStateChangeMessage(message);
+   }
+
+   private void processSteppingStateChangeMessage(QuadrupedSteppingStateChangeMessage message)
+   {
+      if (heightTeleopController != null)
+         heightTeleopController.processSteppingStateChangeMessage(message);
    }
 
    private void setDesiredBodyHeight(double desiredBodyHeight)

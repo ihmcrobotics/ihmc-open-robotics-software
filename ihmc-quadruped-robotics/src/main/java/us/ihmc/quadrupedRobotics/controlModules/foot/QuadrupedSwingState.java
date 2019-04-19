@@ -202,7 +202,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       if (lastStepPosition.containsNaN())
          lastStepPosition.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
 
-      currentStepCommand.getGoalPosition(finalPosition);
+      finalPosition.set(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
 
       if (stepTransitionCallback != null)
       {
@@ -231,9 +231,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (debug)
       {
-         Point3D touchdown = new Point3D();
-         currentStepCommand.getGoalPosition(touchdown);
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + touchdown + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
+         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
                .getTimeInterval());
       }
    }
@@ -376,7 +374,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private void blendForStepAdjustment()
    {
       // Compute current goal position.
-      currentStepCommand.getGoalPosition(finalPosition);
+      finalPosition.set(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       double duration = swingDuration.getDoubleValue();

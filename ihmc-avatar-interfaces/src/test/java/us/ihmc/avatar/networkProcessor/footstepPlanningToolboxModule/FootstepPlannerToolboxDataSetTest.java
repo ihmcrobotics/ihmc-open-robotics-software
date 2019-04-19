@@ -74,6 +74,7 @@ import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -219,7 +220,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                               if (!dataset.hasPlannerInput())
                                                                  return false;
                                                               return dataset.getPlannerInput().getStepPlannerIsInDevelopment() && dataset.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                         .containsFlag(getTimeoutFlag());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -298,9 +299,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return new TestRobotModel();
    }
 
-   public void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
+   public void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, DataSetName dataSetName)
    {
-      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
+      DataSet dataset = DataSetIOTools.loadDataSet(dataSetName);
 
       resetAllAtomics();
       String errorMessages = dataSetTester.apply(dataset);
@@ -381,7 +382,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       if(dataset.getPlannerInput().hasStartOrientation())
          messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(dataset.getPlannerInput().getStartYaw(), 0.0, 0.0));
       if(dataset.getPlannerInput().hasGoalOrientation())
-        messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(dataset.getPlannerInput().getGoalYaw(), 0.0, 0.0));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -427,7 +428,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    private String assertPlansAreValid(String datasetName, FootstepPlanningResult expectedResult, FootstepPlanningResult actualResult,
-                                        FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
+                                      FootstepPlan expectedPlan, FootstepPlan actualPlan, Point3D goal)
    {
       String errorMessage = "";
 

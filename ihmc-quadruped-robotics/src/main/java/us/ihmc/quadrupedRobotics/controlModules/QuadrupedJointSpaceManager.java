@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
@@ -68,7 +70,14 @@ public class QuadrupedJointSpaceManager
          jointConfigurations.add(hipPitch, privilegedConfigurationParameters.getPrivilegedConfiguration(LegJointName.HIP_PITCH, quadrant));
       }
 
-
+      JointLimitParameters jointLimitParameters = new JointLimitParameters();
+      jointLimitParameters.setMaxAbsJointVelocity(20.0);
+      jointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(10.0));
+      jointLimitParameters.setVelocityControlGain(20.0);
+      for (OneDoFJointBasics joint : controlledJoints)
+      {
+         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.DEFAULT, jointLimitParameters);
+      }
 
       privilegedConfigurationWeight = new DoubleParameter("kneePrivWeight", registry, privilegedConfigurationParameters.getKneeWeight());
       privilegedConfigurationGain = new DoubleParameter("kneePrivGain", registry, privilegedConfigurationParameters.getKneeConfigurationGain());
