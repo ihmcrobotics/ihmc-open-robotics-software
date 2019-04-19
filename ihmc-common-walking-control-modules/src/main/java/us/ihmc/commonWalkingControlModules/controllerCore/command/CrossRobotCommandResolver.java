@@ -63,6 +63,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -92,6 +93,14 @@ public class CrossRobotCommandResolver
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
    private final RigidBodyHashCodeResolver rigidBodyHashCodeResolver;
    private final JointHashCodeResolver jointHashCodeResolver;
+
+   public CrossRobotCommandResolver(FullHumanoidRobotModel fullRobotModel)
+   {
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
+      referenceFrameHashCodeResolver.putAllFullRobotModelReferenceFrames(fullRobotModel);
+      rigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(fullRobotModel);
+      jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
+   }
 
    public CrossRobotCommandResolver(ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                                     JointHashCodeResolver jointHashCodeResolver)

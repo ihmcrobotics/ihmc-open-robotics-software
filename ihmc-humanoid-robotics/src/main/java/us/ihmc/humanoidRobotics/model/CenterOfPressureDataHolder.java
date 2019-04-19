@@ -14,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CenterOfPressureDataHolder implements Settable<CenterOfPressureDataHolder>
 {
@@ -33,6 +35,14 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
    public CenterOfPressureDataHolder(Collection<RigidBodyBasics> rigidBodies)
    {
       rigidBodies.forEach(rigidBody -> registerRigidBody(rigidBody));
+   }
+
+   public CenterOfPressureDataHolder(FullHumanoidRobotModel fullRobotModel)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         registerRigidBody(fullRobotModel.getFoot(robotSide));
+      }
    }
 
    public void clear()

@@ -24,7 +24,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -144,8 +143,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
       robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
-                                                  forceSensorDataHolderForController, threadDataSynchronizer.getControllerContactSensorHolder(),
-                                                  centerOfPressureDataHolderForEstimator, sensorInformation,
+                                                  forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator, sensorInformation,
                                                   threadDataSynchronizer.getControllerDesiredJointDataHolder(), yoGraphicsListRegistry, registry,
                                                   arrayOfJointsToIgnore);
 
@@ -155,8 +153,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       registry.addChild(robotController.getYoVariableRegistry());
       if (outputProcessor != null)
       {
-         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder(),
-                                                         threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
+         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder());
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
@@ -224,7 +221,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel, HighLevelHumanoidControllerFactory controllerFactory,
                                                             YoDouble yoTime, double controlDT, double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
-                                                            ContactSensorHolder contactSensorHolder,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             DRCRobotSensorInformation sensorInformation, JointDesiredOutputList lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
@@ -245,7 +241,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry, sensorInformation,
-                                                                        forceSensorDataHolderForController, contactSensorHolder,
+                                                                        forceSensorDataHolderForController,
                                                                         centerOfPressureDataHolderForEstimator, lowLevelControllerOutput, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
