@@ -38,7 +38,6 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -60,7 +59,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
    private final LinkedHashMap<String, OneDoFJointBasics> oneDoFJoints = new LinkedHashMap<String, OneDoFJointBasics>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
-   private final ArrayList<ContactSensorDefinition> contactSensorDefinitions = new ArrayList<ContactSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
@@ -295,19 +293,13 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return this.forceSensorDefinitions.toArray(new ForceSensorDefinition[this.forceSensorDefinitions.size()]);
    }
 
-   /** {@inheritDoc} */
    @Override
-   public ContactSensorDefinition[] getContactSensorDefinitions()
-   {
-      return this.contactSensorDefinitions.toArray(new ContactSensorDefinition[this.contactSensorDefinitions.size()]);
-   }
-   
-   
    public List<String> getLidarSensorNames()
    {
       return new ArrayList<>(lidarBaseFrames.keySet());
    }
-   
+
+   @Override
    public List<String> getCameraSensorNames()
    {
       return new ArrayList<>(cameraFrames.keySet());
