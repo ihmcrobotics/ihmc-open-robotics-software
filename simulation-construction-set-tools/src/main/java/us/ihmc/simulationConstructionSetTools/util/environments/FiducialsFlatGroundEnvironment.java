@@ -18,7 +18,7 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       double angle = 0.0;
-      double radius = 7.0;
+      double radius = 3.0;
       for (Fiducial fiducial : Fiducial.values)
       {
          Vector3D position = new Vector3D(radius * Math.cos(angle), radius * Math.sin(angle), 1.7);
