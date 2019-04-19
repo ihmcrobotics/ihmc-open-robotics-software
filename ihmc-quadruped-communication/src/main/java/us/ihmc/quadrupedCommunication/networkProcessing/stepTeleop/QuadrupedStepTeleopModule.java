@@ -26,7 +26,7 @@ import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
-   private static final int updatePeriodMilliseconds = 75;
+   private static final int updatePeriodMilliseconds = 10;
 
    private final QuadrupedStepTeleopController stepTeleopController;
 

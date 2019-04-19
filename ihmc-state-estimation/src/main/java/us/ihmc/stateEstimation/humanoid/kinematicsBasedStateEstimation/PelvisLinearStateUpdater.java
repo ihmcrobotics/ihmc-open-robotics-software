@@ -429,7 +429,6 @@ public class PelvisLinearStateUpdater
             }
          }
       }
-
       // Else if there is a foot with a force past the threshold trust the force and not the CoP
       else
       {
@@ -531,6 +530,8 @@ public class PelvisLinearStateUpdater
       return lowestFootInContact;
    }
 
+   private final List<RigidBodyBasics> filteredTrusteredFeet = new ArrayList<>(6);
+
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
    {
       double totalForceZ = 0.0;
@@ -544,6 +545,8 @@ public class PelvisLinearStateUpdater
          totalForceZ += footForce.getZ();
       }
 
+      filteredTrusteredFeet.clear();
+
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
@@ -555,11 +558,18 @@ public class PelvisLinearStateUpdater
 
          percentForce = MathTools.clamp(percentForce, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
 
-         if (footLoad.getDoubleValue() < percentForce)
+         if (footLoad.getValue() >= percentForce)
+            filteredTrusteredFeet.add(foot);
+      }
+
+      if (!filteredTrusteredFeet.isEmpty())
+      {
+         numberOfEndEffectorsTrusted = filteredTrusteredFeet.size();
+
+         for (int i = 0; i < feet.size(); i++)
          {
-            if (numberOfEndEffectorsTrusted > 1)
-               numberOfEndEffectorsTrusted--;
-            areFeetTrusted.get(foot).set(false);
+            RigidBodyBasics foot = feet.get(i);
+            areFeetTrusted.get(foot).set(filteredTrusteredFeet.remove(foot));
          }
       }
 

@@ -53,7 +53,7 @@ public class QuadrupedInverseKinematicsSimulationFactory
 
    private void createSensorReader()
    {
-      sensorReader = new SDFQuadrupedPerfectSimulatedSensor(quadrants.get(), sdfRobot.get(), fullRobotModel.get(), null);
+      sensorReader = new SDFQuadrupedPerfectSimulatedSensor(quadrants.get(), sdfRobot.get(), fullRobotModel.get(), null, null);
    }
 
    private void createKinematicsController()
