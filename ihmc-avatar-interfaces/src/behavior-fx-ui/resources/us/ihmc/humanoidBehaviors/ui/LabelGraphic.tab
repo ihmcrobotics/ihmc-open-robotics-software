@@ -1,0 +1,9 @@
+LabelGraphic
+behaviorui:textMeshScale 8
+behaviorui:textOffsetX 1
+behaviorui:textOffsetY 2
+behaviorui:textOffsetZ 3
+behaviorui:textRotationAxisX 4
+behaviorui:textRotationAxisY 5
+behaviorui:textRotationAxisZ 6
+behaviorui:textRotationAngle 7
