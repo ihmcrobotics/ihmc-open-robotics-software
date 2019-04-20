@@ -52,6 +52,9 @@ public class GoodFootstepPositionChecker implements SnapBasedCheckerComponent
    @Override
    public boolean isNodeValid(FootstepNode nodeToCheck, FootstepNode previousNode)
    {
+      if (previousNode == null)
+         return true;
+
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
       FootstepNodeSnapData previousSnapData = snapper.snapFootstepNode(previousNode);
 
