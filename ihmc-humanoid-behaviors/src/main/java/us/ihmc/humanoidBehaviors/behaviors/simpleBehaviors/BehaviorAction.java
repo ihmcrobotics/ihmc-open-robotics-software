@@ -6,7 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.tools.taskExecutor.Task;
+import us.ihmc.robotics.taskExecutor.Task;
 
 // a behavior action can be used in either a StateMachine or a pipeline.
 
