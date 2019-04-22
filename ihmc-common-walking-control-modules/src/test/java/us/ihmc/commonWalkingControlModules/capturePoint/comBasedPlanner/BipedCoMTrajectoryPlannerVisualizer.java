@@ -228,6 +228,7 @@ public class BipedCoMTrajectoryPlannerVisualizer
          feetInContact.add(robotSide);
 
       scsParameters.setShowWindows(visualize);
+      scsParameters.setCreateGUI(visualize);
 
       scs = new SimulationConstructionSet(robot, scsParameters);
       scs.setDT(simDt, 1);
