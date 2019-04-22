@@ -129,25 +129,6 @@ public class PatrolBehaviorUIController extends Group
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
-
-//      JFrame jFrame = new JFrame("Spring Flamingo State Machines");
-//      Container contentPane = jFrame.getContentPane();
-//      contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-//
-//      boolean oldViz = false;
-//
-//      StateMachinesJPanel<States> stateMachinePanel = new StateMachinesJPanel<States>(stateMachine, oldViz);
-//      oldViz = !oldViz;
-//      // Doing the following will cause redraw when the state changes, but not during replay or rewind:
-//      stateMachine.addStateChangedListener(stateMachinePanel);
-//      jFrame.getContentPane().add(stateMachinePanel);
-//      // Doing this will cause redraw every specified milliseconds:
-//      // stateMachinePanel.createUpdaterThread(250);
-//
-//      jFrame.pack();
-//      jFrame.setSize(450, 300);
-//      jFrame.setAlwaysOnTop(false);
-//      jFrame.setVisible(true);
    }
 
    private void goToNextWaypointPositionEdit()
