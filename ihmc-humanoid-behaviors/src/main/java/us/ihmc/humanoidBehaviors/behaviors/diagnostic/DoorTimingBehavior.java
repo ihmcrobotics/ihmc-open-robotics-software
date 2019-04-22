@@ -458,6 +458,8 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
 
             currentRun.successful = true;
             timingBehavior.dataBase.updateRun(currentRun);
+            publishTextToSpeech("Total number of run events added for door task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.runID)));
+           
          }
       };
 
