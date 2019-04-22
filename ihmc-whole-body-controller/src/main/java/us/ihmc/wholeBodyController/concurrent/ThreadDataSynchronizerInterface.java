@@ -4,7 +4,6 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -37,10 +36,6 @@ public interface ThreadDataSynchronizerInterface
    public abstract CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder();
 
    public abstract CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder();
-
-   public abstract ContactSensorHolder getControllerContactSensorHolder();
-
-   public abstract ContactSensorHolder getEstimatorContactSensorHolder();
 
    public abstract RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder();
 

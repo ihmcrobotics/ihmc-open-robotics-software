@@ -31,5 +31,7 @@ public interface FootSwitchInterface
 
    public void setFootContactState(boolean hasFootHitGround);
 
-   public void trustFootSwitch(boolean trustFootSwitch);
+   public void trustFootSwitchInSwing(boolean trustFootSwitchInSwing);
+
+   public void trustFootSwitchInSupport(boolean trustFootSwitchInSupport);
 }
