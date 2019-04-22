@@ -16,7 +16,7 @@
 */src/*/bin
 */src/*/build
 */src/*/out
-*/Configurations
+**/Configurations
 
 # directories to always ignore
 **/classes
