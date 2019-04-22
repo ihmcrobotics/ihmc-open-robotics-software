@@ -41,6 +41,7 @@ public class QuadrupedRuntimeEnvironment
    private final List<ContactablePlaneBody> contactablePlaneBodies;
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches;
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
@@ -48,6 +49,7 @@ public class QuadrupedRuntimeEnvironment
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
+                                      QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches,
                                       double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
                                       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
                                       QuadrupedFallDetectionParameters fallDetectionParameters, RobotMotionStatusHolder robotMotionStatusHolder)
@@ -60,6 +62,7 @@ public class QuadrupedRuntimeEnvironment
       this.graphicsListRegistry = graphicsListRegistry;
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.footSwitches = footSwitches;
+      this.estimatorFootSwitches = estimatorFootSwitches;
       this.contactableFeet = contactableFeet;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.gravityZ = Math.abs(gravity);
@@ -115,6 +118,11 @@ public class QuadrupedRuntimeEnvironment
    public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
+   }
+
+   public QuadrantDependentList<FootSwitchInterface> getEstimatorFootSwitches()
+   {
+      return estimatorFootSwitches;
    }
 
    public QuadrantDependentList<ContactablePlaneBody> getContactableFeet()
