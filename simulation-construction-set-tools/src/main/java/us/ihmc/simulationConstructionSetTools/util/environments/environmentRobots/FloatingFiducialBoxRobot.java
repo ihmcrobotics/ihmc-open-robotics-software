@@ -23,7 +23,7 @@ public class FloatingFiducialBoxRobot extends Robot
       qrCodeLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
       Graphics3DObject qrCodeLinkGraphics = new Graphics3DObject();
       //      qrCodeLinkGraphics.addCoordinateSystem(2.0);
-      double cubeLength = 1.0;
+      double cubeLength = 0.2032;
       qrCodeLinkGraphics.translate(0.0, 0.0, -0.99 * cubeLength);
       AppearanceDefinition cubeAppearance = YoAppearance.Texture(fiducial.getPathString());
       qrCodeLinkGraphics.addCube(cubeLength * 0.98, cubeLength * 1.01, cubeLength * 0.98, YoAppearance.Yellow());
