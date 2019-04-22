@@ -210,7 +210,7 @@ public class SnapBasedNodeCheckerTest
       // the checker should check for limits in z-height, pitch, and roll.
       // the valid ranges for x, y, and yaw should be considered in the node expansion.
       FootstepNode node0 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-      FootstepNode node1 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
+      FootstepNode node1 = new FootstepNode(0.1, -0.2, 0.0, RobotSide.RIGHT);
 
       Assert.assertTrue(checker.isNodeValid(node0, node1));
    }
@@ -256,7 +256,7 @@ public class SnapBasedNodeCheckerTest
       FootstepNodeSnapper snapper = new TestSnapper();
       SnapBasedNodeChecker checker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
 
-      FootstepNode node0 = new FootstepNode(1.0, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode node0 = new FootstepNode(0.2, 0.2, 0.0, RobotSide.LEFT);
       RigidBodyTransform snapTransform0 = new RigidBodyTransform();
 
       // too high step
@@ -291,8 +291,8 @@ public class SnapBasedNodeCheckerTest
 
       double minFoothold = parameters.getMinimumFootholdPercent();
 
-      FootstepNode node0 = new FootstepNode(1.0, 0.0, 0.0, RobotSide.LEFT);
-      FootstepNode node1 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
+      FootstepNode node0 = new FootstepNode(0.2, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode node1 = new FootstepNode(0.0, -0.2, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform0 = new RigidBodyTransform();
 
       double footArea = footPolygons.get(node0.getRobotSide()).getArea();
