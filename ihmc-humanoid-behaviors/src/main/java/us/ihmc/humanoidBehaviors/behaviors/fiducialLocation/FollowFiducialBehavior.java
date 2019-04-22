@@ -174,12 +174,14 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
 
       factory.addState(FollowFiducialState.FINAL_STEPS, finalSteps);
 
+      factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.FINAL_STEPS, t -> closeToGoal());
+      factory.addTransition(FollowFiducialState.PLAN_FROM_SINGLE_SUPPORT, FollowFiducialState.FINAL_STEPS, t -> closeToGoal());
+
       factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.WAIT, planFromDoubleSupportToWait);
       factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
       factory.addTransition(FollowFiducialState.WAIT, FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, t -> waitState.isDoneWaiting());
       factory.addTransition(FollowFiducialState.PLAN_FROM_SINGLE_SUPPORT, FollowFiducialState.WAIT, t -> planFromSingleSupportState.doneWalking());
 
-      factory.addTransition(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, FollowFiducialState.FINAL_STEPS, t -> closeToGoal());
 
       return FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT;
    }

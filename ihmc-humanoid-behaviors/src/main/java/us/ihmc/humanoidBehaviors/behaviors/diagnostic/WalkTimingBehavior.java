@@ -186,6 +186,11 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
    public void onBehaviorExited()
    {
       publishTextToSpeech("leaving walk timing behavior");
+     
+      currentRun.successful = true;
+      timingBehavior.dataBase.updateRun(currentRun);
+      publishTextToSpeech("Total number of run events added for Walk Task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.runID)));
+     
       // publishTextToSpeech("Total Planning Time:" + totalPlanningTime.getDoubleValue() + " Total Walking Time:" + totalWalkTime.getDoubleValue());
    }
 
