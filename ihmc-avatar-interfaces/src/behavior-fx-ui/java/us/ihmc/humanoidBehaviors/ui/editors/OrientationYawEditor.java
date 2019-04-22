@@ -9,12 +9,14 @@ import javafx.scene.input.MouseEvent;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
-import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
@@ -30,8 +32,8 @@ public class OrientationYawEditor
    private final EventHandler<MouseEvent> mouseMoved = this::mouseMoved;
    private final EventHandler<MouseEvent> mouseClicked = this::mouseClicked;
 
-   private final TypedNotification<Point3D> mouseMovedOrientation = new TypedNotification<>();
-   private final TypedNotification<Point3D> mouseClickedOrientation = new TypedNotification<>();
+   private final TypedNotification<Orientation3DReadOnly> mouseMovedOrientation = new TypedNotification<>();
+   private final TypedNotification<Orientation3DReadOnly> mouseClickedOrientation = new TypedNotification<>();
    private final Notification mouseRightClicked = new Notification();
 
    private PoseEditable selectedGraphic;
@@ -100,8 +102,8 @@ public class OrientationYawEditor
 
    private void mouseMoved(MouseEvent event)
    {
-      Point3D point3D = intersectRayWithPlane(event);
-      mouseMovedOrientation.add(point3D);
+      Orientation3DReadOnly rotationVector = intersectRayWithPlane(event);
+      mouseMovedOrientation.add(rotationVector);
    }
 
    private void mouseClicked(MouseEvent event)
@@ -112,8 +114,8 @@ public class OrientationYawEditor
          event.consume();
          if (event.getButton() == MouseButton.PRIMARY)
          {
-            Point3D point3D = intersectRayWithPlane(event);
-            mouseClickedOrientation.add(point3D);
+            Orientation3DReadOnly orientation = intersectRayWithPlane(event);
+            mouseClickedOrientation.add(orientation);
          }
          else if (event.getButton() == MouseButton.SECONDARY)  // maybe move this to patrol controller? or implement cancel
          {
@@ -122,14 +124,21 @@ public class OrientationYawEditor
       }
    }
 
-   private Point3D intersectRayWithPlane(MouseEvent event)
+   private Orientation3DReadOnly intersectRayWithPlane(MouseEvent event)
    {
       Line3D line = getPickRay(sceneNode.getCamera(), event);
 
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);  // TODO link to planar region normal
-      Point3D pointOnPlane = selectedGraphic.getPosition();
+      Point3DReadOnly pickPoint = selectedGraphic.getPosition();
 
-      return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
+      Point3D pickDirection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, planeNormal, line.getPoint(), line.getDirection());
+
+      Vector3D rotationVector = new Vector3D(pickDirection);
+      rotationVector.sub(pickPoint);
+
+      double yaw = Math.atan2(rotationVector.getY(), rotationVector.getX()); // TODO Allow 3D when linking planar region normal
+
+      return new YawPitchRoll(yaw, 0.0, 0.0);
    }
 
    private Line3D getPickRay(Camera camera, MouseEvent event)

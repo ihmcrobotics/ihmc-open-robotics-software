@@ -1,14 +1,18 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
 
 public class SnappedPositionGraphic
 {
    private final Sphere sphere;
    private final PhongMaterial material;
+   private final FramePose3D pose = new FramePose3D();
 
    public SnappedPositionGraphic(Color color)
    {
@@ -17,19 +21,17 @@ public class SnappedPositionGraphic
       sphere.setMaterial(material);
    }
 
-   public void setPosition(Point3D position)
+   public FramePose3DBasics getPose()
    {
-      sphere.setTranslateX(position.getX());
-      sphere.setTranslateY(position.getY());
-      sphere.setTranslateZ(position.getZ());
+      return pose;
    }
 
-   public Point3D getPosition()
+   public void update()
    {
-      return new Point3D(sphere.getTranslateX(), sphere.getTranslateY(), sphere.getTranslateZ());
+      JavaFXGraphicTools.setNodeTransformFromPose(sphere, pose);
    }
 
-   public Sphere getSphere()
+   public Node getNode()
    {
       return sphere;
    }

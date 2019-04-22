@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
@@ -28,12 +29,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -114,7 +110,7 @@ public class PatrolBehaviorUIController extends Group
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
       {
          PatrolWaypointGraphic latestWaypoint = waypoints.get(waypoints.size() - 1);
-         latestWaypoint.getOrientationGraphic().getArrow().setVisible(true);
+         latestWaypoint.getOrientationGraphic().getNode().setVisible(true);
          orientationYawEditor.edit(latestWaypoint, exitType -> waypointPlacementStateMachine.transition(exitType));
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
@@ -179,7 +175,7 @@ public class PatrolBehaviorUIController extends Group
 
             for (int i = 0; i < waypoints.size(); i++)
             {
-               if (waypoints.get(i).getSnappedPositionGraphic().getSphere() == intersectedNode)
+               if (waypoints.get(i).getSnappedPositionGraphic().getNode() == intersectedNode)
                {
                   LogTools.debug("Editing patrol waypoint position: {}", i);
                   placeWaypoints.setDisable(true);
@@ -191,7 +187,7 @@ public class PatrolBehaviorUIController extends Group
                      waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
                   }); // TODO handle right click?
                }
-               else if (waypoints.get(i).getOrientationGraphic().getArrow() == intersectedNode)
+               else if (waypoints.get(i).getOrientationGraphic().getNode() == intersectedNode)
                {
                   LogTools.debug("Editing patrol waypoint orientation: {}", i);
                   placeWaypoints.setDisable(true);
@@ -211,7 +207,7 @@ public class PatrolBehaviorUIController extends Group
       ArrayList<Pose3D> waypointsToSend = new ArrayList<>();
       waypoints.forEach(graphicWaypoint ->
                         {
-                           Point3D pos = graphicWaypoint.getSnappedPositionGraphic().getPosition();
+                           Point3DReadOnly pos = graphicWaypoint.getSnappedPositionGraphic().getPose().getPosition();
                            double yaw = graphicWaypoint.getOrientationGraphic().getYaw();
                            waypointsToSend.add(new Pose3D(pos.getX(), pos.getY(), pos.getZ(), yaw, 0.0, 0.0));
                         });
