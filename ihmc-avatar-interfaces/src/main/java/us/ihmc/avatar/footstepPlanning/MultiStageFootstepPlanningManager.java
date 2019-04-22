@@ -552,7 +552,9 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
       if (footstepPlannerParameters != null)
+      {
          footstepPlanningParameters.set(footstepPlannerParameters);
+      }
 
       VisibilityGraphsParametersPacket visibilityGraphsParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
       if (visibilityGraphsParameters != null)
