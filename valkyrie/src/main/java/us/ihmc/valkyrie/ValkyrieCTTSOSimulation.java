@@ -30,7 +30,7 @@ public class ValkyrieCTTSOSimulation
       DataSet dataSet = DataSetIOTools.loadDataSet(DATA_SET_TO_USE);
 
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
-      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.001, true);
+      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(dataSet.getPlanarRegionsList(), 0.02, true);
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
