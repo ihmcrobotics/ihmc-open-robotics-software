@@ -1,13 +1,11 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -25,12 +23,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.NewMessageListener;
@@ -55,6 +55,8 @@ public class QuadrupedSupportPlanarRegionPublisher
    private static final int HIND_RIGHT_FOOT_INDEX = 3;
    private static final int CONVEX_HULL_INDEX = 4;
 
+   private static final int numberOfRegions = 5;
+
    private final RealtimeRos2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
@@ -68,6 +70,7 @@ public class QuadrupedSupportPlanarRegionPublisher
    private final OneDoFJointBasics[] oneDoFJoints;
    private final CommonQuadrupedReferenceFrames referenceFrames;
    private final QuadrantDependentList<ContactablePlaneBody> contactableFeet;
+   private final QuadrantDependentList<ZUpFrame> soleZUpFrame;
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
    public QuadrupedSupportPlanarRegionPublisher(FullQuadrupedRobotModelFactory robotModel,
@@ -83,9 +86,13 @@ public class QuadrupedSupportPlanarRegionPublisher
       contactableBodiesFactory.setFootContactPoints(groundContactPoints);
       contactableFeet = new QuadrantDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
+      soleZUpFrame = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         soleZUpFrame.put(robotQuadrant, new ZUpFrame(ReferenceFrame.getWorldFrame(), contactableFeet.get(robotQuadrant).getSoleFrame(), robotQuadrant.getShortName() + "ZUpFrame"));
+
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
@@ -97,7 +104,7 @@ public class QuadrupedSupportPlanarRegionPublisher
       defaultParameters.setSupportRegionSize(defaultRegionSize);
       latestParametersMessage.set(defaultParameters);
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < numberOfRegions; i++)
       {
          supportRegions.add(new PlanarRegion());
       }
@@ -139,17 +146,19 @@ public class QuadrupedSupportPlanarRegionPublisher
       setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
 
       referenceFrames.updateFrames();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         soleZUpFrame.get(robotQuadrant).update();;
+      }
 
       QuadrantDependentList<Boolean> isInSupport = new QuadrantDependentList<>(true, true, true, true);
       if (feetAreInSamePlane(isInSupport))
       {
-         ReferenceFrame leftSoleFrame = contactableFeet.get(RobotQuadrant.FRONT_LEFT).getSoleFrame();
+         ReferenceFrame leftSoleFrame = soleZUpFrame.get(RobotQuadrant.FRONT_LEFT);
 
          List<FramePoint2D> allContactPoints = new ArrayList<>();
-         allContactPoints.addAll(createConvexPolygonPoints(contactableFeet.get(RobotQuadrant.FRONT_LEFT).getSoleFrame(), supportRegionSize));
-         allContactPoints.addAll(createConvexPolygonPoints(contactableFeet.get(RobotQuadrant.FRONT_RIGHT).getSoleFrame(), supportRegionSize));
-         allContactPoints.addAll(createConvexPolygonPoints(contactableFeet.get(RobotQuadrant.HIND_RIGHT).getSoleFrame(), supportRegionSize));
-         allContactPoints.addAll(createConvexPolygonPoints(contactableFeet.get(RobotQuadrant.HIND_LEFT).getSoleFrame(), supportRegionSize));
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+            allContactPoints.addAll(createConvexPolygonPoints(soleZUpFrame.get(robotQuadrant), supportRegionSize));
          allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
 
          supportRegions.set(FRONT_LEFT_FOOT_INDEX, new PlanarRegion());
@@ -166,8 +175,8 @@ public class QuadrupedSupportPlanarRegionPublisher
             if (isInSupport.get(robotQuadrant))
             {
                ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
-               List<FramePoint2D> contactPoints = createConvexPolygonPoints(contactableFoot.getSoleFrame(), supportRegionSize);
-               RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
+               List<FramePoint2D> contactPoints = createConvexPolygonPoints(soleZUpFrame.get(robotQuadrant), supportRegionSize);
+               RigidBodyTransform transformToWorld = soleZUpFrame.get(robotQuadrant).getTransformToWorldFrame();
                supportRegions.set(robotQuadrant.ordinal(),
                                   new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
             }
@@ -185,7 +194,7 @@ public class QuadrupedSupportPlanarRegionPublisher
 
    private void publishRegions()
    {
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < numberOfRegions; i++)
       {
          supportRegions.get(i).setRegionId(i);
       }
