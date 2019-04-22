@@ -2,17 +2,22 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.interfaces.OrientationEditable;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
-import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 
 public class PatrolWaypointGraphic extends Group implements PoseEditable
 {
+   public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FramePose3D pose = new FramePose3D();
+
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
    private final LabelGraphic labelGraphic;
@@ -20,30 +25,26 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
    public PatrolWaypointGraphic(int index)
    {
       snappedPositionGraphic = new SnappedPositionGraphic(Color.YELLOW);
-      orientationGraphic = new OrientationGraphic(snappedPositionGraphic);
-      labelGraphic = new LabelGraphic(String.valueOf(index), 1, Color.BLACK);
+      orientationGraphic = new OrientationGraphic();
+      labelGraphic = new LabelGraphic(String.valueOf(index));
 
-      getChildren().add(snappedPositionGraphic.getSphere());
-      getChildren().add(orientationGraphic.getArrow());
-      getChildren().add(labelGraphic.getMesh());
+      getChildren().add(snappedPositionGraphic.getNode());
+      getChildren().add(orientationGraphic.getNode());
+      getChildren().add(labelGraphic.getNode());
    }
 
    @Override
-   public void setPosition(Point3D position)
+   public void setPosition(Point3DReadOnly position)
    {
-      snappedPositionGraphic.setPosition(position);
-      orientationGraphic.setPosition(position);
-//      Point3D offset = new Point3D(-40, 45, 0.1);
-      Point3D offset = new Point3D(-35, 40, 0.1);
-      offset.add(position);
-//      offset.add(0.0, 0.0, 0.0);
-      labelGraphic.setPosition(offset);
+      pose.setPosition(position);
+      updateGraphics();
    }
 
    @Override
-   public void setOrientation(Point3D orientationPoint)
+   public void setOrientation(Orientation3DReadOnly orientationPoint)
    {
-      orientationGraphic.setOrientation(orientationPoint);
+      pose.setOrientation(orientationPoint);
+      updateGraphics();
    }
 
    public SnappedPositionGraphic getSnappedPositionGraphic()
@@ -57,8 +58,20 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
    }
 
    @Override
-   public Point3D getPosition()
+   public Point3DBasics getPosition()
    {
-      return snappedPositionGraphic.getPosition();
+      return pose.getPosition();
+   }
+
+   private void updateGraphics()
+   {
+      snappedPositionGraphic.getPose().set(pose);
+      snappedPositionGraphic.update();
+
+      orientationGraphic.getPose().set(pose);
+      orientationGraphic.update();
+
+      labelGraphic.getPose().set(pose);
+      labelGraphic.update();
    }
 }

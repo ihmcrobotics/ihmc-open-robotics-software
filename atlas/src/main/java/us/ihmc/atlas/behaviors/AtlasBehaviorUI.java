@@ -11,8 +11,11 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.parameterTuner.remote.ParameterTuner;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.tools.processManagement.JavaProcessSpawner;
 
 public class AtlasBehaviorUI extends Application
 {
@@ -42,6 +45,11 @@ public class AtlasBehaviorUI extends Application
 
    public static void main(String[] args)
    {
+      new Thread(() -> {
+         LogTools.info("Spawning parameter tuner");
+         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
+      }).start();
+
       launch(args);
    }
 }
