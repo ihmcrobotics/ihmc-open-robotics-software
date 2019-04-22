@@ -59,6 +59,6 @@ public class OrientationGraphic
 
    public double getYaw()
    {
-      return Math.toRadians(arrow.getRotate());
+      return pose.getYaw();
    }
 }
