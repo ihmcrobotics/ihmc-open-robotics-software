@@ -1,4 +1,8 @@
-package us.ihmc.realtime.barrierScheduler.context;
+package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -8,16 +12,18 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>
 {
-   private final HumanoidRobotContextJointData rawJointData;
+   /** Serves to synchronize the controller time to the estimator time. The estimator sets this, the controller reads it. */
+   private long timestamp = Long.MIN_VALUE;
+   /** Serves to inform the estimator that the controller ran and populated the desired values in this context. Set by the controller. */
+   private boolean controllerRan = false;
+   /** Serves to inform the controller that the estimator ran and populated the estimated values in this context. Set by the estimator. */
+   private boolean estimatorRan = false;
+
    private final HumanoidRobotContextJointData processedJointData;
 
    private final ForceSensorDataHolder forceSensorDataHolder;
@@ -28,11 +34,10 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private final ArrayList<RigidBodyBasics> robotFeet;
    private final Map<String, FramePoint2D> copPoints = new HashMap<>();
 
-   HumanoidRobotContextData(HumanoidRobotContextJointData rawJointData, HumanoidRobotContextJointData processedJointData,
-                            ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                            JointDesiredOutputList jointDesiredOutputList)
+   protected HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
+                                      CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
+                                      JointDesiredOutputList jointDesiredOutputList)
    {
-      this.rawJointData = rawJointData;
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
 
@@ -56,7 +61,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    @Override
    public void copyFrom(HumanoidRobotContextData src)
    {
-      this.rawJointData.copyFrom(src.rawJointData);
+      this.timestamp = src.timestamp;
+
       this.processedJointData.copyFrom(src.processedJointData);
 
       this.forceSensorDataHolder.set(src.forceSensorDataHolder);
@@ -76,5 +82,35 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       {
          this.jointDesiredOutputList.getJointDesiredOutput(i).set(src.jointDesiredOutputList.getJointDesiredOutput(i));
       }
+   }
+
+   public long getTimestamp()
+   {
+      return timestamp;
+   }
+
+   public void setTimestamp(long timestamp)
+   {
+      this.timestamp = timestamp;
+   }
+
+   public void setControllerRan(boolean controllerRan)
+   {
+      this.controllerRan = controllerRan;
+   }
+
+   public boolean getControllerRan()
+   {
+      return controllerRan;
+   }
+
+   public void setEstimatorRan(boolean estimatorRan)
+   {
+      this.estimatorRan = estimatorRan;
+   }
+
+   public boolean getEstimatorRan()
+   {
+      return estimatorRan;
    }
 }

@@ -40,4 +40,10 @@ public class WrenchCalculatorWrapper implements WrenchCalculator
    {
       return wrenchCalculatorInterface.getName();
    }
+
+   @Override
+   public boolean isTorquingIntoJointLimit()
+   {
+      return false;
+   }
 }

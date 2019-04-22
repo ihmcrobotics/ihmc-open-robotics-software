@@ -21,9 +21,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -64,6 +62,7 @@ public class SphereRobotModel implements FullRobotModel
       totalMass = TotalMassCalculator.computeSubTreeMass(body);
    }
 
+   @Override
    public double getTotalMass()
    {
       return totalMass;
@@ -74,16 +73,19 @@ public class SphereRobotModel implements FullRobotModel
       return worldFrame;
    }
 
+   @Override
    public RigidBodyBasics getElevator()
    {
       return elevator;
    }
 
+   @Override
    public SixDoFJoint getRootJoint()
    {
       return floatingJoint;
    }
 
+   @Override
    public void updateFrames()
    {
       elevator.updateFramesRecursively();
@@ -96,11 +98,13 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
+   @Override
    public OneDoFJointBasics[] getOneDoFJoints()
    {
       return oneDoFJoints;
    }
 
+   @Override
    public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
    {
       return null;
@@ -111,6 +115,7 @@ public class SphereRobotModel implements FullRobotModel
 
    }
 
+   @Override
    public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
    {
       List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
@@ -135,6 +140,7 @@ public class SphereRobotModel implements FullRobotModel
    {
    }
 
+   @Override
    public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
    {
       return null;
@@ -145,11 +151,13 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
+   @Override
    public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
    {
       return null;
    }
 
+   @Override
    public JointBasics getLidarJoint(String lidarName)
    {
       return null;
@@ -170,37 +178,38 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
+   @Override
    public RigidBodyBasics getRootBody()
    {
       return null;
    }
 
+   @Override
    public RigidBodyBasics getHead()
    {
       return null;
    }
 
+   @Override
    public ReferenceFrame getHeadBaseFrame()
    {
       return null;
    }
 
+   @Override
    public RobotSpecificJointNames getRobotSpecificJointNames()
    {
       return null;
    }
 
+   @Override
    public IMUDefinition[] getIMUDefinitions()
    {
       return null;
    }
 
+   @Override
    public ForceSensorDefinition[] getForceSensorDefinitions()
-   {
-      return null;
-   }
-
-   public ContactSensorDefinition[] getContactSensorDefinitions()
    {
       return null;
    }
