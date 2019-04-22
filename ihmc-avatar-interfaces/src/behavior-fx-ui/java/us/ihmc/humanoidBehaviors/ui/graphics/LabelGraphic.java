@@ -22,7 +22,6 @@ public class LabelGraphic
    public static DoubleParameter textMeshScale;
    public static DoubleParameter textOffsetX;
    public static DoubleParameter textOffsetY;
-   public static DoubleParameter textOffsetZ;
    public static DoubleParameter textOffsetYaw;
    public static DoubleParameter textOffsetPitch;
    public static DoubleParameter textOffsetRoll;
