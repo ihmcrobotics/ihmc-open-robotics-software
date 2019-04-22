@@ -53,6 +53,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -116,6 +117,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
 
    private boolean requestIntegratorReset = false;
    private final YoBoolean yoRequestingIntegratorReset = new YoBoolean("RequestingIntegratorReset", registry);
+   private final DoubleParameter loadPercentageForGroundPlane = new DoubleParameter("loadPercentageForGroundPlaneUpdate", registry, 0.25);
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final EnumProvider<WholeBodyControllerCoreMode> controllerCoreMode;
@@ -437,7 +439,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       QuadrantDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (footSwitches.get(robotQuadrant).hasFootHitGround())
+         if (footSwitches.get(robotQuadrant).computeFootLoadPercentage() > loadPercentageForGroundPlane.getValue())
          {
             groundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
             upcomingGroundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));

@@ -214,7 +214,6 @@ public class SQLBehaviorDatabaseManager
 
    public boolean saveRunEvent(RunEvent run)
    {
-      System.out.println("making run event");
       try
       {
 
@@ -224,7 +223,6 @@ public class SQLBehaviorDatabaseManager
          st.setFloat(3, run.runTime);
          st.setBoolean(4, run.successful);
          statements.add(st);
-         System.out.println("done making run event");
          return true;
       }
       catch (Exception e)
@@ -262,6 +260,31 @@ public class SQLBehaviorDatabaseManager
 
       }
       return null;
+   }
+
+   public int getNumberOfRunEventsAddedForRun(int runID)
+   {
+      Statement stmt = null;
+      int returnValue = 0;
+      try
+      {
+         stmt = databaseConnection.createStatement();
+
+         ResultSet rs = stmt.executeQuery("SELECT * FROM run_events WHERE id = " + runID + ";");
+         while (rs.next())
+         {
+            returnValue++;
+         }
+         rs.close();
+         stmt.close();
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+
+      }
+      return returnValue;
    }
 
    public Task getTask(String name)
@@ -358,6 +381,7 @@ public class SQLBehaviorDatabaseManager
       {
          this.name = name;
       }
+
       public int operatorID;
       public String name;
    }
@@ -388,10 +412,11 @@ public class SQLBehaviorDatabaseManager
       public RunEvent(int runID, String eventName, float runTime, boolean successfull)
       {
          this.runID = runID;
-         this.eventName= eventName;
+         this.eventName = eventName;
          this.runTime = runTime;
          this.successful = successfull;
       }
+
       public int runID;
       public String eventName;
       public float runTime;
@@ -404,6 +429,7 @@ public class SQLBehaviorDatabaseManager
       {
          this.name = taskName;
       }
+
       public int taskID;
       public String name;
    }
@@ -411,11 +437,11 @@ public class SQLBehaviorDatabaseManager
    public static void main(String[] args)
    {
       SQLBehaviorDatabaseManager test = new SQLBehaviorDatabaseManager();
-      //String userName = "matt";
+      String userName = "matt";
       String taskName = "Walk Through Door";
 
-     // System.out.println("adding in user " + userName);
-     // Operator returnedOperator = test.saveOperator(userName);
+      // System.out.println("adding in user " + userName);
+      Operator returnedOperator = test.saveOperator(userName);
       //System.out.println("MY ID NUMBER IS " + returnedOperator.operatorID);
 
       //make a task
@@ -423,7 +449,7 @@ public class SQLBehaviorDatabaseManager
       Task returnedTask = test.saveTask(taskName);
       System.out.println("MY Task ID NUMBER IS " + returnedTask.taskID);
 
-/*      //make a task
+      //make a task
       System.out.println("adding in Run 1");
       Run newRun = test.new Run(returnedOperator.operatorID, returnedTask.taskID);
       newRun.notes = "test run";
@@ -442,21 +468,13 @@ public class SQLBehaviorDatabaseManager
       Run returnedRun2 = test.getRun(lastRun.runID);
       System.out.println(returnedRun2.notes);
 
-      RunEvent event = test.new RunEvent();
-      event.runID = lastRun.runID;
-      event.eventName = "walk to door";
-      event.runTime = 10;
-      event.successful = true;
+      RunEvent event = test.new RunEvent(lastRun.runID, "walk to door", 10, true);
 
       test.saveRunEvent(event);
 
-      RunEvent event2 = test.new RunEvent();
-      event2.runID = lastRun.runID;
-      event2.eventName = "plan to door";
-      event2.runTime = 9;
-      event2.successful = true;
+      RunEvent event2 = test.new RunEvent(lastRun.runID, "plan to door", 9, true);
 
-      test.saveRunEvent(event2);*/
+      test.saveRunEvent(event2);
 
    }
 
