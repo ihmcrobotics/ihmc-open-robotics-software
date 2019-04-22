@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponseTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerTypeTopic;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResultTopic;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +11,11 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import com.jme3.math.Transform;
 
@@ -18,7 +24,6 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,9 +42,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -54,7 +56,6 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.ApplicationRunner;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -89,7 +90,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -1024,12 +1024,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return new ForceSensorDefinition[0];
-      }
-
-      @Override
-      public ContactSensorDefinition[] getContactSensorDefinitions()
-      {
-         return new ContactSensorDefinition[0];
       }
 
       @Override

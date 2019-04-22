@@ -236,8 +236,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
       yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
-      for (int i = 0; i < footSwitchList.size(); i++)
-         footSwitchList.get(i).updateMeasurement();
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
@@ -249,6 +247,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       jointStateUpdater.updateJointState();
+
+      for (int i = 0; i < footSwitchList.size(); i++)
+         footSwitchList.get(i).updateMeasurement();
+
       if (pelvisRotationalStateUpdater != null)
       {
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();

@@ -11,25 +11,37 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ForceBasedTouchDownDetection implements TouchdownDetector
 {
-   private final String name = getClass().getSimpleName();
+   private final String name = "ForceTchdwnDetect";
    private final YoVariableRegistry registry ;
 
    private final YoBoolean isInContact;
+   private final YoBoolean isDefinitelyInContact;
    private final DoubleProvider zForceThreshold;
+   private final DoubleProvider zForceForSureThreshold;
    private final YoDouble measuredZForce;
+   private final YoBoolean isTorquingIntoJointLimit;
    private final FrameVector3D footForce = new FrameVector3D();
 
    private final WrenchCalculator wrenchCalculator;
 
-   public ForceBasedTouchDownDetection(WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant, YoVariableRegistry parentRegistry)
+   private final boolean dontDetectTouchdownIfAtJointLimit;
+
+   public ForceBasedTouchDownDetection(String suffix, WrenchCalculator wrenchCalculator, RobotQuadrant robotQuadrant,
+                                       boolean dontDetectTouchdownIfAtJointLimit, DoubleProvider zForceThreshold, DoubleProvider zForceForSureThreshold,
+                                       YoVariableRegistry parentRegistry)
    {
       this.wrenchCalculator = wrenchCalculator;
-      String prefix = robotQuadrant.getCamelCaseName() + name;
+      this.dontDetectTouchdownIfAtJointLimit = dontDetectTouchdownIfAtJointLimit;
+      this.zForceThreshold = zForceThreshold;
+      this.zForceForSureThreshold = zForceForSureThreshold;
+      String prefix = robotQuadrant.getShortName() + name;
       registry = new YoVariableRegistry(prefix);
 
-      isInContact = new YoBoolean(prefix + "isInContact", registry);
-      zForceThreshold = new DoubleParameter(prefix + "zForceThreshold", registry, 40.0);
-      measuredZForce = new YoDouble(prefix + "measuredZForce", registry);
+      isInContact = new YoBoolean(prefix + "IsInContact" + suffix, registry);
+      isDefinitelyInContact = new YoBoolean(prefix + "IsDefinitelyInContact" + suffix, registry);
+
+      measuredZForce = new YoDouble(prefix + "MeasuredZForce" + suffix, registry);
+      isTorquingIntoJointLimit = new YoBoolean(prefix + "IsTorquingIntoJointLimit" + suffix, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -41,12 +53,28 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    }
 
    @Override
+   public boolean hasForSureTouchedDown()
+   {
+      return isDefinitelyInContact.getBooleanValue();
+   }
+
+   @Override
    public void update()
    {
       footForce.setIncludingFrame(wrenchCalculator.getWrench().getLinearPart());
       footForce.changeFrame(ReferenceFrame.getWorldFrame());
       measuredZForce.set(footForce.getZ());
-      isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
+      isTorquingIntoJointLimit.set(wrenchCalculator.isTorquingIntoJointLimit());
+      if (dontDetectTouchdownIfAtJointLimit && isTorquingIntoJointLimit.getBooleanValue())
+      {
+         isInContact.set(false);
+         isDefinitelyInContact.set(false);
+      }
+      else
+      {
+         isInContact.set(measuredZForce.getDoubleValue() > zForceThreshold.getValue());
+         isDefinitelyInContact.set(measuredZForce.getDoubleValue() > zForceForSureThreshold.getValue());
+      }
    }
 
    public void reset()

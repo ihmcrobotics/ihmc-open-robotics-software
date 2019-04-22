@@ -14,7 +14,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -148,12 +147,6 @@ public interface FullRobotModel
     * @return
     */
    ForceSensorDefinition[] getForceSensorDefinitions();
-
-   /**
-    * Returns all the ContactSensorDefinitions corresponding to each contact sensor attached to this robot.
-    */
-   ContactSensorDefinition[] getContactSensorDefinitions();
-
 
    double getTotalMass();
 }
