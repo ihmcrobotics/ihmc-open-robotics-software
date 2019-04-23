@@ -58,13 +58,7 @@ float64 min_x_clearance_from_foot
 float64 min_y_clearance_from_foot
 
 # Field default value -11.1
-float64 crawl_speed
-
-# Field default value -11.1
-float64 trot_speed
-
-# Field default value -11.1
-float64 pace_speed
+float64 max_walking_speed_multiplier
 
 # Field default value -11.1
 float64 projection_inside_distance

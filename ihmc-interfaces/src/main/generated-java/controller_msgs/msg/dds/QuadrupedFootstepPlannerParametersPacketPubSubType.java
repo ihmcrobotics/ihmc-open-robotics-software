@@ -90,10 +90,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       return current_alignment - initial_alignment;
    }
@@ -108,12 +104,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -232,11 +222,7 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMinYClearanceFromFoot());
 
-      cdr.write_type_6(data.getCrawlSpeed());
-
-      cdr.write_type_6(data.getTrotSpeed());
-
-      cdr.write_type_6(data.getPaceSpeed());
+      cdr.write_type_6(data.getMaxWalkingSpeedMultiplier());
 
       cdr.write_type_6(data.getProjectionInsideDistance());
 
@@ -290,11 +276,7 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMinYClearanceFromFoot(cdr.read_type_6());
       	
-      data.setCrawlSpeed(cdr.read_type_6());
-      	
-      data.setTrotSpeed(cdr.read_type_6());
-      	
-      data.setPaceSpeed(cdr.read_type_6());
+      data.setMaxWalkingSpeedMultiplier(cdr.read_type_6());
       	
       data.setProjectionInsideDistance(cdr.read_type_6());
       	
@@ -331,9 +313,7 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("heuristics_weight", data.getHeuristicsWeight());
       ser.write_type_6("min_x_clearance_from_foot", data.getMinXClearanceFromFoot());
       ser.write_type_6("min_y_clearance_from_foot", data.getMinYClearanceFromFoot());
-      ser.write_type_6("crawl_speed", data.getCrawlSpeed());
-      ser.write_type_6("trot_speed", data.getTrotSpeed());
-      ser.write_type_6("pace_speed", data.getPaceSpeed());
+      ser.write_type_6("max_walking_speed_multiplier", data.getMaxWalkingSpeedMultiplier());
       ser.write_type_6("projection_inside_distance", data.getProjectionInsideDistance());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
@@ -363,9 +343,7 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setHeuristicsWeight(ser.read_type_6("heuristics_weight"));
       data.setMinXClearanceFromFoot(ser.read_type_6("min_x_clearance_from_foot"));
       data.setMinYClearanceFromFoot(ser.read_type_6("min_y_clearance_from_foot"));
-      data.setCrawlSpeed(ser.read_type_6("crawl_speed"));
-      data.setTrotSpeed(ser.read_type_6("trot_speed"));
-      data.setPaceSpeed(ser.read_type_6("pace_speed"));
+      data.setMaxWalkingSpeedMultiplier(ser.read_type_6("max_walking_speed_multiplier"));
       data.setProjectionInsideDistance(ser.read_type_6("projection_inside_distance"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));
