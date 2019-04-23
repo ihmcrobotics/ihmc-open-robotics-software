@@ -20,7 +20,7 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
 
    private final SnappedPositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
-   private final LabelGraphic labelGraphic;
+   private LabelGraphic labelGraphic;
 
    public PatrolWaypointGraphic(int index)
    {
@@ -55,6 +55,14 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
    public OrientationGraphic getOrientationGraphic()
    {
       return orientationGraphic;
+   }
+
+   public void setIndex(int index)
+   {
+      getChildren().remove(labelGraphic.getNode());
+      labelGraphic = new LabelGraphic(String.valueOf(index));
+      getChildren().add(labelGraphic.getNode());
+      updateGraphics();
    }
 
    @Override

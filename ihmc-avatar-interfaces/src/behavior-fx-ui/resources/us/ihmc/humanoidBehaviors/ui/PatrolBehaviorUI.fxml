@@ -36,6 +36,9 @@
             </Label>
             <Button fx:id="replan" onAction="#replan" text="Re-plan" GridPane.columnIndex="4" GridPane.rowIndex="4" />
             <Button fx:id="sendPlan" onAction="#sendPlan" text="Continue" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+            <Label text="Middle click waypoint to delete." GridPane.columnIndex="4" GridPane.rowIndex="5" />
+            <Label text="Right click waypoint to insert." GridPane.columnIndex="4" GridPane.rowIndex="6" />
+            <Label text="Right click to exit placement." GridPane.columnIndex="5" GridPane.rowIndex="5" />
             </children>
          <columnConstraints>
             <ColumnConstraints />

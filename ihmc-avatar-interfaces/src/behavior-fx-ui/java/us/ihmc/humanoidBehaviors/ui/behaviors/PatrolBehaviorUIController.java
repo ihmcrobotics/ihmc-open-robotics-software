@@ -15,7 +15,6 @@ import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
@@ -60,6 +59,8 @@ public class PatrolBehaviorUIController extends Group
    private OrientationYawEditor orientationYawEditor;
 
    private FXUIStateMachine waypointPlacementStateMachine;
+   private FXUIStateMachine waypointInsertStateMachine;
+   private int currentInsertIndex;
 
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
@@ -120,11 +121,31 @@ public class PatrolBehaviorUIController extends Group
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
       {
          LogTools.debug("Completed waypoint placement.");
-
          removeWaypoint(waypoints.get(waypoints.size() - 1));
-
          teleopUpdateWaypoints();
+         placeWaypoints.setDisable(false);
+      });
 
+      waypointInsertStateMachine = new FXUIStateMachine(uiMessager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      {
+         placeWaypoints.setDisable(true);
+         goToNextInsertedWaypointPositionEdit();
+      });
+      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
+      {
+         PatrolWaypointGraphic latestWaypoint = waypoints.get(currentInsertIndex);
+         latestWaypoint.getOrientationGraphic().getNode().setVisible(true);
+         orientationYawEditor.edit(latestWaypoint, exitType -> waypointInsertStateMachine.transition(exitType));
+      });
+      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
+      {
+         goToNextInsertedWaypointPositionEdit();
+      });
+      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      {
+         LogTools.debug("Completed waypoint insertion.");
+         removeWaypointGraphic(currentInsertIndex);
+         teleopUpdateWaypoints();
          placeWaypoints.setDisable(false);
       });
 
@@ -143,33 +164,59 @@ public class PatrolBehaviorUIController extends Group
       });
    }
 
+   private void goToNextInsertedWaypointPositionEdit()
+   {
+      currentInsertIndex++;
+      waypoints.forEach(waypoint -> waypoint.setMouseTransparent(true));
+      PatrolWaypointGraphic insertedWaypoint = insertWaypointGraphic(currentInsertIndex);
+      LogTools.debug("Inserting waypoint {}", waypoints.size());
+      waypoints.forEach(waypoint -> waypoint.setMouseTransparent(true));
+      snappedPositionEditor.edit(insertedWaypoint, exitType ->
+      {
+         waypointInsertStateMachine.transition(exitType);
+         waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
+      });
+   }
+
    private final void mouseClicked(MouseEvent event)
    {
       if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null)
       {
-         if (event.getButton() == MouseButton.PRIMARY)
-         {
-            LogTools.debug("consume mouseClicked");
-            event.consume();
-            PickResult pickResult = event.getPickResult();
-            Node intersectedNode = pickResult.getIntersectedNode();
+         PickResult pickResult = event.getPickResult();
+         Node intersectedNode = pickResult.getIntersectedNode();
 
-            for (int i = 0; i < waypoints.size(); i++)
+         for (int i = 0; i < waypoints.size(); i++) // edit
+         {
+            if (waypoints.get(i).getSnappedPositionGraphic().getNode() == intersectedNode)
             {
-               if (waypoints.get(i).getSnappedPositionGraphic().getNode() == intersectedNode)
+               if (event.getButton() == MouseButton.PRIMARY)
                {
+                  event.consume();
                   LogTools.debug("Editing patrol waypoint position: {}", i);
                   placeWaypoints.setDisable(true);
                   waypoints.forEach(waypoint -> waypoint.setMouseTransparent(true));
-                  snappedPositionEditor.edit(waypoints.get(i), exitType ->
-                  {
-                     teleopUpdateWaypoints();
-                     placeWaypoints.setDisable(false);
-                     waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
-                  }); // TODO handle right click?
+                  editWaypoint(waypoints.get(i));
                }
-               else if (waypoints.get(i).getOrientationGraphic().getNode() == intersectedNode)
+               else if (event.getButton() == MouseButton.SECONDARY) // insert
                {
+                  event.consume();
+                  LogTools.debug("Inserting patrol waypoint position: {}", i);
+                  currentInsertIndex = i; // TODO avoid this global by extracting waypoint management
+                  waypointInsertStateMachine.start();
+               }
+               else if (event.getButton() == MouseButton.MIDDLE) // delete
+               {
+                  event.consume();
+                  LogTools.debug("Deleting patrol waypoint position: {}", i);
+                  removeWaypointGraphic(i);
+                  teleopUpdateWaypoints();
+               }
+            }
+            else if (waypoints.get(i).getOrientationGraphic().getNode() == intersectedNode)
+            {
+               if (event.getButton() == MouseButton.PRIMARY) // edit
+               {
+                  event.consume();
                   LogTools.debug("Editing patrol waypoint orientation: {}", i);
                   placeWaypoints.setDisable(true);
                   orientationYawEditor.edit(waypoints.get(i), exitType ->
@@ -181,6 +228,16 @@ public class PatrolBehaviorUIController extends Group
             }
          }
       }
+   }
+
+   private void editWaypoint(PatrolWaypointGraphic waypointToEdit)
+   {
+      snappedPositionEditor.edit(waypointToEdit, exitType ->
+      {
+         teleopUpdateWaypoints();
+         placeWaypoints.setDisable(false);
+         waypoints.forEach(waypoint -> waypoint.setMouseTransparent(false));
+      }); // TODO handle abort placement?
    }
 
    private void teleopUpdateWaypoints()
@@ -201,6 +258,28 @@ public class PatrolBehaviorUIController extends Group
       getChildren().add(waypoint);
       waypoints.add(waypoint);
       return waypoint;
+   }
+
+   private PatrolWaypointGraphic insertWaypointGraphic(int index)
+   {
+      PatrolWaypointGraphic waypoint = new PatrolWaypointGraphic(index);
+      getChildren().add(waypoint);
+      waypoints.add(index, waypoint);
+      for (int i = 0; i < waypoints.size(); i++) // redraw numbers
+      {
+         waypoints.get(i).setIndex(i);
+      }
+      return waypoint;
+   }
+
+   private void removeWaypointGraphic(int index)
+   {
+      getChildren().remove(waypoints.get(index));
+      waypoints.remove(index);
+      for (int i = 0; i < waypoints.size(); i++) // redraw numbers
+      {
+         waypoints.get(i).setIndex(i);
+      }
    }
 
    private void removeAllWaypointGraphics()
