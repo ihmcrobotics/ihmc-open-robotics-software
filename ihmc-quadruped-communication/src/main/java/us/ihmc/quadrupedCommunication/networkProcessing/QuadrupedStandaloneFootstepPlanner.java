@@ -82,8 +82,9 @@ public class QuadrupedStandaloneFootstepPlanner
                                             QuadrupedXGaitSettingsReadOnly xGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
                                             LogModelProvider logModelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      modules.add(new QuadrupedFootstepPlanningModule(modelFactory, footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
-                                                      true, false,
+      modules.add(new QuadrupedFootstepPlanningModule(modelFactory.getRobotDescription().getName(), null,
+                                                      footstepPlannerParameters, xGaitSettings, pointFootSnapperParameters, logModelProvider,
+                                                      false, false,
                                                       pubSubImplementation));
    }
 
