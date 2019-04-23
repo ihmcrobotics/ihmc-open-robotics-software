@@ -8,12 +8,12 @@ import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.function.Consumer;
 
@@ -61,16 +61,16 @@ public class SnappedPositionEditor
 
       if (mouseClickedMeshIntersection.hasNext())  // use the clicked position if clicked
       {
-         selectedGraphic.setPosition(mouseClickedMeshIntersection.read());
+         selectedGraphic.setPosition(mouseClickedMeshIntersection.peek());
       }
       else if (mouseMovedMeshIntersection.hasNext())  // just for selection preview
       {
-         selectedGraphic.setPosition(mouseMovedMeshIntersection.read());
+         selectedGraphic.setPosition(mouseMovedMeshIntersection.peek());
       }
 
       if (mouseClickedMeshIntersection.hasNext())
       {
-         LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
+         LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.peek());
          deactivate(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
       }
 

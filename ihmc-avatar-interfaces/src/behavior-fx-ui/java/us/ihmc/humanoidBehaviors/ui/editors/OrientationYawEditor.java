@@ -14,12 +14,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.function.Consumer;
 
@@ -67,16 +67,16 @@ public class OrientationYawEditor
 
       if (mouseClickedOrientation.hasNext())  // use the clicked position if clicked
       {
-         selectedGraphic.setOrientation(mouseClickedOrientation.read());
+         selectedGraphic.setOrientation(mouseClickedOrientation.peek());
       }
       else if (mouseMovedOrientation.hasNext())  // just for selection preview
       {
-         selectedGraphic.setOrientation(mouseMovedOrientation.read());
+         selectedGraphic.setOrientation(mouseMovedOrientation.peek());
       }
 
       if (mouseClickedOrientation.hasNext())
       {
-         LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.read());
+         LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.peek());
          deactivate(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK);
       }
 
