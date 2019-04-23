@@ -44,6 +44,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private CheckBox loopThroughWaypoints;
    @FXML private CheckBox swingOverPlanarRegions;
    @FXML private CheckBox operatorPlanReview;
+   @FXML private CheckBox upDownExploration;
    @FXML private Button replan;
    @FXML private Button sendPlan;
 
@@ -336,5 +337,10 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void sendPlan()
    {
       behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewResult, OperatorPlanReviewResult.WALK);
+   }
+
+   @FXML public void upDownExploration()
+   {
+
    }
 }

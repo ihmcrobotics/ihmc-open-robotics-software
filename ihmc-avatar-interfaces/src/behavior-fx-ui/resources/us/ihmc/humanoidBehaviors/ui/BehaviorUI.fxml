@@ -14,7 +14,7 @@
       
                       <Tab text="Direct">
                           <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="195.0" prefWidth="578.0">
+                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="195.0">
                                   <children>
                                       <fx:include fx:id="directRobotUI" source="DirectRobotUI.fxml" />
                                   </children>
