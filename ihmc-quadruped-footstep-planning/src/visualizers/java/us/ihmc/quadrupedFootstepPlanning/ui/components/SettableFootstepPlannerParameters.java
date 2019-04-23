@@ -15,6 +15,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private double maximumStepChangeZ;
    private double bodyGroundClearance;
+   private double maxWalkingSpeedMultiplier;
 
    private double yawWeight;
    private double costPerStep;
@@ -98,6 +99,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setBodyGroundClearance(double bodyGroundClearance)
    {
       this.bodyGroundClearance = bodyGroundClearance;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaxWalkingSpeedMultiplier(double maxWalkingSpeedMultiplier)
+   {
+      this.maxWalkingSpeedMultiplier = maxWalkingSpeedMultiplier;
    }
 
    @Override
@@ -254,6 +262,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getBodyGroundClearance()
    {
       return bodyGroundClearance;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxWalkingSpeedMultiplier()
+   {
+      return maxWalkingSpeedMultiplier;
    }
 
    @Override
