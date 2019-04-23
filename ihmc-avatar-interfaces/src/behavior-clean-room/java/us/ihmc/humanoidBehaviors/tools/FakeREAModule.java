@@ -5,13 +5,13 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class FakeREAModule
                          LIDARBasedREAModule.ROS2_ID.qualifyMore(LIDARBasedREAModule.CUSTOM_REGION_QUALIFIER),
                          this::acceptCustomRegion);
 
-      ExceptionPrintingThreadScheduler scheduler = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
+      ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
       scheduler.schedule(this::process, 500, TimeUnit.MILLISECONDS);
    }
 

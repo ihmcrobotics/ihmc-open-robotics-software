@@ -2,10 +2,10 @@ package us.ihmc.humanoidBehaviors.ui.tools;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -48,7 +48,7 @@ public class LocalParameterServer
                                                                0.01);
       yoVariableServer.setMainRegistry(registry, null, null);
       ExceptionTools.handle(() -> yoVariableServer.start(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      ExceptionPrintingThreadScheduler scheduler = new ExceptionPrintingThreadScheduler(clazz.getSimpleName() + "YoVariableServer");
+      ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(clazz.getSimpleName() + "YoVariableServer");
       AtomicLong timestamp = new AtomicLong();
       scheduler.schedule(() -> yoVariableServer.update(timestamp.getAndAdd(10000)), PERIOD_MS, TimeUnit.MILLISECONDS);
    }

@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,8 +27,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidBehaviors.tools.thread.ExceptionPrintingThreadScheduler;
-import us.ihmc.humanoidBehaviors.tools.thread.TypedNotification;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -44,6 +41,8 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.thread.TypedNotification;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
 
@@ -157,7 +156,7 @@ public class PatrolBehavior
       planReview = messager.createInput(API.PlanReviewEnabled, false);
       upDownExploration = messager.createInput(API.UpDownExplorationEnabled, false);
 
-      ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
+      ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
@@ -256,7 +255,7 @@ public class PatrolBehavior
       }
       else if (footstepPlanResultNotification.hasNext())
       {
-         if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.read().getFootstepPlanningResult()).validForExecution())
+         if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.peek().getFootstepPlanningResult()).validForExecution())
          {
             return REVIEW;
          }
@@ -271,7 +270,7 @@ public class PatrolBehavior
 
    private void onReviewStateEntry()
    {
-      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.read());
+      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.peek());
    }
 
    private void onReviewStateAction(double timeInState)
@@ -303,11 +302,11 @@ public class PatrolBehavior
       }
       else if (planReviewResult.hasNext())
       {
-         if (planReviewResult.read() == OperatorPlanReviewResult.REPLAN)
+         if (planReviewResult.peek() == OperatorPlanReviewResult.REPLAN)
          {
             return PLAN;
          }
-         else if (planReviewResult.read() == OperatorPlanReviewResult.WALK)
+         else if (planReviewResult.peek() == OperatorPlanReviewResult.WALK)
          {
             return WALK;
          }
@@ -319,7 +318,7 @@ public class PatrolBehavior
    private void onWalkStateEntry()
    {
       walkingCompleted = remoteRobotControllerInterface
-            .requestWalk(footstepPlanResultNotification.read(), remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(), swingOvers.get());
+            .requestWalk(footstepPlanResultNotification.peek(), remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(), swingOvers.get());
    }
 
    private void doWalkStateAction(double timeInState)

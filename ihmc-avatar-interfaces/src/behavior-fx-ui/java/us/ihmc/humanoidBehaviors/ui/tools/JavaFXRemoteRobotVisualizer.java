@@ -4,12 +4,12 @@ import javafx.scene.Group;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.tools.thread.Activator;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.tools.thread.Activator;
 
 public class JavaFXRemoteRobotVisualizer extends Group
 {
@@ -34,7 +34,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
    {
       if (robotLoadedActivator.poll())
       {
-         if (robotLoadedActivator.activationChanged())
+         if (robotLoadedActivator.hasChanged())
          {
             getChildren().add(robotRootNode);
          }
