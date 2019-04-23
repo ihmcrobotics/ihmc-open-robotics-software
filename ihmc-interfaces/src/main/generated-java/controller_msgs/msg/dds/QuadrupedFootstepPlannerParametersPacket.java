@@ -34,9 +34,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double heuristics_weight_ = -11.1;
    public double min_x_clearance_from_foot_ = -11.1;
    public double min_y_clearance_from_foot_ = -11.1;
-   public double crawl_speed_ = -11.1;
-   public double trot_speed_ = -11.1;
-   public double pace_speed_ = -11.1;
+   public double max_walking_speed_multiplier_ = -11.1;
    public double projection_inside_distance_ = -11.1;
    public double minimum_surface_incline_radians_ = -11.1;
    public double cliff_height_to_avoid_ = -11.1;
@@ -93,11 +91,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       min_y_clearance_from_foot_ = other.min_y_clearance_from_foot_;
 
-      crawl_speed_ = other.crawl_speed_;
-
-      trot_speed_ = other.trot_speed_;
-
-      pace_speed_ = other.pace_speed_;
+      max_walking_speed_multiplier_ = other.max_walking_speed_multiplier_;
 
       projection_inside_distance_ = other.projection_inside_distance_;
 
@@ -288,31 +282,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return min_y_clearance_from_foot_;
    }
 
-   public void setCrawlSpeed(double crawl_speed)
+   public void setMaxWalkingSpeedMultiplier(double max_walking_speed_multiplier)
    {
-      crawl_speed_ = crawl_speed;
+      max_walking_speed_multiplier_ = max_walking_speed_multiplier;
    }
-   public double getCrawlSpeed()
+   public double getMaxWalkingSpeedMultiplier()
    {
-      return crawl_speed_;
-   }
-
-   public void setTrotSpeed(double trot_speed)
-   {
-      trot_speed_ = trot_speed;
-   }
-   public double getTrotSpeed()
-   {
-      return trot_speed_;
-   }
-
-   public void setPaceSpeed(double pace_speed)
-   {
-      pace_speed_ = pace_speed;
-   }
-   public double getPaceSpeed()
-   {
-      return pace_speed_;
+      return max_walking_speed_multiplier_;
    }
 
    public void setProjectionInsideDistance(double projection_inside_distance)
@@ -416,11 +392,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_foot_, other.min_y_clearance_from_foot_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.crawl_speed_, other.crawl_speed_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trot_speed_, other.trot_speed_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pace_speed_, other.pace_speed_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_walking_speed_multiplier_, other.max_walking_speed_multiplier_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_, other.projection_inside_distance_, epsilon)) return false;
 
@@ -483,11 +455,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.min_y_clearance_from_foot_ != otherMyClass.min_y_clearance_from_foot_) return false;
 
-      if(this.crawl_speed_ != otherMyClass.crawl_speed_) return false;
-
-      if(this.trot_speed_ != otherMyClass.trot_speed_) return false;
-
-      if(this.pace_speed_ != otherMyClass.pace_speed_) return false;
+      if(this.max_walking_speed_multiplier_ != otherMyClass.max_walking_speed_multiplier_) return false;
 
       if(this.projection_inside_distance_ != otherMyClass.projection_inside_distance_) return false;
 
@@ -547,12 +515,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.min_x_clearance_from_foot_);      builder.append(", ");
       builder.append("min_y_clearance_from_foot=");
       builder.append(this.min_y_clearance_from_foot_);      builder.append(", ");
-      builder.append("crawl_speed=");
-      builder.append(this.crawl_speed_);      builder.append(", ");
-      builder.append("trot_speed=");
-      builder.append(this.trot_speed_);      builder.append(", ");
-      builder.append("pace_speed=");
-      builder.append(this.pace_speed_);      builder.append(", ");
+      builder.append("max_walking_speed_multiplier=");
+      builder.append(this.max_walking_speed_multiplier_);      builder.append(", ");
       builder.append("projection_inside_distance=");
       builder.append(this.projection_inside_distance_);      builder.append(", ");
       builder.append("minimum_surface_incline_radians=");
