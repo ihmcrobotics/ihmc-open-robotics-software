@@ -90,7 +90,7 @@ public class BipedalSupportPlanarRegionPublisher
                                            ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
-      defaultParameters.setEnable(false);
+      defaultParameters.setEnable(true);
       defaultParameters.setSupportRegionScaleFactor(defaultScaleFactor);
       latestParametersMessage.set(defaultParameters);
 
