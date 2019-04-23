@@ -6,6 +6,7 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -318,18 +319,22 @@ public abstract class FootstepPlannerToolboxDataSetTest
          Assertions.fail("Did not find any datasets to test.");
 
       int numberOfFailingTests = 0;
-      int numbberOfTestedSets = 0;
+      int numberOfTestedSets = 0;
+      List<String> failingDatasets = new ArrayList<>();
       for (int i = 0; i < allDatasets.size(); i++)
       {
          DataSet dataset = allDatasets.get(i);
          if (DEBUG || VERBOSE)
             LogTools.info("Testing file: " + dataset.getName());
 
-         numbberOfTestedSets++;
+         numberOfTestedSets++;
          resetAllAtomics();
          String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
+         {
             numberOfFailingTests++;
+            failingDatasets.add(dataset.getName());
+         }
 
          if (DEBUG || VERBOSE)
          {
@@ -340,7 +345,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
          ThreadTools.sleep(500); // Apparently need to give some time for the prints to appear in the right order.
       }
 
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numbberOfTestedSets;
+      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numberOfTestedSets;
+      message += "\n Datasets failing: ";
+      for (int i = 0; i < failingDatasets.size(); i++)
+      {
+         message += "\n" + failingDatasets.get(i);
+      }
       if (VISUALIZE)
       {
          LogTools.info(message);

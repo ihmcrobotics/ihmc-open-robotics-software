@@ -49,6 +49,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionF
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessageBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.MessagerBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -345,7 +346,10 @@ public class FootstepPathCalculatorModule
       case SIMPLE_BODY_PATH:
          return new SplinePathWithAStarPlanner(parameters.get(), contactPointsInSoleFrame, registry, null);
       case VIS_GRAPH_WITH_A_STAR:
-         return new VisibilityGraphWithAStarPlanner(parameters.get(), visibilityGraphsParameters.get(), contactPointsInSoleFrame, null, registry);
+         SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(contactPointsInSoleFrame);
+         long updateFrequency = 1000;
+         BipedalFootstepPlannerListener listener = new MessagerBasedPlannerListener(messager, snapper, updateFrequency);
+         return new VisibilityGraphWithAStarPlanner(parameters.get(), visibilityGraphsParameters.get(), contactPointsInSoleFrame, null, registry, listener);
       default:
          throw new RuntimeException("Planner type " + footstepPlannerTypeReference.get() + " is not valid!");
       }
