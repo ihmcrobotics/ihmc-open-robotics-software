@@ -31,7 +31,7 @@ public class ActivationReference<T>
     *
     * @return current value equals activated value
     */
-   public boolean pollActivated()
+   public boolean poll()
    {
       T newValue = atomicReference.get();
       boolean newValueActivated = isValueActivated(newValue);
@@ -41,16 +41,16 @@ public class ActivationReference<T>
       return newValueActivated;
    }
 
-   public boolean peekActivated()
+   public boolean peek()
    {
       T newValue = atomicReference.get();
       return isValueActivated(newValue);
    }
 
    /**
-    * @return if the activation changed on the last call to {@link #pollActivated()}
+    * @return if the activation changed on the last call to {@link #poll()}
     */
-   public boolean activationChanged()
+   public boolean hasChanged()
    {
       return activationChanged;
    }
