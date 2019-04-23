@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -341,6 +342,9 @@ public class PatrolBehaviorUIController extends Group
 
    @FXML public void upDownExploration()
    {
-
+      placeWaypoints.setDisable(!upDownExploration.isSelected());
+      removeAllWaypointGraphics();
+      teleopUpdateWaypoints();
+      behaviorMessager.submitMessage(API.UpDownExplorationEnabled, upDownExploration.isSelected());
    }
 }

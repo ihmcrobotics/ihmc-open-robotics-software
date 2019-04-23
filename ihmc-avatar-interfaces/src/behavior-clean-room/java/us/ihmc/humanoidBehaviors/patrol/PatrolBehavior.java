@@ -52,7 +52,6 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
-
    public static final double DISTANCE_TO_REQUIRE_PERCEPTION = 1.0;
    public static final double TIME_TO_PERCEIVE = 20.0;
 
@@ -60,6 +59,8 @@ public class PatrolBehavior
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
       STOP,
+      /** Decide on waypoints. */
+      NAVIGATE,
       /** Request and wait for footstep planner result */
       PLAN,
       /** Optional user review of footstep plan. */
@@ -97,6 +98,7 @@ public class PatrolBehavior
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReview;
+   private final AtomicReference<Boolean> upDownExploration;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -107,7 +109,10 @@ public class PatrolBehavior
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
-      factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStopToPlan);
+      factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
+      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
+      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
+      factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, STOP), this::transitionFromNavigate);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
       factory.addTransition(PLAN, Lists.newArrayList(REVIEW, PLAN, STOP), this::transitionFromPlan);
@@ -150,6 +155,7 @@ public class PatrolBehavior
       loop = messager.createInput(API.Loop, false);
       swingOvers = messager.createInput(API.SwingOvers, false);
       planReview = messager.createInput(API.PlanReviewEnabled, false);
+      upDownExploration = messager.createInput(API.UpDownExplorationEnabled, false);
 
       ExceptionPrintingThreadScheduler patrolThread = new ExceptionPrintingThreadScheduler(getClass().getSimpleName());
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
@@ -170,7 +176,7 @@ public class PatrolBehavior
       pollInterrupts();
    }
 
-   private boolean transitionFromStopToPlan(double timeInState)
+   private boolean transitionFromStop(double timeInState)
    {
       boolean transition = overrideGoToWaypointNotification.read() && goalWaypointInBounds();
       if (transition)
@@ -178,6 +184,37 @@ public class PatrolBehavior
          LogTools.debug("STOP -> PLAN");
       }
       return transition;
+   }
+
+   private void onNavigateStateEntry()
+   {
+
+   }
+
+   private void doNavigateStateAction(double timeInState)
+   {
+      pollInterrupts();
+   }
+
+   private PatrolBehaviorState transitionFromNavigate(double timeInState)
+   {
+      if (stopNotification.read())
+      {
+         return STOP;
+      }
+      else if (overrideGoToWaypointNotification.read())
+      {
+         if (goalWaypointInBounds())
+         {
+            return PLAN;
+         }
+         else
+         {
+            return STOP;
+         }
+      }
+
+      return PLAN; // TODO
    }
 
    private void onPlanStateEntry()
@@ -445,6 +482,10 @@ public class PatrolBehavior
 
       /** Input: Enable/disable human plan review before walking. */
       public static final Topic<Boolean> PlanReviewEnabled = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewEnabled"));
+
+      /** Input: Enable/disable human plan review before walking. */
+      public static final Topic<Boolean> UpDownExplorationEnabled
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("UpDownExplorationEnabled"));
 
       /** Input: Enable/disable human plan review before walking. */
       public static final Topic<OperatorPlanReviewResult> PlanReviewResult
