@@ -42,6 +42,8 @@ public class TypedNotification<T>
 
    /**
     * If the initial or polled value was not null.
+    * <p/>
+    * Must have called {@link #poll()} first!
     *
     * @return polled value was not null
     */
@@ -52,10 +54,12 @@ public class TypedNotification<T>
 
    /**
     * The initial or polled value.
+    * <p/>
+    * Must have called {@link #poll()} first!
     *
     * @return polled value
     */
-   public T read()
+   public T peek()
    {
       return previousValue;
    }
