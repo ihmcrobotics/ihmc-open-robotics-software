@@ -250,6 +250,12 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
+   public boolean integrateEstimatedIMUYawDriftRate()
+   {
+      return true;
+   }
+
+   @Override
    public double getIMUBiasFilterFreqInHertz()
    {
       return 6.0e-3;
