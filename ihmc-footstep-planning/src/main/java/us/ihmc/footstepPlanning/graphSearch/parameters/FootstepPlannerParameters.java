@@ -1,12 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.filters.BodyCollisionRegionFilter;
-import us.ihmc.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
 
 public interface FootstepPlannerParameters
 {
@@ -29,11 +26,13 @@ public interface FootstepPlannerParameters
 
    /**
     * Returns the ideal step width for walking on flat ground.
+    * This is ONLY used when assumed to be walking on flat ground.
     */
    double getIdealFootstepWidth();
 
    /**
     * Returns the ideal step length for walking on flat ground.
+    * This is ONLY used when assumed to be walking on flat ground.
     */
    double getIdealFootstepLength();
 
@@ -97,6 +96,10 @@ public interface FootstepPlannerParameters
     * <p>
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
+    * </p>
+    *
+    * <p>
+    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
     * </p>
     */
    double getMinimumStepWidth();
@@ -317,6 +320,10 @@ public interface FootstepPlannerParameters
     * <p>
     * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
     * </p>
+    *
+    * <p>
+    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
+    * </p>
     */
    double getMaximumStepWidth();
 
@@ -476,40 +483,6 @@ public interface FootstepPlannerParameters
    default FootstepPlannerCostParameters getCostParameters()
    {
       return new DefaultFootstepPlannerCostParameters();
-   }
-
-   default SteppableRegionFilter getSteppableRegionFilter()
-   {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
-
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
-
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
-
-            return true;
-         }
-      };
-   }
-
-   default BodyCollisionRegionFilter getBodyCollisionRegionFilter()
-   {
-      return new BodyCollisionRegionFilter()
-      {
-         @Override
-         public boolean isPlanarRegionCollidable(PlanarRegion query, double groundHeight, double minHeight, double maxHeight)
-         {
-            if (query.getBoundingBox3dInWorld().getMaxZ() < minHeight + groundHeight)
-               return false;
-
-            return maxHeight + groundHeight > query.getBoundingBox3dInWorld().getMinZ();
-         }
-      };
    }
 
    /**

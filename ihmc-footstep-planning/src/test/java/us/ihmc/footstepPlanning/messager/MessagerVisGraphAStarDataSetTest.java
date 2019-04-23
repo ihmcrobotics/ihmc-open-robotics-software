@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.pathPlanning.DataSetName;
 
 public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
 {
@@ -35,7 +36,7 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
       MessagerVisGraphAStarDataSetTest test = new MessagerVisGraphAStarDataSetTest();
       VISUALIZE = true;
       test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, "20171215_214730_CinderBlockField");
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
       ThreadTools.sleepForever();
       test.tearDown();
    }
