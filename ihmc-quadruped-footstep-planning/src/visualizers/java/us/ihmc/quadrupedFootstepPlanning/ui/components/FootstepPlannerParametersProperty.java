@@ -8,6 +8,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettableFootstepPlannerParameters>
 {
    private final DoubleField maximumStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepReach, SettableFootstepPlannerParameters::setMaximumStepReach);
+   private final DoubleField maximumStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumStepLength, SettableFootstepPlannerParameters::setMaximumStepLength);
    private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
    private final DoubleField minimumStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepLength, SettableFootstepPlannerParameters::setMinimumStepLength);
    private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, SettableFootstepPlannerParameters::setMinimumStepWidth);
@@ -17,6 +18,17 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField maximumStepChangeZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepChangeZ, SettableFootstepPlannerParameters::setMaximumStepChangeZ);
    private final DoubleField bodyGroundClearance = new DoubleField(SettableFootstepPlannerParameters::getBodyGroundClearance, SettableFootstepPlannerParameters::setBodyGroundClearance);
 
+   private final DoubleField crawlSpeed = new DoubleField(SettableFootstepPlannerParameters::getCrawlSpeed, SettableFootstepPlannerParameters::setCrawlSpeed);
+   private final DoubleField trotSpeed = new DoubleField(SettableFootstepPlannerParameters::getTrotSpeed, SettableFootstepPlannerParameters::setTrotSpeed);
+   private final DoubleField paceSpeed = new DoubleField(SettableFootstepPlannerParameters::getPaceSpeed, SettableFootstepPlannerParameters::setPaceSpeed);
+
+   private final DoubleField projectInsideDistance = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistance, SettableFootstepPlannerParameters::setProjectInsideDistance);
+   private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
+   private final DoubleField minDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
+   private final DoubleField minDistanceFromCliffTops = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffTops, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffTops);
+
+   private final DoubleField distanceWeight = new DoubleField(SettableFootstepPlannerParameters::getDistanceHeuristicWeight, SettableFootstepPlannerParameters::setDistanceHeuristicWeight);
+   private final DoubleField xGaitWeight = new DoubleField(SettableFootstepPlannerParameters::getXGaitWeight, SettableFootstepPlannerParameters::setXGaitWeight);
    private final DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, SettableFootstepPlannerParameters::setYawWeight);
    private final DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, SettableFootstepPlannerParameters::setCostPerStep);
    private final DoubleField stepUpWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, SettableFootstepPlannerParameters::setStepUpWeight);
@@ -53,9 +65,49 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, maximumStepReach);
    }
 
+   public void bidirectionalBindMaximumStepLength(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumStepLength);
+   }
+
    public void bidirectionalBindMinimumStepLength(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minimumStepLength);
+   }
+
+   public void bidirectionalBindCrawlSpeed(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, crawlSpeed);
+   }
+
+   public void bidirectionalBindPaceSpeed(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, paceSpeed);
+   }
+
+   public void bidirectionalBindTrotSpeed(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, trotSpeed);
+   }
+
+   public void bidirectionalBindCliffHeightToAvoid(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, cliffHeightToAvoid);
+   }
+
+   public void bidirectionalBindProjectInsideDistance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, projectInsideDistance);
+   }
+
+   public void bidirectionalBindMinDistanceFromCliffBottoms(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minDistanceFromCliffBottoms);
+   }
+
+   public void bidirectionalBindMinDistanceFromCliffTops(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minDistanceFromCliffTops);
    }
 
    public void bidirectionalBindMaximumStepWidth(Property<? extends Number> property)
@@ -88,9 +140,19 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, bodyGroundClearance);
    }
 
+   public void bidirectionalBindDistanceWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, distanceWeight);
+   }
+
    public void bidirectionalBindYawWeight(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, yawWeight);
+   }
+
+   public void bidirectionalBindXGaitWeight(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, xGaitWeight);
    }
 
    public void bidirectionalBindCostPerStep(Property<? extends Number> property)
