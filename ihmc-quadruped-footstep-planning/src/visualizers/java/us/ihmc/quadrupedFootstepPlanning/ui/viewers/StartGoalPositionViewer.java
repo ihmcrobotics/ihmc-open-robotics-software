@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StartGoalPositionViewer extends AnimationTimer
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    public static final double RADIUS = 0.05;
 
    private final Group root = new Group();
@@ -221,8 +223,8 @@ public class StartGoalPositionViewer extends AnimationTimer
       {
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
-         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
+         footPosition.changeFrame(worldFrame);
+         footPosition.setZ(getHeightAtPoint(footPosition));
 
          startFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          startFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -246,8 +248,8 @@ public class StartGoalPositionViewer extends AnimationTimer
       {
          FramePoint3D footPosition = new FramePoint3D(xGaitFrame, robotQuadrant.getEnd().negateIfHindEnd(xOffset),
                                                       robotQuadrant.getSide().negateIfRightSide(yOffset), 0.0);
-         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         footPosition.setZ(getHeightAtPoint(footPosition.getX(), footPosition.getY()));
+         footPosition.changeFrame(worldFrame);
+         footPosition.setZ(getHeightAtPoint(footPosition));
 
          goalFeetSpheres.get(robotQuadrant).setTranslateX(footPosition.getX());
          goalFeetSpheres.get(robotQuadrant).setTranslateY(footPosition.getY());
@@ -331,13 +333,13 @@ public class StartGoalPositionViewer extends AnimationTimer
       return new Color(red, green, blue, opacity);
    }
 
-   private double getHeightAtPoint(double x, double y)
+   private double getHeightAtPoint(Point3DReadOnly point)
    {
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
       if (planarRegionsList == null)
          return 0.0;
-      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(x, y, 100.0), planarRegionsList);
-      return projectedPoint == null ? 0.0 : projectedPoint.getZ();
+      Point3DReadOnly projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(new Point3D(point.getX(), point.getY(), 100.0), planarRegionsList);
+      return projectedPoint == null ? point.getZ() : projectedPoint.getZ();
    }
 
    public Node getRoot()

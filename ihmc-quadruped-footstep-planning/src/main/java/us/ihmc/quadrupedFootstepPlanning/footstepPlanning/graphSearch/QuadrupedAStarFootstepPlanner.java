@@ -176,8 +176,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
                if (projectedPoint == null)
                {
-                  // FIXME should probably not be at 0.0
-                  addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0);
+                  addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), startPoint.getZ(), start.getTargetPose().getYaw());
                   projectedPoint = startPoint;
                }
             }
@@ -426,12 +425,12 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          {
             if (debug)
                PrintTools.info("adding plane at start foot");
-            addPlanarRegionAtHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+            addPlanarRegionAtHeight(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0, startNode.getNominalYaw());
          }
       }
    }
 
-   private void addPlanarRegionAtHeight(double xLocation, double yLocation, double height)
+   private void addPlanarRegionAtHeight(double xLocation, double yLocation, double height, double yaw)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(0.3, 0.3);
@@ -440,7 +439,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       polygon.addVertex(-0.3, -0.25);
       polygon.update();
 
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, height)), polygon);
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(yaw, 0.0, 0.0), new Vector3D(xLocation, yLocation, height)), polygon);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 

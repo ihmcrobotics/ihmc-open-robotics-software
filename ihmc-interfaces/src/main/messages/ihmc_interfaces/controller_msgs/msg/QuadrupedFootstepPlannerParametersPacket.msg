@@ -23,9 +23,7 @@ float64 step_down_weight -11.1
 float64 heuristics_weight -11.1
 float64 min_x_clearance_from_foot -11.1
 float64 min_y_clearance_from_foot -11.1
-float64 crawl_speed -11.1
-float64 trot_speed -11.1
-float64 pace_speed -11.1
+float64 max_walking_speed_multiplier -11.1
 float64 projection_inside_distance -11.1
 float64 minimum_surface_incline_radians -11.1
 float64 cliff_height_to_avoid -11.1
