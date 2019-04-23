@@ -12,6 +12,7 @@ public class QuadrupedNetworkModuleParameters
    private boolean useStepTeleopModule;
    private boolean visualizeStepTeleopModule;
    private boolean logStepTeleopModule;
+   private boolean useQuadrupedSupportPlanarRegionPublisher;
    private boolean useFootstepPlanningModule;
    private boolean visualizeFootstepPlanningModule;
    private boolean logFootstepPlanningModule;
@@ -52,6 +53,16 @@ public class QuadrupedNetworkModuleParameters
    public boolean isFootstepPlanningModuleEnabled()
    {
       return useFootstepPlanningModule;
+   }
+
+   public void enableQuadrupedSupportPlanarRegionPublisher(boolean enable)
+   {
+      useQuadrupedSupportPlanarRegionPublisher = enable;
+   }
+
+   public boolean isQuadrupedSupportPlanarRegionPublisherEnabled()
+   {
+      return useQuadrupedSupportPlanarRegionPublisher;
    }
 
    public void enableStepTeleopModule(boolean enable)

@@ -413,11 +413,7 @@ public class QuadrupedUIMessageConverter
       if (verbose)
          PrintTools.info("Told the footstep planner toolbox to wake up.");
 
-      QuadrupedFootstepPlannerParametersPacket plannerParametersPacket = new QuadrupedFootstepPlannerParametersPacket();
-      FootstepPlannerParameters footstepPlannerParameters = footstepPlannerParametersReference.get();
-
-      FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
-      footstepPlannerParametersPublisher.publish(plannerParametersPacket);
+      footstepPlannerParametersPublisher.publish(footstepPlannerParametersReference.get().getAsPacket());
 
       VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
       VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();

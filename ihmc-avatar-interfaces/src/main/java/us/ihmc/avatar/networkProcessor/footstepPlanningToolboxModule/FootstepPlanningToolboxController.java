@@ -422,8 +422,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    public void processVisibilityGraphsParameters(VisibilityGraphsParametersPacket parameters)
    {
-      if (DEBUG)
-         LogTools.info("Received new planning parameters");
       latestVisibilityGraphsParametersReference.set(parameters);
    }
 
