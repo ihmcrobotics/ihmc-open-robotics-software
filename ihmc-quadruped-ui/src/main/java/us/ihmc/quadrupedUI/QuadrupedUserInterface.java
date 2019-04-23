@@ -139,6 +139,8 @@ public class QuadrupedUserInterface
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                        QuadrupedUIMessagerAPI.BodyPathDataTopic);
 
+      plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
+
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
