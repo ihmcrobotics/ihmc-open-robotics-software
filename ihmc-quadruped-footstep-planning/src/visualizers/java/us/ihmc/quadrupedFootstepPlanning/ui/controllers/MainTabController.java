@@ -633,7 +633,7 @@ public class MainTabController
          FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
          footPositionScene.clear();
 
-         if (footstepPlan == null)
+         if (footstepPlan == null || footstepPlan.getNumberOfSteps() == 0)
             return;
 
          List<QuadrupedTimedStep> steps = new ArrayList<>();
