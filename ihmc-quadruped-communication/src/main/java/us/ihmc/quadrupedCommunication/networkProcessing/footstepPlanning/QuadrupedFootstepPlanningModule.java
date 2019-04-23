@@ -80,6 +80,10 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                            s -> processFootstepPlanningRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> processFootstepPlannerParametersPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
+                                           s -> processVisibilityGraphParametersPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
@@ -100,6 +104,18 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processSteppingStateChangeMessage(message);
+   }
+
+   private void processFootstepPlannerParametersPacket(QuadrupedFootstepPlannerParametersPacket packet)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processFootstepPlannerParametersPacket(packet);
+   }
+
+   private void processVisibilityGraphParametersPacket(VisibilityGraphsParametersPacket packet)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processVisibilityGraphParametersPacket(packet);
    }
 
    private void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
