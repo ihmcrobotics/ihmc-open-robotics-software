@@ -62,30 +62,30 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
    private final YoInteger planId = new YoInteger("planId", registry);
 
 
-   public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters visibilityGraphParameters,
-                                              FootstepPlannerParameters footstepPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
+   public QuadrupedFootstepPlanningController(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, VisibilityGraphsParameters defaultVisibilityGraphParameters,
+                                              FootstepPlannerParameters defaultFootstepPlannerParameters, PointFootSnapperParameters pointFootSnapperParameters,
                                               OutputManager statusOutputManager, QuadrupedRobotDataReceiver robotDataReceiver,
                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, long tickTimeMs)
    {
       super(robotDataReceiver, statusOutputManager, parentRegistry);
 
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
-      this.visibilityGraphParameters = new YoVisibilityGraphParameters(visibilityGraphParameters, registry);
-      this.footstepPlannerParameters = new YoFootstepPlannerParameters(footstepPlannerParameters, registry);
+      visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
+      footstepPlannerParameters = new YoFootstepPlannerParameters(defaultFootstepPlannerParameters, registry);
 
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, xGaitSettings);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(defaultFootstepPlannerParameters, xGaitSettings);
       if (robotDataReceiver != null)
       {
          plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
                         new QuadrupedSplineWithTurnWalkTurnPlanner(xGaitSettings, robotTimestamp, pointFootSnapperParameters, robotDataReceiver.getReferenceFrames(), null, registry));
          plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_TURN_WALK_TURN,
-                        new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, this.visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
+                        new QuadrupedVisGraphWithTurnWalkTurnPlanner(xGaitSettings, visibilityGraphParameters, robotTimestamp, pointFootSnapperParameters,
                                                                      robotDataReceiver.getReferenceFrames(), null, registry));
       }
       plannerMap.put(FootstepPlannerType.A_STAR,
-                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(this.footstepPlannerParameters, xGaitSettings,
-                                                                                                    this.visibilityGraphParameters, graphicsListRegistry, registry));
+                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, expansion, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
+                                                                                                    visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -121,12 +121,12 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
    public void processFootstepPlannerParametersPacket(QuadrupedFootstepPlannerParametersPacket packet)
    {
-      this.footstepPlannerParameters.set(packet);
+      footstepPlannerParameters.set(packet);
    }
 
    public void processVisibilityGraphParametersPacket(VisibilityGraphsParametersPacket packet)
    {
-      this.visibilityGraphParameters.set(packet);
+      visibilityGraphParameters.set(packet);
    }
 
    public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
