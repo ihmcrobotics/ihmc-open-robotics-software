@@ -24,7 +24,8 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
       double bodyDistance = node.euclideanDistance(goalNode);
-      double minSteps = bodyDistance / parameters.getDesiredWalkingSpeed(xGaitSettings.getEndPhaseShift());
+      double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
+      double minSteps = bodyDistance / desiredSpeed;
 
       double yawHeuristicCost;
       if (bodyDistance < 1.0)

@@ -32,12 +32,10 @@ public class XGaitCost implements FootstepCost
          throw new RuntimeException("For some reason the feet movement is out of order.");
       }
 
-      double phaseShift = xGaitSettings.getEndPhaseShift();
-
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
 
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
-      double desiredSpeed = plannerParameters.getDesiredWalkingSpeed(phaseShift);
+      double desiredSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
 
       Vector2D desiredDistance = new Vector2D(durationBetweenSteps * desiredSpeed, 0.0);
 
