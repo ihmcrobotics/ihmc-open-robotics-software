@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.DataSetName;
 
 @Tag("footstep-planning-slow")
 public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataSetTest
@@ -37,7 +38,7 @@ public class MessagerPlanarRegionBipedalDataSetTest extends FootstepPlannerDataS
       MessagerPlanarRegionBipedalDataSetTest test = new MessagerPlanarRegionBipedalDataSetTest();
       test.setup();
       LogTools.info("Running test.");
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171215_214801_StairsUpDown");
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171215_214801_StairsUpDown);
       LogTools.info("Test finished.");
       test.tearDown();
 
