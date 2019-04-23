@@ -11,31 +11,27 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController">
 	<children>
-		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="186.0" prefWidth="562.0" vgap="5.0">
+		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="186.0" prefWidth="410.0" vgap="5.0">
 			<children>
 				<Label style="-fx-font-weight: bold" text="Robot control" />
-				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="1" />
-				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="2" />
+				<Button fx:id="homeAll" onAction="#homeAll" text="Home All" GridPane.rowIndex="4" />
+				<Button fx:id="freeze" onAction="#freeze" text="Freeze" GridPane.rowIndex="1" />
+				<Button fx:id="standPrep" onAction="#standPrep" text="Stand Prep" GridPane.rowIndex="3" />
+				<Button fx:id="shutdown" onAction="#shutdown" text="Shutdown" GridPane.rowIndex="2" />
 
-				<Label style="-fx-font-weight: bold" text="Support regions" GridPane.columnIndex="2" />
-				<Label prefHeight="17.0" prefWidth="135.0" text="Enable support regions" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-				<Label text="Support regions scale" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-				<Label style="-fx-font-weight: bold" text="REA" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
-				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+				<Label style="-fx-font-weight: bold" text="Support regions" GridPane.columnIndex="1" />
+				<Label prefHeight="17.0" prefWidth="135.0" text="Enable support regions" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<Label text="Support regions scale" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+				<CheckBox fx:id="enableSupportRegions" prefWidth="130.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+				<Label style="-fx-font-weight: bold" text="REA" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+				<Button fx:id="clearREA" onAction="#clearREA" text="Clear REA" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 			</children>
          <columnConstraints>
             <ColumnConstraints />
-            <ColumnConstraints />
             <ColumnConstraints maxWidth="149.0" minWidth="135.0" prefWidth="139.0" />
             <ColumnConstraints maxWidth="120.0" minWidth="106.0" prefWidth="112.0" />
-			 <ColumnConstraints />
-			 <ColumnConstraints />
-            <ColumnConstraints />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints />

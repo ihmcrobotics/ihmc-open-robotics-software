@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
@@ -15,30 +18,50 @@
     <children>
         <GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" vgap="5.0">
             <children>
-                <Button fx:id="placeWaypoints" onAction="#placeWaypoints" prefWidth="130.0" text="Place Waypoints" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Button fx:id="goToWaypoint" onAction="#goToWaypoint" prefWidth="130.0" text="Go To Waypoint" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Spinner fx:id="waypointIndex" amountToStepBy="1" editable="true" initialValue="0" max="500" min="0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" prefWidth="130.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <Label prefWidth="130.0" text="Going to waypoint: " GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                <TextField fx:id="remoteCurrentWaypointIndex" prefWidth="50.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                <Label prefWidth="130.0" text="State: " GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                <TextField fx:id="remoteCurrentState" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-            <Label prefHeight="17.0" text="Loop" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
-            <CheckBox fx:id="loopThroughWaypoints" onAction="#loopThroughWaypoints" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-            <Label text="Swing overs" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            <CheckBox fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-            <Label text="Plan review" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-            <CheckBox fx:id="operatorPlanReview" onAction="#operatorPlanReview" GridPane.columnIndex="2" GridPane.rowIndex="6" />
-            <Label text="Plan Review" GridPane.columnIndex="4" GridPane.rowIndex="3">
+                <Button fx:id="placeWaypoints" onAction="#placeWaypoints" text="Place Waypoints" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Button fx:id="goToWaypoint" onAction="#goToWaypoint" text="Go To Waypoint" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Spinner fx:id="waypointIndex" amountToStepBy="1" editable="true" initialValue="0" max="500" min="0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" text="Stop" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Label prefWidth="130.0" text="Going to waypoint: " GridPane.columnIndex="4" GridPane.rowIndex="4" />
+                <TextField fx:id="remoteCurrentWaypointIndex" prefWidth="50.0" GridPane.columnIndex="5" GridPane.rowIndex="4" />
+                <Label prefWidth="130.0" text="State: " GridPane.columnIndex="4" GridPane.rowIndex="5" />
+                <TextField fx:id="remoteCurrentState" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+            <Label text="Swing overs" GridPane.columnIndex="4" GridPane.rowIndex="6" />
+            <CheckBox fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+            <Label text="Plan review" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+            <CheckBox fx:id="operatorPlanReview" onAction="#operatorPlanReview" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+            <Label text="Plan Review" GridPane.columnIndex="4" GridPane.rowIndex="1">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
-            <Button fx:id="replan" onAction="#replan" text="Re-plan" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-            <Button fx:id="sendPlan" onAction="#sendPlan" text="Continue" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-            <Label text="Middle click waypoint to delete." GridPane.columnIndex="4" GridPane.rowIndex="5" />
-            <Label text="Right click waypoint to insert." GridPane.columnIndex="4" GridPane.rowIndex="6" />
-            <Label text="Right click to exit placement." GridPane.columnIndex="5" GridPane.rowIndex="5" />
+            <BorderPane GridPane.columnIndex="4" GridPane.rowIndex="3">
+               <right>
+                  <Button fx:id="sendPlan" onAction="#sendPlan" text="Continue" BorderPane.alignment="CENTER" />
+               </right>
+               <left>
+                  <Button fx:id="replan" onAction="#replan" text="Re-plan" BorderPane.alignment="CENTER" />
+               </left>
+            </BorderPane>
+            <Label text="Up-Down Exploration" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <CheckBox fx:id="upDownExploration" onAction="#upDownExploration" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <HBox GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <children>
+                  <Label text="Loop:">
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets top="3.0" />
+                     </HBox.margin>
+                  </Label>
+                  <CheckBox fx:id="loopThroughWaypoints" onAction="#loopThroughWaypoints">
+                     <HBox.margin>
+                        <Insets top="3.0" />
+                     </HBox.margin>
+                  </CheckBox>
+               </children>
+            </HBox>
             </children>
          <columnConstraints>
             <ColumnConstraints />
@@ -53,8 +76,8 @@
             <RowConstraints />
             <RowConstraints />
             <RowConstraints />
-            <RowConstraints minHeight="10.0" prefHeight="20.0" />
-            <RowConstraints minHeight="10.0" prefHeight="20.0" />
+            <RowConstraints minHeight="10.0" />
+            <RowConstraints minHeight="10.0" />
             <RowConstraints minHeight="10.0" prefHeight="20.0" />
             <RowConstraints />
             <RowConstraints />
