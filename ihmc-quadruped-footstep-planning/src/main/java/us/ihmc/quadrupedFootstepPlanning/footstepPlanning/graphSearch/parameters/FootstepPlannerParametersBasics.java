@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParameters
@@ -80,6 +81,36 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setTrotSpeed(other.getTrotSpeed());
       setPaceSpeed(other.getPaceSpeed());
       setProjectInsideDistance(other.getProjectInsideDistance());
+      setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
+      setCliffHeightToAvoid(other.getCliffHeightToAvoid());
+      setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
+      setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
+   }
+
+   default void set(QuadrupedFootstepPlannerParametersPacket other)
+   {
+      setMaximumStepReach(other.getMaximumStepReach());
+      setMaximumStepLength(other.getMaximumStepLength());
+      setMinimumStepLength(other.getMinimumStepLength());
+      setMaximumStepWidth(other.getMaximumStepWidth());
+      setMinimumStepWidth(other.getMinimumStepWidth());
+      setMinimumStepYaw(other.getMinimumStepYaw());
+      setMaximumStepYaw(other.getMaximumStepYaw());
+      setMaximumStepChangeZ(other.getMaximumStepChangeZ());
+      setBodyGroundClearance(other.getBodyGroundClearance());
+      setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
+      setYawWeight(other.getYawWeight());
+      setXGaitWeight(other.getXGaitWeight());
+      setCostPerStep(other.getCostPerStep());
+      setStepUpWeight(other.getStepUpWeight());
+      setStepDownWeight(other.getStepDownWeight());
+      setHeuristicsInflationWeight(other.getHeuristicsWeight());
+      setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
+      setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
+      setCrawlSpeed(other.getCrawlSpeed());
+      setTrotSpeed(other.getTrotSpeed());
+      setPaceSpeed(other.getPaceSpeed());
+      setProjectInsideDistance(other.getProjectionInsideDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
       setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
