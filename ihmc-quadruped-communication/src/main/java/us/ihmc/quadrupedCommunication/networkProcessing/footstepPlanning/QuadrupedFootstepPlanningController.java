@@ -20,6 +20,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.Visibility
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -53,6 +54,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoVisibilityGraphParameters visibilityGraphParameters;
+   private final YoFootstepPlannerParameters footstepPlannerParameters;
    private final AtomicLong robotTimestampNanos = new AtomicLong();
    private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -69,6 +71,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
       xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       this.visibilityGraphParameters = new YoVisibilityGraphParameters(visibilityGraphParameters, registry);
+      this.footstepPlannerParameters = new YoFootstepPlannerParameters(footstepPlannerParameters, registry);
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, xGaitSettings);
       if (robotDataReceiver != null)
@@ -81,8 +84,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       }
       plannerMap.put(FootstepPlannerType.A_STAR,
                      QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
-      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
-                                                                                                    visibilityGraphParameters, graphicsListRegistry, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(this.footstepPlannerParameters, xGaitSettings,
+                                                                                                    this.visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -114,6 +117,16 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(plannerKey);
          planner.setGroundPlane(message);
       }
+   }
+
+   public void processFootstepPlannerParametersPacket(QuadrupedFootstepPlannerParametersPacket packet)
+   {
+      this.footstepPlannerParameters.set(packet);
+   }
+
+   public void processVisibilityGraphParametersPacket(VisibilityGraphsParametersPacket packet)
+   {
+      this.visibilityGraphParameters.set(packet);
    }
 
    public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
