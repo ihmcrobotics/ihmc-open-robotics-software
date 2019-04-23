@@ -323,11 +323,7 @@ public class RemoteUIMessageConverter
       if (verbose)
          PrintTools.info("Told the toolbox to wake up.");
       
-      QuadrupedFootstepPlannerParametersPacket plannerParametersPacket = new QuadrupedFootstepPlannerParametersPacket();
-      FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
-
-      FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
-      plannerParametersPublisher.publish(plannerParametersPacket);
+      plannerParametersPublisher.publish(plannerParametersReference.get().getAsPacket());
 
       VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
       VisibilityGraphsParameters visibilityGraphsParameters = visibilityGraphParametersReference.get();

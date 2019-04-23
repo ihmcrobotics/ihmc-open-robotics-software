@@ -88,31 +88,57 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
    {
-      setMaximumStepReach(other.getMaximumStepReach());
-      setMaximumStepLength(other.getMaximumStepLength());
-      setMinimumStepLength(other.getMinimumStepLength());
-      setMaximumStepWidth(other.getMaximumStepWidth());
-      setMinimumStepWidth(other.getMinimumStepWidth());
-      setMinimumStepYaw(other.getMinimumStepYaw());
-      setMaximumStepYaw(other.getMaximumStepYaw());
-      setMaximumStepChangeZ(other.getMaximumStepChangeZ());
-      setBodyGroundClearance(other.getBodyGroundClearance());
-      setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
-      setYawWeight(other.getYawWeight());
-      setXGaitWeight(other.getXGaitWeight());
-      setCostPerStep(other.getCostPerStep());
-      setStepUpWeight(other.getStepUpWeight());
-      setStepDownWeight(other.getStepDownWeight());
-      setHeuristicsInflationWeight(other.getHeuristicsWeight());
-      setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
-      setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
-      setCrawlSpeed(other.getCrawlSpeed());
-      setTrotSpeed(other.getTrotSpeed());
-      setPaceSpeed(other.getPaceSpeed());
-      setProjectInsideDistance(other.getProjectionInsideDistance());
-      setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
-      setCliffHeightToAvoid(other.getCliffHeightToAvoid());
-      setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
-      setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
+      if (other.getMaximumStepReach() != other.NO_VALUE_DOUBLE)
+         setMaximumStepReach(other.getMaximumStepReach());
+      if (other.getMaximumStepLength() != other.NO_VALUE_DOUBLE)
+         setMaximumStepLength(other.getMaximumStepLength());
+      if (other.getMinimumStepLength() != other.NO_VALUE_DOUBLE)
+         setMinimumStepLength(other.getMinimumStepLength());
+      if (other.getMaximumStepWidth() != other.NO_VALUE_DOUBLE)
+         setMaximumStepWidth(other.getMaximumStepWidth());
+      if (other.getMinimumStepWidth() != other.NO_VALUE_DOUBLE)
+         setMinimumStepWidth(other.getMinimumStepWidth());
+      if (other.getMinimumStepYaw() != other.NO_VALUE_DOUBLE)
+         setMinimumStepYaw(other.getMinimumStepYaw());
+      if (other.getMaximumStepYaw() != other.NO_VALUE_DOUBLE)
+         setMaximumStepYaw(other.getMaximumStepYaw());
+      if (other.getMaximumStepChangeZ() != other.NO_VALUE_DOUBLE)
+         setMaximumStepChangeZ(other.getMaximumStepChangeZ());
+      if (other.getBodyGroundClearance() != other.NO_VALUE_DOUBLE)
+         setBodyGroundClearance(other.getBodyGroundClearance());
+      if (other.getDistanceHeuristicWeight() != other.NO_VALUE_DOUBLE)
+         setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
+      if (other.getYawWeight() != other.NO_VALUE_DOUBLE)
+         setYawWeight(other.getYawWeight());
+      if (other.getXGaitWeight() != other.NO_VALUE_DOUBLE)
+         setXGaitWeight(other.getXGaitWeight());
+      if (other.getCostPerStep() != other.NO_VALUE_DOUBLE)
+         setCostPerStep(other.getCostPerStep());
+      if (other.getStepUpWeight() != other.NO_VALUE_DOUBLE)
+         setStepUpWeight(other.getStepUpWeight());
+      if (other.getStepDownWeight() != other.NO_VALUE_DOUBLE)
+         setStepDownWeight(other.getStepDownWeight());
+      if (other.getHeuristicsWeight() != other.NO_VALUE_DOUBLE)
+         setHeuristicsInflationWeight(other.getHeuristicsWeight());
+      if (other.getMinXClearanceFromFoot() != other.NO_VALUE_DOUBLE)
+         setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
+      if (other.getMinYClearanceFromFoot() != other.NO_VALUE_DOUBLE)
+         setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
+      if (other.getCrawlSpeed() != other.NO_VALUE_DOUBLE)
+         setCrawlSpeed(other.getCrawlSpeed());
+      if (other.getTrotSpeed() != other.NO_VALUE_DOUBLE)
+         setTrotSpeed(other.getTrotSpeed());
+      if (other.getPaceSpeed() != other.NO_VALUE_DOUBLE)
+         setPaceSpeed(other.getPaceSpeed());
+      if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
+         setProjectInsideDistance(other.getProjectionInsideDistance());
+      if (other.getMinimumSurfaceInclineRadians() != other.NO_VALUE_DOUBLE)
+         setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
+      if (other.getCliffHeightToAvoid() != other.NO_VALUE_DOUBLE)
+         setCliffHeightToAvoid(other.getCliffHeightToAvoid());
+      if (other.getMinimumDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
+      if (other.getMinimumDistanceFromCliffTops() != other.NO_VALUE_DOUBLE)
+         setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
    }
 }
