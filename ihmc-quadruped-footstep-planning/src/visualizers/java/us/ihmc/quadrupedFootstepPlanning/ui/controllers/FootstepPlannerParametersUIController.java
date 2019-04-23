@@ -40,11 +40,7 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> maxStepChangeZ;
 
    @FXML
-   private Spinner<Double> crawlSpeed;
-   @FXML
-   private Spinner<Double> trotSpeed;
-   @FXML
-   private Spinner<Double> paceSpeed;
+   private Spinner<Double> maxWalkingSpeedMultiplier;
 
    @FXML
    private Spinner<Double> bodyGroundClearance;
@@ -130,9 +126,7 @@ public class FootstepPlannerParametersUIController
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-0.3, 0.0, 0.0, 0.05));
       maxStepChangeZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.05));
 
-      crawlSpeed.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.4, 0.0, 0.05));
-      trotSpeed.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.8, 0.0, 0.05));
-      paceSpeed.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
+      maxWalkingSpeedMultiplier.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.01));
 
       bodyGroundClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.05));
       minXClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
@@ -168,9 +162,7 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMinimumStepYaw(minStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumStepChangeZ(maxStepChangeZ.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindCrawlSpeed(crawlSpeed.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindTrotSpeed(trotSpeed.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindPaceSpeed(paceSpeed.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaxWalkingSpeedMultiplier(maxWalkingSpeedMultiplier.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindBodyGroundClearance(bodyGroundClearance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinXClearanceFromFoot(minXClearanceFromFoot.getValueFactory().valueProperty());
@@ -215,9 +207,7 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
       filePropertyHelper.saveProperty("maxStepChangeZ", maxStepChangeZ.getValue());
 
-      filePropertyHelper.saveProperty("crawlSpeed", crawlSpeed.getValue());
-      filePropertyHelper.saveProperty("trotSpeed", trotSpeed.getValue());
-      filePropertyHelper.saveProperty("paceSpeed", paceSpeed.getValue());
+      filePropertyHelper.saveProperty("maxWalkingSpeedMultiplier", maxWalkingSpeedMultiplier.getValue());
 
       filePropertyHelper.saveProperty("bodyGroundClearance", bodyGroundClearance.getValue());
       filePropertyHelper.saveProperty("minXClearanceFromFoot", minXClearanceFromFoot.getValue());
@@ -265,12 +255,8 @@ public class FootstepPlannerParametersUIController
       if ((value = filePropertyHelper.loadDoubleProperty("maxStepChangeZ")) != null)
          maxStepChangeZ.getValueFactory().setValue(value);
 
-      if ((value = filePropertyHelper.loadDoubleProperty("crawlSpeed")) != null)
-         crawlSpeed.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("trotSpeed")) != null)
-         trotSpeed.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("paceSpeed")) != null)
-         paceSpeed.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxWalkingSpeedMultiplier")) != null)
+         maxWalkingSpeedMultiplier.getValueFactory().setValue(value);
 
       if ((value = filePropertyHelper.loadDoubleProperty("bodyGroundClearance")) != null)
          bodyGroundClearance.getValueFactory().setValue(value);

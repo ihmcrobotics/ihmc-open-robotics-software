@@ -18,9 +18,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField maximumStepChangeZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepChangeZ, SettableFootstepPlannerParameters::setMaximumStepChangeZ);
    private final DoubleField bodyGroundClearance = new DoubleField(SettableFootstepPlannerParameters::getBodyGroundClearance, SettableFootstepPlannerParameters::setBodyGroundClearance);
 
-   private final DoubleField crawlSpeed = new DoubleField(SettableFootstepPlannerParameters::getCrawlSpeed, SettableFootstepPlannerParameters::setCrawlSpeed);
-   private final DoubleField trotSpeed = new DoubleField(SettableFootstepPlannerParameters::getTrotSpeed, SettableFootstepPlannerParameters::setTrotSpeed);
-   private final DoubleField paceSpeed = new DoubleField(SettableFootstepPlannerParameters::getPaceSpeed, SettableFootstepPlannerParameters::setPaceSpeed);
+   private final DoubleField maxWalkingSpeedMultiplier = new DoubleField(SettableFootstepPlannerParameters::getMaxWalkingSpeedMultiplier, SettableFootstepPlannerParameters::setMaxWalkingSpeedMultiplier);
 
    private final DoubleField projectInsideDistance = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistance, SettableFootstepPlannerParameters::setProjectInsideDistance);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
@@ -75,19 +73,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumStepLength);
    }
 
-   public void bidirectionalBindCrawlSpeed(Property<? extends Number> property)
+   public void bidirectionalBindMaxWalkingSpeedMultiplier(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, crawlSpeed);
-   }
-
-   public void bidirectionalBindPaceSpeed(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, paceSpeed);
-   }
-
-   public void bidirectionalBindTrotSpeed(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, trotSpeed);
+      bindFieldBidirectionalToNumberProperty(property, maxWalkingSpeedMultiplier);
    }
 
    public void bidirectionalBindCliffHeightToAvoid(Property<? extends Number> property)
