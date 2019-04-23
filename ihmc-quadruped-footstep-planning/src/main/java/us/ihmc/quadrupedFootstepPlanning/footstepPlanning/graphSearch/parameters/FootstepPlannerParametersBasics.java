@@ -40,6 +40,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinYClearanceFromFoot(double minYClearanceFromFoot);
 
+   void setMaxWalkingSpeedMultiplier(double multiplier);
+
    void setProjectInsideDistance(double projectionInsideDistance);
 
    void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
@@ -70,6 +72,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setHeuristicsInflationWeight(other.getHeuristicsInflationWeight());
       setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
+      setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
       setProjectInsideDistance(other.getProjectInsideDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
@@ -97,6 +100,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepChangeZ(other.getMaximumStepChangeZ());
       if (other.getBodyGroundClearance() != other.NO_VALUE_DOUBLE)
          setBodyGroundClearance(other.getBodyGroundClearance());
+      if (other.getMaxWalkingSpeedMultiplier() != other.NO_VALUE_DOUBLE)
+         setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
       if (other.getDistanceHeuristicWeight() != other.NO_VALUE_DOUBLE)
          setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
       if (other.getYawWeight() != other.NO_VALUE_DOUBLE)

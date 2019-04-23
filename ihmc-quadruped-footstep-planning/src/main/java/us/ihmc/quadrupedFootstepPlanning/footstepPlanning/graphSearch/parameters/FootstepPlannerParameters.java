@@ -152,6 +152,7 @@ public interface FootstepPlannerParameters
       packet.setMaximumStepYaw(getMaximumStepYaw());
       packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
       packet.setBodyGroundClearance(getBodyGroundClearance());
+      packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
       packet.setDistanceHeuristicWeight(getDistanceHeuristicWeight());
       packet.setYawWeight(getYawWeight());
       packet.setXGaitWeight(getXGaitWeight());

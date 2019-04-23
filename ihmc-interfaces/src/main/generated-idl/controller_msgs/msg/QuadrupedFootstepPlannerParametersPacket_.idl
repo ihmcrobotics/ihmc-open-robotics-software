@@ -58,11 +58,7 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double min_y_clearance_from_foot;
         @defaultValue(value=-11.1)
-        double crawl_speed;
-        @defaultValue(value=-11.1)
-        double trot_speed;
-        @defaultValue(value=-11.1)
-        double pace_speed;
+        double max_walking_speed_multiplier;
         @defaultValue(value=-11.1)
         double projection_inside_distance;
         @defaultValue(value=-11.1)
