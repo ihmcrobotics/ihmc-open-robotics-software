@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.pathPlanners.VisibilityGraphPathPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -14,12 +15,12 @@ public class VisibilityGraphWithAStarPlanner extends BodyPathAndFootstepPlannerW
 
    public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                           SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry,
-                                          YoVariableRegistry parentRegistry)
+                                          YoVariableRegistry parentRegistry, BipedalFootstepPlannerListener... listeners)
    {
       super(prefix, parameters, parentRegistry, graphicsListRegistry);
 
       waypointPathPlanner = new VisibilityGraphPathPlanner(parameters, visibilityGraphsParameters, parentRegistry);
       footstepPlanner = new BodyPathBasedAStarPlanner(prefix, bodyPathPlanner, parameters, footPolygons,
-                                                      parameters.getCostParameters().getAStarHeuristicsWeight(), registry);
+                                                      parameters.getCostParameters().getAStarHeuristicsWeight(), registry, listeners);
    }
 }

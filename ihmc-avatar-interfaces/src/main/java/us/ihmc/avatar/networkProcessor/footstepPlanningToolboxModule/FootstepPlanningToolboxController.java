@@ -34,12 +34,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.RosBasedPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.BodyCollisionNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.PlanarRegionBaseOfCliffAvoider;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
