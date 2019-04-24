@@ -114,13 +114,13 @@ public class PlanarRegionsListExamples
 
             double tiltAngle = EuclidCoreRandomTools.nextDouble(random, minTiltAngle, maxTiltAngle);
             if (random.nextDouble() > absentBlockPercentage)
-               generateSingleCiderBlock(generator,
-                                        cinderBlockSize + extrusionLength,
-                                        cinderBlockHeight + extrusionLength,
-                                        angleType,
-                                        axisType,
-                                        tiltAngle,
-                                        onlyGenerateTopOfBlock);
+               generateSingleCinderBlock(generator,
+                                         cinderBlockSize + extrusionLength,
+                                         cinderBlockHeight + extrusionLength,
+                                         angleType,
+                                         axisType,
+                                         tiltAngle,
+                                         onlyGenerateTopOfBlock);
 
             generator.translate(0.0, 0.0, -extraHeightVariation);
             generator.translate(0.0, cinderBlockSize, 0.0);
@@ -181,16 +181,16 @@ public class PlanarRegionsListExamples
       return generator.getPlanarRegionsList();
    }
 
-   public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
-                                               int axisType)
+   public static void generateSingleCinderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
+                                                int axisType)
    {
       double defaultTiltAngle = Math.toRadians(15.0);
       boolean onlyGenerateTopOfBlock = false;
-      generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType, defaultTiltAngle, onlyGenerateTopOfBlock);
+      generateSingleCinderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType, defaultTiltAngle, onlyGenerateTopOfBlock);
    }
 
-   public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
-                                               int axisType, double tiltAngle, boolean onlyGenerateTopOfBlock)
+   public static void generateSingleCinderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
+                                                int axisType, double tiltAngle, boolean onlyGenerateTopOfBlock)
    {
       double angle = 0;
       switch (angleType)
