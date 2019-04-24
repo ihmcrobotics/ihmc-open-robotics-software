@@ -193,18 +193,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                }
             }
 
-            RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            Quaternion orientation = new Quaternion();
-
-            if (planarRegion != null)
-            {
-               planarRegion.getTransformToWorld(transformToWorld);
-               transformToWorld.getRotation(orientation);
-            }
-
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint, orientation);
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint, new Quaternion());
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
