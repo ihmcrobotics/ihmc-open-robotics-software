@@ -30,6 +30,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -56,6 +57,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
@@ -66,6 +68,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -139,6 +142,7 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
+      continuousStepGenerator.setFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       inPlaceStepWidth = steppingParameters.getInPlaceWidth();
@@ -357,6 +361,34 @@ public class StepGeneratorJavaFXController
       MeshView meshView = new MeshView(mesh);
       meshView.setMaterial(new PhongMaterial(footColor));
       return meshView;
+   }
+
+   private final Point3D bodyCenter = new Point3D();
+
+   private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly solePose)
+   {
+      double groundOffset = 0.2;
+      double bodyRadius = 0.5;
+
+      bodyCenter.set(solePose.getPosition());
+      bodyCenter.addZ(bodyRadius + groundOffset);
+
+      PlanarRegionsList planarRegionsList = latestPlanarRegions.get();
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         Point3D closestPoint = PlanarRegionTools.closestPointOnPlane(bodyCenter, planarRegionsList.getPlanarRegion(i));
+         if(closestPoint == null)
+            continue;
+
+         double distance = closestPoint.distance(bodyCenter);
+         if(distance < bodyRadius)
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    private void processToggleFlamingoMode(RobotSide robotSide, ButtonState state)
