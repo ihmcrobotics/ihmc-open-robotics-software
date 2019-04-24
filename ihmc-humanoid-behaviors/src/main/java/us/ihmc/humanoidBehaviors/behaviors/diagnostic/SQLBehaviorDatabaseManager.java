@@ -25,6 +25,7 @@ public class SQLBehaviorDatabaseManager
    private final String database_host;
    private final String database_port;
    private final String database_name;
+   private int foo = 0;
 
    ConcurrentLinkedQueue<PreparedStatement> statements = new ConcurrentLinkedQueue<PreparedStatement>();
 
