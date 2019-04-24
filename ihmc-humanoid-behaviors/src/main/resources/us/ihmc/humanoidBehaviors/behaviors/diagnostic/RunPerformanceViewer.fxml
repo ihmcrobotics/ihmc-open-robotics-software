@@ -21,11 +21,11 @@
                      <children>
                         <TableView fx:id="runsTable" prefHeight="120.0" prefWidth="556.0">
                           <columns>
-                            <TableColumn prefWidth="75.0" text="Run" />
-                            <TableColumn prefWidth="75.0" text="Operator" />
-                              <TableColumn prefWidth="75.0" text="Task" />
-                              <TableColumn prefWidth="75.0" text="Success" />
-                              <TableColumn prefWidth="255.0" text="Notes" />
+                            <TableColumn fx:id="runTableColumn" prefWidth="75.0" text="Run" />
+                            <TableColumn fx:id="operatorTableColumn" prefWidth="75.0" text="Operator" />
+                              <TableColumn fx:id="taskTableColumn" prefWidth="75.0" text="Task" />
+                              <TableColumn fx:id="successTableColumn" prefWidth="75.0" text="Success" />
+                              <TableColumn fx:id="notesTableColumn" prefWidth="255.0" text="Notes" />
                           </columns>
                         </TableView>
                      </children>

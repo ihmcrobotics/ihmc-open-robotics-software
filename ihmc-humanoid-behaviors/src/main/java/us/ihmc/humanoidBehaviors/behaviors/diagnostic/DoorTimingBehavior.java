@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Operator;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Run;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Task;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -510,8 +509,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
          currentTask = timingBehavior.dataBase.saveTask("Walk Through Door Behavior");
 
       }
-      
-      currentRun = timingBehavior.dataBase.saveRun(timingBehavior.dataBase.new Run(operator.operatorID, currentTask.taskID));
+
+      Run run = new Run(operator.operatorID, currentTask.taskID);
+      currentRun = timingBehavior.dataBase.saveRun(run);
 
       //save start time
    }

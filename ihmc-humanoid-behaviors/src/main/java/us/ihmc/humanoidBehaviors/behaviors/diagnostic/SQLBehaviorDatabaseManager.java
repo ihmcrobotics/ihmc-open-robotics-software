@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SQLBehaviorDatabaseManager
@@ -30,8 +31,8 @@ public class SQLBehaviorDatabaseManager
 
    public SQLBehaviorDatabaseManager()
    {
-      this.databaseUsername = "shadylady";
-      this.databasePassword = "ShadyLady";
+      this.databaseUsername = "behaviors";
+      this.databasePassword = "behaviors";
       this.database_host = "10.7.4.48";
       this.database_port = "32769";
       this.database_name = "shadylady";
@@ -63,7 +64,6 @@ public class SQLBehaviorDatabaseManager
          connected = true;
          Runtime.getRuntime().addShutdownHook(new Thread(SQLBehaviorDatabaseManager.this::shutdown));
       }
-
    }
 
    public boolean isConnected()
@@ -93,7 +93,6 @@ public class SQLBehaviorDatabaseManager
       }
 
       System.out.println("stopping thread");
-
    }
 
    private boolean sqlUpdate(String statement)
@@ -186,7 +185,8 @@ public class SQLBehaviorDatabaseManager
       try
       {
 
-         PreparedStatement st = databaseConnection.prepareStatement("INSERT INTO runs (operator,task,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING id;");
+         PreparedStatement st = databaseConnection
+               .prepareStatement("INSERT INTO runs (operator,task,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING id;");
          st.setInt(1, run.operatorID);
          st.setInt(2, run.taskID);
          st.setBoolean(3, run.successful);
@@ -209,7 +209,6 @@ public class SQLBehaviorDatabaseManager
          e.printStackTrace();
       }
       return null;
-
    }
 
    public boolean saveRunEvent(RunEvent run)
@@ -217,7 +216,8 @@ public class SQLBehaviorDatabaseManager
       try
       {
 
-         PreparedStatement st = databaseConnection.prepareStatement("INSERT INTO run_events (run_id,event_name,event_time_in_seconds,is_successful) VALUES (?,?,?,?)");
+         PreparedStatement st = databaseConnection
+               .prepareStatement("INSERT INTO run_events (run_id,event_name,event_time_in_seconds,is_successful) VALUES (?,?,?,?)");
          st.setInt(1, run.runID);
          st.setString(2, run.eventName);
          st.setFloat(3, run.runTime);
@@ -232,7 +232,6 @@ public class SQLBehaviorDatabaseManager
       }
 
       return false;
-
    }
 
    public Operator getOperator(String name)
@@ -257,7 +256,6 @@ public class SQLBehaviorDatabaseManager
       {
          System.err.println(e.getClass().getName() + ": ");
          e.printStackTrace();
-
       }
       return null;
    }
@@ -282,7 +280,6 @@ public class SQLBehaviorDatabaseManager
       {
          System.err.println(e.getClass().getName() + ": ");
          e.printStackTrace();
-
       }
       return returnValue;
    }
@@ -309,7 +306,6 @@ public class SQLBehaviorDatabaseManager
       {
          System.err.println(e.getClass().getName() + ": ");
          e.printStackTrace();
-
       }
       return null;
    }
@@ -341,7 +337,38 @@ public class SQLBehaviorDatabaseManager
       {
          System.err.println(e.getClass().getName() + ": ");
          e.printStackTrace();
+      }
+      return null;
+   }
 
+   public ArrayList<Run> getAllRuns()
+   {
+      Statement statement = null;
+      ArrayList<Run> runs = new ArrayList<>();
+      try
+      {
+         statement = databaseConnection.createStatement();
+
+         ResultSet rs = statement.executeQuery("SELECT * FROM runs;");
+         while (rs.next())
+         {
+            Run run = new Run(rs.getInt("operator"), rs.getInt("task"));
+            run.runID = rs.getInt("id");
+            run.successful = rs.getBoolean("is_successful");
+            run.notes = rs.getString("notes");
+            run.logFile = rs.getString("log_file");
+            run.date = rs.getObject("date", LocalDate.class);
+            run.time = rs.getObject("time", LocalTime.class);
+            runs.add(run);
+         }
+         rs.close();
+         statement.close();
+         return runs;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
       }
       return null;
    }
@@ -351,8 +378,9 @@ public class SQLBehaviorDatabaseManager
       PreparedStatement st = null;
       try
       {
-         st = databaseConnection.prepareStatement("UPDATE runs set " + "operator = ?, " + "task = ?, " + "is_successful = ?, " + "notes = ?, "
-               + "log_file = ?, " + "date = ?," + "time = ? " + " WHERE id = ?;");
+         st = databaseConnection.prepareStatement(
+               "UPDATE runs set " + "operator = ?, " + "task = ?, " + "is_successful = ?, " + "notes = ?, " + "log_file = ?, " + "date = ?," + "time = ? "
+                     + " WHERE id = ?;");
          st.setInt(1, run.operatorID);
          st.setInt(2, run.taskID);
          st.setBoolean(3, run.successful);
@@ -386,26 +414,6 @@ public class SQLBehaviorDatabaseManager
       public String name;
    }
 
-   public class Run
-   {
-      public Run(int operatorID, int TaskID)
-      {
-         this.operatorID = operatorID;
-
-         this.taskID = TaskID;
-         date = LocalDate.now();
-         time = LocalTime.now();
-      }
-
-      public int runID;
-      public int operatorID;
-      public int taskID;
-      public boolean successful;
-      public String notes;
-      public String logFile;
-      public LocalDate date;
-      public LocalTime time;
-   }
 
    public class RunEvent
    {
@@ -434,6 +442,8 @@ public class SQLBehaviorDatabaseManager
       public String name;
    }
 
+
+
    public static void main(String[] args)
    {
       SQLBehaviorDatabaseManager test = new SQLBehaviorDatabaseManager();
@@ -451,7 +461,7 @@ public class SQLBehaviorDatabaseManager
 
       //make a task
       System.out.println("adding in Run 1");
-      Run newRun = test.new Run(returnedOperator.operatorID, returnedTask.taskID);
+      Run newRun = new Run(returnedOperator.operatorID, returnedTask.taskID);
       newRun.notes = "test run";
       newRun.logFile = "test run log number";
 
@@ -475,7 +485,5 @@ public class SQLBehaviorDatabaseManager
       RunEvent event2 = test.new RunEvent(lastRun.runID, "plan to door", 9, true);
 
       test.saveRunEvent(event2);
-
    }
-
 }
