@@ -50,14 +50,16 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       else
       {
          double x = xIndex * FootstepNode.gridSizeXY + projectionTranslation.getX();
+         double xTranslated = x + projectionTranslation.getX();
          double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
-         double z = highestRegion.getPlaneZGivenXY(x, y);
+         double yTranslated = y + projectionTranslation.getY();
+         double z = highestRegion.getPlaneZGivenXY(xTranslated, yTranslated);
 
          Vector3D surfaceNormal = new Vector3D();
          highestRegion.getNormal(surfaceNormal);
 
          RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
-         setTranslationSettingZAndPreservingXAndY(x, y, z, snapTransform);
+         setTranslationSettingZAndPreservingXAndY(x, y, xTranslated, yTranslated, z, snapTransform);
 
          return new FootstepNodeSnapData(snapTransform);
       }
@@ -75,16 +77,6 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    }
 
 
-   private static void setTranslationSettingZAndPreservingXAndY(double x, double y, double z, RigidBodyTransform transformToReturn)
-   {
-      Vector3D newTranslation = new Vector3D(x, y, 0.0);
-      transformToReturn.transform(newTranslation);
-      newTranslation.scale(-1.0);
-      newTranslation.add(x, y, z);
-
-      transformToReturn.setTranslation(newTranslation);
-   }
-
    private static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3D surfaceNormal)
    {
       Vector3D xAxis = new Vector3D();
@@ -99,5 +91,15 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
       transformToReturn.setRotation(rotationMatrix);
       return transformToReturn;
+   }
+
+   private static void setTranslationSettingZAndPreservingXAndY(double x, double y, double xTranslated, double yTranslated, double z, RigidBodyTransform transformToReturn)
+   {
+      Vector3D newTranslation = new Vector3D(x, y, 0.0);
+      transformToReturn.transform(newTranslation);
+      newTranslation.scale(-1.0);
+      newTranslation.add(xTranslated, yTranslated, z);
+
+      transformToReturn.setTranslation(newTranslation);
    }
 }
