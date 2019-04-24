@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -13,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -20,6 +20,13 @@ public class PolygonWiggler
 {
    private static final boolean DEBUG = false;
    private static final boolean coldStart = true;
+
+   /** Weight associated with moving into the polygon. */
+   private static final double polygonWeight = 1.0e6;
+   /** Regularization weight preferring a zero solution. */
+   private static final double regularization = 1.0e-10;
+   /** Weight associated with moving the polygon. */
+   private static final double moveWeight = 1.0;
 
    /**
     * Returns a transform that will move the given polygon into the convex hull of a planar region.
@@ -100,6 +107,7 @@ public class PolygonWiggler
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
       Point2DReadOnly pointToRotateAbout = polygonToWiggle.getCentroid();
 
+      // This creates inequality constraints for points to lie inside the desired polygon.
       DenseMatrix64F A = new DenseMatrix64F(0);
       DenseMatrix64F b = new DenseMatrix64F(0);
       convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside);
@@ -107,7 +115,7 @@ public class PolygonWiggler
       int constraintsPerPoint = A.getNumRows();
 
       int boundConstraints = 6;
-      DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3);
+      DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3 + constraintsPerPoint * numberOfPoints);
       DenseMatrix64F b_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
       // add limits on allowed rotation and translation
       A_full.set(constraintsPerPoint * numberOfPoints , 0, 1.0);
@@ -122,6 +130,20 @@ public class PolygonWiggler
       b_full.set(constraintsPerPoint * numberOfPoints + 4, parameters.maxYaw);
       A_full.set(constraintsPerPoint * numberOfPoints + 5, 2, -1.0);
       b_full.set(constraintsPerPoint * numberOfPoints + 5, -parameters.minYaw);
+
+      // The inequality constraints of form
+      // Ax <= b
+      // are converted to new constraints with a new optimization vector s:
+      // Ax - s - b == 0.0
+      // s <= 0
+      // The equality constraint will be converted to an objective causing the wiggler to do the best it can instead of failing when the wiggle is not possible.
+      DenseMatrix64F Aeq = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
+      DenseMatrix64F beq = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, 1);
+      DenseMatrix64F indentity = new DenseMatrix64F(constraintsPerPoint * numberOfPoints, constraintsPerPoint * numberOfPoints);
+      CommonOps.setIdentity(indentity);
+      CommonOps.insert(indentity, A_full, 0, 3);
+      CommonOps.scale(-1.0, indentity);
+      CommonOps.insert(indentity, Aeq, 0, 3);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -141,36 +163,52 @@ public class PolygonWiggler
          CommonOps.changeSign(b_new);
          CommonOps.add(b, b_new, b_new);
 
-         CommonOps.insert(A_new, A_full, constraintsPerPoint * i, 0);
-         CommonOps.insert(b_new, b_full, constraintsPerPoint * i, 0);
+         CommonOps.insert(A_new, Aeq, constraintsPerPoint * i, 0);
+         CommonOps.insert(b_new, beq, constraintsPerPoint * i, 0);
       }
 
-      DenseMatrix64F costMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.setIdentity(costMatrix);
-      costMatrix.set(2, 2, parameters.rotationWeight);
-      DenseMatrix64F costVector = new DenseMatrix64F(3, 1);
-      CommonOps.fill(costVector, 0.0);
+      // Convert the inequality constraint for being inside the polygon to an objective.
+      DenseMatrix64F costMatrix = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
+      CommonOps.multInner(Aeq, costMatrix);
+      DenseMatrix64F costVector = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 1);
+      CommonOps.multTransA(Aeq, beq, costVector);
+      CommonOps.changeSign(costVector);
+      CommonOps.scale(polygonWeight, costMatrix);
+      CommonOps.scale(polygonWeight, costVector);
+
+      // Add regularization
+      indentity.reshape(3 + constraintsPerPoint * numberOfPoints, 3 + constraintsPerPoint * numberOfPoints);
+      CommonOps.setIdentity(indentity);
+      CommonOps.scale(regularization, indentity);
+      CommonOps.add(costMatrix, indentity, costMatrix);
+
+      // Add movement weight
+      costMatrix.add(0, 0, moveWeight);
+      costMatrix.add(1, 1, moveWeight);
+      costMatrix.add(2, 2, moveWeight * parameters.rotationWeight);
 
       QuadProgSolver solver = new QuadProgSolver();
-      DenseMatrix64F Aeq = new DenseMatrix64F(0, 3);
-      DenseMatrix64F beq = new DenseMatrix64F(0, 3);
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
+      DenseMatrix64F result = new DenseMatrix64F(3 + constraintsPerPoint * numberOfPoints, 1);
+      Aeq = new DenseMatrix64F(0, 3 + constraintsPerPoint * numberOfPoints);
+      beq = new DenseMatrix64F(0, 3 + constraintsPerPoint * numberOfPoints);
       try
       {
          int iterations = solver.solve(costMatrix, costVector, Aeq, beq, A_full, b_full, result, coldStart);
          if (DEBUG)
          {
-            PrintTools.info("Iterations: " + iterations);
-            PrintTools.info("Result: " + result);
+            LogTools.info("Iterations: " + iterations);
+            LogTools.info("Result: " + result);
          }
       }
       catch (Exception e)
       {
+         e.printStackTrace();
          return null;
       }
 
       if (Double.isInfinite(solver.getCost()))
       {
+         LogTools.info("Could not wiggle!");
          return null;
       }
 

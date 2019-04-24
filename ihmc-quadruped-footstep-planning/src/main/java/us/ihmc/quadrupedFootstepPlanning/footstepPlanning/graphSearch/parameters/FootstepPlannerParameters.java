@@ -1,12 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
+import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.robotics.trajectories.CubicSplineCurveGenerator;
 
 public interface FootstepPlannerParameters
 {
@@ -49,18 +47,10 @@ public interface FootstepPlannerParameters
 
    double getMinYClearanceFromFoot();
 
-
-   default double getDesiredWalkingSpeed(double phase)
+   default double getMaxWalkingSpeedMultiplier()
    {
-      if (phase < 90)
-         return InterpolationTools.hermiteInterpolate(getPaceSpeed(), getCrawlSpeed(), phase / 90.0);
-      else
-         return InterpolationTools.hermiteInterpolate(getCrawlSpeed(), getTrotSpeed(), (phase - 90.0) / 90.0);
+      return 0.8;
    }
-
-   double getCrawlSpeed();
-   double getTrotSpeed();
-   double getPaceSpeed();
 
    /**
     * Distance which a foothold is projected into planar region. Should be a positive value,
@@ -147,5 +137,37 @@ public interface FootstepPlannerParameters
             return true;
          }
       };
+   }
+
+
+   default QuadrupedFootstepPlannerParametersPacket getAsPacket()
+   {
+      QuadrupedFootstepPlannerParametersPacket packet = new QuadrupedFootstepPlannerParametersPacket();
+      packet.setMaximumStepReach(getMaximumStepReach());
+      packet.setMaximumStepLength(getMaximumStepLength());
+      packet.setMinimumStepLength(getMinimumStepLength());
+      packet.setMaximumStepWidth(getMaximumStepWidth());
+      packet.setMinimumStepWidth(getMinimumStepWidth());
+      packet.setMinimumStepYaw(getMinimumStepYaw());
+      packet.setMaximumStepYaw(getMaximumStepYaw());
+      packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
+      packet.setBodyGroundClearance(getBodyGroundClearance());
+      packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
+      packet.setDistanceHeuristicWeight(getDistanceHeuristicWeight());
+      packet.setYawWeight(getYawWeight());
+      packet.setXGaitWeight(getXGaitWeight());
+      packet.setCostPerStep(getCostPerStep());
+      packet.setStepUpWeight(getStepUpWeight());
+      packet.setStepDownWeight(getStepDownWeight());
+      packet.setHeuristicsWeight(getHeuristicsInflationWeight());
+      packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
+      packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
+      packet.setProjectionInsideDistance(getProjectInsideDistance());
+      packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
+      packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
+      packet.setMinimumDistanceFromCliffBottoms(getMinimumDistanceFromCliffBottoms());
+      packet.setMinimumDistanceFromCliffTops(getMinimumDistanceFromCliffTops());
+
+      return packet;
    }
 }

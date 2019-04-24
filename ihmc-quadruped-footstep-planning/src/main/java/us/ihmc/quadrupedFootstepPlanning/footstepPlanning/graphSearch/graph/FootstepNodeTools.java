@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -61,11 +62,12 @@ public class FootstepNodeTools
    /**
     * Computes the snap transform which snaps the given node to the given position
     */
-   public static RigidBodyTransform computeSnapTransform(int xIndex, int yIndex, Point3DReadOnly footstepPosition)
+   public static RigidBodyTransform computeSnapTransform(int xIndex, int yIndex, Point3DReadOnly footstepPosition, Orientation3DReadOnly footstepOrientation)
    {
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       RigidBodyTransform stepTransform = new RigidBodyTransform();
       stepTransform.setTranslation(footstepPosition);
+      stepTransform.setRotation(footstepOrientation);
 
       getNodeTransformToWorld(xIndex, yIndex, snapTransform);
       snapTransform.preMultiplyInvertThis(stepTransform);
