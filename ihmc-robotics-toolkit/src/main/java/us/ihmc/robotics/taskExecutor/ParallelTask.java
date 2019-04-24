@@ -4,18 +4,35 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ParallelTask<T> implements Task
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+public class ParallelTask<T> implements State
 {
    // TODO convert to ObjectObjectMap<T, TaskExecutor>
    private final Map<T, TaskExecutor> executorMap = new LinkedHashMap<T, TaskExecutor>();
    private final ArrayList<TaskExecutor> executors = new ArrayList<>();
+   private final StateMachineClock clock;
 
-   public void submit(T executorKey, Task task)
+   public ParallelTask(YoDouble yotime)
+   {
+      clock = StateMachineClock.clock(yotime);
+   }
+   
+   //the new constructor with yoTime should be used.
+   @Deprecated
+   public ParallelTask()
+   {
+      clock = StateMachineClock.dummyClock();
+   }
+   
+   public void submit(T executorKey, State task)
    {
       TaskExecutor executor = executorMap.get(executorKey);
       if (executor == null)
       {
-         executor = new TaskExecutor();
+         executor = new TaskExecutor(clock);
          executorMap.put(executorKey, executor);
          executors.add(executor);
       }
@@ -32,7 +49,7 @@ public class ParallelTask<T> implements Task
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (int i = 0; i < executors.size(); i++)
       {
@@ -41,7 +58,7 @@ public class ParallelTask<T> implements Task
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       for (int i = 0; i < executors.size(); i++)
       {
@@ -50,13 +67,13 @@ public class ParallelTask<T> implements Task
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       // empty
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       for (int i = 0; i < executors.size(); i++)
       {

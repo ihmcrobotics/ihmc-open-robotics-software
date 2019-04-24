@@ -104,9 +104,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       BehaviorAction locateDoor = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Locating Door State");
 
          }
@@ -142,9 +142,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       {
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
 
             publishTextToSpeech("Timer Entering Planning To Door State");
 
@@ -179,9 +179,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       BehaviorAction walkingToDoor = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Walking To Door State");
 
          }
@@ -242,15 +242,15 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       {
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
             transitionToWalking = false;
             transitionToManipulation = false;
-            super.doTransitionIntoAction();
+            super.onEntry();
          }
 
          @Override
-         public void doAction()
+         public void doAction(double timeInState)
          {
 
             if (timingBehavior.footstepDataListMessage.get() != null)
@@ -272,7 +272,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                transitionToManipulation = true;
             }
 
-            super.doAction();
+            super.doAction(timeInState);
          }
 
          @Override
@@ -293,9 +293,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       BehaviorAction movingArm = new BehaviorAction(sleepBehavior)
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             sleepBehavior.setSleepTime(armTrajectoryTime-0.5);
             timingBehavior.clean();
             publishTextToSpeech("Timer Entering OpeningDoor State");
@@ -355,15 +355,15 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       {
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
             transitionToWalking = false;
             transitionToManipulation = false;
-            super.doTransitionIntoAction();
+            super.onEntry();
          }
 
          @Override
-         public void doAction()
+         public void doAction(double timeInState)
          {
 
             if (timingBehavior.footstepDataListMessage.get() != null)
@@ -386,7 +386,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                transitionToManipulation = true;
             }
 
-            super.doAction();
+            super.doAction(timeInState);
          }
 
          @Override
@@ -406,9 +406,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
       BehaviorAction walkingThroughDoor = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Walking Through Door State");
 
          }
@@ -483,7 +483,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
 
       //if operator transition from open door to go through door else transition to prepair to enter door
       factory.addState(DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION, movingArm);
-      factory.addTransition(DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION, DoorTimingBehaviorStates.TRANSITION_THROUGH_DOOR, t -> movingArm.isDone());
+      factory.addTransition(DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION, DoorTimingBehaviorStates.TRANSITION_THROUGH_DOOR, t -> movingArm.isDone(Double.NaN));
 
       factory.addStateAndDoneTransition(DoorTimingBehaviorStates.GO_THROUGH_DOOR, walkingThroughDoor, DoorTimingBehaviorStates.TRANSITION_THROUGH_DOOR);
 

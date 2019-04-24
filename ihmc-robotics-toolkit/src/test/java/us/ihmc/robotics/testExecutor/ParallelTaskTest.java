@@ -5,9 +5,11 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.robotics.taskExecutor.NullTask;
 import us.ihmc.robotics.taskExecutor.ParallelTask;
 import us.ihmc.robotics.taskExecutor.TaskExecutor;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ParallelTaskTest
 {
@@ -15,6 +17,7 @@ public class ParallelTaskTest
    @Test
    public void testOneSerialTask()
    {
+
       TaskExecutor taskExecutor = new TaskExecutor();
       ParallelTask<ParallelTaskKey> parallelTask = new ParallelTask<ParallelTaskKey>();
 

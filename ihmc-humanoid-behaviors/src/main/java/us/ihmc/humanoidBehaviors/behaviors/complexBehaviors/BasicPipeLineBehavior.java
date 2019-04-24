@@ -28,7 +28,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final GoHomeBehavior armGoHomeLeftBehavior;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    public enum BasicStates
    {
@@ -41,7 +41,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
                                 HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       enableBehaviorOnlyLidarBehavior = new EnableLidarBehavior(robotName, ros2Node);
       clearLidarBehavior = new ClearLidarBehavior(robotName, ros2Node);
       walkToLocationBehavior = new WalkToLocationBehavior(robotName, ros2Node, fullRobotModel,
@@ -87,10 +87,10 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          }
 
          @Override
-         public void doTransitionOutOfAction()
+         public void onExit()
          {
 
-            super.doTransitionOutOfAction();
+            super.onExit();
             currentState = BasicStates.BEHAVIOR_COMPLETE;
 
          }

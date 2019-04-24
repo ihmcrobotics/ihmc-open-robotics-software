@@ -2,6 +2,10 @@ package us.ihmc.robotics.taskExecutor;
 
 import java.util.List;
 
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 /**
  * Block diagram representation of a PipeLine:
  * <pre>
@@ -57,8 +61,25 @@ public class PipeLine<T>
 {
    private static final boolean DEBUG = false;
    /** The master TaskExecutor is used to execute the different stages sequentially. */
-   private final TaskExecutor masterTaskExecutor = new TaskExecutor();
+   private final TaskExecutor masterTaskExecutor;
    private final NullTask nullTask = new NullTask();
+   private final StateMachineClock clock;
+   private final YoDouble yoTime;
+
+   public PipeLine(YoDouble yoTime)
+   {
+      this.yoTime = yoTime;
+      clock = StateMachineClock.clock(yoTime);
+      masterTaskExecutor = new TaskExecutor(clock);
+   }
+
+   @Deprecated
+   public PipeLine()
+   {
+      yoTime = null;
+      clock = StateMachineClock.dummyClock();
+      masterTaskExecutor = new TaskExecutor(clock);
+   }
 
    /**
     * Create a new stage in the master TaskExecutor.
@@ -72,7 +93,7 @@ public class PipeLine<T>
    /**
     * Submit a new single Task stage that will be executed in a new stage.
     */
-   public void submitSingleTaskStage(Task singleTaskStage)
+   public void submitSingleTaskStage(State singleTaskStage)
    {
       if (DEBUG)
          System.out.println(getClass().getSimpleName() + ": new task submitted. Type: " + singleTaskStage.getClass().getSimpleName());
@@ -94,7 +115,7 @@ public class PipeLine<T>
     * @param taskToParallelize
     */
    @SuppressWarnings("unchecked")
-   public void submitTaskForPallelPipesStage(T executorKey, Task taskToParallelize)
+   public void submitTaskForPallelPipesStage(T executorKey, State taskToParallelize)
    {
       ParallelTask<T> lastParallelTask;
       if (masterTaskExecutor.getLastTask() instanceof ParallelTask)
@@ -111,7 +132,10 @@ public class PipeLine<T>
          // Thus, create a new stage in the master TaskExecutor for a new series of parallel tasks.
 
          // Create a new stage of parallel tasks.
-         lastParallelTask = new ParallelTask<T>(); //generates garbage, be careful when using in a realtime setting
+         if (yoTime != null)
+            lastParallelTask = new ParallelTask<T>(yoTime); //generates garbage, be careful when using in a realtime setting
+         else
+            lastParallelTask = new ParallelTask<T>(); //generates garbage, be careful when using in a realtime setting
 
          // Submit a new stage to the master TaskExecutor
          submitSingleTaskStage(lastParallelTask);
@@ -141,28 +165,27 @@ public class PipeLine<T>
       masterTaskExecutor.clearAllExceptCurrent();
    }
 
-   
-//    DISABLED: deque.get() does not exist except in the 1.5 compatibility version for no good reason
-//   /**
-//    * Clear all the slave TaskExecutors associated with the given executorKey.
-//    * @param executorKey
-//    */
-//   public void clearAll(T executorKey)
-//   {
-//      ArrayDeque<Task> stageQueue = masterTaskExecutor.getTaskQueue();
-//      
-//      
-//      for (int i = 0; i < stageQueue.size(); i++)
-//      {
-//         Task stage = stageQueue.get(i);
-//         if (stage instanceof ParallelTask<?>)
-//         {
-//            @SuppressWarnings("unchecked")
-//            ParallelTask<T> stageOfParallelTasks = (ParallelTask<T>) stage;
-//            stageOfParallelTasks.clear(executorKey);
-//         }
-//      }
-//   }
+   //    DISABLED: deque.get() does not exist except in the 1.5 compatibility version for no good reason
+   //   /**
+   //    * Clear all the slave TaskExecutors associated with the given executorKey.
+   //    * @param executorKey
+   //    */
+   //   public void clearAll(T executorKey)
+   //   {
+   //      ArrayDeque<Task> stageQueue = masterTaskExecutor.getTaskQueue();
+   //      
+   //      
+   //      for (int i = 0; i < stageQueue.size(); i++)
+   //      {
+   //         Task stage = stageQueue.get(i);
+   //         if (stage instanceof ParallelTask<?>)
+   //         {
+   //            @SuppressWarnings("unchecked")
+   //            ParallelTask<T> stageOfParallelTasks = (ParallelTask<T>) stage;
+   //            stageOfParallelTasks.clear(executorKey);
+   //         }
+   //      }
+   //   }
 
    /**
     * Clear the slave TaskExecutor associated with the given executorKey in the current stage.
@@ -170,7 +193,7 @@ public class PipeLine<T>
     */
    public void clear(T executorKey)
    {
-      Task currentStage = masterTaskExecutor.getCurrentTask();
+      State currentStage = masterTaskExecutor.getCurrentTask();
       if (currentStage instanceof ParallelTask<?>)
       {
          @SuppressWarnings("unchecked")
@@ -179,7 +202,7 @@ public class PipeLine<T>
       }
    }
 
-   public void submitAll(List<Task> tasks)
+   public void submitAll(List<State> tasks)
    {
       for (int i = 0; i < tasks.size(); i++)
       {
@@ -187,7 +210,7 @@ public class PipeLine<T>
       }
    }
 
-   public void submitAll(T executorKey, List<Task> tasks)
+   public void submitAll(T executorKey, List<State> tasks)
    {
       for (int i = 0; i < tasks.size(); i++)
       {
@@ -201,7 +224,7 @@ public class PipeLine<T>
       return masterTaskExecutor.isDone();
    }
 
-   public Task getCurrentStage()
+   public State getCurrentStage()
    {
       return masterTaskExecutor.getCurrentTask();
    }

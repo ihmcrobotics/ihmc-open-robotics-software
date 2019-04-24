@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleArmMotionBehavior extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final HumanoidReferenceFrames referenceFrames;
@@ -33,6 +33,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
                                   AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
@@ -114,7 +115,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

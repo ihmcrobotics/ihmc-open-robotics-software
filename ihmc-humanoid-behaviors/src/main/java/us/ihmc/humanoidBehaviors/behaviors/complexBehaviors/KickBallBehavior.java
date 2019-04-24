@@ -50,7 +50,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    private BehaviorStateMachine<KickState> stateMachine;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private final double initalWalkDistance = 1.0;
    private final double standingDistance = 0.4;
@@ -62,7 +62,7 @@ public class KickBallBehavior extends AbstractBehavior
                            FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
@@ -262,7 +262,7 @@ public class KickBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

@@ -6,11 +6,10 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.taskExecutor.Task;
 
 // a behavior action can be used in either a StateMachine or a pipeline.
 
-public class BehaviorAction implements Task, State
+public class BehaviorAction implements State
 {
    private final ArrayList<AbstractBehavior> behaviors;
    private final Boolean initializeOnTransitionIntoAction;
@@ -37,12 +36,6 @@ public class BehaviorAction implements Task, State
 
    @Override
    public void onEntry()
-   {
-      doTransitionIntoAction();
-   }
-
-   @Override
-   public void doTransitionIntoAction()
    {
       if (initializeOnTransitionIntoAction)
       {
@@ -73,12 +66,6 @@ public class BehaviorAction implements Task, State
    @Override
    public void doAction(double timeInState)
    {
-      doAction();
-   }
-
-   @Override
-   public void doAction()
-   {
       for (int i = 0; i < behaviors.size(); i++)
       {
          behaviors.get(i).doControl();
@@ -94,28 +81,17 @@ public class BehaviorAction implements Task, State
    @Override
    public void onExit()
    {
-      doTransitionOutOfAction();
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
       doPostBehaviorCleanup();
    }
 
-   @Override
-   public boolean isDone()
-   {
-      return isDone(Double.NaN);
-   }
-
+  
    @Override
    public boolean isDone(double timeInState)
    {
       boolean isDone = true;
       for (int i = 0; i < behaviors.size(); i++)
       {
-         if (!behaviors.get(i).isDone())
+         if (!behaviors.get(i).isDone(timeInState))
          {
             isDone = false;
             break;

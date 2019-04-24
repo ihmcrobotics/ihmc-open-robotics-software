@@ -2,19 +2,31 @@ package us.ihmc.robotics.taskExecutor;
 
 import java.util.ArrayDeque;
 
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+
 public class TaskExecutor
 {
    private boolean printDebugStatements;
-   private Task currentTask;
+   private State currentTask;
    private final NullTask nullTask = new NullTask();
-   private final ArrayDeque<Task> taskQueue = new ArrayDeque<Task>();
+   private final ArrayDeque<State> taskQueue = new ArrayDeque<State>();
+   private final StateMachineClock clock;
 
+   public TaskExecutor(StateMachineClock clock)
+   {
+      this.clock = clock;
+      clear();
+   }
+   //a statemachine clock should be passed in slowly removing this constructor
+   @Deprecated
    public TaskExecutor()
    {
+      clock = StateMachineClock.dummyClock();
       clear();
    }
 
-   public void submit(Task task)
+   public void submit(State task)
    {
       taskQueue.add(task);
    }
@@ -22,14 +34,14 @@ public class TaskExecutor
    public void doControl()
    {
       handleTransitions();
-      currentTask.doAction();
+      currentTask.doAction(clock.getTimeInCurrentState());
    }
 
    public void handleTransitions()
    {
-      if (currentTask.isDone())
+      if (currentTask.isDone(clock.getTimeInCurrentState()))
       {
-         currentTask.doTransitionOutOfAction();
+         currentTask.onExit();
 
          if (!taskQueue.isEmpty())
          {
@@ -42,7 +54,8 @@ public class TaskExecutor
             currentTask = nullTask;
          }
 
-         currentTask.doTransitionIntoAction();
+         currentTask.onEntry();
+         clock.notifyStateChanged();
       }
    }
 
@@ -51,22 +64,22 @@ public class TaskExecutor
       return ((currentTask == nullTask) && taskQueue.isEmpty());
    }
 
-   public Task getCurrentTask()
+   public State getCurrentTask()
    {
       return currentTask;
    }
 
-   public Task getLastTask()
+   public State getLastTask()
    {
       return taskQueue.peekLast();
    }
 
-   public Task getNextTask()
+   public State getNextTask()
    {
       return taskQueue.peek();
    }
 
-   protected ArrayDeque<Task> getTaskQueue()
+   protected ArrayDeque<State> getTaskQueue()
    {
       return taskQueue;
    }

@@ -44,7 +44,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return hasInputBeenSet() && !packetAvailable.getBooleanValue();
    }

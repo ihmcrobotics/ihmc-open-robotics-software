@@ -38,7 +38,7 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       // return true;
       return validAcknoledged.getBooleanValue();

@@ -17,13 +17,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class PutBallInBucketBehavior extends AbstractBehavior
 {
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
+   private final PipeLine<AbstractBehavior> pipeLine;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public PutBallInBucketBehavior(String robotName, YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
                                   HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeLine();
@@ -86,7 +87,7 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

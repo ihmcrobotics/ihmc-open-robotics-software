@@ -293,7 +293,7 @@ public abstract class AbstractBehavior implements RobotController
     * 
     * @return
     */
-   public abstract boolean isDone();
+   public abstract boolean isDone(double timeInState);
 
    protected boolean isPaused()
    {

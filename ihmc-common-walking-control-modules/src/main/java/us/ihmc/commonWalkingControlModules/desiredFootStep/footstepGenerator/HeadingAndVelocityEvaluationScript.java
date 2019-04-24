@@ -11,8 +11,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
-import us.ihmc.robotics.taskExecutor.Task;
 import us.ihmc.robotics.taskExecutor.TaskExecutor;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -142,7 +142,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       desiredTurningVelocityRateLimited.update();
    }
 
-   private abstract class EventTask implements Task
+   private abstract class EventTask implements State
    {
       private final EvaluationEvent evaluationEvent;
       protected final double minEventDuration;
@@ -154,32 +154,21 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          currentScriptEvent.set(evaluationEvent);
          clock.notifyStateChanged();
       }
 
-      @Override
-      public final void doAction()
-      {
-         doAction(clock.getTimeInCurrentState());
-      }
-
       public abstract void doAction(double timeInState);
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
 
       @Override
-      public final boolean isDone()
-      {
-         return isDone(clock.getTimeInCurrentState());
-      }
-
       public boolean isDone(double timeInState)
       {
          return timeInState + 1.0e-7 > minEventDuration;
@@ -193,9 +182,9 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       return new EventTask(evaluationEvent)
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             desiredVelocityDirection.setAndNormalize(velocityDirection);
             desiredVelocity.setAndScale(velocityMagnitude, desiredVelocityDirection);
             desiredTurningVelocity.set(turningVelocity);
@@ -236,9 +225,9 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
          private double initialTurningVelocity;
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             initialTurningVelocity = desiredTurningVelocity.getValue();
          }
 

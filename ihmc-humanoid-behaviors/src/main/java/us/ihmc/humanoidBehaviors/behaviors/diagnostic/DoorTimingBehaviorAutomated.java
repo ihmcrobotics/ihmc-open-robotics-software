@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DoorTimingBehaviorAutomated extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private final WalkThroughDoorBehavior walkThroughDoorBehavior;
    private final DoorTimingBehavior doorTimingBehavior;
@@ -26,6 +26,7 @@ public class DoorTimingBehaviorAutomated extends AbstractBehavior
                                             AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       walkThroughDoorBehavior = new WalkThroughDoorBehavior(robotName, "automated", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry);
       doorTimingBehavior = new DoorTimingBehavior(robotName, yoTime, ros2Node, false);
    }

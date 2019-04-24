@@ -23,7 +23,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    boolean chest = true;
    boolean pelvis = true;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    public ResetRobotBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
@@ -33,6 +33,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    public ResetRobotBehavior(String robotName, boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, Ros2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.leftArm = leftArm;
       this.rightArm = rightArm;
       this.chest = chest;
@@ -90,7 +91,7 @@ public class ResetRobotBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

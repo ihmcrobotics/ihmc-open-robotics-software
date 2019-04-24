@@ -61,7 +61,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
