@@ -39,7 +39,7 @@ public class KickBehavior extends AbstractBehavior
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
    private final YoDouble trajectoryTime;
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
@@ -47,6 +47,7 @@ public class KickBehavior extends AbstractBehavior
                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.yoTime = yoTime;
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       trajectoryTime = new YoDouble("kickTrajectoryTime", registry);
@@ -188,7 +189,7 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return hasInputBeenSet() && pipeLine.isDone();
    }

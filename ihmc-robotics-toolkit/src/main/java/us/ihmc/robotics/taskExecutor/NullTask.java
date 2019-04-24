@@ -1,25 +1,26 @@
 package us.ihmc.robotics.taskExecutor;
 
+import us.ihmc.robotics.stateMachine.core.State;
 
-public class NullTask implements Task
+public class NullTask implements State
 {
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return true;
    }

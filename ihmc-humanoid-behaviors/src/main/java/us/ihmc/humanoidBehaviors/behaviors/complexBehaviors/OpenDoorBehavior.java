@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OpenDoorBehavior extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private PoseReferenceFrame doorPoseFrame = null;
 
@@ -35,6 +35,7 @@ public class OpenDoorBehavior extends AbstractBehavior
    public OpenDoorBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
@@ -143,7 +144,7 @@ public class OpenDoorBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

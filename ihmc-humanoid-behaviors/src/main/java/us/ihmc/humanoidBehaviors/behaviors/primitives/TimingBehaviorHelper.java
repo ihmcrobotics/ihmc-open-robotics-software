@@ -144,7 +144,7 @@ public class TimingBehaviorHelper extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return false;
    }

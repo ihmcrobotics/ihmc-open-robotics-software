@@ -247,7 +247,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return false;
    }

@@ -7,9 +7,11 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.taskExecutor.NullTask;
 import us.ihmc.robotics.taskExecutor.Task;
 import us.ihmc.robotics.taskExecutor.TaskExecutor;
+
 public class TaskExecutorTest
 {
 
@@ -19,14 +21,14 @@ public class TaskExecutorTest
       TaskExecutor taskExecutor = new TaskExecutor();
 
       assertTrue(taskExecutor.isDone());
-      Task currentTask = taskExecutor.getCurrentTask();
+      State currentTask = taskExecutor.getCurrentTask();
 
-      assertTrue(currentTask.isDone());
+      assertTrue(currentTask.isDone(Double.NaN));
 
-      Task nextTask = taskExecutor.getNextTask();
+      State nextTask = taskExecutor.getNextTask();
       assertNull(nextTask);
 
-      Task lastTask = taskExecutor.getLastTask();
+      State lastTask = taskExecutor.getLastTask();
       assertNull(lastTask);
    }
 
@@ -119,18 +121,18 @@ public class TaskExecutorTest
    @Test
    public void testSomeTasks()
    {
-      int[] doActionsPerTask = new int[] { 1 };
+      int[] doActionsPerTask = new int[] {1};
       runATest(doActionsPerTask);
 
-      doActionsPerTask = new int[] { 1, 2 };
-
-      runATest(doActionsPerTask);
-
-      doActionsPerTask = new int[] { 2, 3, 7, 10, 1, 3 };
+      doActionsPerTask = new int[] {1, 2};
 
       runATest(doActionsPerTask);
 
-      doActionsPerTask = new int[] { 2, 3, 7, 10, 1, 1 };
+      doActionsPerTask = new int[] {2, 3, 7, 10, 1, 3};
+
+      runATest(doActionsPerTask);
+
+      doActionsPerTask = new int[] {2, 3, 7, 10, 1, 1};
 
       runATest(doActionsPerTask);
 
@@ -246,7 +248,7 @@ public class TaskExecutorTest
             assertEquals(exampleTasks[currentTaskIndex + 1], taskExecutor.getNextTask());
          }
 
-         Task lastTask = taskExecutor.getLastTask();
+         State lastTask = taskExecutor.getLastTask();
          if (lastTask != null)
             assertEquals(exampleTasks[exampleTasks.length - 1], lastTask);
 
@@ -254,12 +256,12 @@ public class TaskExecutorTest
          {
             if (i < currentTaskIndex)
             {
-               assertTrue(exampleTasks[i].isDone());
+               assertTrue(exampleTasks[i].isDone(Double.NaN));
                assertTrue(exampleTasks[i].checkNumberOfCalls(1, doActionsPerTask[i], 1));
 
             }
             else if (currentTaskDoActionCount < doActionsPerTask[currentTaskIndex])
-               assertFalse(exampleTasks[i].isDone());
+               assertFalse(exampleTasks[i].isDone(Double.NaN));
          }
 
          if (currentTaskIndex < doActionsPerTask.length)
@@ -267,12 +269,12 @@ public class TaskExecutorTest
             if ((currentTaskDoActionCount >= doActionsPerTask[currentTaskIndex]))
             {
                exampleTasks[currentTaskIndex].checkNumberOfCalls(1, currentTaskDoActionCount, 1);
-               assertTrue(exampleTasks[currentTaskIndex].isDone());
+               assertTrue(exampleTasks[currentTaskIndex].isDone(Double.NaN));
             }
             else
             {
                exampleTasks[currentTaskIndex].checkNumberOfCalls(1, currentTaskDoActionCount, 0);
-               assertFalse(exampleTasks[currentTaskIndex].isDone());
+               assertFalse(exampleTasks[currentTaskIndex].isDone(Double.NaN));
             }
          }
       }

@@ -1,8 +1,8 @@
 package us.ihmc.robotics.testExecutor;
 
-import us.ihmc.robotics.taskExecutor.Task;
+import us.ihmc.robotics.stateMachine.core.State;
 
-public class CountActionsTask implements Task
+public class CountActionsTask implements State
 {
    private int numberOfTimesTransitionIntoActionWasCalled = 0;
    private int numberOfTimesDoActionWasCalled = 0;
@@ -16,25 +16,25 @@ public class CountActionsTask implements Task
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       numberOfTimesTransitionIntoActionWasCalled++;
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       numberOfTimesDoActionWasCalled++;
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       numberOfTimesTransitionOutOfActionWasCalled++;
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       return (numberOfTimesDoActionWasCalled >= numberOfDoActionsBeforeDone);
    }

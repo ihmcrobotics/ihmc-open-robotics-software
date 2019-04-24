@@ -36,7 +36,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private FootstepPlanningResult planningResult;
 
-   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private PipeLine<BehaviorAction> pipeLine;
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private FramePose3D goalPose = null;
@@ -60,7 +60,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 
@@ -158,10 +158,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          }
 
          @Override
-         public boolean isDone()
+         public boolean isDone(double timeInState)
          {
             
-            return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
+            return super.isDone(timeInState) || footPlanStatusQueue.isNewPacketAvailable();
 
          }
       };
@@ -260,7 +260,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

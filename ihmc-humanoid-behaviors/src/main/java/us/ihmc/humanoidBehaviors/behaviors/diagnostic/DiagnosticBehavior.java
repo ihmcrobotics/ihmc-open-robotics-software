@@ -107,7 +107,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    /**
     * FIXME Should have a packet from the controller to let know when it is ready to execute
@@ -256,7 +256,7 @@ public class DiagnosticBehavior extends AbstractBehavior
                              WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;

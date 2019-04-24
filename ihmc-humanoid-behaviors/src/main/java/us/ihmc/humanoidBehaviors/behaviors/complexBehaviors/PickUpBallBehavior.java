@@ -75,7 +75,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final GoHomeBehavior armGoHomeRightBehavior;
    private final ArmTrajectoryBehavior armTrajectoryBehavior;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoDouble yoTime;
@@ -91,6 +91,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                              FullHumanoidRobotModelFactory robotModelFactory)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.yoTime = yoTime;
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -679,7 +680,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

@@ -139,7 +139,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return isDone.getBooleanValue();
    }

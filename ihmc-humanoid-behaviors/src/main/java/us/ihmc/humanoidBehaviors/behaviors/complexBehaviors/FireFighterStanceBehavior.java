@@ -47,7 +47,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    private final ArmTrajectoryBehavior rightArmBehavior;
    private HumanoidReferenceFrames referenceFrames;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<AbstractBehavior>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    public enum BasicStates
    {
@@ -62,6 +62,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                                     WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.referenceFrames = referenceFrames;
       this.fullRobotModel = fullRobotModel;
       footListBehavior = atlasPrimitiveActions.footstepListBehavior;

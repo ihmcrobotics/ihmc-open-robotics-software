@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class PickObjectOffGroundBehavior extends AbstractBehavior
 {
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private Point3D grabLocation = null;
    private double objectRadius = 0;
@@ -35,6 +35,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
                                       HumanoidReferenceFrames referenceFrames, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       setupPipeline();
@@ -133,7 +134,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

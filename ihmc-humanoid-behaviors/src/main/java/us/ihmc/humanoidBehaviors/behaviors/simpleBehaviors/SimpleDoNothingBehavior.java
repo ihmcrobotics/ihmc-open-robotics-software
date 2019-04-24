@@ -16,7 +16,7 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return true;
    }

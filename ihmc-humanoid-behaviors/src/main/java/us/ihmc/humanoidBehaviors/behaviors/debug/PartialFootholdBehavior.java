@@ -91,7 +91,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return true;
    }

@@ -25,13 +25,14 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
 
    private FramePose3D targetOrientationInWorldFrame;
-   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private PipeLine<BehaviorAction> pipeLine;
    private final  WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
 
    public TurnInPlaceBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
                               HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime )
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       this.referenceFrames = referenceFrames;
       setupPipeline();
@@ -100,7 +101,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
      return pipeLine.isDone();
    }

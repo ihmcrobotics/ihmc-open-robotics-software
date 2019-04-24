@@ -27,7 +27,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraspAndTurnValveBehavior extends AbstractBehavior
 {
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    private PoseReferenceFrame valvePose = null;
    private double valveRadius = 0;
@@ -50,6 +50,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
@@ -227,7 +228,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return pipeLine.isDone();
    }

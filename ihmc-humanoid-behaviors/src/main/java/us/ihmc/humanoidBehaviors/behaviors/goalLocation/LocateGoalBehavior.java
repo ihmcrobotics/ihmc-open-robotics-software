@@ -59,7 +59,7 @@ public class LocateGoalBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeinState)
    {
       return done.get();
    }
