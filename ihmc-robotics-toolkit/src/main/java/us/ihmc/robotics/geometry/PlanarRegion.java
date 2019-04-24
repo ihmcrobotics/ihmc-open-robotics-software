@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -238,7 +237,7 @@ public class PlanarRegion
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
-   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DBasics convexPolygon2DBasics,
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DReadOnly convexPolygon2DBasics,
                                                               ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
