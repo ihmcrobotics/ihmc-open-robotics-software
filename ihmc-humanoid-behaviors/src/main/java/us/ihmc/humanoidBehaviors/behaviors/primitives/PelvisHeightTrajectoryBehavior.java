@@ -89,7 +89,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
          trajectoryTimeElapsed.set(false);

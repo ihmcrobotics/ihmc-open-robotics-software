@@ -40,7 +40,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return frameNumber >= NUMBER_OF_FRAMES;
    }

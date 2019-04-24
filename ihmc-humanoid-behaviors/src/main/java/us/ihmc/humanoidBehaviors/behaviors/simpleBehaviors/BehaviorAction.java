@@ -84,14 +84,18 @@ public class BehaviorAction implements State
       doPostBehaviorCleanup();
    }
 
-  
    @Override
    public boolean isDone(double timeInState)
+   {
+      return isDone();
+   }
+  
+   public boolean isDone()
    {
       boolean isDone = true;
       for (int i = 0; i < behaviors.size(); i++)
       {
-         if (!behaviors.get(i).isDone(timeInState))
+         if (!behaviors.get(i).isDone())
          {
             isDone = false;
             break;

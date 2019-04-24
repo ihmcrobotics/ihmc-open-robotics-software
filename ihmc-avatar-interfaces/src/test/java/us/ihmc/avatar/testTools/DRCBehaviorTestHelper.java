@@ -389,7 +389,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
       boolean success = true;
-      while (!behavior.isDone(Double.NaN) && success)
+      while (!behavior.isDone() && success)
       {
          success = simulateAndBlockAndCatchExceptions(1.0);
       }
@@ -407,7 +407,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       success = simulateAndBlockAndCatchExceptions(0.1);
       sendBehaviorToDispatcher(behavior);
 
-      while (!behavior.isDone(Double.NaN) && success)
+      while (!behavior.isDone() && success)
       {
          success = simulateAndBlockAndCatchExceptions(1.0);
       }

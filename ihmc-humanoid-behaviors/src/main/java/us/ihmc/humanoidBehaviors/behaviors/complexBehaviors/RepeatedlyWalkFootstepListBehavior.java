@@ -200,7 +200,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return iterationCounter.getIntegerValue() == iterations.getIntegerValue();
    }

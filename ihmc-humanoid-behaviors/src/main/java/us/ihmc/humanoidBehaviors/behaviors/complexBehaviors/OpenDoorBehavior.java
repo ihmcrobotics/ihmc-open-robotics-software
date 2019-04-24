@@ -144,7 +144,7 @@ public class OpenDoorBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return pipeLine.isDone();
    }

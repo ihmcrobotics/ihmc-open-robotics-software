@@ -385,7 +385,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return isDone.getBooleanValue() || hasSolverFailed.getBooleanValue();
    }

@@ -62,7 +62,7 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
