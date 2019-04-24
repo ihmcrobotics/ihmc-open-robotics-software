@@ -16,8 +16,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSideOLD;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementOLD.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
@@ -31,8 +29,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematics
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
@@ -56,7 +52,6 @@ public class PickUpBallBehavior extends AbstractBehavior
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
 
-   private final PickUpBallBehaviorCoactiveElementBehaviorSideOLD coactiveElement;
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
    private final EnableLidarBehavior enableBehaviorOnlyLidarBehavior;
@@ -64,7 +59,6 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ClearLidarBehavior clearLidarBehavior;
    private final SphereDetectionBehavior initialSphereDetectionBehavior;
    private final BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior;
-   private final WaitForUserValidationBehavior waitForUserValidationBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ChestTrajectoryBehavior chestTrajectoryBehavior;
    private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
@@ -144,13 +138,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(robotName, "left", ros2Node, yoTime);
       behaviors.add(handDesiredConfigurationBehavior);
 
-      coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSideOLD();
-      //      coactiveElement.setPickUpBallBehavior(this);
-      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
-      waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
-      behaviors.add(waitForUserValidationBehavior);
 
       for (AbstractBehavior behavior : behaviors)
       {
@@ -158,11 +146,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   public CoactiveElement getCoactiveElement()
-   {
-      return null;//coactiveElement;
-   }
+  
 
    boolean locationSet = false;
 
@@ -186,7 +170,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          {
             // FIXME
             //            enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
-            coactiveElement.currentState.set(PickUpBallBehaviorState.ENABLING_LIDAR);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.ENABLING_LIDAR);
          }
       };
 
@@ -198,7 +182,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 1.4f;
             setLidarParametersBehavior.setInput(param);
@@ -211,7 +195,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
          }
       };
 
@@ -223,12 +207,12 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             publishTextToSpeech("LOOKING FOR BALL");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
+           /* coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
             coactiveElement.ballY.set(0);
-            coactiveElement.ballZ.set(0);
+            coactiveElement.ballZ.set(0);*/
 
          }
       };
@@ -237,23 +221,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       // Confirm from the user that this is the correct ball *******************************************
 
-      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.WAITING_FOR_USER_CONFIRMATION);
-            coactiveElement.searchingForBall.set(false);
-            coactiveElement.waitingForValidation.set(true);
-            coactiveElement.validAcknowledged.set(false);
-            coactiveElement.foundBall.set(false);
-            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().getX());
-            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().getY());
-            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().getZ());
-            coactiveElement.ballRadius.set(initialSphereDetectionBehavior.getSpehereRadius());
-
-         }
-      };
+     
 
       // WALK TO THE BALL *******************************************
 
@@ -264,10 +232,10 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             publishTextToSpeech("Walking To The Ball");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
+            /*coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
-            coactiveElement.foundBall.set(true);
+            coactiveElement.foundBall.set(true);*/
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
       };
@@ -294,7 +262,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.BENDING_OVER);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.BENDING_OVER);
          }
       };
 
@@ -317,7 +285,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
          }
       };
 
@@ -333,7 +301,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 0.6f;
             setLidarParametersBehavior.setInput(param);
@@ -346,7 +314,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
+           // coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
          }
       };
 
@@ -357,34 +325,17 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             publishTextToSpeech("Looking for the ball");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
+            /*coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
             coactiveElement.ballY.set(0);
-            coactiveElement.ballZ.set(0);
+            coactiveElement.ballZ.set(0);*/
 
          }
       };
 
-      // re-validat ball with user *******************************************
-      BehaviorAction validateBallTask2 = new BehaviorAction(waitForUserValidationBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            coactiveElement.currentState.set(PickUpBallBehaviorState.WAITING_FOR_USER_CONFIRMATION);
-            coactiveElement.searchingForBall.set(false);
-            coactiveElement.waitingForValidation.set(true);
-            coactiveElement.validAcknowledged.set(false);
-            coactiveElement.foundBall.set(false);
-            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().getX());
-            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().getY());
-            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().getZ());
-            coactiveElement.ballRadius.set(initialSphereDetectionBehavior.getSpehereRadius());
-
-         }
-      };
+     
 
       // GO TO INITIAL POICKUP LOCATION *******************************************
       BehaviorAction goToPickUpBallInitialLocationTask = new BehaviorAction(wholeBodyBehavior)
@@ -397,7 +348,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
             publishTextToSpeech("I think i found the ball");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
+            //coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                                                   initialSphereDetectionBehavior.getBallLocation().getY(),
                                                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius()
@@ -488,7 +439,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          {
             super.setBehaviorInput();
             publishTextToSpeech("Putting The Ball In The Bucket");
-            coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
+           // coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
 
@@ -644,14 +595,14 @@ public class PickUpBallBehavior extends AbstractBehavior
    public void onBehaviorExited()
    {
       publishTextToSpeech("YAY IM ALL DONE");
-      coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
+     /* coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);
       coactiveElement.waitingForValidation.set(false);
       coactiveElement.foundBall.set(false);
       coactiveElement.ballX.set(0);
       coactiveElement.ballY.set(0);
-      coactiveElement.ballZ.set(0);
+      coactiveElement.ballZ.set(0);*/
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();

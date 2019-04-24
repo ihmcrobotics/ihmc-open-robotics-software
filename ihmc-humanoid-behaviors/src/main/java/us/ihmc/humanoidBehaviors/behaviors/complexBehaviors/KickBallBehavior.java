@@ -9,13 +9,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.color.HSVValue;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
@@ -56,7 +54,6 @@ public class KickBallBehavior extends AbstractBehavior
    private final double standingDistance = 0.4;
    private boolean pipelineSetUp = false;
 
-   private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
    public KickBallBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                            FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -91,30 +88,9 @@ public class KickBallBehavior extends AbstractBehavior
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
-
-      if (CREATE_COACTIVE_ELEMENT)
-      {
-         coactiveElement = new KickBallBehaviorCoactiveElementBehaviorSide();
-         coactiveElement.setKickBallBehavior(this);
-         registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-         registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
-
-         waitForUserValidationBehavior = new WaitForUserValidationBehavior(robotName, ros2Node, coactiveElement.validClicked, coactiveElement.validAcknowledged);
-         behaviors.add(waitForUserValidationBehavior);
-
-      }
-      else
-      {
-         coactiveElement = null;
-      }
    }
 
-   @Override
-   public CoactiveElement getCoactiveElement()
-   {
-      return null;//coactiveElement;
-   }
-
+  
    boolean locationSet = false;
 
    @Override
@@ -131,12 +107,12 @@ public class KickBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            if (CREATE_COACTIVE_ELEMENT)
+            /*if (CREATE_COACTIVE_ELEMENT)
             {
                coactiveElement.searchingForBall.set(true);
                coactiveElement.foundBall.set(false);
                coactiveElement.ballPositions.get(0).setToZero();
-            }
+            }*/
          }
       };
 
@@ -147,7 +123,7 @@ public class KickBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            if (CREATE_COACTIVE_ELEMENT)
+           /* if (CREATE_COACTIVE_ELEMENT)
             {
                coactiveElement.searchingForBall.set(false);
                coactiveElement.waitingForValidation.set(true);
@@ -155,7 +131,7 @@ public class KickBallBehavior extends AbstractBehavior
                coactiveElement.foundBall.set(false);
                coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
                coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
-            }
+            }*/
          }
       };
 
@@ -167,6 +143,7 @@ public class KickBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
+            /*
             if (CREATE_COACTIVE_ELEMENT)
             {
                coactiveElement.searchingForBall.set(false);
@@ -174,7 +151,7 @@ public class KickBallBehavior extends AbstractBehavior
                coactiveElement.foundBall.set(true);
                coactiveElement.ballPositions.get(0).set(sphereDetectionBehavior.getBallLocation());
                coactiveElement.ballRadii[0].set(sphereDetectionBehavior.getSpehereRadius());
-            }
+            }*/
             walkToLocationBehavior.setTarget(getoffsetPoint());
          }
       };
@@ -226,13 +203,12 @@ public class KickBallBehavior extends AbstractBehavior
    {
 
       pipelineSetUp = false;
-      if (CREATE_COACTIVE_ELEMENT)
-      {
-         coactiveElement.searchingForBall.set(false);
+
+         /*coactiveElement.searchingForBall.set(false);
          coactiveElement.waitingForValidation.set(false);
          coactiveElement.foundBall.set(false);
-         coactiveElement.ballPositions.get(0).setToZero();
-      }
+         coactiveElement.ballPositions.get(0).setToZero();*/
+      
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.onBehaviorExited();
