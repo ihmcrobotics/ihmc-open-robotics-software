@@ -10,9 +10,11 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -20,6 +22,7 @@ import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionSnapTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -85,6 +88,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final FootstepCost stepCostCalculator;
    private final FootstepNodeSnapper snapper;
 
+   private final PlanarRegionSnapTools snapTools;
+
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
    private final YoDouble timeout = new YoDouble("footstepPlannerTimeout", registry);
@@ -116,6 +121,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
+      snapTools = new PlanarRegionSnapTools(parameters);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
@@ -160,7 +166,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          {
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant));
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, start.getFootGoalPosition(robotQuadrant), new Quaternion());
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
@@ -170,23 +176,35 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-            Point3DReadOnly projectedPoint;
+            Point3D projectedPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);;
+
+            PlanarRegion planarRegion;
             if (planarRegionsList != null)
             {
-               projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(startPoint, planarRegionsList);
-               if (projectedPoint == null)
+               planarRegion = snapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), new Vector2D(), planarRegionsList.getPlanarRegionsAsList());
+
+               if (planarRegion == null)
                {
-                  addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), startPoint.getZ(), start.getTargetPose().getYaw());
-                  projectedPoint = startPoint;
+                  planarRegion = addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0, start.getTargetPose().getYaw());
+               }
+               else
+               {
+                  projectedPoint.setZ(planarRegion.getPlaneZGivenXY(startPoint.getX(), startPoint.getY()));
                }
             }
             else
             {
-               projectedPoint = startPoint;
+               planarRegion = addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0, start.getTargetPose().getYaw());
             }
+
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            Quaternion orientation = new Quaternion();
+            planarRegion.getTransformToWorld(transformToWorld);
+            transformToWorld.getRotation(orientation);
+
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
-            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint);
+            RigidBodyTransform snapTransform = FootstepNodeTools.computeSnapTransform(xIndex, yIndex, projectedPoint, orientation);
             snapper.addSnapData(xIndex, yIndex, new FootstepNodeSnapData(snapTransform));
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
@@ -430,7 +448,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       }
    }
 
-   private void addPlanarRegionAtHeight(double xLocation, double yLocation, double height, double yaw)
+   private PlanarRegion addPlanarRegionAtHeight(double xLocation, double yLocation, double height, double yaw)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(0.3, 0.3);
@@ -441,6 +459,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(yaw, 0.0, 0.0), new Vector3D(xLocation, yLocation, height)), polygon);
       planarRegionsList.addPlanarRegion(planarRegion);
+
+      return planarRegion;
    }
 
    @Override
