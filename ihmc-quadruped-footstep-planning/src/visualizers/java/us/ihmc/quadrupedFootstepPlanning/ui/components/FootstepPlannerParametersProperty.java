@@ -21,7 +21,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, SettableFootstepPlannerParameters::setCostPerStep);
    private final DoubleField stepUpWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, SettableFootstepPlannerParameters::setStepUpWeight);
    private final DoubleField stepDownWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepDownWeight, SettableFootstepPlannerParameters::setStepDownWeight);
-   private final DoubleField heuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getHeuristicsInflationWeight, SettableFootstepPlannerParameters::setHeuristicsWeight);
+   private final DoubleField heuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getHeuristicsInflationWeight, SettableFootstepPlannerParameters::setHeuristicsInflationWeight);
 
    private final DoubleField minXClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromFoot, SettableFootstepPlannerParameters::setMinXClearanceFromFoot);
    private final DoubleField minYClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromFoot, SettableFootstepPlannerParameters::setMinYClearanceFromFoot);

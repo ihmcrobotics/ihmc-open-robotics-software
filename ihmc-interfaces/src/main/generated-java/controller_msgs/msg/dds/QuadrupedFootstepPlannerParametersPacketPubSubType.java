@@ -88,6 +88,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -173,6 +175,9 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -183,11 +188,11 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMaximumStepReach());
 
-      cdr.write_type_6(data.getMaximumStepWidth());
-
-      cdr.write_type_6(data.getMaximumStepCycleDistance());
+      cdr.write_type_6(data.getMaximumStepLength());
 
       cdr.write_type_6(data.getMinimumStepLength());
+
+      cdr.write_type_6(data.getMaximumStepWidth());
 
       cdr.write_type_6(data.getMinimumStepWidth());
 
@@ -197,15 +202,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMaximumStepChangeZ());
 
-      cdr.write_type_6(data.getMaximumStepCycleChangeZ());
-
       cdr.write_type_6(data.getBodyGroundClearance());
 
-      cdr.write_type_6(data.getForwardWeight());
-
-      cdr.write_type_6(data.getLateralWeight());
+      cdr.write_type_6(data.getDistanceHeuristicWeight());
 
       cdr.write_type_6(data.getYawWeight());
+
+      cdr.write_type_6(data.getXGaitWeight());
 
       cdr.write_type_6(data.getCostPerStep());
 
@@ -218,6 +221,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       cdr.write_type_6(data.getMinXClearanceFromFoot());
 
       cdr.write_type_6(data.getMinYClearanceFromFoot());
+
+      cdr.write_type_6(data.getMaxWalkingSpeedMultiplier());
+
+      cdr.write_type_6(data.getProjectionInsideDistance());
 
       cdr.write_type_6(data.getMinimumSurfaceInclineRadians());
 
@@ -235,11 +242,11 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMaximumStepReach(cdr.read_type_6());
       	
-      data.setMaximumStepWidth(cdr.read_type_6());
-      	
-      data.setMaximumStepCycleDistance(cdr.read_type_6());
+      data.setMaximumStepLength(cdr.read_type_6());
       	
       data.setMinimumStepLength(cdr.read_type_6());
+      	
+      data.setMaximumStepWidth(cdr.read_type_6());
       	
       data.setMinimumStepWidth(cdr.read_type_6());
       	
@@ -249,15 +256,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMaximumStepChangeZ(cdr.read_type_6());
       	
-      data.setMaximumStepCycleChangeZ(cdr.read_type_6());
-      	
       data.setBodyGroundClearance(cdr.read_type_6());
       	
-      data.setForwardWeight(cdr.read_type_6());
-      	
-      data.setLateralWeight(cdr.read_type_6());
+      data.setDistanceHeuristicWeight(cdr.read_type_6());
       	
       data.setYawWeight(cdr.read_type_6());
+      	
+      data.setXGaitWeight(cdr.read_type_6());
       	
       data.setCostPerStep(cdr.read_type_6());
       	
@@ -270,6 +275,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMinXClearanceFromFoot(cdr.read_type_6());
       	
       data.setMinYClearanceFromFoot(cdr.read_type_6());
+      	
+      data.setMaxWalkingSpeedMultiplier(cdr.read_type_6());
+      	
+      data.setProjectionInsideDistance(cdr.read_type_6());
       	
       data.setMinimumSurfaceInclineRadians(cdr.read_type_6());
       	
@@ -287,24 +296,25 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("maximum_step_reach", data.getMaximumStepReach());
-      ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
-      ser.write_type_6("maximum_step_cycle_distance", data.getMaximumStepCycleDistance());
+      ser.write_type_6("maximum_step_length", data.getMaximumStepLength());
       ser.write_type_6("minimum_step_length", data.getMinimumStepLength());
+      ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
       ser.write_type_6("minimum_step_width", data.getMinimumStepWidth());
       ser.write_type_6("minimum_step_yaw", data.getMinimumStepYaw());
       ser.write_type_6("maximum_step_yaw", data.getMaximumStepYaw());
       ser.write_type_6("maximum_step_change_z", data.getMaximumStepChangeZ());
-      ser.write_type_6("maximum_step_cycle_change_z", data.getMaximumStepCycleChangeZ());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
-      ser.write_type_6("forward_weight", data.getForwardWeight());
-      ser.write_type_6("lateral_weight", data.getLateralWeight());
+      ser.write_type_6("distance_heuristic_weight", data.getDistanceHeuristicWeight());
       ser.write_type_6("yaw_weight", data.getYawWeight());
+      ser.write_type_6("x_gait_weight", data.getXGaitWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_6("step_up_weight", data.getStepUpWeight());
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
       ser.write_type_6("heuristics_weight", data.getHeuristicsWeight());
       ser.write_type_6("min_x_clearance_from_foot", data.getMinXClearanceFromFoot());
       ser.write_type_6("min_y_clearance_from_foot", data.getMinYClearanceFromFoot());
+      ser.write_type_6("max_walking_speed_multiplier", data.getMaxWalkingSpeedMultiplier());
+      ser.write_type_6("projection_inside_distance", data.getProjectionInsideDistance());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
       ser.write_type_6("minimum_distance_from_cliff_bottoms", data.getMinimumDistanceFromCliffBottoms());
@@ -316,24 +326,25 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setMaximumStepReach(ser.read_type_6("maximum_step_reach"));
-      data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
-      data.setMaximumStepCycleDistance(ser.read_type_6("maximum_step_cycle_distance"));
+      data.setMaximumStepLength(ser.read_type_6("maximum_step_length"));
       data.setMinimumStepLength(ser.read_type_6("minimum_step_length"));
+      data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
       data.setMinimumStepWidth(ser.read_type_6("minimum_step_width"));
       data.setMinimumStepYaw(ser.read_type_6("minimum_step_yaw"));
       data.setMaximumStepYaw(ser.read_type_6("maximum_step_yaw"));
       data.setMaximumStepChangeZ(ser.read_type_6("maximum_step_change_z"));
-      data.setMaximumStepCycleChangeZ(ser.read_type_6("maximum_step_cycle_change_z"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
-      data.setForwardWeight(ser.read_type_6("forward_weight"));
-      data.setLateralWeight(ser.read_type_6("lateral_weight"));
+      data.setDistanceHeuristicWeight(ser.read_type_6("distance_heuristic_weight"));
       data.setYawWeight(ser.read_type_6("yaw_weight"));
+      data.setXGaitWeight(ser.read_type_6("x_gait_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setStepUpWeight(ser.read_type_6("step_up_weight"));
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
       data.setHeuristicsWeight(ser.read_type_6("heuristics_weight"));
       data.setMinXClearanceFromFoot(ser.read_type_6("min_x_clearance_from_foot"));
       data.setMinYClearanceFromFoot(ser.read_type_6("min_y_clearance_from_foot"));
+      data.setMaxWalkingSpeedMultiplier(ser.read_type_6("max_walking_speed_multiplier"));
+      data.setProjectionInsideDistance(ser.read_type_6("projection_inside_distance"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));
       data.setMinimumDistanceFromCliffBottoms(ser.read_type_6("minimum_distance_from_cliff_bottoms"));
