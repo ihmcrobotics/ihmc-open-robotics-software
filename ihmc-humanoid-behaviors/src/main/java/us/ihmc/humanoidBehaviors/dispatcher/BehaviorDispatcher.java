@@ -170,6 +170,11 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       callUpdatables();
 
       stateMachine.doControlAndTransitions();
+      if(!stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey)&&stateMachine.getCurrentBehavior().isDone())
+      {
+         requestedBehavior.set(stopBehaviorKey);
+         System.out.println("YAY A BEHAVIOR HAS ENDED");
+      }
 
       //a behavior has finished or has aborted and has transitioned to STOP
 

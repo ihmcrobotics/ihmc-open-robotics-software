@@ -50,7 +50,7 @@ public class AdditionBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return mathComplete;
    }

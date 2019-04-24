@@ -73,11 +73,11 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       //if your current state has finished and there is no transition out of that state... the entire state machine is finished
 
-      if (stateMachine.getCurrentBehavior().isDone(timeinState) && stateMachine.isCurrentBehaviorTerminal())
+      if (stateMachine.getCurrentBehavior().isDone() && stateMachine.isCurrentBehaviorTerminal())
       {
          return true;
       }

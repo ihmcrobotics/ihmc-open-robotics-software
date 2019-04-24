@@ -261,7 +261,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    private boolean isPlanPathComplete()
    {
-      return planPathToLocationBehavior.isDone(Double.NaN);
+      return planPathToLocationBehavior.isDone();
    }
 
    private boolean hasValidPlanPath()
@@ -270,7 +270,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    }
    
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       if(setupComplete)
       return getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.DONE) ||  getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.PLAN_FAILED);

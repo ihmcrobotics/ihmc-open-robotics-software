@@ -87,7 +87,7 @@ public class PutBallInBucketBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return pipeLine.isDone();
    }

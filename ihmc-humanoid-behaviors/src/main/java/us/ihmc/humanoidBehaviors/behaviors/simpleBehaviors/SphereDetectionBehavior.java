@@ -246,7 +246,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return ballFound.getBooleanValue();
    }

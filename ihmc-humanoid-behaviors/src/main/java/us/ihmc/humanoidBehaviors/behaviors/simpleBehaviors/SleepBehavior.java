@@ -41,7 +41,7 @@ public class SleepBehavior extends AbstractBehavior
    }
 
    @Override
-   public boolean isDone(double timeinState)
+   public boolean isDone()
    {
       return (stopwatch.totalElapsed() > sleepTime.getDoubleValue());
    }
