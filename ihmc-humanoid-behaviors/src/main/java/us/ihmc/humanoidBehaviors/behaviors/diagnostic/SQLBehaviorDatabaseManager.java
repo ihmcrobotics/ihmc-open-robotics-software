@@ -30,11 +30,11 @@ public class SQLBehaviorDatabaseManager
 
    public SQLBehaviorDatabaseManager()
    {
-      this.databaseUsername = "shadylady";
-      this.databasePassword = "ShadyLady";
+      this.databaseUsername = "database";
+      this.databasePassword = "database";
       this.database_host = "10.7.4.48";
       this.database_port = "32769";
-      this.database_name = "shadylady";
+      this.database_name = "database";
 
       databaseURL = "jdbc:postgresql://" + database_host + ":" + database_port + "/" + database_name;
 
