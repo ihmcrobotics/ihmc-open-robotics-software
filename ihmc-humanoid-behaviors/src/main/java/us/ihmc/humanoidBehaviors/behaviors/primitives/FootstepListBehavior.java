@@ -202,6 +202,10 @@ public class FootstepListBehavior extends AbstractBehavior
       hasLastStepBeenReached.set(false);
       isRobotDoneWalking.set(false);
       hasRobotStartedWalking.set(false);
+
+      //upon leaving this behavior just make sure the walking has stopped.
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
+
    }
 
    @Override
