@@ -21,7 +21,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 
 /**
  * This class constructs a UI for behavior operation.
