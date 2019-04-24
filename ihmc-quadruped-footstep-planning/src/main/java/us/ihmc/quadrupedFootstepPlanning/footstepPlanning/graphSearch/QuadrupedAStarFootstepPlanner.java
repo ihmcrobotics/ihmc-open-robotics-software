@@ -178,7 +178,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
             Point3D projectedPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);;
 
-            PlanarRegion planarRegion;
+            PlanarRegion planarRegion = null;
             if (planarRegionsList != null)
             {
                planarRegion = snapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), new Vector2D(), planarRegionsList.getPlanarRegionsAsList());
@@ -192,15 +192,15 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                   projectedPoint.setZ(planarRegion.getPlaneZGivenXY(startPoint.getX(), startPoint.getY()));
                }
             }
-            else
-            {
-               planarRegion = addPlanarRegionAtHeight(startPoint.getX(), startPoint.getY(), 0.0, start.getTargetPose().getYaw());
-            }
 
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Quaternion orientation = new Quaternion();
-            planarRegion.getTransformToWorld(transformToWorld);
-            transformToWorld.getRotation(orientation);
+
+            if (planarRegion != null)
+            {
+               planarRegion.getTransformToWorld(transformToWorld);
+               transformToWorld.getRotation(orientation);
+            }
 
             int xIndex = startNode.getXIndex(robotQuadrant);
             int yIndex = startNode.getYIndex(robotQuadrant);
