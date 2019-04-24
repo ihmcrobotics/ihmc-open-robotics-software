@@ -67,15 +67,27 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
 
-   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation, double extrusionLength,
-                                               double startingBlockLength)
+   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight,
+                                               int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation,
+                                               double extrusionLength, double startingBlockLength)
    {
       double defaultTiltAngle = Math.toRadians(15.0);
       double randomHeightVariation = 0.0;
       boolean onlyGenerateTopOfBlock = false;
 
-      generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation,
-                               extrusionLength, startingBlockLength, 0.0, defaultTiltAngle, defaultTiltAngle, randomHeightVariation, onlyGenerateTopOfBlock);
+      generateCinderBlockField(generator,
+                               cinderBlockSize,
+                               cinderBlockHeight,
+                               courseWidthXInNumberOfBlocks,
+                               courseLengthYInNumberOfBlocks,
+                               heightVariation,
+                               extrusionLength,
+                               startingBlockLength,
+                               0.0,
+                               defaultTiltAngle,
+                               defaultTiltAngle,
+                               randomHeightVariation,
+                               onlyGenerateTopOfBlock);
    }
 
    public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight,
@@ -101,8 +113,14 @@ public class PlanarRegionsListExamples
             generator.translate(0.0, 0.0, extraHeightVariation);
 
             double tiltAngle = EuclidCoreRandomTools.nextDouble(random, minTiltAngle, maxTiltAngle);
-            if(random.nextDouble() > absentBlockPercentage)
-               generateSingleCiderBlock(generator, cinderBlockSize + extrusionLength, cinderBlockHeight + extrusionLength, angleType, axisType, tiltAngle, onlyGenerateTopOfBlock);
+            if (random.nextDouble() > absentBlockPercentage)
+               generateSingleCiderBlock(generator,
+                                        cinderBlockSize + extrusionLength,
+                                        cinderBlockHeight + extrusionLength,
+                                        angleType,
+                                        axisType,
+                                        tiltAngle,
+                                        onlyGenerateTopOfBlock);
 
             generator.translate(0.0, 0.0, -extraHeightVariation);
             generator.translate(0.0, cinderBlockSize, 0.0);
@@ -114,7 +132,7 @@ public class PlanarRegionsListExamples
          }
          else
          {
-            generator.translate(0.0, 0.0, - heightVariation);
+            generator.translate(0.0, 0.0, -heightVariation);
          }
 
          generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
@@ -125,12 +143,21 @@ public class PlanarRegionsListExamples
       generator.addRectangle(startingBlockLength + extrusionLength, courseWidth + extrusionLength);
    }
 
-   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
+   public static void generateCinderBlockField(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight,
+                                               int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
    {
-      generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation, 0.0, 0.6);
+      generateCinderBlockField(generator,
+                               cinderBlockSize,
+                               cinderBlockHeight,
+                               courseWidthXInNumberOfBlocks,
+                               courseLengthYInNumberOfBlocks,
+                               heightVariation,
+                               0.0,
+                               0.6);
    }
 
-   public static PlanarRegionsList generateSteppingStoneField(double steppingStoneWidth, double steppingStoneLength, double stepWidth, double stepLength, int numberOfSteps)
+   public static PlanarRegionsList generateSteppingStoneField(double steppingStoneWidth, double steppingStoneLength, double stepWidth, double stepLength,
+                                                              int numberOfSteps)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -163,7 +190,7 @@ public class PlanarRegionsListExamples
    }
 
    public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
-                                                int axisType, double tiltAngle, boolean onlyGenerateTopOfBlock)
+                                               int axisType, double tiltAngle, boolean onlyGenerateTopOfBlock)
    {
       double angle = 0;
       switch (angleType)
@@ -175,7 +202,7 @@ public class PlanarRegionsListExamples
          angle = tiltAngle;
          break;
       case 2:
-         angle = - tiltAngle;
+         angle = -tiltAngle;
          break;
       }
 
@@ -191,7 +218,7 @@ public class PlanarRegionsListExamples
       }
 
       generator.rotate(angle, axis);
-      if(onlyGenerateTopOfBlock)
+      if (onlyGenerateTopOfBlock)
          generator.addRectangle(cinderBlockSize, cinderBlockSize);
       else
          generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
@@ -230,18 +257,18 @@ public class PlanarRegionsListExamples
       double length = 0.5;
       double width = 0.5;
 
-      generator.translate(maxX/2.0 + length/2.0, maxY/2.0 - width/2.0, 0.0);
+      generator.translate(maxX / 2.0 + length / 2.0, maxY / 2.0 - width / 2.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(1.5 * maxX, 1.25 * maxY, 0.01);
       generator.identity();
 
-      int sizeX = (int) (maxX/length);
-      int sizeY = (int) (maxY/width);
+      int sizeX = (int) (maxX / length);
+      int sizeY = (int) (maxY / width);
 
-      for (int i=0; i<sizeY; i++)
+      for (int i = 0; i < sizeY; i++)
       {
          generator.identity();
          generator.translate(0.0, i * width, 0.0);
-         for (int j=0; j<sizeX; j++)
+         for (int j = 0; j < sizeX; j++)
          {
             generator.translate(length, 0.0, 0.0);
             double height = RandomNumbers.nextDouble(random, 0.01, maxZ);
@@ -274,7 +301,8 @@ public class PlanarRegionsListExamples
 
       double quarterCircleLength = 0.5 * Math.PI * pathRadius;
       int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);
-      if(numberOfSteps % 2 != 1) numberOfSteps++;
+      if (numberOfSteps % 2 != 1)
+         numberOfSteps++;
 
       // starting block
       generator.translate(0.0, -0.5, 0.001);
@@ -296,10 +324,11 @@ public class PlanarRegionsListExamples
          double yPositionAlongCurve = pathRadius * Math.sin(angle);
 
          generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
-         generator.rotate(- angle, Axis.Z);
+         generator.rotate(-angle, Axis.Z);
 
          double xTranslation = cinderBlockSeparationWidth * 0.5;
-         if(i % 2 == 0) xTranslation *= -1.0;
+         if (i % 2 == 0)
+            xTranslation *= -1.0;
          generator.translate(xTranslation, 0.0, 0.0);
 
          generator.addRectangle(cinderBlockWidth, cinderBlockLength);
@@ -410,7 +439,7 @@ public class PlanarRegionsListExamples
       double stepDownHeight = 0.4;
       generator.translate(3.5, -1.5, 0.0);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
-      generator.translate(1.0, 0.0, - stepDownHeight);
+      generator.translate(1.0, 0.0, -stepDownHeight);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.translate(1.0, 0.0, stepDownHeight);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
@@ -422,7 +451,7 @@ public class PlanarRegionsListExamples
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.translate(1.0, 0.0, stepUpHeight);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
-      generator.translate(1.0, 0.0, - stepUpHeight);
+      generator.translate(1.0, 0.0, -stepUpHeight);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.identity();
 
@@ -454,7 +483,7 @@ public class PlanarRegionsListExamples
       generator.addRectangle(2.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.identity();
 
-      PlanarRegionsList obstacleCourse =  generator.getPlanarRegionsList();
+      PlanarRegionsList obstacleCourse = generator.getPlanarRegionsList();
 
       // overhang, wide barrier, and stepping stones
       generator.translate(4.5, -9.5, 2.5);
@@ -481,8 +510,8 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-//      PlanarRegionsList planarRegionsList = createMazeEnvironment();
-//      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
+      //      PlanarRegionsList planarRegionsList = createMazeEnvironment();
+      //      PlanarRegionsList planarRegionsList = generateSteppingStoneField(0.1, 0.1, 0.25, 0.3, 6);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
@@ -498,13 +527,25 @@ public class PlanarRegionsListExamples
       double randomHeightVariation = 0.0;
       boolean onlyGenerateTopOfBlock = false;
 
-      PlanarRegionsListExamples.generateCinderBlockField(generator, cinderBlockSize, cinderBlockHeight, (int) (courseLength / cinderBlockSize),
-                                                         (int) (courseWidth / cinderBlockSize), heightVariation, extrusionLength, 0.5, percentageAbsent,
-                                                         minTilt, maxTilt, randomHeightVariation, onlyGenerateTopOfBlock);
+      PlanarRegionsListExamples.generateCinderBlockField(generator,
+                                                         cinderBlockSize,
+                                                         cinderBlockHeight,
+                                                         (int) (courseLength / cinderBlockSize),
+                                                         (int) (courseWidth / cinderBlockSize),
+                                                         heightVariation,
+                                                         extrusionLength,
+                                                         0.5,
+                                                         percentageAbsent,
+                                                         minTilt,
+                                                         maxTilt,
+                                                         randomHeightVariation,
+                                                         onlyGenerateTopOfBlock);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment",
                                                                                                 new PlanarRegionsList[] {generator.getPlanarRegionsList()},
-                                                                                                null, 1e-5, false);
+                                                                                                null,
+                                                                                                1e-5,
+                                                                                                false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       scs.setGroundVisible(false);
@@ -513,9 +554,9 @@ public class PlanarRegionsListExamples
       //      startAndEndGraphics.translate(0.0, 0.0, 0.5);
       //      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
       //      startAndEndGraphics.identity();
-//      startAndEndGraphics.translate(3.0, 2.5, 0.5);
-//      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
-//      scs.addStaticLinkGraphics(startAndEndGraphics);
+      //      startAndEndGraphics.translate(3.0, 2.5, 0.5);
+      //      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
+      //      scs.addStaticLinkGraphics(startAndEndGraphics);
 
       scs.startOnAThread();
    }
