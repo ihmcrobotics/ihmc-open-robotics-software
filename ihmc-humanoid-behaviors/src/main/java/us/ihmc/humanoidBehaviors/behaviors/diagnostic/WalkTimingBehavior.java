@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Operator;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Run;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Task;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior.WalkTimingBehaviorStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
@@ -177,7 +176,8 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
 
       }
       System.out.println("********************************************** "+currentTask.taskID);
-      currentRun = timingBehavior.dataBase.saveRun(timingBehavior.dataBase.new Run(operator.operatorID, currentTask.taskID));
+      Run run = new Run(operator.operatorID, currentTask.taskID);
+      currentRun = timingBehavior.dataBase.saveRun(run);
 
       //save start time
    }
