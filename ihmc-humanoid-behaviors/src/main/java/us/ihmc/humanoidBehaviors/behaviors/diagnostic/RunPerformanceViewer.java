@@ -9,14 +9,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-
-import javax.swing.*;
 
 public class RunPerformanceViewer extends Application
 {
-   //   public SQLBehaviorDatabaseManager dataBase = new SQLBehaviorDatabaseManager();
+   public SQLBehaviorDatabaseManager dataBase = new SQLBehaviorDatabaseManager();
 
    public RunPerformanceViewer()
    {
@@ -32,17 +29,20 @@ public class RunPerformanceViewer extends Application
    private DatePicker runsDate;
 
    @FXML
-   void getAllRuns(ActionEvent event) {
+   void getAllRuns(ActionEvent event)
+   {
 
    }
 
    @FXML
-   void getLastRuns(ActionEvent event) {
+   void getLastRuns(ActionEvent event)
+   {
 
    }
 
    @FXML
-   void getRunsByDate(ActionEvent event) {
+   void getRunsByDate(ActionEvent event)
+   {
 
    }
 
