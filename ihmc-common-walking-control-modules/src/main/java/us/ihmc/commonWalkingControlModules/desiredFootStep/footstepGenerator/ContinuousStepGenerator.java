@@ -138,6 +138,7 @@ public class ContinuousStepGenerator implements Updatable
    private FootstepMessenger footstepMessenger;
    private FootstepAdjustment footstepAdjustment;
    private FootstepValidityIndicator footstepValidityIndicator;
+   private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -283,9 +284,8 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
          if (footstepValidityIndicator != null && !footstepValidityIndicator.isFootstepValid(nextFootstepPose3D))
          {
-            nextFootstepPose2D.set(footstepPose2D);
-            nextFootstepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(inPlaceWidth.getValue()));
-            nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
+            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
+            nextFootstepPose2D.set(nextFootstepPose3D);
          }
          
          int vizualizerIndex = i / 2;
@@ -558,7 +558,7 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Sets a checker to indicate step validity. If a step is not valid, the step generator
+    * Sets a method of indicating step validity. If a step is not valid, the step generator
     * replaces it with a square-up step
     *
     * @param footstepValidityIndicator method for checking step validity
@@ -566,6 +566,17 @@ public class ContinuousStepGenerator implements Updatable
    public void setFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
       this.footstepValidityIndicator = footstepValidityIndicator;
+   }
+
+   /**
+    * Sets a method of calculating a new step pose if {@link #footstepValidityIndicator} indicates
+    * an invalid step. Will not be used if {@link #footstepValidityIndicator} is not set
+    *
+    * @param alternateStepChooser method for calculating alternate step
+    */
+   public void setAlternateStepChooser(AlternateStepChooser alternateStepChooser)
+   {
+      this.alternateStepChooser = alternateStepChooser;
    }
 
    /**
@@ -740,11 +751,23 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Gets the side of the current support foot.
-    * 
+    *
     * @return the support foot side.
     */
    public RobotSide getCurrentSupportSide()
    {
       return currentSupportSide.getEnumValue();
+   }
+
+   private final FramePose2D alternateStepPose2D = new FramePose2D();
+
+   /**
+    * Calculates a square-up step given a 2D stance foot pose, to be used as an implementation of {@link AlternateStepChooser}
+    */
+   private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose, FramePose2DReadOnly defaultTouchdownPose, RobotSide swingSide, FramePose3D touchdownPoseToPack)
+   {
+      alternateStepPose2D.set(stanceFootPose);
+      alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(inPlaceWidth.getValue()));
+      touchdownPoseToPack.set(footstepAdjustment.adjustFootstep(alternateStepPose2D, swingSide));
    }
 }
