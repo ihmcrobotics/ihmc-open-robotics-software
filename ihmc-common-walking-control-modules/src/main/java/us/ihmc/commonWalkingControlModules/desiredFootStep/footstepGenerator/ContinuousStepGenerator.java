@@ -282,7 +282,7 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
-         if (footstepValidityIndicator != null && !footstepValidityIndicator.isFootstepValid(nextFootstepPose3D))
+         if (footstepValidityIndicator != null && !footstepValidityIndicator.isFootstepValid(nextFootstepPose3D, swingSide))
          {
             alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
             nextFootstepPose2D.set(nextFootstepPose3D);
