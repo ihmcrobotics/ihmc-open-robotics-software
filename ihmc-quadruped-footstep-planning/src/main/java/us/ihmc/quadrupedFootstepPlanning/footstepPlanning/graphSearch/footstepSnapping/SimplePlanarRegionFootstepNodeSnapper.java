@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepS
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -49,9 +50,14 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
          double y = yIndex * FootstepNode.gridSizeXY + projectionTranslation.getY();
          double z = highestRegion.getPlaneZGivenXY(x, y);
 
+         RigidBodyTransform regionTransform = new RigidBodyTransform();
+         highestRegion.getTransformToWorld(regionTransform);
+         Quaternion regionOrientation = new Quaternion();
+         regionTransform.getRotation(regionOrientation);
+
          RigidBodyTransform snapTransform = new RigidBodyTransform();
-         highestRegion.getTransformToWorld(snapTransform);
          snapTransform.setTranslation(projectionTranslation.getX(), projectionTranslation.getY(), z);
+//         snapTransform.setRotation(regionOrientation);
 
          return new FootstepNodeSnapData(snapTransform);
       }
