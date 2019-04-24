@@ -26,10 +26,12 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
@@ -41,6 +43,7 @@ import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -123,7 +126,8 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
-      continuousStepGenerator.setFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
+//      continuousStepGenerator.setFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
+      continuousStepGenerator.setFootstepValidityIndicator((solePose, robotSide) -> isStepSnappable(solePose, robotSide) && isSafeDistanceFromObstacle(solePose, robotSide));
 
       SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
       parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
@@ -222,7 +226,7 @@ public class StepGeneratorJavaFXController
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
 
-      if (planarRegionsList != null)
+      if (planarRegionsList.get() != null)
       {
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
          footPolygonToWiggle.set(footPolygons.get(footSide));
@@ -358,7 +362,7 @@ public class StepGeneratorJavaFXController
 
    private final Point3D bodyCenter = new Point3D();
 
-   private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly solePose)
+   private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly solePose, RobotSide robotSide)
    {
       double groundOffset = 0.2;
       double bodyRadius = 0.5;
@@ -382,6 +386,22 @@ public class StepGeneratorJavaFXController
       }
 
       return true;
+   }
+
+   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final PlanarRegion tempRegion = new PlanarRegion();
+
+   private boolean isStepSnappable(FramePose3DReadOnly solePose, RobotSide robotSide)
+   {
+      tempTransform.setTranslation(solePose.getPosition().getX(), solePose.getPosition().getY(), 0.0);
+      tempTransform.setRotationYaw(solePose.getYaw());
+
+      footPolygon.set(footPolygons.get(robotSide));
+      footPolygon.applyTransform(tempTransform, false);
+
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
+      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, tempRegion) != null;
    }
 
    private void processToggleFlamingoMode(RobotSide robotSide, ButtonState state)
