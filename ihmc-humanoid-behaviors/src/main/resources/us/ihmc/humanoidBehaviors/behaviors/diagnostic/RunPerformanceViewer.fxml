@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunPerformanceViewer">
+   <children>
+      <Label layoutX="14.0" layoutY="14.0" text="Run Performance Log:" />
+      <AnchorPane layoutX="14.0" layoutY="37.0" prefHeight="153.0" prefWidth="569.0">
+         <children>
+            <ScrollPane layoutY="33.0" prefHeight="120.0" prefWidth="569.0">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="130.0" prefWidth="575.0">
+                     <children>
+                        <TableView fx:id="runsTable" prefHeight="120.0" prefWidth="556.0">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="Run" />
+                            <TableColumn prefWidth="75.0" text="Operator" />
+                              <TableColumn prefWidth="75.0" text="Task" />
+                              <TableColumn prefWidth="75.0" text="Success" />
+                              <TableColumn prefWidth="255.0" text="Notes" />
+                          </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+            <Button layoutY="2.0" mnemonicParsing="false" onAction="#getAllRuns" text="Get All Runs" />
+            <Button layoutX="111.0" layoutY="2.0" mnemonicParsing="false" onAction="#getLastRuns" text="Get Last n Runs" />
+            <TextField fx:id="numberOfRunsTextField" layoutX="216.0" layoutY="2.0" prefHeight="25.0" prefWidth="36.0" text="10" />
+            <Button layoutX="288.0" layoutY="2.0" mnemonicParsing="false" onAction="#getRunsByDate" text="Get Runs by Date" />
+            <DatePicker fx:id="runsDate" layoutX="402.0" layoutY="2.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="302.0" layoutY="200.0" prefHeight="262.0" prefWidth="280.0">
+         <children>
+            <ScrollPane prefHeight="262.0" prefWidth="280.0">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="268.0" prefWidth="281.0">
+                     <children>
+                        <TableView prefHeight="262.0" prefWidth="280.0">
+                           <columns>
+                              <TableColumn prefWidth="133.0" text="Event" />
+                              <TableColumn prefWidth="154.0" text="Time in seconds" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="14.0" layoutY="200.0" prefHeight="262.0" prefWidth="280.0">
+         <children>
+            <ScrollPane layoutY="109.0" prefHeight="153.0" prefWidth="280.0">
+               <content>
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="156.0" prefWidth="281.0">
+                     <children>
+                        <TableView layoutX="2.0" prefHeight="153.0" prefWidth="280.0">
+                           <columns>
+                              <TableColumn prefWidth="133.0" text="Event" />
+                              <TableColumn prefWidth="154.0" text="Time in seconds" />
+                           </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+               </content>
+            </ScrollPane>
+            <Label layoutX="7.0" layoutY="6.0" text="Run ID:" />
+            <Label layoutX="7.0" layoutY="43.0" text="Task:" />
+            <Label layoutX="7.0" layoutY="60.0" text="Total Time:" />
+            <Label layoutX="7.0" layoutY="23.0" text="Operator:" />
+            <Label layoutX="9.0" layoutY="77.0" text="Success?" />
+            <Label layoutX="84.0" layoutY="3.0" text="id" />
+            <Label layoutX="84.0" layoutY="40.0" text="task" />
+            <Label layoutX="84.0" layoutY="57.0" text="time" />
+            <Label layoutX="84.0" layoutY="20.0" text="operator" />
+            <Label layoutX="86.0" layoutY="74.0" text="success" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
