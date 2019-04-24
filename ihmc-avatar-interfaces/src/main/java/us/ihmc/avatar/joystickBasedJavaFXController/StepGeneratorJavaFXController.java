@@ -101,7 +101,8 @@ public class StepGeneratorJavaFXController
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   private final AtomicReference<PlanarRegionsList> latestPlanarRegions = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsListMessage> planarRegionsListMessage = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>(null);
    private final SnapAndWiggleSingleStep snapAndWiggleSingleStep;
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
@@ -124,6 +125,10 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
       continuousStepGenerator.setFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
 
+      SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+      parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
+      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
+
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
       ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
@@ -134,18 +139,13 @@ public class StepGeneratorJavaFXController
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.publisherTopicNameGenerator,
-                                           s -> latestPlanarRegions.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(s.takeNextData())));
+                                           REACommunicationProperties.publisherTopicNameGenerator, s -> planarRegionsListMessage.set(s.takeNextData()));
 
       pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
       footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
 
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
       stepTime = () -> stepParametersReference.get().getSwingDuration() + stepParametersReference.get().getTransferDuration();
-
-      SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
-      parameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
-      snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(parameters);
 
       animationTimer = new AnimationTimer()
       {
@@ -154,6 +154,14 @@ public class StepGeneratorJavaFXController
          {
             try
             {
+               PlanarRegionsListMessage latestMessage = planarRegionsListMessage.getAndSet(null);
+               if(latestMessage != null)
+               {
+                  PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestMessage);
+                  snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+                  StepGeneratorJavaFXController.this.planarRegionsList.set(planarRegionsList);
+               }
+
                JoystickStepParameters stepParameters = stepParametersReference.get();
                continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(), stepParameters.getTransferDuration());
                continuousStepGenerator.update(Double.NaN);
@@ -214,12 +222,9 @@ public class StepGeneratorJavaFXController
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
 
-      PlanarRegionsList planarRegionsList = latestPlanarRegions.get();
-
       if (planarRegionsList != null)
       {
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
-         snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
          footPolygonToWiggle.set(footPolygons.get(footSide));
          try
          {
@@ -361,7 +366,7 @@ public class StepGeneratorJavaFXController
       bodyCenter.set(solePose.getPosition());
       bodyCenter.addZ(bodyRadius + groundOffset);
 
-      PlanarRegionsList planarRegionsList = latestPlanarRegions.get();
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
