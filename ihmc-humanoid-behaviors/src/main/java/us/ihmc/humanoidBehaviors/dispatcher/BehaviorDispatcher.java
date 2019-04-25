@@ -229,6 +229,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
             stateMachine.stop();
             behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
             behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+            requestedBehavior.set(stopBehaviorKey);
             break;
          case PAUSE:
             stateMachine.pause();
