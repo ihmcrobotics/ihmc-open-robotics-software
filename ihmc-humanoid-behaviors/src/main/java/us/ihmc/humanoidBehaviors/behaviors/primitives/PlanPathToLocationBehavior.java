@@ -158,10 +158,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          }
 
          @Override
-         public boolean isDone(double timeInState)
+         public boolean isDone()
          {
             
-            return super.isDone(timeInState) || footPlanStatusQueue.isNewPacketAvailable();
+            return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
 
          }
       };

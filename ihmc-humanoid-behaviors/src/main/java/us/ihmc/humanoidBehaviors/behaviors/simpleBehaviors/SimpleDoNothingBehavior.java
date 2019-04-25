@@ -29,6 +29,7 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      System.out.println("entering do nothing behavior");
    }
 
    @Override
