@@ -114,6 +114,8 @@ public class ResetRobotBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
+      publishTextToSpeech("Resetting Robot Pose Complete");
+
    }
 
 }

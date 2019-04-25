@@ -142,7 +142,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          }
 
          @Override
-         public boolean isDone(double timeInState)
+         public boolean isDone()
          {
             // TODO Auto-generated method stub
             return doneWalking();
