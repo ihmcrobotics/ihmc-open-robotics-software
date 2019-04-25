@@ -90,6 +90,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)},
  * {@link #setHeightMapBasedFootstepAdjustment(HeightMap)}, and
  * {@link #setSupportFootBasedFootstepAdjustment(boolean)}.
+ * <li><u>Method for indicating step validity and providing alternative steps for invalid ones:</u><br>
+ * See {@link #setFootstepValidityIndicator(FootstepValidityIndicator)} to set method for indicating invalid steps.
+ * By default, no steps are deemed invalid. See {@link #setAlternateStepChooser(AlternateStepChooser)} to set
+ * how an alternative step is chosen if a step is invalid. The default is to do a square-up step,
+ * see {@link #calculateSquareUpStep}.
  * <li><u>Frequency at which footsteps are sent to the controller:</u><br>
  * See {@link #setNumberOfTicksBeforeSubmittingFootsteps(int)}.
  * </ul>
