@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="800.0" minHeight="-Infinity" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunPerformanceViewer">
    <children>
@@ -97,6 +98,20 @@
                               <Label fx:id="totalTimeLabel" />
                               <Label fx:id="operatorNameLabel" />
                               <Label fx:id="successLabel" />
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="106.0" prefWidth="157.0">
+                           <children>
+                              <Label text="Average Speed Over 8m:" textAlignment="CENTER" wrapText="true">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="averageSpeedLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="156.0" textAlignment="CENTER">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
                            </children>
                         </VBox>
                      </children>
