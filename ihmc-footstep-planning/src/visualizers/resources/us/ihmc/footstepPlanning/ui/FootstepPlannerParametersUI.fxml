@@ -88,13 +88,16 @@
                             <Spinner fx:id="maxStepYaw" editable="true" GridPane.columnIndex="4" />
                             <Spinner fx:id="minStepYaw" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                             <Spinner fx:id="minFootholdPercent" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                        <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                        <Spinner fx:id="cliffClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
 
                         <Label layoutX="734.0" layoutY="77.0" text="Min X Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                         <Label layoutX="714.0" layoutY="113.0" text="Min Y Clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                         <Label layoutX="714.0" layoutY="113.0" text="Cliff clearance" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                        <Label layoutX="714.0" layoutY="113.0" text="Goal turn radius" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+
+                            <Spinner fx:id="minXClearance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                            <Spinner fx:id="minYClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="3" />
+                            <Spinner fx:id="cliffClearance" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+                            <Spinner fx:id="goalTurnRadius" editable="true" layoutX="820.0" layoutY="72.0" GridPane.columnIndex="4" GridPane.rowIndex="5" />
                         </children>
                     </GridPane>
                </children>

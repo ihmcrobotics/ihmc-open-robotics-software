@@ -80,6 +80,8 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> maxStepDownX;
    @FXML
    private Spinner<Double> stepDownHeight;
+   @FXML
+   private Spinner<Double> goalTurnRadius;
 
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
@@ -139,6 +141,7 @@ public class FootstepPlannerParametersUIController
       maxXYWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
       maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
       wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
+      goalTurnRadius.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10000.0, 1.0, 0.1));
 
       maxStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
       minStepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> updateStepShape());
@@ -186,6 +189,7 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionBindMinZToConsiderStepUp(stepUpHeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionBindMaxXForStepDown(maxStepDownX.getValueFactory().valueProperty());
       parametersProperty.bidirectionBindMinZToConsiderStepDown(stepDownHeight.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindGoalTurnRadius(goalTurnRadius.getValueFactory().valueProperty());
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
 

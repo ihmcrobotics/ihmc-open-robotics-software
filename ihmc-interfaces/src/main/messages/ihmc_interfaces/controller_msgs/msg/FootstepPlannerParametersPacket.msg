@@ -236,5 +236,8 @@ float64 min_x_clearance_from_stance -1.0
 # this parameter.
 float64 min_y_clearance_from_stance -1.0
 
+# Radius around the goal inside which the planner will start to turn to match the goal's orientation
+float64 goal_turn_radius 1.0
+
 # When using a cost based planning approach this value defines the weighting parameters to be used
 FootstepPlannerCostParametersPacket cost_parameters

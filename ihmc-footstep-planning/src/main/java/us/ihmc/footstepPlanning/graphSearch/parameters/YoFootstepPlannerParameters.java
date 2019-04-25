@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerCostParametersPacket;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -48,6 +47,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
    private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
    private final YoDouble minYClearanceFromStance = new YoDouble("minYClearanceFromStance", registry);
+   private final YoDouble goalTurnRadius = new YoDouble("goalTurnRadius", registry);
 
    private final YoFootstepPlannerCostParameters costParameters;
 
@@ -97,6 +97,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
       minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
       minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
+      goalTurnRadius.set(defaults.getGoalTurnRadius());
 
       costParameters.set(defaults.getCostParameters());
    }
@@ -323,6 +324,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       return costParameters;
    }
 
+   @Override
+   public double getGoalTurnRadius()
+   {
+      return goalTurnRadius.getDoubleValue();
+   }
+
    public void set(FootstepPlannerParametersPacket parametersPacket)
    {
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
@@ -392,6 +399,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != -1.0)
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      setGoalTurnRadius(parametersPacket.getGoalTurnRadius());
 
       setCostParameters(parametersPacket.getCostParameters());
    }
@@ -574,6 +582,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public void setMinYClearanceFromStance(double minYClearanceFromStance)
    {
       this.minYClearanceFromStance.set(minYClearanceFromStance);
+   }
+
+   public void setGoalTurnRadius(double goalTurnRadius)
+   {
+      this.goalTurnRadius.set(goalTurnRadius);
    }
 
    public void setCostParameters(FootstepPlannerCostParameters parameters)

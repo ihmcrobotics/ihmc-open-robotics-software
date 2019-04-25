@@ -32,6 +32,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double maximumZPenetrationOnValleyRegions;
    private double cliffHeightToAvoid;
    private double minimumDistanceFromCliffBottoms;
+   private double goalTurnRadius;
 
    private boolean returnBestEffortPlan;
    private int minimumStepsForBestEffortPlan;
@@ -85,6 +86,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.maximumZPenetrationOnValleyRegions = footstepPlannerParameters.getMaximumZPenetrationOnValleyRegions();
       this.cliffHeightToAvoid = footstepPlannerParameters.getCliffHeightToAvoid();
       this.minimumDistanceFromCliffBottoms = footstepPlannerParameters.getMinimumDistanceFromCliffBottoms();
+      this.goalTurnRadius = footstepPlannerParameters.getGoalTurnRadius();
 
       this.returnBestEffortPlan = footstepPlannerParameters.getReturnBestEffortPlan();
       this.minimumStepsForBestEffortPlan = footstepPlannerParameters.getMinimumStepsForBestEffortPlan();
@@ -362,6 +364,11 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.costParameters.setBoundingBoxCost(boundingBoxCost);
    }
 
+   public void setGoalTurnRadius(double goalTurnRadius)
+   {
+      this.goalTurnRadius = goalTurnRadius;
+   }
+
    @Override
    public double getIdealFootstepWidth()
    {
@@ -576,6 +583,12 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getBodyBoxBaseZ()
    {
       return bodyBoxBaseZ;
+   }
+
+   @Override
+   public double getGoalTurnRadius()
+   {
+      return goalTurnRadius;
    }
 
    public boolean useQuadraticDistanceCost()

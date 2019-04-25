@@ -92,6 +92,7 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
+      packet.setGoalTurnRadius(parameters.getGoalTurnRadius());
 
       FootstepPlannerCostParameters costParameters = parameters.getCostParameters();
 

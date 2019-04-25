@@ -114,6 +114,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -240,6 +242,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.getCdrSerializedSize(data.getCostParameters(), current_alignment);
 
 
@@ -322,6 +327,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMinYClearanceFromStance());
 
+      cdr.write_type_6(data.getGoalTurnRadius());
+
       controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.write(data.getCostParameters(), cdr);
    }
 
@@ -401,6 +408,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMinYClearanceFromStance(cdr.read_type_6());
       	
+      data.setGoalTurnRadius(cdr.read_type_6());
+      	
       controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType.read(data.getCostParameters(), cdr);	
 
    }
@@ -445,6 +454,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("body_box_base_z", data.getBodyBoxBaseZ());
       ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
       ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
+      ser.write_type_6("goal_turn_radius", data.getGoalTurnRadius());
       ser.write_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());
 
    }
@@ -489,6 +499,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setBodyBoxBaseZ(ser.read_type_6("body_box_base_z"));
       data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
       data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
+      data.setGoalTurnRadius(ser.read_type_6("goal_turn_radius"));
       ser.read_type_a("cost_parameters", new controller_msgs.msg.dds.FootstepPlannerCostParametersPacketPubSubType(), data.getCostParameters());
 
    }

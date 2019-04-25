@@ -39,7 +39,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode)
    {
       double distanceToGoal = node.euclideanDistance(goalNode);
-      double finalTurnProximity = parameters.getFinalTurnProximity();
+      double finalTurnProximity = parameters.getGoalTurnRadius();
 
       double minimumBlendDistance = (1.0 - goalTurnRadiusBlendRatio) * finalTurnProximity;
       double maximumBlendDistance = (1.0 + goalTurnRadiusBlendRatio) * finalTurnProximity;

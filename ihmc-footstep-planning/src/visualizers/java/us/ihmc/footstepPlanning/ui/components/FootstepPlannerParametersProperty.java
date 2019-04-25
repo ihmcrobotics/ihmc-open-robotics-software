@@ -25,6 +25,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private DoubleField minZToConsiderStepUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumStepZWhenSteppingUp);
    private DoubleField maxXForStepDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepXWhenForwardAndDown, SettableFootstepPlannerParameters::setMaximumStepXWhenForwardAndDown);
    private DoubleField minZToConsiderStepDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepZWhenForwardAndDown, SettableFootstepPlannerParameters::setMaximumStepZWhenForwardAndDown);
+   private DoubleField goalTurnRadius = new DoubleField(SettableFootstepPlannerParameters::getGoalTurnRadius, SettableFootstepPlannerParameters::setGoalTurnRadius);
 
    private BooleanField returnBestEffortPlan = new BooleanField(SettableFootstepPlannerParameters::getReturnBestEffortPlan, SettableFootstepPlannerParameters::setReturnBestEffortPlan);
    private BooleanField useQuadraticDistanceCost = new BooleanField(SettableFootstepPlannerParameters::useQuadraticDistanceCost, SettableFootstepPlannerParameters::setUseQuadraticDistanceCost);
@@ -299,5 +300,10 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionBindMinZToConsiderStepDown(Property<Double> property)
    {
       bindFieldBidirectionalToNumberProperty(property, minZToConsiderStepDown);
+   }
+
+   public void bidirectionalBindGoalTurnRadius(Property<Double> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, goalTurnRadius);
    }
 }
