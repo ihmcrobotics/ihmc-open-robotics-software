@@ -24,7 +24,7 @@ public class RunPerformanceViewer extends Application implements Initializable
    private ObservableList<Run> runsList = FXCollections.observableArrayList();
    private ObservableList<RunEvent> runEventsList = FXCollections.observableArrayList();
    private ObservableList<RunEvent> runEventsSummaryList = FXCollections.observableArrayList();
-   private DecimalFormat format = new DecimalFormat("0.0");
+   private DecimalFormat format = new DecimalFormat("0.00");
 
    @FXML
    private TableView<Run> runsTableView;
@@ -52,6 +52,8 @@ public class RunPerformanceViewer extends Application implements Initializable
    private Label operatorNameLabel;
    @FXML
    private Label successLabel;
+   @FXML
+   private Label averageSpeedLabel;
    @FXML
    private TableView<RunEvent> eventsListTableView;
    @FXML
@@ -147,6 +149,7 @@ public class RunPerformanceViewer extends Application implements Initializable
                }
 
                totalTimeLabel.setText(format.format(totalTime));
+               averageSpeedLabel.setText(format.format(8.0/totalTime) + "m/s");
             }
          });
          return row;
