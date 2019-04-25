@@ -218,10 +218,10 @@ public class SQLBehaviorDatabaseManager
 
          PreparedStatement st = databaseConnection
                .prepareStatement("INSERT INTO run_events (run_id,event_name,event_time_in_seconds,is_successful) VALUES (?,?,?,?)");
-         st.setInt(1, run.runID);
-         st.setString(2, run.eventName);
-         st.setFloat(3, run.runTime);
-         st.setBoolean(4, run.successful);
+         st.setInt(1, run.getRunID());
+         st.setString(2, run.getEventName());
+         st.setFloat(3, run.getEventTimeInSeconds());
+         st.setBoolean(4, run.isSuccessful());
          statements.add(st);
          return true;
       }
@@ -406,6 +406,36 @@ public class SQLBehaviorDatabaseManager
       return false;
    }
 
+   public ArrayList<RunEvent> getEventsForRun(int runID)
+   {
+      Statement statement = null;
+      ArrayList<RunEvent> runEventsList = new ArrayList<RunEvent>();
+      try
+      {
+         statement = databaseConnection.createStatement();
+
+         ResultSet rs = statement.executeQuery("SELECT * FROM run_events WHERE run_id = " + runID + ";");
+         while (rs.next())
+         {
+            String eventName = rs.getString("event_name");
+            Float eventTimeInSeconds = rs.getFloat("event_time_in_seconds");
+            Boolean isSuccessful = rs.getBoolean("is_successful");
+            Integer eventSequence = rs.getInt("event_sequence");
+            RunEvent runEvent = new RunEvent(runID, eventName, eventTimeInSeconds, isSuccessful, eventSequence);
+            runEventsList.add(runEvent);
+         }
+         rs.close();
+         statement.close();
+         return runEventsList;
+      }
+      catch (Exception e)
+      {
+         System.err.println(e.getClass().getName() + ": ");
+         e.printStackTrace();
+      }
+      return null;
+   }
+
    public class Operator
    {
       public Operator(String name)
@@ -415,23 +445,6 @@ public class SQLBehaviorDatabaseManager
 
       public int operatorID;
       public String name;
-   }
-
-
-   public class RunEvent
-   {
-      public RunEvent(int runID, String eventName, float runTime, boolean successfull)
-      {
-         this.runID = runID;
-         this.eventName = eventName;
-         this.runTime = runTime;
-         this.successful = successfull;
-      }
-
-      public int runID;
-      public String eventName;
-      public float runTime;
-      public boolean successful;
    }
 
    public class Task
@@ -481,11 +494,11 @@ public class SQLBehaviorDatabaseManager
       Run returnedRun2 = test.getRun(lastRun.runID);
       System.out.println(returnedRun2.notes);
 
-      RunEvent event = test.new RunEvent(lastRun.runID, "walk to door", 10, true);
+      RunEvent event = new RunEvent(lastRun.runID, "walk to door", 10, true);
 
       test.saveRunEvent(event);
 
-      RunEvent event2 = test.new RunEvent(lastRun.runID, "plan to door", 9, true);
+      RunEvent event2 = new RunEvent(lastRun.runID, "plan to door", 9, true);
 
       test.saveRunEvent(event2);
    }

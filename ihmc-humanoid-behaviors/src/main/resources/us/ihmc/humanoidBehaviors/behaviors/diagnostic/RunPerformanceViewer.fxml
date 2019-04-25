@@ -9,6 +9,8 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="800.0" minHeight="-Infinity" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunPerformanceViewer">
    <children>
@@ -19,13 +21,13 @@
               <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="246.0" prefWidth="785.0">
                      <children>
-                        <TableView fx:id="runsTable" prefHeight="120.0" prefWidth="556.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="runsTableView" prefHeight="120.0" prefWidth="556.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
-                            <TableColumn fx:id="runTableColumn" prefWidth="75.0" text="Run" />
-                            <TableColumn fx:id="operatorTableColumn" prefWidth="75.0" text="Operator" />
-                              <TableColumn fx:id="taskTableColumn" prefWidth="75.0" text="Task" />
-                              <TableColumn fx:id="successTableColumn" prefWidth="75.0" text="Success" />
-                              <TableColumn fx:id="notesTableColumn" prefWidth="255.0" text="Notes" />
+                            <TableColumn fx:id="runTableColumn" prefWidth="43.0" resizable="false" text="Run" />
+                            <TableColumn fx:id="operatorTableColumn" prefWidth="123.0" text="Operator" />
+                              <TableColumn fx:id="taskTableColumn" prefWidth="128.0" text="Task" />
+                              <TableColumn fx:id="successTableColumn" minWidth="5.0" prefWidth="52.0" resizable="false" text="Success" />
+                              <TableColumn fx:id="notesTableColumn" prefWidth="431.0" text="Notes" />
                           </columns>
                         </TableView>
                      </children>
@@ -47,10 +49,10 @@
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="268.0" prefWidth="281.0">
                            <children>
-                              <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TableView fx:id="eventsListTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <columns>
-                                    <TableColumn prefWidth="133.0" text="Event" />
-                                    <TableColumn prefWidth="154.0" text="Time in seconds" />
+                                    <TableColumn fx:id="eventsListColumn" prefWidth="200.0" text="Event" />
+                                    <TableColumn fx:id="eventsListTimeColumn" prefWidth="177.0" text="Time in seconds" />
                                  </columns>
                               </TableView>
                            </children>
@@ -67,26 +69,38 @@
                      <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="156.0" prefWidth="391.0">
                            <children>
-                              <TableView layoutX="2.0" prefHeight="153.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TableView fx:id="summaryEventsListTableView" layoutX="2.0" prefHeight="153.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <columns>
-                                    <TableColumn prefWidth="133.0" text="Event" />
-                                    <TableColumn prefWidth="154.0" text="Time in seconds" />
+                                    <TableColumn fx:id="summaryEventsListColumn" prefWidth="200.0" text="Event" />
+                                    <TableColumn fx:id="summaryEventsListTimeColumn" prefWidth="175.0" text="Time in seconds" />
                                  </columns>
                               </TableView>
                            </children>
                         </AnchorPane>
                      </content>
                   </ScrollPane>
-                  <Label layoutX="7.0" layoutY="6.0" text="Run ID:" />
-                  <Label layoutX="7.0" layoutY="43.0" text="Task:" />
-                  <Label layoutX="7.0" layoutY="60.0" text="Total Time:" />
-                  <Label layoutX="7.0" layoutY="23.0" text="Operator:" />
-                  <Label layoutX="9.0" layoutY="77.0" text="Success?" />
-                  <Label layoutX="84.0" layoutY="3.0" text="id" />
-                  <Label layoutX="84.0" layoutY="40.0" text="task" />
-                  <Label layoutX="84.0" layoutY="57.0" text="time" />
-                  <Label layoutX="84.0" layoutY="20.0" text="operator" />
-                  <Label layoutX="86.0" layoutY="74.0" text="success" />
+                  <HBox layoutX="9.0" prefHeight="106.0" prefWidth="364.0">
+                     <children>
+                        <VBox prefHeight="106.0" prefWidth="107.0">
+                           <children>
+                              <Label text="Run ID:" />
+                              <Label text="Task:" />
+                              <Label text="Total Time:" />
+                              <Label text="Operator:" />
+                              <Label text="Success?" />
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="200.0" prefWidth="100.0">
+                           <children>
+                              <Label fx:id="selectedRunIDLabel" />
+                              <Label fx:id="taskNameLabel" />
+                              <Label fx:id="totalTimeLabel" />
+                              <Label fx:id="operatorNameLabel" />
+                              <Label fx:id="successLabel" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
             </AnchorPane>
          </left>

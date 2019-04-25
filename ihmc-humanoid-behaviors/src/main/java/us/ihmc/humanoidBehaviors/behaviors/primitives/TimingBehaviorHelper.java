@@ -12,9 +12,9 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunEvent;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.RunEvent;
 import us.ihmc.ros2.Ros2Node;
 
 public class TimingBehaviorHelper extends AbstractBehavior
@@ -151,7 +151,7 @@ public class TimingBehaviorHelper extends AbstractBehavior
 
    public void saveEvent(int runID, String eventName, double eventTime)
    {
-      dataBase.saveRunEvent(dataBase.new RunEvent(runID, eventName, (float) eventTime, true));
+      dataBase.saveRunEvent(new RunEvent(runID, eventName, (float) eventTime, true));
    }
 
 }
