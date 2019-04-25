@@ -16,7 +16,9 @@ public class Run
 
    public int runID;
    public int operatorID;
+   public String operatorName;
    public int taskID;
+   public String taskName;
    public boolean successful;
    public String notes;
    public String logFile;
@@ -43,6 +45,16 @@ public class Run
       this.operatorID = operatorID;
    }
 
+   public String getOperatorName()
+   {
+      return operatorName;
+   }
+
+   public void setOperatorName(String operatorName)
+   {
+      this.operatorName = operatorName;
+   }
+
    public int getTaskID()
    {
       return taskID;
@@ -51,6 +63,16 @@ public class Run
    public void setTaskID(int taskID)
    {
       this.taskID = taskID;
+   }
+
+   public String getTaskName()
+   {
+      return taskName;
+   }
+
+   public void setTaskName(String taskName)
+   {
+      this.taskName = taskName;
    }
 
    public boolean isSuccessful()

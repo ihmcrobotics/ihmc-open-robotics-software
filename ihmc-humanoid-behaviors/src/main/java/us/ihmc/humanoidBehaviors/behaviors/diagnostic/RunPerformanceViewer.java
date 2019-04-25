@@ -85,14 +85,12 @@ public class RunPerformanceViewer extends Application implements Initializable
    public void initialize(URL location, ResourceBundle resources)
    {
       runTableColumn.setCellValueFactory(new PropertyValueFactory<>("runID"));
-      operatorTableColumn.setCellValueFactory(new PropertyValueFactory<>("operatorID"));
-      taskTableColumn.setCellValueFactory(new PropertyValueFactory<>("taskID"));
-      successTableColumn.setCellValueFactory(new PropertyValueFactory<>("sucess"));
+      operatorTableColumn.setCellValueFactory(new PropertyValueFactory<>("operatorName"));
+      taskTableColumn.setCellValueFactory(new PropertyValueFactory<>("taskName"));
+      successTableColumn.setCellValueFactory(new PropertyValueFactory<>("successful"));
       notesTableColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
 
       runsTable.setItems(runsList);
-      Run temp = new Run(99, 89);
-      runsList.add(temp);
    }
 
    public static void main(String[] args)
