@@ -241,13 +241,13 @@ public class PlanarRegionsListExamples
 
             generator.translate(0.0, cinderBlockSurfaceSquareSize, 0.0);
 
-            if ((courseWidthYNumberOfBlocks - y) < x) // <-- complicated function to get the corner pile
+            if (((courseWidthYNumberOfBlocks - 1) - y) < (x + 1)) // <-- complicated function to get the corner pile
             {
                generator.translate(0.0, 0.0, zStepUpPerRow);
             }
          }
 
-         generator.translate(0.0, 0.0, -x * zStepUpPerRow);
+         generator.translate(0.0, 0.0, -(x + 1) * zStepUpPerRow);
 
          generator.translate(cinderBlockSurfaceSquareSize, -cinderBlockSurfaceSquareSize * courseWidthYNumberOfBlocks, 0.0);
       }
