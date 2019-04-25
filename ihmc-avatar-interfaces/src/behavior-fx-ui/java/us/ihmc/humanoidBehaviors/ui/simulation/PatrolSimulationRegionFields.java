@@ -37,10 +37,13 @@ public class PatrolSimulationRegionFields
 
    public static PlanarRegionsList createUpDownOpenHouseRegions()
    {
-      Random random = new Random(System.nanoTime());
+      Random random = new Random(8349829898174L);
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.setId(greenId);
       generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+
+      generator.translate(1.0, -superGridSize / 2, 0.0);
+
       addTopFlatRegion(generator);
       addPlusFormationSlopes(random, generator);
       addXFormationSlopes(random, generator);
