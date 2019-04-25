@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.taskExecutor.NullTask;
-import us.ihmc.robotics.taskExecutor.Task;
 import us.ihmc.robotics.taskExecutor.TaskExecutor;
 
 public class TaskExecutorTest
