@@ -1,22 +1,18 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import sun.rmi.runtime.Log;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.FakeREAModule;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.ui.simulation.PatrolSimulationRegionFields;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.parameterTuner.remote.ParameterTuner;
@@ -94,25 +90,6 @@ public class AtlasBehaviorUIDemo extends Application
       ui.show();
    }
 
-   private PlanarRegionsList createPlanarRegions()
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      PlanarRegionsListExamples.generateCinderBlockField(generator,
-                                                         0.4,
-                                                         0.1,
-                                                         5,
-                                                         6,
-                                                         0.02,
-                                                         -0.03,
-                                                         1.5,
-                                                         0.0,
-                                                         Math.toRadians(15.0),
-                                                         Math.toRadians(15.0),
-                                                         0.05,
-                                                         false);
-      return generator.getPlanarRegionsList();
-   }
-
    private AtlasRobotModel createRobotModel()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values,
@@ -122,6 +99,11 @@ public class AtlasBehaviorUIDemo extends Application
                                                                                                      true);
       return new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false, simulationContactPoints);
 
+   }
+
+   private PlanarRegionsList createPlanarRegions()
+   {
+      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
    }
 
    @Override
