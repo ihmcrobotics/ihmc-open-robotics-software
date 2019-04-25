@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerCostParameters;
@@ -9,6 +10,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
+   private static final double goalTurnRadiusBlendRatio = 0.25;
+
    private final FootstepPlannerParameters parameters;
    private final FootstepPlannerCostParameters costParameters;
 
@@ -38,22 +41,20 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double distanceToGoal = node.euclideanDistance(goalNode);
       double finalTurnProximity = parameters.getFinalTurnProximity();
 
-      double minimumBlendDistance = 0.75 * finalTurnProximity;
-      double maximumBlendDistance = 1.25 * finalTurnProximity;
+      double minimumBlendDistance = (1.0 - goalTurnRadiusBlendRatio) * finalTurnProximity;
+      double maximumBlendDistance = (1.0 + goalTurnRadiusBlendRatio) * finalTurnProximity;
+
+      if(distanceToGoal < minimumBlendDistance)
+      {
+         return goalNode.getYaw();
+      }
 
       double pathHeading = Math.atan2(goalNode.getY() - node.getY(), goalNode.getX() - node.getX());
       pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
 
-      double yawMultiplier;
-      if(distanceToGoal < minimumBlendDistance)
-         yawMultiplier = 0.0;
-      else if(distanceToGoal > maximumBlendDistance)
-         yawMultiplier = 1.0;
-      else
-         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
+      double alpha = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
+      alpha = EuclidCoreTools.clamp(alpha, 0.0, 1.0);
 
-      double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getYaw();
-      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
+      return alpha * pathHeading + (1.0 - alpha) * goalNode.getYaw();
    }
 }
