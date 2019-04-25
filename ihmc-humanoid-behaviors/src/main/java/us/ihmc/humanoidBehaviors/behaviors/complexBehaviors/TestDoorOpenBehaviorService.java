@@ -1,17 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ros2.Ros2Node;
 
 public class TestDoorOpenBehaviorService extends AbstractBehavior
@@ -36,6 +31,8 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      publishTextToSpeech("watching the door");
+      doorOpenDetectorBehaviorService.initialize();
    }
 
    @Override
@@ -71,6 +68,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    public void onBehaviorExited()
    {
       isDoorOpen = false;
+      doorOpenDetectorBehaviorService.destroy();
    }
 
    @Override

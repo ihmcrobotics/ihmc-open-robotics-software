@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.ros2.Ros2Node;
 
@@ -20,7 +18,7 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
    private FramePose3D averageCurrentDoorLocation;
    public FramePose3D newPose = null;
    private boolean doorOpen = false;
-   private float openDistance = 0.0254f;
+   private float openDistance = 0.0127f;
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -44,6 +42,7 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
       return doorOpen;
    }
 
+   @Override
    public void doThreadAction()
    {
       super.doThreadAction();
