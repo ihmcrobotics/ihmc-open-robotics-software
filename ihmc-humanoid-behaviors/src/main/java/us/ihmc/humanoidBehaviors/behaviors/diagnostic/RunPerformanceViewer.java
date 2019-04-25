@@ -75,7 +75,7 @@ public class RunPerformanceViewer extends Application implements Initializable
    public void start(Stage stage) throws Exception
    {
       Parent root = FXMLLoader.load(getClass().getResource(getClass().getSimpleName() + ".fxml"));
-      Scene scene = new Scene(root, 600, 476);
+      Scene scene = new Scene(root, 800, 600);
       stage.setTitle(getClass().getSimpleName());
       stage.setScene(scene);
       stage.show();

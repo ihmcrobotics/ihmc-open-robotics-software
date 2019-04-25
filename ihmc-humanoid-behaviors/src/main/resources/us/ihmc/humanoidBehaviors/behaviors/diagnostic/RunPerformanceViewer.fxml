@@ -8,18 +8,18 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="476.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunPerformanceViewer">
+<AnchorPane maxHeight="-Infinity" maxWidth="800.0" minHeight="-Infinity" minWidth="800.0" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunPerformanceViewer">
    <children>
       <Label layoutX="14.0" layoutY="14.0" text="Run Performance Log:" />
-      <AnchorPane layoutX="14.0" layoutY="37.0" prefHeight="153.0" prefWidth="569.0">
+      <AnchorPane layoutX="14.0" layoutY="37.0" maxWidth="800.0" minWidth="800.0" prefHeight="284.0" prefWidth="800.0" AnchorPane.bottomAnchor="279.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="37.0">
          <children>
-            <ScrollPane layoutY="33.0" prefHeight="120.0" prefWidth="569.0">
+            <ScrollPane fitToHeight="true" fitToWidth="true" layoutY="33.0" prefHeight="120.0" prefWidth="569.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0">
               <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="130.0" prefWidth="575.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="246.0" prefWidth="785.0">
                      <children>
-                        <TableView fx:id="runsTable" prefHeight="120.0" prefWidth="556.0">
+                        <TableView fx:id="runsTable" prefHeight="120.0" prefWidth="556.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
                             <TableColumn fx:id="runTableColumn" prefWidth="75.0" text="Run" />
                             <TableColumn fx:id="operatorTableColumn" prefWidth="75.0" text="Operator" />
@@ -39,51 +39,57 @@
             <DatePicker fx:id="runsDate" layoutX="402.0" layoutY="2.0" />
          </children>
       </AnchorPane>
-      <AnchorPane layoutX="302.0" layoutY="200.0" prefHeight="262.0" prefWidth="280.0">
-         <children>
-            <ScrollPane prefHeight="262.0" prefWidth="280.0">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="268.0" prefWidth="281.0">
-                     <children>
-                        <TableView prefHeight="262.0" prefWidth="280.0">
-                           <columns>
-                              <TableColumn prefWidth="133.0" text="Event" />
-                              <TableColumn prefWidth="154.0" text="Time in seconds" />
-                           </columns>
-                        </TableView>
-                     </children>
-                  </AnchorPane>
-              </content>
-            </ScrollPane>
-         </children>
-      </AnchorPane>
-      <AnchorPane layoutX="14.0" layoutY="200.0" prefHeight="262.0" prefWidth="280.0">
-         <children>
-            <ScrollPane layoutY="109.0" prefHeight="153.0" prefWidth="280.0">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="156.0" prefWidth="281.0">
-                     <children>
-                        <TableView layoutX="2.0" prefHeight="153.0" prefWidth="280.0">
-                           <columns>
-                              <TableColumn prefWidth="133.0" text="Event" />
-                              <TableColumn prefWidth="154.0" text="Time in seconds" />
-                           </columns>
-                        </TableView>
-                     </children>
-                  </AnchorPane>
-               </content>
-            </ScrollPane>
-            <Label layoutX="7.0" layoutY="6.0" text="Run ID:" />
-            <Label layoutX="7.0" layoutY="43.0" text="Task:" />
-            <Label layoutX="7.0" layoutY="60.0" text="Total Time:" />
-            <Label layoutX="7.0" layoutY="23.0" text="Operator:" />
-            <Label layoutX="9.0" layoutY="77.0" text="Success?" />
-            <Label layoutX="84.0" layoutY="3.0" text="id" />
-            <Label layoutX="84.0" layoutY="40.0" text="task" />
-            <Label layoutX="84.0" layoutY="57.0" text="time" />
-            <Label layoutX="84.0" layoutY="20.0" text="operator" />
-            <Label layoutX="86.0" layoutY="74.0" text="success" />
-         </children>
-      </AnchorPane>
+      <BorderPane prefHeight="262.0" prefWidth="800.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+         <right>
+            <AnchorPane prefHeight="262.0" prefWidth="380.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="262.0" prefWidth="380.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="268.0" prefWidth="281.0">
+                           <children>
+                              <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columns>
+                                    <TableColumn prefWidth="133.0" text="Event" />
+                                    <TableColumn prefWidth="154.0" text="Time in seconds" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
+         </right>
+         <left>
+            <AnchorPane prefHeight="262.0" prefWidth="390.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ScrollPane fitToWidth="true" layoutY="109.0" prefHeight="153.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="156.0" prefWidth="391.0">
+                           <children>
+                              <TableView layoutX="2.0" prefHeight="153.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <columns>
+                                    <TableColumn prefWidth="133.0" text="Event" />
+                                    <TableColumn prefWidth="154.0" text="Time in seconds" />
+                                 </columns>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                     </content>
+                  </ScrollPane>
+                  <Label layoutX="7.0" layoutY="6.0" text="Run ID:" />
+                  <Label layoutX="7.0" layoutY="43.0" text="Task:" />
+                  <Label layoutX="7.0" layoutY="60.0" text="Total Time:" />
+                  <Label layoutX="7.0" layoutY="23.0" text="Operator:" />
+                  <Label layoutX="9.0" layoutY="77.0" text="Success?" />
+                  <Label layoutX="84.0" layoutY="3.0" text="id" />
+                  <Label layoutX="84.0" layoutY="40.0" text="task" />
+                  <Label layoutX="84.0" layoutY="57.0" text="time" />
+                  <Label layoutX="84.0" layoutY="20.0" text="operator" />
+                  <Label layoutX="86.0" layoutY="74.0" text="success" />
+               </children>
+            </AnchorPane>
+         </left>
+      </BorderPane>
    </children>
 </AnchorPane>
