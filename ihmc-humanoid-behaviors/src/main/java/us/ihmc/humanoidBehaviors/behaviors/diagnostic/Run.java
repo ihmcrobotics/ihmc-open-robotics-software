@@ -5,6 +5,17 @@ import java.time.LocalTime;
 
 public class Run
 {
+   private int runID;
+   private int operatorID;
+   private String operatorName;
+   private int taskID;
+   private String taskName;
+   private boolean successful;
+   private String notes;
+   private String logFile;
+   private LocalDate date;
+   private LocalTime time;
+
    public Run(int operatorID, int TaskID)
    {
       this.operatorID = operatorID;
@@ -13,17 +24,6 @@ public class Run
       date = LocalDate.now();
       time = LocalTime.now();
    }
-
-   public int runID;
-   public int operatorID;
-   public String operatorName;
-   public int taskID;
-   public String taskName;
-   public boolean successful;
-   public String notes;
-   public String logFile;
-   public LocalDate date;
-   public LocalTime time;
 
    public int getRunID()
    {

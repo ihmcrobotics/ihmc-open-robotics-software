@@ -187,13 +187,13 @@ public class SQLBehaviorDatabaseManager
 
          PreparedStatement st = databaseConnection
                .prepareStatement("INSERT INTO runs (operator,task,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING id;");
-         st.setInt(1, run.operatorID);
-         st.setInt(2, run.taskID);
-         st.setBoolean(3, run.successful);
-         st.setString(4, run.notes);
-         st.setString(5, run.logFile);
-         st.setObject(6, run.date);
-         st.setObject(7, run.time);
+         st.setInt(1, run.getOperatorID());
+         st.setInt(2, run.getTaskID());
+         st.setBoolean(3, run.isSuccessful());
+         st.setString(4, run.getNotes());
+         st.setString(5, run.getLogFile());
+         st.setObject(6, run.getDate());
+         st.setObject(7, run.getTime());
 
          ResultSet lastUpdate = st.executeQuery();
 
@@ -322,12 +322,12 @@ public class SQLBehaviorDatabaseManager
          while (rs.next())
          {
             returnedRun = new Run(rs.getInt("operator_id"), rs.getInt("task_id"));
-            returnedRun.runID = rs.getInt("run_id");
-            returnedRun.successful = rs.getBoolean("is_successful");
-            returnedRun.notes = rs.getString("notes");
-            returnedRun.logFile = rs.getString("log_file");
-            returnedRun.date = rs.getObject("date", LocalDate.class);
-            returnedRun.time = rs.getObject("time", LocalTime.class);
+            returnedRun.setRunID(rs.getInt("run_id"));
+            returnedRun.setSuccessful(rs.getBoolean("is_successful"));
+            returnedRun.setNotes(rs.getString("notes"));
+            returnedRun.setLogFile(rs.getString("log_file"));
+            returnedRun.setDate(rs.getObject("date", LocalDate.class));
+            returnedRun.setTime(rs.getObject("time", LocalTime.class));
          }
          rs.close();
          stmt.close();
@@ -353,14 +353,14 @@ public class SQLBehaviorDatabaseManager
          while (rs.next())
          {
             Run run = new Run(rs.getInt("operator_id"), rs.getInt("task_id"));
-            run.runID = rs.getInt("run_id");
-            run.successful = rs.getBoolean("is_successful");
-            run.notes = rs.getString("notes");
-            run.logFile = rs.getString("log_file");
-            run.date = rs.getObject("date", LocalDate.class);
-            run.time = rs.getObject("time", LocalTime.class);
-            run.operatorName = rs.getString("operator_name");
-            run.taskName = rs.getString("task_name");
+            run.setRunID(rs.getInt("run_id"));
+            run.setSuccessful(rs.getBoolean("is_successful"));
+            run.setNotes(rs.getString("notes"));
+            run.setLogFile(rs.getString("log_file"));
+            run.setDate(rs.getObject("date", LocalDate.class));
+            run.setTime(rs.getObject("time", LocalTime.class));
+            run.setOperatorName(rs.getString("operator_name"));
+            run.setTaskName(rs.getString("task_name"));
 
             runs.add(run);
          }
@@ -384,14 +384,14 @@ public class SQLBehaviorDatabaseManager
          st = databaseConnection.prepareStatement(
                "UPDATE runs set " + "operator_id = ?, " + "task_id = ?, " + "is_successful = ?, " + "notes = ?, " + "log_file = ?, " + "date = ?," + "time = ? "
                      + " WHERE run_id = ?;");
-         st.setInt(1, run.operatorID);
-         st.setInt(2, run.taskID);
-         st.setBoolean(3, run.successful);
-         st.setString(4, run.notes);
-         st.setString(5, run.logFile);
-         st.setObject(6, run.date);
-         st.setObject(7, run.time);
-         st.setObject(8, run.runID);
+         st.setInt(1, run.getOperatorID());
+         st.setInt(2, run.getTaskID());
+         st.setBoolean(3, run.isSuccessful());
+         st.setString(4, run.getNotes());
+         st.setString(5, run.getLogFile());
+         st.setObject(6, run.getDate());
+         st.setObject(7, run.getTime());
+         st.setObject(8, run.getRunID());
 
          st.executeUpdate();
 
@@ -478,27 +478,27 @@ public class SQLBehaviorDatabaseManager
       //make a task
       System.out.println("adding in Run 1");
       Run newRun = new Run(returnedOperator.operatorID, returnedTask.taskID);
-      newRun.notes = "test run";
-      newRun.logFile = "test run log number";
+      newRun.setNotes("test run");
+      newRun.setLogFile("test run log number");
 
-      newRun.successful = true;
+      newRun.setSuccessful(true);
       Run lastRun = test.saveRun(newRun);
-      System.out.println("MY Run ID NUMBER IS " + lastRun.runID);
+      System.out.println("MY Run ID NUMBER IS " + lastRun.getRunID());
 
-      Run returnedRun = test.getRun(lastRun.runID);
-      System.out.println(returnedRun.runID + " " + returnedRun.notes);
-      returnedRun.notes = "new notes";
+      Run returnedRun = test.getRun(lastRun.getRunID());
+      System.out.println(returnedRun.getRunID() + " " + returnedRun.getNotes());
+      returnedRun.setNotes("new notes");
 
       test.updateRun(returnedRun);
 
-      Run returnedRun2 = test.getRun(lastRun.runID);
-      System.out.println(returnedRun2.notes);
+      Run returnedRun2 = test.getRun(lastRun.getRunID());
+      System.out.println(returnedRun2.getNotes());
 
-      RunEvent event = new RunEvent(lastRun.runID, "walk to door", 10, true);
+      RunEvent event = new RunEvent(lastRun.getRunID(), "walk to door", 10, true);
 
       test.saveRunEvent(event);
 
-      RunEvent event2 = new RunEvent(lastRun.runID, "plan to door", 9, true);
+      RunEvent event2 = new RunEvent(lastRun.getRunID(), "plan to door", 9, true);
 
       test.saveRunEvent(event2);
    }

@@ -67,11 +67,6 @@ public class RunPerformanceViewer extends Application implements Initializable
    @FXML
    private TableColumn<RunEvent, String> summaryEventsListTimeColumn;
 
-
-   public RunPerformanceViewer()
-   {
-   }
-
    @FXML
    void getAllRuns(ActionEvent event)
    {
@@ -82,13 +77,13 @@ public class RunPerformanceViewer extends Application implements Initializable
    @FXML
    void getLastRuns(ActionEvent event)
    {
-
+      //not implemented yet
    }
 
    @FXML
    void getRunsByDate(ActionEvent event)
    {
-
+      //not implemented yet
    }
 
    @Override
@@ -121,7 +116,7 @@ public class RunPerformanceViewer extends Application implements Initializable
                runEventsSummaryList.clear();
 
                Run selectedItem = runsTableView.getSelectionModel().getSelectedItem();
-               selectedRunIDLabel.setText("" + selectedItem.runID);
+               selectedRunIDLabel.setText("" + selectedItem.getRunID());
                operatorNameLabel.setText(selectedItem.getOperatorName());
                taskNameLabel.setText(selectedItem.getTaskName());
                successLabel.setText("" + selectedItem.isSuccessful());
@@ -129,14 +124,16 @@ public class RunPerformanceViewer extends Application implements Initializable
                runEventsList.addAll(dataBase.getEventsForRun(selectedItem.getRunID()));
 
                HashMap<String, Float> eventSet = new HashMap<>();
-               Float totalTime = 0.0f;
+               float totalTime = 0.0f;
                for (RunEvent runEvent : runEventsList)
                {
                   totalTime += runEvent.getEventTimeInSeconds();
 
                   Float time = eventSet.get(runEvent.getEventName());
                   if (time == null)
-                     time = new Float(0.0);
+                  {
+                     time = 0.0f;
+                  }
 
                   time = time + runEvent.getEventTimeInSeconds();
                   eventSet.put(runEvent.getEventName(), time);
@@ -144,12 +141,12 @@ public class RunPerformanceViewer extends Application implements Initializable
 
                for (String eventName : eventSet.keySet())
                {
-                  RunEvent runEvent = new RunEvent(selectedItem.runID, eventName, eventSet.get(eventName), true);
+                  RunEvent runEvent = new RunEvent(selectedItem.getRunID(), eventName, eventSet.get(eventName), true);
                   runEventsSummaryList.add(runEvent);
                }
 
                totalTimeLabel.setText(format.format(totalTime));
-               averageSpeedLabel.setText(format.format(8.0/totalTime) + "m/s");
+               averageSpeedLabel.setText(format.format(8.0 / totalTime) + "m/s");
             }
          });
          return row;

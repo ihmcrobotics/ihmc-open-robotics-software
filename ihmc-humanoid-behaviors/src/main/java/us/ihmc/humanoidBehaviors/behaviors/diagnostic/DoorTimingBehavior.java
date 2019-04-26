@@ -118,7 +118,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             {
                totalTimeFindingDoor.add(getStateMachine().getTimeInCurrentState());
 
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.LOCATE_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.LOCATE_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to locating door: " + getStateMachine().getTimeInCurrentState());
                return true;
@@ -157,7 +157,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             {
                totalTimePlanning.add(getStateMachine().getTimeInCurrentState());
 
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_TO_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_TO_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to total planning: " + (getStateMachine().getTimeInCurrentState()));
                return true;
@@ -197,7 +197,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                case ABORT_REQUESTED:
                {
                   totalTimeApproach.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
 
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
 
@@ -206,7 +206,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                case COMPLETED:
                {
                   totalTimeApproach.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
 
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
 
@@ -215,7 +215,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                case PAUSED:
                {
                   totalTimeApproach.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.APPROACH.toString(), getStateMachine().getTimeInCurrentState());
 
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
 
@@ -255,7 +255,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             if (timingBehavior.footstepDataListMessage.get() != null)
             {
                totalTimePlanning.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_TO_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_TO_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to total planning: " + (getStateMachine().getTimeInCurrentState()));
                transitionToWalking = true;
@@ -264,7 +264,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             {
                armTrajectoryTime = getArmTrajectoryTime();
                totalTimePlanningArmMotionsToOpenDoor.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_OPEN_DOOR_ARM_MOTION.toString(),
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_OPEN_DOOR_ARM_MOTION.toString(),
                                         getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to openDoor Planning : " + getStateMachine().getTimeInCurrentState());
@@ -311,7 +311,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                armTrajectoryTime = getArmTrajectoryTime();
 
                totalTimeMovingArmToOpenDoor.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to openingDoor handle: " + getStateMachine().getTimeInCurrentState());
                return true;
@@ -321,7 +321,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             if (timingBehavior.footstepDataListMessage.get() != null)
             {
                totalTimeMovingArmToOpenDoor.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to walkPlanning handle: " + getStateMachine().getTimeInCurrentState());
                return true;
@@ -331,7 +331,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             if (sleepBehavior.isDone())
             {
                totalTimeMovingArmToOpenDoor.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.OPEN_DOOR_ARM_MOTION.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to openingDoor handle: " + getStateMachine().getTimeInCurrentState());
                return true;
@@ -368,7 +368,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
             if (timingBehavior.footstepDataListMessage.get() != null)
             {
                totalTimePlanning.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to total planning: " + (getStateMachine().getTimeInCurrentState()));
                transitionToWalking = true;
@@ -378,7 +378,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
                armTrajectoryTime = getArmTrajectoryTime();
 
                totalTimeMovingArmToOpenDoor.add(getStateMachine().getTimeInCurrentState());
-               timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.PLANNING_OPEN_DOOR_ARM_MOTION.toString(),
+               timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.PLANNING_OPEN_DOOR_ARM_MOTION.toString(),
                                         getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to Planning opening Door: " + getStateMachine().getTimeInCurrentState());
@@ -447,7 +447,7 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
          public void doPostBehaviorCleanup()
          {
             totalTimeGoThroughDoor.add(getStateMachine().getTimeInCurrentState());
-            timingBehavior.saveEvent(currentRun.runID, DoorTimingBehaviorStates.GO_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
+            timingBehavior.saveEvent(currentRun.getRunID(), DoorTimingBehaviorStates.GO_THROUGH_DOOR.toString(), getStateMachine().getTimeInCurrentState());
 
             publishTextToSpeech("Adding time to total Walking Through Door: " + (getStateMachine().getTimeInCurrentState()));
             
@@ -455,9 +455,9 @@ public class DoorTimingBehavior extends StateMachineBehavior<DoorTimingBehaviorS
 
             super.doPostBehaviorCleanup();
 
-            currentRun.successful = true;
+            currentRun.setSuccessful(true);
             timingBehavior.dataBase.updateRun(currentRun);
-            publishTextToSpeech("Total number of run events added for door task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.runID)));
+            publishTextToSpeech("Total number of run events added for door task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.getRunID())));
            
          }
       };
