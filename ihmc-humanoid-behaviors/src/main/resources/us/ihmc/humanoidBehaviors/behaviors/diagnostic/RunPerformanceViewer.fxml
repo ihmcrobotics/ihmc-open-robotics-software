@@ -24,11 +24,11 @@
                      <children>
                         <TableView fx:id="runsTableView" prefHeight="120.0" prefWidth="556.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
+                              <TableColumn fx:id="successTableColumn" minWidth="5.0" prefWidth="52.0" resizable="false" text="Success" />
                             <TableColumn fx:id="runTableColumn" prefWidth="43.0" resizable="false" text="Run" />
                             <TableColumn fx:id="operatorTableColumn" prefWidth="123.0" text="Operator" />
-                              <TableColumn fx:id="taskTableColumn" prefWidth="128.0" text="Task" />
-                              <TableColumn fx:id="successTableColumn" minWidth="5.0" prefWidth="52.0" resizable="false" text="Success" />
-                              <TableColumn fx:id="notesTableColumn" prefWidth="431.0" text="Notes" />
+                              <TableColumn fx:id="taskTableColumn" prefWidth="218.0" text="Task" />
+                              <TableColumn fx:id="notesTableColumn" prefWidth="341.0" text="Notes" />
                           </columns>
                         </TableView>
                      </children>
