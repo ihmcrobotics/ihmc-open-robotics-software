@@ -2,7 +2,10 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,15 +14,16 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.TreeSet;
+import java.util.*;
 
 public class PlanarRegionUpDownNavigation
 {
    private static final double LEVEL_EPSILON = 1e-3;
    private static final double HIGH_LOW_MINIMUM = 0.10;
    private static final double MINIMUM_AREA = 0.5 * 0.5; // square half meter
+   public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
+   public static final double MAX_NAVIGATION_DISTANCE = 10.0;
+   public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
 
    public enum NavigationResult
    {
@@ -31,8 +35,12 @@ public class PlanarRegionUpDownNavigation
       TOO_MANY_QUALIFIED_REGIONS
    }
 
-   public static Pair<NavigationResult, FramePose3D> up(FramePose3D midFeetZUp, PlanarRegionsList planarRegionsList)
+   public static Pair<NavigationResult, FramePose3D> up(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
    {
+      FramePose3D midFeetZUpPose = new FramePose3D();
+      midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
+
+      // TODO extract these filters into a method
       TreeSet<PlanarRegion> levelRegions = new TreeSet<>(Comparator.comparingInt(PlanarRegion::getRegionId));
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
@@ -50,7 +58,7 @@ public class PlanarRegionUpDownNavigation
       TreeSet<PlanarRegion> higherRegions = new TreeSet<>(Comparator.comparingInt(PlanarRegion::getRegionId));
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
-         if (centroid(planarRegion).getZ() > midFeetZUp.getZ() + HIGH_LOW_MINIMUM)
+         if (centroid(planarRegion).getZ() > midFeetZUpPose.getZ() + HIGH_LOW_MINIMUM)
          {
             higherRegions.add(planarRegion);
          }
@@ -94,15 +102,94 @@ public class PlanarRegionUpDownNavigation
       }
 
       FramePose3D waypointPose = new FramePose3D();
+      waypointPose.setFromReferenceFrame(midFeetZUpFrame);
       waypointPose.setPosition(centroid(candidateRegions.first()));
-      waypointPose.setOrientation(midFeetZUp.getOrientation());
 
       return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
    }
 
-   public static Pair<NavigationResult, FramePose3D> down(FramePose3D midFeetZUp, PlanarRegionsList planarRegionsList)
+   public static Pair<NavigationResult, FramePose3D> down(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
    {
+      FramePose3D midFeetZUpPose = new FramePose3D();
+      midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
+
+      // move straight out from mid feet z up until polygon points share their highest collisions with the same region
+      PolygonPoints2D polygonPoints = new PolygonPoints2D(5, REQUIRED_FLAT_AREA_RADIUS, midFeetZUpFrame);
+
+      polygonPoints.add(2 * CHECK_STEP_SIZE, 0.0); // initial check step a bit out
+
+      FramePoint3D centerPoint;
+      while ((centerPoint = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints, planarRegionsList)) == null
+            && polygonPoints.getCenterPoint().getX() < MAX_NAVIGATION_DISTANCE)
+      {
+         polygonPoints.add(CHECK_STEP_SIZE, 0.0);
+      }
+
+      if (centerPoint != null)
+      {
+         if (centerPoint.getZ() < midFeetZUpPose.getZ() - HIGH_LOW_MINIMUM);
+         {
+            FramePose3D waypointPose = new FramePose3D();
+            waypointPose.setFromReferenceFrame(midFeetZUpFrame);
+            waypointPose.setPosition(centerPoint);
+            return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
+         }
+      }
+
       return Pair.of(NavigationResult.NO_QUALIFIED_REGIONS, null);
+   }
+
+   public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints, PlanarRegionsList planarRegionsList)
+   {
+      // map points to their collisions
+      HashMap<FramePoint2D, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
+      for (FramePoint2D point : polygonPoints.getPoints())
+      {
+         ReferenceFrame previousFrame = point.getReferenceFrame();
+         point.changeFrame(ReferenceFrame.getWorldFrame());
+         { // point frame changed block
+            TreeSet<Pair<PlanarRegion, Double>> singlePointCollisions = new TreeSet<>(Comparator.comparingDouble(o -> o.getRight()));
+            List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(point);
+
+            if (collidedRegions.isEmpty())
+            {
+               return null; // not every point collides once
+            }
+
+            for (PlanarRegion collidedRegion : collidedRegions)
+            {
+               singlePointCollisions.add(Pair.of(collidedRegion, collidedRegion.getPlaneZGivenXY(point.getX(), point.getY())));
+            }
+
+            collisions.put(point, singlePointCollisions);
+         } // point frame changed block
+         point.changeFrame(previousFrame);
+      }
+
+      // find highest collision
+      Pair<PlanarRegion, Double> highestCollision = Pair.of(null, Double.NEGATIVE_INFINITY);
+      for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values())
+      {
+         Pair<PlanarRegion, Double> collisionOccurrence = value.last(); // TODO might be first
+         if (collisionOccurrence.getRight() >= highestCollision.getRight())
+         {
+            highestCollision = collisionOccurrence;
+         }
+      }
+
+      for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values())
+      {
+         if (highestCollision.getLeft() != value.last().getLeft())  // TODO might be first
+         {
+            return null; // point has its highest collision on a region other than the region of the highest collision of all points
+         }
+      }
+
+      FramePoint3D centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint().getReferenceFrame());
+      centerPoint3D.changeFrame(ReferenceFrame.getWorldFrame());
+      centerPoint3D.setZ(highestCollision.getRight());
+
+      return centerPoint3D; // all points have a collision and all of their highest collisions are with the same region
    }
 
    public static ArrayList<PlanarRegion> findHighestRegions(PlanarRegionsList regionsList, int numberToGet)
