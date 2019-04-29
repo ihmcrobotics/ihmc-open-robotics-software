@@ -170,7 +170,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       callUpdatables();
 
       stateMachine.doControlAndTransitions();
-      if(!stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey)&&stateMachine.getCurrentBehavior().isDone())
+      if(!stateMachine.getCurrentBehaviorKey().equals(stopBehaviorKey)&&stateMachine.getCurrentAction().isDone())
       {
          requestedBehavior.set(stopBehaviorKey);
       }

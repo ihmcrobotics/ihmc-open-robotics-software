@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
+import java.util.Map;
+
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -78,13 +81,18 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    public boolean isDone()
    {
       //if your current state has finished and there is no transition out of that state... the entire state machine is finished
-
-      if (stateMachine.getCurrentBehavior().isDone() && stateMachine.isCurrentBehaviorTerminal())
+      System.out.println("----"+stateMachine.isCurrentActionTerminal()+" " +stateMachine.getCurrentBehaviorKey()+" "+stateMachine.getStateTransitions().keySet());
+      
+      if (stateMachine.getCurrentAction().isDone() && stateMachine.isCurrentActionTerminal())
       {
          return true;
       }
       return false;
 
+   }
+   public Map<E, StateTransition<E>> getStateTransitions()
+   {
+      return stateMachine.getStateTransitions();
    }
 
 }
