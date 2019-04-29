@@ -166,6 +166,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
             super.onEntry();
          }
+         @Override
+         public void onExit()
+         {
+
+            System.out.println("SETTING OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
+
+            super.onExit();
+         }
       };
 
       BehaviorAction walkToDoorAction = new BehaviorAction(walkToInteractableObjectBehavior)
@@ -189,11 +197,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            
+            System.out.println("SETTING OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
             if(DEBUG)
             {
                publishTextToSpeech("open door action");
             }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
+            System.out.println("SET OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
+
          }
       };
 
