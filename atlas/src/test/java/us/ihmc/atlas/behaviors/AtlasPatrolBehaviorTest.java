@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -64,7 +65,7 @@ public class AtlasPatrolBehaviorTest
       waypoints.add(new Pose3D(1.0, -0.2, 0.0, 20.0, 0.0, 0.0));
       waypoints.add(new Pose3D(1.0, -1.0, 0.0, 180.0, 0.0, 0.0));
 
-      behaviorMessager.submitMessage(PatrolBehavior.API.Waypoints, waypoints);
+//      behaviorMessager.submitMessage(API.WaypointsToModule, waypoints);
 
       behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, 0);
 

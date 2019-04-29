@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.upDownExploration;
 
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -108,7 +108,7 @@ public class PlanarRegionUpDownNavigation
       return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
    }
 
-   public static Pair<NavigationResult, FramePose3D> down(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
+   public static Pair<NavigationResult, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
    {
       FramePose3D midFeetZUpPose = new FramePose3D();
       midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
