@@ -99,6 +99,13 @@ public class PlanarRegionSnapTools
          return projectionTranslation;
       }
 
+      if (signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
+      {
+         // Projection distance is too big. Must be smaller than half of the grid size
+         projectionTranslation.setToNaN();
+         return projectionTranslation;
+      }
+
       boolean successfulProjection = scaledRegionPolygon.orthogonalProjection(projectedPoint);
       if(!successfulProjection)
       {
