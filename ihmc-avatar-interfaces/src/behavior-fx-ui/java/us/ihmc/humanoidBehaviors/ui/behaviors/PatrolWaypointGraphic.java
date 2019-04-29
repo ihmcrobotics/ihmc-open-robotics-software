@@ -57,7 +57,7 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
       return orientationGraphic;
    }
 
-   public void setIndex(int index)
+   public void redrawIndex(int index)
    {
       getChildren().remove(labelGraphic.getNode());
       labelGraphic = new LabelGraphic(String.valueOf(index));

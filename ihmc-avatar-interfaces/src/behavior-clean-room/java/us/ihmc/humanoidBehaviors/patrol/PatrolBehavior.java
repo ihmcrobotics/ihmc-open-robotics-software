@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.patrol;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.REAStateRequestMessage;
@@ -21,13 +20,18 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
+import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -51,7 +55,6 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorStat
  */
 public class PatrolBehavior
 {
-   public static final double DISTANCE_TO_REQUIRE_PERCEPTION = 1.0;
    public static final double TIME_TO_PERCEIVE = 20.0;
 
    public enum PatrolBehaviorState
@@ -59,8 +62,8 @@ public class PatrolBehavior
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
       STOP,
       /** Decide on waypoints. */
-      NAVIGATE,
-      /** Request and wait for footstep planner result */
+//      NAVIGATE,
+//      /** Request and wait for footstep planner result */
       PLAN,
       /** Optional user review of footstep plan. */
       REVIEW,
@@ -85,15 +88,16 @@ public class PatrolBehavior
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
 
    private final Notification stopNotification = new Notification();
-   private final Notification overrideGoToWaypointNotification = new Notification();
+   private final Notification goNotification = new Notification();
+//   private final Notification overrideGoToWaypointNotification = new Notification();
    private final TypedNotification<OperatorPlanReviewResult> planReviewResult = new TypedNotification<>();
 
-   private final AtomicInteger goalWaypointIndex = new AtomicInteger();
+//   private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
-   private final AtomicReference<ArrayList<Pose3D>> waypoints;
+   private final WaypointManager waypointManager;
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReview;
@@ -108,10 +112,10 @@ public class PatrolBehavior
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
-      factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
-      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
-      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
-      factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, STOP), this::transitionFromNavigate);
+      factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStop);
+//      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
+//      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
+//      factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, STOP), this::transitionFromNavigate);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
       factory.addTransition(PLAN, Lists.newArrayList(REVIEW, PLAN, STOP), this::transitionFromPlan);
@@ -138,19 +142,14 @@ public class PatrolBehavior
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
+      waypointManager = WaypointManager.createForModule(messager, API.WaypointsToModule, API.WaypointsToUI, API.GoToWaypoint, goNotification);
+
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
-      messager.registerTopicListener(API.GoToWaypoint, goToWaypointIndex ->
-      {
-         goalWaypointIndex.set(goToWaypointIndex);
-         LogTools.info("Interrupted with GO_TO_WAYPOINT {}", goalWaypointIndex.get());
-         overrideGoToWaypointNotification.set();
-      });
       messager.registerTopicListener(API.PlanReviewResult, message ->
       {
          planReviewResult.add(message);
       });
 
-      waypoints = messager.createInput(API.Waypoints);
       loop = messager.createInput(API.Loop, false);
       swingOvers = messager.createInput(API.SwingOvers, false);
       planReview = messager.createInput(API.PlanReviewEnabled, false);
@@ -173,11 +172,12 @@ public class PatrolBehavior
    private void doStopStateAction(double timeInState)
    {
       pollInterrupts();
+      goNotification.poll();
    }
 
    private boolean transitionFromStop(double timeInState)
    {
-      boolean transition = overrideGoToWaypointNotification.read() && goalWaypointInBounds();
+      boolean transition = goNotification.read() && waypointManager.hasWaypoints();
       if (transition)
       {
          LogTools.debug("STOP -> PLAN");
@@ -185,47 +185,69 @@ public class PatrolBehavior
       return transition;
    }
 
-   private void onNavigateStateEntry()
-   {
-
-   }
-
-   private void doNavigateStateAction(double timeInState)
-   {
-      pollInterrupts();
-   }
-
-   private PatrolBehaviorState transitionFromNavigate(double timeInState)
-   {
-      if (stopNotification.read())
-      {
-         return STOP;
-      }
-      else if (overrideGoToWaypointNotification.read())
-      {
-         if (goalWaypointInBounds())
-         {
-            return PLAN;
-         }
-         else
-         {
-            return STOP;
-         }
-      }
-
-      return PLAN; // TODO
-   }
+//   private void onNavigateStateEntry()
+//   {
+//      // update waypoints if UI modified them
+//      if (waypointManager.receivedNotification().poll())
+//      {
+//         waypoints = waypointManager.receivedNotification().peek();
+//      }
+//
+//      if (upDownExploration.get())
+//      {
+//         Pair<NavigationResult, FramePose3D> upOrDownResult = PlanarRegionUpDownNavigation
+//               .upOrDown(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
+//                         PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+//         if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND)
+//         {
+//            // success
+//         }
+//         else
+//         {
+//
+//         }
+//      }
+//      else
+//      {
+//
+//      }
+//   }
+//
+//   private void doNavigateStateAction(double timeInState)
+//   {
+//      pollInterrupts();
+//   }
+//
+//   private PatrolBehaviorState transitionFromNavigate(double timeInState)
+//   {
+//      if (stopNotification.read())
+//      {
+//         return STOP;
+//      }
+//
+//      return PLAN; // TODO
+//   }
 
    private void onPlanStateEntry()
    {
+      // update waypoints if UI modified them
+      waypointManager.updateToMostRecentData();
+
       remoteFootstepPlannerInterface.abortPlanning();
 
-      FramePose3D midFeetZUpPose = new FramePose3D();
-      // prevent frame from continuing to change
-      midFeetZUpPose.setFromReferenceFrame(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame());
-      int index = goalWaypointIndex.get();
-      messager.submitMessage(API.CurrentWaypointIndexStatus, index);
-      FramePose3D currentGoalWaypoint = new FramePose3D(waypoints.get().get(index));
+      FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
+
+      if (upDownExploration.get()) // find up-down or spin. setup the waypoint
+      {
+
+
+
+      }
+
+
+//      int index = goalWaypointIndex.get();
+//      messager.submitMessage(API.CurrentWaypointIndexStatus, index);
+      FramePose3D currentGoalWaypoint = new FramePose3D(waypointManager.peekNextPose());
 
       footstepPlanResultNotification = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
    }
@@ -242,17 +264,17 @@ public class PatrolBehavior
       {
          return STOP;
       }
-      else if (overrideGoToWaypointNotification.read())
-      {
-         if (goalWaypointInBounds())
-         {
-            return PLAN;
-         }
-         else
-         {
-            return STOP;
-         }
-      }
+//      else if (overrideGoToWaypointNotification.read())
+//      {
+//         if (goalWaypointInBounds())
+//         {
+//            return PLAN;
+//         }
+//         else
+//         {
+//            return STOP;
+//         }
+//      }
       else if (footstepPlanResultNotification.hasNext())
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.peek().getFootstepPlanningResult()).validForExecution())
@@ -285,17 +307,17 @@ public class PatrolBehavior
       {
          return STOP;
       }
-      else if (overrideGoToWaypointNotification.read())
-      {
-         if (goalWaypointInBounds())
-         {
-            return PLAN;
-         }
-         else
-         {
-            return STOP;
-         }
-      }
+//      else if (overrideGoToWaypointNotification.read())
+//      {
+//         if (goalWaypointInBounds())
+//         {
+//            return PLAN;
+//         }
+//         else
+//         {
+//            return STOP;
+//         }
+//      }
       else if (!planReview.get()) // if review is disabled, proceed
       {
          return WALK;
@@ -333,36 +355,33 @@ public class PatrolBehavior
       {
          return STOP;
       }
-      else if (overrideGoToWaypointNotification.read())
-      {
-         if (goalWaypointInBounds())
-         {
-            remoteRobotControllerInterface.pauseWalking(); // TODO investigate this
-            return PERCEIVE;
-         }
-         else
-         {
-            return STOP;
-         }
-      }
+//      else if (overrideGoToWaypointNotification.read())
+//      {
+//         if (goalWaypointInBounds())
+//         {
+//            remoteRobotControllerInterface.pauseWalking(); // TODO investigate this
+//            return PERCEIVE;
+//         }
+//         else
+//         {
+//            return STOP;
+//         }
+//      }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         int currentGoalWaypoint = goalWaypointIndex.get();
-         int nextWaypointIndex = currentGoalWaypoint + 1;
-         ArrayList<Pose3D> currentWaypointList = waypoints.get();
-         if (!loop.get() && nextWaypointIndex >= currentWaypointList.size()) // stop if looping disabled
+//         int currentGoalWaypoint = goalWaypointIndex.get();
+//         int nextWaypointIndex = currentGoalWaypoint + 1;
+//         ArrayList<Pose3D> currentWaypointList = waypoints.get();
+         if (!loop.get() && waypointManager.incrementingWillLoop()) // stop if looping disabled
          {
             return STOP;
          }
          else
          {
-            if (nextWaypointIndex >= currentWaypointList.size())
-            {
-               nextWaypointIndex = 0;
-            }
             // next waypoint is far, gather more data to increase robustness
-            if (currentWaypointList.get(currentGoalWaypoint).getPositionDistance(currentWaypointList.get(nextWaypointIndex))
-                  > DISTANCE_TO_REQUIRE_PERCEPTION)
+            if (remoteFootstepPlannerInterface.decidePlanType(remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
+                                                              waypointManager.peekAfterNextPose())
+                  == PlanType.FAR)
             {
                return PERCEIVE;
             }
@@ -378,15 +397,10 @@ public class PatrolBehavior
 
    private void onWalkStateExit()
    {
-      if (!stopNotification.read() && !overrideGoToWaypointNotification.read()) // only increment if WALK -> PLAN
+      if (!stopNotification.read()) // only increment in normal operation (WALK -> PLAN or end with loop disabled)
       {
-         ArrayList<Pose3D> latestWaypoints = waypoints.get();      // access and store these early
-         int nextGoalWaypointIndex = goalWaypointIndex.get() + 1;  // to make thread-safe
-         if (nextGoalWaypointIndex >= latestWaypoints.size())
-         {
-            nextGoalWaypointIndex = 0;
-         }
-         goalWaypointIndex.set(nextGoalWaypointIndex);
+         waypointManager.increment();
+         waypointManager.publish();
       }
    }
 
@@ -402,17 +416,6 @@ public class PatrolBehavior
       if (stopNotification.read())
       {
          return STOP;
-      }
-      else if (overrideGoToWaypointNotification.read())
-      {
-         if (goalWaypointInBounds())
-         {
-            return PLAN; // TODO investigate this transition
-         }
-         else
-         {
-            return STOP;
-         }
       }
       else if (timeInState > TIME_TO_PERCEIVE)
       {
@@ -433,7 +436,6 @@ public class PatrolBehavior
       }
 
       stopNotification.poll();         // poll both at the same time to handle race condition
-      overrideGoToWaypointNotification.poll();
    }
 
    private void reduceAndSendFootstepsForVisualization(FootstepPlanningToolboxOutputStatus footstepPlanningOutput)
@@ -449,14 +451,14 @@ public class PatrolBehavior
       messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
    }
 
-   private boolean goalWaypointInBounds()
-   {
-      ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
-      int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
-
-      boolean indexInBounds = latestWaypoints != null && currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
-      return indexInBounds;
-   }
+//   private boolean goalWaypointInBounds()
+//   {
+//      ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
+//      int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
+//
+//      boolean indexInBounds = latestWaypoints != null && currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
+//      return indexInBounds;
+//   }
 
    public static class API
    {
@@ -464,8 +466,11 @@ public class PatrolBehavior
       private static final Category Root = apiFactory.createRootCategory("PatrolBehavior");
       private static final CategoryTheme Patrol = apiFactory.createCategoryTheme("Patrol");
 
-      /** Input: Update the waypoints */
-      public static final Topic<ArrayList<Pose3D>> Waypoints = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Waypoints"));
+      /** Input: Waypoints modified by operator */
+      public static final Topic<WaypointSequence> WaypointsToModule = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("WaypointsToModule"));
+
+      /** Output: Waypoints modified by behavior */
+      public static final Topic<WaypointSequence> WaypointsToUI = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("WaypointsToUI"));
 
       /** Input: Robot stops and immediately goes to this waypoint. The "start" or "reset" command.  */
       public static final Topic<Integer> GoToWaypoint = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("GoToWaypoint"));
@@ -497,9 +502,9 @@ public class PatrolBehavior
       /** Output: to visualize the current state. */
       public static final Topic<PatrolBehaviorState> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
 
-      /** Output: to visualize the current waypoint status. TODO clean me up */
-      public static final Topic<Integer> CurrentWaypointIndexStatus
-            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
+//      /** Output: to visualize the current waypoint status. TODO clean me up */
+//      public static final Topic<Integer> CurrentWaypointIndexStatus
+//            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
 
       public static final MessagerAPI create()
       {
