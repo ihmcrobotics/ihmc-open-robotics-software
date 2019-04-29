@@ -21,15 +21,9 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
       return true;
    }
 
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
-
    @Override
    public void onBehaviorEntered()
    {
-      System.out.println("entering do nothing behavior");
    }
 
    @Override
