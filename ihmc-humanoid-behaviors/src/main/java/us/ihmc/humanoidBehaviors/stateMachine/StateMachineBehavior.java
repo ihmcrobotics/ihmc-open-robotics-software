@@ -27,6 +27,8 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       this.timeProvider = timeProvider;
    }
 
+   
+   //TODO JJC this should be called from the onBehaviorEntered method of this class instead of classes that extend it, i need to move it and then test to make sure there was not a reason for this decision.
    protected void setupStateMachine()
    {
       StateMachineFactory<E, BehaviorAction> stateMachineFactory = new StateMachineFactory<>(keyType);

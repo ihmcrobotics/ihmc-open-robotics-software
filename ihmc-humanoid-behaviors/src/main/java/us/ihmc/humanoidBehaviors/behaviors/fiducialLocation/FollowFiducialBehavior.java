@@ -161,7 +161,6 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
          }
       };
 
-      factory.setNamePrefix(getName() + "StateMachine").setRegistry(registry).buildYoClock(yoTime);
 
       factory.addState(FollowFiducialState.WAIT, waitState);
       factory.addState(FollowFiducialState.PLAN_FROM_DOUBLE_SUPPORT, planFromDoubleSupportState);
