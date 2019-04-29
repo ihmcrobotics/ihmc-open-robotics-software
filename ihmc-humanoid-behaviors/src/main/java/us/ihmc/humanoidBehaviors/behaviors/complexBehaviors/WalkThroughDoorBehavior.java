@@ -37,6 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
+   private final boolean DEBUG = true;
    public enum WalkThroughDoorBehaviorState
    {
       STOPPED,
@@ -91,7 +92,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
+      openDoorBehavior = new OpenDoorBehavior(robotName,yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions,yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
 
       //setup publisher for sending door location to UI
@@ -127,6 +128,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            if(DEBUG)
+            {
+               publishTextToSpeech("entering setup");
+            }
             HandDesiredConfigurationMessage leftHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT,
                                                                                                                          HandConfiguration.CLOSE);
             HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT,
@@ -137,12 +142,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
          }
 
-         @Override
-         public void onEntry()
-         {
 
-            super.onEntry();
-         }
       };
 
       //this is the first search for the door, once automated searching is in place, this should be an all the time thing.
@@ -155,26 +155,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             publishTextToSpeech("Searching For The Door");
             super.onEntry();
          }
-
-         @Override
-         public void onExit()
-         {
-            super.onExit();
-            //found the door location, inform the UI of its location
-
-         }
       };
 
       BehaviorAction searchForDoorNear = new BehaviorAction(searchForDoorBehavior)
       {
-         @Override
-         public void onExit()
-         {
-            super.onExit();
-            //found the door location, inform the UI of its location
-
-         }
-
          @Override
          public void onEntry()
          {
@@ -189,6 +173,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            if(DEBUG)
+            {
+               publishTextToSpeech("walk to door action");
+            }
             FramePoint3D point1 = offsetPointFromDoor(doorOffsetPoint1);
             FramePoint3D point2 = offsetPointFromDoor(doorOffsetPoint2);
 
@@ -201,6 +189,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            if(DEBUG)
+            {
+               publishTextToSpeech("open door action");
+            }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
          }
       };
@@ -210,7 +202,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-
+            if(DEBUG)
+            {
+               publishTextToSpeech("setup for walk");
+            }
             double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
                   1.3376930879072813};
             double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
@@ -230,6 +225,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            if(DEBUG)
+            {
+               publishTextToSpeech("walk through door action");
+            }
             FootstepDataListMessage message = setUpFootSteps();
             atlasPrimitiveActions.footstepListBehavior.set(message);
          }
@@ -355,6 +354,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       publishTextToSpeech("Leaving Walk Through Door behavior");
 
+   }
+   @Override
+   public boolean isDone()
+   {
+      // TODO Auto-generated method stub
+      return false;
    }
 
    private boolean isWalkingDone()

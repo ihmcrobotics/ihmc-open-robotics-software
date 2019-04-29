@@ -90,7 +90,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return recievedNewDoorLocation;
+      return recievedNewDoorLocation&& doorTransformToWorld!=null;
    }
 
    @Override
