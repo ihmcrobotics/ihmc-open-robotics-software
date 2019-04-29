@@ -11,17 +11,17 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.OpenDoorBehavior.OpenDoorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
@@ -44,7 +44,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
+   private SleepBehavior sleepBehavior;
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
    public OpenDoorBehavior(String robotName,String behaviorPrefix, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions,YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -53,7 +53,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
-      
+      sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
+
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, behaviorPrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
       doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
       doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
@@ -63,6 +64,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       addBehaviorService(doorOpenDetectorBehaviorService);
       
       setupStateMachine();
+      
       
    }
 
@@ -92,8 +94,14 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    protected OpenDoorState configureStateMachineAndReturnInitialKey(StateMachineFactory<OpenDoorState, BehaviorAction> factory)
    {
     
-      BehaviorAction start = new BehaviorAction();
-      
+      BehaviorAction start = new BehaviorAction(sleepBehavior) {
+         @Override
+         protected void setBehaviorInput()
+         {
+            publishTextToSpeech("Starting ****************************");
+            sleepBehavior.setSleepTime(1);
+         }
+      };
       BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
@@ -103,9 +111,6 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.102,  1.079 , 1.551252338779563, 0.048351007951384285, 0.007252343575301105,RobotSide.RIGHT, "Moving Right Hand Above Door Knob"));
             atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 0.298, -0.147,  1.097,1.2554068994570775, 0.03416782147174632, 0.26586161890007015,RobotSide.LEFT,"Moving Left Hand To Door"));
-
-
-            
          }
       };
 
@@ -198,6 +203,13 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
    }
 
+   @Override
+   public boolean isDone()
+   {
+      System.out.println("done check "+super.isDone()+" "+getStateMachine().getCurrentBehaviorKey()+" " +getStateMachine().isCurrentActionTerminal());
+      
+      return super.isDone();
+   }
 
    private HandTrajectoryMessage moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,final RobotSide side, final String description)
    {

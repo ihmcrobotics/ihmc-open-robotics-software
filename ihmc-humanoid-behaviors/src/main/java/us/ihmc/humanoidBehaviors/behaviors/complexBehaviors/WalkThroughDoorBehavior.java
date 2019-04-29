@@ -38,6 +38,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
    private final boolean DEBUG = true;
+
    public enum WalkThroughDoorBehaviorState
    {
       STOPPED,
@@ -92,7 +93,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName,yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions,yoGraphicsListRegistry);
+      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
 
       //setup publisher for sending door location to UI
@@ -128,7 +129,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            if(DEBUG)
+            if (DEBUG)
             {
                publishTextToSpeech("entering setup");
             }
@@ -141,7 +142,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(leftHandMessage);
          }
-
 
       };
 
@@ -166,11 +166,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
             super.onEntry();
          }
+
          @Override
          public void onExit()
          {
 
-            System.out.println("SETTING OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
+            System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
 
             super.onExit();
          }
@@ -181,7 +182,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            if(DEBUG)
+            if (DEBUG)
             {
                publishTextToSpeech("walk to door action");
             }
@@ -197,14 +198,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            
-            System.out.println("SETTING OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
-            if(DEBUG)
+
+            System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
+            if (DEBUG)
             {
                publishTextToSpeech("open door action");
             }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
-            System.out.println("SET OPEN DOOR ACTION INPUT "+searchForDoorBehavior.getLocation());
+            System.out.println("SET OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
 
          }
       };
@@ -214,7 +215,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            if(DEBUG)
+            if (DEBUG)
             {
                publishTextToSpeech("setup for walk");
             }
@@ -237,7 +238,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            if(DEBUG)
+            if (DEBUG)
             {
                publishTextToSpeech("walk through door action");
             }
@@ -367,11 +368,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       publishTextToSpeech("Leaving Walk Through Door behavior");
 
    }
+
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
-      return false;
+      System.out.println("super done " + super.isDone() +" "+getStateMachine().getStateTransitions().containsKey(getStateMachine().getCurrentBehaviorKey())+" " +getStateMachine().isCurrentActionTerminal());
+      return super.isDone();
    }
 
    private boolean isWalkingDone()
