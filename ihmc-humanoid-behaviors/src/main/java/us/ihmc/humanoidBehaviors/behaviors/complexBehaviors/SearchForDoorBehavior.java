@@ -101,6 +101,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
 
    public Pose3D getLocation()
    {
+System.out.println("GET LOCATION " + doorTransformToWorld);
       return doorTransformToWorld;
    }
 
@@ -112,6 +113,8 @@ public class SearchForDoorBehavior extends AbstractBehavior
    
    public void setDoorLocation(Pose3D pose)
    {
+      
+      System.out.println("SET DOOR LOCATION "+pose);
       doorTransformToWorld = pose;
 
       

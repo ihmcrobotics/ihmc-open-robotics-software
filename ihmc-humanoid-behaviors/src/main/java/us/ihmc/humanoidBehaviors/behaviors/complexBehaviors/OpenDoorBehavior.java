@@ -32,7 +32,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    
    enum OpenDoorState
    {
-      MOVE_HANDS_TO_INITIAL_LOCATION, TURN_DOOR_KNOB, PUSH_ON_DOOR, PUSH_OPEN_DOOR, PULL_BACK_HANDS, DONE
+      START, MOVE_HANDS_TO_INITIAL_LOCATION, TURN_DOOR_KNOB, PUSH_ON_DOOR, PUSH_OPEN_DOOR, PULL_BACK_HANDS, DONE
    }
    
    boolean isDoorOpen = false;
@@ -92,6 +92,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    protected OpenDoorState configureStateMachineAndReturnInitialKey(StateMachineFactory<OpenDoorState, BehaviorAction> factory)
    {
     
+      BehaviorAction start = new BehaviorAction();
+      
       BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
@@ -166,6 +168,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       
       
+      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION);
 
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, moveHandsToDoor, OpenDoorState.TURN_DOOR_KNOB);
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.TURN_DOOR_KNOB);
@@ -177,20 +180,20 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       
       
-    //  factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pushDoorALittle.isDone()&&!isDoorOpen);
+     factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pushDoorALittle.isDone()&&!isDoorOpen);
       factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t ->  pushDoorALittle.isDone()&&isDoorOpen);
 
-    //  factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pushDoorOpen.isDone()&&!isDoorOpen);
+      factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pushDoorOpen.isDone()&&!isDoorOpen);
       factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.PULL_BACK_HANDS, t -> pushDoorOpen.isDone()&&isDoorOpen);
       
-    //  factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pullHandsBack.isDone()&&!isDoorOpen);
+      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, t -> pullHandsBack.isDone()&&!isDoorOpen);
       factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.DONE, t -> pullHandsBack.isDone()&&isDoorOpen);
 
 
 
 
 
-      return OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION;
+      return OpenDoorState.START;
 
 
    }
@@ -215,7 +218,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
    public void setGrabLocation(Pose3D doorPose3D)
    {
-      publishTextToSpeech("grab location set "+doorPose3D);
+      System.out.println("grab location set "+ doorPose3D);
+      publishTextToSpeech("grab location set "+ doorPose3D);
       PoseReferenceFrame doorPose = new PoseReferenceFrame("OpenDoorReferenceFrame", ReferenceFrame.getWorldFrame());
       doorPose.setPoseAndUpdate(new Pose3D(doorPose3D));
       this.doorPoseFrame = doorPose;
