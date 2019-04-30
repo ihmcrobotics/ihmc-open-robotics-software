@@ -1,16 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
-
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -26,6 +20,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -33,12 +28,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
-   private static final double stanceWidthCoPShiftFactor = 0.1;
+   private static final double stanceWidthCoPShiftFactor = 0.5;
    private static final double stanceLengthCoPShiftFactor = 0.0;
    private static final double maxStanceWidthCoPShift = 0.1;
    private static final double maxStanceLengthCoPShift = 0.1;
+
+   private static final double safeDistanceFromSupportPolygonEdges = 0.04;
 
    private final QuadrantDependentList<ContactState> initialContactState;
    private boolean initialized;
@@ -124,13 +124,15 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       {
          QuadrantDependentList<FramePoint3D> solePosition = timedContactSequence.get(interval).getSolePosition();
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
+         FixedFramePoint3DBasics copPositionAtStartOfInterval = copPositionsAtStartOfInterval.get(interval);
 
          QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition,
                                                                                 weightDistributionCalculator);
          QuadrupedCenterOfPressureTools
-               .computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+               .computeCenterOfPressure(copPositionAtStartOfInterval, solePosition, normalizedPressureAtStartOfInterval.get(interval));
          computeCoPOffsetFromStance(contactState, solePosition, copOffsetFromStance);
-         copPositionsAtStartOfInterval.get(interval).add(copOffsetFromStance);
+         copPositionAtStartOfInterval.add(copOffsetFromStance);
+         constrainToPolygon(contactState, solePosition, copPositionAtStartOfInterval);
 
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
       }
@@ -193,6 +195,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D smallEndContact = new FramePoint3D();
    private final FramePoint3D tempBigSideContact = new FramePoint3D();
    private final FramePoint3D tempBigEndContact = new FramePoint3D();
+
 
    private void computeCoPOffsetFromStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
                                            FrameVector3D copOffsetToPack)
@@ -269,6 +272,46 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       double widthShift = smallSide.negateIfRightSide(MathTools.clamp(stanceWidthCoPShiftFactor * averageWidth, maxStanceWidthCoPShift));
       copOffsetToPack.set(lengthShift, widthShift, 0.0);
       nominalOrientation.inverseTransform(copOffsetToPack);
+   }
+
+
+   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
+   private final ConvexPolygon2D constraintPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D scaledConstraintPolygon = new ConvexPolygon2D();
+   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
+
+   private void constrainToPolygon(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
+                                   FixedFramePoint3DBasics copToConstraint)
+   {
+      constraintPolygon.clear();
+      int numberOfFeetInContact = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant).isLoadBearing())
+         {
+            numberOfFeetInContact++;
+            constraintPolygon.addVertex(solePositions.get(robotQuadrant));
+         }
+      }
+      constraintPolygon.update();
+
+      tempFramePoint2D.set(copToConstraint);
+
+      // don't need to do anything if it's already inside
+      if (constraintPolygon.signedDistance(tempFramePoint2D) <= -safeDistanceFromSupportPolygonEdges)
+         return;
+
+      if (numberOfFeetInContact > 2)
+      {
+         polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, scaledConstraintPolygon);
+         scaledConstraintPolygon.orthogonalProjection(tempFramePoint2D);
+         copToConstraint.set(tempFramePoint2D);
+      }
+      else
+      {
+         constraintPolygon.orthogonalProjection(tempFramePoint2D);
+         copToConstraint.set(tempFramePoint2D);
+      }
    }
 
    private final QuadrantDependentList<FramePoint3DReadOnly> tempList = new QuadrantDependentList<>();
