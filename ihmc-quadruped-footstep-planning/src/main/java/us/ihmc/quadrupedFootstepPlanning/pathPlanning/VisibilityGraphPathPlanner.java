@@ -50,11 +50,10 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
       {
          Point3DReadOnly startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3DReadOnly goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-         navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
          if (startPos == null)
          {
-            LogTools.info("adding plane at start foot");
+            LogTools.info("adding plane at start pose");
             startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY());
          }
@@ -71,6 +70,8 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
             LogTools.info("Body start pose: " + startPos);
             LogTools.info("Body goal pose:  " + goalPos);
          }
+
+         navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
          try
          {
@@ -108,18 +109,7 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
    }
 
    // TODO hack to add start and goal planar regions
-   private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
-   {
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(0.3, 0.3);
-      polygon.addVertex(-0.3, 0.3);
-      polygon.addVertex(0.3, -0.3);
-      polygon.addVertex(-0.3, -0.25);
-      polygon.update();
 
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
-      planarRegionsList.addPlanarRegion(planarRegion);
-   }
 
    private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)
    {

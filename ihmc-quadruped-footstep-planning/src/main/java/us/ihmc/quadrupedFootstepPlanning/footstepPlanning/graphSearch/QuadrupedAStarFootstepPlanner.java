@@ -40,6 +40,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpans
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -142,6 +143,18 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    public BodyPathPlan getPathPlan()
    {
       return null;
+   }
+
+   @Override
+   public WaypointsForQuadrupedFootstepPlanner getWaypointPathPlanner()
+   {
+      return null;
+   }
+
+   @Override
+   public QuadrupedFootstepPlanner getFootstepPlanner()
+   {
+      return this;
    }
 
    @Override

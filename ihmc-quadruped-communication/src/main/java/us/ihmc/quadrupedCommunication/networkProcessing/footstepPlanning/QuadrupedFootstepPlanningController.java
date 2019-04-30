@@ -23,6 +23,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedVisGraphWithTurnWalkTurnPlanner;
+import us.ihmc.quadrupedFootstepPlanning.pathPlanning.WaypointsForQuadrupedFootstepPlanner;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
@@ -116,6 +117,16 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       {
          QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(plannerKey);
          planner.setGroundPlane(message);
+      }
+   }
+
+   public void processSupportRegionParameters(QuadrupedSupportPlanarRegionParametersMessage message)
+   {
+      for (FootstepPlannerType plannerKey : plannerMap.keySet())
+      {
+         WaypointsForQuadrupedFootstepPlanner planner = plannerMap.get(plannerKey).getWaypointPathPlanner();
+         if (planner != null)
+            planner.setFallbackRegionSize(message.getSupportRegionSize());
       }
    }
 
