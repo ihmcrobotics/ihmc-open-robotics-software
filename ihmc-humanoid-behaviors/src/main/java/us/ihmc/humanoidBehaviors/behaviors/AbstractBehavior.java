@@ -249,7 +249,6 @@ public abstract class AbstractBehavior implements RobotController
 
    public void publishTextToSpeech(String textToSpeak)
    {
-      System.out.println("textToSpeak -"+textToSpeak);
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
    

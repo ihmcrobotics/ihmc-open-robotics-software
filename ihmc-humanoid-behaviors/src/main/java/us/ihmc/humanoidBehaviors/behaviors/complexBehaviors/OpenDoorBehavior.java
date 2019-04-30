@@ -88,19 +88,20 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
             publishTextToSpeech("Door is Closed");
       }
 
+      super.doControl();
+
    }
    
    @Override
    protected OpenDoorState configureStateMachineAndReturnInitialKey(StateMachineFactory<OpenDoorState, BehaviorAction> factory)
    {
     
-      BehaviorAction start = new BehaviorAction(sleepBehavior) {
+      BehaviorAction start = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node)) {
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeech("Starting ****************************");
-            sleepBehavior.setSleepTime(1);
          }
+        
       };
       BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
@@ -112,6 +113,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.102,  1.079 , 1.551252338779563, 0.048351007951384285, 0.007252343575301105,RobotSide.RIGHT, "Moving Right Hand Above Door Knob"));
             atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand( 0.298, -0.147,  1.097,1.2554068994570775, 0.03416782147174632, 0.26586161890007015,RobotSide.LEFT,"Moving Left Hand To Door"));
          }
+         
       };
 
       BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
@@ -132,7 +134,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             publishTextToSpeech("pushDoorALittle Action");
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, 0,  0.879,  1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT,"Moving Hand To Door Knob"));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.051,  0.879,  1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT,"Moving Hand To Door Knob"));
 
          }
       };
@@ -174,9 +176,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       
       
       factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION);
-
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_HANDS_TO_INITIAL_LOCATION, moveHandsToDoor, OpenDoorState.TURN_DOOR_KNOB);
-      factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.TURN_DOOR_KNOB);
+      factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
       factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
       factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
       factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);
@@ -202,14 +203,16 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
 
    }
+   
+ 
 
-   @Override
+/*   @Override
    public boolean isDone()
    {
-      System.out.println("done check "+super.isDone()+" "+getStateMachine().getCurrentBehaviorKey()+" " +getStateMachine().isCurrentActionTerminal());
+      //System.out.println("done check "+super.isDone()+" "+getStateMachine().getCurrentBehaviorKey()+" " +getStateMachine().getCurrentAction().isDone());
       
       return super.isDone();
-   }
+   }*/
 
    private HandTrajectoryMessage moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,final RobotSide side, final String description)
    {
@@ -225,12 +228,11 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                                      CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-     return handTrajectoryMessage;
+      return handTrajectoryMessage;
    }
 
    public void setGrabLocation(Pose3D doorPose3D)
    {
-      System.out.println("grab location set "+ doorPose3D);
       publishTextToSpeech("grab location set "+ doorPose3D);
       PoseReferenceFrame doorPose = new PoseReferenceFrame("OpenDoorReferenceFrame", ReferenceFrame.getWorldFrame());
       doorPose.setPoseAndUpdate(new Pose3D(doorPose3D));
@@ -241,6 +243,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    public void onBehaviorExited()
    {
       doorPoseFrame = null;
+      publishTextToSpeech("Door Open Behavior Complete");
+
    }
 
 

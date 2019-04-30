@@ -74,15 +74,13 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    @Override
    public void doControl()
    {
+      
       stateMachine.doControlAndTransitions();
    }
 
    @Override
    public boolean isDone()
-   {
-      //if your current state has finished and there is no transition out of that state... the entire state machine is finished
-      System.out.println("----"+stateMachine.isCurrentActionTerminal()+" " +stateMachine.getCurrentBehaviorKey()+" "+stateMachine.getStateTransitions().keySet());
-      
+   {      
       if (stateMachine.getCurrentAction().isDone() && stateMachine.isCurrentActionTerminal())
       {
          return true;
@@ -90,9 +88,6 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       return false;
 
    }
-   public Map<E, StateTransition<E>> getStateTransitions()
-   {
-      return stateMachine.getStateTransitions();
-   }
+
 
 }
