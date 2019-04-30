@@ -2,11 +2,13 @@ package us.ihmc.footstepPlanning.graphSearch.planners;
 
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
@@ -33,6 +35,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.*;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 {
@@ -49,6 +53,9 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode startNode;
    private FootstepNode endNode;
+
+   private Predicate<FootstepNode> goalCondition;
+   private UnaryOperator<FootstepNode> finalStepSupplier;
 
    private PlanarRegionsList planarRegionsList;
 
@@ -140,8 +147,11 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
-      if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.POSE_BETWEEN_FEET))
+      // set goal nodes
+      switch (goal.getFootstepPlannerGoalType())
       {
+      case POSE_BETWEEN_FEET:
+      case CLOSE_TO_POSE:
          FramePose3D goalPose = goal.getGoalPoseBetweenFeet();
          ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
          for (RobotSide side : RobotSide.values)
@@ -155,9 +165,8 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
             goalPoses.put(side, goalNodePose);
          }
-      }
-      else if (goal.getFootstepPlannerGoalType().equals(FootstepPlannerGoalType.DOUBLE_FOOTSTEP))
-      {
+         break;
+      case DOUBLE_FOOTSTEP:
          SideDependentList<SimpleFootstep> goalSteps = goal.getDoubleFootstepGoal();
          for (RobotSide side : RobotSide.values)
          {
@@ -169,6 +178,33 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
             goalNodePose.changeFrame(ReferenceFrame.getWorldFrame());
             goalPoses.put(side, goalNodePose);
          }
+         break;
+      }
+
+      // set goal conditions
+      switch (goal.getFootstepPlannerGoalType())
+      {
+      case POSE_BETWEEN_FEET:
+      case DOUBLE_FOOTSTEP:
+         goalCondition = (node) -> goalNodes.get(node.getRobotSide()).equals(node);
+         finalStepSupplier = (node) -> goalNodes.get(node.getRobotSide().getOppositeSide());
+         break;
+      case CLOSE_TO_POSE:
+         double distanceFromGoalPoseSquared = MathTools.square(goal.getDistanceFromGoalPose());
+         goalCondition = (node) ->
+         {
+            Point2D midFootPoint = node.getOrComputeMidFootPoint(0.5 * parameters.getIdealFootstepWidth());
+            Point2D goalMidFootPoint = goalNodes.get(node.getRobotSide()).getOrComputeMidFootPoint(0.5 * parameters.getIdealFootstepWidth());
+            return midFootPoint.distanceSquared(goalMidFootPoint) < distanceFromGoalPoseSquared;
+         };
+         finalStepSupplier = (node) ->
+         {
+            double stanceWidth = node.getRobotSide().negateIfLeftSide(parameters.getIdealFootstepWidth());
+            double dx = - stanceWidth * Math.sin(node.getYaw());
+            double dy = stanceWidth * Math.cos(node.getYaw());
+            return new FootstepNode(node.getX() + dx, node.getY() + dy, node.getYaw(), node.getRobotSide().getOppositeSide());
+         };
+         break;
       }
 
       goalPoseInWorld.interpolate(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT), 0.5);
@@ -401,15 +437,16 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      RobotSide nodeSide = nodeToExpand.getRobotSide();
-      if (goalNodes.get(nodeSide).equals(nodeToExpand))
+      if (goalCondition.test(nodeToExpand))
       {
-         endNode = goalNodes.get(nodeSide.getOppositeSide());
+         endNode = finalStepSupplier.apply(nodeToExpand);
          graph.checkAndSetEdge(nodeToExpand, endNode, 0.0);
          return true;
       }
-
-      return false;
+      else
+      {
+         return false;
+      }
    }
 
    private void checkAndHandleBestEffortNode(FootstepNode nodeToExpand)
@@ -444,10 +481,10 @@ public class AStarFootstepPlanner implements BodyPathAndFootstepPlanner
 
    public static void checkGoalType(FootstepPlannerGoal goal)
    {
-      FootstepPlannerGoalType supportedGoalType1 = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
-      FootstepPlannerGoalType supportedGoalType2 = FootstepPlannerGoalType.DOUBLE_FOOTSTEP;
-      if (!goal.getFootstepPlannerGoalType().equals(supportedGoalType1) && !goal.getFootstepPlannerGoalType().equals(supportedGoalType2))
-         throw new IllegalArgumentException("Planner does not support goals other than " + supportedGoalType1 + " and " + supportedGoalType2);
+      HashSet<FootstepPlannerGoalType> supportedGoalTypes = new HashSet<>(
+            Arrays.asList(FootstepPlannerGoalType.POSE_BETWEEN_FEET, FootstepPlannerGoalType.DOUBLE_FOOTSTEP, FootstepPlannerGoalType.CLOSE_TO_POSE));
+      if (!supportedGoalTypes.contains(goal.getFootstepPlannerGoalType()))
+         throw new IllegalArgumentException("Goal type " + goal.getFootstepPlannerGoalType() + " is not supported.");
    }
 
    public static AStarFootstepPlanner createPlanner(FootstepPlannerParameters parameters, BipedalFootstepPlannerListener listener,
