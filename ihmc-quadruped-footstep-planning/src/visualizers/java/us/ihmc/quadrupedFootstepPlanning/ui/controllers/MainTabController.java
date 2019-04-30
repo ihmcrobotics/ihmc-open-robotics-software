@@ -39,6 +39,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
@@ -598,12 +599,11 @@ public class MainTabController
 
    private class FootstepPlanPreviewPlaybackManager extends AnimationTimer
    {
-      private final AtomicReference<FootstepPlan> footstepPlanReference;
       private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
 
-      private final double frameDt = 0.01;
+      private final double frameDt = 0.005;
       // frames per call to handle()
-      final int playbackSpeed = 5;
+      final int playbackSpeed = 10;
       int playbackCounter = 0;
 
       // whether to show ghost robot
@@ -613,14 +613,13 @@ public class MainTabController
       final AtomicBoolean playbackModeActive = new AtomicBoolean(false);
       private final List<QuadrantDependentList<Point3DReadOnly>> footPositionScene = new ArrayList<>();
 
-      QuadrantDependentList<Point3D> previewFootstepPositions;
+      private QuadrantDependentList<Point3D> previewFootstepPositions;
 
       FootstepPlanPreviewPlaybackManager(Messager messager)
       {
-         footstepPlanReference = messager.createInput(footstepPlanTopic);
          xGaitSettingsReference = messager.createInput(xGaitSettingsTopic);
 
-         messager.registerTopicListener(footstepPlanTopic, output -> calculateFrames());
+         messager.registerTopicListener(footstepPlanTopic, this::calculateFrames);
       }
 
       void setPreviewFootstepPositions(QuadrantDependentList<Point3D> previewFootstepPositions)
@@ -628,12 +627,11 @@ public class MainTabController
          this.previewFootstepPositions = previewFootstepPositions;
       }
 
-      private void calculateFrames()
+      private void calculateFrames(FootstepPlan footstepPlan)
       {
-         FootstepPlan footstepPlan = footstepPlanReference.getAndSet(null);
          footPositionScene.clear();
 
-         if (footstepPlan == null)
+         if (footstepPlan == null || footstepPlan.getNumberOfSteps() < 1)
             return;
 
          List<QuadrupedTimedStep> steps = new ArrayList<>();

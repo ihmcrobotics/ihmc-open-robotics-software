@@ -358,7 +358,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
 
-      turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters);
+      turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
@@ -2628,10 +2628,9 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitTurnInPlaceAngle(boolean parallelize, double angleToTurn)
    {
       if (parallelize)
-         pipeLine.submitTaskForPallelPipesStage(turnInPlaceBehavior, new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(),
-                                                                                         swingTime.getDoubleValue()));
+         pipeLine.submitTaskForPallelPipesStage(turnInPlaceBehavior, new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior));
       else
-         pipeLine.submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue()));
+         pipeLine.submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior));
    }
 
    private void sequenceFootLift()

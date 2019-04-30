@@ -20,6 +20,7 @@ import us.ihmc.pubsub.common.SerializedPayload;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.robotDataLogger.logger.LogAliveListener;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 
 /**
@@ -39,6 +40,7 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
 
    private final WebsocketDataBroadcaster broadcaster;
    private final VariableChangedListener variableChangedListener;
+   private final LogAliveListener logAliveListener;
    private final int dataSize;
 
    private Object lock;
@@ -59,12 +61,14 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
    
    private long requestedUpdateDT = 0;
 
-   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, int numberOfRegistryBuffers, VariableChangedListener variableChangedListener)
+   public WebsocketDataServerFrameHandler(WebsocketDataBroadcaster broadcaster, int dataSize, int numberOfRegistryBuffers, VariableChangedListener variableChangedListener,
+                                          LogAliveListener logAliveListener)
          throws IOException
    {
       this.broadcaster = broadcaster;
       this.dataSize = dataSize;
       this.variableChangedListener = variableChangedListener;
+      this.logAliveListener = logAliveListener;
       this.udpTimestampServer = new UDPTimestampServer();
       
       registryStatistics = new WebsocketDataServerRegistrySendStatistics[numberOfRegistryBuffers];
@@ -106,6 +110,18 @@ class WebsocketDataServerFrameHandler extends SimpleChannelInboundHandler<WebSoc
          synchronized(lock)
          {
             requestedUpdateDT = Conversions.millisecondsToNanoseconds(argument);
+         }
+         break;
+      case LOG_ACTIVE:
+         if (logAliveListener != null)
+         {
+            logAliveListener.receivedLogAliveCommand(false);
+         }
+         break;
+      case LOG_ACTIVE_WITH_CAMERA:
+         if (logAliveListener != null)
+         {
+            logAliveListener.receivedLogAliveCommand(true);
          }
          break;
          default:

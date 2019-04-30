@@ -10,10 +10,12 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
 {
    private final Class<E> keyType;
    private BehaviorStateMachine<E> stateMachine = null;
+   private final String namePrefix;
+   private final DoubleProvider timeProvider;
 
    public StateMachineBehavior(String robotName, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, Ros2Node ros2Node)
    {
-      this(robotName, null, stateMachineName, keyType, timeProvider, ros2Node);
+      this(robotName, stateMachineName, stateMachineName, keyType, timeProvider, ros2Node);
    }
 
    public StateMachineBehavior(String robotName, String namePrefix, String stateMachineName, Class<E> keyType,
@@ -21,13 +23,18 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    {
       super(robotName, namePrefix, ros2Node);
       this.keyType = keyType;
+      this.namePrefix = namePrefix;
+      this.timeProvider = timeProvider;
    }
 
    protected void setupStateMachine()
    {
       StateMachineFactory<E, BehaviorAction> stateMachineFactory = new StateMachineFactory<>(keyType);
       E initialBehaviorKey = configureStateMachineAndReturnInitialKey(stateMachineFactory);
+      stateMachineFactory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
+
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(initialBehaviorKey));
+
    }
 
    protected abstract E configureStateMachineAndReturnInitialKey(StateMachineFactory<E, BehaviorAction> factory);

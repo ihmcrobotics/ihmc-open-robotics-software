@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
 {
-   private static final double DEFAULT_FIDUCIAL_SIZE = 0.22;
+   private static final double DEFAULT_FIDUCIAL_SIZE = 1;
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
 
@@ -26,15 +26,15 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
 
    private final YoBoolean locationEnabled;
 
-   public FiducialDetectorBehaviorService(String robotName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FiducialDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(robotName, FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node);
+      super(robotName, ThreadName, ros2Node);
 
       createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
-                                                                              yoGraphicsListRegistry);
+                                                                              yoGraphicsListRegistry,ThreadName);
 
       fiducialDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       fiducialDetectorFromCameraImages.setExpectedFiducialSize(DEFAULT_FIDUCIAL_SIZE);

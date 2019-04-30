@@ -425,8 +425,18 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    }
 
    @Override
-   public void trustFootSwitch(boolean trustFootSwitch)
+   public void trustFootSwitchInSwing(boolean trustFootSwitch)
    {
       this.trustFootSwitch.set(trustFootSwitch);
+   }
+
+   /**
+    * Should use {@link #trustFootSwitchInSwing}.
+    */
+   @Deprecated
+   @Override
+   public void trustFootSwitchInSupport(boolean trustFootSwitch)
+   {
+      throw new RuntimeException("This is not a different implementation by default.");
    }
 }

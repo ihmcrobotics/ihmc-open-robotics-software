@@ -1,8 +1,9 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 
-public class SettableFootstepPlannerParameters implements FootstepPlannerParameters
+public class SettableFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
    private double maximumStepReach;
    private double maximumStepLength;
@@ -14,261 +15,356 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private double maximumStepChangeZ;
    private double bodyGroundClearance;
+   private double maxWalkingSpeedMultiplier;
 
    private double yawWeight;
    private double costPerStep;
    private double stepUpWeight;
    private double stepDownWeight;
-   private double heuristicsWeight;
    private double distanceWeight;
+   private double heuristicsWeight;
    private double xGaitWeight;
 
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
    private double minimumSurfaceInclineRadians;
    private double projectInsideDistance;
-
-   private double crawlSpeed;
-   private double trotSpeed;
-   private double paceSpeed;
+   private double cliffHeightToAvoid;
+   private double minimumDistanceFromCliffTops;
+   private double minimumDistanceFromCliffBottoms;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
    }
 
-   public void set(FootstepPlannerParameters footstepPlannerParameters)
-   {
-      this.maximumStepReach = footstepPlannerParameters.getMaximumStepReach();
-      this.maximumStepLength = footstepPlannerParameters.getMaximumStepLength();
-      this.maximumStepWidth = footstepPlannerParameters.getMaximumStepWidth();
-      this.minimumStepLength = footstepPlannerParameters.getMinimumStepLength();
-      this.minimumStepWidth = footstepPlannerParameters.getMinimumStepWidth();
-      this.maximumStepYaw = footstepPlannerParameters.getMaximumStepYaw();
-      this.minimumStepYaw = footstepPlannerParameters.getMinimumStepYaw();
-      this.maximumStepChangeZ = footstepPlannerParameters.getMaximumStepChangeZ();
-      this.bodyGroundClearance = footstepPlannerParameters.getBodyGroundClearance();
-
-      this.yawWeight = footstepPlannerParameters.getYawWeight();
-      this.costPerStep = footstepPlannerParameters.getCostPerStep();
-      this.stepUpWeight = footstepPlannerParameters.getStepUpWeight();
-      this.stepDownWeight = footstepPlannerParameters.getStepDownWeight();
-      this.heuristicsWeight = footstepPlannerParameters.getHeuristicsInflationWeight();
-      this.distanceWeight = footstepPlannerParameters.getDistanceHeuristicWeight();
-      this.xGaitWeight = footstepPlannerParameters.getXGaitWeight();
-
-      this.minimumSurfaceInclineRadians = footstepPlannerParameters.getMinimumSurfaceInclineRadians();
-      this.minXClearanceFromFoot = footstepPlannerParameters.getMinXClearanceFromFoot();
-      this.minYClearanceFromFoot = footstepPlannerParameters.getMinYClearanceFromFoot();
-      this.projectInsideDistance = footstepPlannerParameters.getProjectInsideDistance();
-
-      this.crawlSpeed = footstepPlannerParameters.getCrawlSpeed();
-      this.trotSpeed = footstepPlannerParameters.getTrotSpeed();
-      this.paceSpeed = footstepPlannerParameters.getPaceSpeed();
-   }
-
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumStepReach(double maximumStepReach)
    {
       this.maximumStepReach = maximumStepReach;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumStepLength(double maximumStepLength)
    {
       this.maximumStepLength = maximumStepLength;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumStepWidth(double maximumStepWidth)
    {
       this.maximumStepWidth = maximumStepWidth;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinimumStepLength(double minimumStepLength)
    {
       this.minimumStepLength = minimumStepLength;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinimumStepWidth(double minimumStepWidth)
    {
       this.minimumStepWidth = minimumStepWidth;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinimumStepYaw(double minimumStepYaw)
    {
       this.minimumStepYaw = minimumStepYaw;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumStepYaw(double maximumStepYaw)
    {
       this.maximumStepYaw = maximumStepYaw;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumStepChangeZ(double maximumStepChangeZ)
    {
       this.maximumStepChangeZ = maximumStepChangeZ;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setBodyGroundClearance(double bodyGroundClearance)
    {
       this.bodyGroundClearance = bodyGroundClearance;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public void setMaxWalkingSpeedMultiplier(double maxWalkingSpeedMultiplier)
+   {
+      this.maxWalkingSpeedMultiplier = maxWalkingSpeedMultiplier;
+   }
+
+   @Override
+   public void setDistanceHeuristicWeight(double distanceHeuristicWeight)
+   {
+      this.distanceWeight = distanceHeuristicWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setYawWeight(double yawWeight)
    {
       this.yawWeight = yawWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public void setXGaitWeight(double xGaitWeight)
+   {
+      this.xGaitWeight = xGaitWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setCostPerStep(double costPerStep)
    {
       this.costPerStep = costPerStep;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setStepUpWeight(double stepUpWeight)
    {
       this.stepUpWeight = stepUpWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setStepDownWeight(double stepDownWeight)
    {
       this.stepDownWeight = stepDownWeight;
    }
 
-   public void setHeuristicsWeight(double heuristicsWeight)
+   /** {@inheritDoc} */
+   @Override
+   public void setHeuristicsInflationWeight(double heuristicsWeight)
    {
       this.heuristicsWeight = heuristicsWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinXClearanceFromFoot(double minXClearanceFromFoot)
    {
       this.minXClearanceFromFoot = minXClearanceFromFoot;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinYClearanceFromFoot(double minYClearanceFromFoot)
    {
       this.minYClearanceFromFoot = minYClearanceFromFoot;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public void setMinimumSurfaceInclineRadians(double minimumSurfaceInclineRadians)
    {
       this.minimumSurfaceInclineRadians = minimumSurfaceInclineRadians;
    }
 
+   @Override
+   public void setCliffHeightToAvoid(double cliffHeightToAvoid)
+   {
+      this.cliffHeightToAvoid = cliffHeightToAvoid;
+   }
+
+   @Override
+   public void setMinimumDistanceFromCliffBottoms(double distance)
+   {
+      this.minimumDistanceFromCliffBottoms = distance;
+   }
+
+   @Override
+   public void setMinimumDistanceFromCliffTops(double distance)
+   {
+      this.minimumDistanceFromCliffTops = distance;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setProjectInsideDistance(double projectInsideDistance)
    {
       this.projectInsideDistance = projectInsideDistance;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepReach()
    {
       return maximumStepReach;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepLength()
    {
       return maximumStepLength;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepWidth()
    {
       return maximumStepWidth;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinimumStepLength()
    {
       return minimumStepLength;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinimumStepWidth()
    {
       return minimumStepWidth;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinimumStepYaw()
    {
       return minimumStepYaw;
    }
 
+   /** {@inheritDoc} */
    public double getMaximumStepYaw()
    {
       return maximumStepYaw;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepChangeZ()
    {
       return maximumStepChangeZ;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getBodyGroundClearance()
    {
       return bodyGroundClearance;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxWalkingSpeedMultiplier()
+   {
+      return maxWalkingSpeedMultiplier;
+   }
+
+   @Override
    public double getDistanceHeuristicWeight()
    {
       return distanceWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getXGaitWeight()
    {
       return xGaitWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getYawWeight()
    {
       return yawWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getCostPerStep()
    {
       return costPerStep;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getStepUpWeight()
    {
       return stepUpWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getStepDownWeight()
    {
       return stepDownWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getHeuristicsInflationWeight()
    {
       return heuristicsWeight;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinXClearanceFromFoot()
    {
       return minXClearanceFromFoot;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinYClearanceFromFoot()
    {
       return minYClearanceFromFoot;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getMinimumSurfaceInclineRadians()
    {
       return minimumSurfaceInclineRadians;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public double getProjectInsideDistance()
    {
       return projectInsideDistance;
    }
 
-   public double getTrotSpeed()
+   /** {@inheritDoc} */
+   @Override
+   public double getCliffHeightToAvoid()
    {
-      return trotSpeed;
+      return cliffHeightToAvoid;
    }
 
-   public double getCrawlSpeed()
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
    {
-      return crawlSpeed;
+      return minimumDistanceFromCliffBottoms;
    }
 
-   public double getPaceSpeed()
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumDistanceFromCliffTops()
    {
-      return paceSpeed;
+      return minimumDistanceFromCliffTops;
    }
 }

@@ -40,7 +40,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    private static final int FLUSH_EVERY_N_PACKETS = 250;
-   private static final long STATUS_PACKET_RATE = Conversions.secondsToNanoseconds(5.0);
+   public static final long STATUS_PACKET_RATE = Conversions.secondsToNanoseconds(5.0);
    private static final long VIDEO_RECORDING_TIMEOUT = Conversions.secondsToNanoseconds(1.0);
 
    public static final String propertyFile = "robotData.log";

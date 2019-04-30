@@ -7,13 +7,13 @@ uint32 sequence_id
 float64 maximum_step_reach
 
 # Field default value -11.1
-float64 maximum_step_width
-
-# Field default value -11.1
-float64 maximum_step_cycle_distance
+float64 maximum_step_length
 
 # Field default value -11.1
 float64 minimum_step_length
+
+# Field default value -11.1
+float64 maximum_step_width
 
 # Field default value -11.1
 float64 minimum_step_width
@@ -28,19 +28,16 @@ float64 maximum_step_yaw
 float64 maximum_step_change_z
 
 # Field default value -11.1
-float64 maximum_step_cycle_change_z
-
-# Field default value -11.1
 float64 body_ground_clearance
 
 # Field default value -11.1
-float64 forward_weight
-
-# Field default value -11.1
-float64 lateral_weight
+float64 distance_heuristic_weight
 
 # Field default value -11.1
 float64 yaw_weight
+
+# Field default value -11.1
+float64 x_gait_weight
 
 # Field default value -11.1
 float64 cost_per_step
@@ -59,6 +56,12 @@ float64 min_x_clearance_from_foot
 
 # Field default value -11.1
 float64 min_y_clearance_from_foot
+
+# Field default value -11.1
+float64 max_walking_speed_multiplier
+
+# Field default value -11.1
+float64 projection_inside_distance
 
 # Field default value -11.1
 float64 minimum_surface_incline_radians

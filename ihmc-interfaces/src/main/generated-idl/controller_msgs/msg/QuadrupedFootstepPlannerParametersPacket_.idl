@@ -24,11 +24,11 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double maximum_step_reach;
         @defaultValue(value=-11.1)
-        double maximum_step_width;
-        @defaultValue(value=-11.1)
-        double maximum_step_cycle_distance;
+        double maximum_step_length;
         @defaultValue(value=-11.1)
         double minimum_step_length;
+        @defaultValue(value=-11.1)
+        double maximum_step_width;
         @defaultValue(value=-11.1)
         double minimum_step_width;
         @defaultValue(value=-11.1)
@@ -38,15 +38,13 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double maximum_step_change_z;
         @defaultValue(value=-11.1)
-        double maximum_step_cycle_change_z;
-        @defaultValue(value=-11.1)
         double body_ground_clearance;
         @defaultValue(value=-11.1)
-        double forward_weight;
-        @defaultValue(value=-11.1)
-        double lateral_weight;
+        double distance_heuristic_weight;
         @defaultValue(value=-11.1)
         double yaw_weight;
+        @defaultValue(value=-11.1)
+        double x_gait_weight;
         @defaultValue(value=-11.1)
         double cost_per_step;
         @defaultValue(value=-11.1)
@@ -59,6 +57,10 @@ module controller_msgs
         double min_x_clearance_from_foot;
         @defaultValue(value=-11.1)
         double min_y_clearance_from_foot;
+        @defaultValue(value=-11.1)
+        double max_walking_speed_multiplier;
+        @defaultValue(value=-11.1)
+        double projection_inside_distance;
         @defaultValue(value=-11.1)
         double minimum_surface_incline_radians;
         @defaultValue(value=-11.1)
