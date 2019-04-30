@@ -25,3 +25,10 @@ float64 horizon_length
 PlanarRegionsListMessage planar_regions_list_message
 bool assume_flat_ground
 int32 planner_request_id -1
+
+# Radius around the given goal pose that defines a goal region.
+# A step is considered inside the goal region if it's associated mid-foot point
+# is inside the region.
+# If this value is non-positive the goal region will consist of a single point
+# at the given pose
+float64 goal_position_proximity -1.0

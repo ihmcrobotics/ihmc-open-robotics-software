@@ -42,4 +42,12 @@ bool assume_flat_ground
 # Field default value -1
 int32 planner_request_id
 
+# Radius around the given goal pose that defines a goal region.
+# A step is considered inside the goal region if it's associated mid-foot point
+# is inside the region.
+# If this value is non-positive the goal region will consist of a single point
+# at the given pose
+# Field default value -1.0
+float64 goal_position_proximity
+
 
