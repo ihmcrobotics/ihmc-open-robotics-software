@@ -182,7 +182,7 @@ public class DCMPlanner implements DCMPlannerInterface
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
       timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
-      piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
+      piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
       int numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();

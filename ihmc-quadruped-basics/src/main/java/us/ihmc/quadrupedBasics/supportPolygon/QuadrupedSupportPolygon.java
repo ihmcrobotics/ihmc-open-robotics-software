@@ -784,7 +784,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       return getNominalYaw(footsteps, getNumberOfVertices());
    }
 
-   public static double getNominalYaw(QuadrantDependentList<FramePoint3D> solePositions, int numberOfVertices)
+   public static double getNominalYaw(QuadrantDependentList<? extends FramePoint3DReadOnly> solePositions, int numberOfVertices)
    {
       if (numberOfVertices >= 3)
       {
