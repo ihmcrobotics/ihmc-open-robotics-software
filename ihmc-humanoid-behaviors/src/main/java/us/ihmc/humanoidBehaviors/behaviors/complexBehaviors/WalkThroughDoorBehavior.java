@@ -369,12 +369,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
-   @Override
-   public boolean isDone()
-   {
-      System.out.println("super done " + super.isDone() +" "+getStateMachine().getStateTransitions().containsKey(getStateMachine().getCurrentBehaviorKey())+" " +getStateMachine().isCurrentActionTerminal());
-      return super.isDone();
-   }
+
 
    private boolean isWalkingDone()
    {

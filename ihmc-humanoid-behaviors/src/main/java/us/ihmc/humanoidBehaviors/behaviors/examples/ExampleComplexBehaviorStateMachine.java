@@ -7,6 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -17,32 +18,23 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
 {
    public enum ExampleStates
    {
-      ENABLE_LIDAR, SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, RESET_ROBOT_PIPELINE_EXAMPLE, GET_LIDAR, GET_VIDEO, GET_USER_VALIDATION, WHOLEBODY_EXAMPLE,
+      STEP1, STEP2, STEP3, STEP4,
    }
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   private final GetLidarScanExampleBehavior getLidarScanExampleBehavior;
-   private final GetVideoPacketExampleBehavior getVideoPacketExampleBehavior;
-   private final GetUserValidationBehavior userValidationExampleBehavior;
+   private final SleepBehavior sleepBehavior;
    private final SimpleArmMotionBehavior simpleArmMotionBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
-   private final ReferenceFrame midZupFrame;
 
    public ExampleComplexBehaviorStateMachine(String robotName, Ros2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "ExampleStateMachine", ExampleStates.class, yoTime, ros2Node);
-
-      midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
-      //      coactiveBehaviorsNetworkManager = ros2Node;
-      //      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
+      sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       //create your behaviors
-      getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(robotName, ros2Node);
-      getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(robotName, ros2Node);
-      userValidationExampleBehavior = new GetUserValidationBehavior(robotName, ros2Node);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       simpleArmMotionBehavior = new SimpleArmMotionBehavior(robotName, yoTime, atlasPrimitiveActions.referenceFrames, ros2Node, atlasPrimitiveActions);
 
@@ -69,7 +61,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    @Override
    public void onBehaviorExited()
    {
-      System.out.println("IM ALL DONE");
+      publishTextToSpeech("Ending Example Behavior");
    }
 
    @Override
@@ -77,13 +69,25 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    {
       //TODO setup search for ball behavior
 
-      BehaviorAction enableLidar = new BehaviorAction(atlasPrimitiveActions.enableLidarBehavior) // ExampleStates.ENABLE_LIDAR
+      BehaviorAction sleep = new BehaviorAction(sleepBehavior) // ExampleStates.ENABLE_LIDAR
       {
+         @Override
+         public void onEntry()
+         {
+            publishTextToSpeech("entering 3 second sleep behavior");
+            super.onEntry();
+         }
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeech("Enabling Lidar");
-            // FIXME atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
+            publishTextToSpeech("sleeping for 3 seconds");
+            sleepBehavior.setSleepTime(3);
+         }
+         @Override
+         public void onExit()
+         {
+            publishTextToSpeech("sleeping for 3 seconds complete");
+            super.onExit();
          }
       };
 
@@ -94,6 +98,12 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          {
             publishTextToSpeech("Resetting Robot");
             super.setBehaviorInput();
+         }
+         @Override
+         public void onExit()
+         {
+            publishTextToSpeech("reset robot complete");
+            super.onExit();
          }
       };
 
@@ -106,38 +116,15 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          }
       };
 
-      BehaviorAction wholeBodyExample = new BehaviorAction(atlasPrimitiveActions.wholeBodyBehavior) // ExampleStates.WHOLEBODY_EXAMPLE
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            publishTextToSpeech("Doing Whole Body Behavior");
-            FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
-            point.changeFrame(ReferenceFrame.getWorldFrame());
+     
 
-            //the point in the world you want to move the hand to.
-            //i set this high so that more solutions are accepted
-            atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
-            //how fast you want the action to be
-            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
 
-            FrameQuaternion tmpOr = new FrameQuaternion(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
-            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
-         }
-      };
+      factory.addStateAndDoneTransition(ExampleStates.STEP1, setupRobot, ExampleStates.STEP3);
+      factory.addStateAndDoneTransition(ExampleStates.STEP3, sleep, ExampleStates.STEP4);
+      factory.addState(ExampleStates.STEP4, resetRobot);
+      
 
-      BehaviorAction getLidar = new BehaviorAction(getLidarScanExampleBehavior); // ExampleStates.GET_LIDAR
-      BehaviorAction getVideo = new BehaviorAction(getVideoPacketExampleBehavior); // ExampleStates.GET_VIDEO
-      BehaviorAction getUserValidation = new BehaviorAction(userValidationExampleBehavior); // ExampleStates.GET_USER_VALIDATION
-
-      factory.addStateAndDoneTransition(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
-      factory.addStateAndDoneTransition(ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE, resetRobot, ExampleStates.ENABLE_LIDAR);
-      factory.addStateAndDoneTransition(ExampleStates.ENABLE_LIDAR, enableLidar, ExampleStates.GET_LIDAR);
-      factory.addStateAndDoneTransition(ExampleStates.GET_LIDAR, getLidar, ExampleStates.GET_VIDEO);
-      factory.addStateAndDoneTransition(ExampleStates.GET_VIDEO, getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
-      factory.addStateAndDoneTransition(ExampleStates.WHOLEBODY_EXAMPLE, wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
-      factory.addState(ExampleStates.GET_USER_VALIDATION, getUserValidation);
-
-      return ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE;
+      return ExampleStates.STEP1;
    }
+   
 }

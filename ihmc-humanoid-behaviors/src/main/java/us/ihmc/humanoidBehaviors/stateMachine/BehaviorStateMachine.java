@@ -75,8 +75,4 @@ public class BehaviorStateMachine<E extends Enum<E>>
    {
       return stateMachine.getTimeInCurrentState();
    }
-   public Map<E, StateTransition<E>> getStateTransitions()
-   {
-      return stateMachine.getStateTransitions();
-   }
 }
