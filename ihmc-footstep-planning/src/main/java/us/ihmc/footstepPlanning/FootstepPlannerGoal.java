@@ -14,8 +14,7 @@ public class FootstepPlannerGoal
    private FramePoint3D goalPositionBetweenFeet;
    private SimpleFootstep singleFootstepGoal;
    private SideDependentList<SimpleFootstep> doubleFootstepGoal;
-   private Point2D xyGoal;
-   private double distanceFromXYGoal;
+   private double distanceFromGoalPose;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
 
@@ -33,10 +32,8 @@ public class FootstepPlannerGoal
          for (RobotSide robotSide : RobotSide.values)
             doubleFootstepGoal.put(robotSide, other.doubleFootstepGoal.get(robotSide));
       }
-      if (other.xyGoal != null)
-         xyGoal = new Point2D(other.xyGoal);
-      if (Double.isFinite(other.distanceFromXYGoal))
-         distanceFromXYGoal = other.distanceFromXYGoal;
+      if (Double.isFinite(other.distanceFromGoalPose))
+         distanceFromGoalPose = other.distanceFromGoalPose;
       if (other.footstepPlannerGoalType != null)
          footstepPlannerGoalType = other.footstepPlannerGoalType;
    }
@@ -81,20 +78,14 @@ public class FootstepPlannerGoal
       this.doubleFootstepGoal = doubleFootstepGoal;
    }
 
-   public void setXYGoal(Point2D xyGoal, double distanceFromXYGoal)
+   public void setDistanceFromGoalPose(double distanceFromGoalPose)
    {
-      this.xyGoal = new Point2D(xyGoal);
-      this.distanceFromXYGoal = distanceFromXYGoal;
+      this.distanceFromGoalPose = distanceFromGoalPose;
    }
 
-   public Point2D getXYGoal()
+   public double getDistanceFromGoalPose()
    {
-      return xyGoal;
-   }
-
-   public double getDistanceFromXYGoal()
-   {
-      return distanceFromXYGoal;
+      return distanceFromGoalPose;
    }
 
    public FootstepPlannerGoalType getFootstepPlannerGoalType()

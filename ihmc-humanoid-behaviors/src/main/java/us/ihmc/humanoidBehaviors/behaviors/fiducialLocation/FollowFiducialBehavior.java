@@ -401,15 +401,11 @@ public class FollowFiducialBehavior extends AbstractBehavior
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
 
       // For now, just get close to the Fiducial, don't need to get exactly on it.
-      Point2D xyGoal = new Point2D();
-      xyGoal.setX(goalPose.getX());
-      xyGoal.setY(goalPose.getY());
-      double distanceFromXYGoal = 1.0;
-      footstepPlannerGoal.setXYGoal(xyGoal, distanceFromXYGoal);
-      //      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
+      double distanceFromGoalPose = 1.0;
+      footstepPlannerGoal.setDistanceFromGoalPose(distanceFromGoalPose);
+      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_POSE);
 
-      uiPositionCheckerPublisher.publish(MessageTools.createUIPositionCheckerPacket(new Point3D(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()),
+      uiPositionCheckerPublisher.publish(MessageTools.createUIPositionCheckerPacket(new Point3D(goalPose.getX(), goalPose.getY(), leftFootPose.getZ()),
                                                                                     new Quaternion()));
 
       footstepPlanner.setGoal(footstepPlannerGoal);

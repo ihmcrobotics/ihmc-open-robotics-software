@@ -88,7 +88,6 @@ public class PlannerTools
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
