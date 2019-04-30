@@ -574,8 +574,17 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
       mainObjective.setInitialStanceFootSide(RobotSide.fromByte(request.getInitialStanceRobotSide()));
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
-      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
+      if(request.getGoalPositionProximity() > 0.0)
+      {
+         goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_POSE);
+         goal.setDistanceFromGoalPose(request.getGoalPositionProximity());
+      }
+      else
+      {
+         goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      }
+
       mainObjective.setGoal(goal);
 
       double timeout = request.getTimeout();
