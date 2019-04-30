@@ -28,9 +28,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
@@ -41,7 +41,6 @@ import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -58,6 +57,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
@@ -90,6 +90,11 @@ public class StepGeneratorJavaFXController
    private final SideDependentList<AtomicBoolean> isFootInSupport = new SideDependentList<>(isLeftFootInSupport, isRightFootInSupport);
    private final BooleanProvider isInDoubleSupport = () -> isLeftFootInSupport.get() && isRightFootInSupport.get();
    private final DoubleProvider stepTime;
+
+   private static final double collisionBoxDepth = 0.45;
+   private static final double collisionBoxWidth = 0.85;
+   private static final double collisionBoxHeight = 1.0;
+   private final BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, 0.01);
 
    public enum SecondaryControlOption
    {
@@ -163,6 +168,10 @@ public class StepGeneratorJavaFXController
                {
                   PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestMessage);
                   snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
+                  collisionDetector.setPlanarRegionsList(new PlanarRegionsList(planarRegionsList.getPlanarRegionsAsList()
+                                                                                  .stream()
+                                                                                  .filter(region -> region.getConvexHull().getArea() >= parameters.getMinPlanarRegionArea())
+                                                                                  .collect(Collectors.toList())));
                   StepGeneratorJavaFXController.this.planarRegionsList.set(planarRegionsList);
                }
 
@@ -360,32 +369,18 @@ public class StepGeneratorJavaFXController
       return meshView;
    }
 
-   private final Point3D bodyCenter = new Point3D();
-
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly solePose, RobotSide robotSide)
    {
-      double groundOffset = 0.2;
-      double bodyRadius = 0.5;
+      double stanceWidth = 0.1;
+      double heightOffset = 0.3;
 
-      bodyCenter.set(solePose.getPosition());
-      bodyCenter.addZ(bodyRadius + groundOffset);
+      double soleYaw = solePose.getYaw();
+      double lateralOffset = robotSide.negateIfLeftSide(stanceWidth);
+      double offsetX = - lateralOffset * Math.sin(soleYaw);
+      double offsetY = lateralOffset * Math.cos(soleYaw);
+      collisionDetector.setBoxPose(solePose.getX() + offsetX, solePose.getY() + offsetY, solePose.getZ() + heightOffset, soleYaw);
 
-      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         Point3D closestPoint = PlanarRegionTools.closestPointOnPlane(bodyCenter, planarRegionsList.getPlanarRegion(i));
-         if(closestPoint == null)
-            continue;
-
-         double distance = closestPoint.distance(bodyCenter);
-         if(distance < bodyRadius)
-         {
-            return false;
-         }
-      }
-
-      return true;
+      return !collisionDetector.checkForCollision().isCollisionDetected();
    }
 
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
