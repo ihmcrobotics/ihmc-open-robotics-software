@@ -54,14 +54,14 @@ public class VisibilityGraphPathPlanner extends AbstractWaypointsForFootstepsPla
          if (startPos == null)
          {
             LogTools.info("adding plane at start pose");
-            startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
-            addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY(), 1738);
+            startPos = new Point3D(bodyStartPose.getPosition());
+            addPlanarRegionAtHeight(bodyStartPose.getPosition(), 1738);
          }
          if (goalPos == null)
          {
             LogTools.info("adding plane at goal pose");
-            goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
-            addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY(), 1739);
+            goalPos = new Point3D(bodyGoalPose.getPosition());
+            addPlanarRegionAtHeight(bodyGoalPose.getPosition(), 1739);
          }
 
          if (debug)

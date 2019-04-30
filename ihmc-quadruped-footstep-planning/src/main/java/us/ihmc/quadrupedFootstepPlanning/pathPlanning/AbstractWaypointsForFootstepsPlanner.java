@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -86,7 +87,12 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       return waypoints;
    }
 
-   protected void addPlanarRegionAtZeroHeight(double xLocation, double yLocation, int id)
+   protected void addPlanarRegionAtHeight(Point3DReadOnly point, int id)
+   {
+      addPlanarRegionAtHeight(point.getX(), point.getY(), point.getZ(), id);
+   }
+
+   protected void addPlanarRegionAtHeight(double xLocation, double yLocation, double zLocation, int id)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(fallbackRegionSize, fallbackRegionSize);
@@ -95,7 +101,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       polygon.addVertex(-fallbackRegionSize, -fallbackRegionSize);
       polygon.update();
 
-      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, zLocation)), polygon);
       planarRegion.setRegionId(id);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
