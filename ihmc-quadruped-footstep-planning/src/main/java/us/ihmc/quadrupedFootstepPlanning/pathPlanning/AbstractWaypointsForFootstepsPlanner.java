@@ -1,12 +1,17 @@
 package us.ihmc.quadrupedFootstepPlanning.pathPlanning;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.QuadrupedFootstepPlannerGoal;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -17,6 +22,9 @@ import java.util.List;
 public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsForQuadrupedFootstepPlanner
 {
    protected final static boolean debug = false;
+   private static final double defaultFallbackRegionSize = 0.3;
+
+
 
    protected final FramePose3D bodyStartPose = new FramePose3D();
    protected final FramePose3D bodyGoalPose = new FramePose3D();
@@ -26,6 +34,9 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
    protected final YoEnum<FootstepPlanningResult> yoResult;
 
    protected PlanarRegionsList planarRegionsList;
+
+   private double fallbackRegionSize = defaultFallbackRegionSize;
+
 
    public AbstractWaypointsForFootstepsPlanner(String prefix, YoVariableRegistry registry)
    {
@@ -40,15 +51,23 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       bodyStartPose.setOrientationYawPitchRoll(initialPose.getYaw(), 0.0, 0.0);
    }
 
+   @Override
    public void setGoal(QuadrupedFootstepPlannerGoal goal)
    {
       FramePose3DReadOnly goalPose = goal.getTargetPose();
       bodyGoalPose.setIncludingFrame(goalPose);
    }
 
+   @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
+      this.planarRegionsList = new PlanarRegionsList(planarRegionsList);
+   }
+
+   @Override
+   public void setFallbackRegionSize(double size)
+   {
+      this.fallbackRegionSize = size;
    }
 
    public void computeBestEffortPlan(double horizonLength)
@@ -61,9 +80,23 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       waypoints.add(waypoint);
    }
 
+   @Override
    public List<Point3D> getWaypoints()
    {
       return waypoints;
+   }
+
+   protected void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
+   {
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(fallbackRegionSize, fallbackRegionSize);
+      polygon.addVertex(-fallbackRegionSize, fallbackRegionSize);
+      polygon.addVertex(fallbackRegionSize, -fallbackRegionSize);
+      polygon.addVertex(-fallbackRegionSize, -fallbackRegionSize);
+      polygon.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
+      planarRegionsList.addPlanarRegion(planarRegion);
    }
 
    @Override
