@@ -155,7 +155,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
    public FootstepPlan getPlan()
    {
       FootstepPlan footstepPlan = footstepPlanner.getPlan();
-      footstepPlan.setLowLevelPlanGoal(lowLevelGoal);
+      if (footstepPlan != null)
+         footstepPlan.setLowLevelPlanGoal(lowLevelGoal);
 
       return footstepPlan;
    }

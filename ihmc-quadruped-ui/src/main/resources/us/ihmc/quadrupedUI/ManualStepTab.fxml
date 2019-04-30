@@ -21,18 +21,18 @@
                 <Label text="Number of Steps" GridPane.columnIndex="0" GridPane.rowIndex="3" />
 
 
-                <Spinner fx:id="swingHeight" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                <Spinner fx:id="stepDuration" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Spinner fx:id="dwellTime" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <Spinner fx:id="numberOfSteps" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Spinner fx:id="swingHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <Spinner fx:id="stepDuration" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Spinner fx:id="dwellTime" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Spinner fx:id="numberOfSteps" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
                 <Label text="Step Height (m)" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                 <Label text="Step Length (m)" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <Label text="Step Width (m)" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
-                <Spinner fx:id="stepHeight" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                <Spinner fx:id="stepLength" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <Spinner fx:id="stepWidth" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Spinner fx:id="stepHeight" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                <Spinner fx:id="stepLength" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <Spinner fx:id="stepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
 
 
                 <Label text="First Foot" GridPane.columnIndex="4" GridPane.rowIndex="0"/>

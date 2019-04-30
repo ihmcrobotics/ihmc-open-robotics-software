@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.pathPlanning.DataSetName;
 
 @Tag("footstep-planning-slow")
 public class MessagerSimpleBodyPathDataSetTest extends FootstepPlannerDataSetTest
@@ -34,7 +35,7 @@ public class MessagerSimpleBodyPathDataSetTest extends FootstepPlannerDataSetTes
    {
       MessagerSimpleBodyPathDataSetTest test = new MessagerSimpleBodyPathDataSetTest();
       test.setup();
-      test.runAssertionsOnDataset(dataset -> test.runAssertions(dataset), "20171218_204917_FlatGround");
+      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_204917_FlatGround);
       test.tearDown();
 
    }

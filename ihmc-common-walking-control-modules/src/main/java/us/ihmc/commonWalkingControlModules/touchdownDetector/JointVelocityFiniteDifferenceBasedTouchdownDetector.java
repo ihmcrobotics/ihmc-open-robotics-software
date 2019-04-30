@@ -11,9 +11,9 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
 {
    private final OneDoFJointBasics joint;
    private final AlphaFilteredYoVariable velocityFiniteDifferenceFiltered;
-   private final YoDouble footInSwingThreshold, touchdownThreshold, finiteDifferenceAlphaFilter;
+   private final YoDouble footInSwingThreshold, touchdownThreshold, touchdownForSureThreshold, finiteDifferenceAlphaFilter;
    private final GlitchFilteredYoBoolean footInSwingFiltered;
-   private final YoBoolean controllerSetFootSwitch, touchdownDetected;
+   private final YoBoolean controllerSetFootSwitch, touchdownDetected, touchdownForSureDetected;
 
    private double previousVelocity;
    private boolean initialized = false;
@@ -28,8 +28,10 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       velocityFiniteDifferenceFiltered = new AlphaFilteredYoVariable(joint.getName() + "_velocityFiniteDifferenceFiltered", registry, finiteDifferenceAlphaFilter);
       footInSwingThreshold = new YoDouble(joint.getName() + "_footInSwingThreshold", registry);
       touchdownThreshold = new YoDouble(joint.getName() + "__velocityFiniteDifferenceTouchdownThreshold", registry);
+      touchdownForSureThreshold = new YoDouble(joint.getName() + "__velocityFiniteDifferenceTouchdownForSureThreshold", registry);
       footInSwingFiltered = new GlitchFilteredYoBoolean(joint.getName() + "_footInSwingFiltered", registry, 50);
       touchdownDetected = new YoBoolean(joint.getName() + "_velocityFiniteDifferenceTouchdownDetected", registry);
+      touchdownForSureDetected = new YoBoolean(joint.getName() + "_velocityFiniteDifferenceTouchdownForSureDetected", registry);
    }
 
    public void setFootInSwingThreshold(double footInSwingThreshold)
@@ -42,10 +44,22 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
       this.touchdownThreshold.set(touchdownThreshold);
    }
 
+   public void setTouchdownForSureThreshold(double touchdownThreshold)
+   {
+      this.touchdownForSureThreshold.set(touchdownThreshold);
+   }
+
+
    @Override
    public boolean hasTouchedDown()
    {
       return touchdownDetected.getBooleanValue();
+   }
+
+   @Override
+   public boolean hasForSureTouchedDown()
+   {
+      return touchdownForSureDetected.getBooleanValue();
    }
 
    @Override
@@ -62,6 +76,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
             if(footInSwingFiltered.getBooleanValue())
             {
                touchdownDetected.set(velocityFiniteDifferenceFiltered.getDoubleValue() > touchdownThreshold.getDoubleValue());
+               touchdownForSureDetected.set(velocityFiniteDifferenceFiltered.getDoubleValue() > touchdownForSureThreshold.getDoubleValue());
             }
          }
          else
@@ -80,6 +95,7 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    public void reset()
    {
       touchdownDetected.set(false);
+      touchdownForSureDetected.set(false);
    }
 
    @Override

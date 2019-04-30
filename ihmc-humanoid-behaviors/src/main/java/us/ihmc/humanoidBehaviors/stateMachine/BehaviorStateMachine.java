@@ -65,4 +65,9 @@ public class BehaviorStateMachine<E extends Enum<E>>
    {
       return stateMachine.isCurrentStateTerminal();
    }
+   
+   public double getTimeInCurrentState()
+   {
+      return stateMachine.getTimeInCurrentState();
+   }
 }
