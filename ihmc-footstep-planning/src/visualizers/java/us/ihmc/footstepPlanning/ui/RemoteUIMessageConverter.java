@@ -69,6 +69,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> plannerRequestIdReference;
    private final AtomicReference<Double> plannerHorizonLengthReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
+   private final AtomicReference<Double> goalProximityReference;
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Boolean> ignorePartialFootholds;
@@ -121,6 +122,7 @@ public class RemoteUIMessageConverter
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestIdTopic, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholdsTopic, false);
+      goalProximityReference = messager.createInput(FootstepPlannerMessagerAPI.GoalProximityTopic, -1.0);
 
       registerPubSubs(ros2Node);
 
@@ -397,6 +399,8 @@ public class RemoteUIMessageConverter
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
       packet.setAssumeFlatGround(assumeFlatGround.get());
+      if  (goalProximityReference != null)
+         packet.setGoalPositionProximity(goalProximityReference.get());
 
       footstepPlanningRequestPublisher.publish(packet);
    }

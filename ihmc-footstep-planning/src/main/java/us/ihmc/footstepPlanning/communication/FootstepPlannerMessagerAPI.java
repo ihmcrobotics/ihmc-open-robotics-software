@@ -82,6 +82,7 @@ public class FootstepPlannerMessagerAPI
 
    private static final TypedTopicTheme<WalkingControllerPreviewInputMessage> PreviewRequest = apiFactory.createTypedTopicTheme("WalkingPreviewInput");
    private static final TypedTopicTheme<WalkingControllerPreviewOutputMessage> PreviewResponse = apiFactory.createTypedTopicTheme("WalkingPreviewOutput");
+   private static final TypedTopicTheme<Double> GoalProximity = apiFactory.createTypedTopicTheme("GoalProximity");
 
    private static final TypedTopicTheme<VisibilityGraphsParameters> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
    private static final TypedTopicTheme<Boolean> Export = apiFactory.createTypedTopicTheme("Export");
@@ -132,6 +133,8 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> StartOrientationEditModeEnabledTopic = Root.child(Start).child(EditMode).child(OrientationTheme).topic(Enable);
    public static final Topic<Boolean> GoalOrientationEditModeEnabledTopic = Root.child(Goal).child(EditMode).child(OrientationTheme).topic(Enable);
+
+   public static final Topic<Double> GoalProximityTopic = Root.child(Goal).topic(GoalProximity);
 
    public static final Topic<RobotSide> InitialSupportSideTopic = Root.child(Start).topic(Side);
    public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlan).child(Start).topic(Position);

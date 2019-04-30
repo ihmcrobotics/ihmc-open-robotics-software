@@ -103,6 +103,8 @@ public class MainTabController
    private Spinner<Double> goalZPosition;
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
+   @FXML
+   private Spinner<Double> goalProximity;
 
    @FXML
    private Spinner<Double> startYaw;
@@ -251,6 +253,8 @@ public class MainTabController
 
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
+      goalProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-1.0, 50.0, 0.0, 0.1));
+
       ObservableList<us.ihmc.footstepPlanning.FootstepPlannerType> plannerTypeOptions = FXCollections.observableArrayList(FootstepPlannerType.values);
       plannerType.setItems(plannerTypeOptions);
       plannerType.setValue(FootstepPlannerType.A_STAR);
@@ -292,6 +296,8 @@ public class MainTabController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSideTopic, initialSupportSide.valueProperty(), true);
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.GoalProximityTopic, goalProximity.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       startPositionProperty.bindBidirectionalX(startXPosition.getValueFactory().valueProperty());
       startPositionProperty.bindBidirectionalY(startYPosition.getValueFactory().valueProperty());

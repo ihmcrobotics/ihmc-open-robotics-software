@@ -169,8 +169,12 @@
                   <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="9" GridPane.rowIndex="1" />
                   <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+
                   <Label text="initialSupport" textAlignment="RIGHT" GridPane.columnIndex="11" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <Label text="Goal proximity" GridPane.columnIndex="11" GridPane.rowIndex="1"/>
+
                   <ComboBox fx:id="initialSupportSide" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="12" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <Spinner fx:id="goalProximity" editable="true" layoutX="243.0" layoutY="89.0" GridPane.columnIndex="12" GridPane.rowIndex="1" />
                </children>
             </GridPane>
          </children>
