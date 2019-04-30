@@ -1,34 +1,46 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
+   private static final double stanceWidthCoPShiftFactor = 0.1;
+   private static final double stanceLengthCoPShiftFactor = 0.0;
+   private static final double maxStanceWidthCoPShift = 0.1;
+   private static final double maxStanceLengthCoPShift = 0.1;
+
    private final QuadrantDependentList<ContactState> initialContactState;
-   private final QuadrantDependentList<MutableBoolean> isInitialContactState;
    private boolean initialized;
 
    private final FramePoint3D copPositionAtCurrentTime;
@@ -36,8 +48,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
    private final ArrayList<YoFramePoint3D> copPositionsAtStartOfInterval;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
-   private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
-   private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
 
    private final WeightDistributionCalculator weightDistributionCalculator;
 
@@ -46,11 +56,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       this.weightDistributionCalculator = weightDistributionCalculator;
 
       initialContactState = new QuadrantDependentList<>();
-      isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          initialContactState.set(robotQuadrant, ContactState.IN_CONTACT);
-         isInitialContactState.set(robotQuadrant, new MutableBoolean(true));
       }
       initialized = false;
 
@@ -58,16 +66,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
       copPositionsAtStartOfInterval = new ArrayList<>(maxIntervals);
-      normalizedPressureContributedByInitialContacts = new ArrayList<>(maxIntervals);
-      normalizedPressureContributedByQueuedSteps = new ArrayList<>(maxIntervals);
       normalizedPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
          copPositionsAtStartOfInterval.add(i, new YoFramePoint3D("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
 
-         normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
-         normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
          normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<MutableDouble>());
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
@@ -79,7 +83,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    public void resetVariables()
    {
-      for (int i = 0; i < copPositionsAtStartOfInterval.size(); i ++)
+      for (int i = 0; i < copPositionsAtStartOfInterval.size(); i++)
          copPositionsAtStartOfInterval.get(i).setToNaN();
    }
 
@@ -95,6 +99,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       }
    }
 
+   private final FrameVector3D copOffsetFromStance = new FrameVector3D();
 
    /**
     * compute piecewise constant center of pressure plan given the upcoming contact states
@@ -112,7 +117,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
-         isInitialContactState.get(robotQuadrant).setValue(true);
       }
 
       numberOfIntervals = timedContactSequence.size();
@@ -121,29 +125,13 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          QuadrantDependentList<FramePoint3D> solePosition = timedContactSequence.get(interval).getSolePosition();
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
-         QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition, weightDistributionCalculator);
-         QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition,
+                                                                                weightDistributionCalculator);
+         QuadrupedCenterOfPressureTools
+               .computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         computeCoPOffsetFromStance(contactState, solePosition, copOffsetFromStance);
+         copPositionsAtStartOfInterval.get(interval).add(copOffsetFromStance);
 
-
-
-         normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
-         normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
-            {
-               isInitialContactState.get(robotQuadrant).setValue(false);
-            }
-            if (isInitialContactState.get(robotQuadrant).booleanValue())
-            {
-               normalizedPressureContributedByInitialContacts.get(interval)
-                     .add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
-            }
-            else
-            {
-               normalizedPressureContributedByQueuedSteps.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
-            }
-         }
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
       }
 
@@ -199,18 +187,26 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return copPositionsAtStartOfInterval;
    }
 
-   private void
+   private final Quaternion nominalOrientation = new Quaternion();
 
-   private void computeCoPOffset(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions, FrameVector3D copOffsetToPack)
+   private final FramePoint3D smallSideContact = new FramePoint3D();
+   private final FramePoint3D smallEndContact = new FramePoint3D();
+   private final FramePoint3D tempBigSideContact = new FramePoint3D();
+   private final FramePoint3D tempBigEndContact = new FramePoint3D();
+
+   private void computeCoPOffsetFromStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
+                                           FrameVector3D copOffsetToPack)
    {
       int numberOfLeftFeetInContact = 0;
       int numberOfRightFeetInContact = 0;
       int numberOfFrontFeetInContact = 0;
       int numberOfHindFeetInContact = 0;
+      int numberOfFeetInContact = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
+            numberOfFeetInContact++;
             if (robotQuadrant.isQuadrantInFront())
                numberOfFrontFeetInContact++;
             else
@@ -222,16 +218,73 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          }
       }
 
-      if (numberOfLeftFeetInContact > 0 && numberOfRightFeetInContact > 0)
+      if (numberOfFeetInContact != 3)
+         return;
+
+      RobotSide smallSide;
+      RobotEnd smallEnd;
+
+      if (numberOfLeftFeetInContact > numberOfRightFeetInContact)
+         smallSide = RobotSide.RIGHT; // left side has more feet in contact
+      else
+         smallSide = RobotSide.LEFT;
+
+      if (numberOfFrontFeetInContact > numberOfHindFeetInContact)
+         smallEnd = RobotEnd.HIND; // front end has more feet in contact
+      else
+         smallEnd = RobotEnd.FRONT;
+
+      RobotSide bigSide = smallSide.getOppositeSide();
+      RobotEnd bigEnd = smallEnd.getOppositeEnd();
+
+      RobotQuadrant smallEndQuadrant = RobotQuadrant.getQuadrant(smallEnd, bigSide);
+      RobotQuadrant smallSideQuadrant = RobotQuadrant.getQuadrant(bigEnd, smallSide);
+
+      double nominalYaw = getNominalYawForStance(contactState, solePositions);
+      nominalOrientation.setToYawQuaternion(nominalYaw);
+
+      smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
+      smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));
+
+      nominalOrientation.transform(smallSideContact);
+      nominalOrientation.transform(smallEndContact);
+
+      double averageLength = 0.0;
+      for (RobotSide robotSide : RobotSide.values)
       {
-         if (numberOfLeftFeetInContact > numberOfRightFeetInContact)
-         { // left side has more feet in contact, so shift a little to the right
+         tempBigEndContact.setIncludingFrame(solePositions.get(RobotQuadrant.getQuadrant(bigEnd, robotSide)));
+         nominalOrientation.transform(tempBigEndContact);
+         averageLength += 0.5 * Math.abs(tempBigEndContact.getX() - smallEndContact.getX());
+      }
 
-         }
-         else if (numberOfRightFeetInContact > numberOfLeftFeetInContact)
-         { // right side has more feet in contact, so shift a little to the left
+      double averageWidth = 0.0;
+      for (RobotEnd robotEnd : RobotEnd.values)
+      {
+         tempBigSideContact.setIncludingFrame(solePositions.get(RobotQuadrant.getQuadrant(robotEnd, bigSide)));
+         nominalOrientation.transform(tempBigSideContact);
+         averageWidth += 0.5 * Math.abs(tempBigSideContact.getY() - smallSideContact.getY());
+      }
 
+      double lengthShift = smallEnd.negateIfHindEnd(MathTools.clamp(stanceLengthCoPShiftFactor * averageLength, maxStanceLengthCoPShift));
+      double widthShift = smallSide.negateIfRightSide(MathTools.clamp(stanceWidthCoPShiftFactor * averageWidth, maxStanceWidthCoPShift));
+      copOffsetToPack.set(lengthShift, widthShift, 0.0);
+      nominalOrientation.inverseTransform(copOffsetToPack);
+   }
+
+   private final QuadrantDependentList<FramePoint3DReadOnly> tempList = new QuadrantDependentList<>();
+
+   private double getNominalYawForStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions)
+   {
+      tempList.clear();
+      int numberOfVertices = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant).isLoadBearing())
+         {
+            tempList.put(robotQuadrant, solePositions.get(robotQuadrant));
+            numberOfVertices++;
          }
       }
+      return QuadrupedSupportPolygon.getNominalYaw(tempList, numberOfVertices);
    }
 }
