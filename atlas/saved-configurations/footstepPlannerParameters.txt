@@ -1,18 +1,18 @@
 #
-#Fri Apr 19 14:28:42 CDT 2019
+#Tue Apr 30 16:52:24 CDT 2019
 cliffClearance=0.1
 cliffHeightSpinner=0.05
-maxStepLength=0.35
+maxStepLength=0.5
 maxStepWidth=0.4
-maxStepYaw=1.5
+maxStepYaw=0.5
 maxStepZ=0.25
-maxXYWiggleSpinner=0.03
+maxXYWiggleSpinner=0.1
 maxYawWiggleSpinner=0.09
-minFootholdPercent=0.99
-minStepLength=-0.4
-minStepWidth=0.15
-minStepYaw=0.0
+minFootholdPercent=0.7
+minStepLength=-0.6
+minStepWidth=0.0
+minStepYaw=-0.5
 minSurfaceIncline=0.7853981633974483
-minXClearance=0.22
+minXClearance=0.3
 minYClearance=0.22
 wiggleInsideDeltaSpinner=0.02
