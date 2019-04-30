@@ -38,7 +38,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private static final double stanceLengthCoPShiftFactor = 0.0;
    private static final double maxStanceWidthCoPShift = 0.1;
    private static final double maxStanceLengthCoPShift = 0.1;
-   private static final double stepWidthCoPShiftFactor = 0.0;
+   private static final double stepWidthCoPShiftFactor = 0.1;
    private static final double stepLengthCoPShiftFactor = 0.2;
    private static final double maxStepWidthCoPShift = 0.1;
    private static final double maxStepLengthCoPShift = 0.1;
@@ -206,6 +206,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D tempBigSideContact = new FramePoint3D();
    private final FramePoint3D tempBigEndContact = new FramePoint3D();
 
+   private final PoseReferenceFrame stepFrame = new PoseReferenceFrame("stepFrame", ReferenceFrame.getWorldFrame());
+
+
    private void computeCoPOffsetFromStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
                                            FrameVector3D copOffsetToPack)
    {
@@ -258,23 +261,27 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
       smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));
 
-      nominalOrientation.transform(smallSideContact);
-      nominalOrientation.transform(smallEndContact);
+//      nominalOrientation.transform(smallSideContact);
+//      nominalOrientation.transform(smallEndContact);
+
+      stepFrame.setPoseAndUpdate(smallEndContact, nominalOrientation);
 
       double averageLength = 0.0;
       for (RobotSide robotSide : RobotSide.values)
       {
          tempBigEndContact.setIncludingFrame(solePositions.get(RobotQuadrant.getQuadrant(bigEnd, robotSide)));
-         nominalOrientation.transform(tempBigEndContact);
-         averageLength += 0.5 * Math.abs(tempBigEndContact.getX() - smallEndContact.getX());
+         tempBigSideContact.changeFrame(stepFrame);
+         averageLength += 0.5 * Math.abs(tempBigEndContact.getX());
       }
+
+      stepFrame.setPoseAndUpdate(smallSideContact, nominalOrientation);
 
       double averageWidth = 0.0;
       for (RobotEnd robotEnd : RobotEnd.values)
       {
          tempBigSideContact.setIncludingFrame(solePositions.get(RobotQuadrant.getQuadrant(robotEnd, bigSide)));
-         nominalOrientation.transform(tempBigSideContact);
-         averageWidth += 0.5 * Math.abs(tempBigSideContact.getY() - smallSideContact.getY());
+         tempBigSideContact.changeFrame(stepFrame);
+         averageWidth += 0.5 * Math.abs(tempBigSideContact.getY());
       }
 
       double lengthShift = smallEnd.negateIfHindEnd(MathTools.clamp(stanceLengthCoPShiftFactor * averageLength, maxStanceLengthCoPShift));
@@ -283,11 +290,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       nominalOrientation.inverseTransform(copOffsetToPack);
    }
 
-   // FIXME this isn't correct if more than one step is moving at a time.
-   private final FramePoint3D currentPosition = new FramePoint3D();
    private final FramePoint3D goalPosition = new FramePoint3D();
+   private final List<QuadrupedTimedStep> nextSteps = new ArrayList<>();
 
-   private final PoseReferenceFrame stepFrame = new PoseReferenceFrame("stepFrame", ReferenceFrame.getWorldFrame());
 
    private void computeCoPOffsetFromSteps(double currentTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
                                           List<QuadrupedTimedStep> stepSequence, FrameVector3D copOffsetToPack)
@@ -302,33 +307,58 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       if ( numberOfFeetInContact < 3)
          return;
 
-      QuadrupedTimedStep nextStep = null;
+      double nextStepTime = Double.NaN;
+      nextSteps.clear();
       for (int i = 0; i < stepSequence.size(); i++)
       {
-         if (stepSequence.get(i).getTimeInterval().intervalContains(currentTime))
+         QuadrupedTimedStep step = stepSequence.get(i);
+         if (step.getTimeInterval().intervalContains(currentTime))
             continue;
 
-         if (stepSequence.get(i).getTimeInterval().getStartTime() > currentTime)
+         if (step.getTimeInterval().getStartTime() > currentTime)
          {
-            nextStep = stepSequence.get(i);
-            break;
+            if (Double.isNaN(nextStepTime))
+            {
+               nextSteps.add(step);
+               nextStepTime = step.getTimeInterval().getStartTime();
+            }
+            else if (MathTools.epsilonEquals(nextStepTime, step.getTimeInterval().getStartTime(), 1e-4))
+            {
+               nextSteps.add(step);
+            }
+            else
+            {
+               break;
+            }
          }
       }
 
-      if (nextStep == null)
+      if (nextSteps.isEmpty())
          return;
 
-
+      double averageLength = 0.0;
+      double averageWidth = 0.0;
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
       nominalOrientation.setToYawQuaternion(nominalYaw);
 
-      stepFrame.setPoseAndUpdate(solePositions.get(nextStep.getRobotQuadrant()), nominalOrientation);
+      for (int i = 0; i < nextSteps.size(); i++)
+      {
+         QuadrupedTimedStep nextStep = nextSteps.get(i);
 
-      goalPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), nextStep.getGoalPosition());
-      goalPosition.changeFrame(stepFrame);
+         stepFrame.setPoseAndUpdate(solePositions.get(nextStep.getRobotQuadrant()), nominalOrientation);
 
-      double lengthShift = MathTools.clamp(stepLengthCoPShiftFactor * goalPosition.getX(), maxStepLengthCoPShift);
-      double widthShift = MathTools.clamp(stepWidthCoPShiftFactor * goalPosition.getY(), maxStepWidthCoPShift);
+         goalPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), nextStep.getGoalPosition());
+         goalPosition.changeFrame(stepFrame);
+
+         averageLength += goalPosition.getX();
+         averageWidth += goalPosition.getY();
+      }
+
+      averageLength /= nextSteps.size();
+      averageWidth /= nextSteps.size();
+
+      double lengthShift = MathTools.clamp(stepLengthCoPShiftFactor * averageLength, maxStepLengthCoPShift);
+      double widthShift = MathTools.clamp(stepWidthCoPShiftFactor * averageWidth, maxStepWidthCoPShift);
 
       copOffsetToPack.setToZero(stepFrame);
       copOffsetToPack.set(lengthShift, widthShift, 0.0);
