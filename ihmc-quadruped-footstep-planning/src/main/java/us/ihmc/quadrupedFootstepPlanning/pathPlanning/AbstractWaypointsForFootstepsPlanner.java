@@ -86,7 +86,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       return waypoints;
    }
 
-   protected void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
+   protected void addPlanarRegionAtZeroHeight(double xLocation, double yLocation, int id)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(fallbackRegionSize, fallbackRegionSize);
@@ -96,6 +96,7 @@ public abstract class AbstractWaypointsForFootstepsPlanner implements WaypointsF
       polygon.update();
 
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
+      planarRegion.setRegionId(id);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 
