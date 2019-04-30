@@ -21,6 +21,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -33,10 +34,14 @@ import java.util.List;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
-   private static final double stanceWidthCoPShiftFactor = 0.5;
+   private static final double stanceWidthCoPShiftFactor = 0.2;
    private static final double stanceLengthCoPShiftFactor = 0.0;
    private static final double maxStanceWidthCoPShift = 0.1;
    private static final double maxStanceLengthCoPShift = 0.1;
+   private static final double stepWidthCoPShiftFactor = 0.0;
+   private static final double stepLengthCoPShiftFactor = 0.2;
+   private static final double maxStepWidthCoPShift = 0.1;
+   private static final double maxStepLengthCoPShift = 0.1;
 
    private static final double safeDistanceFromSupportPolygonEdges = 0.04;
 
@@ -100,12 +105,13 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    }
 
    private final FrameVector3D copOffsetFromStance = new FrameVector3D();
+   private final FrameVector3D copOffsetFromSteps = new FrameVector3D();
 
    /**
     * compute piecewise constant center of pressure plan given the upcoming contact states
     * @param timedContactSequence contact sequence (input)
     */
-   public void initializeTrajectory(QuadrupedTimedContactSequence timedContactSequence, List<QuadrupedTimedStep> stepSequence)
+   public void initializeTrajectory(double currentTime, QuadrupedTimedContactSequence timedContactSequence, List<QuadrupedTimedStep> stepSequence)
    {
       if (timedContactSequence.size() < 1)
       {
@@ -128,10 +134,14 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
          QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState, solePosition,
                                                                                 weightDistributionCalculator);
-         QuadrupedCenterOfPressureTools
-               .computeCenterOfPressure(copPositionAtStartOfInterval, solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionAtStartOfInterval, solePosition, normalizedPressureAtStartOfInterval.get(interval));
+
          computeCoPOffsetFromStance(contactState, solePosition, copOffsetFromStance);
+         computeCoPOffsetFromSteps(currentTime, contactState, solePosition, stepSequence, copOffsetFromSteps);
+
          copPositionAtStartOfInterval.add(copOffsetFromStance);
+         copPositionAtStartOfInterval.add(copOffsetFromSteps);
+
          constrainToPolygon(contactState, solePosition, copPositionAtStartOfInterval);
 
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
@@ -195,7 +205,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D smallEndContact = new FramePoint3D();
    private final FramePoint3D tempBigSideContact = new FramePoint3D();
    private final FramePoint3D tempBigEndContact = new FramePoint3D();
-
 
    private void computeCoPOffsetFromStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
                                            FrameVector3D copOffsetToPack)
@@ -274,6 +283,57 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       nominalOrientation.inverseTransform(copOffsetToPack);
    }
 
+   // FIXME this isn't correct if more than one step is moving at a time.
+   private final FramePoint3D currentPosition = new FramePoint3D();
+   private final FramePoint3D goalPosition = new FramePoint3D();
+
+   private final PoseReferenceFrame stepFrame = new PoseReferenceFrame("stepFrame", ReferenceFrame.getWorldFrame());
+
+   private void computeCoPOffsetFromSteps(double currentTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
+                                          List<QuadrupedTimedStep> stepSequence, FrameVector3D copOffsetToPack)
+   {
+      int numberOfFeetInContact = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (contactState.get(robotQuadrant).isLoadBearing())
+            numberOfFeetInContact++;
+      }
+
+      if ( numberOfFeetInContact < 3)
+         return;
+
+      QuadrupedTimedStep nextStep = null;
+      for (int i = 0; i < stepSequence.size(); i++)
+      {
+         if (stepSequence.get(i).getTimeInterval().intervalContains(currentTime))
+            continue;
+
+         if (stepSequence.get(i).getTimeInterval().getStartTime() > currentTime)
+         {
+            nextStep = stepSequence.get(i);
+            break;
+         }
+      }
+
+      if (nextStep == null)
+         return;
+
+
+      double nominalYaw = getNominalYawForStance(contactState, solePositions);
+      nominalOrientation.setToYawQuaternion(nominalYaw);
+
+      stepFrame.setPoseAndUpdate(solePositions.get(nextStep.getRobotQuadrant()), nominalOrientation);
+
+      goalPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), nextStep.getGoalPosition());
+      goalPosition.changeFrame(stepFrame);
+
+      double lengthShift = MathTools.clamp(stepLengthCoPShiftFactor * goalPosition.getX(), maxStepLengthCoPShift);
+      double widthShift = MathTools.clamp(stepWidthCoPShiftFactor * goalPosition.getY(), maxStepWidthCoPShift);
+
+      copOffsetToPack.setToZero(stepFrame);
+      copOffsetToPack.set(lengthShift, widthShift, 0.0);
+      copOffsetToPack.changeFrame(ReferenceFrame.getWorldFrame());
+   }
 
    private final FramePoint2D tempFramePoint2D = new FramePoint2D();
    private final ConvexPolygon2D constraintPolygon = new ConvexPolygon2D();
