@@ -121,6 +121,11 @@ public abstract class AbstractBehavior implements RobotController
    {
       return createPublisher(messageType, behaviorPubGenerator);
    }
+   
+   public <T> IHMCROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
+   {
+      return createPublisher(messageType, behaviorSubGenerator);
+   }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
