@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExceptionHandlingThreadScheduler
 {
-   private static final ExceptionHandler DEFAULT_HANDLER = t ->
+   public static final ExceptionHandler DEFAULT_HANDLER = t ->
    {
       LogTools.error(t.getMessage());
       t.printStackTrace();
