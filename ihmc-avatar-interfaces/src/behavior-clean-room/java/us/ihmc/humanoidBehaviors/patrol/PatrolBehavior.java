@@ -298,6 +298,7 @@ public class PatrolBehavior
    {
       pollInterrupts();
       walkingCompleted.poll();
+      waypointManager.updateToMostRecentData();
    }
 
    private PatrolBehaviorState transitionFromWalk(double timeInState)
