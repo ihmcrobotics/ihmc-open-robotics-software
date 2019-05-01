@@ -116,10 +116,15 @@ public class PatrolBehaviorUIController extends Group
             updateUIFromWaypointManager();
 
             // update waypoint graphics from manager
-            for (Long waypointId : waypointGraphics.keySet())
+            removeAllWaypointGraphics();
+            for (int i = 0; i < waypointManager.size(); i++)
             {
-               waypointGraphics.get(waypointId).setPosition(waypointManager.getPoseFromId(waypointId).getPosition());
-               waypointGraphics.get(waypointId).setOrientation(waypointManager.getPoseFromId(waypointId).getOrientation());
+               PatrolWaypointGraphic graphic = new PatrolWaypointGraphic(i);
+               graphic.setPosition(waypointManager.getPoseFromIndex(i).getPosition());
+               graphic.setOrientation(waypointManager.getPoseFromIndex(i).getOrientation());
+               graphic.getOrientationGraphic().getNode().setVisible(true);
+               waypointGraphics.put(waypointManager.idFromIndex(i), graphic);
+               getChildren().add(graphic);
             }
          });
       });
@@ -139,6 +144,7 @@ public class PatrolBehaviorUIController extends Group
       {
          placeWaypoints.setDisable(true);
          removeAllWaypointGraphics();
+         waypointManager.clearWaypoints();
          goToNextWaypointPositionEdit();
       });
       waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
@@ -342,7 +348,6 @@ public class PatrolBehaviorUIController extends Group
       LogTools.debug("Removing all waypoint graphics.");
       waypointGraphics.values().forEach(graphic -> getChildren().remove(graphic));
       waypointGraphics.clear();
-      waypointManager.clearWaypoints();
    }
 
    private void removeLastWaypoint()
@@ -399,8 +404,6 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void upDownExploration()
    {
       placeWaypoints.setDisable(upDownExploration.isSelected());
-      removeAllWaypointGraphics();
-      publishWaypointsToModule();
       behaviorMessager.submitMessage(API.UpDownExplorationEnabled, upDownExploration.isSelected());
    }
 }
