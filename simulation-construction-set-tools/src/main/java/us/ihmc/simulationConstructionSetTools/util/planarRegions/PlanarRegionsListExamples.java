@@ -358,7 +358,6 @@ public class PlanarRegionsListExamples
 
       double halfCinderBlockSize = cinderBlockSize / 2;
       double additionalHeightForAngledCinderBlock = halfCinderBlockSize * Math.sin(Math.abs(angle));
-      LogTools.info("tile additional hieght: {} ", additionalHeightForAngledCinderBlock);
       generator.translate(halfCinderBlockSize, halfCinderBlockSize, additionalHeightForAngledCinderBlock);
 
       generator.rotate(angle, axis);
