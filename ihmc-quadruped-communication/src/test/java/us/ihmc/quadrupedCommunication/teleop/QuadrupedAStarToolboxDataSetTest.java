@@ -26,6 +26,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       settings.getAmbleMediumTimings().setStepDuration(0.5);
       settings.getAmbleFastTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleFastTimings().setStepDuration(0.35);
+      settings.getAmbleFastTimings().setMaxSpeed(1.0);
       settings.getTrotMediumTimings().setEndDoubleSupportDuration(0.1);
       settings.getTrotMediumTimings().setStepDuration(0.35);
 

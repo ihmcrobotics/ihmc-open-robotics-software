@@ -249,7 +249,8 @@ public class BipedCoMTrajectoryPlannerVisualizer
 
       scs.startOnAThread();
       simulate();
-      ThreadTools.sleepForever();
+      if (visualize)
+         ThreadTools.sleepForever();
    }
 
    private static double computeStiffness()

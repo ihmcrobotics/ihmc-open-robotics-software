@@ -137,6 +137,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
       this.scsInitialSetup.setRunMultiThreaded(true);
 
+
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();

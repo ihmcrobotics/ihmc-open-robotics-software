@@ -20,6 +20,17 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
 
    public QuadrupedXGaitSettings()
    {
+      paceSlowTimings.setMaxSpeed(0.2);
+      paceMediumTimings.setMaxSpeed(0.4);
+      paceFastTimings.setMaxSpeed(0.6);
+
+      ambleSlowTimings.setMaxSpeed(0.3);
+      ambleMediumTimings.setMaxSpeed(0.6);
+      ambleFastTimings.setMaxSpeed(0.9);
+
+      trotSlowTimings.setMaxSpeed(0.5);
+      trotMediumTimings.setMaxSpeed(1.0);
+      trotFastTimings.setMaxSpeed(1.5);
    }
 
    public QuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultSettings)
