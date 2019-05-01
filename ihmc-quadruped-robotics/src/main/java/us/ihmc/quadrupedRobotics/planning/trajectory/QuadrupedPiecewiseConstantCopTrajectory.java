@@ -182,6 +182,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private void computeCoPOffsetFromStance(QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePositions,
                                            FrameVector3D copOffsetToPack)
    {
+      copOffsetToPack.setToZero();
+
       int numberOfLeftFeetInContact = 0;
       int numberOfRightFeetInContact = 0;
       int numberOfFrontFeetInContact = 0;
@@ -271,7 +273,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
             numberOfFeetInContact++;
       }
 
-      if ( numberOfFeetInContact < 3)
+      copOffsetToPack.setToZero();
+
+      if (numberOfFeetInContact < 3)
          return;
 
       double nextStepTime = Double.NaN;

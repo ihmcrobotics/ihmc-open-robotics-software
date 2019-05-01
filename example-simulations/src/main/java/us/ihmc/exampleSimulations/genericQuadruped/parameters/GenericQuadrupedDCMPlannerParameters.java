@@ -30,14 +30,14 @@ public class GenericQuadrupedDCMPlannerParameters implements DCMPlannerParameter
    @Override
    public double getMaxStanceWidthCoPShift()
    {
-      return 0.1;
+      return 0.055;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxStanceLengthCoPShift()
    {
-      return 0.1;
+      return 0.075;
    }
 
    /** {@inheritDoc} */
@@ -51,21 +51,21 @@ public class GenericQuadrupedDCMPlannerParameters implements DCMPlannerParameter
    @Override
    public double getStepLengthCoPShiftFactor()
    {
-      return 0.2;
+      return 0.1;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxStepWidthCoPShift()
    {
-      return 0.1;
+      return 0.075;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxStepLengthCoPShift()
    {
-      return 0.1;
+      return 0.075;
    }
 
    /** {@inheritDoc} */
