@@ -58,7 +58,7 @@
                     <registry name="WalkingJointSettings">
                         <parameter name="LoadedAnklePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
                         <parameter name="LoadedAnkleRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="0.0"/>
-                        <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.5"/>
+                        <parameter name="NoLoadhipYawVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="2.0"/>
                         <parameter name="NoLoadhipPitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0"/>
                         <parameter name="NoLoadkneePitchVelocityBreakFrequency" type="DoubleParameter" min="0.0" max="5.0" value="1.0"/>
                         <parameter name="NoLoadHipYawDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
