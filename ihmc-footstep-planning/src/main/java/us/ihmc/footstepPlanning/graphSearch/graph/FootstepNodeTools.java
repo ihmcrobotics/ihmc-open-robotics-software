@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -62,8 +63,14 @@ public class FootstepNodeTools
       footPolygonToPack.applyTransform(nodeTransform);
    }
 
-   public static LatticeNode computeAverage(LatticeNode nodeA, LatticeNode nodeB)
+   /**
+    * Calculates a new lattice node that is interpolated between the two given nodes
+    * @return interpoalted node
+    */
+   public static LatticeNode interpolate(LatticeNode nodeA, LatticeNode nodeB, double alpha)
    {
-      return new LatticeNode(0.5 * (nodeA.getX() + nodeB.getX()), 0.5 * (nodeA.getY() + nodeB.getY()),AngleTools.computeAngleAverage(nodeA.getYaw(), nodeB.getYaw()));
+      return new LatticeNode(EuclidCoreTools.interpolate(nodeA.getX(), nodeB.getX(), alpha),
+                             EuclidCoreTools.interpolate(nodeA.getY(), nodeB.getY(), alpha),
+                             EuclidCoreTools.interpolate(nodeA.getYaw(), nodeB.getYaw(), alpha));
    }
 }
