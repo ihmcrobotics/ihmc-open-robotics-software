@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.waypoints;
 
+import us.ihmc.log.LogTools;
+
 import java.util.ArrayList;
 
 /**
@@ -85,6 +87,7 @@ public class WaypointSequence
    public void setNextFromIndex(int index) // assume no out of bounds
    {
       nextWaypointUniqueId = list.get(index).getUniqueId();
+      LogTools.warn("Set next id to {}, index: {}", nextWaypointUniqueId, indexOfId(nextWaypointUniqueId));
    }
 
    public long highestId()
@@ -104,6 +107,7 @@ public class WaypointSequence
    {
       int incrementedIndex = incrementedIndex();
       nextWaypointUniqueId = list.get(incrementedIndex).getUniqueId();
+      LogTools.warn("Increment next id to {}, index: {}", nextWaypointUniqueId, indexOfId(nextWaypointUniqueId));
    }
 
    public boolean incrementingWillLoop()
@@ -114,10 +118,12 @@ public class WaypointSequence
    private int incrementedIndex()
    {
       int incrementedIndex = peekNextIndex() + 1;
+      LogTools.warn("Candidate index: {}", incrementedIndex);
       if (incrementedIndex == list.size())
       {
          incrementedIndex = 0;
       }
+      LogTools.warn("Incremented index: {}, list.size: {}", incrementedIndex, list.size());
       return incrementedIndex;
    }
 }

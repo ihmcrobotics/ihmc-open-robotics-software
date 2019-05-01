@@ -127,6 +127,7 @@ public class PatrolBehaviorUIController extends Group
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
                                              index ->
                                              {
+                                                waypointManager.setNextFromIndex(index);
                                                 Platform.runLater(() ->
                                                                   {
                                                                      remoteCurrentWaypointIndex.setText(index.toString());
@@ -361,6 +362,7 @@ public class PatrolBehaviorUIController extends Group
 
    @FXML public void goToWaypoint()
    {
+      waypointManager.setNextFromIndex(waypointIndex.getValue()); // this might not be necessary
       behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, waypointIndex.getValue());
    }
 

@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.waypoints;
 
-import sun.rmi.runtime.Log;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -15,7 +14,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
 
    private volatile WaypointSequence activeSequence = new WaypointSequence();
 
-   private long highestSeenId = 0;
+   private long highestSeenId = -1;
 
    private final Topic<Integer> waypointIndexUIUpdateTopic;
    private final boolean delayUpdate; // for module to
@@ -111,7 +110,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    }
 
    /** For UI to set by user seeing continuous number line */
-   private void setNextFromIndex(int index)
+   public void setNextFromIndex(int index)
    {
       activeSequence.setNextFromIndex(index);
       publishNextIndexToUI();
