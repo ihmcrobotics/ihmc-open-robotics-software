@@ -137,4 +137,10 @@ public class ValkyrieSmoothCMPPlannerParameters extends SmoothCMPPlannerParamete
    {
       return true;
    }
+
+   @Override
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return 0.5;
+   }
 }
