@@ -6,6 +6,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -23,8 +24,7 @@ public class BehaviorModule
    {
       KryoMessager messager = KryoMessager.createServer(getBehaviorAPI(),
                                                         NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
-                                                        BehaviorModule.class.getSimpleName(),
-                                                        5);
+                                                        new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
       return new BehaviorModule(robotModel, messager);
    }

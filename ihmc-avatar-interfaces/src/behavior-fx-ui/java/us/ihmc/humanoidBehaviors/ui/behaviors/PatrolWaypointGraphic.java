@@ -71,6 +71,11 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
       return pose.getPosition();
    }
 
+   public Orientation3DReadOnly getOrientation()
+   {
+      return pose.getOrientation();
+   }
+
    private void updateGraphics()
    {
       snappedPositionGraphic.getPose().set(pose);
