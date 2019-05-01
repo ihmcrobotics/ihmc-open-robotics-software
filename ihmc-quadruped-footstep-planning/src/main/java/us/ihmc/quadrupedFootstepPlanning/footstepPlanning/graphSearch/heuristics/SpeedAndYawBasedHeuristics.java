@@ -36,33 +36,36 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
 
       double stepHeuristicCost = 4.0 * parameters.getCostPerStep() * minSteps;
 
-      RigidBodyTransform startNodeTransform = new RigidBodyTransform();
-      RigidBodyTransform endNodeTransform = new RigidBodyTransform();
+      RigidBodyTransform nodeTransform = new RigidBodyTransform();
+      RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
 
       double heightCost = 0.0;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         int endNodeXIndex = goalNode.getXIndex(robotQuadrant);
-         int endNodeYIndex = goalNode.getYIndex(robotQuadrant);
-         int startNodeXIndex = node.getXIndex(robotQuadrant);
-         int startNodeYIndex = node.getYIndex(robotQuadrant);
+         int goalNodeXIndex = goalNode.getXIndex(robotQuadrant);
+         int goalNodeYIndex = goalNode.getYIndex(robotQuadrant);
+         int nodeXIndex = node.getXIndex(robotQuadrant);
+         int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         FootstepNodeSnapData endNodeData = snapper.getSnapData(endNodeXIndex, endNodeYIndex);
-         FootstepNodeSnapData startNodeData = snapper.getSnapData(startNodeXIndex, startNodeYIndex);
+         FootstepNodeSnapData goalNodeData = snapper.getSnapData(goalNodeXIndex, goalNodeYIndex);
+         FootstepNodeSnapData nodeData = snapper.getSnapData(nodeXIndex, nodeYIndex);
 
-         if (startNodeData == null || endNodeData == null)
+         if (nodeData == null || goalNodeData == null)
             return 0.0;
 
-         FootstepNodeTools.getSnappedNodeTransformToWorld(startNodeXIndex, startNodeYIndex, startNodeData.getSnapTransform(), startNodeTransform);
-         FootstepNodeTools.getSnappedNodeTransformToWorld(endNodeXIndex, endNodeYIndex, endNodeData.getSnapTransform(), endNodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(nodeXIndex, nodeYIndex, nodeData.getSnapTransform(), nodeTransform);
+         FootstepNodeTools.getSnappedNodeTransformToWorld(goalNodeXIndex, goalNodeYIndex, goalNodeData.getSnapTransform(), goalNodeTransform);
 
-         double heightChange = endNodeTransform.getTranslationVector().getZ() - startNodeTransform.getTranslationVector().getZ();
+         if (!nodeTransform.containsNaN() && !goalNodeTransform.containsNaN())
+         {
+            double heightChange = goalNodeTransform.getTranslationVector().getZ() - nodeTransform.getTranslationVector().getZ();
 
-         if (heightChange > 0.0)
-            heightCost += parameters.getStepUpWeight() * heightChange;
-         else
-            heightCost += -parameters.getStepDownWeight() * heightChange;
+            if (heightChange > 0.0)
+               heightCost += parameters.getStepUpWeight() * heightChange;
+            else
+               heightCost += -parameters.getStepDownWeight() * heightChange;
+         }
       }
 
       return yawHeuristicCost + stepHeuristicCost + heightCost + parameters.getDistanceHeuristicWeight() * bodyDistance;
