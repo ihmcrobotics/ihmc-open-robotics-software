@@ -356,7 +356,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       RobotSide startStep = RobotSide.LEFT;
 
-      //All z values were 0.11830896252372711 changing to 0 for current test until i can get them to automaticaly snap to the ground.
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
                                                                                            atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
@@ -380,6 +379,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       message.getFootstepDataList().add().set(fs3);
       message.getFootstepDataList().add().set(fs4);
       message.getFootstepDataList().add().set(fs5);
+      message.setTrustHeightOfFootsteps(false);
 
       return message;
 
