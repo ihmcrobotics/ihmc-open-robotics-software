@@ -32,7 +32,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
+   
    @Override
    @Test
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
