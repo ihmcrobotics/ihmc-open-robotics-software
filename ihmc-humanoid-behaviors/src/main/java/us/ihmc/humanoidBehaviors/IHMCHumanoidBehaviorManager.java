@@ -30,11 +30,16 @@ import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehaviorAutomated;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.BasicTimingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
@@ -207,8 +212,9 @@ public class IHMCHumanoidBehaviorManager
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       // CREATE SERVICES
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, ros2Node, yoGraphicsListRegistry);
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+      fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
       ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
@@ -236,16 +242,29 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
       
-      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new BasicTimingBehavior(robotName, ros2Node));
+      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new TimingBehaviorHelper(robotName, ros2Node));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName,yoTime, ros2Node));
+      
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
                              new TurnValveBehaviorStateMachine(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                                wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                         wholeBodyControllerParameters, atlasPrimitiveActions));
-
+                             new WalkThroughDoorBehavior(robotName,"Human", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                                                         wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR,
+                             new DoorTimingBehavior(robotName, yoTime,ros2Node,true));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
+                             new DoorTimingBehaviorAutomated(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                                                         wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR,
+                             new WalkTimingBehavior(robotName, yoTime,ros2Node,true));
+      
+      
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS, new PartialFootholdBehavior(robotName, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION, new TestICPOptimizationBehavior(robotName, ros2Node, referenceFrames, yoTime));
@@ -265,7 +284,9 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
-                             new FollowFiducialBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
+                             new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50_AND_TURN,
+                             new WalkToFiducialAndTurnBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService,fullRobotModel));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN,
                              new WalkOverTerrainStateMachineBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames));
 
@@ -273,7 +294,7 @@ public class IHMCHumanoidBehaviorManager
       {
          dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
          dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
-                                new FollowFiducialBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
+                                new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService));
       }
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE, new BasicPipeLineBehavior(robotName, "pipelineTest", yoTime, ros2Node, fullRobotModel,

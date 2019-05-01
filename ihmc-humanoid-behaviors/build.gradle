@@ -41,6 +41,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-perception", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
+compile group: "org.postgresql", name: "postgresql", version: "42.2.5"
 }
 
 testDependencies {
