@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.kryo.KryoMessager;
 
@@ -13,8 +14,7 @@ public class RemoteBehaviorInterface
       KryoMessager moduleMessager = KryoMessager.createClient(BehaviorModule.getBehaviorAPI(),
                                                               backpackAddress,
                                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
-                                                              RemoteBehaviorInterface.class.getSimpleName(),
-                                                              5);
+                                                              new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));
       new Thread(() -> ExceptionTools.handle(() -> moduleMessager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION),
                  "KryoMessagerAsyncConnectionThread").start();
       return moduleMessager;

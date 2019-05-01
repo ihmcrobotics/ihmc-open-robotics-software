@@ -12,7 +12,7 @@ public class WaypointSequence
    private ArrayList<Waypoint> list = new ArrayList<>();
    private long nextWaypointUniqueId = -1;
 
-   private int peekNextIndex()
+   public int peekNextIndex()
    {
       return indexOfId(nextWaypointUniqueId);
    }
@@ -49,7 +49,7 @@ public class WaypointSequence
 
    public Waypoint last()
    {
-      return list.get(size() - 1);
+      return list.get(list.size() - 1);
    }
 
    public void add(Waypoint newWaypoint)

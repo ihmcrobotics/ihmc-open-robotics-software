@@ -15,9 +15,11 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -28,6 +30,8 @@ import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation;
+import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation.NavigationResult;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -89,10 +93,7 @@ public class PatrolBehavior
 
    private final Notification stopNotification = new Notification();
    private final Notification goNotification = new Notification();
-//   private final Notification overrideGoToWaypointNotification = new Notification();
    private final TypedNotification<OperatorPlanReviewResult> planReviewResult = new TypedNotification<>();
-
-//   private final AtomicInteger goalWaypointIndex = new AtomicInteger();
 
    private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
@@ -113,9 +114,6 @@ public class PatrolBehavior
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
       factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStop);
-//      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
-//      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
-//      factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, STOP), this::transitionFromNavigate);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
       factory.addTransition(PLAN, Lists.newArrayList(REVIEW, PLAN, STOP), this::transitionFromPlan);
@@ -142,7 +140,12 @@ public class PatrolBehavior
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
 
-      waypointManager = WaypointManager.createForModule(messager, API.WaypointsToModule, API.WaypointsToUI, API.GoToWaypoint, goNotification);
+      waypointManager = WaypointManager.createForModule(messager,
+                                                        API.WaypointsToModule,
+                                                        API.WaypointsToUI,
+                                                        API.GoToWaypoint,
+                                                        API.CurrentWaypointIndexStatus,
+                                                        goNotification);
 
       messager.registerTopicListener(API.Stop, object -> stopNotification.set());
       messager.registerTopicListener(API.PlanReviewResult, message ->
@@ -155,7 +158,9 @@ public class PatrolBehavior
       planReview = messager.createInput(API.PlanReviewEnabled, false);
       upDownExploration = messager.createInput(API.UpDownExplorationEnabled, false);
 
-      ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
+      ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
+                                                                                           DefaultExceptionHandler.PRINT_STACKTRACE,
+                                                                                           5);
       patrolThread.schedule(this::patrolThread, 2, TimeUnit.MILLISECONDS); // TODO tune this up, 500Hz is probably too much
    }
 
@@ -173,6 +178,10 @@ public class PatrolBehavior
    {
       pollInterrupts();
       goNotification.poll();
+      if (goNotification.read())
+      {
+         LogTools.debug("Go notified. Number of waypoints: {}", waypointManager.size());
+      }
    }
 
    private boolean transitionFromStop(double timeInState)
@@ -185,49 +194,6 @@ public class PatrolBehavior
       return transition;
    }
 
-//   private void onNavigateStateEntry()
-//   {
-//      // update waypoints if UI modified them
-//      if (waypointManager.receivedNotification().poll())
-//      {
-//         waypoints = waypointManager.receivedNotification().peek();
-//      }
-//
-//      if (upDownExploration.get())
-//      {
-//         Pair<NavigationResult, FramePose3D> upOrDownResult = PlanarRegionUpDownNavigation
-//               .upOrDown(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
-//                         PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
-//         if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND)
-//         {
-//            // success
-//         }
-//         else
-//         {
-//
-//         }
-//      }
-//      else
-//      {
-//
-//      }
-//   }
-//
-//   private void doNavigateStateAction(double timeInState)
-//   {
-//      pollInterrupts();
-//   }
-//
-//   private PatrolBehaviorState transitionFromNavigate(double timeInState)
-//   {
-//      if (stopNotification.read())
-//      {
-//         return STOP;
-//      }
-//
-//      return PLAN; // TODO
-//   }
-
    private void onPlanStateEntry()
    {
       // update waypoints if UI modified them
@@ -239,11 +205,18 @@ public class PatrolBehavior
 
       if (upDownExploration.get()) // find up-down or spin. setup the waypoint
       {
-
-
-
+         Pair<NavigationResult, FramePose3D> upOrDownResult = PlanarRegionUpDownNavigation
+                        .upOrDown(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
+                                  PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+                  if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND)
+                  {
+                     // success
+                  }
+                  else
+                  {
+                     // turn
+                  }
       }
-
 
 //      int index = goalWaypointIndex.get();
 //      messager.submitMessage(API.CurrentWaypointIndexStatus, index);
@@ -264,17 +237,6 @@ public class PatrolBehavior
       {
          return STOP;
       }
-//      else if (overrideGoToWaypointNotification.read())
-//      {
-//         if (goalWaypointInBounds())
-//         {
-//            return PLAN;
-//         }
-//         else
-//         {
-//            return STOP;
-//         }
-//      }
       else if (footstepPlanResultNotification.hasNext())
       {
          if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.peek().getFootstepPlanningResult()).validForExecution())
@@ -307,17 +269,6 @@ public class PatrolBehavior
       {
          return STOP;
       }
-//      else if (overrideGoToWaypointNotification.read())
-//      {
-//         if (goalWaypointInBounds())
-//         {
-//            return PLAN;
-//         }
-//         else
-//         {
-//            return STOP;
-//         }
-//      }
       else if (!planReview.get()) // if review is disabled, proceed
       {
          return WALK;
@@ -355,18 +306,6 @@ public class PatrolBehavior
       {
          return STOP;
       }
-//      else if (overrideGoToWaypointNotification.read())
-//      {
-//         if (goalWaypointInBounds())
-//         {
-//            remoteRobotControllerInterface.pauseWalking(); // TODO investigate this
-//            return PERCEIVE;
-//         }
-//         else
-//         {
-//            return STOP;
-//         }
-//      }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
 //         int currentGoalWaypoint = goalWaypointIndex.get();
@@ -400,7 +339,6 @@ public class PatrolBehavior
       if (!stopNotification.read()) // only increment in normal operation (WALK -> PLAN or end with loop disabled)
       {
          waypointManager.increment();
-         waypointManager.publish();
       }
    }
 
@@ -451,15 +389,6 @@ public class PatrolBehavior
       messager.submitMessage(API.CurrentFootstepPlan, footstepLocations);
    }
 
-//   private boolean goalWaypointInBounds()
-//   {
-//      ArrayList<Pose3D> latestWaypoints = waypoints.get();     // access and store these early
-//      int currentGoalWaypointIndex = goalWaypointIndex.get();  // to make thread-safe
-//
-//      boolean indexInBounds = latestWaypoints != null && currentGoalWaypointIndex >= 0 && currentGoalWaypointIndex < latestWaypoints.size();
-//      return indexInBounds;
-//   }
-
    public static class API
    {
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
@@ -474,6 +403,10 @@ public class PatrolBehavior
 
       /** Input: Robot stops and immediately goes to this waypoint. The "start" or "reset" command.  */
       public static final Topic<Integer> GoToWaypoint = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("GoToWaypoint"));
+
+      /** Output: to visualize the current waypoint status. TODO clean me up */
+      public static final Topic<Integer> CurrentWaypointIndexStatus
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
 
       /** Input: When received, the robot stops walking and waits forever. */
       public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
@@ -501,10 +434,6 @@ public class PatrolBehavior
 
       /** Output: to visualize the current state. */
       public static final Topic<PatrolBehaviorState> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
-
-//      /** Output: to visualize the current waypoint status. TODO clean me up */
-//      public static final Topic<Integer> CurrentWaypointIndexStatus
-//            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
 
       public static final MessagerAPI create()
       {

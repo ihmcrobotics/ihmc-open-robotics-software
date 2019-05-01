@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.waypoints;
 
+import sun.rmi.runtime.Log;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -11,10 +13,11 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    private final Messager messager;
    private final Topic<WaypointSequence> sendTopic;
 
-   private volatile WaypointSequence activeSequence;
+   private volatile WaypointSequence activeSequence = new WaypointSequence();
 
    private long highestSeenId = 0;
 
+   private final Topic<Integer> waypointIndexUIUpdateTopic;
    private final boolean delayUpdate; // for module to
    private volatile WaypointSequence delayedUpdateSequence;
 
@@ -22,12 +25,19 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                                                  Topic<WaypointSequence> receiveTopic,
                                                  Topic<WaypointSequence> sendTopic,
                                                  Topic<Integer> goToWaypointTopic,
+                                                 Topic<Integer> waypointIndexUIUpdateTopic,
                                                  Notification goNotification)
    {
-      WaypointManager waypointManager = new WaypointManager(messager, receiveTopic, sendTopic, null, true);
-      messager.registerTopicListener(goToWaypointTopic, goToWaypointIndex ->
+      WaypointManager waypointManager = new WaypointManager(messager,
+                                                            receiveTopic,
+                                                            sendTopic,
+                                                            waypointIndexUIUpdateTopic,
+                                                            null,
+                                                            true);
+      messager.registerTopicListener(goToWaypointTopic, goToWaypointIndex -> // easy to put here, so do
       {
          LogTools.info("Recieved GoToWaypoint {}", goToWaypointIndex);
+         waypointManager.updateToMostRecentData();
          waypointManager.setNextFromIndex(goToWaypointIndex);
          goNotification.set();
       });
@@ -39,22 +49,30 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
                                              Topic<WaypointSequence> sendTopic,
                                              Runnable receivedListener) // accept listenerForUI
    {
-      WaypointManager waypointManager = new WaypointManager(messager, receiveTopic, sendTopic, receivedListener, false);
+      WaypointManager waypointManager = new WaypointManager(messager,
+                                                            receiveTopic,
+                                                            sendTopic,
+                                                            null,
+                                                            receivedListener,
+                                                            false);
       return waypointManager;
    }
 
    public WaypointManager(Messager messager,
                           Topic<WaypointSequence> receiveTopic,
                           Topic<WaypointSequence> sendTopic,
+                          Topic<Integer> waypointIndexUIUpdateTopic,
                           Runnable receivedListener,
                           boolean delayUpdate)
    {
       this.messager = messager;
       this.sendTopic = sendTopic;
+      this.waypointIndexUIUpdateTopic = waypointIndexUIUpdateTopic;
       this.delayUpdate = delayUpdate;
 
       messager.registerTopicListener(receiveTopic, newSequence ->
       {
+         LogTools.info("Received {} updated waypoints.", newSequence.size());
          if (delayUpdate)
          {
             delayedUpdateSequence = newSequence;
@@ -75,6 +93,9 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
 
    public void publish()
    {
+      LogTools.info("Publishing active waypoint sequence: size: {} id: {} {}", activeSequence.size(),
+                    activeSequence.peekNext().getUniqueId(),
+                    activeSequence);
       messager.submitMessage(sendTopic, activeSequence);
    }
 
@@ -86,12 +107,22 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    public void increment()
    {
       activeSequence.increment();
+      publishNextIndexToUI();
    }
 
    /** For UI to set by user seeing continuous number line */
    private void setNextFromIndex(int index)
    {
       activeSequence.setNextFromIndex(index);
+      publishNextIndexToUI();
+   }
+
+   private void publishNextIndexToUI()
+   {
+      if (waypointIndexUIUpdateTopic != null)
+      {
+         messager.submitMessage(waypointIndexUIUpdateTopic, activeSequence.peekNextIndex());
+      }
    }
 
    public boolean hasWaypoints()
@@ -156,9 +187,19 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       return activeSequence.peekNext().getPose();
    }
 
+   public int peekNextIndex()
+   {
+      return activeSequence.peekNextIndex();
+   }
+
    public Pose3DReadOnly peekAfterNextPose()
    {
       return activeSequence.peekAfterNext().getPose();
+   }
+
+   public Pose3DBasics getPoseFromId(long id)
+   {
+      return activeSequence.get(indexOfId(id)).getPose();
    }
 
    public long lastId()
