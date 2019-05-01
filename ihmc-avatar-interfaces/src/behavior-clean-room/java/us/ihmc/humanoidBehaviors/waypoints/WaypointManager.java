@@ -18,7 +18,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
 
    private final Topic<Integer> waypointIndexUIUpdateTopic;
    private final boolean delayUpdate; // for module to
-   private volatile WaypointSequence delayedUpdateSequence;
+   private volatile WaypointSequence delayedUpdateSequence = new WaypointSequence(); // prevent NPE
 
    public static WaypointManager createForModule(Messager messager,
                                                  Topic<WaypointSequence> receiveTopic,
@@ -92,8 +92,9 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
 
    public void publish()
    {
-      LogTools.info("Publishing active waypoint sequence: size: {} id: {} {}", activeSequence.size(),
-                    activeSequence.peekNext().getUniqueId(),
+      LogTools.info("Publishing active waypoint sequence: size: {} nextId: {} {}",
+                    activeSequence.size(),
+                    activeSequence.size() > 0 ? activeSequence.peekNext().getUniqueId() : -1,
                     activeSequence);
       messager.submitMessage(sendTopic, activeSequence);
    }
@@ -199,6 +200,11 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    public Pose3DBasics getPoseFromId(long id)
    {
       return activeSequence.get(indexOfId(id)).getPose();
+   }
+
+   public Pose3DBasics getPoseFromIndex(int index)
+   {
+      return activeSequence.get(index).getPose();
    }
 
    public long lastId()

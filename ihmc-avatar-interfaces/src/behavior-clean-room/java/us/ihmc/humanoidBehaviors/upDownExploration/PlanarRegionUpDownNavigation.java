@@ -117,29 +117,34 @@ public class PlanarRegionUpDownNavigation
       PolygonPoints2D polygonPoints = new PolygonPoints2D(5, REQUIRED_FLAT_AREA_RADIUS, midFeetZUpFrame);
 
       polygonPoints.add(2 * CHECK_STEP_SIZE, 0.0); // initial check step a bit out
+      LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
 
       FramePoint3D centerPoint;
-      while ((centerPoint = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints, planarRegionsList)) == null
+      while ((centerPoint = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints, planarRegionsList, midFeetZUpPose.getZ())) == null
             && polygonPoints.getCenterPoint().getX() < MAX_NAVIGATION_DISTANCE)
       {
          polygonPoints.add(CHECK_STEP_SIZE, 0.0);
+         LogTools.info("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
+         LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
       }
 
       if (centerPoint != null)
       {
-         if (centerPoint.getZ() < midFeetZUpPose.getZ() - HIGH_LOW_MINIMUM);
-         {
-            FramePose3D waypointPose = new FramePose3D();
-            waypointPose.setFromReferenceFrame(midFeetZUpFrame);
-            waypointPose.setPosition(centerPoint);
-            return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
-         }
+         FramePose3D waypointPose = new FramePose3D();
+         waypointPose.setFromReferenceFrame(midFeetZUpFrame);
+         waypointPose.setPosition(centerPoint);
+
+         LogTools.debug("Qualifying pose found at height {}: {}", centerPoint.getZ() - midFeetZUpPose.getZ(), waypointPose);
+
+         return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
       }
 
       return Pair.of(NavigationResult.NO_QUALIFIED_REGIONS, null);
    }
 
-   public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints, PlanarRegionsList planarRegionsList)
+   public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints,
+                                                                                                 PlanarRegionsList planarRegionsList,
+                                                                                                 double startingZ)
    {
       // map points to their collisions
       HashMap<FramePoint2D, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
@@ -151,7 +156,7 @@ public class PlanarRegionUpDownNavigation
             TreeSet<Pair<PlanarRegion, Double>> singlePointCollisions = new TreeSet<>(Comparator.comparingDouble(o -> o.getRight()));
             List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(point);
 
-            if (collidedRegions.isEmpty())
+            if (collidedRegions == null || collidedRegions.isEmpty())
             {
                return null; // not every point collides once
             }
@@ -185,7 +190,13 @@ public class PlanarRegionUpDownNavigation
          }
       }
 
-      FramePoint3D centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint().getReferenceFrame());
+      // make sure to go up or down
+      if (Math.abs(highestCollision.getRight() - startingZ) <  HIGH_LOW_MINIMUM)
+      {
+         return null;
+      }
+
+      FramePoint3D centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint());
       centerPoint3D.changeFrame(ReferenceFrame.getWorldFrame());
       centerPoint3D.setZ(highestCollision.getRight());
 

@@ -26,12 +26,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation.NavigationResult;
+import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -157,6 +160,7 @@ public class PatrolBehavior
       swingOvers = messager.createInput(API.SwingOvers, false);
       planReview = messager.createInput(API.PlanReviewEnabled, false);
       upDownExploration = messager.createInput(API.UpDownExplorationEnabled, false);
+      messager.registerTopicListener(API.UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
       ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
                                                                                            DefaultExceptionHandler.PRINT_STACKTRACE,
@@ -177,7 +181,6 @@ public class PatrolBehavior
    private void doStopStateAction(double timeInState)
    {
       pollInterrupts();
-      goNotification.poll();
       if (goNotification.read())
       {
          LogTools.debug("Go notified. Number of waypoints: {}", waypointManager.size());
@@ -186,7 +189,7 @@ public class PatrolBehavior
 
    private boolean transitionFromStop(double timeInState)
    {
-      boolean transition = goNotification.read() && waypointManager.hasWaypoints();
+      boolean transition = goNotification.read() && (waypointManager.hasWaypoints() || upDownExploration.get());
       if (transition)
       {
          LogTools.debug("STOP -> PLAN");
@@ -205,21 +208,27 @@ public class PatrolBehavior
 
       if (upDownExploration.get()) // find up-down or spin. setup the waypoint
       {
-         Pair<NavigationResult, FramePose3D> upOrDownResult = PlanarRegionUpDownNavigation
-                        .upOrDown(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
-                                  PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
-                  if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND)
-                  {
-                     // success
-                  }
-                  else
-                  {
-                     // turn
-                  }
+         Pair<NavigationResult, FramePose3D> upOrDownResult
+               = PlanarRegionUpDownNavigation.upOrDown(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame(), // get because just polled
+                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+
+         waypointManager.clearWaypoints();
+         Waypoint newWaypoint = waypointManager.appendNewWaypoint();
+
+         if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND) // success
+         {
+            newWaypoint.getPose().set(upOrDownResult.getRight());
+         }
+         else // turn counter-clockwise 45 degrees
+         {
+            newWaypoint.getPose().set(midFeetZUpPose);
+            newWaypoint.getPose().appendYawRotation(Math.toRadians(27)); // turn odd amount of degrees to quickly hit a variety of angles
+         }
+
+         waypointManager.publish();
+         waypointManager.setNextFromIndex(0);
       }
 
-//      int index = goalWaypointIndex.get();
-//      messager.submitMessage(API.CurrentWaypointIndexStatus, index);
       FramePose3D currentGoalWaypoint = new FramePose3D(waypointManager.peekNextPose());
 
       footstepPlanResultNotification = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
@@ -309,11 +318,8 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-//         int currentGoalWaypoint = goalWaypointIndex.get();
-//         int nextWaypointIndex = currentGoalWaypoint + 1;
-//         ArrayList<Pose3D> currentWaypointList = waypoints.get();
-         if (!loop.get() && waypointManager.incrementingWillLoop()) // stop if looping disabled
-         {
+         if (!upDownExploration.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and looping disabled
+         {                                                                                      // and it's going to loop
             return STOP;
          }
          else
@@ -375,6 +381,7 @@ public class PatrolBehavior
       }
 
       stopNotification.poll();         // poll both at the same time to handle race condition
+      goNotification.poll();           // poll go everytime so it doesn't queue up and disable stop
    }
 
    private void reduceAndSendFootstepsForVisualization(FootstepPlanningToolboxOutputStatus footstepPlanningOutput)
