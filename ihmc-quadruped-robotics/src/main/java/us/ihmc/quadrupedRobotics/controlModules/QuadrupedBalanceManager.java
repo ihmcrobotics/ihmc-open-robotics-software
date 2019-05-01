@@ -109,8 +109,8 @@ public class QuadrupedBalanceManager
 
       double nominalHeight = physicalProperties.getNominalBodyHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
-                                  yoGraphicsListRegistry, debug);
+      dcmPlanner = new DCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame,
+                                  referenceFrames.getSoleFrames(), registry, yoGraphicsListRegistry, debug);
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
