@@ -185,7 +185,10 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+                                           s -> {
+                                              if(robotDataReceiver!=null && s!=null)
+                                              robotDataReceiver.receivedPacket(s.takeNextData());  
+                                           });
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
