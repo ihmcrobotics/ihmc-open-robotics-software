@@ -355,8 +355,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
 
       DRCOutputProcessor drcOutputProcessor = null;
+
       if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
-         drcOutputProcessor = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
+      {
+         DRCOutputProcessorWithStateChangeSmoother outputSmoother = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
+         controllerFactory.attachControllerStateChangedListener(outputSmoother.createControllerStateChangedListener());
+         drcOutputProcessor = outputSmoother;
+      }
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
