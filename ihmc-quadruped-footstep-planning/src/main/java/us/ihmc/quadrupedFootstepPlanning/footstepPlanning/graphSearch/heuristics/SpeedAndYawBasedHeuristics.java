@@ -38,7 +38,7 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
 
       RigidBodyTransform startNodeTransform = new RigidBodyTransform();
       RigidBodyTransform endNodeTransform = new RigidBodyTransform();
-      
+
       double heightCost = 0.0;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
