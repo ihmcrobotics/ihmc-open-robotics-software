@@ -11,10 +11,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotEnd;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.*;
 
 import java.io.Serializable;
 
@@ -613,7 +610,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
    /**
     * getBounds modifies the min and max points passed in to the min and max
-    * xy values contained in the set of Footsteps that make up the polygon
+    * xy keys contained in the set of Footsteps that make up the polygon
     *
     * @param minToPack Point2d  Minimum x and y value contained in footsteps list
     * @param maxToPack Point2d  Maximum x and y value contained in footsteps list
@@ -655,7 +652,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
 
    /**
     * Returns true if the given (x,y) value is inside the polygon. This test
-    * ignores Z values for the polygon. The test works by computing the minimum
+    * ignores Z keys for the polygon. The test works by computing the minimum
     * distance from each polygon line segment to the point.
     *
     * @param point Point2d
@@ -784,20 +781,25 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
     */
    public double getNominalYaw()
    {
-      if (getNumberOfVertices() >= 3)
+      return getNominalYaw(footsteps, getNumberOfVertices());
+   }
+
+   public static double getNominalYaw(QuadrantDependentList<? extends FramePoint3DReadOnly> solePositions, int numberOfVertices)
+   {
+      if (numberOfVertices >= 3)
       {
          double deltaX = 0.0;
          double deltaY = 0.0;
 
-         if (footsteps.containsQuadrant(FRONT_LEFT) && footsteps.containsQuadrant(HIND_LEFT))
+         if (solePositions.containsKey(FRONT_LEFT) && solePositions.containsKey(HIND_LEFT))
          {
-            deltaX += getFootstep(FRONT_LEFT).getX() - getFootstep(HIND_LEFT).getX();
-            deltaY += getFootstep(FRONT_LEFT).getY() - getFootstep(HIND_LEFT).getY();
+            deltaX += solePositions.get(FRONT_LEFT).getX() - solePositions.get(HIND_LEFT).getX();
+            deltaY += solePositions.get(FRONT_LEFT).getY() - solePositions.get(HIND_LEFT).getY();
          }
-         if (footsteps.containsQuadrant(FRONT_RIGHT) && footsteps.containsQuadrant(HIND_RIGHT))
+         if (solePositions.containsKey(FRONT_RIGHT) && solePositions.containsKey(HIND_RIGHT))
          {
-            deltaX += getFootstep(FRONT_RIGHT).getX() - getFootstep(HIND_RIGHT).getX();
-            deltaY += getFootstep(FRONT_RIGHT).getY() - getFootstep(HIND_RIGHT).getY();
+            deltaX += solePositions.get(FRONT_RIGHT).getX() - solePositions.get(HIND_RIGHT).getX();
+            deltaY += solePositions.get(FRONT_RIGHT).getY() - solePositions.get(HIND_RIGHT).getY();
          }
 
          if (!Double.isFinite(deltaX))
@@ -809,7 +811,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       }
       else
       {
-         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + getNumberOfVertices());
+         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + numberOfVertices);
       }
    }
 
