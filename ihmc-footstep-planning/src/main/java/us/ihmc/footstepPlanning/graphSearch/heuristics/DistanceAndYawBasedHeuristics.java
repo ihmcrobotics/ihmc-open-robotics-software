@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -9,10 +11,12 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
    private final FootstepPlannerParametersReadOnly parameters;
+   private final FootstepNodeSnapper snapper;
 
-   public DistanceAndYawBasedHeuristics(DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
+   public DistanceAndYawBasedHeuristics(FootstepNodeSnapper snapper, DoubleProvider weight, FootstepPlannerParametersReadOnly parameters)
    {
       super(weight);
+      this.snapper = snapper;
       this.parameters = parameters;
    }
 
@@ -21,13 +25,24 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    {
       Point2D goalPoint = goalNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
       Point2D nodeMidFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
+
+      double nodeHeight = snapper.snapFootstepNode(node).getSnapTransform().getTranslationZ();
+      double goalHeight = snapper.snapFootstepNode(goalNode).getSnapTransform().getTranslationZ();
+      double heightChange = goalHeight - nodeHeight;
+
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
 
       double referenceYaw = computeReferenceYaw(node, goalNode);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), referenceYaw);
 
-      double minSteps = euclideanDistance / parameters.getIdealFootstepLength() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
-      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep() * minSteps;
+      double heightCost;
+      if (heightChange > 0)
+         heightCost = parameters.getStepUpWeight() * heightChange;
+      else
+         heightCost = -parameters.getStepDownWeight() * heightChange;
+
+      double minSteps = euclideanDistance / parameters.getMaximumStepReach() + Math.abs(yaw) / (0.5 * parameters.getMaximumStepYaw());
+      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + heightCost + parameters.getCostPerStep() * minSteps;
    }
 
    private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode)
