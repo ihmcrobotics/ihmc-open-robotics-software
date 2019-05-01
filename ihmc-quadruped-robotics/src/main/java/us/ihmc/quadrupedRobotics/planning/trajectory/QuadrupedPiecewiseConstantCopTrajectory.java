@@ -34,20 +34,6 @@ import java.util.List;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
-   private static final double stanceWidthCoPShiftFactor = 0.2;
-   private static final double stanceLengthCoPShiftFactor = 0.0;
-   private static final double maxStanceWidthCoPShift = 0.1;
-   private static final double maxStanceLengthCoPShift = 0.1;
-   private static final double stepWidthCoPShiftFactor = 0.1;
-   private static final double stepLengthCoPShiftFactor = 0.2;
-   private static final double maxStepWidthCoPShift = 0.1;
-   private static final double maxStepLengthCoPShift = 0.1;
-
-   private static final double safeDistanceFromSupportPolygonEdges = 0.04;
-
-   private final QuadrantDependentList<ContactState> initialContactState;
-   private boolean initialized;
-
    private final FramePoint3D copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
@@ -55,17 +41,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
 
    private final WeightDistributionCalculator weightDistributionCalculator;
+   private final DCMPlannerParameters plannerParameters;
 
-   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, WeightDistributionCalculator weightDistributionCalculator, YoVariableRegistry registry)
+   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals, DCMPlannerParameters plannerParameters, YoVariableRegistry registry)
    {
-      this.weightDistributionCalculator = weightDistributionCalculator;
-
-      initialContactState = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         initialContactState.set(robotQuadrant, ContactState.IN_CONTACT);
-      }
-      initialized = false;
+      this.plannerParameters = plannerParameters;
+      this.weightDistributionCalculator = plannerParameters.getWeightDistributionCalculatorForInclines();
 
       copPositionAtCurrentTime = new FramePoint3D();
       numberOfIntervals = 0;
@@ -77,7 +58,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
          copPositionsAtStartOfInterval.add(i, new YoFramePoint3D("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
 
-         normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<MutableDouble>());
+         normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<>());
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             normalizedPressureAtStartOfInterval.get(i).set(robotQuadrant, new MutableDouble(0.0));
@@ -120,11 +101,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
       resetVariables();
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
-      }
-
       numberOfIntervals = timedContactSequence.size();
       for (int interval = 0; interval < numberOfIntervals; interval++)
       {
@@ -147,17 +123,11 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
       }
 
-      initialized = true;
       computeTrajectory(timeAtStartOfInterval.get(0).doubleValue());
    }
 
    public void computeTrajectory(double currentTime)
    {
-      if (!initialized)
-      {
-         throw new RuntimeException("trajectory must be initialized before calling computeTrajectory");
-      }
-
       for (int interval = numberOfIntervals - 1; interval >= 0; interval--)
       {
          if (currentTime >= timeAtStartOfInterval.get(interval).doubleValue())
@@ -261,9 +231,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
       smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));
 
-//      nominalOrientation.transform(smallSideContact);
-//      nominalOrientation.transform(smallEndContact);
-
       stepFrame.setPoseAndUpdate(smallEndContact, nominalOrientation);
 
       double averageLength = 0.0;
@@ -284,8 +251,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          averageWidth += 0.5 * Math.abs(tempBigSideContact.getY());
       }
 
-      double lengthShift = smallEnd.negateIfHindEnd(MathTools.clamp(stanceLengthCoPShiftFactor * averageLength, maxStanceLengthCoPShift));
-      double widthShift = smallSide.negateIfRightSide(MathTools.clamp(stanceWidthCoPShiftFactor * averageWidth, maxStanceWidthCoPShift));
+      double lengthShift = smallEnd.negateIfHindEnd(MathTools.clamp(plannerParameters.getStanceLengthCoPShiftFactor() * averageLength, plannerParameters.getMaxStanceLengthCoPShift()));
+      double widthShift = smallSide.negateIfRightSide(MathTools.clamp(plannerParameters.getStanceWidthCoPShiftFactor() * averageWidth, plannerParameters.getMaxStanceWidthCoPShift()));
       copOffsetToPack.set(lengthShift, widthShift, 0.0);
       nominalOrientation.inverseTransform(copOffsetToPack);
    }
@@ -357,8 +324,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       averageLength /= nextSteps.size();
       averageWidth /= nextSteps.size();
 
-      double lengthShift = MathTools.clamp(stepLengthCoPShiftFactor * averageLength, maxStepLengthCoPShift);
-      double widthShift = MathTools.clamp(stepWidthCoPShiftFactor * averageWidth, maxStepWidthCoPShift);
+      double lengthShift = MathTools.clamp(plannerParameters.getStepLengthCoPShiftFactor() * averageLength, plannerParameters.getMaxStepLengthCoPShift());
+      double widthShift = MathTools.clamp(plannerParameters.getStepWidthCoPShiftFactor() * averageWidth, plannerParameters.getMaxStepWidthCoPShift());
 
       copOffsetToPack.setToZero(stepFrame);
       copOffsetToPack.set(lengthShift, widthShift, 0.0);
@@ -388,12 +355,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       tempFramePoint2D.set(copToConstraint);
 
       // don't need to do anything if it's already inside
-      if (constraintPolygon.signedDistance(tempFramePoint2D) <= -safeDistanceFromSupportPolygonEdges)
+      if (constraintPolygon.signedDistance(tempFramePoint2D) <= -plannerParameters.getSafeDistanceFromSupportPolygonEdges())
          return;
 
       if (numberOfFeetInContact > 2)
       {
-         polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, scaledConstraintPolygon);
+         polygonScaler.scaleConvexPolygon(constraintPolygon, plannerParameters.getSafeDistanceFromSupportPolygonEdges(), scaledConstraintPolygon);
          scaledConstraintPolygon.orthogonalProjection(tempFramePoint2D);
          copToConstraint.set(tempFramePoint2D);
       }
