@@ -1,9 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -26,9 +27,14 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       Point2D goalPoint = goalNode.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
       Point2D nodeMidFootPoint = node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth());
 
-      double nodeHeight = snapper.snapFootstepNode(node).getSnapTransform().getTranslationZ();
-      double goalHeight = snapper.snapFootstepNode(goalNode).getSnapTransform().getTranslationZ();
-      double heightChange = goalHeight - nodeHeight;
+
+      RigidBodyTransform nodeTransform = new RigidBodyTransform();
+      RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
+
+      FootstepNodeTools.getSnappedNodeTransform(node, snapper.snapFootstepNode(node).getSnapTransform(), nodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(goalNode, snapper.snapFootstepNode(goalNode).getSnapTransform(), goalNodeTransform);
+
+      double heightChange = goalNodeTransform.getTranslationVector().getZ() - nodeTransform.getTranslationVector().getZ();
 
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
 
