@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
    private final ArrayList<YoFramePoint3D> copPositionsAtStartOfInterval;
+   private final ArrayList<YoFrameVector2D> stanceShifts;
+   private final ArrayList<YoFrameVector2D> stepShifts;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
 
    private final WeightDistributionCalculator weightDistributionCalculator;
@@ -52,11 +55,14 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
       copPositionsAtStartOfInterval = new ArrayList<>(maxIntervals);
+      stanceShifts = new ArrayList<>(maxIntervals);
+      stepShifts = new ArrayList<>(maxIntervals);
       normalizedPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
          copPositionsAtStartOfInterval.add(i, new YoFramePoint3D("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
+
 
          normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<>());
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -64,13 +70,25 @@ public class QuadrupedPiecewiseConstantCopTrajectory
             normalizedPressureAtStartOfInterval.get(i).set(robotQuadrant, new MutableDouble(0.0));
          }
       }
+      for (int i = 0; i < 10; i++)
+      {
+         stanceShifts.add(i, new YoFrameVector2D("stanceCopShift" + i, ReferenceFrame.getWorldFrame(), registry));
+         stepShifts.add(i, new YoFrameVector2D("stepCoPShift" + i, ReferenceFrame.getWorldFrame(), registry));
+      }
       resetVariables();
    }
 
    public void resetVariables()
    {
       for (int i = 0; i < copPositionsAtStartOfInterval.size(); i++)
+      {
          copPositionsAtStartOfInterval.get(i).setToNaN();
+      }
+      for (int i = 0; i < stanceShifts.size(); i++)
+      {
+         stanceShifts.get(i).setToNaN();
+         stepShifts.get(i).setToNaN();
+      }
    }
 
    public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
@@ -115,6 +133,11 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          computeCoPOffsetFromStance(contactState, solePosition, copOffsetFromStance);
          computeCoPOffsetFromSteps(currentTime, contactState, solePosition, stepSequence, copOffsetFromSteps);
 
+         if (interval < stanceShifts.size())
+         {
+            stanceShifts.get(interval).set(copOffsetFromStance);
+            stepShifts.get(interval).set(copOffsetFromSteps);
+         }
          copPositionAtStartOfInterval.add(copOffsetFromStance);
          copPositionAtStartOfInterval.add(copOffsetFromSteps);
 
@@ -255,8 +278,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
       double lengthShift = smallEnd.negateIfHindEnd(MathTools.clamp(plannerParameters.getStanceLengthCoPShiftFactor() * averageLength, plannerParameters.getMaxStanceLengthCoPShift()));
       double widthShift = smallSide.negateIfRightSide(MathTools.clamp(plannerParameters.getStanceWidthCoPShiftFactor() * averageWidth, plannerParameters.getMaxStanceWidthCoPShift()));
-      copOffsetToPack.set(lengthShift, widthShift, 0.0);
-      nominalOrientation.inverseTransform(copOffsetToPack);
+      copOffsetToPack.setIncludingFrame(stepFrame, lengthShift, widthShift, 0.0);
+      copOffsetToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    private final FramePoint3D goalPosition = new FramePoint3D();
@@ -331,8 +354,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       double lengthShift = MathTools.clamp(plannerParameters.getStepLengthCoPShiftFactor() * averageLength, plannerParameters.getMaxStepLengthCoPShift());
       double widthShift = MathTools.clamp(plannerParameters.getStepWidthCoPShiftFactor() * averageWidth, plannerParameters.getMaxStepWidthCoPShift());
 
-      copOffsetToPack.setToZero(stepFrame);
-      copOffsetToPack.set(lengthShift, widthShift, 0.0);
+      copOffsetToPack.setIncludingFrame(stepFrame, lengthShift, widthShift, 0.0);
       copOffsetToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
