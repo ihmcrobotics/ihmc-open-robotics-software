@@ -148,6 +148,7 @@ public class CrossRobotCommandRandomTools
       set.add(CenterOfPressureDataHolder.class);
       set.add(HumanoidRobotContextJointData.class);
       set.add(RobotMotionStatusHolder.class);
+      set.add(LowLevelOneDoFJointDesiredDataHolder.class);
       return set;
    }
 

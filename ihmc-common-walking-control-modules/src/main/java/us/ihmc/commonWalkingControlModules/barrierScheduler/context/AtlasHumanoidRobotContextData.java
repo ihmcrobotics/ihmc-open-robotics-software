@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
@@ -16,7 +16,7 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
 
    protected AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
                                            CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                           JointDesiredOutputList jointDesiredOutputList, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+                                           LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
