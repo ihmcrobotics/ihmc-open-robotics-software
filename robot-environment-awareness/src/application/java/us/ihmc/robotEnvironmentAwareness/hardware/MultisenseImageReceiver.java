@@ -28,11 +28,11 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
    private static final String multisenseCartAddress = "http://10.6.192.14:11311";
    private static final String imageROSTopicName = "/multisense/left/image_rect_color";
    private static final String cameraInfoROSTopicName = "/multisense/left/camera_info";
-   
+
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
    private final IHMCROS2Publisher<ImageMessage> imagePublisher;
-   
+
    private final MultisenseCameraInfoReceiver cameraInfoReceiver;
 
    private final Scanner commandScanner;
@@ -56,7 +56,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       System.out.println(ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(ImageMessage.class));
 
       cameraInfoReceiver = new MultisenseCameraInfoReceiver();
-      
+
       Runnable inputReader = new Runnable()
       {
          @Override
@@ -67,12 +67,12 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
             if (command.contains(commandToSaveImage))
             {
                saveImage.set(true);
-               System.out.println("s pressed");
+               System.out.println(commandToSaveImage + " pressed");
             }
-            else if(command.contains(commandToShowCameraInfo))
+            else if (command.contains(commandToShowCameraInfo))
             {
                showCameraInfo.set(true);
-               System.out.println("c pressed");
+               System.out.println(commandToShowCameraInfo + " pressed");
             }
          }
       };
@@ -139,7 +139,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
    {
       new MultisenseImageReceiver();
    }
-   
+
    private class MultisenseCameraInfoReceiver extends AbstractRosTopicSubscriber<CameraInfo>
    {
       public MultisenseCameraInfoReceiver() throws URISyntaxException, IOException
@@ -154,7 +154,7 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
       @Override
       public void onNewMessage(CameraInfo cameraInfo)
       {
-         if(showCameraInfo.getAndSet(false))
+         if (showCameraInfo.getAndSet(false))
          {
             System.out.println("## CameraInfo");
             String distortionModel = cameraInfo.getDistortionModel();
