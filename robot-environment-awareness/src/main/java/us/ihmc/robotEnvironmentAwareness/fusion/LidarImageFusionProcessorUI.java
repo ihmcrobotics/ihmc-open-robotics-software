@@ -32,7 +32,7 @@ public class LidarImageFusionProcessorUI
    private final FusionSensorMeshViewer meshViewer;
    private final FusionSensorImageViewer imageViewer;
 
-   public static final int imageStreamingImageFixedWidth = 256;
+   public static final int imageStreamingImageFixedWidth = 512;
 
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
 

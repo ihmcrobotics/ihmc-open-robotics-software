@@ -49,7 +49,7 @@ public class LidarImageFusionProcessorCommunicationModule
                                            this::dispatchStereoVisionPointCloudMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, "/ihmc/image", this::dispatchImageMessage);
 
-      objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node);
+      objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
       messager.registerTopicListener(LidarImageFusionAPI.RequestSocketConnection, (content) -> connect());
       messager.registerTopicListener(LidarImageFusionAPI.RequestObjectDetection, (content) -> request());

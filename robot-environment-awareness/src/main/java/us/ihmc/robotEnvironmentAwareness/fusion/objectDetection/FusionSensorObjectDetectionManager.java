@@ -20,26 +20,33 @@ import controller_msgs.msg.dds.DoorParameterPacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.Conversions;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.ros2.Ros2Node;
 
 public class FusionSensorObjectDetectionManager
 {
+   private final SharedMemoryJavaFXMessager messager;
+
    private static final int socketPort = 65535;
    private static final long milliSecondsForOneTick = 10;
    private static final double maximumTimeToWaitResult = 20.0;
    private Socket objectDetectionSocket;
    private boolean imageRequested;
-   
-   private final List<ObjectType> selectedObjectTypes = new ArrayList<>(); 
+
+   private final List<ObjectType> selectedObjectTypes = new ArrayList<>();
    private final Map<ObjectType, RegionOfInterest> objectTypeToROIMap = new HashMap<>();
 
    private final AbstractObjectParameterCalculator<DoorParameterPacket> doorParameterCalculator;
 
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
+   private final AtomicReference<BufferedImage> leatestBufferedImage = new AtomicReference<BufferedImage>();
 
-   public FusionSensorObjectDetectionManager(Ros2Node ros2Node)
+   public FusionSensorObjectDetectionManager(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)
    {
+      this.messager = messager;
       doorParameterCalculator = new DoorParameterCalculator(ros2Node, DoorParameterPacket.class);
 
       TimerTask socketTimerTask = new TimerTask()
@@ -130,6 +137,7 @@ public class FusionSensorObjectDetectionManager
 
    public void requestObjectDetection(BufferedImage image, List<ObjectType> selectedTypes)
    {
+      leatestBufferedImage.set(image);
       byte[] imgBytes = ObjectDetectionSocketHelper.convertImgToBytes(image);
       byte[] imgDimBytes = ObjectDetectionSocketHelper.convertImgDimToBytes(imgBytes.length, image.getWidth(), image.getHeight());
       try
@@ -156,17 +164,18 @@ public class FusionSensorObjectDetectionManager
 
    private void publishResults()
    {
-      for(ObjectType objectType : selectedObjectTypes)
+      for (ObjectType objectType : selectedObjectTypes)
       {
-         if(objectTypeToROIMap.get(objectType) != null)
+         RegionOfInterest detectedObjectROI = objectTypeToROIMap.get(objectType);
+         if (detectedObjectROI != null)
          {
-            LogTools.info("calculate " + objectType);
-            switch(objectType)
+            ImageVisualizationHelper.drawROIOnImage(leatestBufferedImage.get(), detectedObjectROI, objectType.getROIColor(), objectType.toString());
+            switch (objectType)
             {
             case Cup:
                break;
             case Door:
-               calculateAndPublishDoorParameter(objectTypeToROIMap.get(objectType), objectTypeToROIMap.get(ObjectType.DoorHandle));
+               calculateAndPublishDoorParameter(detectedObjectROI, objectTypeToROIMap.get(ObjectType.DoorHandle));
                break;
             case DoorHandle:
                break;
@@ -175,6 +184,7 @@ public class FusionSensorObjectDetectionManager
             default:
                break;
             }
+            messager.submitMessage(LidarImageFusionAPI.ImageResultState, leatestBufferedImage.getAndSet(null));
          }
       }
    }
@@ -192,6 +202,6 @@ public class FusionSensorObjectDetectionManager
       doorParameterCalculator.calculate(handleROI);
       doorParameterCalculator.publish();
       long computingTime = System.nanoTime() - startTime;
-      LogTools.info("computing time is " + Conversions.nanosecondsToMicroseconds(computingTime));
+      LogTools.info("Door computing time is " + Conversions.nanosecondsToMicroseconds(computingTime));
    }
 }
