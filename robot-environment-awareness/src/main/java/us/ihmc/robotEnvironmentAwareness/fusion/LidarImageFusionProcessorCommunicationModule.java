@@ -19,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObjectDetectionManager;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.ros2.Ros2Node;
@@ -29,6 +30,8 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private final Ros2Node ros2Node;
    private final REAModuleStateReporter moduleStateReporter;
+
+   private final FusionSensorObjectDetectionManager objectDetectionManager;
 
    private final AtomicReference<String> socketHostIPAddress;
    private final AtomicReference<BufferedImage> latestBufferedImage = new AtomicReference<>(null);
@@ -46,6 +49,7 @@ public class LidarImageFusionProcessorCommunicationModule
                                            this::dispatchStereoVisionPointCloudMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, ImageMessage.class, "/ihmc/image", this::dispatchImageMessage);
 
+      objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node);
 
       messager.registerTopicListener(LidarImageFusionAPI.RequestSocketConnection, (content) -> connect());
       messager.registerTopicListener(LidarImageFusionAPI.RequestObjectDetection, (content) -> request());
@@ -55,12 +59,12 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private void connect()
    {
-      
+      objectDetectionManager.connectExternalModule(socketHostIPAddress.get());
    }
 
    private void request()
    {
-      
+      objectDetectionManager.requestObjectDetection(latestBufferedImage.getAndSet(null), selectedObjecTypes.get());
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -73,6 +77,7 @@ public class LidarImageFusionProcessorCommunicationModule
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
+      objectDetectionManager.updateLatestStereoVisionPointCloudMessage(message);
    }
 
    private void dispatchImageMessage(Subscriber<ImageMessage> subscriber)
@@ -93,6 +98,7 @@ public class LidarImageFusionProcessorCommunicationModule
    {
       messager.closeMessager();
       ros2Node.destroy();
+      objectDetectionManager.close();
    }
 
    public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(SharedMemoryJavaFXMessager messager,
