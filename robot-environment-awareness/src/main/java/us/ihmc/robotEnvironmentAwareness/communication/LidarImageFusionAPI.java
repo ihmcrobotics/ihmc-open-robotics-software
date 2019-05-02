@@ -12,6 +12,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 
 public class LidarImageFusionAPI
 {
@@ -38,6 +39,7 @@ public class LidarImageFusionAPI
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<String> Address = apiFactory.createTypedTopicTheme("Address");
    private static final TypedTopicTheme<List<RegionOfInterest>> ROIs = apiFactory.createTypedTopicTheme("ROIs");
+   private static final TypedTopicTheme<List<ObjectType>> ObjecTypes = apiFactory.createTypedTopicTheme("ObjecTypes");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
@@ -51,6 +53,7 @@ public class LidarImageFusionAPI
    public static final Topic<Boolean> RequestSocketConnection = ObjectDetectionCategory.child(Socket).topic(Request);
    public static final Topic<Boolean> RequestObjectDetection = ObjectDetectionCategory.topic(Request);
    public static final Topic<String> ObjectDetectionModuleAddress = ObjectDetectionCategory.child(Socket).topic(Address);
+   public static final Topic<List<ObjectType>> SelectedObjecTypes = ObjectDetectionCategory.topic(ObjecTypes);
    public static final Topic<List<RegionOfInterest>> ReceivedROIs = ObjectDetectionCategory.topic(ROIs);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
