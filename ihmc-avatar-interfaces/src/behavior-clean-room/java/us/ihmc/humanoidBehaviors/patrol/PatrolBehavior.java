@@ -26,10 +26,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
@@ -109,6 +105,7 @@ public class PatrolBehavior
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReview;
    private final AtomicReference<Boolean> upDownExploration;
+   private final AtomicReference<Double> exploreTurnAmount;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -163,6 +160,7 @@ public class PatrolBehavior
       swingOvers = messager.createInput(API.SwingOvers, false);
       planReview = messager.createInput(API.PlanReviewEnabled, false);
       upDownExploration = messager.createInput(API.UpDownExplorationEnabled, false);
+      exploreTurnAmount = messager.createInput(API.ExplorationTurnAmount, 180.0);
       messager.registerTopicListener(API.UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
       ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
@@ -222,10 +220,10 @@ public class PatrolBehavior
          {
             newWaypoint.getPose().set(upOrDownResult.getRight());
          }
-         else // turn counter-clockwise 45 degrees
+         else // turn counter-clockwise to try and find an up-down
          {
             newWaypoint.getPose().set(midFeetZUpPose);
-            newWaypoint.getPose().appendYawRotation(Math.toRadians(27)); // turn odd amount of degrees to quickly hit a variety of angles
+            newWaypoint.getPose().appendYawRotation(Math.toRadians(exploreTurnAmount.get())); // TODO figure out another algorithm? state machine?
          }
 
          waypointManager.publish();
@@ -434,6 +432,10 @@ public class PatrolBehavior
       /** Input: Enable/disable human plan review before walking. */
       public static final Topic<Boolean> UpDownExplorationEnabled
             = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("UpDownExplorationEnabled"));
+
+      /** Input: Set the turn amount to find up or down. */
+      public static final Topic<Double> ExplorationTurnAmount
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("ExplorationTurnAmount"));
 
       /** Input: Enable/disable human plan review before walking. */
       public static final Topic<OperatorPlanReviewResult> PlanReviewResult
