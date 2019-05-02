@@ -603,7 +603,7 @@ public class MainTabController
 
       private final double frameDt = 0.005;
       // frames per call to handle()
-      final int playbackSpeed = 10;
+      final int playbackSpeed = 50;
       int playbackCounter = 0;
 
       // whether to show ghost robot
