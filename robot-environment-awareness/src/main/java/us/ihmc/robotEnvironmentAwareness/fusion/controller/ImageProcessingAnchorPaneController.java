@@ -29,7 +29,7 @@ public class ImageProcessingAnchorPaneController
          public void handle(ActionEvent event)
          {
             System.out.println("ImageProcessingAnchorPaneController true");
-            messager.submitMessage(LidarImageFusionAPI.ImageSnapShot, true);
+            messager.submitMessage(LidarImageFusionAPI.TakeSnapShot, true);
          }
       });
 
@@ -38,6 +38,6 @@ public class ImageProcessingAnchorPaneController
    
    public void clearImageView()
    {
-      messager.submitMessage(LidarImageFusionAPI.ImageViewClear, true);
+      messager.submitMessage(LidarImageFusionAPI.ClearSnapShot, true);
    }
 }

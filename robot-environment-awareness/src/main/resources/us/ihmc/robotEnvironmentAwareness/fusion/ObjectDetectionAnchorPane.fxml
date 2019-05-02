@@ -21,6 +21,7 @@
             <TextField fx:id="serverADD" alignment="CENTER" maxWidth="1.7976931348623157E308" text="127.0.0.1" />
             <Button fx:id="btnConnect" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#connect" prefHeight="25.0" prefWidth="75.0" text="Connect" />
             <Button fx:id="btnObjectDetection" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestObjectDetection" prefHeight="25.0" prefWidth="75.0" text="Object Detection" />
+            <Button fx:id="btnClear" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" prefHeight="25.0" prefWidth="75.0" text="Clear" />
          </children>
       </VBox>
    </children>
