@@ -7,7 +7,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public interface ThreadDataSynchronizerInterface
@@ -51,8 +51,8 @@ public interface ThreadDataSynchronizerInterface
 
    public abstract boolean receiveControllerDataForEstimator();
 
-   public abstract JointDesiredOutputList getEstimatorDesiredJointDataHolder();
-   
-   public abstract JointDesiredOutputList getControllerDesiredJointDataHolder();
+   public abstract JointDesiredOutputListBasics getEstimatorDesiredJointDataHolder();
+
+   public abstract JointDesiredOutputListBasics getControllerDesiredJointDataHolder();
 
 }

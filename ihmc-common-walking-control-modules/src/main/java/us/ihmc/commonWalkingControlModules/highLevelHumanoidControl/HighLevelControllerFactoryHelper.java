@@ -12,7 +12,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -26,11 +26,11 @@ public class HighLevelControllerFactoryHelper
    private ICPTrajectoryPlannerParameters icpPlannerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
-   private JointDesiredOutputList lowLevelControllerOutput;
+   private JointDesiredOutputListBasics lowLevelControllerOutput;
    private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
-   public void setLowLevelControllerOutput(JointDesiredOutputList lowLevelControllerOutput)
+   public void setLowLevelControllerOutput(JointDesiredOutputListBasics lowLevelControllerOutput)
    {
       this.lowLevelControllerOutput = lowLevelControllerOutput;
    }
