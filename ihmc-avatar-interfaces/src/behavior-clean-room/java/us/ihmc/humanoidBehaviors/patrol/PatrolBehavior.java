@@ -326,9 +326,11 @@ public class PatrolBehavior
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            if (remoteFootstepPlannerInterface.decidePlanType(remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
-                                                              waypointManager.peekAfterNextPose())
-                  == PlanType.FAR)
+            if (upDownExploration.get() // perceive everytime when updownenabled
+             || remoteFootstepPlannerInterface.decidePlanType(
+                   remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
+                   waypointManager.peekAfterNextPose())
+                == PlanType.FAR)
             {
                return PERCEIVE;
             }
