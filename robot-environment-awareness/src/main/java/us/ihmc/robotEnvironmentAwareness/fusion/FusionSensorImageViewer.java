@@ -41,8 +41,8 @@ public class FusionSensorImageViewer
       imagePane.getChildren().add(imageViewPane);
 
       enableStreaming = messager.createInput(LidarImageFusionAPI.EnableStreaming, false);
-      snapshot = messager.createInput(LidarImageFusionAPI.ImageSnapShot, false);
-      clearImages = messager.createInput(LidarImageFusionAPI.ImageViewClear, false);
+      snapshot = messager.createInput(LidarImageFusionAPI.TakeSnapShot, false);
+      clearImages = messager.createInput(LidarImageFusionAPI.ClearSnapShot, false);
 
       newImageMessageToStream = messager.createInput(LidarImageFusionAPI.ImageState);
       recentBufferedImageToStream = new AtomicReference<BufferedImage>(null);

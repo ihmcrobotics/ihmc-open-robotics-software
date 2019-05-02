@@ -29,6 +29,7 @@ public class LidarImageFusionAPI
    private static final Category ObjectDetectionCategory = Root.child(ObjectDetection);
 
    private static final CategoryTheme Image = apiFactory.createCategoryTheme("Image");
+   private static final CategoryTheme Object = apiFactory.createCategoryTheme("Object");
    private static final CategoryTheme Socket = apiFactory.createCategoryTheme("Socket");
    
    private static final CategoryTheme Result = apiFactory.createCategoryTheme("Result");
@@ -44,8 +45,9 @@ public class LidarImageFusionAPI
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
 
    public static final Topic<Boolean> EnableStreaming = UICategory.child(Image).topic(Enable);
-   public static final Topic<Boolean> ImageSnapShot = UICategory.child(Image).topic(SnapShot);
-   public static final Topic<Boolean> ImageViewClear = UICategory.child(Image).topic(Clear);
+   public static final Topic<Boolean> TakeSnapShot = UICategory.child(Image).topic(SnapShot);
+   public static final Topic<Boolean> ClearSnapShot = UICategory.child(Image).topic(Clear);
+   public static final Topic<Boolean> ClearObjects = UICategory.child(Object).topic(Clear);
 
    public static final Topic<ImageMessage> ImageState = ModuleCategory.child(Image).topic(Data);
    public static final Topic<BufferedImage> ImageResultState = ModuleCategory.child(Image).child(Result).topic(Data);

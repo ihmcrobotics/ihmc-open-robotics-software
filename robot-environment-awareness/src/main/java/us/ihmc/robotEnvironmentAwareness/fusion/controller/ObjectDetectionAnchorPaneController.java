@@ -28,6 +28,9 @@ public class ObjectDetectionAnchorPaneController
    private Button btnObjectDetection;
 
    @FXML
+   private Button btnClear;
+
+   @FXML
    private CheckBox cboxDoor;
 
    @FXML
@@ -52,7 +55,12 @@ public class ObjectDetectionAnchorPaneController
    {
       messager.submitMessage(LidarImageFusionAPI.ObjectDetectionModuleAddress, serverADD.getText());
       messager.submitMessage(LidarImageFusionAPI.RequestSocketConnection, true);
+   }
 
+   @FXML
+   public void clear()
+   {
+      messager.submitMessage(LidarImageFusionAPI.ClearObjects, true);
    }
 
    @FXML
