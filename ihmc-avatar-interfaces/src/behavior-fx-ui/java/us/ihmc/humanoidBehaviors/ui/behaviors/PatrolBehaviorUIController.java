@@ -8,6 +8,7 @@ import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -47,6 +48,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private CheckBox swingOverPlanarRegions;
    @FXML private CheckBox operatorPlanReview;
    @FXML private CheckBox upDownExploration;
+   @FXML private Spinner<Double> exploreTurnAmount;
    @FXML private Button replan;
    @FXML private Button sendPlan;
 
@@ -93,6 +95,8 @@ public class PatrolBehaviorUIController extends Group
          goToWaypoint.setDisable(true);
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
          waypointIndex.setDisable(true);
+         exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 180.0, 1.0));
+         exploreTurnAmount.getValueFactory().valueProperty().addListener((ChangeListener) -> publishExploreTurnAmount());
       });
       behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> Platform.runLater(() ->
       {
@@ -357,6 +361,11 @@ public class PatrolBehaviorUIController extends Group
       getChildren().remove(waypointGraphics.get(lastId));
       waypointGraphics.remove(lastId);
       waypointManager.remove(lastId);
+   }
+
+   public void publishExploreTurnAmount()
+   {behaviorMessager.submitMessage(PatrolBehavior.API.ExplorationTurnAmount, exploreTurnAmount.getValue());
+
    }
 
    @FXML
