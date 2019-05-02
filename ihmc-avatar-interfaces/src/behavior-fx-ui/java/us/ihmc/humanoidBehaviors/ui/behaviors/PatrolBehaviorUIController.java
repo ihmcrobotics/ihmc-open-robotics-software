@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -93,6 +94,7 @@ public class PatrolBehaviorUIController extends Group
          replan.setDisable(true);
          sendPlan.setDisable(true);
          goToWaypoint.setDisable(true);
+         waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
          waypointIndex.setDisable(true);
          exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 180.0, 1.0));
@@ -303,8 +305,14 @@ public class PatrolBehaviorUIController extends Group
    {
       goToWaypoint.setDisable(!waypointManager.hasWaypoints());
       waypointIndex.setDisable(!waypointManager.hasWaypoints());
-      waypointIndex.getValueFactory().valueProperty().setValue(waypointManager.peekNextIndex());
-      waypointIndex.getValueFactory().setValue(waypointManager.peekNextIndex());
+      if (waypointManager.hasWaypoints())
+      {
+         waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(0, waypointManager.size() - 1, waypointManager.peekNextIndex(), 1));
+      }
+      else
+      {
+         waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
+      }
    }
 
    private PatrolWaypointGraphic createWaypointGraphic()
