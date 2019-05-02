@@ -76,7 +76,7 @@ public class AtlasFootstepPlanBehaviorTest
                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
+      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 
@@ -166,7 +166,7 @@ public class AtlasFootstepPlanBehaviorTest
                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-      RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
+      RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 

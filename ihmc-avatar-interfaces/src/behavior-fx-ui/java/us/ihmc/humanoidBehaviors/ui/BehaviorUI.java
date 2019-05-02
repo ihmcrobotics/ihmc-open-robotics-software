@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
 import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
 import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
@@ -34,6 +35,7 @@ public class BehaviorUI
 
    @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
    @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
+   @FXML private PlannerParametersUIController plannerParametersUIController;
    @FXML private DirectRobotUIController directRobotUIController;
 
    public BehaviorUI(Stage primaryStage,
@@ -64,6 +66,7 @@ public class BehaviorUI
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
+      plannerParametersUIController.init(ros2Node, robotModel, behaviorMessager);
       directRobotUIController.init(ros2Node, robotModel);
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);

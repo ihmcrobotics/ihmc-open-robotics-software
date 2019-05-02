@@ -26,12 +26,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation.NavigationResult;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
@@ -141,7 +144,7 @@ public class PatrolBehavior
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, LIDARBasedREAModule.ROS2_ID);
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
-      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel);
+      remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
 
       waypointManager = WaypointManager.createForModule(messager,
                                                         API.WaypointsToModule,
@@ -435,6 +438,10 @@ public class PatrolBehavior
       /** Input: Enable/disable human plan review before walking. */
       public static final Topic<OperatorPlanReviewResult> PlanReviewResult
             = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewResult"));
+
+      /** Input: For the UI to set the parameters published before walking. */
+      public static final Topic<TunedFootstepPlannerParameters> PlannerParameters
+            = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlannerParameters"));
 
       /** Output: to visualize the current robot path plan. */
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan

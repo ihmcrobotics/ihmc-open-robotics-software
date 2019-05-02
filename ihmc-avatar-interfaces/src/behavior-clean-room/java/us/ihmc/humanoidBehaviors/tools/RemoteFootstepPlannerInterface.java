@@ -15,17 +15,17 @@ import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
@@ -39,7 +39,8 @@ public class RemoteFootstepPlannerInterface
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FootstepPlannerParameters footstepPlannerParameters;
+   private final Messager messager;
+   private volatile FootstepPlannerParameters footstepPlannerParameters;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -51,9 +52,19 @@ public class RemoteFootstepPlannerInterface
 
    public enum PlanType { CLOSE, FAR }
 
-   public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
+   public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
    {
+      this.messager = messager;
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      if (messager != null)
+      {
+         messager.registerTopicListener(API.PlannerParameters, parameters ->
+         {
+            SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
+            parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);
+            footstepPlannerParameters = settableFootstepPlannerParameters;
+         }); // updated from UI
+      }
 
       toolboxStatePublisher =
             ROS2Tools.createPublisher(ros2Node,
