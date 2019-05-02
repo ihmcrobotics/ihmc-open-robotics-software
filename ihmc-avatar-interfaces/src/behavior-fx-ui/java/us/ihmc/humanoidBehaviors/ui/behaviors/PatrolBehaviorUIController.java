@@ -225,7 +225,7 @@ public class PatrolBehaviorUIController extends Group
 
    private final void mouseClicked(MouseEvent event)
    {
-      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null)
+      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null && !upDownExploration.isSelected())
       {
          PickResult pickResult = event.getPickResult();
          Node intersectedNode = pickResult.getIntersectedNode();
