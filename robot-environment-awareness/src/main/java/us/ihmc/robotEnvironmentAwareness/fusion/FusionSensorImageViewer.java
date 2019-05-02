@@ -14,6 +14,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 
 public class FusionSensorImageViewer
 {
@@ -62,7 +63,7 @@ public class FusionSensorImageViewer
       if (imageMessage == null)
          return;
 
-      BufferedImage bufferedImage = convertImageMessageToBufferedImage(imageMessage);
+      BufferedImage bufferedImage = ImageVisualizationHelper.convertImageMessageToBufferedImage(imageMessage);
       recentBufferedImageToStream.set(bufferedImage);
       Image streamingImage = SwingFXUtils.toFXImage(bufferedImage, null);
       streamingView.setImage(streamingImage);
@@ -70,19 +71,19 @@ public class FusionSensorImageViewer
 
    public void update()
    {
-//      if (!enableStreaming.get())
-//         return;
-//
-//      if (clearImages.getAndSet(false))
-//         clearImageView();
-//
-//      if (newImageMessageToStream.get() == null)
-//         return;
+      if (!enableStreaming.get())
+         return;
+
+      if (clearImages.getAndSet(false))
+         clearImageView();
 
       if (newBufferedImageToView.get() != null)
          imagesToView.add(newBufferedImageToView.getAndSet(null));
 
-//      unpackImage(newImageMessageToStream.getAndSet(null));
+      if (newImageMessageToStream.get() == null)
+         return;
+
+      unpackImage(newImageMessageToStream.getAndSet(null));
 
       if (snapshot.getAndSet(false))
       {
@@ -112,23 +113,5 @@ public class FusionSensorImageViewer
    public void clearImageView()
    {
       imagesToView.clear();
-   }
-
-   //TODO : create a helper class and move to there.
-   public static BufferedImage convertImageMessageToBufferedImage(ImageMessage imageMessage)
-   {
-      int width = imageMessage.getWidth();
-      int height = imageMessage.getHeight();
-      BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-      int pixelIndex = 0;
-      for (int i = 0; i < height; i++)
-      {
-         for (int j = 0; j < width; j++)
-         {
-            bufferedImage.setRGB(j, i, imageMessage.getRgbdata().get(pixelIndex));
-            pixelIndex++;
-         }
-      }
-      return bufferedImage;
    }
 }

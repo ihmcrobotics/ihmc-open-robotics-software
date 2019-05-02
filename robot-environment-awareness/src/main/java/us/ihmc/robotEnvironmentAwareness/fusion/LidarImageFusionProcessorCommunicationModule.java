@@ -21,6 +21,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObjectDetectionManager;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
+import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.ros2.Ros2Node;
 
@@ -86,7 +87,7 @@ public class LidarImageFusionProcessorCommunicationModule
       if (messager.isMessagerOpen())
          messager.submitMessage(LidarImageFusionAPI.ImageState, new ImageMessage(message));
 
-      latestBufferedImage.set(FusionSensorImageViewer.convertImageMessageToBufferedImage(message));
+      latestBufferedImage.set(ImageVisualizationHelper.convertImageMessageToBufferedImage(message));
    }
 
    public void start() throws IOException
