@@ -1,9 +1,13 @@
 package us.ihmc.robotEnvironmentAwareness.hardware;
 
 import java.awt.Color;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
@@ -26,6 +30,12 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
+   private final Scanner commandScanner;
+   private static final String commandToSaveImage = "s";
+   private int savingIndex = 0;
+
+   private AtomicReference<Boolean> saveStereoVisionPointCloud = new AtomicReference<Boolean>(false);
+
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
       super(PointCloud2._TYPE);
@@ -36,6 +46,24 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
       rosMainNode.execute();
 
       stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+
+      commandScanner = new Scanner(System.in);
+      Runnable inputReader = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            String command = commandScanner.next();
+
+            if (command.contains(commandToSaveImage))
+            {
+               saveStereoVisionPointCloud.set(true);
+               System.out.println("s pressed");
+            }
+         }
+      };
+      Thread inputHolder = new Thread(inputReader);
+      inputHolder.start();
    }
 
    @Override
@@ -78,6 +106,29 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
       StereoVisionPointCloudMessage stereoVisionMessage = MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
+
+      if (saveStereoVisionPointCloud.getAndSet(false))
+      {
+         FileWriter fileWriter;
+         try
+         {
+            fileWriter = new FileWriter("stereovision_pointcloud_" + savingIndex + ".txt");
+            String pointCloudDataString = "";
+            for (int i = 0; i < numberOfPoints; i++)
+            {
+               Point3D scanPoint = pointCloud[i];
+               String pointInfo = i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB();
+               pointCloudDataString = pointCloudDataString + pointInfo;
+            }
+            fileWriter.write(pointCloudDataString);
+            fileWriter.close();
+         }
+         catch (IOException e1)
+         {
+            e1.printStackTrace();
+         }
+         savingIndex++;
+      }
    }
 
    public static void main(String[] args) throws URISyntaxException
