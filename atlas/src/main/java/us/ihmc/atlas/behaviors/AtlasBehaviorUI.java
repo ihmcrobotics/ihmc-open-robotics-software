@@ -45,10 +45,10 @@ public class AtlasBehaviorUI extends Application
 
    public static void main(String[] args)
    {
-      new Thread(() -> {
-         LogTools.info("Spawning parameter tuner");
-         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
-      }).start();
+//      new Thread(() -> {
+//         LogTools.info("Spawning parameter tuner");
+//         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
+//      }).start();
 
       launch(args);
    }

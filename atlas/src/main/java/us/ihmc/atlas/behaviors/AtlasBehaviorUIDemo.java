@@ -78,10 +78,10 @@ public class AtlasBehaviorUIDemo extends Application
          BehaviorModule.createForBackpack(createRobotModel());
       }).start();
 
-      new Thread(() -> {
-         LogTools.info("Spawning parameter tuner");
-         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
-      }).start();
+//      new Thread(() -> {
+//         LogTools.info("Spawning parameter tuner");
+//         new JavaProcessSpawner(true).spawn(ParameterTuner.class); // NPE if ParameterTuner started in same process, so spawn it
+//      }).start();
 
       LogTools.info("Creating behavior user interface");
       AtlasRobotModel robotModel = createRobotModel();
