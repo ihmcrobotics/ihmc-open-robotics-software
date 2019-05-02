@@ -4,12 +4,30 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import controller_msgs.msg.dds.ImageMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 
 public class ImageVisualizationHelper
 {
    private static final float fontSize = 30f;
    private static final int defaultThickness = 5;
+
+   public static BufferedImage convertImageMessageToBufferedImage(ImageMessage imageMessage)
+   {
+      int width = imageMessage.getWidth();
+      int height = imageMessage.getHeight();
+      BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      int pixelIndex = 0;
+      for (int i = 0; i < height; i++)
+      {
+         for (int j = 0; j < width; j++)
+         {
+            bufferedImage.setRGB(j, i, imageMessage.getRgbdata().get(pixelIndex));
+            pixelIndex++;
+         }
+      }
+      return bufferedImage;
+   }
 
    public static void drawROIOnImage(BufferedImage image, RegionOfInterest roiToDraw, Color color)
    {
