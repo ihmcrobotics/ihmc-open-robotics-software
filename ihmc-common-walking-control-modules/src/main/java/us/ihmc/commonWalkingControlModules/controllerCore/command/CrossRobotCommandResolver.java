@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -72,6 +73,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
@@ -85,7 +87,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
  * The main challenge when passing commands is to retrieve the joints, rigid-bodies, and reference
  * frames properly.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class CrossRobotCommandResolver
@@ -131,7 +133,7 @@ public class CrossRobotCommandResolver
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(), out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
    }
 
-   private void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
+   public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
    {
       out.clear();
       for (int i = 0; i < in.getNumberOfBodiesWithCenterOfPressure(); i++)
@@ -699,12 +701,22 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
    }
 
-   private void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
+   public void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
    {
       out.setIsAdjustable(in.getIsAdjustable());
       out.setRobotSide(in.getRobotSide());
       resolveFramePose3D(in.getSoleFramePose(), out.getSoleFramePose());
       out.setFoothold(in.getFoothold());
+   }
+
+   public void resolveHumanoidRobotContextJointData(HumanoidRobotContextJointData in, HumanoidRobotContextJointData out)
+   {
+      out.set(in);
+   }
+
+   public void resolveRobotMotionStatusHolder(RobotMotionStatusHolder in, RobotMotionStatusHolder out)
+   {
+      out.set(in);
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)
