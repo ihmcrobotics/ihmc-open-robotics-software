@@ -11,7 +11,7 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController">
 	<children>
-		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefHeight="186.0" prefWidth="410.0" vgap="5.0">
+		<GridPane hgap="10.0" layoutX="15.0" layoutY="17.0" prefWidth="410.0" vgap="5.0">
 			<children>
 				<Label style="-fx-font-weight: bold" text="Robot control" />
 				<Button fx:id="homeAll" onAction="#homeAll" text="Home All" GridPane.rowIndex="4" />

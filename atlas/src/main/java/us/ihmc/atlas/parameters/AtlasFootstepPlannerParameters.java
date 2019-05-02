@@ -30,6 +30,10 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double minXClearance = 0.3;
    private double minYClearance = 0.22;
    private double wiggleInsideDelta = 0.02;
+   private double stepUpHeight   = 1.5;
+   private double stepDownHeight = 1.5;
+   private double maxStepUpX     = 0.5;
+   private double maxStepDownX   = 1.5;
    private double idealFootstepWidth = 0.22; // unused?
    private double idealFootstepLength = 0.3; // unused?
    private boolean wiggleIntoConvexHull = true;
@@ -159,5 +163,29 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    public double getMaximumYawWiggle()
    {
       return maxYawWiggle;
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return stepUpHeight;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return stepDownHeight;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return maxStepUpX;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return maxStepDownX;
    }
 }

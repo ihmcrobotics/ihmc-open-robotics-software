@@ -37,6 +37,10 @@ public class PlannerParametersUIController
    @FXML private Spinner<Double> minXClearance;
    @FXML private Spinner<Double> minYClearance;
    @FXML private Spinner<Double> wiggleInsideDelta;
+   @FXML private Spinner<Double> stepUpHeight      ;
+   @FXML private Spinner<Double> stepDownHeight    ;
+   @FXML private Spinner<Double> maxStepUpX        ;
+   @FXML private Spinner<Double> maxStepDownX      ;
    @FXML private Button cancelPlanning;
 
    private FootstepPlannerParameters footstepPlannerParameters;
@@ -71,6 +75,10 @@ public class PlannerParametersUIController
       minXClearance       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinXClearanceFromStance()         , 0.05   ));
       minYClearance       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinYClearanceFromStance()         , 0.05   ));
       wiggleInsideDelta   .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getWiggleInsideDelta()               , 0.05   ));
+      stepUpHeight        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenSteppingUp()      , 0.05   ));
+      stepDownHeight      .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepZWhenForwardAndDown()  , 0.05   ));
+      maxStepUpX          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReachWhenSteppingUp()  , 0.05   ));
+      maxStepDownX        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepXWhenForwardAndDown()  , 0.05   ));
 
       // add edit listeners to all fields and publish automatically
       cliffClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
@@ -89,28 +97,36 @@ public class PlannerParametersUIController
       minXClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       minYClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       wiggleInsideDelta.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      stepUpHeight  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      stepDownHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      maxStepUpX    .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      maxStepDownX  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       });
    }
 
    private void publishParameters()
    {
       TunedFootstepPlannerParameters tunedFootstepPlannerParameters = new TunedFootstepPlannerParameters();
-      tunedFootstepPlannerParameters.setCliffClearance      ( cliffClearance       .getValue()       );
-      tunedFootstepPlannerParameters.setCliffHeight         ( cliffHeight          .getValue()       );
-      tunedFootstepPlannerParameters.setMaxStepLength       ( maxStepLength        .getValue()       );
-      tunedFootstepPlannerParameters.setMaxStepWidth        ( maxStepWidth         .getValue()       );
-      tunedFootstepPlannerParameters.setMaxStepYaw          ( maxStepYaw           .getValue()       );
-      tunedFootstepPlannerParameters.setMaxStepZ            ( maxStepZ             .getValue()       );
-      tunedFootstepPlannerParameters.setMaxXYWiggle         ( maxXYWiggle          .getValue()       );
-      tunedFootstepPlannerParameters.setMaxYawWiggle        ( maxYawWiggle         .getValue()       );
-      tunedFootstepPlannerParameters.setMinFootholdPercent  ( minFootholdPercent   .getValue()       );
-      tunedFootstepPlannerParameters.setMinStepLength       ( minStepLength        .getValue()       );
-      tunedFootstepPlannerParameters.setMinStepWidth        ( minStepWidth         .getValue()       );
-      tunedFootstepPlannerParameters.setMinStepYaw          ( minStepYaw           .getValue()       );
-      tunedFootstepPlannerParameters.setMinSurfaceIncline   ( minSurfaceIncline    .getValue()       );
-      tunedFootstepPlannerParameters.setMinXClearance       ( minXClearance        .getValue()       );
-      tunedFootstepPlannerParameters.setMinYClearance       ( minYClearance        .getValue()       );
-      tunedFootstepPlannerParameters.setWiggleInsideDelta   ( wiggleInsideDelta    .getValue()       );
+      tunedFootstepPlannerParameters.setCliffClearance                   ( cliffClearance       .getValue()       );
+      tunedFootstepPlannerParameters.setCliffHeight                      ( cliffHeight          .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepLength                    ( maxStepLength        .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepWidth                     ( maxStepWidth         .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepYaw                       ( maxStepYaw           .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepZ                         ( maxStepZ             .getValue()       );
+      tunedFootstepPlannerParameters.setMaxXYWiggle                      ( maxXYWiggle          .getValue()       );
+      tunedFootstepPlannerParameters.setMaxYawWiggle                     ( maxYawWiggle         .getValue()       );
+      tunedFootstepPlannerParameters.setMinFootholdPercent               ( minFootholdPercent   .getValue()       );
+      tunedFootstepPlannerParameters.setMinStepLength                    ( minStepLength        .getValue()       );
+      tunedFootstepPlannerParameters.setMinStepWidth                     ( minStepWidth         .getValue()       );
+      tunedFootstepPlannerParameters.setMinStepYaw                       ( minStepYaw           .getValue()       );
+      tunedFootstepPlannerParameters.setMinSurfaceIncline                ( minSurfaceIncline    .getValue()       );
+      tunedFootstepPlannerParameters.setMinXClearance                    ( minXClearance        .getValue()       );
+      tunedFootstepPlannerParameters.setMinYClearance                    ( minYClearance        .getValue()       );
+      tunedFootstepPlannerParameters.setWiggleInsideDelta                ( wiggleInsideDelta    .getValue()       );
+      tunedFootstepPlannerParameters.setStepUpHeight                     ( stepUpHeight         .getValue()       );
+      tunedFootstepPlannerParameters.setStepDownHeight                   ( stepDownHeight       .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepUpX                       ( maxStepUpX           .getValue()       );
+      tunedFootstepPlannerParameters.setMaxStepDownX                     ( maxStepDownX         .getValue()       );
 
       messager.submitMessage(API.PlannerParameters, tunedFootstepPlannerParameters);
    }

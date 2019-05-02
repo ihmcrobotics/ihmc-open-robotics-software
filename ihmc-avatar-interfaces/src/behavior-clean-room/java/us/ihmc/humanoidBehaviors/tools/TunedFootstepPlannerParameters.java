@@ -21,6 +21,10 @@ public class TunedFootstepPlannerParameters
    private double minXClearance     ;
    private double minYClearance     ;
    private double wiggleInsideDelta ;
+   private double stepUpHeight      ;
+   private double stepDownHeight    ;
+   private double maxStepUpX        ;
+   private double maxStepDownX      ;
 
    public void setFromFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -40,6 +44,10 @@ public class TunedFootstepPlannerParameters
       minXClearance       = footstepPlannerParameters.getMinXClearanceFromStance()        ;
       minYClearance       = footstepPlannerParameters.getMinYClearanceFromStance()        ;
       wiggleInsideDelta   = footstepPlannerParameters.getWiggleInsideDelta()              ;
+      stepUpHeight        = footstepPlannerParameters.getMaximumStepZWhenSteppingUp()     ;
+      stepDownHeight      = footstepPlannerParameters.getMaximumStepZWhenForwardAndDown() ;
+      maxStepUpX          = footstepPlannerParameters.getMaximumStepReachWhenSteppingUp() ;
+      maxStepDownX        = footstepPlannerParameters.getMaximumStepXWhenForwardAndDown() ;
    }
 
    public void packFootstepPlannerParameters(SettableFootstepPlannerParameters footstepPlannerParameters)
@@ -60,6 +68,10 @@ public class TunedFootstepPlannerParameters
       footstepPlannerParameters.setMinXClearanceFromStance(               minXClearance       );
       footstepPlannerParameters.setMinYClearanceFromStance(               minYClearance       );
       footstepPlannerParameters.setWiggleInsideDelta(                     wiggleInsideDelta   );
+      footstepPlannerParameters.setMaximumStepZWhenSteppingUp(            stepUpHeight        );
+      footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(        stepDownHeight      );
+      footstepPlannerParameters.setMaximumStepReachWhenSteppingUp(        maxStepUpX          );
+      footstepPlannerParameters.setMaximumStepXWhenForwardAndDown(        maxStepDownX        );
    }
 
    public double getCliffClearance()
@@ -220,5 +232,45 @@ public class TunedFootstepPlannerParameters
    public void setWiggleInsideDelta(double wiggleInsideDelta)
    {
       this.wiggleInsideDelta = wiggleInsideDelta;
+   }
+
+   public double getStepUpHeight()
+   {
+      return stepUpHeight;
+   }
+
+   public void setStepUpHeight(double stepUpHeight)
+   {
+      this.stepUpHeight = stepUpHeight;
+   }
+
+   public double getStepDownHeight()
+   {
+      return stepDownHeight;
+   }
+
+   public void setStepDownHeight(double stepDownHeight)
+   {
+      this.stepDownHeight = stepDownHeight;
+   }
+
+   public double getMaxStepUpX()
+   {
+      return maxStepUpX;
+   }
+
+   public void setMaxStepUpX(double maxStepUpX)
+   {
+      this.maxStepUpX = maxStepUpX;
+   }
+
+   public double getMaxStepDownX()
+   {
+      return maxStepDownX;
+   }
+
+   public void setMaxStepDownX(double maxStepDownX)
+   {
+      this.maxStepDownX = maxStepDownX;
    }
 }
