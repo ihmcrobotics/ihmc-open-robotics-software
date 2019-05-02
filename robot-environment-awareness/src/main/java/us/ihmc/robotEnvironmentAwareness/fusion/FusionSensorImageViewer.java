@@ -20,8 +20,8 @@ public class FusionSensorImageViewer
    private final VBox imageViewPane = new VBox();
    private final ImageView streamingView = new ImageView();
 
-   private final AtomicReference<ImageMessage> newImageMessageToView;
-   private final AtomicReference<BufferedImage> recentBufferedImage;
+   private final AtomicReference<ImageMessage> newImageMessageToStream;
+   private final AtomicReference<BufferedImage> recentBufferedImageToStream;
    private final AtomicReference<BufferedImage> newBufferedImageToView;
 
    private final AtomicReference<Boolean> enableStreaming;
@@ -43,10 +43,10 @@ public class FusionSensorImageViewer
       snapshot = messager.createInput(LidarImageFusionAPI.ImageSnapShot, false);
       clearImages = messager.createInput(LidarImageFusionAPI.ImageViewClear, false);
 
-      newImageMessageToView = messager.createInput(LidarImageFusionAPI.ImageState);
-      recentBufferedImage = new AtomicReference<BufferedImage>(null);
+      newImageMessageToStream = messager.createInput(LidarImageFusionAPI.ImageState);
+      recentBufferedImageToStream = new AtomicReference<BufferedImage>(null);
       newBufferedImageToView = messager.createInput(LidarImageFusionAPI.ImageResultState);
-      
+
       imageStreamer = new AnimationTimer()
       {
          @Override
@@ -63,32 +63,32 @@ public class FusionSensorImageViewer
          return;
 
       BufferedImage bufferedImage = convertImageMessageToBufferedImage(imageMessage);
-      recentBufferedImage.set(bufferedImage);
+      recentBufferedImageToStream.set(bufferedImage);
       Image streamingImage = SwingFXUtils.toFXImage(bufferedImage, null);
       streamingView.setImage(streamingImage);
    }
 
    public void update()
    {
-      if (!enableStreaming.get())
-         return;
+//      if (!enableStreaming.get())
+//         return;
+//
+//      if (clearImages.getAndSet(false))
+//         clearImageView();
+//
+//      if (newImageMessageToStream.get() == null)
+//         return;
 
-      if (clearImages.getAndSet(false))
-         clearImageView();
-
-      if (newImageMessageToView.get() == null)
-         return;
-      
-      if(newBufferedImageToView.get() != null)
+      if (newBufferedImageToView.get() != null)
          imagesToView.add(newBufferedImageToView.getAndSet(null));
 
-      unpackImage(newImageMessageToView.getAndSet(null));
+//      unpackImage(newImageMessageToStream.getAndSet(null));
 
       if (snapshot.getAndSet(false))
       {
-         if (recentBufferedImage.get() != null)
+         if (recentBufferedImageToStream.get() != null)
          {
-            imagesToView.add(recentBufferedImage.getAndSet(null));
+            imagesToView.add(recentBufferedImageToStream.getAndSet(null));
          }
       }
 
