@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="166.0" prefWidth="412.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchorPaneController">
+   <children>
+      <VBox alignment="CENTER" layoutX="140.0" maxHeight="1.7976931348623157E308" prefHeight="176.0" prefWidth="118.0" spacing="5.0">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Object List" textAlignment="CENTER" />
+            <CheckBox fx:id="cboxDoor" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Door" />
+            <CheckBox fx:id="cboxDoorHandle" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Door handle" />
+            <CheckBox fx:id="cboxCup" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Cup" />
+            <CheckBox fx:id="cboxhuman" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Human" />
+         </children>
+      </VBox>
+      <VBox alignment="CENTER" layoutX="14.0" maxHeight="1.7976931348623157E308" prefHeight="176.0" prefWidth="110.0" spacing="5.0">
+         <children>
+            <TextField fx:id="serverADD" alignment="CENTER" maxWidth="1.7976931348623157E308" text="127.0.0.1" />
+            <Button fx:id="btnConnect" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#connect" prefHeight="25.0" prefWidth="75.0" text="Connect" />
+            <Button fx:id="btnObjectDetection" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestObjectDetection" prefHeight="25.0" prefWidth="75.0" text="Object Detection" />
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
