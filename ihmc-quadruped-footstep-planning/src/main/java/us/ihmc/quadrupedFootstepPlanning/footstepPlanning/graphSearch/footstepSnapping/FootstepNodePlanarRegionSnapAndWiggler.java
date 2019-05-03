@@ -105,7 +105,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       wiggleParameters.minX = -projectionInsideDelta.getValue();
       wiggleParameters.maxY = projectionInsideDelta.getValue();
       wiggleParameters.minY = -projectionInsideDelta.getValue();
-      wiggleParameters.maxYaw = Double.POSITIVE_INFINITY;
-      wiggleParameters.minYaw = -Double.POSITIVE_INFINITY;
+      wiggleParameters.maxYaw = 0.0;
+      wiggleParameters.minYaw = -0.0;
    }
 }
