@@ -1,23 +1,15 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
 import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.ros2.Ros2Node;
 
 public class PlannerParametersUIController
 {
@@ -45,17 +37,11 @@ public class PlannerParametersUIController
 
    private FootstepPlannerParameters footstepPlannerParameters;
    private Messager messager;
-   private IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
 
-   public void init(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
+   public void init(Messager messager, DRCRobotModel robotModel)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       this.messager = messager;
-
-      toolboxStatePublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      ToolboxStateMessage.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       Platform.runLater(() ->
       {
@@ -134,7 +120,6 @@ public class PlannerParametersUIController
    @FXML
    public void cancelPlanning()
    {
-      LogTools.debug("Cancel planning clicked. Sending SLEEP to footstep planner");
-      toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
+      messager.submitMessage(API.CancelPlanning, new Object());
    }
 }
