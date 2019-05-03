@@ -110,6 +110,20 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
+   private final DenseMatrix64F tempWrench = new DenseMatrix64F(6, 1);
+   @Deprecated // maintains compatibility with the thread data synchronizer
+   public void setDataOnly(ForceSensorDataHolder other)
+   {
+      for (int i = 0; i < other.getForceSensorDefinitions().size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = other.getForceSensorDefinitions().get(i);
+         ForceSensorData thisData = getByName(forceSensorDefinition.getSensorName());
+         ForceSensorData otherData = other.getByName(forceSensorDefinition.getSensorName());
+         otherData.getWrench(tempWrench);
+         thisData.setWrench(tempWrench);
+      }
+   }
+
    public void setForceSensorValue(ForceSensorDefinition key, DenseMatrix64F data)
    {
       forceSensorMap.get(key).setWrench(data);
