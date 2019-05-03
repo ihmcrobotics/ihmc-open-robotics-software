@@ -4,9 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -168,9 +166,6 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    {
       Collection<ReferenceFrame> allChildren = new ArrayList<>();
       getAllChildren(referenceFrame, allChildren);
-      List<String> names = allChildren.stream().map(r -> r.getName()).collect(Collectors.toList());
-      Collections.sort(names);
-      names.forEach(name -> System.out.println(name));
       putAll(allChildren);
    }
 
