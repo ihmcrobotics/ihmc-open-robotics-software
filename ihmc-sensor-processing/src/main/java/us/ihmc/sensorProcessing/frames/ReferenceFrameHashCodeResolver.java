@@ -4,7 +4,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -118,8 +120,8 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
          ReferenceFrame existingFrame = hashCodeToReferenceFrameMap.get(frameHashCode);
          if (referenceFrame != existingFrame)
          {
-            throw new IllegalArgumentException(getClass().getSimpleName()
-                  + ": The reference frame has the same hash-code as another distinct reference frame previously registered.");
+            throw new IllegalArgumentException(getClass().getSimpleName() + ": The reference frame " + referenceFrame.getName()
+                  + " has the same hash-code as another distinct reference frame previously registered.");
          }
       }
       else
@@ -146,6 +148,44 @@ public class ReferenceFrameHashCodeResolver implements FrameIndexMap
    {
       putAllMultiBodySystemReferenceFrames(fullRobotModel.getElevator());
       putAll(extractReferenceFrames(fullRobotModel));
+   }
+
+   /**
+    * Extracts then registers all the reference frames that are children of the provided frame.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    * <p>
+    * In the case one of the reference frames of the given tree was already registered, this map is not modified.
+    * </p>
+    *
+    * @param referenceFrame
+    *           is the frame whos children will be registered.
+    * @throws IllegalArgumentException
+    *            in the case of a hash-code collision, i.e. two distinct reference frames with the same hash-code.
+    */
+   public void putAllChildren(ReferenceFrame referenceFrame)
+   {
+      Collection<ReferenceFrame> allChildren = new ArrayList<>();
+      getAllChildren(referenceFrame, allChildren);
+      List<String> names = allChildren.stream().map(r -> r.getName()).collect(Collectors.toList());
+      Collections.sort(names);
+      names.forEach(name -> System.out.println(name));
+      putAll(allChildren);
+   }
+
+   @Deprecated // Use same method in ReferenceFrameTools instead after making it public.
+   private static void getAllChildren(ReferenceFrame frame, Collection<ReferenceFrame> collectionToPack)
+   {
+      for (int i = 0; i < frame.getNumberOfChildren(); i++)
+      {
+         ReferenceFrame child = frame.getChild(i);
+         if (child != null)
+         {
+            collectionToPack.add(child);
+            getAllChildren(child, collectionToPack);
+         }
+      }
    }
 
    /**
