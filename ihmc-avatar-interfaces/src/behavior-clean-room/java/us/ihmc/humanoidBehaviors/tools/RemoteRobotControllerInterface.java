@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
@@ -90,20 +91,25 @@ public class RemoteRobotControllerInterface
       }
    }
 
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutput,
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)
+   {
+      return requestWalk(footstepPlan, humanoidReferenceFrames, false, null);
+   }
+
+   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
                                                               HumanoidReferenceFrames humanoidReferenceFrames,
-                                                              boolean swingOverPlanarRegions)
+                                                              boolean swingOverPlanarRegions,
+                                                              PlanarRegionsList planarRegionsList)
    {
 
-      FootstepDataListMessage footsteps = footstepPlanningToolboxOutput.getFootstepDataList();
-      if (swingOverPlanarRegions)
+      if (swingOverPlanarRegions && planarRegionsList != null)
       {
-         footsteps = calculateSwingOverTrajectoryExpansions(footsteps, humanoidReferenceFrames, footstepPlanningToolboxOutput.getPlanarRegionsList());
+         footstepPlan = calculateSwingOverTrajectoryExpansions(footstepPlan, humanoidReferenceFrames, planarRegionsList);
       }
 
-      LogTools.debug("Tasking {} footstep(s) to the robot", footsteps.getFootstepDataList().size());
+      LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlan.getFootstepDataList().size());
 
-      footstepDataListPublisher.publish(footsteps);
+      footstepDataListPublisher.publish(footstepPlan);
 
       TypedNotification<WalkingStatusMessage> walkingCompletedNotification = new TypedNotification<>();
       walkingCompletedNotifications.add(walkingCompletedNotification);
@@ -112,7 +118,7 @@ public class RemoteRobotControllerInterface
 
    private FootstepDataListMessage calculateSwingOverTrajectoryExpansions(FootstepDataListMessage footsteps,
                                                                           HumanoidReferenceFrames humanoidReferenceFrames,
-                                                                          PlanarRegionsListMessage messagePlanarRegionsList)
+                                                                          PlanarRegionsList planarRegionsList)
    {
       LogTools.debug("Calculating swing over planar regions...");
 
@@ -122,7 +128,6 @@ public class RemoteRobotControllerInterface
       FramePose3D stanceFootPose = new FramePose3D();
       FramePose3D swingStartPose = new FramePose3D();
       FramePose3D swingEndPose = new FramePose3D();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(messagePlanarRegionsList);
 
       RobotSide firstSwingFoot = RobotSide.fromByte(footsteps.getFootstepDataList().get(0).getRobotSide());
       stanceFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(firstSwingFoot));
