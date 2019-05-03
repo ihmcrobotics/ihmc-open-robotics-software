@@ -22,6 +22,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private final DoubleField projectInsideDistanceForExpansion = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForExpansion, SettableFootstepPlannerParameters::setProjectInsideDistanceForExpansion);
    private final DoubleField projectInsideDistanceForPostProcessing = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForPostProcessing, SettableFootstepPlannerParameters::setProjectInsideDistanceForPostProcessing);
+   private final DoubleField maximumXYWiggleDistance = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private final DoubleField minDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
    private final DoubleField minDistanceFromCliffTops = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffTops, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffTops);
@@ -92,6 +93,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    public void bidirectionalBindProjectInsideDistanceForPostProcessing(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForPostProcessing);
+   }
+
+   public void bidirectionalBindMaximumXYWiggleDistance(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumXYWiggleDistance);
    }
 
    public void bidirectionalBindMinDistanceFromCliffBottoms(Property<? extends Number> property)

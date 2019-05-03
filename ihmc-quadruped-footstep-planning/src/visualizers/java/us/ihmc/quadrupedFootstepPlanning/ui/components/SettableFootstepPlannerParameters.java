@@ -30,6 +30,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumSurfaceInclineRadians;
    private double projectInsideDistanceForExpansion;
    private double projectInsideDistanceForPostProcessing;
+   private double maximumXYWiggleDistance;
    private double cliffHeightToAvoid;
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
@@ -212,6 +213,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
+   public void setMaximumXYWiggleDistance(double maximumWiggleDistance)
+   {
+      this.maximumXYWiggleDistance = maximumWiggleDistance;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getMaximumStepReach()
    {
       return maximumStepReach;
@@ -360,6 +368,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getProjectInsideDistanceForPostProcessing()
    {
       return projectInsideDistanceForPostProcessing;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return maximumXYWiggleDistance;
    }
 
    /** {@inheritDoc} */

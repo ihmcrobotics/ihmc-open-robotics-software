@@ -122,6 +122,12 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    }
 
    @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 0.03;
+   }
+
+   @Override
    public double getMinXClearanceFromFoot()
    {
       return 0.05;

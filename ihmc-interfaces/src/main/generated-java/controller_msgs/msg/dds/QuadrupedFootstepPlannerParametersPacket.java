@@ -37,6 +37,7 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double max_walking_speed_multiplier_ = -11.1;
    public double projection_inside_distance_for_expansion_ = -11.1;
    public double projection_inside_distance_for_post_processing_ = -11.1;
+   public double maximum_xy_wiggle_distance_ = -11.1;
    public double minimum_surface_incline_radians_ = -11.1;
    public double cliff_height_to_avoid_ = -11.1;
    public double minimum_distance_from_cliff_bottoms_ = -11.1;
@@ -97,6 +98,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       projection_inside_distance_for_expansion_ = other.projection_inside_distance_for_expansion_;
 
       projection_inside_distance_for_post_processing_ = other.projection_inside_distance_for_post_processing_;
+
+      maximum_xy_wiggle_distance_ = other.maximum_xy_wiggle_distance_;
 
       minimum_surface_incline_radians_ = other.minimum_surface_incline_radians_;
 
@@ -312,6 +315,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return projection_inside_distance_for_post_processing_;
    }
 
+   public void setMaximumXyWiggleDistance(double maximum_xy_wiggle_distance)
+   {
+      maximum_xy_wiggle_distance_ = maximum_xy_wiggle_distance;
+   }
+   public double getMaximumXyWiggleDistance()
+   {
+      return maximum_xy_wiggle_distance_;
+   }
+
    public void setMinimumSurfaceInclineRadians(double minimum_surface_incline_radians)
    {
       minimum_surface_incline_radians_ = minimum_surface_incline_radians;
@@ -410,6 +422,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_post_processing_, other.projection_inside_distance_for_post_processing_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_xy_wiggle_distance_, other.maximum_xy_wiggle_distance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_height_to_avoid_, other.cliff_height_to_avoid_, epsilon)) return false;
@@ -475,6 +489,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.projection_inside_distance_for_post_processing_ != otherMyClass.projection_inside_distance_for_post_processing_) return false;
 
+      if(this.maximum_xy_wiggle_distance_ != otherMyClass.maximum_xy_wiggle_distance_) return false;
+
       if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
 
       if(this.cliff_height_to_avoid_ != otherMyClass.cliff_height_to_avoid_) return false;
@@ -537,6 +553,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.projection_inside_distance_for_expansion_);      builder.append(", ");
       builder.append("projection_inside_distance_for_post_processing=");
       builder.append(this.projection_inside_distance_for_post_processing_);      builder.append(", ");
+      builder.append("maximum_xy_wiggle_distance=");
+      builder.append(this.maximum_xy_wiggle_distance_);      builder.append(", ");
       builder.append("minimum_surface_incline_radians=");
       builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
       builder.append("cliff_height_to_avoid=");

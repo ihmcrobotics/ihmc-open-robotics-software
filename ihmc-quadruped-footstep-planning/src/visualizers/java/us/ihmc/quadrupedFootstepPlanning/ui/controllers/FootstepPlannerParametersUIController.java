@@ -56,6 +56,8 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Spinner<Double> projectInsideDistanceForPostProcessing;
    @FXML
+   private Spinner<Double> maximumXYWiggleDistance;
+   @FXML
    private Spinner<Double> cliffHeightToAvoid;
    @FXML
    private Spinner<Double> minDistanceFromCliffBottoms;
@@ -137,6 +139,7 @@ public class FootstepPlannerParametersUIController
 
       projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
       projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
+      maximumXYWiggleDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
       cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.4, 0.0, 0.05));
       minDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
       minDistanceFromCliffTops.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
@@ -174,6 +177,7 @@ public class FootstepPlannerParametersUIController
 
       parametersProperty.bidirectionalBindProjectInsideDistanceForExpansion(projectInsideDistanceForExpansion.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindProjectInsideDistanceForPostProcessing(projectInsideDistanceForPostProcessing.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumXYWiggleDistance(maximumXYWiggleDistance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCliffHeightToAvoid(cliffHeightToAvoid.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinDistanceFromCliffBottoms(minDistanceFromCliffBottoms.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinDistanceFromCliffTops(minDistanceFromCliffTops.getValueFactory().valueProperty());
