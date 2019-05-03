@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.AtlasHumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
@@ -164,15 +166,33 @@ public class CrossRobotCommandResolver
       }
    }
 
-   private void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
+   public void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
    {
       out.set(in);
       out.setFrameAndBody(resolveReferenceFrame(in.getMeasurementFrame()), resolveRigidBody(in.getMeasurementLink()));
    }
 
-   private void resolveForceSensorDefinition(ForceSensorDefinition in, ForceSensorDefinition out)
+   public void resolveForceSensorDefinition(ForceSensorDefinition in, ForceSensorDefinition out)
    {
       out.set(in.getSensorName(), resolveRigidBody(in.getRigidBody()), resolveReferenceFrame(in.getSensorFrame()));
+   }
+
+   public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
+      resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
+      resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      out.setTimestamp(in.getTimestamp());
+      out.setControllerRan(in.getControllerRan());
+      out.setEstimatorRan(in.getEstimatorRan());
+   }
+
+   public void resolveAtlasHumanoidRobotContextData(AtlasHumanoidRobotContextData in, AtlasHumanoidRobotContextData out)
+   {
+      resolveRawJointSensorDataHolderMap(in.getRawJointSensorDataHolderMap(), out.getRawJointSensorDataHolderMap());
+      resolveHumanoidRobotContextData(in, out);
    }
 
    public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)
