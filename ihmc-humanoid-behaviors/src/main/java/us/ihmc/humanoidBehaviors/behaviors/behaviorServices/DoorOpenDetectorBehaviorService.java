@@ -41,6 +41,13 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
    {
       return doorOpen;
    }
+   
+   public void reset()
+   {
+      doorOpen = false;
+      averageOrigin = null;
+      
+   }
 
    @Override
    public void doThreadAction()
