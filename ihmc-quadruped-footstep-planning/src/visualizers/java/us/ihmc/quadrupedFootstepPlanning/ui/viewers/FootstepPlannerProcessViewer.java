@@ -57,7 +57,8 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
    public FootstepPlannerProcessViewer(Messager messager)
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                true);
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();

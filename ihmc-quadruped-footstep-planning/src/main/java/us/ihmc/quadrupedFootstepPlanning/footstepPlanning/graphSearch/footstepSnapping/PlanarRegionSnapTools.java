@@ -21,10 +21,12 @@ public class PlanarRegionSnapTools
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
 
    private final DoubleProvider projectionInsideDelta;
+   private final boolean enforceTranslationLessThanGridCell;
 
-   public PlanarRegionSnapTools(DoubleProvider projectionInsideDelta)
+   public PlanarRegionSnapTools(DoubleProvider projectionInsideDelta, boolean enforceTranslationLessThanGridCell)
    {
       this.projectionInsideDelta = projectionInsideDelta;
+      this.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
    }
 
    public PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
@@ -100,7 +102,7 @@ public class PlanarRegionSnapTools
          return projectionTranslation;
       }
 
-      if (signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
+      if (enforceTranslationLessThanGridCell && signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
       {
          // Projection distance is too big. Must be smaller than half of the grid size
          projectionTranslation.setToNaN();

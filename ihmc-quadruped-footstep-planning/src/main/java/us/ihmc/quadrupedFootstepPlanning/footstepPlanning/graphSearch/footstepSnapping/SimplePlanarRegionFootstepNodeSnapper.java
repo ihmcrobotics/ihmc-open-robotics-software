@@ -20,11 +20,12 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
    private final PlanarRegionSnapTools snapTools;
 
-   public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta)
+   public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
+                                                boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta);
+      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, enforceTranslationLessThanGridCell);
    }
 
    @Override
