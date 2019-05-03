@@ -120,13 +120,13 @@ public class DRCNetworkProcessor
 
          if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(), robotModel, robotModel, logModelProvider,
+            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel.getSimpleRobotName(),robotModel.getFootstepPlannerParameters(), robotModel, robotModel, logModelProvider,
                                                                                    params.isBehaviorVisualizerEnabled(), sensorInformation,
                                                                                    params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(), robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(),
+            new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(), robotModel.getFootstepPlannerParameters(), robotModel, robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(),
                                             sensorInformation);
          }
 

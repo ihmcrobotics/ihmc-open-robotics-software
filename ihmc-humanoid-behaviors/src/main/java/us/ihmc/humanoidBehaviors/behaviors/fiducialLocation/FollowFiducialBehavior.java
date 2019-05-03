@@ -276,8 +276,6 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
    @Override
    public void doControl()
    {
-      PrintTools.info(""+getStateMachine().getCurrentBehaviorKey());
-
       if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
 

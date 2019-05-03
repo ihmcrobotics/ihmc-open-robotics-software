@@ -3,11 +3,14 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -15,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -50,27 +54,32 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private final IHMCROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
-   
-   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
-   
-   private boolean assumeFlatGround = false;
 
-   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
+
+   private boolean assumeFlatGround = false;
+   private FootstepPlannerParameters footstepPlannerParameters;
+
+   public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, FootstepPlannerParameters footstepPlannerParameters, YoDouble yoTime)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
+      this.footstepPlannerParameters = footstepPlannerParameters;
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
       footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
+      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlanningToolboxSubGenerator);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }
 
-   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerType footStepPlannerToUse, boolean assumeFlatGround)
+   public void setInputs(FramePose3D goalPose, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerType footStepPlannerToUse,
+                         boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
@@ -143,6 +152,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             }
             request.setPlannerRequestId(planId.getIntegerValue());
             request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
+
+            FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
+
+            FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+            plannerParametersPacket.setMaximumStepYaw(0.8);
+            footstepPlannerParametersPublisher.publish(plannerParametersPacket);
+
             footstepPlanningRequestPublisher.publish(request);
          }
       };
@@ -153,14 +169,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-
             sleepBehavior.setSleepTime(timeout);
          }
 
          @Override
          public boolean isDone()
          {
-            
+
             return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
 
          }
@@ -177,7 +192,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
                footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
                planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
-               
 
                if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
                {

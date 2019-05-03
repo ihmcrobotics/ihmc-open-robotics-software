@@ -127,12 +127,20 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       if (ADD_FIDUCIAL_BOX_ROBOT)
       {
-         FloatingFiducialBoxRobot robot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50);
+         FloatingFiducialBoxRobot robot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50,"1");
 
-         robot.setPosition(6.0, 0.0, 2.0);
+         robot.setPosition(2.0, 0.0, 1.25);
          robot.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
 
          environmentRobots.add(robot);
+         
+         
+         FloatingFiducialBoxRobot robot1 = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50,"2");
+
+         robot1.setPosition(-2, 0.0, 1.25);
+         robot1.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
+
+         environmentRobots.add(robot1);
       }
 //      if (ADD_LIMBO_BAR)
 //      {

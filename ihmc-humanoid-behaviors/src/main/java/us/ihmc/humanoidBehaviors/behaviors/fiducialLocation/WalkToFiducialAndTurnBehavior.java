@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior.WalkAndTurn;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -24,7 +25,7 @@ public class WalkToFiducialAndTurnBehavior extends StateMachineBehavior<WalkAndT
    private boolean turnLeft = false;
 
    public WalkToFiducialAndTurnBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                        HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService,
+                                        HumanoidReferenceFrames referenceFrames, FootstepPlannerParameters footstepPlannerParameters, GoalDetectorBehaviorService goalDetectorBehaviorService,
                                         FullHumanoidRobotModel fullRobotModel)
    {
       super(robotName, "walkAndTurn", WalkAndTurn.class, yoTime, ros2Node);
@@ -32,7 +33,7 @@ public class WalkToFiducialAndTurnBehavior extends StateMachineBehavior<WalkAndT
       followFiducialBehavior = new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames,
                                                           goalDetectorBehaviorService);
       turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames,
-                                                    wholeBodyControllerParameters.getWalkingControllerParameters(), yoTime);
+                                                    wholeBodyControllerParameters.getWalkingControllerParameters(),footstepPlannerParameters, yoTime);
       setupStateMachine();
    }
 

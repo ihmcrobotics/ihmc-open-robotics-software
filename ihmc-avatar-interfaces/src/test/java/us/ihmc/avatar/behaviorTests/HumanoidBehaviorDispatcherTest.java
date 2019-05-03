@@ -325,7 +325,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       YoBoolean yoDoubleSupport = new YoBoolean("doubleSupport", registry);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(drcSimulationTestHelper.getRobotName(), fullRobotModel, supportLeg, referenceFrames,
-                                                                     yoTime, yoDoubleSupport, ros2Node, wholeBodyControllerParameters, yoSupportPolygon,
+                                                                     yoTime, yoDoubleSupport, ros2Node, wholeBodyControllerParameters, getRobotModel().getFootstepPlannerParameters(), yoSupportPolygon,
                                                                      yoGraphicsListRegistry);
 
       behaviorDispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
