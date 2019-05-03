@@ -106,7 +106,7 @@ public class CrossRobotCommandResolver
    public CrossRobotCommandResolver(FullHumanoidRobotModel fullRobotModel)
    {
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
-      referenceFrameHashCodeResolver.putAllFullRobotModelReferenceFrames(fullRobotModel);
+      referenceFrameHashCodeResolver.putAllChildren(fullRobotModel.getRootJoint().getFrameAfterJoint());
       rigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(fullRobotModel);
       jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
    }
