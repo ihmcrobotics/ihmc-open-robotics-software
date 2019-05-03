@@ -75,7 +75,7 @@ public class IntermediateEstimatorStateHolder
 
       checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
-      intermediateForceSensorDataHolder.set(estimatorForceSensorDataHolder);
+      intermediateForceSensorDataHolder.setDataOnly(estimatorForceSensorDataHolder);
       intermediateCenterOfMassDataHolder.set(estimatorCenterOfMassDataHolder);
       intermediateRawJointSensorDataHolderMap.set(estimatorRawJointSensorDataHolderMap);
    }
@@ -83,7 +83,7 @@ public class IntermediateEstimatorStateHolder
    public void getIntoControllerModel()
    {
       intermediateToControllerCopier.copy();
-      controllerForceSensorDataHolder.set(intermediateForceSensorDataHolder);
+      controllerForceSensorDataHolder.setDataOnly(intermediateForceSensorDataHolder);
       controllerCenterOfMassDataHolder.set(intermediateCenterOfMassDataHolder);
       controllerRawJointSensorDataHolderMap.set(intermediateRawJointSensorDataHolderMap);
    }
