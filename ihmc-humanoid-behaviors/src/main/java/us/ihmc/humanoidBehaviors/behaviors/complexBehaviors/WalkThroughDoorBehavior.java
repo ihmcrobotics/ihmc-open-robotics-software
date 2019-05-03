@@ -17,7 +17,9 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.OpenDoorBehavior.OpenDoorState;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -41,6 +43,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
    private final boolean DEBUG = true;
+   private boolean isDoorOpen = false;
 
    public enum WalkThroughDoorBehaviorState
    {
@@ -80,7 +83,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private SleepBehavior sleepBehavior;
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   private  IHMCROS2Publisher<DoorLocationPacket> publisher;
+   private IHMCROS2Publisher<DoorLocationPacket> publisher;
+   private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
 
    // private BasicTimingBehavior basicTimingBehavior;
 
@@ -90,6 +94,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
+
+      doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
+      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+      registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
+      addBehaviorService(doorOpenDetectorBehaviorService);
+
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix + "SearchForDoorFiducial1", ros2Node,
                                                                             yoGraphicsListRegistry);
@@ -106,10 +117,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoGraphicsListRegistry);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
-      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, yoGraphicsListRegistry);
+      openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
+                                              yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
-     
+
       //setup publisher for sending door location to UI
       setupStateMachine();
    }
@@ -119,6 +131,24 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       //should constantly be searching for door and updating its location here
       publisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+
+      if (doorOpenDetectorBehaviorService.newPose != null)
+      {
+         Point3D location = new Point3D();
+         Quaternion orientation = new Quaternion();
+         doorOpenDetectorBehaviorService.newPose.get(location, orientation);
+         publishUIPositionCheckerPacket(location, orientation);
+      }
+
+      if (isDoorOpen != doorOpenDetectorBehaviorService.isDoorOpen())
+      {
+         isDoorOpen = doorOpenDetectorBehaviorService.isDoorOpen();
+         if (isDoorOpen)
+            publishTextToSpeech("Door is Open");
+
+         else
+            publishTextToSpeech("Door is Closed");
+      }
 
       if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
       {
@@ -321,7 +351,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, openDoorAction,
                                         setUpArms ? WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK : WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
 
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+      factory.addState(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.OPEN_DOOR,
+                            t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
+                            t -> setUpForWalk.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
+
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
 
@@ -355,7 +391,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       doorPose.setPoseAndUpdate(unrotatedDoor);
 
       RobotSide startStep = RobotSide.LEFT;
-
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
                                                                                            atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
