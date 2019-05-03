@@ -10,12 +10,28 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
 {
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
-   protected AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
-                                           CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                           LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public AtlasHumanoidRobotContextData()
+   {
+      super();
+      rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap();
+   }
+
+   public AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
+                                        LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
+   }
+
+   public void set(AtlasHumanoidRobotContextData other)
+   {
+      copyFrom(other);
+   }
+
+   public RawJointSensorDataHolderMap getRawJointSensorDataHolderMap()
+   {
+      return rawJointSensorDataHolderMap;
    }
 
    @Override
@@ -25,5 +41,25 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
 
       AtlasHumanoidRobotContextData atlasSrc = (AtlasHumanoidRobotContextData) src;
       rawJointSensorDataHolderMap.set(atlasSrc.rawJointSensorDataHolderMap);
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof AtlasHumanoidRobotContextData)
+      {
+         AtlasHumanoidRobotContextData other = (AtlasHumanoidRobotContextData) obj;
+         if (!rawJointSensorDataHolderMap.equals(other.rawJointSensorDataHolderMap))
+            return false;
+         return super.equals(other);
+      }
+      else
+      {
+         return false;
+      }
    }
 }
