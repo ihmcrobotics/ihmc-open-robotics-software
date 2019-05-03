@@ -69,6 +69,8 @@ import org.fxyz3d.shapes.primitives.helper.TriangleMeshHelper.SectionType;
 import org.fxyz3d.shapes.primitives.helper.TriangleMeshHelper.TextureType;
 
 /**
+ * TODO Stop vendoring this after upgrading fxyz!
+ *
  * TexturedMesh is a base class that provides support for different mesh implementations
  * taking into account four different kind of textures
  * - None
