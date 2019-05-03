@@ -34,6 +34,7 @@ public interface DRCRobotSensorInformation
 
    public DRCRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
 
+   @Deprecated // Unused, remove.
    public ReferenceFrame getHeadIMUFrameWhenLevel();
 
    public String[] getSensorFramesToTrack();
