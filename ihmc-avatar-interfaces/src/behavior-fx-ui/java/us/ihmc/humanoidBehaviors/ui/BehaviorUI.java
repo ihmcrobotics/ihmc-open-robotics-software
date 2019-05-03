@@ -66,7 +66,7 @@ public class BehaviorUI
 
       stepInPlaceBehaviorUIController.init(behaviorMessager);
       patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-      plannerParametersUIController.init(behaviorMessager, robotModel);
+      plannerParametersUIController.init(ros2Node, robotModel, behaviorMessager);
       directRobotUIController.init(ros2Node, robotModel);
 
       view3dFactory.addNodeToView(patrolBehaviorUIController);
