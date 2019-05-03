@@ -179,13 +179,25 @@ public class CrossRobotCommandResolver
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
-      resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
-      resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      resolveHumanoidRobotContextDataControllerToEstimator(in, out);
+      resolveHumanoidRobotContextDataEstimatorToController(in, out);
+   }
+
+   // TODO: split context up in part that goes from controller to estimator and other way.
+   public void resolveHumanoidRobotContextDataControllerToEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
-      out.setTimestamp(in.getTimestamp());
       out.setControllerRan(in.getControllerRan());
+   }
+
+   // TODO: split context up in part that goes from controller to estimator and other way.
+   public void resolveHumanoidRobotContextDataEstimatorToController(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
+      resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      out.setTimestamp(in.getTimestamp());
       out.setEstimatorRan(in.getEstimatorRan());
    }
 
