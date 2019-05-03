@@ -19,13 +19,17 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
    public FramePose3D newPose = null;
    private boolean doorOpen = false;
    private float openDistance = 0.0127f;
+   private boolean run = false;
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ThreadName, ros2Node, yoGraphicsListRegistry);
       initialize();
    }
-
+   public void run(boolean run)
+   {
+      this.run = run;
+   }
    @Override
    public void initialize()
    {
@@ -35,66 +39,74 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
       averageOrigin = null;
       averageCurrentDoorLocation = null;
       doorOpen = false;
+      run = false;
    }
-   
+
    public boolean isDoorOpen()
    {
       return doorOpen;
    }
-   
+
+   public boolean doorDetected()
+   {
+      return averageOrigin != null;
+   }
+
    public void reset()
    {
       doorOpen = false;
       averageOrigin = null;
-      
+      run = false;
+
    }
 
    @Override
    public void doThreadAction()
    {
+      
       super.doThreadAction();
-
-      
-      
-      if (getGoalHasBeenLocated())
+      if (run)
       {
-          newPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-         getReportedGoalPoseWorldFrame(newPose);
-         if (averageOrigin == null)
+         if (getGoalHasBeenLocated())
          {
-
-            originPoses.add(newPose);
-
-            if (originPoses.size() >= numberToAverage)
+            newPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+            getReportedGoalPoseWorldFrame(newPose);
+            if (averageOrigin == null)
             {
-               averageOrigin = averageFramePoses(originPoses);
+
+               originPoses.add(newPose);
+
+               if (originPoses.size() >= numberToAverage)
+               {
+                  averageOrigin = averageFramePoses(originPoses);
+               }
+
+            }
+            //track the door for movements
+            else
+            {
+
+               doorPoses.add(newPose);
+               if (doorPoses.size() > numberToAverage)
+                  doorPoses.remove(0);
+
+               if (doorPoses.size() >= numberToAverage)
+               {
+                  averageCurrentDoorLocation = averageFramePoses(doorPoses);
+
+                  if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
+                  {
+                     doorOpen = true;
+                  }
+                  else
+                  {
+                     doorOpen = false;
+                  }
+               }
             }
 
+            super.initialize();
          }
-         //track the door for movements
-         else
-         {
-
-            doorPoses.add(newPose);
-            if (doorPoses.size() > numberToAverage)
-               doorPoses.remove(0);
-
-            if (doorPoses.size() >= numberToAverage)
-            {
-               averageCurrentDoorLocation = averageFramePoses(doorPoses);
-
-               if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
-               {
-                  doorOpen = true;
-               }
-               else
-               {
-                  doorOpen = false;
-               }
-            }
-         }
-
-         super.initialize();
       }
    }
 
