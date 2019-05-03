@@ -238,25 +238,37 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       if (robotQuadrant.isQuadrantInFront())
       {
-         forwardBound = outsideSize;
-         backwardBound = -insideSize;
+         forwardBound = insideSize;
+         backwardBound = -outsideSize;
+         if (robotQuadrant.isQuadrantOnLeftSide())
+         {
+            leftBound = insideSize;
+            rightBound = -outsideSize;
+         }
+         else
+         {
+            leftBound = outsideSize;
+            rightBound= -insideSize;
+         }
       }
       else
       {
          forwardBound = insideSize;
          backwardBound = -outsideSize;
+
+         if (robotQuadrant.isQuadrantOnLeftSide())
+         {
+            leftBound = outsideSize;
+            rightBound = -insideSize;
+         }
+         else
+         {
+            leftBound = insideSize;
+            rightBound = -outsideSize;
+         }
       }
 
-      if (robotQuadrant.isQuadrantOnLeftSide())
-      {
-         leftBound = outsideSize;
-         rightBound = -insideSize;
-      }
-      else
-      {
-         leftBound = insideSize;
-         rightBound = -outsideSize;
-      }
+
 
       points.add(new FramePoint2D(referenceFrame, forwardBound, leftBound));
       points.add(new FramePoint2D(referenceFrame, forwardBound, rightBound));

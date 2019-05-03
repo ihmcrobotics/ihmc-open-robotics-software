@@ -56,7 +56,7 @@ public class SnapBasedNodeCheckerTest
             return 0.0;
          }
       };
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -219,7 +219,7 @@ public class SnapBasedNodeCheckerTest
             return 0.0;
          }
       };
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -414,7 +414,7 @@ public class SnapBasedNodeCheckerTest
             return 0.0;
          }
       };
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
@@ -598,7 +598,7 @@ public class SnapBasedNodeCheckerTest
 
       TestParameters parameters = new TestParameters();
       parameters.setDistanceInside(0.5 * cinderWidth);
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();

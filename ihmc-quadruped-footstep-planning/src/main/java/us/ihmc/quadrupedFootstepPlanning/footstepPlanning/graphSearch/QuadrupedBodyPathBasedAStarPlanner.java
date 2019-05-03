@@ -51,11 +51,11 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
 
       heuristics = new BodyPathHeuristics(parameters, this.bodyPathPlanner);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 //      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing);
+      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing, false);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
