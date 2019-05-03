@@ -5,9 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -23,17 +21,17 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, ArrayList<IMUMount> imuMounts,
-         ArrayList<WrenchCalculatorInterface> forceSensors, ForceSensorDefinition[] forceSensorDefinitions)
+         ArrayList<WrenchCalculatorInterface> forceSensors, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
-      this.imuDefinitions = generateIMUDefinitions(imuMounts);
+      this.imuDefinitions = generateIMUDefinitions(imuMounts, imuDefinitions);
       this.forceSensorDefinitions = generateForceSensorDefinitions(forceSensors, forceSensorDefinitions);
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
       createAndAddForceSensorDefinitions(this.forceSensorDefinitions);
       createAndAddOneDoFSensors();
-      createAndAddIMUSensors(imuDefinitions);
+      createAndAddIMUSensors(this.imuDefinitions);
    }
 
    private void createAndAddForceSensorDefinitions(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions)
@@ -79,21 +77,30 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       return stateEstimatorSensorDefinitions;
    }
 
-   // FIXME This is terrible, we should use the already existing IMUDefinition from the FullRobotModel
-   private LinkedHashMap<IMUMount, IMUDefinition> generateIMUDefinitions(ArrayList<IMUMount> imuMounts)
+   private LinkedHashMap<IMUMount, IMUDefinition> generateIMUDefinitions(ArrayList<IMUMount> imuMounts, IMUDefinition[] imuDefinitions)
    {
-      LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions = new LinkedHashMap<IMUMount, IMUDefinition>();
+      LinkedHashMap<IMUMount, IMUDefinition> imuDefinitionMap = new LinkedHashMap<IMUMount, IMUDefinition>();
 
       for (IMUMount imuMount : imuMounts)
       {
-         RigidBodyBasics rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
-         RigidBodyTransform transformFromMountToJoint = new RigidBodyTransform();
-         imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
-         IMUDefinition imuDefinition = new IMUDefinition(imuMount.getName(), rigidBody, transformFromMountToJoint);
-         imuDefinitions.put(imuMount, imuDefinition);
+         IMUDefinition imuDefinition = null;
+         for (int i = 0; i < imuDefinitions.length; i++)
+         {
+            if (imuDefinitions[i].getName().equals(imuMount.getName()))
+            {
+               imuDefinition = imuDefinitions[i];
+               break;
+            }
+         }
+         if (imuDefinition == null)
+         {
+            throw new RuntimeException("Could not find imu definition for " + imuMount.getName());
+         }
+
+         imuDefinitionMap.put(imuMount, imuDefinition);
       }
 
-      return imuDefinitions;
+      return imuDefinitionMap;
    }
 
    public void createAndAddOneDoFSensors()

@@ -41,7 +41,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCaclculators = new ArrayList<WrenchCalculatorInterface>();
       robot.getForceSensors(groundContactPointBasedWrenchCaclculators);
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators, forceSensorDefinitions);
+            scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators, imuDefinitions, forceSensorDefinitions);
       stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
 
       SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderToUpdate, null);
