@@ -4,6 +4,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -33,7 +34,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       Vector2D projectionTranslation = new Vector2D();
-      PlanarRegion highestRegion = findHighestRegion(footPosition.getX(), footPosition.getY(), projectionTranslation);
+      PlanarRegion highestRegion = findHighestRegion(footPosition, projectionTranslation);
 
       if(highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
@@ -50,16 +51,16 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
          Vector3D surfaceNormal = new Vector3D();
          highestRegion.getNormal(surfaceNormal);
 
-         RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
-         setTranslationSettingZAndPreservingXAndY(x, y, xTranslated, yTranslated, z, snapTransform);
+         RigidBodyTransform snapTransform = PlanarRegionSnapTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
+         PlanarRegionSnapTools.setTranslationSettingZAndPreservingXAndY(x, y, xTranslated, yTranslated, z, snapTransform);
 
          return new FootstepNodeSnapData(snapTransform);
       }
    }
 
-   private PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack)
+   private PlanarRegion findHighestRegion(Point2DReadOnly footPosition, Vector2D projectionTranslationToPack)
    {
-      return snapTools.findHighestRegion(x, y, projectionTranslationToPack, planarRegionsList.getPlanarRegionsAsList());
+      return snapTools.findHighestRegion(footPosition,  projectionTranslationToPack, planarRegionsList.getPlanarRegionsAsList());
    }
 
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)
@@ -68,30 +69,4 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       return Math.abs(translation.getX()) > maximumTranslationPerAxis || Math.abs(translation.getY()) > maximumTranslationPerAxis;
    }
 
-
-   private static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3D surfaceNormal)
-   {
-      Vector3D xAxis = new Vector3D();
-      Vector3D yAxis = new Vector3D(0.0, 1.0, 0.0);
-
-      xAxis.cross(yAxis, surfaceNormal);
-      xAxis.normalize();
-      yAxis.cross(surfaceNormal, xAxis);
-
-      RotationMatrix rotationMatrix = new RotationMatrix();
-      rotationMatrix.setColumns(xAxis, yAxis, surfaceNormal);
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      transformToReturn.setRotation(rotationMatrix);
-      return transformToReturn;
-   }
-
-   private static void setTranslationSettingZAndPreservingXAndY(double x, double y, double xTranslated, double yTranslated, double z, RigidBodyTransform transformToReturn)
-   {
-      Vector3D newTranslation = new Vector3D(x, y, 0.0);
-      transformToReturn.transform(newTranslation);
-      newTranslation.scale(-1.0);
-      newTranslation.add(xTranslated, yTranslated, z);
-
-      transformToReturn.setTranslation(newTranslation);
-   }
 }

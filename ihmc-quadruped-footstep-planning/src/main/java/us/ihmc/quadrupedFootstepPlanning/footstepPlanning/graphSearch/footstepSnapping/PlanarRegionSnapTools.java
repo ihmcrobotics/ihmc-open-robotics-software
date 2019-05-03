@@ -1,10 +1,15 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
+import boofcv.struct.image.Planar;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -27,6 +32,11 @@ public class PlanarRegionSnapTools
    {
       this.projectionInsideDelta = projectionInsideDelta;
       this.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
+   }
+
+   public PlanarRegion findHighestRegion(Point2DReadOnly point, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
+   {
+      return findHighestRegion(point.getX(), point.getY(), projectionTranslationToPack, planarRegions);
    }
 
    public PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
@@ -122,5 +132,50 @@ public class PlanarRegionSnapTools
       projectionTranslation.setZ(0.0);
 
       return projectionTranslation;
+   }
+
+   public static RigidBodyTransform getSnapTransformToRegion(Point2DReadOnly pointToSnap, PlanarRegion planarRegionToSnapTo)
+   {
+      Point3D point = new Point3D(pointToSnap);
+      point.setZ(planarRegionToSnapTo.getPlaneZGivenXY(pointToSnap.getX(), pointToSnap.getY()));
+
+      Vector3D surfaceNormal = new Vector3D();
+      planarRegionToSnapTo.getNormal(surfaceNormal);
+
+      RigidBodyTransform snapTransform = PlanarRegionSnapTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
+      PlanarRegionSnapTools.setTranslationSettingZAndPreservingXAndY(point, snapTransform);
+
+      return snapTransform;
+   }
+
+   public static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3D surfaceNormal)
+   {
+      Vector3D xAxis = new Vector3D();
+      Vector3D yAxis = new Vector3D(0.0, 1.0, 0.0);
+
+      xAxis.cross(yAxis, surfaceNormal);
+      xAxis.normalize();
+      yAxis.cross(surfaceNormal, xAxis);
+
+      RotationMatrix rotationMatrix = new RotationMatrix();
+      rotationMatrix.setColumns(xAxis, yAxis, surfaceNormal);
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();
+      transformToReturn.setRotation(rotationMatrix);
+      return transformToReturn;
+   }
+
+   public static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly point, RigidBodyTransform transformToReturn)
+   {
+      setTranslationSettingZAndPreservingXAndY(point.getX(), point.getY(), point.getX(), point.getY(), point.getZ(), transformToReturn);
+   }
+
+   public static void setTranslationSettingZAndPreservingXAndY(double x, double y, double xTranslated, double yTranslated, double z, RigidBodyTransform transformToReturn)
+   {
+      Vector3D newTranslation = new Vector3D(x, y, 0.0);
+      transformToReturn.transform(newTranslation);
+      newTranslation.scale(-1.0);
+      newTranslation.add(xTranslated, yTranslated, z);
+
+      transformToReturn.setTranslation(newTranslation);
    }
 }
