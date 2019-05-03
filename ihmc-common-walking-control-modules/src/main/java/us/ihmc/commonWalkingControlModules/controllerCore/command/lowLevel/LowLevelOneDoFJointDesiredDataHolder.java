@@ -29,6 +29,12 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       this(50);
    }
 
+   public LowLevelOneDoFJointDesiredDataHolder(OneDoFJointBasics[] joints)
+   {
+      this(joints.length);
+      registerJointsWithEmptyData(joints);
+   }
+
    public LowLevelOneDoFJointDesiredDataHolder(int initialCapacity)
    {
       lowLevelJointData = new RecyclingArrayList<>(initialCapacity, JointDesiredOutput::new);
