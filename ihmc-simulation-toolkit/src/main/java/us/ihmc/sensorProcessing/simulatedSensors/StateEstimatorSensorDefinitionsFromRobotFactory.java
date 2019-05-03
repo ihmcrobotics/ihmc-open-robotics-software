@@ -46,6 +46,11 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
                                                                                                           ForceSensorDefinition[] forceSensorDefinitions)
    {
       LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionMap = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
+      if (forceSensorDefinitions == null)
+      {
+         return forceSensorDefinitionMap;
+      }
+
       for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          ForceSensorDefinition forceSensorDefinition = null;
