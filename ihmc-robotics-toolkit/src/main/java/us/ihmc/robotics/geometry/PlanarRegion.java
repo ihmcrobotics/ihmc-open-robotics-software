@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -461,6 +462,48 @@ public class PlanarRegion
       fromWorldToLocalTransform.transform(localPoint);
 
       return isPointInside(localPoint.getX(), localPoint.getY());
+   }
+
+   public boolean isPointInsideByVerticalLineIntersection(double x, double y)
+   {
+      Line3D verticalLine = new Line3D(x, y, 0.0, 0.0, 0.0, 1.0);
+      return intersectWithLine(verticalLine) != null;
+   }
+
+   /**
+    * Will return the intersection point between a line and a single planar region. If the line does
+    * not intersect the region this method will return null.
+    */
+   public Point3D intersectWithLine(Line3D projectionLineInWorld)
+   {
+      RigidBodyTransform regionToWorld = new RigidBodyTransform();
+      getTransformToWorld(regionToWorld);
+
+      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Point3DReadOnly pointOnPlane = new Point3D(getConvexPolygon(0).getVertex(0));
+
+      Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
+      Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
+
+      pointOnLineInLocal.applyInverseTransform(regionToWorld);
+      directionOfLineInLocal.applyInverseTransform(regionToWorld);
+
+      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
+                                                                                                     planeNormal,
+                                                                                                     pointOnLineInLocal,
+                                                                                                     directionOfLineInLocal);
+      if (intersectionWithPlaneInLocal == null) // line was parallel to plane
+      {
+         return null;
+      }
+
+      if (isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
+      {
+         intersectionWithPlaneInLocal.applyTransform(regionToWorld);
+         return intersectionWithPlaneInLocal;
+      }
+
+      return null; // line does not intersect
    }
 
    /**

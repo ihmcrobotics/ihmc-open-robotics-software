@@ -154,7 +154,7 @@ public class PlanarRegionUpDownNavigation
          point.changeFrame(ReferenceFrame.getWorldFrame());
          { // point frame changed block
             TreeSet<Pair<PlanarRegion, Double>> singlePointCollisions = new TreeSet<>(Comparator.comparingDouble(o -> o.getRight()));
-            List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(point);
+            List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByVerticalLineIntersection(point);
 
             if (collidedRegions == null || collidedRegions.isEmpty())
             {
