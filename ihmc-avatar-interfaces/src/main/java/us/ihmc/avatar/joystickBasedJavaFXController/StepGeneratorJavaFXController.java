@@ -411,16 +411,16 @@ public class StepGeneratorJavaFXController
       return meshView;
    }
 
-   private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly solePose, RobotSide robotSide)
+   private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       double stanceWidth = 0.1;
       double heightOffset = 0.3;
 
-      double soleYaw = solePose.getYaw();
-      double lateralOffset = robotSide.negateIfLeftSide(stanceWidth);
+      double soleYaw = touchdownPose.getYaw();
+      double lateralOffset = swingSide.negateIfLeftSide(stanceWidth);
       double offsetX = -lateralOffset * Math.sin(soleYaw);
       double offsetY = lateralOffset * Math.cos(soleYaw);
-      collisionDetector.setBoxPose(solePose.getX() + offsetX, solePose.getY() + offsetY, solePose.getZ() + heightOffset, soleYaw);
+      collisionDetector.setBoxPose(touchdownPose.getX() + offsetX, touchdownPose.getY() + offsetY, touchdownPose.getZ() + heightOffset, soleYaw);
 
       return !collisionDetector.checkForCollision().isCollisionDetected();
    }
@@ -429,12 +429,12 @@ public class StepGeneratorJavaFXController
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final PlanarRegion tempRegion = new PlanarRegion();
 
-   private boolean isStepSnappable(FramePose3DReadOnly solePose, RobotSide robotSide)
+   private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
-      tempTransform.setTranslation(solePose.getPosition().getX(), solePose.getPosition().getY(), 0.0);
-      tempTransform.setRotationYaw(solePose.getYaw());
+      tempTransform.setTranslation(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
+      tempTransform.setRotationYaw(touchdownPose.getYaw());
 
-      footPolygon.set(footPolygons.get(robotSide));
+      footPolygon.set(footPolygons.get(swingSide));
       footPolygon.applyTransform(tempTransform, false);
 
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
