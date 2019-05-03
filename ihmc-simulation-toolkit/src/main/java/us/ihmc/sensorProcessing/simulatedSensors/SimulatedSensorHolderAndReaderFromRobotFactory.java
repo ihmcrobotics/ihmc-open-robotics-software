@@ -62,6 +62,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap,
                                                                                                                                                             imuMounts,
                                                                                                                                                             groundContactPointBasedWrenchCalculators,
+                                                                                                                                                            imuDefinition,
                                                                                                                                                             forceSensorDefinitions);
 
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
