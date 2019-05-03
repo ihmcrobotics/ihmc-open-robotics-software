@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -22,13 +23,14 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface.PlanType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface.PlanType;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation;
 import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation.NavigationResult;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
@@ -94,9 +96,8 @@ public class PatrolBehavior
    private final Notification stopNotification = new Notification();
    private final Notification goNotification = new Notification();
    private final TypedNotification<OperatorPlanReviewResult> planReviewResult = new TypedNotification<>();
-   private final Notification cancelPlanning = new Notification();
 
-   private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
+   private TypedNotification<FootstepPlanningToolboxOutputStatus> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final WaypointManager waypointManager;
@@ -155,7 +156,6 @@ public class PatrolBehavior
       {
          planReviewResult.add(message);
       });
-      messager.registerTopicListener(API.CancelPlanning, object -> cancelPlanning.set());
 
       loop = messager.createInput(API.Loop, false);
       swingOvers = messager.createInput(API.SwingOvers, false);
@@ -183,6 +183,10 @@ public class PatrolBehavior
    private void doStopStateAction(double timeInState)
    {
       pollInterrupts();
+      if (goNotification.read())
+      {
+         LogTools.debug("Go notified. Number of waypoints: {}", waypointManager.size());
+      }
    }
 
    private boolean transitionFromStop(double timeInState)
@@ -244,13 +248,9 @@ public class PatrolBehavior
       {
          return STOP;
       }
-      else if (cancelPlanning.read())
-      {
-         return PLAN;
-      }
       else if (footstepPlanResultNotification.hasNext())
       {
-         if (footstepPlanResultNotification.peek().isValidForExecution())
+         if (FootstepPlanningResult.fromByte(footstepPlanResultNotification.peek().getFootstepPlanningResult()).validForExecution())
          {
             return REVIEW;
          }
@@ -265,12 +265,13 @@ public class PatrolBehavior
 
    private void onReviewStateEntry()
    {
-      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.peek().getFootstepPlan());
+      reduceAndSendFootstepsForVisualization(footstepPlanResultNotification.peek());
    }
 
    private void onReviewStateAction(double timeInState)
    {
       pollInterrupts();
+      planReviewResult.poll();
    }
 
    private PatrolBehaviorState transitionFromReview(double timeInState)
@@ -300,10 +301,8 @@ public class PatrolBehavior
 
    private void onWalkStateEntry()
    {
-      walkingCompleted = remoteRobotControllerInterface.requestWalk(footstepPlanResultNotification.peek().getFootstepDataListMessage(),
-                                                                    remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(),
-                                                                    swingOvers.get(),
-                                                                    footstepPlanResultNotification.peek().getPlanarRegionsList());
+      walkingCompleted = remoteRobotControllerInterface
+            .requestWalk(footstepPlanResultNotification.peek(), remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames(), swingOvers.get());
    }
 
    private void doWalkStateAction(double timeInState)
@@ -391,15 +390,12 @@ public class PatrolBehavior
       }
 
       stopNotification.poll();         // poll both at the same time to handle race condition
-
-      // poll these everytime to throw away ill-timed inputs
-      goNotification.poll();
-      planReviewResult.poll();
-      cancelPlanning.poll();
+      goNotification.poll();           // poll go everytime so it doesn't queue up and disable stop
    }
 
-   private void reduceAndSendFootstepsForVisualization(FootstepPlan footstepPlan)
+   private void reduceAndSendFootstepsForVisualization(FootstepPlanningToolboxOutputStatus footstepPlanningOutput)
    {
+      FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(footstepPlanningOutput.getFootstepDataList());
       ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
       {
@@ -431,9 +427,6 @@ public class PatrolBehavior
 
       /** Input: When received, the robot stops walking and waits forever. */
       public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
-
-      /** Input: Cancel planning for things like live tuning. */
-      public static final Topic<Object> CancelPlanning = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CancelPlanning"));
 
       /** Input: Toggle looping through waypoints. */
       public static final Topic<Boolean> Loop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Loop"));

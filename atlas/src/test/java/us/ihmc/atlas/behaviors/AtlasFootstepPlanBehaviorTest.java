@@ -13,9 +13,8 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
@@ -111,20 +110,23 @@ public class AtlasFootstepPlanBehaviorTest
       LogTools.info("Planning from {}, {}, yaw: {}", lastX, lastY, lastYaw);
       LogTools.info("to {}, {}, yaw: {}", x, y, yaw);
 
-      TypedNotification<RemoteFootstepPlannerResult> resultNotification = remoteFootstepPlannerInterface
+      TypedNotification<FootstepPlanningToolboxOutputStatus> resultNotification = remoteFootstepPlannerInterface
             .requestPlan(startPose, goalPose, null);
 
-      RemoteFootstepPlannerResult output1 = resultNotification.blockingPoll();
+      FootstepPlanningToolboxOutputStatus output1 = resultNotification.blockingPoll();
 
-      LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(output1.getRawResult().getFootstepPlanningResult()));
-      LogTools.info("Received footstep plan took: {} s", output1.getRawResult().getTimeTaken());
+      LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(output1.getFootstepPlanningResult()));
+      LogTools.info("Received footstep plan took: {} s", output1.getTimeTaken());
       LogTools.info("Received footstep planning status: {}", output1);
 
-      assertTrue(output1.isValidForExecution(), "Solution failed");
+      boolean optimal = output1.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION;
+      boolean subOptimal = output1.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
+      assertTrue(optimal || subOptimal, "Solution failed");
+      FootstepPlanningToolboxOutputStatus output = output1;
 
-      footstepDataListPublisher.publish(output1.getRawResult().getFootstepDataList());
+      footstepDataListPublisher.publish(output.getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, output1.getRawResult().getFootstepDataList().getFootstepDataList().size(), 6.0);
+      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
 
       lastX = x;
       lastY = y;
@@ -173,16 +175,16 @@ public class AtlasFootstepPlanBehaviorTest
 
       FramePose3D currentGoalWaypoint = new FramePose3D();
       currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
-      RemoteFootstepPlannerResult output = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
-                                                                                      currentGoalWaypoint,
-                                                                                      null).blockingPoll();
+      FootstepPlanningToolboxOutputStatus output = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
+                                                                                                      currentGoalWaypoint,
+                                                                                                      null).blockingPoll();
 
       LogTools.info("Received footstep planning status: {}", output);
 
-      boolean optimal = output.getResult() == FootstepPlanningResult.OPTIMAL_SOLUTION;
-      boolean subOptimal = output.getResult() == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+      boolean optimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION;
+      boolean subOptimal = output.getFootstepPlanningResult() == FootstepPlanningToolboxOutputStatus.FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION;
       assertTrue(optimal || subOptimal, "Solution failed");
-      return output.getRawResult();
+      return output;
    }
 
    @AfterEach
