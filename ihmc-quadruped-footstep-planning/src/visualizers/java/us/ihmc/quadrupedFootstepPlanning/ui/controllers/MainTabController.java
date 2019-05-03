@@ -25,6 +25,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
@@ -163,6 +164,19 @@ public class MainTabController
    }
 
    @FXML
+   public void requestStopWalking()
+   {
+      messager.submitMessage(stepListMessageTopic, null);
+      requestStanding();
+   }
+
+   private void requestStanding()
+   {
+      if (desiredSteppingStateNameTopic != null)
+         messager.submitMessage(desiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
+   }
+
+   @FXML
    public void clearFlat()
    {
       acceptNewRegions.setSelected(false);
@@ -236,6 +250,7 @@ public class MainTabController
    private Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic;
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
+   private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -351,6 +366,11 @@ public class MainTabController
    public void setStepListMessageTopic(Topic<QuadrupedTimedStepListMessage> stepListMessageTopic)
    {
       this.stepListMessageTopic = stepListMessageTopic;
+   }
+
+   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic)
+   {
+      this.desiredSteppingStateNameTopic = desiredSteppingStateNameTopic;
    }
 
    public void bindControls()
