@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -61,7 +62,8 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
          RigidBodyTransform transformFromSensorToParentJoint = new RigidBodyTransform();
          groundContactPointBasedWrenchCalculator.getTransformToParentJoint(transformFromSensorToParentJoint);
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), transformFromSensorToParentJoint);
+         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), transformFromSensorToParentJoint);
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), sensorFrame);
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
 
       }
