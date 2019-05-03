@@ -35,7 +35,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double min_x_clearance_from_foot_ = -11.1;
    public double min_y_clearance_from_foot_ = -11.1;
    public double max_walking_speed_multiplier_ = -11.1;
-   public double projection_inside_distance_ = -11.1;
+   public double projection_inside_distance_for_expansion_ = -11.1;
+   public double projection_inside_distance_for_post_processing_ = -11.1;
    public double minimum_surface_incline_radians_ = -11.1;
    public double cliff_height_to_avoid_ = -11.1;
    public double minimum_distance_from_cliff_bottoms_ = -11.1;
@@ -93,7 +94,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       max_walking_speed_multiplier_ = other.max_walking_speed_multiplier_;
 
-      projection_inside_distance_ = other.projection_inside_distance_;
+      projection_inside_distance_for_expansion_ = other.projection_inside_distance_for_expansion_;
+
+      projection_inside_distance_for_post_processing_ = other.projection_inside_distance_for_post_processing_;
 
       minimum_surface_incline_radians_ = other.minimum_surface_incline_radians_;
 
@@ -291,13 +294,22 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return max_walking_speed_multiplier_;
    }
 
-   public void setProjectionInsideDistance(double projection_inside_distance)
+   public void setProjectionInsideDistanceForExpansion(double projection_inside_distance_for_expansion)
    {
-      projection_inside_distance_ = projection_inside_distance;
+      projection_inside_distance_for_expansion_ = projection_inside_distance_for_expansion;
    }
-   public double getProjectionInsideDistance()
+   public double getProjectionInsideDistanceForExpansion()
    {
-      return projection_inside_distance_;
+      return projection_inside_distance_for_expansion_;
+   }
+
+   public void setProjectionInsideDistanceForPostProcessing(double projection_inside_distance_for_post_processing)
+   {
+      projection_inside_distance_for_post_processing_ = projection_inside_distance_for_post_processing;
+   }
+   public double getProjectionInsideDistanceForPostProcessing()
+   {
+      return projection_inside_distance_for_post_processing_;
    }
 
    public void setMinimumSurfaceInclineRadians(double minimum_surface_incline_radians)
@@ -394,7 +406,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_walking_speed_multiplier_, other.max_walking_speed_multiplier_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_, other.projection_inside_distance_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_expansion_, other.projection_inside_distance_for_expansion_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_post_processing_, other.projection_inside_distance_for_post_processing_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
 
@@ -457,7 +471,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.max_walking_speed_multiplier_ != otherMyClass.max_walking_speed_multiplier_) return false;
 
-      if(this.projection_inside_distance_ != otherMyClass.projection_inside_distance_) return false;
+      if(this.projection_inside_distance_for_expansion_ != otherMyClass.projection_inside_distance_for_expansion_) return false;
+
+      if(this.projection_inside_distance_for_post_processing_ != otherMyClass.projection_inside_distance_for_post_processing_) return false;
 
       if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
 
@@ -517,8 +533,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.min_y_clearance_from_foot_);      builder.append(", ");
       builder.append("max_walking_speed_multiplier=");
       builder.append(this.max_walking_speed_multiplier_);      builder.append(", ");
-      builder.append("projection_inside_distance=");
-      builder.append(this.projection_inside_distance_);      builder.append(", ");
+      builder.append("projection_inside_distance_for_expansion=");
+      builder.append(this.projection_inside_distance_for_expansion_);      builder.append(", ");
+      builder.append("projection_inside_distance_for_post_processing=");
+      builder.append(this.projection_inside_distance_for_post_processing_);      builder.append(", ");
       builder.append("minimum_surface_incline_radians=");
       builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
       builder.append("cliff_height_to_avoid=");

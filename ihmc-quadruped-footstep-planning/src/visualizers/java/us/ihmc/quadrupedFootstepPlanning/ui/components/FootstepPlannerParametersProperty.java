@@ -20,7 +20,8 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 
    private final DoubleField maxWalkingSpeedMultiplier = new DoubleField(SettableFootstepPlannerParameters::getMaxWalkingSpeedMultiplier, SettableFootstepPlannerParameters::setMaxWalkingSpeedMultiplier);
 
-   private final DoubleField projectInsideDistance = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistance, SettableFootstepPlannerParameters::setProjectInsideDistance);
+   private final DoubleField projectInsideDistanceForExpansion = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForExpansion, SettableFootstepPlannerParameters::setProjectInsideDistanceForExpansion);
+   private final DoubleField projectInsideDistanceForPostProcessing = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForPostProcessing, SettableFootstepPlannerParameters::setProjectInsideDistanceForPostProcessing);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private final DoubleField minDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
    private final DoubleField minDistanceFromCliffTops = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffTops, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffTops);
@@ -83,9 +84,14 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, cliffHeightToAvoid);
    }
 
-   public void bidirectionalBindProjectInsideDistance(Property<? extends Number> property)
+   public void bidirectionalBindProjectInsideDistanceForExpansion(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, projectInsideDistance);
+      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForExpansion);
+   }
+
+   public void bidirectionalBindProjectInsideDistanceForPostProcessing(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, projectInsideDistanceForPostProcessing);
    }
 
    public void bidirectionalBindMinDistanceFromCliffBottoms(Property<? extends Number> property)

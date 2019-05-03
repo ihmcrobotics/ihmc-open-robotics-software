@@ -10,6 +10,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.List;
 
@@ -19,11 +20,11 @@ public class PlanarRegionSnapTools
    private final ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
 
-   private final FootstepPlannerParameters parameters;
+   private final DoubleProvider projectionInsideDelta;
 
-   public PlanarRegionSnapTools(FootstepPlannerParameters parameters)
+   public PlanarRegionSnapTools(DoubleProvider projectionInsideDelta)
    {
-      this.parameters = parameters;
+      this.projectionInsideDelta = projectionInsideDelta;
    }
 
    public PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
@@ -78,7 +79,7 @@ public class PlanarRegionSnapTools
       Point3D pointToSnap = new Point3D();
 
       pointToSnap.set(x, y, region.getPlaneZGivenXY(x, y));
-      double projectionDistance = parameters.getProjectInsideDistance();
+      double projectionDistance = projectionInsideDelta.getValue();
       boolean successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon);
 
       // region is too small to wiggle inside

@@ -28,7 +28,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
    private double minimumSurfaceInclineRadians;
-   private double projectInsideDistance;
+   private double projectInsideDistanceForExpansion;
+   private double projectInsideDistanceForPostProcessing;
    private double cliffHeightToAvoid;
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
@@ -197,9 +198,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideDistance(double projectInsideDistance)
+   public void setProjectInsideDistanceForExpansion(double projectInsideDistance)
    {
-      this.projectInsideDistance = projectInsideDistance;
+      this.projectInsideDistanceForExpansion = projectInsideDistance;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setProjectInsideDistanceForPostProcessing(double projectInsideDistance)
+   {
+      this.projectInsideDistanceForPostProcessing = projectInsideDistance;
    }
 
    /** {@inheritDoc} */
@@ -342,9 +350,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistance()
+   public double getProjectInsideDistanceForExpansion()
    {
-      return projectInsideDistance;
+      return projectInsideDistanceForExpansion;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForPostProcessing()
+   {
+      return projectInsideDistanceForPostProcessing;
    }
 
    /** {@inheritDoc} */

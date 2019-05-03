@@ -26,7 +26,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minXClearanceFromFoot = new YoDouble("minXClearanceFromFoot", registry);
    private final YoDouble minYClearanceFromFoot = new YoDouble("minYClearanceFromFoot", registry);
    private final YoDouble maxWalkingSpeedMultiplier = new YoDouble("maxWalkingSpeedMultiplier", registry);
-   private final YoDouble projectionInsideDistance = new YoDouble("projectionInsideDistance", registry);
+   private final YoDouble projectionInsideDistanceForExpansion = new YoDouble("projectionInsideDistanceForExpansion", registry);
+   private final YoDouble projectionInsideDistanceForPostProcessing = new YoDouble("projectionInsideDistanceForPostProcessing", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
@@ -153,9 +154,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setProjectInsideDistance(double projectionInsideDistance)
+   public void setProjectInsideDistanceForExpansion(double projectionInsideDistance)
    {
-      this.projectionInsideDistance.set(projectionInsideDistance);
+      this.projectionInsideDistanceForExpansion.set(projectionInsideDistance);
+   }
+
+   @Override
+   public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
+   {
+      this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
    }
 
    @Override
@@ -317,9 +324,16 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistance()
+   public double getProjectInsideDistanceForExpansion()
    {
-      return projectionInsideDistance.getDoubleValue();
+      return projectionInsideDistanceForExpansion.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForPostProcessing()
+   {
+      return projectionInsideDistanceForPostProcessing.getDoubleValue();
    }
 
    /** {@inheritDoc} */
