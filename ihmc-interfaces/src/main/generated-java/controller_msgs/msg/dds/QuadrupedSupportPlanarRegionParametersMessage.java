@@ -8,6 +8,7 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message sets the parameters of the BipedalSupportPlanarRegionPublisher
+       * The support planar region is set to be a rectangle at each of the feet.
        */
 public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<QuadrupedSupportPlanarRegionParametersMessage> implements Settable<QuadrupedSupportPlanarRegionParametersMessage>, EpsilonComparable<QuadrupedSupportPlanarRegionParametersMessage>
 {
@@ -16,10 +17,13 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
             */
    public boolean enable_;
    /**
-            * The support planar region is set to be a square at each of the feet.
-            * This value specifies the half length of the side of teh square.
+            * This value specifies the distance from the foot to the inside portion of the vertices (under the robot).
             */
-   public double support_region_size_ = 1.0;
+   public double inside_support_region_size_ = -1.0;
+   /**
+            * This value specifies the distance from the foot to the outside portion of the vertices (not under the robot).
+            */
+   public double outside_support_region_size_ = -1.0;
 
    public QuadrupedSupportPlanarRegionParametersMessage()
    {
@@ -35,7 +39,9 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
    {
       enable_ = other.enable_;
 
-      support_region_size_ = other.support_region_size_;
+      inside_support_region_size_ = other.inside_support_region_size_;
+
+      outside_support_region_size_ = other.outside_support_region_size_;
 
    }
 
@@ -55,20 +61,33 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
    }
 
    /**
-            * The support planar region is set to be a square at each of the feet.
-            * This value specifies the half length of the side of teh square.
+            * This value specifies the distance from the foot to the inside portion of the vertices (under the robot).
             */
-   public void setSupportRegionSize(double support_region_size)
+   public void setInsideSupportRegionSize(double inside_support_region_size)
    {
-      support_region_size_ = support_region_size;
+      inside_support_region_size_ = inside_support_region_size;
    }
    /**
-            * The support planar region is set to be a square at each of the feet.
-            * This value specifies the half length of the side of teh square.
+            * This value specifies the distance from the foot to the inside portion of the vertices (under the robot).
             */
-   public double getSupportRegionSize()
+   public double getInsideSupportRegionSize()
    {
-      return support_region_size_;
+      return inside_support_region_size_;
+   }
+
+   /**
+            * This value specifies the distance from the foot to the outside portion of the vertices (not under the robot).
+            */
+   public void setOutsideSupportRegionSize(double outside_support_region_size)
+   {
+      outside_support_region_size_ = outside_support_region_size;
+   }
+   /**
+            * This value specifies the distance from the foot to the outside portion of the vertices (not under the robot).
+            */
+   public double getOutsideSupportRegionSize()
+   {
+      return outside_support_region_size_;
    }
 
 
@@ -91,7 +110,9 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_, other.enable_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.support_region_size_, other.support_region_size_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.inside_support_region_size_, other.inside_support_region_size_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outside_support_region_size_, other.outside_support_region_size_, epsilon)) return false;
 
 
       return true;
@@ -108,7 +129,9 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
 
       if(this.enable_ != otherMyClass.enable_) return false;
 
-      if(this.support_region_size_ != otherMyClass.support_region_size_) return false;
+      if(this.inside_support_region_size_ != otherMyClass.inside_support_region_size_) return false;
+
+      if(this.outside_support_region_size_ != otherMyClass.outside_support_region_size_) return false;
 
 
       return true;
@@ -122,8 +145,10 @@ public class QuadrupedSupportPlanarRegionParametersMessage extends Packet<Quadru
       builder.append("QuadrupedSupportPlanarRegionParametersMessage {");
       builder.append("enable=");
       builder.append(this.enable_);      builder.append(", ");
-      builder.append("support_region_size=");
-      builder.append(this.support_region_size_);
+      builder.append("inside_support_region_size=");
+      builder.append(this.inside_support_region_size_);      builder.append(", ");
+      builder.append("outside_support_region_size=");
+      builder.append(this.outside_support_region_size_);
       builder.append("}");
       return builder.toString();
    }
