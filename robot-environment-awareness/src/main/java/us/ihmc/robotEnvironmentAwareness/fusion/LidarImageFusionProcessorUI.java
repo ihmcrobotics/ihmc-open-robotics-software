@@ -20,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ImageProcessingAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.fusion.controller.ObjectDetectionAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
+import us.ihmc.ros2.Ros2Node;
 
 public class LidarImageFusionProcessorUI
 {
@@ -45,7 +46,7 @@ public class LidarImageFusionProcessorUI
    @FXML
    private ObjectDetectionAnchorPaneController objectDetectionAnchorPaneController;
 
-   private LidarImageFusionProcessorUI(SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
+   private LidarImageFusionProcessorUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager, Stage primaryStage) throws Exception
    {
       this.messager = messager;
       this.primaryStage = primaryStage;
@@ -64,7 +65,7 @@ public class LidarImageFusionProcessorUI
       mainPane.setRight(imageViewPane);
       mainPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
-      meshViewer = new FusionSensorMeshViewer(reaMessager);
+      meshViewer = new FusionSensorMeshViewer(ros2Node, messager, reaMessager);
       imageViewer = new FusionSensorImageViewer(messager, imageViewPane);
 
       view3dFactory.addNodeToView(meshViewer.getRoot());
@@ -77,14 +78,14 @@ public class LidarImageFusionProcessorUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   public static LidarImageFusionProcessorUI creatIntraprocessUI(SharedMemoryJavaFXMessager messager, Stage primaryStage) throws Exception
+   public static LidarImageFusionProcessorUI creatIntraprocessUI(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, Stage primaryStage) throws Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager reaMessager = new REAUIMessager(moduleMessager);
       reaMessager.startMessager();
 
-      return new LidarImageFusionProcessorUI(messager, reaMessager, primaryStage);
+      return new LidarImageFusionProcessorUI(ros2Node, messager, reaMessager, primaryStage);
    }
 
    public void show()
