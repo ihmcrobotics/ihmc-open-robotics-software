@@ -42,7 +42,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMaxWalkingSpeedMultiplier(double multiplier);
 
-   void setProjectInsideDistance(double projectionInsideDistance);
+   void setProjectInsideDistanceForExpansion(double projectionInsideDistanceForExpansion);
+
+   void setProjectInsideDistanceForPostProcessing(double projectionInsideDistanceForPostProcessing);
 
    void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
 
@@ -73,7 +75,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
       setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
-      setProjectInsideDistance(other.getProjectInsideDistance());
+      setProjectInsideDistanceForExpansion(other.getProjectInsideDistanceForExpansion());
+      setProjectInsideDistanceForPostProcessing(other.getProjectInsideDistanceForPostProcessing());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
       setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
@@ -120,8 +123,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinXClearanceFromFoot(other.getMinXClearanceFromFoot());
       if (other.getMinYClearanceFromFoot() != other.NO_VALUE_DOUBLE)
          setMinYClearanceFromFoot(other.getMinYClearanceFromFoot());
-      if (other.getProjectionInsideDistance() != other.NO_VALUE_DOUBLE)
-         setProjectInsideDistance(other.getProjectionInsideDistance());
+      if (other.getProjectionInsideDistanceForExpansion() != other.NO_VALUE_DOUBLE)
+         setProjectInsideDistanceForExpansion(other.getProjectionInsideDistanceForExpansion());
+      if (other.getProjectionInsideDistanceForPostProcessing() != other.NO_VALUE_DOUBLE)
+         setProjectInsideDistanceForPostProcessing(other.getProjectionInsideDistanceForPostProcessing());
       if (other.getMinimumSurfaceInclineRadians() != other.NO_VALUE_DOUBLE)
          setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       if (other.getCliffHeightToAvoid() != other.NO_VALUE_DOUBLE)

@@ -52,7 +52,9 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minSurfaceIncline;
 
    @FXML
-   private Spinner<Double> projectInsideDistance;
+   private Spinner<Double> projectInsideDistanceForExpansion;
+   @FXML
+   private Spinner<Double> projectInsideDistanceForPostProcessing;
    @FXML
    private Spinner<Double> cliffHeightToAvoid;
    @FXML
@@ -133,7 +135,8 @@ public class FootstepPlannerParametersUIController
       minYClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
 
-      projectInsideDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
+      projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
+      projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
       cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.4, 0.0, 0.05));
       minDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
       minDistanceFromCliffTops.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
@@ -169,7 +172,8 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMinYClearanceFromFoot(minYClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumSurfaceInclineRadians(minSurfaceIncline.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindProjectInsideDistance(projectInsideDistance.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindProjectInsideDistanceForExpansion(projectInsideDistanceForExpansion.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindProjectInsideDistanceForPostProcessing(projectInsideDistanceForPostProcessing.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCliffHeightToAvoid(cliffHeightToAvoid.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinDistanceFromCliffBottoms(minDistanceFromCliffBottoms.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinDistanceFromCliffTops(minDistanceFromCliffTops.getValueFactory().valueProperty());
@@ -214,7 +218,8 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("minYClearanceFromFoot", minYClearanceFromFoot.getValue());
       filePropertyHelper.saveProperty("minSurfaceIncline", minSurfaceIncline.getValue());
 
-      filePropertyHelper.saveProperty("projectInsideDistance", projectInsideDistance.getValue());
+      filePropertyHelper.saveProperty("projectInsideDistanceForExpansion", projectInsideDistanceForExpansion.getValue());
+      filePropertyHelper.saveProperty("projectInsideDistanceForPostProcessing", projectInsideDistanceForPostProcessing.getValue());
       filePropertyHelper.saveProperty("cliffHeightToAvoid", cliffHeightToAvoid.getValue());
       filePropertyHelper.saveProperty("minDistanceFromCliffBottoms", minDistanceFromCliffBottoms.getValue());
       filePropertyHelper.saveProperty("minDistanceFromCliffTops", minDistanceFromCliffTops.getValue());
@@ -267,8 +272,10 @@ public class FootstepPlannerParametersUIController
       if ((value = filePropertyHelper.loadDoubleProperty("minSurfaceIncline")) != null)
          minSurfaceIncline.getValueFactory().setValue(value);
 
-      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistance")) != null)
-         projectInsideDistance.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistanceForExpansion")) != null)
+         projectInsideDistanceForExpansion.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("projectInsideDistanceForPostProcessing")) != null)
+         projectInsideDistanceForPostProcessing.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightToAvoid")) != null)
          cliffHeightToAvoid.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("minDistanceFromCliffBottoms")) != null)

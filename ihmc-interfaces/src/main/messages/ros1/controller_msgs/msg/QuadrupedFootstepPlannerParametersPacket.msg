@@ -61,7 +61,10 @@ float64 min_y_clearance_from_foot
 float64 max_walking_speed_multiplier
 
 # Field default value -11.1
-float64 projection_inside_distance
+float64 projection_inside_distance_for_expansion
+
+# Field default value -11.1
+float64 projection_inside_distance_for_post_processing
 
 # Field default value -11.1
 float64 minimum_surface_incline_radians

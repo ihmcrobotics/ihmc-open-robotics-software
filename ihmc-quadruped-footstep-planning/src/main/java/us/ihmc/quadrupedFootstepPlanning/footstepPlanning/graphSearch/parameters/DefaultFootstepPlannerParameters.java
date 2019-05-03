@@ -109,7 +109,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistance()
+   public double getProjectInsideDistanceForExpansion()
+   {
+      return 0.02;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForPostProcessing()
    {
       return 0.04;
    }

@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -53,10 +52,16 @@ public interface FootstepPlannerParameters
    }
 
    /**
-    * Distance which a foothold is projected into planar region. Should be a positive value,
+    * Distance which a foothold is projected into planar region during expansion and node checking. Should be a positive value,
     * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
     */
-   double getProjectInsideDistance();
+   double getProjectInsideDistanceForExpansion();
+
+   /**
+    * Distance which a foothold is projected into planar region during post processing. Should be a positive value,
+    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
+    */
+   double getProjectInsideDistanceForPostProcessing();
 
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
@@ -162,7 +167,8 @@ public interface FootstepPlannerParameters
       packet.setHeuristicsWeight(getHeuristicsInflationWeight());
       packet.setMinXClearanceFromFoot(getMinXClearanceFromFoot());
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
-      packet.setProjectionInsideDistance(getProjectInsideDistance());
+      packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
+      packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
       packet.setMinimumDistanceFromCliffBottoms(getMinimumDistanceFromCliffBottoms());
