@@ -5,8 +5,11 @@ import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -85,6 +88,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
    private IHMCROS2Publisher<DoorLocationPacket> publisher;
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+   private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
 
    // private BasicTimingBehavior basicTimingBehavior;
 
@@ -94,6 +98,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
+      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
 
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
       doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
@@ -129,6 +134,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    @Override
    public void doControl()
    {
+      
       //should constantly be searching for door and updating its location here
       publisher = createBehaviorInputPublisher(DoorLocationPacket.class);
 
@@ -271,14 +277,16 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-
+            lookDown();
+            doorOpenDetectorBehaviorService.reset();
+            doorOpenDetectorBehaviorService.run(true);
             System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
             if (DEBUG)
             {
                publishTextToSpeech("open door action");
             }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
-            System.out.println("SET OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
+            System.out.println("SET OPEN DOOR ACTION INPUT" + searchForDoorBehavior.getLocation());
 
          }
       };
@@ -311,8 +319,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
+            lookUp();
+
             if (DEBUG)
             {
+               doorOpenDetectorBehaviorService.run(false);
                publishTextToSpeech("walk through door action");
             }
             FootstepDataListMessage message = setUpFootSteps();
@@ -348,8 +359,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addTransition(WalkThroughDoorBehaviorState.WALKING_TO_DOOR, WalkThroughDoorBehaviorState.FAILED, t -> isWalkingDone() && !hasWalkingSucceded());
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, searchForDoorNear, WalkThroughDoorBehaviorState.OPEN_DOOR);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, openDoorAction,
-                                        setUpArms ? WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK : WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+      factory.addState(WalkThroughDoorBehaviorState.OPEN_DOOR, openDoorAction);
+
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL,
+                            t -> openDoorAction.isDone() && !openDoorBehavior.succeeded());
+      factory.addTransition(WalkThroughDoorBehaviorState.OPEN_DOOR, WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+                            t -> openDoorAction.isDone() && openDoorBehavior.succeeded());
 
       factory.addState(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk);
 
@@ -445,6 +460,28 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
       publishTextToSpeech("Leaving Walk Through Door behavior");
 
+   }
+
+   private void lookDown()
+   {
+      AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0.8);
+      Quaternion headOrientation = new Quaternion();
+      headOrientation.set(orientationAxisAngle);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+                                                                                                     atlasPrimitiveActions.referenceFrames.getChestFrame());
+      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      headTrajectoryPublisher.publish(headTrajectoryMessage);
+   }
+
+   private void lookUp()
+   {
+      AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
+      Quaternion headOrientation = new Quaternion();
+      headOrientation.set(orientationAxisAngle);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+                                                                                                     atlasPrimitiveActions.referenceFrames.getChestFrame());
+      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
+      headTrajectoryPublisher.publish(headTrajectoryMessage);
    }
 
    private boolean isWalkingDone()
