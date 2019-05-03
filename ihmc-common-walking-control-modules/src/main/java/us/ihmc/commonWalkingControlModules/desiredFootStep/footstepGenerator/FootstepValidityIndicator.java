@@ -14,10 +14,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public interface FootstepValidityIndicator
 {
    /**
-    * Checks if the given pose is steppable.
+    * Checks if the given touchdown pose is steppable given the stance pose.
     *
-    * @param solePose footstep to check
-    * @param robotSide side of the given footstep
+    * @param touchdownPose touchdown pose of the step
+    * @param stanceFootPose stance pose of the step
+    * @param robotSide side of the swing foot
     */
-   boolean isFootstepValid(FramePose3DReadOnly solePose, RobotSide robotSide);
+   boolean isFootstepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stanceFootPose, RobotSide robotSide);
 }
