@@ -67,6 +67,9 @@ float64 projection_inside_distance_for_expansion
 float64 projection_inside_distance_for_post_processing
 
 # Field default value -11.1
+float64 maximum_xy_wiggle_distance
+
+# Field default value -11.1
 float64 minimum_surface_incline_radians
 
 # Field default value -11.1

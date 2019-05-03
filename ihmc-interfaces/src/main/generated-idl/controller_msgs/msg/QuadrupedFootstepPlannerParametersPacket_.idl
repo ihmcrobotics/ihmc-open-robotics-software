@@ -64,6 +64,8 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double projection_inside_distance_for_post_processing;
         @defaultValue(value=-11.1)
+        double maximum_xy_wiggle_distance;
+        @defaultValue(value=-11.1)
         double minimum_surface_incline_radians;
         @defaultValue(value=-11.1)
         double cliff_height_to_avoid;

@@ -28,6 +28,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble maxWalkingSpeedMultiplier = new YoDouble("maxWalkingSpeedMultiplier", registry);
    private final YoDouble projectionInsideDistanceForExpansion = new YoDouble("projectionInsideDistanceForExpansion", registry);
    private final YoDouble projectionInsideDistanceForPostProcessing = new YoDouble("projectionInsideDistanceForPostProcessing", registry);
+   private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
@@ -163,6 +164,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
    {
       this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
+   }
+
+   @Override
+   public void setMaximumXYWiggleDistance(double wiggleDistance)
+   {
+      this.maximumXYWiggleDistance.set(wiggleDistance);
    }
 
    @Override
@@ -334,6 +341,13 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getProjectInsideDistanceForPostProcessing()
    {
       return projectionInsideDistanceForPostProcessing.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return maximumXYWiggleDistance.getDoubleValue();
    }
 
    /** {@inheritDoc} */

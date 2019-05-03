@@ -6,7 +6,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -101,10 +100,10 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    private void updateWiggleParameters()
    {
       wiggleParameters.deltaInside = projectionInsideDelta.getValue();
-      wiggleParameters.maxX = projectionInsideDelta.getValue();
-      wiggleParameters.minX = -projectionInsideDelta.getValue();
-      wiggleParameters.maxY = projectionInsideDelta.getValue();
-      wiggleParameters.minY = -projectionInsideDelta.getValue();
+      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
       wiggleParameters.maxYaw = 0.0;
       wiggleParameters.minYaw = -0.0;
    }
