@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Skully;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.parameters.AbstractParameterReader;
@@ -37,7 +37,7 @@ public class ParameterLoaderHelper
    {
       if (parameterFile == null)
       {
-         PrintTools.error(caller, "No parameter file provided. Falling back to loading the default values for parameters.");
+         LogTools.error("No parameter file provided. Falling back to loading the default values for parameters.");
          DefaultParameterReader reader = new DefaultParameterReader();
          reader.readParametersInRegistry(registry);
       }
@@ -83,11 +83,11 @@ public class ParameterLoaderHelper
 
       if (debugLoading)
       {
-         PrintTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
-         PrintTools.info("\n---> Unmatched in XML <---");
-         unmatchedParameters.forEach(parameter -> PrintTools.info(parameter));
-         PrintTools.info("\n---> Default Values: <---");
-         defaultParameters.forEach(parameter -> PrintTools.info(parameter));
+         LogTools.info("When loading " + registry.getName() + " with " + registry.getAllParameters().size() + " parameters:");
+         LogTools.info("\n---> Unmatched in XML <---");
+         unmatchedParameters.forEach(parameter -> LogTools.info(parameter));
+         LogTools.info("\n---> Default Values: <---");
+         defaultParameters.forEach(parameter -> LogTools.info(parameter));
       }
    }
 }

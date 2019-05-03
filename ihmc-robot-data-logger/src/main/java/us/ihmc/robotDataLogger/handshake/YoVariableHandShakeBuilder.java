@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.AppearanceDefinitionMessage;
 import us.ihmc.robotDataLogger.EnumType;
 import us.ihmc.robotDataLogger.GraphicObjectMessage;
@@ -413,11 +414,18 @@ public class YoVariableHandShakeBuilder
 
    public void setFrames(ReferenceFrame rootFrame)
    {
-      Collection<ReferenceFrame> frames = ReferenceFrameTools.getAllFramesInTree(rootFrame);
-      ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
-      frames.forEach(frame -> {
-         referenceFrameInformation.getFrameNames().add(frame.getName());
-         referenceFrameInformation.getFrameIndices().add(frame.getFrameIndex());
-      });
+      try
+      {
+         Collection<ReferenceFrame> frames = ReferenceFrameTools.getAllFramesInTree(rootFrame);
+         ReferenceFrameInformation referenceFrameInformation = handshake.getReferenceFrameInformation();
+         frames.forEach(frame -> {
+            referenceFrameInformation.getFrameNames().add(frame.getName());
+            referenceFrameInformation.getFrameIndices().add(frame.getFrameIndex());
+         });
+      }
+      catch (NullPointerException nullPointerException)
+      {
+         LogTools.error("Setting frames failed, most likely due to a threading violation. Frames may not be set.");
+      }
    }
 }
