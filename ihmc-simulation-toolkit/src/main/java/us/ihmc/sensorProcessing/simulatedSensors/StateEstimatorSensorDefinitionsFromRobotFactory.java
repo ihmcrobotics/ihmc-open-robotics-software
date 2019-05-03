@@ -5,14 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
@@ -25,15 +23,15 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, ArrayList<IMUMount> imuMounts,
-         ArrayList<WrenchCalculatorInterface> forceSensors)
+         ArrayList<WrenchCalculatorInterface> forceSensors, ForceSensorDefinition[] forceSensorDefinitions)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
-      this.forceSensorDefinitions = generateForceSensorDefinitions(forceSensors);
+      this.forceSensorDefinitions = generateForceSensorDefinitions(forceSensors, forceSensorDefinitions);
 
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      createAndAddForceSensorDefinitions(forceSensorDefinitions);
+      createAndAddForceSensorDefinitions(this.forceSensorDefinitions);
       createAndAddOneDoFSensors();
       createAndAddIMUSensors(imuDefinitions);
    }
@@ -46,28 +44,29 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       }
    }
 
-   // FIXME This is terrible, we should use the already existing ForceSensorDefinition from the FullRobotModel
-   private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(
-         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
+   private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators,
+                                                                                                          ForceSensorDefinition[] forceSensorDefinitions)
    {
-      LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
+      LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionMap = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
       for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
-         Joint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         OneDoFJointBasics sensorParentJoint;
-         if (forceTorqueSensorJoint instanceof OneDegreeOfFreedomJoint)
-            sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint((OneDegreeOfFreedomJoint) forceTorqueSensorJoint);
-         else
-            throw new RuntimeException("Force sensor is only supported for OneDegreeOfFreedomJoint.");
+         ForceSensorDefinition forceSensorDefinition = null;
+         for (int i = 0; i < forceSensorDefinitions.length; i++)
+         {
+            if (forceSensorDefinitions[i].getSensorName().equals(groundContactPointBasedWrenchCalculator.getName()))
+            {
+               forceSensorDefinition = forceSensorDefinitions[i];
+               break;
+            }
+         }
+         if (forceSensorDefinition == null)
+         {
+            throw new RuntimeException("Could not find force sensor definition for " + groundContactPointBasedWrenchCalculator.getName());
+         }
 
-         RigidBodyTransform transformFromSensorToParentJoint = new RigidBodyTransform();
-         groundContactPointBasedWrenchCalculator.getTransformToParentJoint(transformFromSensorToParentJoint);
-         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), transformFromSensorToParentJoint);
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), sensorFrame);
-         forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
-
+         forceSensorDefinitionMap.put(groundContactPointBasedWrenchCalculator, forceSensorDefinition);
       }
-      return forceSensorDefinitions;
+      return forceSensorDefinitionMap;
    }
 
    public Map<IMUMount, IMUDefinition> getIMUDefinitions()
