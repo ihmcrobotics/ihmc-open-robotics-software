@@ -21,6 +21,18 @@ public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRo
    private final TDoubleArrayList jointQdd = new TDoubleArrayList(50);
    private final TDoubleArrayList jointTau = new TDoubleArrayList(50);
 
+   public HumanoidRobotContextJointData()
+   {
+   }
+
+   public HumanoidRobotContextJointData(int degreesOfFreedom)
+   {
+      for (int i = 0; i < degreesOfFreedom; i++)
+      {
+         addJoint(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      }
+   }
+
    public void clear()
    {
       jointQ.resetQuick();
