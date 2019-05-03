@@ -102,8 +102,7 @@ public class LidarImageFusionProcessorCommunicationModule
       objectDetectionManager.close();
    }
 
-   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(SharedMemoryJavaFXMessager messager,
-                                                                                       DomainFactory.PubSubImplementation implementation)
+   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)
          throws IOException
    {
       KryoMessager kryoMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
@@ -111,7 +110,6 @@ public class LidarImageFusionProcessorCommunicationModule
       kryoMessager.setAllowSelfSubmit(true);
       kryoMessager.startMessager();
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(implementation, "ihmc_lidar_image_fusion_ui");
       return new LidarImageFusionProcessorCommunicationModule(ros2Node, kryoMessager, messager);
    }
 }
