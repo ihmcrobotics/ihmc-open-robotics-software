@@ -61,7 +61,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap,
                                                                                                                                                             imuMounts,
-                                                                                                                                                            groundContactPointBasedWrenchCalculators);
+                                                                                                                                                            groundContactPointBasedWrenchCalculators,
+                                                                                                                                                            forceSensorDefinitions);
 
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
