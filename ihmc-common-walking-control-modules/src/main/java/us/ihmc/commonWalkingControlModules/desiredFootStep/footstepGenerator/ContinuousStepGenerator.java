@@ -186,6 +186,7 @@ public class ContinuousStepGenerator implements Updatable
    private final FramePose2D footstepPose2D = new FramePose2D();
    private final FramePose2D nextFootstepPose2D = new FramePose2D();
    private final FramePose3D nextFootstepPose3D = new FramePose3D();
+   private final FramePose3D previousFootstepPose = new FramePose3D();
    private final FramePose3D nextFootstepPose3DViz = new FramePose3D();
 
    private boolean updateFirstFootstep = true;
@@ -247,6 +248,7 @@ public class ContinuousStepGenerator implements Updatable
          footsteps.clear();
          footstepPose2D.set(currentSupportFootPose);
          swingSide = currentSupportSide.getEnumValue().getOppositeSide();
+         previousFootstepPose.set(currentSupportFootPose);
       }
       else
       {
@@ -256,6 +258,8 @@ public class ContinuousStepGenerator implements Updatable
          footstepPose2D.getPosition().set(firstFootstep.getLocation());
          footstepPose2D.getOrientation().set(firstFootstep.getOrientation());
          swingSide = RobotSide.fromByte(firstFootstep.getRobotSide()).getOppositeSide();
+
+         previousFootstepPose.set(firstFootstep.getLocation(), firstFootstep.getOrientation());
       }
 
       for (int i = startIndex; i < numberOfFootstepsToPlan.getValue(); i++)
@@ -287,12 +291,13 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D, swingSide));
-         if (!isStepValid(nextFootstepPose3D, swingSide))
+
+         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
             alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
             nextFootstepPose2D.set(nextFootstepPose3D);
          }
-         
+
          int vizualizerIndex = i / 2;
          List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
 
@@ -303,7 +308,7 @@ public class ContinuousStepGenerator implements Updatable
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
          }
-
+         
          FootstepDataMessage footstep = footsteps.add();
          footstep.setRobotSide(swingSide.toByte());
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
@@ -311,6 +316,7 @@ public class ContinuousStepGenerator implements Updatable
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
+         previousFootstepPose.set(nextFootstepPose3D);
       }
 
       if (updateFirstFootstep)
@@ -764,11 +770,11 @@ public class ContinuousStepGenerator implements Updatable
       return currentSupportSide.getEnumValue();
    }
 
-   private boolean isStepValid(FramePose3DReadOnly solePose, RobotSide swingSide)
+   private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       for (int i = 0; i < footstepValidityIndicators.size(); i++)
       {
-         if (!footstepValidityIndicators.get(i).isFootstepValid(solePose, swingSide))
+         if (!footstepValidityIndicators.get(i).isFootstepValid(touchdownPose, stancePose, swingSide))
          {
             return false;
          }
