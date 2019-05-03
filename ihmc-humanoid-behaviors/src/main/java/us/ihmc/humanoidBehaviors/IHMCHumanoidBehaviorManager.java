@@ -13,6 +13,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
@@ -83,13 +84,14 @@ public class IHMCHumanoidBehaviorManager
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
+   private FootstepPlannerParameters footstepPlannerParameters;
 
-   public IHMCHumanoidBehaviorManager(String robotName, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                      FullHumanoidRobotModelFactory robotModelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                      DRCRobotSensorInformation sensorInfo)
+   public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParameters footstepPlannerParameters,
+                                      WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
+                                      LogModelProvider modelProvider, boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo)
          throws IOException
    {
-      this(robotName, wholeBodyControllerParameters, robotModelFactory, modelProvider, startYoVariableServer, sensorInfo, false);
+      this(robotName, footstepPlannerParameters, wholeBodyControllerParameters, robotModelFactory, modelProvider, startYoVariableServer, sensorInfo, false);
    }
 
    public static void setAutomaticDiagnosticTimeToWait(double timeToWait)
@@ -97,13 +99,14 @@ public class IHMCHumanoidBehaviorManager
       runAutomaticDiagnosticTimeToWait = timeToWait;
    }
 
-   private IHMCHumanoidBehaviorManager(String robotName, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                       FullHumanoidRobotModelFactory robotModelFactory, LogModelProvider modelProvider, boolean startYoVariableServer,
-                                       DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic)
+   private IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParameters footstepPlannerParameters,
+                                       WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
+                                       LogModelProvider modelProvider, boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo,
+                                       boolean runAutomaticDiagnostic)
          throws IOException
    {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
-
+      this.footstepPlannerParameters = footstepPlannerParameters;
       if (startYoVariableServer)
       {
          yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
@@ -158,12 +161,13 @@ public class IHMCHumanoidBehaviorManager
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(robotName, dispatcher, fullRobotModel, referenceFrames, yoTime, ros2Node, capturePointUpdatable,
-                                              wholeBodyControllerParameters, runAutomaticDiagnosticTimeToWait, yoGraphicsListRegistry);
+                                              wholeBodyControllerParameters, footstepPlannerParameters, runAutomaticDiagnosticTimeToWait,
+                                              yoGraphicsListRegistry);
       }
       else
       {
          createAndRegisterBehaviors(robotName, dispatcher, modelProvider, fullRobotModel, robotModelFactory, wristSensorUpdatables, referenceFrames, yoTime,
-                                    ros2Node, yoGraphicsListRegistry, capturePointUpdatable, wholeBodyControllerParameters);
+                                    ros2Node, yoGraphicsListRegistry, capturePointUpdatable, wholeBodyControllerParameters, footstepPlannerParameters);
       }
 
       MessageTopicNameGenerator behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
@@ -202,18 +206,21 @@ public class IHMCHumanoidBehaviorManager
                                            FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
                                            YoDouble yoTime, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                           CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
+                                           CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                           FootstepPlannerParameters footstepPlannerParameters)
    {
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
-      AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(robotName, ros2Node, fullRobotModel, robotModelFactory, referenceFrames, yoTime,
-                                                                              wholeBodyControllerParameters, registry);
+      AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(robotName, ros2Node, footstepPlannerParameters, fullRobotModel, robotModelFactory,
+                                                                              referenceFrames, yoTime, wholeBodyControllerParameters, registry);
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       // CREATE SERVICES
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,FiducialDetectorBehaviorService.class.getSimpleName(), ros2Node, yoGraphicsListRegistry);
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,
+                                                                                                            FiducialDetectorBehaviorService.class.getSimpleName(),
+                                                                                                            ros2Node, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
@@ -242,30 +249,26 @@ public class IHMCHumanoidBehaviorManager
                                                                 wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
-      
+
       dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new TimingBehaviorHelper(robotName, ros2Node));
-      
-      dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName,yoTime, ros2Node));
-      
+
+      dispatcher.addBehavior(HumanoidBehaviorType.ROUGH_TERRAIN_OPERATOR_TIMING_BEHAVIOR, new RoughTerrainTimingBehavior(robotName, yoTime, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
                              new TurnValveBehaviorStateMachine(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
                                                                wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(robotName,"Human", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                         wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
-      
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR,
-                             new DoorTimingBehavior(robotName, yoTime,ros2Node,true));
+                             new WalkThroughDoorBehavior(robotName, "Human", ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
+                                                         wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry));
+
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
                              new DoorTimingBehaviorAutomated(robotName, ros2Node, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                         wholeBodyControllerParameters, atlasPrimitiveActions,yoGraphicsListRegistry));
-      
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR,
-                             new WalkTimingBehavior(robotName, yoTime,ros2Node,true));
-      
-      
+                                                             wholeBodyControllerParameters, atlasPrimitiveActions, yoGraphicsListRegistry));
+
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION_TIMING_BEHAVIOR, new WalkTimingBehavior(robotName, yoTime, ros2Node, true));
+
       dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS, new PartialFootholdBehavior(robotName, ros2Node));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION, new TestICPOptimizationBehavior(robotName, ros2Node, referenceFrames, yoTime));
@@ -286,18 +289,19 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR, new TestDoorOpenBehaviorService(robotName,"doorOpen", ros2Node, yoGraphicsListRegistry));
       
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
-                             new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
+                                                                                                 referenceFrames, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50_AND_TURN,
-                             new WalkToFiducialAndTurnBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService,fullRobotModel));
+                             new WalkToFiducialAndTurnBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames,
+                                                               footstepPlannerParameters, fiducialDetectorBehaviorService, fullRobotModel));
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN,
                              new WalkOverTerrainStateMachineBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames));
 
       if (objectDetectorBehaviorService != null)
       {
          dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_VALVE, new LocateGoalBehavior(robotName, ros2Node, objectDetectorBehaviorService));
-         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
-                                new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters, referenceFrames, fiducialDetectorBehaviorService));
+         dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE, new FollowFiducialBehavior(robotName, ros2Node, yoTime, wholeBodyControllerParameters,
+                                                                                              referenceFrames, fiducialDetectorBehaviorService));
       }
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE, new BasicPipeLineBehavior(robotName, "pipelineTest", yoTime, ros2Node, fullRobotModel,
@@ -318,14 +322,16 @@ public class IHMCHumanoidBehaviorManager
       //      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName, fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     ros2Node, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+                                                                     ros2Node, wholeBodyControllerParameters, footstepPlannerParameters, yoSupportPolygon,
+                                                                     yoGraphicsListRegistry);
       diagnosticBehavior.setCanArmsReachFarBehind(robotModelFactory.getRobotDescription().getName().contains("valkyrie"));
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(robotName, ros2Node, referenceFrames, walkingControllerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-      
-      WalkToLocationPlannedBehavior walkToLocationBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+
+      WalkToLocationPlannedBehavior walkToLocationBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames,
+                                                                                               walkingControllerParameters, footstepPlannerParameters, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       RepeatedlyWalkFootstepListBehavior repeatedlyWalkFootstepListBehavior = new RepeatedlyWalkFootstepListBehavior(robotName, ros2Node, referenceFrames,
@@ -336,7 +342,8 @@ public class IHMCHumanoidBehaviorManager
    private void createAndRegisterAutomaticDiagnostic(String robotName, BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
                                                      Ros2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
-                                                     WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
+                                                     WholeBodyControllerParameters wholeBodyControllerParameters,
+                                                     FootstepPlannerParameters footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -344,13 +351,14 @@ public class IHMCHumanoidBehaviorManager
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(robotName, fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     ros2Node, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+                                                                     ros2Node, wholeBodyControllerParameters, footstepPlannerParameters, yoSupportPolygon,
+                                                                     yoGraphicsListRegistry);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
    }
 
-   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName,
+   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName, FootstepPlannerParameters footstepPlannerParameters,
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
                                                                                         LogModelProvider modelProvider, boolean startYoVariableServer,
@@ -358,8 +366,9 @@ public class IHMCHumanoidBehaviorManager
          throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
-      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(robotName, wholeBodyControllerParameters, robotModelFactory,
-                                                                                                modelProvider, startYoVariableServer, sensorInfo, true);
+      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(robotName, footstepPlannerParameters,
+                                                                                                wholeBodyControllerParameters, robotModelFactory, modelProvider,
+                                                                                                startYoVariableServer, sensorInfo, true);
       return ihmcHumanoidBehaviorManager;
    }
 

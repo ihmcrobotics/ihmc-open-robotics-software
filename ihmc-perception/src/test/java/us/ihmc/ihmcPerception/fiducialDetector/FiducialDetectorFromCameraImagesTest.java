@@ -52,7 +52,7 @@ public class FiducialDetectorFromCameraImagesTest
 
       final Robot simpleRobotWithCamera = createCameraRobot(fieldOfView);
 
-      final FloatingFiducialBoxRobot floatingFiducialBoxRobot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50);
+      final FloatingFiducialBoxRobot floatingFiducialBoxRobot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50,"3");
       floatingFiducialBoxRobot.setPosition(6.0, 0.0, 2.0);
       floatingFiducialBoxRobot.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
 

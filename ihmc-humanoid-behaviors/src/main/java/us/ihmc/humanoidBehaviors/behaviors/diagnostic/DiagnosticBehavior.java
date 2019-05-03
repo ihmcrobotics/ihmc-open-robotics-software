@@ -34,6 +34,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
@@ -254,7 +255,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParameters footstepPlannerParameters,
                              YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
@@ -360,7 +361,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(robotName, ros2Node, yoTime);
       registry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
 
-      turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      turnInPlaceBehavior = new TurnInPlaceBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters,footstepPlannerParameters, yoTime);
       registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
 
       for (RobotSide robotSide : RobotSide.values)
