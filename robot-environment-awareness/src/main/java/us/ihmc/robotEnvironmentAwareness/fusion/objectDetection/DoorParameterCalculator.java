@@ -209,7 +209,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
             }
          }
       }
-      
+
       for (DoorVertexName vertexName : DoorVertexName.values())
       {
          LogTools.info("doorVerticesInWorld vertexName " + vertexName + " " + doorVerticesInWorld.get(vertexName));
