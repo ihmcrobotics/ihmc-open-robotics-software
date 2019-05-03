@@ -675,6 +675,7 @@ public class CrossRobotCommandCodeQualityTest
    private static Set<Class<?>> safeTypes()
    {
       Set<Class<?>> safeTypes = new HashSet<>();
+      safeTypes.add(String.class);
       safeTypes.add(ArrayList.class);
       safeTypes.add(List.class);
       safeTypes.add(AtomicReference.class);

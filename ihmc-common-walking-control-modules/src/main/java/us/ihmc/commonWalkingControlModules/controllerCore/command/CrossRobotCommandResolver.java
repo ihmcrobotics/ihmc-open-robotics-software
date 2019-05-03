@@ -70,6 +70,9 @@ import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -143,6 +146,33 @@ public class CrossRobotCommandResolver
          out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
          resolveFrameTuple2D(in.getCenterOfPressure(i), out.getCenterOfPressure(i));
       }
+   }
+
+   public void resolveForceSensorDataHolder(ForceSensorDataHolder in, ForceSensorDataHolder out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfForceSensors(); i++)
+      {
+         ForceSensorDefinition inDefinition = in.getForceSensorDefinitions().get(i);
+         ForceSensorData inData = in.get(inDefinition);
+         out.registerForceSensor(inDefinition);
+         ForceSensorDefinition outDefinition = out.getForceSensorDefinitions().get(i);
+         ForceSensorData outData = out.get(outDefinition);
+
+         resolveForceSensorDefinition(inDefinition, outDefinition);
+         resolveForceSensorData(inData, outData);
+      }
+   }
+
+   private void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
+   {
+      out.set(in);
+      out.setFrameAndBody(resolveReferenceFrame(in.getMeasurementFrame()), resolveRigidBody(in.getMeasurementLink()));
+   }
+
+   private void resolveForceSensorDefinition(ForceSensorDefinition in, ForceSensorDefinition out)
+   {
+      out.set(in.getSensorName(), resolveRigidBody(in.getRigidBody()), resolveReferenceFrame(in.getSensorFrame()));
    }
 
    public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)

@@ -111,6 +111,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -152,6 +155,7 @@ public class CrossRobotCommandRandomTools
       set.add(RobotMotionStatusHolder.class);
       set.add(LowLevelOneDoFJointDesiredDataHolder.class);
       set.add(RawJointSensorDataHolderMap.class);
+      set.add(ForceSensorDataHolder.class);
       return set;
    }
 
@@ -257,6 +261,11 @@ public class CrossRobotCommandRandomTools
    public static <E> E nextElementIn(Random random, List<E> list)
    {
       return list.get(random.nextInt(list.size()));
+   }
+
+   public static String nextString(Random random)
+   {
+      return Long.toString(random.nextLong());
    }
 
    public static Point2D nextPoint2D(Random random)
@@ -1379,6 +1388,42 @@ public class CrossRobotCommandRandomTools
       next.setTemperature(random.nextDouble());
       next.setMotorAngle(0, random.nextDouble());
       next.setMotorAngle(1, random.nextDouble());
+      return next;
+   }
+
+   public static ForceSensorDataHolder nextForceSensorDataHolder(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      return nextForceSensorDataHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static ForceSensorDataHolder nextForceSensorDataHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                 ReferenceFrame... possibleFrames)
+   {
+      ForceSensorDataHolder next = new ForceSensorDataHolder();
+      int numberOfSensors = random.nextInt(20);
+      if (ensureNonEmptyCommand)
+         numberOfSensors = Math.max(numberOfSensors, 1);
+      for (int sensorIndex = 0; sensorIndex < numberOfSensors; sensorIndex++)
+      {
+         next.registerForceSensor(nextForceSensorDefinition(random, rootBody, possibleFrames));
+      }
+      return next;
+   }
+
+   public static ForceSensorDefinition nextForceSensorDefinition(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      ForceSensorDefinition next = new ForceSensorDefinition();
+      List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
+      next.set("Sensor" + random.nextLong(), nextElementIn(random, allBodies), nextElementIn(random, possibleFrames));
+      return next;
+   }
+
+   public static ForceSensorData nextForceSensorData(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      ForceSensorData next = new ForceSensorData();
+      List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
+      next.setFrameAndBody(nextElementIn(random, possibleFrames), nextElementIn(random, allBodies));
+      next.setWrench(nextDenseMatrix64F(random, 6, 1));
       return next;
    }
 
