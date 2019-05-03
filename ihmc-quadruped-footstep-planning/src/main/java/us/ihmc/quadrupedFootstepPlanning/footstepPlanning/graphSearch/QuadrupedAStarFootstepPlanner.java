@@ -356,6 +356,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
          QuadrupedTimedOrientedStep newStep = new QuadrupedTimedOrientedStep();
          newStep.setRobotQuadrant(robotQuadrant);
+         newStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
 
          double endTimeShift;
          if (i == 0)

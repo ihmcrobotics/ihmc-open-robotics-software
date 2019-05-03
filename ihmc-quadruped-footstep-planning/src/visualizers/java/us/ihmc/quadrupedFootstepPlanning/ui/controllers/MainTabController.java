@@ -166,7 +166,7 @@ public class MainTabController
    @FXML
    public void requestStopWalking()
    {
-      messager.submitMessage(stepListMessageTopic, null);
+      messager.submitMessage(stepListMessageTopic, new QuadrupedTimedStepListMessage());
       requestStanding();
    }
 
