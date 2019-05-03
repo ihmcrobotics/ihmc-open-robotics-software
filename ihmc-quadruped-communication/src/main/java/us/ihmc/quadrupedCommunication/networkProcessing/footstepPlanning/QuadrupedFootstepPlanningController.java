@@ -126,7 +126,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       {
          WaypointsForQuadrupedFootstepPlanner planner = plannerMap.get(plannerKey).getWaypointPathPlanner();
          if (planner != null)
-            planner.setFallbackRegionSize(message.getSupportRegionSize());
+            planner.setFallbackRegionSize(message.getInsideSupportRegionSize());
       }
    }
 
