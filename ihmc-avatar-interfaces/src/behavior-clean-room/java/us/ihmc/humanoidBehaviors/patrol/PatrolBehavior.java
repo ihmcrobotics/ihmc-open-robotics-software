@@ -128,6 +128,7 @@ public class PatrolBehavior
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
       factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, PLAN, STOP), this::transitionFromWalk);
       factory.getStateMap().get(PERCEIVE).setOnEntry(this::onPerceiveStateEntry);
+      factory.getStateMap().get(PERCEIVE).setDoAction(this::doPerceiveStateAction);
       factory.addTransition(PERCEIVE, Lists.newArrayList(PLAN, STOP), this::transitionFromPerceive);
       factory.getFactory().addStateChangedListener((from, to) ->
                                                    {
@@ -357,6 +358,11 @@ public class PatrolBehavior
       REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       clearMessage.setRequestClear(true);
       reaStateRequestPublisher.publish(clearMessage);
+   }
+
+   private void doPerceiveStateAction(double timeInState)
+   {
+      pollInterrupts();
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
