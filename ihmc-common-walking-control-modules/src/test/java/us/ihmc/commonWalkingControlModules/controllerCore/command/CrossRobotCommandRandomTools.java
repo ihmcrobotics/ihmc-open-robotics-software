@@ -118,6 +118,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class CrossRobotCommandRandomTools
 {
@@ -149,6 +151,7 @@ public class CrossRobotCommandRandomTools
       set.add(HumanoidRobotContextJointData.class);
       set.add(RobotMotionStatusHolder.class);
       set.add(LowLevelOneDoFJointDesiredDataHolder.class);
+      set.add(RawJointSensorDataHolderMap.class);
       return set;
    }
 
@@ -1332,6 +1335,50 @@ public class CrossRobotCommandRandomTools
    {
       RobotMotionStatusHolder next = new RobotMotionStatusHolder();
       next.setCurrentRobotMotionStatus(nextElementIn(random, RobotMotionStatus.values));
+      return next;
+   }
+
+   public static RawJointSensorDataHolderMap nextRawJointSensorDataHolderMap(Random random, RigidBodyBasics rootBody)
+   {
+      return nextRawJointSensorDataHolderMap(random, false, rootBody);
+   }
+
+   public static RawJointSensorDataHolderMap nextRawJointSensorDataHolderMap(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody)
+   {
+      RawJointSensorDataHolderMap next = new RawJointSensorDataHolderMap();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.registerJoint(joint);
+      }
+
+      return next;
+   }
+
+   public static RawJointSensorDataHolder nextRawJointSensorDataHolder(Random random)
+   {
+      RawJointSensorDataHolder next = new RawJointSensorDataHolder();
+      next.setIsEnabled(random.nextBoolean());
+      next.setQ_raw(random.nextDouble());
+      next.setQ_out_raw(random.nextDouble());
+      next.setQd_out_raw(random.nextDouble());
+      next.setQd_raw(random.nextDouble());
+      next.setF_raw(random.nextDouble());
+      next.setPsi_neg_raw(random.nextDouble());
+      next.setPsi_pos_raw(random.nextDouble());
+      next.setUsesOutputEncoderQ(random.nextBoolean());
+      next.setUsesOutputEncoderQd(random.nextBoolean());
+      next.setMotorCurrent(random.nextDouble());
+      next.setCommandedMotorCurrent(random.nextDouble());
+      next.setTemperature(random.nextDouble());
+      next.setMotorAngle(0, random.nextDouble());
+      next.setMotorAngle(1, random.nextDouble());
       return next;
    }
 

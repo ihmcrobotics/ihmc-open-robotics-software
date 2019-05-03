@@ -75,6 +75,8 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 /**
  * The objective of this class is to help the passing commands between two instances of the same
@@ -141,6 +143,21 @@ public class CrossRobotCommandResolver
          out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
          resolveFrameTuple2D(in.getCenterOfPressure(i), out.getCenterOfPressure(i));
       }
+   }
+
+   public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfJoints(); i++)
+      {
+         out.registerJoint(resolveJoint(in.getJoint(i)));
+         resolveRawJointSensorDataHolder(in.get(i), out.get(i));
+      }
+   }
+
+   public void resolveRawJointSensorDataHolder(RawJointSensorDataHolder in, RawJointSensorDataHolder out)
+   {
+      out.set(in);
    }
 
    public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
