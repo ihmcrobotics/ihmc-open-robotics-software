@@ -1,13 +1,9 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -19,6 +15,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
@@ -48,7 +45,7 @@ public class RemoteFootstepPlannerInterface
 
    private final AtomicInteger requestCounter = new AtomicInteger(1739);
 
-   private final HashMap<Integer, TypedNotification<FootstepPlanningToolboxOutputStatus>> resultNotifications = new HashMap<>();
+   private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
    public enum PlanType { CLOSE, FAR }
 
@@ -83,18 +80,38 @@ public class RemoteFootstepPlannerInterface
                          FootstepPlanningToolboxOutputStatus.class,
                          robotModel.getSimpleRobotName(),
                          MultiStageFootstepPlanningModule.ROS2_ID,
-                         this::acceptFootstepPlanningStatus);
+                         this::acceptFootstepPlannerResult);
+
+      new ROS2Callback<>(ros2Node,
+                         FootstepPlannerStatusMessage.class,
+                         robotModel.getSimpleRobotName(),
+                         MultiStageFootstepPlanningModule.ROS2_ID,
+                         this::acceptFootstepPlannerState);
    }
 
-   private void acceptFootstepPlanningStatus(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus)
+   private void acceptFootstepPlannerResult(FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus)
    {
       if (resultNotifications.containsKey(footstepPlanningToolboxOutputStatus.getPlanId()))
       {
-         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(footstepPlanningToolboxOutputStatus);
+         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(new RemoteFootstepPlannerResult(footstepPlanningToolboxOutputStatus));
       }
    }
 
-   public TypedNotification<FootstepPlanningToolboxOutputStatus> requestPlan(FramePose3DReadOnly start,
+   // TODO Remove this when planner returns failure for sleep
+   private void acceptFootstepPlannerState(FootstepPlannerStatusMessage footstepPlannerStatusMessage)
+   {
+      if (FootstepPlannerStatus.fromByte(footstepPlannerStatusMessage.getFootstepPlannerStatus()) == FootstepPlannerStatus.IDLE)
+      {
+         for (TypedNotification<RemoteFootstepPlannerResult> notification : resultNotifications.values())
+         {
+            notification.add(new RemoteFootstepPlannerResult(footstepPlannerStatusMessage));
+         }
+
+         resultNotifications.clear();
+      }
+   }
+
+   public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
                                                                              FramePose3DReadOnly goal,
                                                                              PlanarRegionsListMessage planarRegionsListMessage)
    {
@@ -138,7 +155,7 @@ public class RemoteFootstepPlannerInterface
 
       footstepPlanningRequestPublisher.publish(packet);
 
-      TypedNotification<FootstepPlanningToolboxOutputStatus> resultNotification = new TypedNotification<>();
+      TypedNotification<RemoteFootstepPlannerResult> resultNotification = new TypedNotification<>();
       resultNotifications.put(sentPlannerId, resultNotification);
       return resultNotification;
    }
