@@ -110,7 +110,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
-   private final DenseMatrix64F tempWrench = new DenseMatrix64F(6, 1);
+   private final transient DenseMatrix64F tempWrench = new DenseMatrix64F(6, 1);
    @Deprecated // maintains compatibility with the thread data synchronizer
    public void setDataOnly(ForceSensorDataHolder other)
    {
