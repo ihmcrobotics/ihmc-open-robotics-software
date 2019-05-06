@@ -151,10 +151,11 @@ public class QuadrupedSupportPlanarRegionPublisher
       referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         soleZUpFrame.get(robotQuadrant).update();;
+         soleZUpFrame.get(robotQuadrant).update();
       }
 
       QuadrantDependentList<Boolean> isInSupport = new QuadrantDependentList<>(true, true, true, true);
+      /*
       if (feetAreInSamePlane(isInSupport))
       {
          ReferenceFrame leftSoleFrame = soleZUpFrame.get(RobotQuadrant.FRONT_LEFT);
@@ -173,11 +174,11 @@ public class QuadrupedSupportPlanarRegionPublisher
       }
       else
       {
+      */
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             if (isInSupport.get(robotQuadrant))
             {
-               ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
                List<FramePoint2D> contactPoints = createConvexPolygonPoints(robotQuadrant, soleZUpFrame.get(robotQuadrant), insideSupportRegionSize, outsideSupportRegionSize);
                RigidBodyTransform transformToWorld = soleZUpFrame.get(robotQuadrant).getTransformToWorldFrame();
                supportRegions.set(robotQuadrant.ordinal(),
@@ -190,7 +191,7 @@ public class QuadrupedSupportPlanarRegionPublisher
          }
 
          supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
-      }
+//      }
 
       publishRegions();
    }
