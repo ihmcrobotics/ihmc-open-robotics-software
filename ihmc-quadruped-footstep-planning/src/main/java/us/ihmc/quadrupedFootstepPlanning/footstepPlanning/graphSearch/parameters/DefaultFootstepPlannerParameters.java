@@ -4,14 +4,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 {
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
       return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepLength()
+   public double getMaximumFrontStepLength()
    {
       return 0.45;
    }
@@ -25,7 +25,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepLength()
+   public double getMinimumFrontStepLength()
    {
       return -0.2;
    }

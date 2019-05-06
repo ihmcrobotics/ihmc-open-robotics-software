@@ -16,9 +16,12 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public double maximum_step_reach_ = -11.1;
-   public double maximum_step_length_ = -11.1;
-   public double minimum_step_length_ = -11.1;
+   public double maximum_front_step_reach_ = -11.1;
+   public double maximum_front_step_length_ = -11.1;
+   public double minimum_front_step_length_ = -11.1;
+   public double maximum_hind_step_reach_ = -11.1;
+   public double maximum_hind_step_length_ = -11.1;
+   public double minimum_hind_step_length_ = -11.1;
    public double maximum_step_width_ = -11.1;
    public double minimum_step_width_ = -11.1;
    public double minimum_step_yaw_ = -11.1;
@@ -57,11 +60,17 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    {
       sequence_id_ = other.sequence_id_;
 
-      maximum_step_reach_ = other.maximum_step_reach_;
+      maximum_front_step_reach_ = other.maximum_front_step_reach_;
 
-      maximum_step_length_ = other.maximum_step_length_;
+      maximum_front_step_length_ = other.maximum_front_step_length_;
 
-      minimum_step_length_ = other.minimum_step_length_;
+      minimum_front_step_length_ = other.minimum_front_step_length_;
+
+      maximum_hind_step_reach_ = other.maximum_hind_step_reach_;
+
+      maximum_hind_step_length_ = other.maximum_hind_step_length_;
+
+      minimum_hind_step_length_ = other.minimum_hind_step_length_;
 
       maximum_step_width_ = other.maximum_step_width_;
 
@@ -126,31 +135,58 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return sequence_id_;
    }
 
-   public void setMaximumStepReach(double maximum_step_reach)
+   public void setMaximumFrontStepReach(double maximum_front_step_reach)
    {
-      maximum_step_reach_ = maximum_step_reach;
+      maximum_front_step_reach_ = maximum_front_step_reach;
    }
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
-      return maximum_step_reach_;
-   }
-
-   public void setMaximumStepLength(double maximum_step_length)
-   {
-      maximum_step_length_ = maximum_step_length;
-   }
-   public double getMaximumStepLength()
-   {
-      return maximum_step_length_;
+      return maximum_front_step_reach_;
    }
 
-   public void setMinimumStepLength(double minimum_step_length)
+   public void setMaximumFrontStepLength(double maximum_front_step_length)
    {
-      minimum_step_length_ = minimum_step_length;
+      maximum_front_step_length_ = maximum_front_step_length;
    }
-   public double getMinimumStepLength()
+   public double getMaximumFrontStepLength()
    {
-      return minimum_step_length_;
+      return maximum_front_step_length_;
+   }
+
+   public void setMinimumFrontStepLength(double minimum_front_step_length)
+   {
+      minimum_front_step_length_ = minimum_front_step_length;
+   }
+   public double getMinimumFrontStepLength()
+   {
+      return minimum_front_step_length_;
+   }
+
+   public void setMaximumHindStepReach(double maximum_hind_step_reach)
+   {
+      maximum_hind_step_reach_ = maximum_hind_step_reach;
+   }
+   public double getMaximumHindStepReach()
+   {
+      return maximum_hind_step_reach_;
+   }
+
+   public void setMaximumHindStepLength(double maximum_hind_step_length)
+   {
+      maximum_hind_step_length_ = maximum_hind_step_length;
+   }
+   public double getMaximumHindStepLength()
+   {
+      return maximum_hind_step_length_;
+   }
+
+   public void setMinimumHindStepLength(double minimum_hind_step_length)
+   {
+      minimum_hind_step_length_ = minimum_hind_step_length;
+   }
+   public double getMinimumHindStepLength()
+   {
+      return minimum_hind_step_length_;
    }
 
    public void setMaximumStepWidth(double maximum_step_width)
@@ -380,11 +416,17 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_reach_, other.maximum_step_reach_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_front_step_reach_, other.maximum_front_step_reach_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_length_, other.maximum_step_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_front_step_length_, other.maximum_front_step_length_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_length_, other.minimum_step_length_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_front_step_length_, other.minimum_front_step_length_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_hind_step_reach_, other.maximum_hind_step_reach_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_hind_step_length_, other.maximum_hind_step_length_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_step_length_, other.minimum_hind_step_length_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_, other.maximum_step_width_, epsilon)) return false;
 
@@ -447,11 +489,17 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.maximum_step_reach_ != otherMyClass.maximum_step_reach_) return false;
+      if(this.maximum_front_step_reach_ != otherMyClass.maximum_front_step_reach_) return false;
 
-      if(this.maximum_step_length_ != otherMyClass.maximum_step_length_) return false;
+      if(this.maximum_front_step_length_ != otherMyClass.maximum_front_step_length_) return false;
 
-      if(this.minimum_step_length_ != otherMyClass.minimum_step_length_) return false;
+      if(this.minimum_front_step_length_ != otherMyClass.minimum_front_step_length_) return false;
+
+      if(this.maximum_hind_step_reach_ != otherMyClass.maximum_hind_step_reach_) return false;
+
+      if(this.maximum_hind_step_length_ != otherMyClass.maximum_hind_step_length_) return false;
+
+      if(this.minimum_hind_step_length_ != otherMyClass.minimum_hind_step_length_) return false;
 
       if(this.maximum_step_width_ != otherMyClass.maximum_step_width_) return false;
 
@@ -511,12 +559,18 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append("QuadrupedFootstepPlannerParametersPacket {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("maximum_step_reach=");
-      builder.append(this.maximum_step_reach_);      builder.append(", ");
-      builder.append("maximum_step_length=");
-      builder.append(this.maximum_step_length_);      builder.append(", ");
-      builder.append("minimum_step_length=");
-      builder.append(this.minimum_step_length_);      builder.append(", ");
+      builder.append("maximum_front_step_reach=");
+      builder.append(this.maximum_front_step_reach_);      builder.append(", ");
+      builder.append("maximum_front_step_length=");
+      builder.append(this.maximum_front_step_length_);      builder.append(", ");
+      builder.append("minimum_front_step_length=");
+      builder.append(this.minimum_front_step_length_);      builder.append(", ");
+      builder.append("maximum_hind_step_reach=");
+      builder.append(this.maximum_hind_step_reach_);      builder.append(", ");
+      builder.append("maximum_hind_step_length=");
+      builder.append(this.maximum_hind_step_length_);      builder.append(", ");
+      builder.append("minimum_hind_step_length=");
+      builder.append(this.minimum_hind_step_length_);      builder.append(", ");
       builder.append("maximum_step_width=");
       builder.append(this.maximum_step_width_);      builder.append(", ");
       builder.append("minimum_step_width=");

@@ -45,7 +45,7 @@ public class SnapBasedNodeCheckerTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMinimumStepLength()
+         public double getMinimumFrontStepLength()
          {
             return -0.3;
          }

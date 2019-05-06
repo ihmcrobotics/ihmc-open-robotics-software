@@ -7,10 +7,13 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class FootstepPlannerParametersProperty extends ParametersProperty<SettableFootstepPlannerParameters>
 {
-   private final DoubleField maximumStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepReach, SettableFootstepPlannerParameters::setMaximumStepReach);
-   private final DoubleField maximumStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumStepLength, SettableFootstepPlannerParameters::setMaximumStepLength);
+   private final DoubleField maximumFrontStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepReach, SettableFootstepPlannerParameters::setMaximumFrontStepReach);
+   private final DoubleField maximumFrontStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLength, SettableFootstepPlannerParameters::setMaximumFrontStepLength);
+   private final DoubleField minimumFrontStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLength, SettableFootstepPlannerParameters::setMinimumFrontStepLength);
+   private final DoubleField maximumHindStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepReach, SettableFootstepPlannerParameters::setMaximumHindStepReach);
+   private final DoubleField maximumHindStepLength= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLength, SettableFootstepPlannerParameters::setMaximumHindStepLength);
+   private final DoubleField minimumHindStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLength, SettableFootstepPlannerParameters::setMinimumHindStepLength);
    private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
-   private final DoubleField minimumStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepLength, SettableFootstepPlannerParameters::setMinimumStepLength);
    private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, SettableFootstepPlannerParameters::setMinimumStepWidth);
    private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, SettableFootstepPlannerParameters::setMinimumStepYaw);
    private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, SettableFootstepPlannerParameters::setMaximumStepYaw);
@@ -60,19 +63,34 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       return new SettableFootstepPlannerParameters(valueToCopy);
    }
 
-   public void bidirectionalBindMaximumStepReach(Property<? extends Number> property)
+   public void bidirectionalBindMaximumFrontStepReach(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, maximumStepReach);
+      bindFieldBidirectionalToNumberProperty(property, maximumFrontStepReach);
    }
 
-   public void bidirectionalBindMaximumStepLength(Property<? extends Number> property)
+   public void bidirectionalBindMaximumFrontStepLength(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, maximumStepLength);
+      bindFieldBidirectionalToNumberProperty(property, maximumFrontStepLength);
    }
 
-   public void bidirectionalBindMinimumStepLength(Property<? extends Number> property)
+   public void bidirectionalBindMinimumFrontStepLength(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, minimumStepLength);
+      bindFieldBidirectionalToNumberProperty(property, minimumFrontStepLength);
+   }
+
+   public void bidirectionalBindMaximumHindStepReach(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumHindStepReach);
+   }
+
+   public void bidirectionalBindMaximumHindStepLength(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumHindStepLength);
+   }
+
+   public void bidirectionalBindMinimumHindStepLength(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minimumHindStepLength);
    }
 
    public void bidirectionalBindMaxWalkingSpeedMultiplier(Property<? extends Number> property)

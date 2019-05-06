@@ -22,11 +22,17 @@ module controller_msgs
          */
         unsigned long sequence_id;
         @defaultValue(value=-11.1)
-        double maximum_step_reach;
+        double maximum_front_step_reach;
         @defaultValue(value=-11.1)
-        double maximum_step_length;
+        double maximum_front_step_length;
         @defaultValue(value=-11.1)
-        double minimum_step_length;
+        double minimum_front_step_length;
+        @defaultValue(value=-11.1)
+        double maximum_hind_step_reach;
+        @defaultValue(value=-11.1)
+        double maximum_hind_step_length;
+        @defaultValue(value=-11.1)
+        double minimum_hind_step_length;
         @defaultValue(value=-11.1)
         double maximum_step_width;
         @defaultValue(value=-11.1)

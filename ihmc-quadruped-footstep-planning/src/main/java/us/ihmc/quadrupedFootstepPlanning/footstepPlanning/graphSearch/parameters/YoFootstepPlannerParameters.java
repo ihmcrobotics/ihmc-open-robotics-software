@@ -7,9 +7,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
-   private final YoDouble maximumStepLength = new YoDouble("maximumStepLength", registry);
-   private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
+   private final YoDouble maximumFrontStepReach = new YoDouble("maximumFrontStepReach", registry);
+   private final YoDouble maximumFrontStepLength = new YoDouble("maximumFrontStepLength", registry);
+   private final YoDouble minimumFrontStepLength = new YoDouble("minimumFrontStepLength", registry);
+   private final YoDouble maximumHindStepReach = new YoDouble("maximumHindStepReach", registry);
+   private final YoDouble maximumHindStepLength = new YoDouble("maximumHindStepLength", registry);
+   private final YoDouble minimumHindStepLength = new YoDouble("minimumHindStepLength", registry);
    private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
    private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
    private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
@@ -41,21 +44,39 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMaximumStepReach(double maximumStepReach)
+   public void setMaximumFrontStepReach(double maximumStepReach)
    {
-      this.maximumStepReach.set(maximumStepReach);
+      this.maximumFrontStepReach.set(maximumStepReach);
    }
 
    @Override
-   public void setMaximumStepLength(double maximumStepLength)
+   public void setMaximumFrontStepLength(double maximumStepLength)
    {
-      this.maximumStepLength.set(maximumStepLength);
+      this.maximumFrontStepLength.set(maximumStepLength);
    }
 
    @Override
-   public void setMinimumStepLength(double minimumStepLength)
+   public void setMinimumFrontStepLength(double minimumStepLength)
    {
-      this.minimumStepLength.set(minimumStepLength);
+      this.minimumFrontStepLength.set(minimumStepLength);
+   }
+
+   @Override
+   public void setMaximumHindStepReach(double maximumStepReach)
+   {
+      this.maximumHindStepReach.set(maximumStepReach);
+   }
+
+   @Override
+   public void setMaximumHindStepLength(double maximumStepLength)
+   {
+      this.maximumHindStepLength.set(maximumStepLength);
+   }
+
+   @Override
+   public void setMinimumHindStepLength(double minimumStepLength)
+   {
+      this.minimumHindStepLength.set(minimumStepLength);
    }
 
    @Override
@@ -198,23 +219,44 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
-      return maximumStepReach.getDoubleValue();
+      return maximumFrontStepReach.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepLength()
+   public double getMaximumFrontStepLength()
    {
-      return maximumStepLength.getDoubleValue();
+      return maximumFrontStepLength.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepLength()
+   public double getMinimumFrontStepLength()
    {
-      return minimumStepLength.getDoubleValue();
+      return minimumFrontStepLength.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepReach()
+   {
+      return maximumHindStepReach.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepLength()
+   {
+      return maximumHindStepLength.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindStepLength()
+   {
+      return minimumHindStepLength.getDoubleValue();
    }
 
    /** {@inheritDoc} */

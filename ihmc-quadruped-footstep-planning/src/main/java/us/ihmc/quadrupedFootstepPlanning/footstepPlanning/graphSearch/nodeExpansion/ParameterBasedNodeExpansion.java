@@ -56,7 +56,10 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
       nodeOrientation.transform(clearanceVector);
 
-      for (double movingX = parameters.getMinimumStepLength(); movingX < parameters.getMaximumStepLength(); movingX += FootstepNode.gridSizeXY)
+      double minLength = movingQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+      double maxLength = movingQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+
+      for (double movingX = minLength; movingX < maxLength; movingX += FootstepNode.gridSizeXY)
       {
          for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += FootstepNode.gridSizeXY)
          {
