@@ -5,9 +5,12 @@ float64 NO_VALUE_DOUBLE = -11.1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-float64 maximum_step_reach -11.1
-float64 maximum_step_length -11.1
-float64 minimum_step_length -11.1
+float64 maximum_front_step_reach -11.1
+float64 maximum_front_step_length -11.1
+float64 minimum_front_step_length -11.1
+float64 maximum_hind_step_reach -11.1
+float64 maximum_hind_step_length -11.1
+float64 minimum_hind_step_length -11.1
 float64 maximum_step_width -11.1
 float64 minimum_step_width -11.1
 float64 minimum_step_yaw -11.1

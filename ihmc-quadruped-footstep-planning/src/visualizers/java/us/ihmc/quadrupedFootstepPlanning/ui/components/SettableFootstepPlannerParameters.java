@@ -5,10 +5,14 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 
 public class SettableFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
-   private double maximumStepReach;
-   private double maximumStepLength;
+   private double maximumFrontStepReach;
+   private double maximumFrontStepLength;
+   private double minimumFrontStepLength;
+   private double maximumHindStepReach;
+   private double maximumHindStepLength;
+   private double minimumHindStepLength;
+
    private double maximumStepWidth;
-   private double minimumStepLength;
    private double minimumStepWidth;
    private double minimumStepYaw;
    private double maximumStepYaw;
@@ -42,16 +46,44 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepReach(double maximumStepReach)
+   public void setMaximumFrontStepReach(double maximumStepReach)
    {
-      this.maximumStepReach = maximumStepReach;
+      this.maximumFrontStepReach = maximumStepReach;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepLength(double maximumStepLength)
+   public void setMaximumFrontStepLength(double maximumStepLength)
    {
-      this.maximumStepLength = maximumStepLength;
+      this.maximumFrontStepLength = maximumStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumFrontStepLength(double minimumStepLength)
+   {
+      this.minimumFrontStepLength = minimumStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumHindStepReach(double maximumStepReach)
+   {
+      this.maximumHindStepReach = maximumStepReach;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumHindStepLength(double maximumStepLength)
+   {
+      this.maximumHindStepLength = maximumStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumHindStepLength(double minimumStepLength)
+   {
+      this.minimumHindStepLength = minimumStepLength;
    }
 
    /** {@inheritDoc} */
@@ -59,13 +91,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMaximumStepWidth(double maximumStepWidth)
    {
       this.maximumStepWidth = maximumStepWidth;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void setMinimumStepLength(double minimumStepLength)
-   {
-      this.minimumStepLength = minimumStepLength;
    }
 
    /** {@inheritDoc} */
@@ -220,16 +245,44 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
-      return maximumStepReach;
+      return maximumFrontStepReach;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepLength()
+   public double getMaximumFrontStepLength()
    {
-      return maximumStepLength;
+      return maximumFrontStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumFrontStepLength()
+   {
+      return minimumFrontStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepReach()
+   {
+      return maximumHindStepReach;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepLength()
+   {
+      return maximumHindStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindStepLength()
+   {
+      return minimumHindStepLength;
    }
 
    /** {@inheritDoc} */
@@ -237,13 +290,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumStepWidth()
    {
       return maximumStepWidth;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumStepLength()
-   {
-      return minimumStepLength;
    }
 
    /** {@inheritDoc} */

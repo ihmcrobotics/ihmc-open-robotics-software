@@ -157,6 +157,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, previousOrientation);
+
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          FramePoint3D expectedXGaitPoint = new FramePoint3D(footFrames.get(robotQuadrant));
@@ -168,7 +170,11 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          newStepPosition.changeFrame(footFrames.get(robotQuadrant));
 
          // check total distance
-         if ((newStepPosition.distance(expectedXGaitPoint) > parameters.getMaximumStepLength()))
+         double maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+         double maxReach = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
+         double minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+
+         if ((newStepPosition.distance(expectedXGaitPoint) > maxReach))
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far.");
@@ -177,13 +183,13 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          }
 
          // check forward/backward
-         if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > parameters.getMaximumStepLength())
+         if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > maxLength)
          {
 
             rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
             return false;
          }
-         else if (newStepPosition.getX() - expectedXGaitPoint.getX() < parameters.getMinimumStepLength())
+         else if (newStepPosition.getX() - expectedXGaitPoint.getX() < minLength)
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far backward.");

@@ -10,11 +10,26 @@ public interface FootstepPlannerParameters
    /**
     * The total maximum Euclidean distance length.
     */
-   double getMaximumStepReach();
+   double getMaximumFrontStepReach();
 
-   double getMaximumStepLength();
+   double getMaximumFrontStepLength();
 
-   double getMinimumStepLength();
+   double getMinimumFrontStepLength();
+
+   default double getMaximumHindStepReach()
+   {
+      return getMaximumFrontStepReach();
+   }
+
+   default double getMaximumHindStepLength()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumHindStepLength()
+   {
+      return getMinimumFrontStepLength();
+   }
 
    double getMaximumStepWidth();
 
@@ -153,9 +168,12 @@ public interface FootstepPlannerParameters
    default QuadrupedFootstepPlannerParametersPacket getAsPacket()
    {
       QuadrupedFootstepPlannerParametersPacket packet = new QuadrupedFootstepPlannerParametersPacket();
-      packet.setMaximumStepReach(getMaximumStepReach());
-      packet.setMaximumStepLength(getMaximumStepLength());
-      packet.setMinimumStepLength(getMinimumStepLength());
+      packet.setMaximumFrontStepReach(getMaximumFrontStepReach());
+      packet.setMaximumFrontStepLength(getMaximumFrontStepLength());
+      packet.setMinimumFrontStepLength(getMinimumFrontStepLength());
+      packet.setMaximumHindStepReach(getMaximumHindStepReach());
+      packet.setMaximumHindStepLength(getMaximumHindStepLength());
+      packet.setMinimumHindStepLength(getMinimumHindStepLength());
       packet.setMaximumStepWidth(getMaximumStepWidth());
       packet.setMinimumStepWidth(getMinimumStepWidth());
       packet.setMinimumStepYaw(getMinimumStepYaw());

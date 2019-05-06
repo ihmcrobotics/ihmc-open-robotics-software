@@ -22,11 +22,17 @@ public class FootstepPlannerParametersUIController
 
 
    @FXML
-   private Spinner<Double> maxStepReach;
+   private Spinner<Double> maxFrontStepReach;
    @FXML
-   private Spinner<Double> maxStepLength;
+   private Spinner<Double> maxFrontStepLength;
    @FXML
-   private Spinner<Double> minStepLength;
+   private Spinner<Double> minFrontStepLength;
+   @FXML
+   private Spinner<Double> maxHindStepReach;
+   @FXML
+   private Spinner<Double> maxHindStepLength;
+   @FXML
+   private Spinner<Double> minHindStepLength;
    @FXML
    private Spinner<Double> maxStepWidth;
    @FXML
@@ -120,9 +126,12 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
-      maxStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
-      maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      maxFrontStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
+      maxFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      maxHindStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
+      maxHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.01));
 
@@ -158,9 +167,12 @@ public class FootstepPlannerParametersUIController
    {
       setupControls();
 
-      parametersProperty.bidirectionalBindMaximumStepReach(maxStepReach.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumStepLength(maxStepLength.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinimumStepLength(minStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumFrontStepReach(maxFrontStepReach.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumFrontStepLength(maxFrontStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumFrontStepLength(minFrontStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumHindStepReach(maxHindStepReach.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumHindStepLength(maxHindStepLength.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumHindStepLength(minHindStepLength.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumStepWidth(maxStepWidth.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepWidth(minStepWidth.getValueFactory().valueProperty());
 
@@ -205,11 +217,14 @@ public class FootstepPlannerParametersUIController
 
       System.out.println("Saving Parameters to file.");
 
-      filePropertyHelper.saveProperty("maxStepReach", maxStepReach.getValue());
-      filePropertyHelper.saveProperty("maxStepLength", maxStepLength.getValue());
+      filePropertyHelper.saveProperty("maxFrontStepReach", maxFrontStepReach.getValue());
+      filePropertyHelper.saveProperty("maxFrontStepLength", maxFrontStepLength.getValue());
+      filePropertyHelper.saveProperty("minFrontStepLength", minFrontStepLength.getValue());
+      filePropertyHelper.saveProperty("maxHindStepReach", maxHindStepReach.getValue());
+      filePropertyHelper.saveProperty("maxHindStepLength", maxHindStepLength.getValue());
+      filePropertyHelper.saveProperty("minHindStepLength", minHindStepLength.getValue());
       filePropertyHelper.saveProperty("maxStepWidth", maxStepWidth.getValue());
       filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
-      filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
 
       filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
       filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
@@ -246,16 +261,22 @@ public class FootstepPlannerParametersUIController
       }
 
       Double value;
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepReach")) != null)
-         maxStepReach.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("maxStepLength")) != null)
-         maxStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxFrontStepReach")) != null)
+         maxFrontStepReach.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxFrontStepLength")) != null)
+         maxFrontStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFrontStepLength")) != null)
+         minFrontStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxHindStepReach")) != null)
+         maxHindStepReach.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxHindStepLength")) != null)
+         maxHindStepLength.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minHindStepLength")) != null)
+         minHindStepLength.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("maxStepWidth")) != null)
          maxStepWidth.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("minStepWidth")) != null)
          minStepWidth.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minStepLength")) != null)
-         minStepLength.getValueFactory().setValue(value);
 
       if ((value = filePropertyHelper.loadDoubleProperty("maxStepYaw")) != null)
          maxStepYaw.getValueFactory().setValue(value);

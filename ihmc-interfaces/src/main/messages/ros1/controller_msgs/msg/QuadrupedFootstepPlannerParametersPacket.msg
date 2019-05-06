@@ -4,13 +4,22 @@ float64 NO_VALUE_DOUBLE=-11.1
 uint32 sequence_id
 
 # Field default value -11.1
-float64 maximum_step_reach
+float64 maximum_front_step_reach
 
 # Field default value -11.1
-float64 maximum_step_length
+float64 maximum_front_step_length
 
 # Field default value -11.1
-float64 minimum_step_length
+float64 minimum_front_step_length
+
+# Field default value -11.1
+float64 maximum_hind_step_reach
+
+# Field default value -11.1
+float64 maximum_hind_step_length
+
+# Field default value -11.1
+float64 minimum_hind_step_length
 
 # Field default value -11.1
 float64 maximum_step_width

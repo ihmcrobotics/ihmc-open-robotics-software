@@ -4,11 +4,17 @@ import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParameters
 {
-   void setMaximumStepReach(double maximumStepReach);
+   void setMaximumFrontStepReach(double maximumStepReach);
 
-   void setMaximumStepLength(double maximumStepLength);
+   void setMaximumFrontStepLength(double maximumStepLength);
 
-   void setMinimumStepLength(double minimumStepLength);
+   void setMinimumFrontStepLength(double minimumStepLength);
+
+   void setMaximumHindStepReach(double maximumStepReach);
+
+   void setMaximumHindStepLength(double maximumStepLength);
+
+   void setMinimumHindStepLength(double minimumStepLength);
 
    void setMaximumStepWidth(double maximumStepWidth);
 
@@ -58,9 +64,12 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    default void set(FootstepPlannerParameters other)
    {
-      setMaximumStepReach(other.getMaximumStepReach());
-      setMaximumStepLength(other.getMaximumStepLength());
-      setMinimumStepLength(other.getMinimumStepLength());
+      setMaximumFrontStepReach(other.getMaximumFrontStepReach());
+      setMaximumFrontStepLength(other.getMaximumFrontStepLength());
+      setMinimumFrontStepLength(other.getMinimumFrontStepLength());
+      setMaximumHindStepReach(other.getMaximumHindStepReach());
+      setMaximumHindStepLength(other.getMaximumHindStepLength());
+      setMinimumHindStepLength(other.getMinimumHindStepLength());
       setMaximumStepWidth(other.getMaximumStepWidth());
       setMinimumStepWidth(other.getMinimumStepWidth());
       setMinimumStepYaw(other.getMinimumStepYaw());
@@ -88,12 +97,18 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
    {
-      if (other.getMaximumStepReach() != other.NO_VALUE_DOUBLE)
-         setMaximumStepReach(other.getMaximumStepReach());
-      if (other.getMaximumStepLength() != other.NO_VALUE_DOUBLE)
-         setMaximumStepLength(other.getMaximumStepLength());
-      if (other.getMinimumStepLength() != other.NO_VALUE_DOUBLE)
-         setMinimumStepLength(other.getMinimumStepLength());
+      if (other.getMaximumFrontStepReach() != other.NO_VALUE_DOUBLE)
+         setMaximumFrontStepReach(other.getMaximumFrontStepReach());
+      if (other.getMaximumFrontStepLength() != other.NO_VALUE_DOUBLE)
+         setMaximumFrontStepLength(other.getMaximumFrontStepLength());
+      if (other.getMinimumFrontStepLength() != other.NO_VALUE_DOUBLE)
+         setMinimumFrontStepLength(other.getMinimumFrontStepLength());
+      if (other.getMaximumHindStepReach() != other.NO_VALUE_DOUBLE)
+         setMaximumHindStepReach(other.getMaximumHindStepReach());
+      if (other.getMaximumHindStepLength() != other.NO_VALUE_DOUBLE)
+         setMaximumHindStepLength(other.getMaximumHindStepLength());
+      if (other.getMinimumHindStepLength() != other.NO_VALUE_DOUBLE)
+         setMinimumHindStepLength(other.getMinimumHindStepLength());
       if (other.getMaximumStepWidth() != other.NO_VALUE_DOUBLE)
          setMaximumStepWidth(other.getMaximumStepWidth());
       if (other.getMinimumStepWidth() != other.NO_VALUE_DOUBLE)

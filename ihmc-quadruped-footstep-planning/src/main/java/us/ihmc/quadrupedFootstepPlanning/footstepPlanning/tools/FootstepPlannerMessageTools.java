@@ -48,33 +48,6 @@ public class FootstepPlannerMessageTools
       return message;
    }
 
-   public static void copyParametersToPacket(QuadrupedFootstepPlannerParametersPacket packet, FootstepPlannerParameters parameters)
-   {
-      if (parameters == null)
-      {
-         return;
-      }
-
-      packet.setMaximumStepReach(parameters.getMaximumStepReach());
-      packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
-      packet.setMinimumStepLength(parameters.getMinimumStepLength());
-      packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
-      packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
-      packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
-      packet.setMaximumStepChangeZ(parameters.getMaximumStepChangeZ());
-      packet.setBodyGroundClearance(parameters.getBodyGroundClearance());
-      packet.setYawWeight(parameters.getYawWeight());
-      packet.setCostPerStep(parameters.getCostPerStep());
-      packet.setStepUpWeight(parameters.getStepUpWeight());
-      packet.setStepDownWeight(parameters.getStepDownWeight());
-      packet.setHeuristicsWeight(parameters.getHeuristicsInflationWeight());
-      packet.setMinXClearanceFromFoot(parameters.getMinXClearanceFromFoot());
-      packet.setMinYClearanceFromFoot(parameters.getMinYClearanceFromFoot());
-      packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
-      packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
-      packet.setMinimumDistanceFromCliffBottoms(packet.getMinimumDistanceFromCliffBottoms());
-      packet.setMinimumDistanceFromCliffTops(packet.getMinimumDistanceFromCliffTops());
-   }
 
    public static void copyParametersToPacket(VisibilityGraphsParametersPacket packet, VisibilityGraphsParameters parameters)
    {
