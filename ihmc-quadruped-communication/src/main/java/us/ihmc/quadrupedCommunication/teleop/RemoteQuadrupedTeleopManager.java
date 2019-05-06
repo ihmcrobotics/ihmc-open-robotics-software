@@ -357,7 +357,7 @@ public class RemoteQuadrupedTeleopManager
       publishXGaitSettings(this.xGaitSettings);
    }
 
-   public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
+   public QuadrupedXGaitSettingsBasics getXGaitSettings()
    {
       return xGaitSettings;
    }
