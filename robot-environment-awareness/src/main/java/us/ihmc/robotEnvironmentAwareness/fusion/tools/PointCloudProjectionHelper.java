@@ -21,6 +21,23 @@ public class PointCloudProjectionHelper
     */
    public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel, IntrinsicParameters param)
    {
+      int[] pixelArray = projectMultisensePointCloudOnImage(point, param);
+
+      pixel.set(pixelArray[0], pixelArray[1]);
+   }
+   
+   /**
+    * This method uses default intrinsic value which of Multisense on cart.
+    */
+   public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel)
+   {
+      int[] pixelArray = projectMultisensePointCloudOnImage(point);
+
+      pixel.set(pixelArray[0], pixelArray[1]);
+   }
+   
+   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point, IntrinsicParameters param)
+   {
       double fx = param.getFx();
       double fy = param.getFy();
       double cx = param.getCx();
@@ -36,26 +53,11 @@ public class PointCloudProjectionHelper
       int u = (int) (fx * normX + cx);
       int v = (int) (fy * normY + cy);
 
-      pixel.set(u, v);
+      return new int[] {u, v};
    }
    
-   public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel)
+   public static int[] projectMultisensePointCloudOnImage(Point3DBasics point)
    {
-      double fx = multisenseOnCartIntrinsicParameters.getFx();
-      double fy = multisenseOnCartIntrinsicParameters.getFy();
-      double cx = multisenseOnCartIntrinsicParameters.getCx();
-      double cy = multisenseOnCartIntrinsicParameters.getCy();
-
-      double cameraX = -point.getY();
-      double cameraY = -point.getZ();
-      double cameraZ = point.getX();
-
-      double normX = cameraX / cameraZ;
-      double normY = cameraY / cameraZ;
-
-      int u = (int) (fx * normX + cx);
-      int v = (int) (fy * normY + cy);
-
-      pixel.set(u, v);
+      return projectMultisensePointCloudOnImage(point, multisenseOnCartIntrinsicParameters);
    }
 }
