@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.time.TimeIntervalProvider;
+
+import java.util.List;
 
 /**
  * Provides the contact state that constitutes the contact sequence used by the {@link CoMTrajectoryPlanner}. This includes
@@ -23,4 +26,14 @@ public interface ContactStateProvider extends TimeIntervalProvider
     * Specifies whether the current state is in contact or not.
     */
    ContactState getContactState();
+
+   default boolean hasCopConstraintRegion()
+   {
+      return false;
+   }
+
+   default List<Point3DReadOnly> getCopConstraintRegion()
+   {
+      return null;
+   }
 }

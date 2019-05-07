@@ -395,8 +395,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       isPaused.set(false);
       isStopped.set(false);
-      isDone.set(false);
-      hasSolverFailed.set(false);
+      //isDone.set(false);
+      //hasSolverFailed.set(false);
       hasSentMessageToController.set(false);
       chestMessage = null;
       pelvisMessage = null;
