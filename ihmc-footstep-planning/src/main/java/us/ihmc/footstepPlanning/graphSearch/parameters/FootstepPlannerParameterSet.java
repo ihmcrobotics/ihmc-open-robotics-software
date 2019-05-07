@@ -6,67 +6,70 @@ import us.ihmc.log.LogTools;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Properties;
-import java.util.TreeMap;
 
-public class FootstepPlannerParameterMap
+public class FootstepPlannerParameterSet
 {
-   private final FootstepPlannerParameterKeyMap keyMap;
+   private final FootstepPlannerParameterKeys keys;
    private final String saveFileName;
 
-   private final TreeMap<Integer, Object> values = new TreeMap<>();
+   private final Object[] values;
 
-   public FootstepPlannerParameterMap(FootstepPlannerParameterKeyMap keyMap)
+   public FootstepPlannerParameterSet(FootstepPlannerParameterKeys keys)
    {
-      this.keyMap = keyMap;
-      this.saveFileName = keyMap.getSaveFileName() + ".ini";
+      this.keys = keys;
+      this.saveFileName = keys.getSaveFileName() + ".ini";
 
-//      for (FootstepPlannerParameterKey<?> key : keyMap.keys())
-//      {
-//         values.put(key.getId(), key.newInstance());
-//      }
+      values = new Object[keys.keys().size()];
 
-      reload();
-
+      load();
    }
 
    public double getValue(DoubleFootstepPlannerParameterKey key)
    {
-      return (Double) values.get(key.getId());
+      return (Double) values[key.getIndex()];
    }
 
    public int getValue(IntegerFootstepPlannerParameterKey key)
    {
-      return (Integer) values.get(key.getId());
+      return (Integer) values[key.getIndex()];
    }
 
    public boolean getValue(BooleanFootstepPlannerParameterKey key)
    {
-      return (Boolean) values.get(key.getId());
+      return (Boolean) values[key.getIndex()];
    }
 
-//   public <T> T getValue(FootstepPlannerParameterKey<T> key)
-//   {
-//      FootstepPlannerParameter<T> footstepPlannerParameter = (FootstepPlannerParameter<T>) values.get(key.getId());
-//      return footstepPlannerParameter.getValue();
-//   }
+   public void setValue(DoubleFootstepPlannerParameterKey key, double value)
+   {
+      values[key.getIndex()] = value;
+   }
 
-   public void reload()
+   public void setValue(IntegerFootstepPlannerParameterKey key, int value)
+   {
+      values[key.getIndex()] = value;
+   }
+
+   public void setValue(BooleanFootstepPlannerParameterKey key, boolean value)
+   {
+      values[key.getIndex()] = value;
+   }
+
+   public void load()
    {
       ExceptionTools.handle(() ->
       {
-//         Ini ini = new Ini(accessStreamForLoading());
-//         IniPreferences preferences = new IniPreferences(ini);
-
          Properties properties = new Properties();
          properties.load(accessStreamForLoading());
 
-//         properties.containsKey()
-
-         for (FootstepPlannerParameterKey<?> key : keyMap.keys())
+         for (FootstepPlannerParameterKey<?> key : keys.keys())
          {
             if (!properties.containsKey(key.getSaveName()))
             {
@@ -79,74 +82,43 @@ public class FootstepPlannerParameterMap
 
             if (key.getType().equals(Double.class))
             {
-               values.put(key.getId(), Double.valueOf(stringValue));
+               values[key.getIndex()] = Double.valueOf(stringValue);
             }
             else if (key.getType().equals(Integer.class))
             {
-               values.put(key.getId(), Integer.valueOf(stringValue));
+               values[key.getIndex()] = Integer.valueOf(stringValue);
             }
             else if (key.getType().equals(Boolean.class))
             {
-               values.put(key.getId(), Boolean.valueOf(stringValue));
+               values[key.getIndex()] = Boolean.valueOf(stringValue);
             }
             else
             {
                throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
             }
-
-
-//            ClassUtils.isPrimitiveOrWrapper()
-//
-//
-//            if (Double.valueOf(stringValue))
-
-//            values.put(key.getId(), );
          }
-
-//         for (String key : preferences.keys())
-//         {
-//            System.out.println(key);
-//
-//
-//
-//         }
-
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
-
-//   private boolean preferencesContainKey(IniPreferences preferences, FootstepPlannerParameterKey<?> key) throws BackingStoreException
-//   {
-//      for (String foundKey : preferences.keys())
-//      {
-//         LogTools.info("{}:{}", foundKey, key.getSaveName());
-//         if (foundKey.equals(key.getSaveName()))
-//         {
-//            return true;
-//         }
-//      }
-//
-//      return false;
-//   }
 
    public void save()
    {
       ExceptionTools.handle(() ->
       {
-//         Ini ini = new Ini(accessStreamForLoading());
-//         IniPreferences preferences = new IniPreferences(ini);
+         Properties properties = new Properties();
 
-         for (FootstepPlannerParameterKey<?> parameterKey : keyMap.keys())
+         for (FootstepPlannerParameterKey<?> key : keys.keys())
          {
-//            preferences.put(parameterKey.getSaveName(), "");
+            properties.setProperty(key.getSaveName(), values[key.getIndex()].toString());
          }
 
-//         ini.store();
+         properties.store(new PrintWriter(findFileForSaving()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
+
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
-   public void printInitializedSaveFile()
+   public static void printInitialSaveFileContents(List<FootstepPlannerParameterKey<?>> keys)
    {
-      for (FootstepPlannerParameterKey<?> parameterKey : keyMap.keys())
+      for (FootstepPlannerParameterKey<?> parameterKey : keys)
       {
          System.out.println(parameterKey.getSaveName() + "=");
       }
@@ -199,7 +171,7 @@ public class FootstepPlannerParameterMap
 
       LogTools.info("Reworked path: {}", reworkedPath);
 
-      Path subPath = Paths.get("ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters");
+      Path subPath = Paths.get("ihmc-footstep-planning/src/main/resources/us/ihmc/footstepPlanning/graphSearch/parameters");
 
       Path finalPath = reworkedPath.resolve(subPath);
       LogTools.info("Final path: {}", finalPath);
