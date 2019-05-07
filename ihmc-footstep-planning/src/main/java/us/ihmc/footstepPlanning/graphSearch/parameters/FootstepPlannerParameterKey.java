@@ -1,23 +1,27 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.List;
 
 public class FootstepPlannerParameterKey<T>
 {
    private final String titleCasedName;
    private final String saveName;
+   private final Class<T> type;
    private final int id;
 
-   public FootstepPlannerParameterKey(List<FootstepPlannerParameterKey<?>> listToAddTo, int id, String titleCasedName)
+   public FootstepPlannerParameterKey(Class<T> type, int id, String titleCasedName)
    {
+      if (!ClassUtils.isPrimitiveOrWrapper(type))
+      {
+         throw new RuntimeException("Type must be primitive!");
+      }
+
+      this.type = type;
       this.id = id;
       this.titleCasedName = titleCasedName;
 
       saveName = buildSaveName();
-
-      listToAddTo.add(this);
    }
 
    public String getTitleCasedName()
@@ -28,6 +32,11 @@ public class FootstepPlannerParameterKey<T>
    public int getId()
    {
       return id;
+   }
+
+   public Class<T> getType()
+   {
+      return type;
    }
 
    public String getSaveName()
