@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.graphSearch.parameters;
+package us.ihmc.tools.property;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -6,7 +6,6 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -17,16 +16,31 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
-public class FootstepPlannerParameterSet
+/**
+ * Provides a load/saveable property set access by strongly typed static keys.
+ *
+ * The property set is loaded from the classpath and saved to the classpath if running from source.
+ */
+public class StoredPropertySet
 {
-   private final FootstepPlannerParameterKeys keys;
+   private final StoredPropertyKeyList keys;
    private final String saveFileName;
 
    private final Object[] values;
+   private final Class<?> classForLoading;
+   private final String directoryNameToAssumePresent;
+   private final String subsequentPathToResourceFolder;
 
-   public FootstepPlannerParameterSet(FootstepPlannerParameterKeys keys)
+   public StoredPropertySet(StoredPropertyKeyList keys,
+                            Class<?> classForLoading,
+                            String directoryNameToAssumePresent,
+                            String subsequentPathToResourceFolder)
    {
       this.keys = keys;
+      this.classForLoading = classForLoading;
+      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
+      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+
       this.saveFileName = keys.getSaveFileName() + ".ini";
 
       values = new Object[keys.keys().size()];
@@ -34,32 +48,32 @@ public class FootstepPlannerParameterSet
       load();
    }
 
-   public double getValue(DoubleFootstepPlannerParameterKey key)
+   public double getValue(DoubleStoredPropertyKey key)
    {
       return (Double) values[key.getIndex()];
    }
 
-   public int getValue(IntegerFootstepPlannerParameterKey key)
+   public int getValue(IntegerStoredPropertyKey key)
    {
       return (Integer) values[key.getIndex()];
    }
 
-   public boolean getValue(BooleanFootstepPlannerParameterKey key)
+   public boolean getValue(BooleanStoredPropertyKey key)
    {
       return (Boolean) values[key.getIndex()];
    }
 
-   public void setValue(DoubleFootstepPlannerParameterKey key, double value)
+   public void setValue(DoubleStoredPropertyKey key, double value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(IntegerFootstepPlannerParameterKey key, int value)
+   public void setValue(IntegerStoredPropertyKey key, int value)
    {
       values[key.getIndex()] = value;
    }
 
-   public void setValue(BooleanFootstepPlannerParameterKey key, boolean value)
+   public void setValue(BooleanStoredPropertyKey key, boolean value)
    {
       values[key.getIndex()] = value;
    }
@@ -71,7 +85,7 @@ public class FootstepPlannerParameterSet
          Properties properties = new Properties();
          properties.load(accessStreamForLoading());
 
-         for (FootstepPlannerParameterKey<?> key : keys.keys())
+         for (StoredPropertyKey<?> key : keys.keys())
          {
             if (!properties.containsKey(key.getSaveName()))
             {
@@ -79,8 +93,6 @@ public class FootstepPlannerParameterSet
             }
 
             String stringValue = (String) properties.get(key.getSaveName());
-
-            LogTools.info("Loading {}: ({}) {}", key.getSaveName(), stringValue.getClass().getSimpleName(), stringValue);
 
             if (key.getType().equals(Double.class))
             {
@@ -108,7 +120,7 @@ public class FootstepPlannerParameterSet
       {
          Properties properties = new Properties();
 
-         for (FootstepPlannerParameterKey<?> key : keys.keys())
+         for (StoredPropertyKey<?> key : keys.keys())
          {
             properties.setProperty(key.getSaveName(), values[key.getIndex()].toString());
          }
@@ -128,9 +140,9 @@ public class FootstepPlannerParameterSet
       printer.close();
    }
 
-   public static void printInitialSaveFileContents(List<FootstepPlannerParameterKey<?>> keys)
+   public static void printInitialSaveFileContents(List<StoredPropertyKey<?>> keys)
    {
-      for (FootstepPlannerParameterKey<?> parameterKey : keys)
+      for (StoredPropertyKey<?> parameterKey : keys)
       {
          System.out.println(parameterKey.getSaveName() + "=");
       }
@@ -138,12 +150,12 @@ public class FootstepPlannerParameterSet
 
    private InputStream accessStreamForLoading()
    {
-      return getClass().getResourceAsStream(saveFileName);
+      return classForLoading.getResourceAsStream(saveFileName);
    }
 
    private URL accessUrlForLoading()
    {
-      return getClass().getResource(saveFileName);
+      return classForLoading.getResource(saveFileName);
    }
 
    private Path findFileForSaving()
@@ -153,21 +165,18 @@ public class FootstepPlannerParameterSet
 
    private Path findSaveFileDirectory()
    {
-      // find ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
+      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
       // of just save the file in the working directory
 
       Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
-      LogTools.info(absoluteWorkingDirectory.toString());
 
       Path reworkedPath = Paths.get("/").toAbsolutePath().normalize();
       boolean openRoboticsFound = false;
       for (Path path : absoluteWorkingDirectory)
       {
-         LogTools.info("Part: {}", path.toString());
-
          reworkedPath = reworkedPath.resolve(path); // building up the path
 
-         if (path.toString().equals("ihmc-open-robotics-software"))
+         if (path.toString().equals(directoryNameToAssumePresent))
          {
             openRoboticsFound = true;
             break;
@@ -176,17 +185,20 @@ public class FootstepPlannerParameterSet
 
       if (!openRoboticsFound)
       {
-         LogTools.warn("Directory \"ihmc-open-robotics-software\" could not be found to save parameters. Using working directory {}",
+         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}",
+                       directoryNameToAssumePresent,
                        absoluteWorkingDirectory);
          return absoluteWorkingDirectory;
       }
 
-      LogTools.info("Reworked path: {}", reworkedPath);
+      String s = classForLoading.getPackage().toString();
+      LogTools.info(s);
+      String packagePath = s.split(" ")[1].replaceAll("\\.", "/");
+      LogTools.info(packagePath);
 
-      Path subPath = Paths.get("ihmc-footstep-planning/src/main/resources/us/ihmc/footstepPlanning/graphSearch/parameters");
+      Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
 
       Path finalPath = reworkedPath.resolve(subPath);
-      LogTools.info("Final path: {}", finalPath);
 
       return finalPath;
    }
