@@ -12,6 +12,7 @@ ihmc {
 }
 
 mainDependencies {
+   compile group: "us.ihmc", name: "ihmc-messager-kryo", version: "0.1.0"
    compile group: "com.thoughtworks.xstream", name: "xstream", version: "1.4.7"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"

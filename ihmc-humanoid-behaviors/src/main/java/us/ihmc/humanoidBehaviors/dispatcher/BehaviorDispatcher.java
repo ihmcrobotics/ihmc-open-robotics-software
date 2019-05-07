@@ -11,10 +11,13 @@ import controller_msgs.msg.dds.BehaviorStatusPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -25,6 +28,10 @@ import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.Ros2Node;
@@ -72,6 +79,10 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
    private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
+   
+   public static Messager messager;
+   
+   MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
    public BehaviorDispatcher(String robotName, YoDouble yoTime, RobotDataReceiver robotDataReceiver,
                              BehaviorControlModeSubscriber desiredBehaviorControlSubscriber, BehaviorTypeSubscriber<E> desiredBehaviorSubscriber,
@@ -101,9 +112,26 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       requestedBehavior.set(null);
 
+      
+      apiFactory.createRootCategory("Root");
+
       parentRegistry.addChild(registry);
+      
+      
    }
 
+   public void startMessanger()
+   {
+      messager = KryoMessager.createServer(getBehaviorAPI(),
+                                                        NetworkPorts.BEHAVIOUR_COMMUNICATION_PORT.getPort(), BehaviorDispatcher.class.getSimpleName(), 5);
+      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+   }
+   
+   public MessagerAPI getBehaviorAPI()
+   {
+      return apiFactory.getAPIAndCloseFactory();
+   }
+   
    public void requestBehavior(E behaviorEnum)
    {
       requestedBehavior.set(behaviorEnum);
@@ -122,6 +150,10 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    public void addBehavior(E behaviorKey, AbstractBehavior behaviorToAdd)
    {
+      if(behaviorToAdd.getBehaviorAPI()!=null)
+      apiFactory.includeMessagerAPIs(behaviorToAdd.getBehaviorAPI());
+
+      
       BehaviorAction behaviorStateToAdd = new BehaviorAction(behaviorToAdd);
 
       stateMachineFactory.addState(behaviorKey, behaviorStateToAdd);
@@ -148,6 +180,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    public void finalizeStateMachine()
    {
       stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
+      startMessanger();
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
@@ -160,6 +193,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (stateMachine == null)
          finalizeStateMachine();
       stateMachine.initialize();
+      
    }
 
    private void doControl()
