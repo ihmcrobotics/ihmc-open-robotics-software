@@ -21,7 +21,7 @@ public class StoredPropertyKey<T>
       this.index = index;
       this.titleCasedName = titleCasedName;
 
-      saveName = buildSaveName();
+      saveName = buildCamelCasedName();
    }
 
    public String getTitleCasedName()
@@ -39,12 +39,12 @@ public class StoredPropertyKey<T>
       return type;
    }
 
-   public String getSaveName()
+   public String getCamelCasedName()
    {
       return saveName;
    }
 
-   private String buildSaveName() // to lower camel case
+   private String buildCamelCasedName() // to lower camel case
    {
       String[] splitBySpaces = titleCasedName.split(" ");
 
