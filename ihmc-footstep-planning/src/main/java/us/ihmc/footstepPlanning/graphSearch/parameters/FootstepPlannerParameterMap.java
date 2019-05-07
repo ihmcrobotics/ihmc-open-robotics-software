@@ -1,9 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ClassUtils;
-import org.ini4j.Ini;
-import org.ini4j.IniPreferences;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
@@ -13,36 +9,50 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.prefs.BackingStoreException;
 
 public class FootstepPlannerParameterMap
 {
-   private final List<FootstepPlannerParameterKey<?>> parameterKeys;
+   private final FootstepPlannerParameterKeyMap keyMap;
    private final String saveFileName;
 
-   private final TreeMap<Integer, FootstepPlannerParameter<?>> values = new TreeMap<>();
+   private final TreeMap<Integer, Object> values = new TreeMap<>();
 
-   public FootstepPlannerParameterMap(List<FootstepPlannerParameterKey<?>> parameterKeys, String saveFileName)
+   public FootstepPlannerParameterMap(FootstepPlannerParameterKeyMap keyMap)
    {
-      this.parameterKeys = parameterKeys;
-      this.saveFileName = saveFileName + ".ini";
+      this.keyMap = keyMap;
+      this.saveFileName = keyMap.getSaveFileName() + ".ini";
+
+//      for (FootstepPlannerParameterKey<?> key : keyMap.keys())
+//      {
+//         values.put(key.getId(), key.newInstance());
+//      }
 
       reload();
 
-      for (FootstepPlannerParameterKey<?> key : parameterKeys)
-      {
-//         values.put(key.getId(), )
-      }
    }
 
-   public <T> T getValue(FootstepPlannerParameterKey<T> key)
+   public double getValue(DoubleFootstepPlannerParameterKey key)
    {
-      FootstepPlannerParameter<T> footstepPlannerParameter = (FootstepPlannerParameter<T>) values.get(key.getId());
-      return footstepPlannerParameter.getValue();
+      return (Double) values.get(key.getId());
    }
+
+   public int getValue(IntegerFootstepPlannerParameterKey key)
+   {
+      return (Integer) values.get(key.getId());
+   }
+
+   public boolean getValue(BooleanFootstepPlannerParameterKey key)
+   {
+      return (Boolean) values.get(key.getId());
+   }
+
+//   public <T> T getValue(FootstepPlannerParameterKey<T> key)
+//   {
+//      FootstepPlannerParameter<T> footstepPlannerParameter = (FootstepPlannerParameter<T>) values.get(key.getId());
+//      return footstepPlannerParameter.getValue();
+//   }
 
    public void reload()
    {
@@ -56,16 +66,33 @@ public class FootstepPlannerParameterMap
 
 //         properties.containsKey()
 
-         for (FootstepPlannerParameterKey<?> key : parameterKeys)
+         for (FootstepPlannerParameterKey<?> key : keyMap.keys())
          {
             if (!properties.containsKey(key.getSaveName()))
             {
                throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getSaveName());
             }
 
-            Object stringValue = properties.get(key.getSaveName());
+            String stringValue = (String) properties.get(key.getSaveName());
 
-            LogTools.info("{}: ({}) {}", key.getSaveName(), stringValue.getClass().getSimpleName(), stringValue);
+            LogTools.info("Loading {}: ({}) {}", key.getSaveName(), stringValue.getClass().getSimpleName(), stringValue);
+
+            if (key.getType().equals(Double.class))
+            {
+               values.put(key.getId(), Double.valueOf(stringValue));
+            }
+            else if (key.getType().equals(Integer.class))
+            {
+               values.put(key.getId(), Integer.valueOf(stringValue));
+            }
+            else if (key.getType().equals(Boolean.class))
+            {
+               values.put(key.getId(), Boolean.valueOf(stringValue));
+            }
+            else
+            {
+               throw new RuntimeException("Please implement String deserialization for type: " + key.getType());
+            }
 
 
 //            ClassUtils.isPrimitiveOrWrapper()
@@ -87,39 +114,39 @@ public class FootstepPlannerParameterMap
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
-   private boolean preferencesContainKey(IniPreferences preferences, FootstepPlannerParameterKey<?> key) throws BackingStoreException
-   {
-      for (String foundKey : preferences.keys())
-      {
-         LogTools.info("{}:{}", foundKey, key.getSaveName());
-         if (foundKey.equals(key.getSaveName()))
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
+//   private boolean preferencesContainKey(IniPreferences preferences, FootstepPlannerParameterKey<?> key) throws BackingStoreException
+//   {
+//      for (String foundKey : preferences.keys())
+//      {
+//         LogTools.info("{}:{}", foundKey, key.getSaveName());
+//         if (foundKey.equals(key.getSaveName()))
+//         {
+//            return true;
+//         }
+//      }
+//
+//      return false;
+//   }
 
    public void save()
    {
       ExceptionTools.handle(() ->
       {
-         Ini ini = new Ini(accessStreamForLoading());
-         IniPreferences preferences = new IniPreferences(ini);
+//         Ini ini = new Ini(accessStreamForLoading());
+//         IniPreferences preferences = new IniPreferences(ini);
 
-         for (FootstepPlannerParameterKey<?> parameterKey : parameterKeys)
+         for (FootstepPlannerParameterKey<?> parameterKey : keyMap.keys())
          {
-            preferences.put(parameterKey.getSaveName(), "");
+//            preferences.put(parameterKey.getSaveName(), "");
          }
 
-         ini.store();
+//         ini.store();
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 
    public void printInitializedSaveFile()
    {
-      for (FootstepPlannerParameterKey<?> parameterKey : parameterKeys)
+      for (FootstepPlannerParameterKey<?> parameterKey : keyMap.keys())
       {
          System.out.println(parameterKey.getSaveName() + "=");
       }
