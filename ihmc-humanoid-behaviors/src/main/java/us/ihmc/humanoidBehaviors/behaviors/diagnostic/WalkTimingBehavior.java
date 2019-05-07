@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Operator;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Run;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager.Task;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior.WalkTimingBehaviorStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
@@ -76,7 +75,7 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
             {
                totalTimePlanning.add(getStateMachine().getTimeInCurrentState());
 
-               timingBehavior.saveEvent(currentRun.runID, WalkTimingBehaviorStates.PLANNING.toString(), getStateMachine().getTimeInCurrentState());
+               timingBehavior.saveEvent(currentRun.getRunID(), WalkTimingBehaviorStates.PLANNING.toString(), getStateMachine().getTimeInCurrentState());
 
                publishTextToSpeech("Adding time to total planning: " + (getStateMachine().getTimeInCurrentState()));
                return true;
@@ -114,21 +113,21 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
                case ABORT_REQUESTED:
                {
                   totalTimeWalking.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
                   return true;
                }
                case COMPLETED:
                {
                   totalTimeWalking.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
                   return true;
                }
                case PAUSED:
                {
                   totalTimeWalking.add(getStateMachine().getTimeInCurrentState());
-                  timingBehavior.saveEvent(currentRun.runID, WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
+                  timingBehavior.saveEvent(currentRun.getRunID(), WalkTimingBehaviorStates.WALKING.toString(), getStateMachine().getTimeInCurrentState());
                   publishTextToSpeech("Adding time to total Walking: " + (getStateMachine().getTimeInCurrentState()));
                   return true;
                }
@@ -177,7 +176,8 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
 
       }
       System.out.println("********************************************** "+currentTask.taskID);
-      currentRun = timingBehavior.dataBase.saveRun(timingBehavior.dataBase.new Run(operator.operatorID, currentTask.taskID));
+      Run run = new Run(operator.operatorID, currentTask.taskID);
+      currentRun = timingBehavior.dataBase.saveRun(run);
 
       //save start time
    }
@@ -187,9 +187,9 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
    {
       publishTextToSpeech("leaving walk timing behavior");
      
-      currentRun.successful = true;
+      currentRun.setSuccessful(true);
       timingBehavior.dataBase.updateRun(currentRun);
-      publishTextToSpeech("Total number of run events added for Walk Task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.runID)));
+      publishTextToSpeech("Total number of run events added for Walk Task: " + ( timingBehavior.dataBase.getNumberOfRunEventsAddedForRun(currentRun.getRunID())));
      
       // publishTextToSpeech("Total Planning Time:" + totalPlanningTime.getDoubleValue() + " Total Walking Time:" + totalWalkTime.getDoubleValue());
    }
