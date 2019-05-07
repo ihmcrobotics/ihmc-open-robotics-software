@@ -178,26 +178,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
          generateFootsteps();
    }
 
-   @Override
-   public void onBehaviorEntered()
-   {
-      hasTargetBeenProvided.set(false);
-      haveFootstepsBeenGenerated.set(false);
-      hasInputBeenSet.set(false);
-      footstepListBehavior.initialize();
-
-      robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
-      robotPose.changeFrame(worldFrame);
-
-      robotYoPose.set(robotPose);
-
-      robotLocation.set(robotPose.getPosition());
-      robotOrientation.set(robotPose.getOrientation());
-
-      this.targetLocation.set(robotLocation);
-      this.targetOrientation.set(robotOrientation);
-   }
-
+  
    public int getNumberOfFootSteps()
    {
       return footsteps.size();
@@ -320,11 +301,29 @@ public class WalkToLocationBehavior extends AbstractBehavior
    {
       isPaused.set(false);
       isAborted.set(false);
+      footstepListBehavior.onBehaviorExited();
+   }
+   
+   @Override
+   public void onBehaviorEntered()
+   {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
-      footstepListBehavior.onBehaviorExited();
+      footstepListBehavior.initialize();
+
+      robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      robotPose.changeFrame(worldFrame);
+
+      robotYoPose.set(robotPose);
+
+      robotLocation.set(robotPose.getPosition());
+      robotOrientation.set(robotPose.getOrientation());
+
+      this.targetLocation.set(robotLocation);
+      this.targetOrientation.set(robotOrientation);
    }
+
 
    public boolean hasInputBeenSet()
    {
