@@ -8,9 +8,9 @@ public class FootstepPlannerParameterKey<T>
    private final String titleCasedName;
    private final String saveName;
    private final Class<T> type;
-   private final int id;
+   private final int index;
 
-   public FootstepPlannerParameterKey(Class<T> type, int id, String titleCasedName)
+   public FootstepPlannerParameterKey(Class<T> type, int index, String titleCasedName)
    {
       if (!ClassUtils.isPrimitiveOrWrapper(type))
       {
@@ -18,7 +18,7 @@ public class FootstepPlannerParameterKey<T>
       }
 
       this.type = type;
-      this.id = id;
+      this.index = index;
       this.titleCasedName = titleCasedName;
 
       saveName = buildSaveName();
@@ -29,9 +29,9 @@ public class FootstepPlannerParameterKey<T>
       return titleCasedName;
    }
 
-   public int getId()
+   public int getIndex()
    {
-      return id;
+      return index;
    }
 
    public Class<T> getType()
