@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -19,21 +18,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.OpenDoorBehavior.OpenDoorState;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
+import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -134,6 +135,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    @Override
    public void doControl()
    {
+
+      
+      BehaviorDispatcher.messager.submitMessage(MessengerAPI.State, getStateMachine().getCurrentBehaviorKey().toString());
+
       
       //should constantly be searching for door and updating its location here
       publisher = createBehaviorInputPublisher(DoorLocationPacket.class);
@@ -492,6 +497,27 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private boolean hasWalkingSucceded()
    {
       return walkToInteractableObjectBehavior.succeded();
+   }
+
+   @Override
+   public MessagerAPI getBehaviorAPI()
+   {
+      return MessengerAPI.create();
+   }
+
+   public static class MessengerAPI
+   {
+      private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
+      private static final Category Root = apiFactory.createRootCategory("WalkThroughDoor");
+      private static final CategoryTheme BEHAVIOR = apiFactory.createCategoryTheme("Behavior");
+
+      public static final Topic<Boolean> Started = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("Started"));
+      public static final Topic<String> State = Root.child(BEHAVIOR).topic(apiFactory.createTypedTopicTheme("State"));
+
+      public static final MessagerAPI create()
+      {
+         return apiFactory.getAPIAndCloseFactory();
+      }
    }
 
 }

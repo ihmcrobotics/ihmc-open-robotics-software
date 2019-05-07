@@ -23,6 +23,8 @@ public class NetworkPorts
 
    // Network manager ports
    public static final NetworkPorts BEHAVIOUR_MODULE_PORT = new NetworkPorts(6001, "behaviour_module");
+   public static final NetworkPorts BEHAVIOUR_COMMUNICATION_PORT = new NetworkPorts(6000, "behaviour_communication");
+
    public static final NetworkPorts UI_MODULE = new NetworkPorts(6002, "ui_module");
    public static final NetworkPorts SENSOR_MANAGER = new NetworkPorts(6003, "sensor_manager");
    public static final NetworkPorts LEFT_HAND_MANAGER_PORT = new NetworkPorts(6004, "left_hand_manager");

@@ -11,17 +11,22 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,6 +46,8 @@ public abstract class AbstractBehavior implements RobotController
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
+
+   KryoMessager messager;
 
    protected final Ros2Node ros2Node;
    private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
@@ -110,6 +117,12 @@ public abstract class AbstractBehavior implements RobotController
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
 
+   }
+
+
+   public MessagerAPI getBehaviorAPI()
+   {
+      return null;
    }
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
@@ -257,8 +270,7 @@ public abstract class AbstractBehavior implements RobotController
       System.err.println("**** "+textToSpeak);
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
-   
-   
+
    public void publishUIPositionCheckerPacket(Point3DReadOnly position)
    {
       uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position));
@@ -267,10 +279,9 @@ public abstract class AbstractBehavior implements RobotController
 
    public void publishUIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
    {
-      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position,orientation));
+      uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(position, orientation));
 
    }
-
 
    public abstract void onBehaviorResumed();
 
@@ -358,3 +369,4 @@ public abstract class AbstractBehavior implements RobotController
       }
    }
 }
+
