@@ -39,6 +39,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -116,6 +117,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
    private final RequiredFactoryField<HighLevelControllerParameters> highLevelControllerParameters = new RequiredFactoryField<>("highLevelControllerParameters");
+   private final RequiredFactoryField<DCMPlannerParameters> dcmPlannerParameters = new RequiredFactoryField<>("dcmPlannerParameters");
    private final RequiredFactoryField<QuadrupedSitDownParameters> sitDownParameters = new RequiredFactoryField<>("sitDownParameters");
    private final RequiredFactoryField<QuadrupedPrivilegedConfigurationParameters> privilegedConfigurationParameters = new RequiredFactoryField<>("privilegedConfigurationParameters");
    private final RequiredFactoryField<QuadrupedFallDetectionParameters> fallDetectionParameters = new RequiredFactoryField<>("fallDetectionParameters");
@@ -138,7 +140,6 @@ public class QuadrupedSimulationFactory
    // TO CONSTRUCT
    private YoVariableRegistry factoryRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
    private QuadrupedSensorReaderWrapper sensorReaderWrapper;
    private SensorReader sensorReader;
    private RobotMotionStatusHolder robotMotionStatusFromController;
@@ -172,7 +173,6 @@ public class QuadrupedSimulationFactory
       factoryRegistry = new YoVariableRegistry("factoryRegistry");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
-      yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
    }
 
    private void createPushRobotController()
@@ -330,10 +330,9 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
                                                                                        sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
-                                                                                       yoGraphicsListRegistryForDetachedOverhead, contactableFeet,
-                                                                                       contactablePlaneBodies, centerOfMassDataHolder, controllerFootSwitches,
-                                                                                       stateEstimatorFootSwitches,
-                                                                                       gravity.get(), highLevelControllerParameters.get(),
+                                                                                       contactableFeet, contactablePlaneBodies, centerOfMassDataHolder,
+                                                                                       controllerFootSwitches, stateEstimatorFootSwitches, gravity.get(),
+                                                                                       highLevelControllerParameters.get(), dcmPlannerParameters.get(),
                                                                                        sitDownParameters.get(), privilegedConfigurationParameters.get(),
                                                                                        fallDetectionParameters.get(), robotMotionStatusFromController);
 
@@ -633,6 +632,11 @@ public class QuadrupedSimulationFactory
    public void setHighLevelControllerParameters(HighLevelControllerParameters highLevelControllerParameters)
    {
       this.highLevelControllerParameters.set(highLevelControllerParameters);
+   }
+
+   public void setDCMPlannerParameters(DCMPlannerParameters dcmPlannerParameters)
+   {
+      this.dcmPlannerParameters.set(dcmPlannerParameters);
    }
 
    public void setSitDownParameters(QuadrupedSitDownParameters sitDownParameters)

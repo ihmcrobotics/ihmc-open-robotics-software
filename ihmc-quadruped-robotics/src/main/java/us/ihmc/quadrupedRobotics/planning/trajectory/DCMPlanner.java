@@ -75,18 +75,15 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final DoubleProvider maximumWeightShiftForward = new DoubleParameter("maximumWeightShiftForward", registry, 0.0);
-   private final DoubleProvider angleForMaxWeightShiftForward = new DoubleParameter("angleForMaxWeightShiftForward", registry, Math.toRadians(20.0));
-
    private final boolean debug;
 
-   public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(gravity, nominalHeight, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+      this(dcmPlannerParameters, gravity, nominalHeight, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
-   public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
@@ -97,14 +94,10 @@ public class DCMPlanner implements DCMPlannerInterface
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
-      WeightDistributionCalculator weightDistributionCalculator = (pitchAngle ->
-      {
-         double percentTotal = MathTools.clamp(pitchAngle / angleForMaxWeightShiftForward.getValue(), 1.0);
-         return percentTotal * maximumWeightShiftForward.getValue();
-      });
 
+      DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
-      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, weightDistributionCalculator, registry);
+      piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, yoDcmPlannerParameters, registry);
 
       parentRegistry.addChild(registry);
 
@@ -182,7 +175,7 @@ public class DCMPlanner implements DCMPlannerInterface
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
       timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
-      piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
+      piecewiseConstantCopTrajectory.initializeTrajectory(currentTime, timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
       int numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();
