@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -21,7 +22,7 @@ import java.util.Properties;
  *
  * The property set is loaded from the classpath and saved to the classpath if running from source.
  */
-public class StoredPropertySet
+public class StoredPropertySet implements StoredPropertySetReadOnly
 {
    private final StoredPropertyKeyList keys;
    private final String saveFileName;
@@ -44,20 +45,21 @@ public class StoredPropertySet
       this.saveFileName = keys.getSaveFileName() + ".ini";
 
       values = new Object[keys.keys().size()];
-
-      load();
    }
 
+   @Override
    public double getValue(DoubleStoredPropertyKey key)
    {
       return (Double) values[key.getIndex()];
    }
 
+   @Override
    public int getValue(IntegerStoredPropertyKey key)
    {
       return (Integer) values[key.getIndex()];
    }
 
+   @Override
    public boolean getValue(BooleanStoredPropertyKey key)
    {
       return (Boolean) values[key.getIndex()];
@@ -78,6 +80,20 @@ public class StoredPropertySet
       values[key.getIndex()] = value;
    }
 
+   @Override
+   public List<Object> getAllValues()
+   {
+      return Arrays.asList(values);
+   }
+
+   public void setAllValues(List<Object> newValues)
+   {
+      for (int i = 0; i < values.length; i++)
+      {
+         values[i] = newValues.get(i);
+      }
+   }
+
    public void load()
    {
       ExceptionTools.handle(() ->
@@ -87,12 +103,12 @@ public class StoredPropertySet
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            if (!properties.containsKey(key.getSaveName()))
+            if (!properties.containsKey(key.getCamelCasedName()))
             {
-               throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getSaveName());
+               throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
             }
 
-            String stringValue = (String) properties.get(key.getSaveName());
+            String stringValue = (String) properties.get(key.getCamelCasedName());
 
             if (key.getType().equals(Double.class))
             {
@@ -122,7 +138,7 @@ public class StoredPropertySet
 
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            properties.setProperty(key.getSaveName(), values[key.getIndex()].toString());
+            properties.setProperty(key.getCamelCasedName(), values[key.getIndex()].toString());
          }
 
          Path fileForSaving = findFileForSaving();
@@ -144,7 +160,7 @@ public class StoredPropertySet
    {
       for (StoredPropertyKey<?> parameterKey : keys)
       {
-         System.out.println(parameterKey.getSaveName() + "=");
+         System.out.println(parameterKey.getCamelCasedName() + "=");
       }
    }
 
