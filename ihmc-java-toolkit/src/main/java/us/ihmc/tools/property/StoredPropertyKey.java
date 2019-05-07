@@ -1,16 +1,16 @@
-package us.ihmc.footstepPlanning.graphSearch.parameters;
+package us.ihmc.tools.property;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class FootstepPlannerParameterKey<T>
+public class StoredPropertyKey<T>
 {
    private final String titleCasedName;
    private final String saveName;
    private final Class<T> type;
    private final int index;
 
-   public FootstepPlannerParameterKey(Class<T> type, int index, String titleCasedName)
+   public StoredPropertyKey(Class<T> type, int index, String titleCasedName)
    {
       if (!ClassUtils.isPrimitiveOrWrapper(type))
       {
