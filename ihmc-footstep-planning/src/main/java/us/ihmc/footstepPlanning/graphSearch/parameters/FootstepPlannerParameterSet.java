@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 
 import java.io.File;
@@ -111,9 +113,19 @@ public class FootstepPlannerParameterSet
             properties.setProperty(key.getSaveName(), values[key.getIndex()].toString());
          }
 
-         properties.store(new PrintWriter(findFileForSaving()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
+         Path fileForSaving = findFileForSaving();
+         properties.store(new PrintWriter(fileForSaving.toFile()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
 
+         convertLineEndingsToUnix(fileForSaving);
       }, DefaultExceptionHandler.PRINT_STACKTRACE);
+   }
+
+   private void convertLineEndingsToUnix(Path fileForSaving)
+   {
+      List<String> lines = FileTools.readAllLines(fileForSaving, DefaultExceptionHandler.PRINT_STACKTRACE);
+      PrintWriter printer = FileTools.newPrintWriter(fileForSaving, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
+      lines.forEach(line -> printer.print(line + "\n"));
+      printer.close();
    }
 
    public static void printInitialSaveFileContents(List<FootstepPlannerParameterKey<?>> keys)
@@ -134,9 +146,9 @@ public class FootstepPlannerParameterSet
       return getClass().getResource(saveFileName);
    }
 
-   private File findFileForSaving()
+   private Path findFileForSaving()
    {
-      return findSaveFileDirectory().resolve(saveFileName).toFile();
+      return findSaveFileDirectory().resolve(saveFileName);
    }
 
    private Path findSaveFileDirectory()
