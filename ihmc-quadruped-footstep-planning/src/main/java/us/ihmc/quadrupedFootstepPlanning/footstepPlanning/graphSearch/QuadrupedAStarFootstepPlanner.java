@@ -659,8 +659,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
-//      DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, xGaitSettings);
-      CostToGoHeuristics heuristics = new SpeedAndYawBasedHeuristics(parameters, xGaitSettings);
+      CostToGoHeuristics heuristics = new SpeedAndYawBasedHeuristics(snapper, parameters, xGaitSettings);
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);

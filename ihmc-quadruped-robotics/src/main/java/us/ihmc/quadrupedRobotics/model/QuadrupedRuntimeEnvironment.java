@@ -6,6 +6,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -25,11 +26,11 @@ public class QuadrupedRuntimeEnvironment
    private final FullQuadrupedRobotModel fullRobotModel;
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
-   private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
    private final HighLevelControllerParameters highLevelControllerParameters;
+   private final DCMPlannerParameters dcmPlannerParameters;
    private final QuadrupedSitDownParameters sitDownParameters;
    private final QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters;
    private final QuadrupedFallDetectionParameters fallDetectionParameters;
@@ -46,12 +47,11 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings, JointDesiredOutputList jointDesiredOutputList,
                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead,
                                       QuadrantDependentList<ContactablePlaneBody> contactableFeet, List<ContactablePlaneBody> contactablePlaneBodies,
                                       CenterOfMassDataHolderReadOnly centerOfMassDataHolder, QuadrantDependentList<FootSwitchInterface> footSwitches,
                                       QuadrantDependentList<FootSwitchInterface> estimatorFootSwitches,
-                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, QuadrupedSitDownParameters sitDownParameters,
-                                      QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
+                                      double gravity, HighLevelControllerParameters highLevelControllerParameters, DCMPlannerParameters dcmPlannerParameters,
+                                      QuadrupedSitDownParameters sitDownParameters, QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters,
                                       QuadrupedFallDetectionParameters fallDetectionParameters, RobotMotionStatusHolder robotMotionStatusHolder)
    {
       this.controlDT = controlDT;
@@ -60,7 +60,6 @@ public class QuadrupedRuntimeEnvironment
       this.fullRobotModel = fullRobotModel;
       this.parentRegistry = parentRegistry;
       this.graphicsListRegistry = graphicsListRegistry;
-      this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.footSwitches = footSwitches;
       this.estimatorFootSwitches = estimatorFootSwitches;
       this.contactableFeet = contactableFeet;
@@ -69,6 +68,7 @@ public class QuadrupedRuntimeEnvironment
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.highLevelControllerParameters = highLevelControllerParameters;
+      this.dcmPlannerParameters = dcmPlannerParameters;
       this.sitDownParameters = sitDownParameters;
       this.privilegedConfigurationParameters = privilegedConfigurationParameters;
       this.fallDetectionParameters = fallDetectionParameters;
@@ -105,10 +105,6 @@ public class QuadrupedRuntimeEnvironment
       return graphicsListRegistry;
    }
 
-   public YoGraphicsListRegistry getGraphicsListRegistryForDetachedOverhead()
-   {
-      return graphicsListRegistryForDetachedOverhead;
-   }
 
    public ControllerCoreOptimizationSettings getControllerCoreOptimizationSettings()
    {
@@ -148,6 +144,11 @@ public class QuadrupedRuntimeEnvironment
    public HighLevelControllerParameters getHighLevelControllerParameters()
    {
       return highLevelControllerParameters;
+   }
+
+   public DCMPlannerParameters getDCMPlannerParameters()
+   {
+      return dcmPlannerParameters;
    }
 
    public QuadrupedSitDownParameters getSitDownParameters()

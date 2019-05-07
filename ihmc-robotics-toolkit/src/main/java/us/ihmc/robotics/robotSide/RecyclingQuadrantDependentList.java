@@ -6,26 +6,26 @@ import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
-public class RecyclingQuadrantDependentList<V>
+public class RecyclingQuadrantDependentList<V> extends QuadrantDependentList<V>
 {
    private final V[] elementStorageForWhenNull;
    private final Supplier<V> builder;
    private final V[][] valueArrays;
-   private final QuadrantDependentList<V> quadrantDependentList;
+//   private final QuadrantDependentList<V> quadrantDependentList;
 
    public RecyclingQuadrantDependentList(Class<V> clazz)
    {
-      quadrantDependentList = new QuadrantDependentList<>();
+//      quadrantDependentList = new QuadrantDependentList<>();
       builder = SupplierBuilder.createFromEmptyConstructor(clazz);
-      
+
       elementStorageForWhenNull = (V[]) Array.newInstance(clazz, 4);
       for (int i = 0; i < 4; i++)
       {
          V newInstance = builder.get();
-         
+
          elementStorageForWhenNull[i] = newInstance;
       }
-      
+
       valueArrays = (V[][]) new Object[5][];
       valueArrays[0] = (V[]) Array.newInstance(clazz, 0);
       valueArrays[1] = (V[]) Array.newInstance(clazz, 1);
@@ -45,7 +45,7 @@ public class RecyclingQuadrantDependentList<V>
       // remove
       if (element == null && containsQuadrant(robotQuadrant))
       {
-         quadrantDependentList.set(robotQuadrant, element);
+         super.set(robotQuadrant, element);
          fillValueArray();
          return element;
       }
@@ -53,11 +53,11 @@ public class RecyclingQuadrantDependentList<V>
       else if (element != null && !containsQuadrant(robotQuadrant))
       {
          V storageWhenNull = elementStorageForWhenNull[robotQuadrant.ordinal()];
-         quadrantDependentList.set(robotQuadrant, storageWhenNull);
+         super.set(robotQuadrant, storageWhenNull);
          fillValueArray();
          return element;
       }
-      
+
       return element;
    }
 
@@ -67,7 +67,7 @@ public class RecyclingQuadrantDependentList<V>
       if (containsQuadrant(robotQuadrant))
       {
          elementStorageForWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
-         V remove = quadrantDependentList.remove(robotQuadrant);
+         V remove = super.remove(robotQuadrant);
          fillValueArray();
          return remove;
       }
@@ -78,16 +78,11 @@ public class RecyclingQuadrantDependentList<V>
       }
    }
 
-   public V get(RobotQuadrant key)
-   {
-      return quadrantDependentList.get(key);
-   }
-   
    private void fillValueArray()
    {
       if (size() == 4)
          return;
-      
+
       for (int i = 0, j = 0; i < elementStorageForWhenNull.length; i++)
       {
          if (containsQuadrant(RobotQuadrant.values[i]))
@@ -96,17 +91,13 @@ public class RecyclingQuadrantDependentList<V>
          }
       }
    }
-   
-   public V[] values()
+
+   public V[] keys()
    {
       return valueArrays[size()];
    }
-   
-   public RobotQuadrant[] quadrants()
-   {
-      return quadrantDependentList.quadrants();
-   }
 
+   @Override
    public void clear()
    {
       for (RobotQuadrant robotQuadrant : quadrants())
@@ -114,16 +105,11 @@ public class RecyclingQuadrantDependentList<V>
          elementStorageForWhenNull[robotQuadrant.ordinal()] = get(robotQuadrant);
       }
 
-      quadrantDependentList.clear();
+      super.clear();
    }
-   
-   public int size()
-   {
-      return quadrantDependentList.size();
-   }
-   
+
    public boolean containsQuadrant(RobotQuadrant robotQuadrant)
    {
-      return quadrantDependentList.containsKey(robotQuadrant);
+      return this.containsKey(robotQuadrant);
    }
 }
