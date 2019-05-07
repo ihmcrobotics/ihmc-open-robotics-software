@@ -27,6 +27,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.output.SimulatedQuadrupedOutputWriter;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
@@ -104,6 +105,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
       GenericQuadrupedHighLevelControllerParameters highLevelControllerParameters = new GenericQuadrupedHighLevelControllerParameters(
             modelFactory.getJointMap());
+      DCMPlannerParameters dcmPlannerParameters = new GenericQuadrupedDCMPlannerParameters();
       GenericQuadrupedSitDownParameters sitDownParameters = new GenericQuadrupedSitDownParameters();
       QuadrupedPrivilegedConfigurationParameters privilegedConfigurationParameters = new GenericQuadrupedPrivilegedConfigurationParameters();
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
@@ -156,6 +158,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setInitialForceControlState(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
+      simulationFactory.setDCMPlannerParameters(dcmPlannerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
       simulationFactory.setPrivilegedConfigurationParameters(privilegedConfigurationParameters);
       simulationFactory.setFallDetectionParameters(fallDetectionParameters);
