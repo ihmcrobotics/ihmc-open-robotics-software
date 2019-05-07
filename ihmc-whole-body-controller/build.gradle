@@ -21,7 +21,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "commons-net", name: "commons-net", version: "3.3"
    compile group: "org.yaml", name: "snakeyaml", version: "1.17" //1.11
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.4"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.apache.commons", name: "commons-lang3", version: "3.8.1"
