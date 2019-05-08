@@ -58,7 +58,6 @@ public class PatrolBehaviorUIController extends Group
    private Messager behaviorMessager;
 
    private WaypointManager waypointManager;
-//   private ArrayList<PatrolWaypointGraphic> waypointGraphics = new ArrayList<>();
    private HashMap<Long, PatrolWaypointGraphic> waypointGraphics = new HashMap<>(); // map unique id to graphic
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private FootstepPlanGraphic footstepPlanGraphic;
@@ -372,8 +371,8 @@ public class PatrolBehaviorUIController extends Group
    }
 
    public void publishExploreTurnAmount()
-   {behaviorMessager.submitMessage(PatrolBehavior.API.ExplorationTurnAmount, exploreTurnAmount.getValue());
-
+   {
+      behaviorMessager.submitMessage(PatrolBehavior.API.ExplorationTurnAmount, exploreTurnAmount.getValue());
    }
 
    @FXML
