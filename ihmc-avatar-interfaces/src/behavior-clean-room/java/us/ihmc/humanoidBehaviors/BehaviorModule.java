@@ -6,6 +6,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -53,7 +54,7 @@ public class BehaviorModule
       apiFactory.createRootCategory("Root");
 
       apiFactory.includeMessagerAPIs(StepInPlaceBehavior.API.create());
-      apiFactory.includeMessagerAPIs(PatrolBehavior.API.create());
+      apiFactory.includeMessagerAPIs(PatrolBehaviorAPI.create());
 
       return apiFactory.getAPIAndCloseFactory();
    }

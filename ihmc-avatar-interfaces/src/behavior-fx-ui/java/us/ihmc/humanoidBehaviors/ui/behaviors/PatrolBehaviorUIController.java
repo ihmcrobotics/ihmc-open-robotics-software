@@ -16,8 +16,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
 public class PatrolBehaviorUIController extends Group
 {
@@ -81,7 +82,7 @@ public class PatrolBehaviorUIController extends Group
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentFootstepPlan, plan -> {
+      behaviorMessager.registerTopicListener(CurrentFootstepPlan, plan -> {
          executorService.submit(() -> {
             LogTools.debug("Received footstep plan containing {} steps", plan.size());
             footstepPlanGraphic.generateMeshes(plan);
@@ -99,7 +100,7 @@ public class PatrolBehaviorUIController extends Group
          exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 180.0, 1.0));
          exploreTurnAmount.getValueFactory().valueProperty().addListener((ChangeListener) -> publishExploreTurnAmount());
       });
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> Platform.runLater(() ->
+      behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
       {
          remoteCurrentState.setText(state.name());
          if (state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected())
@@ -114,7 +115,7 @@ public class PatrolBehaviorUIController extends Group
          }
       }));
 
-      waypointManager = WaypointManager.createForUI(behaviorMessager, API.WaypointsToUI, API.WaypointsToModule, () ->
+      waypointManager = WaypointManager.createForUI(behaviorMessager, WaypointsToUI, WaypointsToModule, () ->
       {
          Platform.runLater(() ->
          {
@@ -134,7 +135,7 @@ public class PatrolBehaviorUIController extends Group
          });
       });
 
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentWaypointIndexStatus,
+      behaviorMessager.registerTopicListener(CurrentWaypointIndexStatus,
                                              index ->
                                              {
                                                 waypointManager.setNextFromIndex(index);
@@ -372,7 +373,7 @@ public class PatrolBehaviorUIController extends Group
 
    public void publishExploreTurnAmount()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.ExplorationTurnAmount, exploreTurnAmount.getValue());
+      behaviorMessager.submitMessage(ExplorationTurnAmount, exploreTurnAmount.getValue());
    }
 
    @FXML
@@ -384,42 +385,42 @@ public class PatrolBehaviorUIController extends Group
    @FXML public void goToWaypoint()
    {
       waypointManager.setNextFromIndex(waypointIndex.getValue()); // this might not be necessary
-      behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, waypointIndex.getValue());
+      behaviorMessager.submitMessage(GoToWaypoint, waypointIndex.getValue());
    }
 
    @FXML public void stopWalking()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.Stop, new Object());
+      behaviorMessager.submitMessage(Stop, new Object());
    }
 
    @FXML public void loopThroughWaypoints()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.Loop, loopThroughWaypoints.isSelected());
+      behaviorMessager.submitMessage(Loop, loopThroughWaypoints.isSelected());
    }
 
    @FXML public void swingOverPlanarRegions()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.SwingOvers, swingOverPlanarRegions.isSelected());
+      behaviorMessager.submitMessage(SwingOvers, swingOverPlanarRegions.isSelected());
    }
 
    @FXML public void operatorPlanReview()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewEnabled, operatorPlanReview.isSelected());
+      behaviorMessager.submitMessage(PlanReviewEnabled, operatorPlanReview.isSelected());
    }
 
    @FXML public void replan()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewResult, OperatorPlanReviewResult.REPLAN);
+      behaviorMessager.submitMessage(PlanReviewResult, OperatorPlanReviewResult.REPLAN);
    }
 
    @FXML public void sendPlan()
    {
-      behaviorMessager.submitMessage(PatrolBehavior.API.PlanReviewResult, OperatorPlanReviewResult.WALK);
+      behaviorMessager.submitMessage(PlanReviewResult, OperatorPlanReviewResult.WALK);
    }
 
    @FXML public void upDownExploration()
    {
       placeWaypoints.setDisable(upDownExploration.isSelected());
-      behaviorMessager.submitMessage(API.UpDownExplorationEnabled, upDownExploration.isSelected());
+      behaviorMessager.submitMessage(UpDownExplorationEnabled, upDownExploration.isSelected());
    }
 }

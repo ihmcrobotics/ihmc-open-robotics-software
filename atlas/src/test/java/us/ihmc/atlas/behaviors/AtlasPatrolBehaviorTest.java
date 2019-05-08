@@ -13,8 +13,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -29,8 +28,6 @@ import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Tag("humanoid-behaviors")
 public class AtlasPatrolBehaviorTest
@@ -56,7 +53,7 @@ public class AtlasPatrolBehaviorTest
 
       LogTools.info("Creating behavior messager");
       Messager behaviorMessager = RemoteBehaviorInterface.createForTest(messager);
-      behaviorMessager.registerTopicListener(PatrolBehavior.API.CurrentState, state -> LogTools.info("Patrol state: {}", state));
+      behaviorMessager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 
@@ -65,9 +62,9 @@ public class AtlasPatrolBehaviorTest
       waypoints.add(new Pose3D(1.0, -0.2, 0.0, 20.0, 0.0, 0.0));
       waypoints.add(new Pose3D(1.0, -1.0, 0.0, 180.0, 0.0, 0.0));
 
-//      behaviorMessager.submitMessage(API.WaypointsToModule, waypoints);
+//      behaviorMessager.submitMessage(PatrolBehaviorAPI.WaypointsToModule, waypoints);
 
-      behaviorMessager.submitMessage(PatrolBehavior.API.GoToWaypoint, 0);
+      behaviorMessager.submitMessage(PatrolBehaviorAPI.GoToWaypoint, 0);
 
 
 //      FramePose3D currentGoalWaypoint = new FramePose3D();
