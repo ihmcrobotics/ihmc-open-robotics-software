@@ -1,8 +1,5 @@
 package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
@@ -13,7 +10,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -26,6 +22,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.TypedNotification;
 
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Taken mostly from us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter
  */
@@ -33,9 +32,6 @@ public class RemoteFootstepPlannerInterface
 {
    private static final double CLOSE_PLAN_RADIUS = 1.0;
 
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final Messager messager;
    private volatile FootstepPlannerParameters footstepPlannerParameters;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -50,7 +46,6 @@ public class RemoteFootstepPlannerInterface
 
    public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
    {
-      this.messager = messager;
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       if (messager != null)
       {
@@ -147,6 +142,6 @@ public class RemoteFootstepPlannerInterface
 
    public PlanType decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
-      return start.getPositionDistance(goal) < 1.0 ? PlanType.CLOSE : PlanType.FAR;
+      return start.getPositionDistance(goal) < CLOSE_PLAN_RADIUS ? PlanType.CLOSE : PlanType.FAR;
    }
 }
