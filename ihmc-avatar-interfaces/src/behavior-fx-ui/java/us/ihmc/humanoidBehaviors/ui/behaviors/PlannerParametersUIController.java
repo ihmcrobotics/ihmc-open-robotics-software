@@ -7,7 +7,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.API;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
 import us.ihmc.messager.Messager;
 
@@ -114,12 +114,12 @@ public class PlannerParametersUIController
       tunedFootstepPlannerParameters.setMaxStepUpX                       ( maxStepUpX           .getValue()       );
       tunedFootstepPlannerParameters.setMaxStepDownX                     ( maxStepDownX         .getValue()       );
 
-      messager.submitMessage(API.PlannerParameters, tunedFootstepPlannerParameters);
+      messager.submitMessage(PatrolBehaviorAPI.PlannerParameters, tunedFootstepPlannerParameters);
    }
 
    @FXML
    public void cancelPlanning()
    {
-      messager.submitMessage(API.CancelPlanning, new Object());
+      messager.submitMessage(PatrolBehaviorAPI.CancelPlanning, new Object());
    }
 }
