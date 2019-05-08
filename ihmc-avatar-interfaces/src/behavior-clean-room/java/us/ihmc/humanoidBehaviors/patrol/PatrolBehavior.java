@@ -28,8 +28,8 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInte
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
-import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation;
-import us.ihmc.humanoidBehaviors.upDownExploration.PlanarRegionUpDownNavigation.NavigationResult;
+import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
+import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.UpDownResultType;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -200,15 +200,15 @@ public class PatrolBehavior
 
       if (upDownExploration.get()) // find up-down or spin. setup the waypoint
       {
-         Pair<NavigationResult, FramePose3D> upOrDownResult
-               = PlanarRegionUpDownNavigation.upOrDown(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame(), // get because just polled
-                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()),
-                                                       messager);
+         Pair<UpDownResultType, FramePose3D> upOrDownResult
+               = UpDownFlatAreaFinder.upOrDown(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame(), // get because just polled
+                                               PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()),
+                                               messager);
 
          waypointManager.clearWaypoints();
          Waypoint newWaypoint = waypointManager.appendNewWaypoint();
 
-         if (upOrDownResult.getLeft() == NavigationResult.WAYPOINT_FOUND) // success
+         if (upOrDownResult.getLeft() == UpDownResultType.WAYPOINT_FOUND) // success
          {
             newWaypoint.getPose().set(upOrDownResult.getRight());
          }

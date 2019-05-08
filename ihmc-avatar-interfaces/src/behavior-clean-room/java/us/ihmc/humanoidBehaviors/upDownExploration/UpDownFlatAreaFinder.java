@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.upDownExploration;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -20,27 +19,26 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.*;
 
-public class PlanarRegionUpDownNavigation
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.UpDownResultType.*;
+
+public class UpDownFlatAreaFinder
 {
    private static final double LEVEL_EPSILON = 1e-3;
    private static final double HIGH_LOW_MINIMUM = 0.10;
    private static final double MINIMUM_AREA = 0.5 * 0.5; // square half meter
    public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
-   public static final double MAX_NAVIGATION_DISTANCE = 10.0;
+   public static final double MAX_NAVIGATION_DISTANCE = 4.0;
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
    public static final int NUMBER_OF_VERTICES = 5;
 
-   public enum NavigationResult
+   public enum UpDownResultType
    {
+      STILL_SEARCHING,
       WAYPOINT_FOUND,
-      NO_LEVEL_REGIONS,
-      NO_HIGHER_REGIONS,
-      NO_LARGE_REGIONS,
-      NO_QUALIFIED_REGIONS,
-      TOO_MANY_QUALIFIED_REGIONS
+      HIT_MAX_SEARCH_DISTANCE,
    }
 
-   public static Pair<NavigationResult, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList, Messager messager)
+   public static Pair<UpDownResultType, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList, Messager messager)
    {
       FramePose3D midFeetZUpPose = new FramePose3D();
       midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
@@ -50,27 +48,35 @@ public class PlanarRegionUpDownNavigation
 
       UpDownResult upDownResult = new UpDownResult(NUMBER_OF_VERTICES);
 
-      polygonPoints.add(2 * CHECK_STEP_SIZE, 0.0); // initial check step a bit out
-      LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
+      polygonPoints.add(CHECK_STEP_SIZE, 0.0); // initial check step a bit out
 
       FramePoint3D centerPoint3D;
-      while ((centerPoint3D = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints,
-                                                                                                 planarRegionsList,
-                                                                                                 midFeetZUpPose.getZ(),
-                                                                                                 upDownResult)) == null
-            && polygonPoints.getCenterPoint().getX() < MAX_NAVIGATION_DISTANCE)
+      UpDownResultType resultType = STILL_SEARCHING;
+      do
       {
          polygonPoints.add(CHECK_STEP_SIZE, 0.0);
          LogTools.info("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
+
+         centerPoint3D = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints,
+                                                                                            planarRegionsList,
+                                                                                            midFeetZUpPose.getZ(),
+                                                                                            upDownResult);
          LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
+         if (centerPoint3D != null)
+         {
+            resultType = WAYPOINT_FOUND;
+         }
+         else if (polygonPoints.getCenterPoint().getX() >= MAX_NAVIGATION_DISTANCE)
+         {
+            resultType = HIT_MAX_SEARCH_DISTANCE;
+         }
 
          messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResult);
-
          ThreadTools.sleepSeconds(0.25);
       }
-      messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResult);
+      while (resultType == STILL_SEARCHING);
 
-      if (centerPoint3D != null)
+      if (resultType == WAYPOINT_FOUND)
       {
          FramePose3D waypointPose = new FramePose3D();
          waypointPose.setFromReferenceFrame(midFeetZUpFrame);
@@ -78,10 +84,10 @@ public class PlanarRegionUpDownNavigation
 
          LogTools.debug("Qualifying pose found at height {}: {}", centerPoint3D.getZ() - midFeetZUpPose.getZ(), waypointPose);
 
-         return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
+         return Pair.of(resultType, waypointPose);
       }
 
-      return Pair.of(NavigationResult.NO_QUALIFIED_REGIONS, null);
+      return Pair.of(resultType, null);
    }
 
    public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints,
