@@ -22,7 +22,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurati
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class RobotiqControlThread extends HandControlThread
 {
@@ -35,7 +34,7 @@ public class RobotiqControlThread extends HandControlThread
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private RobotiqHandSensorData handStatus;
 
-   public RobotiqControlThread(String robotName, RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public RobotiqControlThread(String robotName, RobotSide robotSide)
    {
       super(robotSide);
       this.robotSide = robotSide;
@@ -48,7 +47,7 @@ public class RobotiqControlThread extends HandControlThread
 
       IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
                                                                                                           publisherTopicNameGenerator);
-      jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher, closeableAndDisposableRegistry);
+      jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subscriberTopicNameGenerator,
                                            handDesiredConfigurationMessageSubscriber);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, ManualHandControlPacket.class, subscriberTopicNameGenerator, manualHandControlProvider);
@@ -62,6 +61,7 @@ public class RobotiqControlThread extends HandControlThread
       jointAngleCommunicator.write();
    }
 
+   @Override
    public void run()
    {
       if (CALIBRATE_ON_CONNECT)
@@ -138,7 +138,6 @@ public class RobotiqControlThread extends HandControlThread
 
    public static void main(String[] args)
    {
-      CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
       JSAP jsap = new JSAP();
 
       FlaggedOption robotSide = new FlaggedOption("robotSide").setRequired(true).setLongFlag("robotSide").setShortFlag('r').setStringParser(JSAP.STRING_PARSER);
@@ -150,8 +149,7 @@ public class RobotiqControlThread extends HandControlThread
 
          if (config.success())
          {
-            RobotiqControlThread controlThread = new RobotiqControlThread("atlas", RobotSide.valueOf(config.getString("robotSide").toUpperCase()),
-                                                                          closeableAndDisposableRegistry);
+            RobotiqControlThread controlThread = new RobotiqControlThread("atlas", RobotSide.valueOf(config.getString("robotSide").toUpperCase()));
             controlThread.run();
          }
       }
