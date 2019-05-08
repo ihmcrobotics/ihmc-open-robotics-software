@@ -22,7 +22,7 @@ public class PlanarRegionUpDownNavigation
    private static final double HIGH_LOW_MINIMUM = 0.10;
    private static final double MINIMUM_AREA = 0.5 * 0.5; // square half meter
    public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
-   public static final double MAX_NAVIGATION_DISTANCE = 10.0;
+   public static final double MAX_NAVIGATION_DISTANCE = 4.0;
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
 
    public enum NavigationResult
