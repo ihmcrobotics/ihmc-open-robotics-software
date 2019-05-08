@@ -16,7 +16,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
@@ -54,8 +53,6 @@ public class PatrolBehaviorUIController extends Group
    @FXML private Button replan;
    @FXML private Button sendPlan;
 
-   private JavaFXMessager uiMessager;
-   private SubScene sceneNode;
    private Messager behaviorMessager;
 
    private WaypointManager waypointManager;
@@ -73,7 +70,6 @@ public class PatrolBehaviorUIController extends Group
 
    public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.sceneNode = sceneNode;
       this.behaviorMessager = behaviorMessager;
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
@@ -146,7 +142,7 @@ public class PatrolBehaviorUIController extends Group
                                                                   });
                                              });
 
-      waypointPlacementStateMachine = new FXUIStateMachine(uiMessager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      waypointPlacementStateMachine = new FXUIStateMachine(trigger ->
       {
          placeWaypoints.setDisable(true);
          removeAllWaypointGraphics();
@@ -171,7 +167,7 @@ public class PatrolBehaviorUIController extends Group
          placeWaypoints.setDisable(false);
       });
 
-      waypointInsertStateMachine = new FXUIStateMachine(uiMessager, FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      waypointInsertStateMachine = new FXUIStateMachine(trigger ->
       {
          placeWaypoints.setDisable(true);
          goToNextInsertedWaypointPositionEdit();
