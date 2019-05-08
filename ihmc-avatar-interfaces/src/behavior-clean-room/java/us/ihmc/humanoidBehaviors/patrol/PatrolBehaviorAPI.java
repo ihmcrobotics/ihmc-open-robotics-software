@@ -21,56 +21,41 @@ public class PatrolBehaviorAPI
    private static final Category Root = apiFactory.createRootCategory("PatrolBehavior");
    private static final CategoryTheme Patrol = apiFactory.createCategoryTheme("Patrol");
 
-   /** Input: Waypoints modified by operator */
-   public static final Topic<WaypointSequence> WaypointsToModule = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("WaypointsToModule"));
-
+   /** Input: Waypoints modified by operator TODO These two require a new feature from messager: remote-receive only */
+   public static final Topic<WaypointSequence> WaypointsToModule = topic("WaypointsToModule");
    /** Output: Waypoints modified by behavior */
-   public static final Topic<WaypointSequence> WaypointsToUI = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("WaypointsToUI"));
-
-   /** Input: Robot stops and immediately goes to this waypoint. The "start" or "reset" command.  */
-   public static final Topic<Integer> GoToWaypoint = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("GoToWaypoint"));
-
+   public static final Topic<WaypointSequence> WaypointsToUI = topic("WaypointsToUI");
+   /** Input: Robot stops and immediately goes to this waypoint. The "start" or "reset" command. */
+   public static final Topic<Integer> GoToWaypoint = topic("GoToWaypoint");
    /** Output: to visualize the current waypoint status. TODO clean me up */
-   public static final Topic<Integer> CurrentWaypointIndexStatus
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentWaypointIndexStatus"));
-
+   public static final Topic<Integer> CurrentWaypointIndexStatus = topic("CurrentWaypointIndexStatus");
    /** Input: When received, the robot stops walking and waits forever. */
-   public static final Topic<Object> Stop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Stop"));
-
+   public static final Topic<Object> Stop = topic("Stop");
    /** Input: Cancel planning for things like live tuning. */
-   public static final Topic<Object> CancelPlanning = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CancelPlanning"));
-
+   public static final Topic<Object> CancelPlanning = topic("CancelPlanning");
    /** Input: Toggle looping through waypoints. */
-   public static final Topic<Boolean> Loop = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("Loop"));
-
+   public static final Topic<Boolean> Loop = topic("Loop");
    /** Input: Toggle swinging over planar regions. */
-   public static final Topic<Boolean> SwingOvers = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("SwingOvers"));
-
+   public static final Topic<Boolean> SwingOvers = topic("SwingOvers");
    /** Input: Enable/disable human plan review before walking. */
-   public static final Topic<Boolean> PlanReviewEnabled = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewEnabled"));
-
+   public static final Topic<Boolean> PlanReviewEnabled = topic("PlanReviewEnabled");
    /** Input: Enable/disable human plan review before walking. */
-   public static final Topic<Boolean> UpDownExplorationEnabled
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("UpDownExplorationEnabled"));
-
+   public static final Topic<Boolean> UpDownExplorationEnabled = topic("UpDownExplorationEnabled");
    /** Input: Set the turn amount to find up or down. */
-   public static final Topic<Double> ExplorationTurnAmount
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("ExplorationTurnAmount"));
-
+   public static final Topic<Double> ExplorationTurnAmount = topic("ExplorationTurnAmount");
    /** Input: Enable/disable human plan review before walking. */
-   public static final Topic<OperatorPlanReviewResult> PlanReviewResult
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlanReviewResult"));
-
+   public static final Topic<OperatorPlanReviewResult> PlanReviewResult = topic("PlanReviewResult");
    /** Input: For the UI to set the parameters published before walking. */
-   public static final Topic<TunedFootstepPlannerParameters> PlannerParameters
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("PlannerParameters"));
-
+   public static final Topic<TunedFootstepPlannerParameters> PlannerParameters = topic("PlannerParameters");
    /** Output: to visualize the current robot path plan. */
-   public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan
-         = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentFootstepPlan"));
-
+   public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan = topic("CurrentFootstepPlan");
    /** Output: to visualize the current state. */
-   public static final Topic<PatrolBehaviorState> CurrentState = Root.child(Patrol).topic(apiFactory.createTypedTopicTheme("CurrentState"));
+   public static final Topic<PatrolBehaviorState> CurrentState = topic("CurrentState");
+
+   private static final <T> Topic<T> topic(String name)
+   {
+      return Root.child(Patrol).topic(apiFactory.createTypedTopicTheme(name));
+   }
 
    public static final MessagerAPI create()
    {
