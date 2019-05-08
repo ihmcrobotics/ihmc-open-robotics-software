@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -14,6 +15,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PatrolBehaviorAPI
 {
@@ -51,6 +53,8 @@ public class PatrolBehaviorAPI
    public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> CurrentFootstepPlan = topic("CurrentFootstepPlan");
    /** Output: to visualize the current state. */
    public static final Topic<PatrolBehaviorState> CurrentState = topic("CurrentState");
+   /** Output: to visualize up-down goal poses. */
+   public static final Topic<UpDownResult> UpDownGoalPoses = topic("UpDownGoalPoses");
 
    private static final <T> Topic<T> topic(String name)
    {

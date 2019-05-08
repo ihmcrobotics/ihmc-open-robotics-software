@@ -202,7 +202,8 @@ public class PatrolBehavior
       {
          Pair<NavigationResult, FramePose3D> upOrDownResult
                = PlanarRegionUpDownNavigation.upOrDown(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame(), // get because just polled
-                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()),
+                                                       messager);
 
          waypointManager.clearWaypoints();
          Waypoint newWaypoint = waypointManager.appendNewWaypoint();

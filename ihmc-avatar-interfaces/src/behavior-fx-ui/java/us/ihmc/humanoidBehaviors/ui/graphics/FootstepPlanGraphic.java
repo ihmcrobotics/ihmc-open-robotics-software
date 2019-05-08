@@ -7,6 +7,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,15 +18,19 @@ import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FootstepPlanGraphic extends Group
 {
    private final MeshView meshView = new MeshView();
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -45,6 +50,17 @@ public class FootstepPlanGraphic extends Group
       getChildren().addAll(meshView);
 
       animationTimer.start();
+   }
+
+   /**
+    * To process in parallel.
+    */
+   public void generateMeshesAsynchronously(ArrayList<Pair<RobotSide, Pose3D>> plan)
+   {
+      executorService.submit(() -> {
+         LogTools.debug("Received footstep plan containing {} steps", plan.size());
+         generateMeshes(plan);
+      });
    }
 
    public void generateMeshes(ArrayList<Pair<RobotSide, Pose3D>> message)

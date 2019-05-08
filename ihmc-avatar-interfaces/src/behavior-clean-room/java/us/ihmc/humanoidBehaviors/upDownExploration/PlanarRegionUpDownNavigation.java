@@ -1,7 +1,9 @@
 package us.ihmc.humanoidBehaviors.upDownExploration;
 
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -10,7 +12,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -22,8 +26,9 @@ public class PlanarRegionUpDownNavigation
    private static final double HIGH_LOW_MINIMUM = 0.10;
    private static final double MINIMUM_AREA = 0.5 * 0.5; // square half meter
    public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
-   public static final double MAX_NAVIGATION_DISTANCE = 4.0;
+   public static final double MAX_NAVIGATION_DISTANCE = 10.0;
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
+   public static final int NUMBER_OF_VERTICES = 5;
 
    public enum NavigationResult
    {
@@ -35,33 +40,43 @@ public class PlanarRegionUpDownNavigation
       TOO_MANY_QUALIFIED_REGIONS
    }
 
-   public static Pair<NavigationResult, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
+   public static Pair<NavigationResult, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList, Messager messager)
    {
       FramePose3D midFeetZUpPose = new FramePose3D();
       midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
 
       // move straight out from mid feet z up until polygon points share their highest collisions with the same region
-      PolygonPoints2D polygonPoints = new PolygonPoints2D(5, REQUIRED_FLAT_AREA_RADIUS, midFeetZUpFrame);
+      PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS, midFeetZUpFrame);
+
+      UpDownResult upDownResult = new UpDownResult(NUMBER_OF_VERTICES);
 
       polygonPoints.add(2 * CHECK_STEP_SIZE, 0.0); // initial check step a bit out
       LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
 
-      FramePoint3D centerPoint;
-      while ((centerPoint = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints, planarRegionsList, midFeetZUpPose.getZ())) == null
+      FramePoint3D centerPoint3D;
+      while ((centerPoint3D = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints,
+                                                                                                 planarRegionsList,
+                                                                                                 midFeetZUpPose.getZ(),
+                                                                                                 upDownResult)) == null
             && polygonPoints.getCenterPoint().getX() < MAX_NAVIGATION_DISTANCE)
       {
          polygonPoints.add(CHECK_STEP_SIZE, 0.0);
          LogTools.info("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
          LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
-      }
 
-      if (centerPoint != null)
+         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResult);
+
+         ThreadTools.sleepSeconds(0.25);
+      }
+      messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResult);
+
+      if (centerPoint3D != null)
       {
          FramePose3D waypointPose = new FramePose3D();
          waypointPose.setFromReferenceFrame(midFeetZUpFrame);
-         waypointPose.setPosition(centerPoint);
+         waypointPose.setPosition(centerPoint3D);
 
-         LogTools.debug("Qualifying pose found at height {}: {}", centerPoint.getZ() - midFeetZUpPose.getZ(), waypointPose);
+         LogTools.debug("Qualifying pose found at height {}: {}", centerPoint3D.getZ() - midFeetZUpPose.getZ(), waypointPose);
 
          return Pair.of(NavigationResult.WAYPOINT_FOUND, waypointPose);
       }
@@ -71,12 +86,17 @@ public class PlanarRegionUpDownNavigation
 
    public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints,
                                                                                                  PlanarRegionsList planarRegionsList,
-                                                                                                 double startingZ)
+                                                                                                 double startingZ,
+                                                                                                 UpDownResult upDownResult)
    {
+      upDownResult.setValid(false);
+
       // map points to their collisions
       HashMap<FramePoint2D, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
-      for (FramePoint2D point : polygonPoints.getPoints())
+      List<FramePoint2D> points = polygonPoints.getPoints();
+      for (int i = 0; i < points.size(); i++)
       {
+         FramePoint2D point = points.get(i);
          ReferenceFrame previousFrame = point.getReferenceFrame();
          point.changeFrame(ReferenceFrame.getWorldFrame());
          { // point frame changed block
@@ -94,6 +114,11 @@ public class PlanarRegionUpDownNavigation
             }
 
             collisions.put(point, singlePointCollisions);
+
+            // pack 3D point for visualization
+            upDownResult.getPoints().get(i).setX(point.getX());
+            upDownResult.getPoints().get(i).setY(point.getY());
+            upDownResult.getPoints().get(i).setZ(singlePointCollisions.last().getRight());
          } // point frame changed block
          point.changeFrame(previousFrame);
       }
@@ -102,30 +127,32 @@ public class PlanarRegionUpDownNavigation
       Pair<PlanarRegion, Double> highestCollision = Pair.of(null, Double.NEGATIVE_INFINITY);
       for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values())
       {
-         Pair<PlanarRegion, Double> collisionOccurrence = value.last(); // TODO might be first
+         Pair<PlanarRegion, Double> collisionOccurrence = value.last(); // last is highest
          if (collisionOccurrence.getRight() >= highestCollision.getRight())
          {
             highestCollision = collisionOccurrence;
          }
       }
 
-      for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values())
+      if (Math.abs(highestCollision.getRight() - startingZ) <  HIGH_LOW_MINIMUM) // make sure to go up or down
       {
-         if (highestCollision.getLeft() != value.last().getLeft())  // TODO might be first
+         return null;
+      }
+
+      for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values()) // make sure all points' highest collisions are on same region
+      {
+         if (highestCollision.getLeft() != value.last().getLeft())  // last is highest
          {
             return null; // point has its highest collision on a region other than the region of the highest collision of all points
          }
       }
 
-      // make sure to go up or down
-      if (Math.abs(highestCollision.getRight() - startingZ) <  HIGH_LOW_MINIMUM)
-      {
-         return null;
-      }
-
       FramePoint3D centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint());
       centerPoint3D.changeFrame(ReferenceFrame.getWorldFrame());
       centerPoint3D.setZ(highestCollision.getRight());
+
+      LogTools.debug("Returning valid center point! {}", centerPoint3D);
+      upDownResult.setValid(true);
 
       return centerPoint3D; // all points have a collision and all of their highest collisions are with the same region
    }
@@ -139,8 +166,8 @@ public class PlanarRegionUpDownNavigation
       ArrayList<PlanarRegion> highestRegions = new ArrayList<>();
       for (int i = 0; i < numberToGet; i++)
       {
-         PlanarRegion highRegion = regionsSortedByHeight.pollFirst();
-         highestRegions.add(highRegion); // TODO might be poll last
+         PlanarRegion highRegion = regionsSortedByHeight.pollFirst(); // TODO might be poll last
+         highestRegions.add(highRegion);
          LogTools.debug("Found high region with id {} and centroid {}", highRegion.getRegionId(), centroid(highRegion));
       }
       return highestRegions;
