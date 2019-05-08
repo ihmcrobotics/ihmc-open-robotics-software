@@ -15,25 +15,22 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.UpDownGoalGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
@@ -57,8 +54,8 @@ public class PatrolBehaviorUIController extends Group
 
    private WaypointManager waypointManager;
    private HashMap<Long, PatrolWaypointGraphic> waypointGraphics = new HashMap<>(); // map unique id to graphic
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private FootstepPlanGraphic footstepPlanGraphic;
+   private UpDownGoalGraphic upDownGoalGraphic;
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
@@ -75,15 +72,14 @@ public class PatrolBehaviorUIController extends Group
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       getChildren().add(footstepPlanGraphic);
 
+      upDownGoalGraphic = new UpDownGoalGraphic();
+      getChildren().addAll(upDownGoalGraphic.getNodes());
+
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
-      behaviorMessager.registerTopicListener(CurrentFootstepPlan, plan -> {
-         executorService.submit(() -> {
-            LogTools.debug("Received footstep plan containing {} steps", plan.size());
-            footstepPlanGraphic.generateMeshes(plan);
-         });
-      });
+      behaviorMessager.registerTopicListener(CurrentFootstepPlan, footstepPlanGraphic::generateMeshesAsynchronously);
+      behaviorMessager.registerTopicListener(UpDownGoalPoses, result -> Platform.runLater(() -> upDownGoalGraphic.setResult(result)));
 
       Platform.runLater(() ->
       {

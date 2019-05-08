@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * N corner points around one in the center in 2D, forming the points of a polygon plus a center one
@@ -23,18 +24,18 @@ public class PolygonPoints2D
    private final ArrayList<FramePoint2D> points = new ArrayList<>();
    private final FramePoint2D centerPoint;
 
-   public PolygonPoints2D(int numberOfPoints, double radius, ReferenceFrame referenceFrame)
+   public PolygonPoints2D(int numberOfVertices, double radius, ReferenceFrame referenceFrame)
    {
       centerPoint = new FramePoint2D(referenceFrame);
-      getPoints().add(centerPoint); // center
+      points.add(centerPoint); // center
 
-      double angleStepSize = Math.PI * 2.0 / (double) numberOfPoints;
+      double angleStepSize = Math.PI * 2.0 / (double) numberOfVertices;
 
-      for (int i = 0; i < numberOfPoints; i++)
+      for (int i = 0; i < numberOfVertices; i++)
       {
          double x = radius * Math.cos(i * angleStepSize);
          double y = radius * Math.sin(i * angleStepSize);
-         getPoints().add(new FramePoint2D(referenceFrame, x, y));
+         points.add(new FramePoint2D(referenceFrame, x, y));
       }
    }
 
@@ -51,7 +52,7 @@ public class PolygonPoints2D
       return centerPoint;
    }
 
-   public ArrayList<FramePoint2D> getPoints()
+   public List<FramePoint2D> getPoints()
    {
       return points;
    }
