@@ -1,21 +1,13 @@
 package us.ihmc.humanoidBehaviors.ui.model;
 
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.messager.Messager;
-
 import java.util.HashMap;
 
 public class FXUIStateMachine
 {
-   private final Messager messager;
-   private final FXUIStateTransitionTrigger exitTransition;
    private HashMap<FXUIStateTransitionTrigger, FXUIStateTransition> transitions = new HashMap<>();
 
-   public FXUIStateMachine(Messager messager, FXUIStateTransitionTrigger exitTrigger, FXUIStateTransition startTransition)
+   public FXUIStateMachine(FXUIStateTransition startTransition)
    {
-      this.messager = messager;
-      this.exitTransition = exitTrigger;
-
       mapTransition(FXUIStateTransitionTrigger.START, startTransition);
    }
 
