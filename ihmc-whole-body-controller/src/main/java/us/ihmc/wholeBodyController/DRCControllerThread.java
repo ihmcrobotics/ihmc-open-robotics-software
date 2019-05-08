@@ -30,7 +30,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -222,7 +222,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                                                             YoDouble yoTime, double controlDT, double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                            DRCRobotSensorInformation sensorInformation, JointDesiredOutputList lowLevelControllerOutput,
+                                                            DRCRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
