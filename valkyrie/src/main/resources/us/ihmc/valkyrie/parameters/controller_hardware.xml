@@ -28,15 +28,16 @@
                         <parameter name="kpZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="80.0"/>
                         <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                         <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                        <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     </registry>
                     <registry name="FootGains">
-                        <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
                         <parameter name="kpYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
                         <parameter name="kpZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="250.0"/>
                         <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
                         <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
                         <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                        <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
+                        <parameter name="zetaXSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
                         <parameter name="zetaYSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.7"/>
                         <parameter name="zetaZSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                         <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
