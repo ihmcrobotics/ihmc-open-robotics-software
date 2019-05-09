@@ -67,6 +67,7 @@
                         <parameter name="NoLoadHipPitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
                         <parameter name="NoLoadKneePitchStiffness" type="DoubleParameter" min="0.0" max="10.0" value="10.0"/>
                         <parameter name="NoLoadKneePitchDamping" type="DoubleParameter" min="0.0" max="10.0" value="5.0"/>
+                        <parameter name="NoLoadElbowRollStiffness" type="DoubleParameter" min="0.0" max="10.0" value="6.5"/>
                     </registry>
                     <registry name="WholeBodyControllerCore">
                         <registry name="WholeBodyFeedbackController">
