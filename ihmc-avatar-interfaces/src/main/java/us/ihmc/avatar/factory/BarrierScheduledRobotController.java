@@ -32,7 +32,7 @@ public class BarrierScheduledRobotController<C> implements DisposableRobotContro
       // Start the task threads.
       for (int i = 0; i < tasks.size(); i++)
       {
-         new Thread(tasks.get(i), "TaskThread" + i).start();
+         new Thread(tasks.get(i), tasks.get(i).getClass().getSimpleName() + "Thread").start();
       }
    }
 
