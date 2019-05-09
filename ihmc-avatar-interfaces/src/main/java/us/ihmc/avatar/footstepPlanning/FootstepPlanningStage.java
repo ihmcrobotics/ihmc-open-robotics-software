@@ -98,8 +98,6 @@ public class FootstepPlanningStage implements FootstepPlanner
       this.tickDurationMs = tickDurationMs;
       this.activePlannerEnum = activePlanner;
 
-      footstepPlannerParameters.printValues();
-
       String prefix = stageId + "_Step_";
 
       plannerGoalRecommendationHolder = new PlannerGoalRecommendationHolder(stageId);

@@ -358,7 +358,6 @@ public class FootstepPathCalculatorModule
    private BodyPathAndFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
    {
       FootstepPlannerParameters parameters = this.parameters.get();
-      parameters.printValues();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       FootstepNodeSnapAndWiggler postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);

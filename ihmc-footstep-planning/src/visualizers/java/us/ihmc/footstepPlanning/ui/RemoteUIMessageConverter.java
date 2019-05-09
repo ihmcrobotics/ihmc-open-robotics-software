@@ -334,7 +334,6 @@ public class RemoteUIMessageConverter
       
       FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerParameters footstepPlannerParameters = plannerParametersReference.get();
-      footstepPlannerParameters.printValues();
 
       FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
       plannerParametersPublisher.publish(plannerParametersPacket);

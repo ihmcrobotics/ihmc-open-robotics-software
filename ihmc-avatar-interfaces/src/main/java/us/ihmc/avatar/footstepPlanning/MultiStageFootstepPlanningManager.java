@@ -477,46 +477,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
    public void processFootstepPlannerParameters(FootstepPlannerParametersPacket parameters)
    {
       latestFootstepPlannerParametersReference.set(parameters);
-
-      LogTools.debug("wiggleIntoConvexHullOfPlanarRegions: {}", parameters.getWiggleIntoConvexHullOfPlanarRegions ()  );
-      LogTools.debug("rejectIfCannotFullyWiggleInside    : {}", parameters.getRejectIfCannotFullyWiggleInside     ()  );
-      LogTools.debug("returnBestEffortPlan               : {}", parameters.getReturnBestEffortPlan                ()  );
-      LogTools.debug("checkForBodyBoxCollisions          : {}", parameters.getCheckForBodyBoxCollisions           ()  );
-      LogTools.debug("performHeuristicSearchPolicies     : {}", parameters.getPerformHeuristicSearchPolicies      ()  );
-      LogTools.debug("minimumStepsForBestEffortPlan      : {}", parameters.getMinimumStepsForBestEffortPlan       ()  );
-      LogTools.debug("idealFootstepWidth                 : {}", parameters.getIdealFootstepWidth                  ()  );
-      LogTools.debug("idealFootstepLength                : {}", parameters.getIdealFootstepLength                 ()  );
-      LogTools.debug("wiggleInsideDelta                  : {}", parameters.getWiggleInsideDelta                   ()  );
-      LogTools.debug("maximumXYWiggleDistance            : {}", parameters.getMaximumXyWiggleDistance             ()  );
-      LogTools.debug("maximumYawWiggle                   : {}", parameters.getMaximumYawWiggle                    ()  );
-      LogTools.debug("maxStepReach                       : {}", parameters.getMaximumStepReach                    ()  );
-      LogTools.debug("maxStepYaw                         : {}", parameters.getMaximumStepYaw                      ()  );
-      LogTools.debug("minStepWidth                       : {}", parameters.getMinimumStepWidth                    ()  );
-      LogTools.debug("minStepLength                      : {}", parameters.getMinimumStepLength                   ()  );
-      LogTools.debug("minStepYaw                         : {}", parameters.getMinimumStepYaw                      ()  );
-      LogTools.debug("maxStepZ                           : {}", parameters.getMaximumStepZ                        ()  );
-      LogTools.debug("minFootholdPercent                 : {}", parameters.getMinimumFootholdPercent              ()  );
-      LogTools.debug("minSurfaceIncline                  : {}", parameters.getMinimumSurfaceInclineRadians        ()  );
-      LogTools.debug("maxStepWidth                       : {}", parameters.getMaximumStepWidth                    ()  );
-      LogTools.debug("minXClearanceFromStance            : {}", parameters.getMinXClearanceFromStance             ()  );
-      LogTools.debug("minYClearanceFromStance            : {}", parameters.getMinYClearanceFromStance             ()  );
-      LogTools.debug("maximumStepReachWhenSteppingUp     : {}", parameters.getMaximumStepReachWhenSteppingUp      ()  );
-      LogTools.debug("maximumStepZWhenSteppingUp         : {}", parameters.getMaximumStepZWhenSteppingUp          ()  );
-      LogTools.debug("maximumStepXWhenForwardAndDown     : {}", parameters.getMaximumStepXWhenForwardAndDown      ()  );
-      LogTools.debug("maximumStepZWhenForwardAndDown     : {}", parameters.getMaximumStepZWhenForwardAndDown      ()  );
-      LogTools.debug("maximumZPenetrationOnValleyRegions : {}", parameters.getMaximumZPenetrationOnValleyRegions  ()  );
-      LogTools.debug("cliffHeightToAvoid                 : {}", parameters.getCliffHeightToAvoid                  ()  );
-      LogTools.debug("minimumDistanceFromCliffBottoms    : {}", parameters.getMinimumDistanceFromCliffBottoms     ()  );
-      LogTools.debug("bodyGroundClearance                : {}", parameters.getBodyGroundClearance                 ()  );
-      LogTools.debug("bodyBoxWidth                       : {}", parameters.getBodyBoxWidth                        ()  );
-      LogTools.debug("bodyBoxHeight                      : {}", parameters.getBodyBoxHeight                       ()  );
-      LogTools.debug("bodyBoxDepth                       : {}", parameters.getBodyBoxDepth                        ()  );
-      LogTools.debug("bodyBoxBaseX                       : {}", parameters.getBodyBoxBaseX                        ()  );
-      LogTools.debug("bodyBoxBaseY                       : {}", parameters.getBodyBoxBaseY                        ()  );
-      LogTools.debug("bodyBoxBaseZ                       : {}", parameters.getBodyBoxBaseZ                        ()  );
-      LogTools.debug("finalTurnProximity                 : not set");
-
-
       LogTools.info("Received new set of footstep planner parameters.");
    }
 
@@ -566,8 +526,6 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
          FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, footstepPlanningParameters);
       }
 
-      footstepPlanningParameters.printValues();
-
       parametersPublisher.publish(parametersPacket);
    }
 
@@ -594,10 +552,7 @@ public class MultiStageFootstepPlanningManager implements PlannerCompletionCallb
 
       FootstepPlannerParametersPacket footstepPlannerParameters = latestFootstepPlannerParametersReference.getAndSet(null);
       if (footstepPlannerParameters != null)
-      {
          footstepPlanningParameters.set(footstepPlannerParameters);
-         footstepPlanningParameters.printValues();
-      }
 
       VisibilityGraphsParametersPacket visibilityGraphsParameters = latestVisibilityGraphsParametersReference.getAndSet(null);
       if (visibilityGraphsParameters != null)
