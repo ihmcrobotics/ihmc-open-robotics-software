@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +30,6 @@ import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.UpDownResultType;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -60,8 +60,8 @@ public class PatrolBehavior
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
       STOP,
       /** Decide on waypoints. */
-//      NAVIGATE,
-//      /** Request and wait for footstep planner result */
+      NAVIGATE,
+      /** Request and wait for footstep planner result */
       PLAN,
       /** Optional user review of footstep plan. */
       REVIEW,
@@ -84,12 +84,15 @@ public class PatrolBehavior
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
+   private final UpDownFlatAreaFinder upDownFlatAreaFinder;
 
    private final Notification stopNotification = new Notification();
    private final Notification goNotification = new Notification();
    private final TypedNotification<OperatorPlanReviewResult> planReviewResult = new TypedNotification<>();
    private final Notification cancelPlanning = new Notification();
+   private final Notification skipPerceive = new Notification();
 
+   private TypedNotification<Optional<FramePose3D>> upOrDownNotification = new TypedNotification<>();
    private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
@@ -109,20 +112,23 @@ public class PatrolBehavior
       EnumBasedStateMachineFactory<PatrolBehaviorState> factory = new EnumBasedStateMachineFactory<>(PatrolBehaviorState.class);
       factory.getStateMap().get(STOP).setOnEntry(this::onStopStateEntry);
       factory.getStateMap().get(STOP).setDoAction(this::doStopStateAction);
-      factory.getFactory().addTransition(STOP, PLAN, this::transitionFromStop);
+      factory.getFactory().addTransition(STOP, NAVIGATE, this::transitionFromStop);
+      factory.getStateMap().get(NAVIGATE).setOnEntry(this::onNavigateStateEntry);
+      factory.getStateMap().get(NAVIGATE).setDoAction(this::doNavigateStateAction);
+      factory.addTransition(NAVIGATE, Lists.newArrayList(PLAN, NAVIGATE, STOP), this::transitionFromNavigate);
       factory.getStateMap().get(PLAN).setOnEntry(this::onPlanStateEntry);
       factory.getStateMap().get(PLAN).setDoAction(this::doPlanStateAction);
-      factory.addTransition(PLAN, Lists.newArrayList(REVIEW, PLAN, STOP), this::transitionFromPlan);
+      factory.addTransition(PLAN, Lists.newArrayList(REVIEW, NAVIGATE, STOP), this::transitionFromPlan);
       factory.getStateMap().get(REVIEW).setOnEntry(this::onReviewStateEntry);
       factory.getStateMap().get(REVIEW).setDoAction(this::onReviewStateAction);
       factory.addTransition(REVIEW, Lists.newArrayList(WALK, PLAN, STOP), this::transitionFromReview);
       factory.getStateMap().get(WALK).setOnEntry(this::onWalkStateEntry);
       factory.getStateMap().get(WALK).setDoAction(this::doWalkStateAction);
       factory.getStateMap().get(WALK).setOnExit(this::onWalkStateExit);
-      factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, PLAN, STOP), this::transitionFromWalk);
+      factory.addTransition(WALK, Lists.newArrayList(PERCEIVE, NAVIGATE, STOP), this::transitionFromWalk);
       factory.getStateMap().get(PERCEIVE).setOnEntry(this::onPerceiveStateEntry);
       factory.getStateMap().get(PERCEIVE).setDoAction(this::doPerceiveStateAction);
-      factory.addTransition(PERCEIVE, Lists.newArrayList(PLAN, STOP), this::transitionFromPerceive);
+      factory.addTransition(PERCEIVE, Lists.newArrayList(NAVIGATE, STOP), this::transitionFromPerceive);
       factory.getFactory().addStateChangedListener((from, to) ->
                                                    {
                                                       messager.submitMessage(CurrentState, to);
@@ -136,6 +142,7 @@ public class PatrolBehavior
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
       waypointManager = WaypointManager.createForModule(messager,
                                                         WaypointsToModule,
@@ -149,7 +156,12 @@ public class PatrolBehavior
       {
          planReviewResult.add(message);
       });
-      messager.registerTopicListener(CancelPlanning, object -> cancelPlanning.set());
+      messager.registerTopicListener(CancelPlanning, object ->
+      {
+         cancelPlanning.set();
+         upDownFlatAreaFinder.abort();
+      });
+      messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
 
       loop = messager.createInput(Loop, false);
       swingOvers = messager.createInput(SwingOvers, false);
@@ -189,6 +201,39 @@ public class PatrolBehavior
       return transition;
    }
 
+   private void onNavigateStateEntry()
+   {
+      if (upDownExploration.get()) // find up-down or spin. setup the waypoint
+      {
+         upOrDownNotification = upDownFlatAreaFinder.upOrDownOnAThread(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
+                                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+      }
+   }
+
+   private void doNavigateStateAction(double timeInState)
+   {
+      pollInterrupts();
+      upOrDownNotification.poll();
+   }
+
+   private PatrolBehaviorState transitionFromNavigate(double timeInState)
+   {
+      if (stopNotification.read())
+      {
+         return STOP;
+      }
+      else if (cancelPlanning.read())
+      {
+         return NAVIGATE;
+      }
+      else if (!upDownExploration.get() || upOrDownNotification.hasNext())
+      {
+         return PLAN;
+      }
+
+      return null;
+   }
+
    private void onPlanStateEntry()
    {
       // update waypoints if UI modified them
@@ -198,19 +243,16 @@ public class PatrolBehavior
 
       FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
-      if (upDownExploration.get()) // find up-down or spin. setup the waypoint
+      if (upDownExploration.get() && upOrDownNotification.hasNext())
       {
-         Pair<UpDownResultType, FramePose3D> upOrDownResult
-               = UpDownFlatAreaFinder.upOrDown(remoteSyncedHumanoidFrames.getHumanoidReferenceFrames().getMidFeetZUpFrame(), // get because just polled
-                                               PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()),
-                                               messager);
-
          waypointManager.clearWaypoints();
          Waypoint newWaypoint = waypointManager.appendNewWaypoint();
 
-         if (upOrDownResult.getLeft() == UpDownResultType.WAYPOINT_FOUND) // success
+         upOrDownNotification.peek().get().set(new FramePose3D());
+
+         if (upOrDownNotification.peek().isPresent()) // success
          {
-            newWaypoint.getPose().set(upOrDownResult.getRight());
+            newWaypoint.getPose().set(upOrDownNotification.peek().get());
          }
          else // turn counter-clockwise to try and find an up-down
          {
@@ -222,9 +264,10 @@ public class PatrolBehavior
          waypointManager.setNextFromIndex(0);
       }
 
-      FramePose3D currentGoalWaypoint = new FramePose3D(waypointManager.peekNextPose());
-
-      footstepPlanResultNotification = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose, currentGoalWaypoint, planarRegionsList.getLatest());
+      footstepPlanResultNotification
+            = remoteFootstepPlannerInterface.requestPlan(midFeetZUpPose,
+                                                         new FramePose3D(waypointManager.peekNextPose()),
+                                                         planarRegionsList.getLatest());
    }
 
    private void doPlanStateAction(double timeInState)
@@ -241,7 +284,7 @@ public class PatrolBehavior
       }
       else if (cancelPlanning.read())
       {
-         return PLAN;
+         return NAVIGATE;
       }
       else if (footstepPlanResultNotification.hasNext())
       {
@@ -251,7 +294,7 @@ public class PatrolBehavior
          }
          else
          {
-            return PLAN;
+            return NAVIGATE;
          }
       }
 
@@ -333,7 +376,7 @@ public class PatrolBehavior
             }
             else // next waypoint is close
             {
-               return PLAN;
+               return NAVIGATE;
             }
          }
       }
@@ -367,9 +410,13 @@ public class PatrolBehavior
       {
          return STOP;
       }
+      else if (skipPerceive.read())
+      {
+         return NAVIGATE;
+      }
       else if (timeInState > TIME_TO_PERCEIVE)
       {
-         return PLAN;
+         return NAVIGATE;
       }
 
       return null;
@@ -391,6 +438,7 @@ public class PatrolBehavior
       goNotification.poll();
       planReviewResult.poll();
       cancelPlanning.poll();
+      skipPerceive.poll();
    }
 
    private void reduceAndSendFootstepsForVisualization(FootstepPlan footstepPlan)

@@ -16,10 +16,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.*;
 
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.UpDownResultType.*;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.*;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.*;
 
 public class UpDownFlatAreaFinder
 {
@@ -29,40 +32,118 @@ public class UpDownFlatAreaFinder
    public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
    public static final double MAX_NAVIGATION_DISTANCE = 4.0;
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
+   public static final double ANGLE_STEP_SIZE = 0.05;
+   public static final double MAX_ANGLE_TO_SEARCH = 0.6;
    public static final int NUMBER_OF_VERTICES = 5;
 
-   public enum UpDownResultType
+   private final Messager messager;
+   private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
+   private final PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
+   private final UpDownResult upDownResultForVisualization = new UpDownResult(NUMBER_OF_VERTICES);
+
+   private volatile boolean abort = false;
+
+   private ReferenceFrame midFeetZUpFrame;
+   private PlanarRegionsList planarRegionsList;
+   private double initialHeight;
+   private FramePoint3D centerPoint3D;
+
+   public enum SingleAngleSearch
    {
       STILL_SEARCHING,
       WAYPOINT_FOUND,
       HIT_MAX_SEARCH_DISTANCE,
+      ABORTED
    }
 
-   public static Pair<UpDownResultType, FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList, Messager messager)
+   public enum MultiAngleSearch
    {
-      FramePose3D midFeetZUpPose = new FramePose3D();
+      STILL_ANGLING,
+      ANGLE_SUCCESS,
+      HIT_MAX_ANGLE_TO_SEARCH,
+      ABORTED
+   }
+
+   public UpDownFlatAreaFinder(Messager messager)
+   {
+      this.messager = messager;
+   }
+
+   public TypedNotification<Optional<FramePose3D>> upOrDownOnAThread(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
+   {
+      TypedNotification<Optional<FramePose3D>> typedNotification = new TypedNotification<>();
+      scheduler.scheduleOnce(() -> typedNotification.add(upOrDown(midFeetZUpFrame, planarRegionsList)));
+      return typedNotification;
+   }
+
+   public void abort()
+   {
+      abort = true;
+   }
+
+   public Optional<FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
+   {
+      abort = false;
+      this.midFeetZUpFrame = midFeetZUpFrame;
+      this.planarRegionsList = planarRegionsList;
+
       midFeetZUpPose.setFromReferenceFrame(midFeetZUpFrame);
 
       // move straight out from mid feet z up until polygon points share their highest collisions with the same region
-      PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS, midFeetZUpFrame);
+      upDownResultForVisualization.reset();
+      initialHeight = midFeetZUpPose.getZ();
 
-      UpDownResult upDownResult = new UpDownResult(NUMBER_OF_VERTICES);
-
-      polygonPoints.add(CHECK_STEP_SIZE, 0.0); // initial check step a bit out
-
-      FramePoint3D centerPoint3D;
-      UpDownResultType resultType = STILL_SEARCHING;
+      double searchAngle = 0.0;
+      MultiAngleSearch resultType = STILL_ANGLING;
       do
       {
-         polygonPoints.add(CHECK_STEP_SIZE, 0.0);
-         LogTools.info("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
+         if (searchAngle(searchAngle) == WAYPOINT_FOUND)
+         {
+            resultType = ANGLE_SUCCESS;
+         }
+         else if (searchAngle > 0.0 && searchAngle(-searchAngle) == WAYPOINT_FOUND)
+         {
+            resultType = ANGLE_SUCCESS;
+         }
+         else if (searchAngle >= MAX_ANGLE_TO_SEARCH)
+         {
+            resultType = HIT_MAX_ANGLE_TO_SEARCH;
+         }
+         else if (abort)
+         {
+            resultType = MultiAngleSearch.ABORTED;
+         }
 
-         centerPoint3D = centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints,
-                                                                                            planarRegionsList,
-                                                                                            midFeetZUpPose.getZ(),
-                                                                                            upDownResult);
-         LogTools.info("Polygon center point {}", polygonPoints.getCenterPoint());
-         if (centerPoint3D != null)
+         searchAngle += ANGLE_STEP_SIZE;
+      }
+      while (resultType == STILL_ANGLING);
+
+      if (resultType == ANGLE_SUCCESS)
+      {
+         FramePose3D waypointPose = new FramePose3D();
+         waypointPose.setFromReferenceFrame(midFeetZUpFrame);
+         waypointPose.setPosition(centerPoint3D);
+
+         LogTools.debug("Qualifying pose found at height {}: {}", centerPoint3D.getZ() - initialHeight, waypointPose);
+
+         return Optional.of(waypointPose);
+      }
+
+      return Optional.empty();
+   }
+
+   private SingleAngleSearch searchAngle(double angle)
+   {
+      polygonPoints.reset(midFeetZUpFrame);
+      polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle)); // initial check step a bit out
+      SingleAngleSearch resultType = STILL_SEARCHING;
+      do
+      {
+         polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle));
+         LogTools.trace("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
+
+         if (centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion())
          {
             resultType = WAYPOINT_FOUND;
          }
@@ -70,32 +151,24 @@ public class UpDownFlatAreaFinder
          {
             resultType = HIT_MAX_SEARCH_DISTANCE;
          }
+         else if (abort)
+         {
+            resultType = SingleAngleSearch.ABORTED;
+         }
 
-         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResult);
-         ThreadTools.sleepSeconds(0.25);
+         LogTools.trace("Polygon center point {}", polygonPoints.getCenterPoint());
+
+         messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
+         ThreadTools.sleepSeconds(0.02);
       }
       while (resultType == STILL_SEARCHING);
 
-      if (resultType == WAYPOINT_FOUND)
-      {
-         FramePose3D waypointPose = new FramePose3D();
-         waypointPose.setFromReferenceFrame(midFeetZUpFrame);
-         waypointPose.setPosition(centerPoint3D);
-
-         LogTools.debug("Qualifying pose found at height {}: {}", centerPoint3D.getZ() - midFeetZUpPose.getZ(), waypointPose);
-
-         return Pair.of(resultType, waypointPose);
-      }
-
-      return Pair.of(resultType, null);
+      return resultType;
    }
 
-   public static FramePoint3D centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints,
-                                                                                                 PlanarRegionsList planarRegionsList,
-                                                                                                 double startingZ,
-                                                                                                 UpDownResult upDownResult)
+   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion()
    {
-      upDownResult.setValid(false);
+      upDownResultForVisualization.setValid(false);
 
       // map points to their collisions
       HashMap<FramePoint2D, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
@@ -111,7 +184,8 @@ public class UpDownFlatAreaFinder
 
             if (collidedRegions == null || collidedRegions.isEmpty())
             {
-               return null; // not every point collides once
+               LogTools.trace("not every point collides once");
+               return false; // not every point collides once
             }
 
             for (PlanarRegion collidedRegion : collidedRegions)
@@ -122,9 +196,9 @@ public class UpDownFlatAreaFinder
             collisions.put(point, singlePointCollisions);
 
             // pack 3D point for visualization
-            upDownResult.getPoints().get(i).setX(point.getX());
-            upDownResult.getPoints().get(i).setY(point.getY());
-            upDownResult.getPoints().get(i).setZ(singlePointCollisions.last().getRight());
+            upDownResultForVisualization.getPoints().get(i).setX(point.getX());
+            upDownResultForVisualization.getPoints().get(i).setY(point.getY());
+            upDownResultForVisualization.getPoints().get(i).setZ(singlePointCollisions.last().getRight());
          } // point frame changed block
          point.changeFrame(previousFrame);
       }
@@ -140,30 +214,32 @@ public class UpDownFlatAreaFinder
          }
       }
 
-      if (Math.abs(highestCollision.getRight() - startingZ) <  HIGH_LOW_MINIMUM) // make sure to go up or down
+      if (Math.abs(highestCollision.getRight() - initialHeight) <  HIGH_LOW_MINIMUM) // make sure to go up or down
       {
-         return null;
+         LogTools.trace("doesn't go up or down");
+         return false;
       }
 
       for (TreeSet<Pair<PlanarRegion, Double>> value : collisions.values()) // make sure all points' highest collisions are on same region
       {
          if (highestCollision.getLeft() != value.last().getLeft())  // last is highest
          {
-            return null; // point has its highest collision on a region other than the region of the highest collision of all points
+            LogTools.trace("point has its highest collision on a region other than the region of the highest collision of all points");
+            return false; // point has its highest collision on a region other than the region of the highest collision of all points
          }
       }
 
-      FramePoint3D centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint());
+      centerPoint3D = new FramePoint3D(polygonPoints.getCenterPoint());
       centerPoint3D.changeFrame(ReferenceFrame.getWorldFrame());
       centerPoint3D.setZ(highestCollision.getRight());
 
-      LogTools.debug("Returning valid center point! {}", centerPoint3D);
-      upDownResult.setValid(true);
+      LogTools.trace("Returning valid center point! {}", centerPoint3D);
+      upDownResultForVisualization.setValid(true);
 
-      return centerPoint3D; // all points have a collision and all of their highest collisions are with the same region
+      return true;
    }
 
-   public static ArrayList<PlanarRegion> findHighestRegions(PlanarRegionsList regionsList, int numberToGet)
+   private ArrayList<PlanarRegion> findHighestRegions(PlanarRegionsList regionsList, int numberToGet)
    {
       TreeSet<PlanarRegion> regionsSortedByHeight = new TreeSet<>(Comparator.comparingDouble(region -> centroid(region).getZ()));
 
@@ -180,12 +256,12 @@ public class UpDownFlatAreaFinder
    }
 
    /** Is normal Z up */
-   public static boolean isLevel(PlanarRegion region, double epsilon)
+   private boolean isLevel(PlanarRegion region, double epsilon)
    {
       return region.getNormal().epsilonEquals(new Vector3D(0.0, 0.0, 1.0), epsilon);
    }
 
-   public static double area(PlanarRegion region)
+   private double area(PlanarRegion region)
    {
       double totalArea = 0;
       for (ConvexPolygon2D convexPolygon : region.getConvexPolygons())
@@ -195,7 +271,7 @@ public class UpDownFlatAreaFinder
       return totalArea;
    }
 
-   public static Point3D centroid(PlanarRegion region)
+   private Point3D centroid(PlanarRegion region)
    {
       region.update();
       Point2DReadOnly centroid2DLocal = region.getConvexHull().getCentroid();

@@ -38,8 +38,9 @@ public class PatrolBehaviorUIController extends Group
 {
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
+   @FXML private Button cancelPlanning2;
+   @FXML private Button skip;
    @FXML private Spinner<Integer> waypointIndex;
-   @FXML private Button pauseWalking;
    @FXML private TextField remoteCurrentWaypointIndex;
    @FXML private TextField remoteCurrentState;
    @FXML private CheckBox loopThroughWaypoints;
@@ -85,6 +86,8 @@ public class PatrolBehaviorUIController extends Group
       {
          replan.setDisable(true);
          sendPlan.setDisable(true);
+         cancelPlanning2.setDisable(true);
+         skip.setDisable(true);
          goToWaypoint.setDisable(true);
          waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
@@ -95,16 +98,10 @@ public class PatrolBehaviorUIController extends Group
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
       {
          remoteCurrentState.setText(state.name());
-         if (state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected())
-         {
-            replan.setDisable(false);
-            sendPlan.setDisable(false);
-         }
-         else
-         {
-            replan.setDisable(true);
-            sendPlan.setDisable(true);
-         }
+         replan.setDisable(!(state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected()));
+         sendPlan.setDisable(!(state == PatrolBehaviorState.REVIEW && operatorPlanReview.isSelected()));
+         cancelPlanning2.setDisable(!(state == PatrolBehaviorState.NAVIGATE || state == PatrolBehaviorState.PLAN));
+         skip.setDisable(!(state == PatrolBehaviorState.PERCEIVE));
       }));
 
       waypointManager = WaypointManager.createForUI(behaviorMessager, WaypointsToUI, WaypointsToModule, () ->
@@ -378,6 +375,16 @@ public class PatrolBehaviorUIController extends Group
    {
       waypointManager.setNextFromIndex(waypointIndex.getValue()); // this might not be necessary
       behaviorMessager.submitMessage(GoToWaypoint, waypointIndex.getValue());
+   }
+
+   @FXML public void cancelPlanning2()
+   {
+      behaviorMessager.submitMessage(CancelPlanning, new Object());
+   }
+
+   @FXML public void skip()
+   {
+      behaviorMessager.submitMessage(SkipPerceive, new Object());
    }
 
    @FXML public void stopWalking()
