@@ -84,6 +84,15 @@ public class ExceptionHandlingThreadScheduler
       return scheduledFuture;
    }
 
+   public ScheduledFuture<?> scheduleOnce(Runnable runnable)
+   {
+      this.runnable = runnable;
+      scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS);
+      running = true;
+
+      return scheduledFuture;
+   }
+
    private void printingRunnableWrapper()
    {
       try
