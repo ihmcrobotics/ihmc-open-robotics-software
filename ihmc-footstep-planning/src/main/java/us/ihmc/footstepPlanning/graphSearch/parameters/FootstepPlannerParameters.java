@@ -4,6 +4,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.log.LogTools;
 
 public interface FootstepPlannerParameters
 {
@@ -491,5 +492,46 @@ public interface FootstepPlannerParameters
    default AdaptiveSwingParameters getAdaptiveSwingParameters()
    {
       return null;
+   }
+
+   default void printValues()
+   {
+      LogTools.info("wiggleIntoConvexHullOfPlanarRegions: {}", getWiggleIntoConvexHullOfPlanarRegions ()  );
+      LogTools.info("rejectIfCannotFullyWiggleInside    : {}", getRejectIfCannotFullyWiggleInside     ()  );
+      LogTools.info("returnBestEffortPlan               : {}", getReturnBestEffortPlan                ()  );
+      LogTools.info("checkForBodyBoxCollisions          : {}", checkForBodyBoxCollisions              ()  );
+      LogTools.info("performHeuristicSearchPolicies     : {}", performHeuristicSearchPolicies         ()  );
+      LogTools.info("minimumStepsForBestEffortPlan      : {}", getMinimumStepsForBestEffortPlan       ()  );
+      LogTools.info("idealFootstepWidth                 : {}", getIdealFootstepWidth                  ()  );
+      LogTools.info("idealFootstepLength                : {}", getIdealFootstepLength                 ()  );
+      LogTools.info("wiggleInsideDelta                  : {}", getWiggleInsideDelta                   ()  );
+      LogTools.info("maximumXYWiggleDistance            : {}", getMaximumXYWiggleDistance             ()  );
+      LogTools.info("maximumYawWiggle                   : {}", getMaximumYawWiggle                    ()  );
+      LogTools.info("maxStepReach                       : {}", getMaximumStepReach                    ()  );
+      LogTools.info("maxStepYaw                         : {}", getMaximumStepYaw                      ()  );
+      LogTools.info("minStepWidth                       : {}", getMinimumStepWidth                    ()  );
+      LogTools.info("minStepLength                      : {}", getMinimumStepLength                   ()  );
+      LogTools.info("minStepYaw                         : {}", getMinimumStepYaw                      ()  );
+      LogTools.info("maxStepZ                           : {}", getMaximumStepZ                        ()  );
+      LogTools.info("minFootholdPercent                 : {}", getMinimumFootholdPercent              ()  );
+      LogTools.info("minSurfaceIncline                  : {}", getMinimumSurfaceInclineRadians        ()  );
+      LogTools.info("maxStepWidth                       : {}", getMaximumStepWidth                    ()  );
+      LogTools.info("minXClearanceFromStance            : {}", getMinXClearanceFromStance             ()  );
+      LogTools.info("minYClearanceFromStance            : {}", getMinYClearanceFromStance             ()  );
+      LogTools.info("maximumStepReachWhenSteppingUp     : {}", getMaximumStepReachWhenSteppingUp      ()  );
+      LogTools.info("maximumStepZWhenSteppingUp         : {}", getMaximumStepZWhenSteppingUp          ()  );
+      LogTools.info("maximumStepXWhenForwardAndDown     : {}", getMaximumStepXWhenForwardAndDown      ()  );
+      LogTools.info("maximumStepZWhenForwardAndDown     : {}", getMaximumStepZWhenForwardAndDown      ()  );
+      LogTools.info("maximumZPenetrationOnValleyRegions : {}", getMaximumZPenetrationOnValleyRegions  ()  );
+      LogTools.info("cliffHeightToAvoid                 : {}", getCliffHeightToAvoid                  ()  );
+      LogTools.info("minimumDistanceFromCliffBottoms    : {}", getMinimumDistanceFromCliffBottoms     ()  );
+      LogTools.info("bodyGroundClearance                : {}", getBodyGroundClearance                 ()  );
+      LogTools.info("bodyBoxWidth                       : {}", getBodyBoxWidth                        ()  );
+      LogTools.info("bodyBoxHeight                      : {}", getBodyBoxHeight                       ()  );
+      LogTools.info("bodyBoxDepth                       : {}", getBodyBoxDepth                        ()  );
+      LogTools.info("bodyBoxBaseX                       : {}", getBodyBoxBaseX                        ()  );
+      LogTools.info("bodyBoxBaseY                       : {}", getBodyBoxBaseY                        ()  );
+      LogTools.info("bodyBoxBaseZ                       : {}", getBodyBoxBaseZ                        ()  );
+      LogTools.info("finalTurnProximity                 : {}", getFinalTurnProximity                  ()  );
    }
 }
