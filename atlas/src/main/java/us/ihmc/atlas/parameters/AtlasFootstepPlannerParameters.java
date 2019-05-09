@@ -78,8 +78,6 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
          maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
          wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
 
-         printValues();
-
          if (!printed)
          {
             printed = true;
