@@ -14,6 +14,12 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 {
    private static volatile boolean printed = false;
 
+   private boolean wiggleIntoConvexHull = true;
+   private boolean rejectIfCannotFullyWiggleInside = false;
+   private boolean returnBestEffortPlan = false;
+   private boolean checkForBodyBoxCollisions = false;
+   private boolean performHeuristicSearchPolicies = true;
+   private int minimumStepsForBestEffortPlan = 3;
    private double cliffClearance = 0.1;
    private double cliffHeight = 0.05;
    private double maxStepLength = 0.5;
@@ -34,10 +40,17 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double stepDownHeight = 1.5;
    private double maxStepUpX     = 0.5;
    private double maxStepDownX   = 1.5;
+   private double maxZPenetrationOnValleyRegions = Double.POSITIVE_INFINITY;
    private double idealFootstepWidth = 0.22; // unused?
    private double idealFootstepLength = 0.3; // unused?
-   private boolean wiggleIntoConvexHull = true;
-   private boolean rejectIfCannotFullyWiggleInside = false;
+   private double bodyGroundClearance = 0.25;
+   private double bodyBoxWidth = 0.7;
+   private double bodyBoxHeight = 1.5;
+   private double bodyBoxDepth = 0.3;
+   private double bodyBoxBaseX = 0.0;
+   private double bodyBoxBaseY = 0.0;
+   private double bodyBoxBaseZ = 0.25;
+   private double finalTurnProximity = 1.0;
 
    public AtlasFootstepPlannerParameters()
    {
@@ -65,6 +78,8 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
          maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
          wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
 
+         printValues();
+
          if (!printed)
          {
             printed = true;
@@ -82,6 +97,18 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
+   public boolean checkForBodyBoxCollisions()
+   {
+      return checkForBodyBoxCollisions;
+   }
+
+   @Override
+   public boolean performHeuristicSearchPolicies()
+   {
+      return performHeuristicSearchPolicies;
+   }
+
+   @Override
    public double getIdealFootstepWidth()
    {
       return idealFootstepWidth;
@@ -91,6 +118,12 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    public double getIdealFootstepLength()
    {
       return idealFootstepLength;
+   }
+
+   @Override
+   public double getWiggleInsideDelta()
+   {
+      return wiggleInsideDelta;
    }
 
    @Override
@@ -112,33 +145,57 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
+   public double getMinimumStepLength()
+   {
+      return minStepLength;
+   }
+
+   @Override
+   public double getMinimumStepYaw()
+   {
+      return minStepYaw;
+   }
+
+   @Override
+   public double getMaximumStepReachWhenSteppingUp()
+   {
+      return maxStepUpX;
+   }
+
+   @Override
+   public double getMaximumStepZWhenSteppingUp()
+   {
+      return stepUpHeight;
+   }
+
+   @Override
+   public double getMaximumStepXWhenForwardAndDown()
+   {
+      return maxStepDownX;
+   }
+
+   @Override
+   public double getMaximumStepZWhenForwardAndDown()
+   {
+      return stepDownHeight;
+   }
+
+   @Override
    public double getMaximumStepZ()
    {
       return maxStepZ;
    }
 
    @Override
-   public double getMaximumStepWidth()
+   public double getMinimumFootholdPercent()
    {
-      return maxStepWidth;
+      return minFootholdPercent;
    }
 
    @Override
-   public double getCliffHeightToAvoid()
+   public double getMinimumSurfaceInclineRadians()
    {
-      return cliffHeight;
-   }
-
-   @Override
-   public double getMinimumDistanceFromCliffBottoms()
-   {
-      return cliffClearance;
-   }
-
-   @Override
-   public double getWiggleInsideDelta()
-   {
-      return wiggleInsideDelta;
+      return minSurfaceIncline;
    }
 
    @Override
@@ -166,26 +223,98 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    }
 
    @Override
-   public double getMaximumStepZWhenSteppingUp()
+   public double getMaximumZPenetrationOnValleyRegions()
    {
-      return stepUpHeight;
+      return maxZPenetrationOnValleyRegions;
    }
 
    @Override
-   public double getMaximumStepZWhenForwardAndDown()
+   public double getMaximumStepWidth()
    {
-      return stepDownHeight;
+      return maxStepWidth;
    }
 
    @Override
-   public double getMaximumStepReachWhenSteppingUp()
+   public double getCliffHeightToAvoid()
    {
-      return maxStepUpX;
+      return cliffHeight;
    }
 
    @Override
-   public double getMaximumStepXWhenForwardAndDown()
+   public double getMinimumDistanceFromCliffBottoms()
    {
-      return maxStepDownX;
+      return cliffClearance;
+   }
+
+   @Override
+   public boolean getReturnBestEffortPlan()
+   {
+      return returnBestEffortPlan;
+   }
+
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minimumStepsForBestEffortPlan;
+   }
+
+   @Override
+   public double getBodyGroundClearance()
+   {
+      return bodyGroundClearance;
+   }
+
+   @Override
+   public double getBodyBoxHeight()
+   {
+      return bodyBoxHeight;
+   }
+
+   @Override
+   public double getBodyBoxDepth()
+   {
+      return bodyBoxDepth;
+   }
+
+   @Override
+   public double getBodyBoxWidth()
+   {
+      return bodyBoxWidth;
+   }
+
+   @Override
+   public double getBodyBoxBaseX()
+   {
+      return bodyBoxBaseX;
+   }
+
+   @Override
+   public double getBodyBoxBaseY()
+   {
+      return bodyBoxBaseY;
+   }
+
+   @Override
+   public double getBodyBoxBaseZ()
+   {
+      return bodyBoxBaseZ;
+   }
+
+   @Override
+   public double getMinXClearanceFromStance()
+   {
+      return minXClearance;
+   }
+
+   @Override
+   public double getMinYClearanceFromStance()
+   {
+      return minYClearance;
+   }
+
+   @Override
+   public double getFinalTurnProximity()
+   {
+      return finalTurnProximity;
    }
 }
