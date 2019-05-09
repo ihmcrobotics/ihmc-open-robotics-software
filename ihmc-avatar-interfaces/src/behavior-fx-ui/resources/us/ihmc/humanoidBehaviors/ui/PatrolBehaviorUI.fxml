@@ -17,13 +17,13 @@
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController">
     <children>
       <BorderPane>
-         <center>
+         <left>
               <GridPane hgap="10.0" vgap="5.0" BorderPane.alignment="CENTER">
                   <children>
                       <Button fx:id="placeWaypoints" onAction="#placeWaypoints" text="Place Waypoints" GridPane.rowIndex="1" />
                       <Button fx:id="goToWaypoint" onAction="#goToWaypoint" text="Go To Waypoint" GridPane.rowIndex="4" />
                       <Spinner fx:id="waypointIndex" amountToStepBy="1" editable="true" initialValue="0" max="500" min="0" prefWidth="90.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                      <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" text="Stop" GridPane.rowIndex="5" />
+                      <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" text="Stop" GridPane.rowIndex="6" />
                   <Label text="Up-Down Exploration" GridPane.rowIndex="2" />
                   <CheckBox fx:id="upDownExploration" onAction="#upDownExploration" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <HBox GridPane.columnIndex="1" GridPane.rowIndex="1">
@@ -45,6 +45,7 @@
                   </HBox>
                   <Label text="Turn amount" GridPane.rowIndex="3" />
                   <Spinner fx:id="exploreTurnAmount" editable="true" maxWidth="80.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Button fx:id="cancelPlanning2" mnemonicParsing="false" onAction="#cancelPlanning2" text="Cancel Planning" GridPane.rowIndex="5" />
                   </children>
                <columnConstraints>
                   <ColumnConstraints />
@@ -57,17 +58,19 @@
                   <RowConstraints />
                   <RowConstraints minHeight="10.0" />
                   <RowConstraints minHeight="10.0" />
+                  <RowConstraints minHeight="10.0" />
                </rowConstraints>
                <padding>
                   <Insets left="5.0" />
                </padding>
               </GridPane>
-         </center>
-         <right>
+         </left>
+         <center>
             <GridPane BorderPane.alignment="CENTER">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="144.0" minWidth="10.0" prefWidth="136.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="144.0" minWidth="10.0" prefWidth="125.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="144.0" minWidth="10.0" />
               </columnConstraints>
               <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -99,12 +102,13 @@
                       <TextField fx:id="remoteCurrentState" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                   <Label text="Swing overs" GridPane.rowIndex="5" />
                   <CheckBox fx:id="swingOverPlanarRegions" onAction="#swingOverPlanarRegions" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                  <Button fx:id="skip" mnemonicParsing="false" onAction="#skip" text="Skip" GridPane.columnIndex="2" GridPane.rowIndex="4" />
                </children>
                <padding>
                   <Insets left="10.0" />
                </padding>
             </GridPane>
-         </right>
+         </center>
       </BorderPane>
     </children>
 </AnchorPane>

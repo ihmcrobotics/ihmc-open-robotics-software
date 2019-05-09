@@ -35,6 +35,8 @@ public class PatrolBehaviorAPI
    public static final Topic<Object> Stop = topic("Stop");
    /** Input: Cancel planning for things like live tuning. */
    public static final Topic<Object> CancelPlanning = topic("CancelPlanning");
+   /** Input: Option to skip perceive state. */
+   public static final Topic<Object> SkipPerceive = topic("SkipPerceive");
    /** Input: Toggle looping through waypoints. */
    public static final Topic<Boolean> Loop = topic("Loop");
    /** Input: Toggle swinging over planar regions. */

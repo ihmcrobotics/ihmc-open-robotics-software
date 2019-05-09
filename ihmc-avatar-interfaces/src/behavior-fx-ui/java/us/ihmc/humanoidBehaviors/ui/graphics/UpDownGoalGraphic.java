@@ -66,17 +66,10 @@ public class UpDownGoalGraphic
 
    public void setValid(boolean valid)
    {
-      LogTools.error("Setting valid: {} {}", valid, valid ? VALID_COLOR : INVALID_COLOR);
-
-//      parent.removeAll(spheres);
-//      newSpheres(valid);
       for (Sphere sphere : spheres)
       {
-//         sphere.setMaterial(new PhongMaterial(valid ? VALID_COLOR : INVALID_COLOR));
          ((PhongMaterial) sphere.getMaterial()).setDiffuseColor(valid ? VALID_COLOR : INVALID_COLOR);
-//         sphere.
       }
-//      parent.addAll(spheres);
    }
 
    public void callOnNodes(Consumer<Node> nodeConsumer)
