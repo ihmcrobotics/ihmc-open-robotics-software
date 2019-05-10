@@ -14,6 +14,8 @@ ihmc {
 mainDependencies {
     compile group: "us.ihmc", name: "ihmc-quadruped-planning", version: "source"
     compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
+    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
+
 }
 
 testDependencies {
