@@ -277,7 +277,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       {
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
-         if (!footSnapTransform.containsNaN())
+         if (footSnapTransform.containsNaN())
             continue;
 
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
