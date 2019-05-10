@@ -57,7 +57,8 @@ public class AtlasRobotConfigurationDataTest
       ForceSensorDefinition forceSensorDefinitions[] = new ForceSensorDefinition[4];
       for (int i = 0; i < forceSensorDefinitions.length; i++)
       {
-         forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, new RigidBodyTransform());
+         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame("wim", body2, new RigidBodyTransform());
+         forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, sensorFrame);
       }
 
       RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuSensorDefinitions);
