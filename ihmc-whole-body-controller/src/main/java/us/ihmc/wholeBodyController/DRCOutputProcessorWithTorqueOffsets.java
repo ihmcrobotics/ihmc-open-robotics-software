@@ -6,7 +6,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -76,7 +76,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    }
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerCoreOutput)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerCoreOutput)
    {
       if (drcOutputWriter != null)
       {
@@ -89,7 +89,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
       for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithDesiredOutput(); i++)
       {
          JointDesiredOutputBasics jointData = lowLevelControllerCoreOutput.getJointDesiredOutput(i);
-         final YoDouble torqueOffset = new YoDouble("tauOffset_" + lowLevelControllerCoreOutput.getJointName(i), registry);
+         final YoDouble torqueOffset = new YoDouble("tauOffset_" + lowLevelControllerCoreOutput.getOneDoFJoint(i).getName(), registry);
 
          torqueOffsetList.add(jointData, torqueOffset);
          torqueOffsetMap.put(lowLevelControllerCoreOutput.getOneDoFJoint(i), torqueOffset);
