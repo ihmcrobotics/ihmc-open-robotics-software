@@ -103,15 +103,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       steppingStateChangeMessage.set(message);
    }
 
-   public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
-   {
-      for (FootstepPlannerType plannerKey : plannerMap.keySet())
-      {
-         QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(plannerKey);
-         planner.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
-      }
-   }
-
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
       for (FootstepPlannerType plannerKey : plannerMap.keySet())
