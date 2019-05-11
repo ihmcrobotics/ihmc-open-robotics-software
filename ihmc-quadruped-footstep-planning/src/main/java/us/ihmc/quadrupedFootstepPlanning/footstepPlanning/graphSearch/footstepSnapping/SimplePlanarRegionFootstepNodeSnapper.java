@@ -13,6 +13,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
@@ -26,7 +27,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    {
       super(parameters);
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, enforceTranslationLessThanGridCell);
+      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, parameters::getProjectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
    }
 
    @Override

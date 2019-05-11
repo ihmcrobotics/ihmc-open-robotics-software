@@ -120,7 +120,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
-      snapTools = new PlanarRegionSnapTools(parameters::getProjectInsideDistanceForExpansion, true);
+      snapTools = new PlanarRegionSnapTools(parameters::getProjectInsideDistanceForExpansion, parameters::getProjectInsideUsingConvexHull, true);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
