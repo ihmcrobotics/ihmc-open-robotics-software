@@ -190,7 +190,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             PlanarRegion planarRegion = null;
             if (planarRegionsList != null)
             {
-               planarRegion = snapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), new Vector2D());
+               planarRegion = snapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant));
 
                if (planarRegion == null)
                {
