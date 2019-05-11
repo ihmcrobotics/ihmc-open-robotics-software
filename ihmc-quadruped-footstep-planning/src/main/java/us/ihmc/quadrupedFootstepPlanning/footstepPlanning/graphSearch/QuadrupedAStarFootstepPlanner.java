@@ -65,6 +65,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final PlanarRegionConstraintDataParameters highLevelPlanarRegionConstraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
@@ -85,8 +86,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final FootstepCost stepCostCalculator;
    private final FootstepNodeSnapper snapper;
    private final FootstepNodeSnapper postProcessingSnapper;
-
-   private final PlanarRegionSnapTools snapTools;
 
    private final ArrayList<StartAndGoalListener> startAndGoalListeners = new ArrayList<>();
 
@@ -120,7 +119,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       this.graph = new FootstepGraph();
       timeout.set(Double.POSITIVE_INFINITY);
       this.initialize.set(true);
-      snapTools = new PlanarRegionSnapTools(true);
+      highLevelPlanarRegionConstraintDataParameters.enforceTranslationLessThanGridCell = true;
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footReachedTheGoal.put(robotQuadrant, new YoBoolean(robotQuadrant.getShortName() + "FootReachedTheGoal", registry));
@@ -185,12 +184,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             Point3D startPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
-            Point3D projectedPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);;
+            Point3D projectedPoint = new Point3D(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
 
             PlanarRegion planarRegion = null;
             if (planarRegionsList != null)
             {
-               planarRegion = snapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant));
+               planarRegion = PlanarRegionSnapTools.findHighestRegion(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant),
+                                                          planarRegionsList.getPlanarRegionsAsList(), highLevelPlanarRegionConstraintDataParameters);
 
                if (planarRegion == null)
                {
@@ -287,7 +287,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    @Override
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      snapTools.setPlanarRegionsList(planarRegionsList, parameters.getProjectInsideDistanceForExpansion(), parameters.getProjectInsideUsingConvexHull());
+      highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistanceForExpansion();
+      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
       postProcessingSnapper.setPlanarRegions(planarRegionsList);

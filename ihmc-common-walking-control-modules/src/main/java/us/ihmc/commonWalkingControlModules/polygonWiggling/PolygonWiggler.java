@@ -97,7 +97,7 @@ public class PolygonWiggler
     * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
     * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
     */
-   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters)
    {
       return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, -1);
    }
@@ -106,7 +106,7 @@ public class PolygonWiggler
     * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
     * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
     */
-   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters,
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters,
                                                         int... startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();

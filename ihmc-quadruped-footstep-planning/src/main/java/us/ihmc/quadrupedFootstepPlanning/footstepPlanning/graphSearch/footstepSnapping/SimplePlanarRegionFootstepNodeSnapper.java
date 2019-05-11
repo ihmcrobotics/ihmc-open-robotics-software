@@ -16,8 +16,9 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
    private final Point2D footPosition = new Point2D();
 
-   private final PlanarRegionSnapTools snapTools;
    private final DoubleProvider projectionInsideDelta;
+   private final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
+   private final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
                                                 boolean enforceTranslationLessThanGridCell)
@@ -26,14 +27,16 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
       this.projectionInsideDelta = projectionInsideDelta;
 
-      snapTools = new PlanarRegionSnapTools(enforceTranslationLessThanGridCell);
+      constraintDataParameters.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
    }
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       super.setPlanarRegions(planarRegionsList);
-      this.snapTools.setPlanarRegionsList(planarRegionsList, projectionInsideDelta.getValue(), parameters.getProjectInsideUsingConvexHull());
+      constraintDataHolder.clear();
+      constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
+      constraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
    }
 
    @Override
@@ -41,9 +44,11 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       Vector2D projectionTranslation = new Vector2D();
-      PlanarRegion highestRegion = findHighestRegion(footPosition, projectionTranslation);
+      PlanarRegion highestRegion = PlanarRegionSnapTools
+            .findHighestRegionWithProjection(footPosition, projectionTranslation, constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
+                                             constraintDataParameters);
 
-      if(highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
+      if (highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
          return FootstepNodeSnapData.emptyData();
       }
@@ -63,11 +68,6 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
          return new FootstepNodeSnapData(snapTransform);
       }
-   }
-
-   private PlanarRegion findHighestRegion(Point2DReadOnly footPosition, Vector2D projectionTranslationToPack)
-   {
-      return snapTools.findHighestRegionWithProjection(footPosition, projectionTranslationToPack);
    }
 
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)

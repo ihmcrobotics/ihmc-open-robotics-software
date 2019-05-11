@@ -64,30 +64,17 @@ public class PlanarRegionConstraintData
       {
          Point2DReadOnly vertex = containingRegion.getVertex(index);
          Point2DReadOnly nextVertex = containingRegion.getNextVertex(index);
-         if (isPointInOtherRegion(vertex, containingRegion, allRegions) && isPointInOtherRegion(nextVertex, containingRegion, allRegions))
+         if (PlanarRegionSnapTools.isPointInOtherRegion(vertex, containingRegion, allRegions) && PlanarRegionSnapTools
+               .isPointInOtherRegion(nextVertex, containingRegion, allRegions))
             indicesToIgnore.add(index);
       }
       return indicesToIgnore;
    }
 
-   private static boolean isPointInOtherRegion(Point2DReadOnly point, ConvexPolygon2DReadOnly regionToIgnore, List<ConvexPolygon2D> allRegions)
+   public TIntArrayList getPolygonIndicesToIgnore(Point2DReadOnly pointToCheck)
    {
-      for (ConvexPolygon2D convexPolygon : allRegions)
-      {
-         if (regionToIgnore.equals(convexPolygon))
-            continue;
-
-         if (convexPolygon.isPointInside(point))
-            return true;
-
-         for (Point2DReadOnly vertex : convexPolygon.getVertexBufferView())
-         {
-            if (vertex.epsilonEquals(point, 1e-8))
-               return true;
-         }
-      }
-
-      return false;
+      ConvexPolygon2DReadOnly polygonRegion = PlanarRegionSnapTools.getContainingConvexRegion(pointToCheck, convexPolygons);
+      return getPolygonIndicesToIgnore(polygonRegion);
    }
 
    public TIntArrayList getPolygonIndicesToIgnore(ConvexPolygon2DReadOnly polygonRegion)
@@ -112,7 +99,7 @@ public class PlanarRegionConstraintData
       }
       else
       {
-         ConvexPolygon2DReadOnly containingRegion = getContainingConvexRegion(pointToCheck);
+         ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(pointToCheck, convexPolygons);
          if (scaledPolygons.containsKey(containingRegion))
             return scaledPolygons.get(containingRegion);
          else
@@ -122,24 +109,6 @@ public class PlanarRegionConstraintData
             return scaledPolygon;
          }
       }
-   }
-
-   private ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck)
-   {
-      return getContainingConvexRegion(pointToCheck, convexPolygons);
-   }
-
-   private static ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck, List<ConvexPolygon2D> convexPolygons)
-   {
-      int size = convexPolygons.size();
-      for (int i = 0; i < size; i++)
-      {
-         ConvexPolygon2DReadOnly convexPolygon = convexPolygons.get(i);
-         if (convexPolygon.isPointInside(pointToCheck))
-            return convexPolygon;
-      }
-
-      return null;
    }
 
 

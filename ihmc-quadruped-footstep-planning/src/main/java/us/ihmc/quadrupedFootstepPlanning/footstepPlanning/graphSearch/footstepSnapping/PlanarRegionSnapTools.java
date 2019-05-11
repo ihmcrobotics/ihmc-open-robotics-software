@@ -16,42 +16,51 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class PlanarRegionSnapTools
 {
-   private PlanarRegionsList planarRegionsList;
-   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-
-   private double projectionInsideDelta;
-   private boolean projectInsideUsingConvexHull;
-   private final boolean enforceTranslationLessThanGridCell;
-
-   private final HashMap<PlanarRegion, PlanarRegionConstraintData> planarRegionConstraintData = new HashMap<>();
-
-   public PlanarRegionSnapTools(boolean enforceTranslationLessThanGridCell)
+   static boolean isPointInOtherRegion(Point2DReadOnly point, ConvexPolygon2DReadOnly regionToIgnore, List<ConvexPolygon2D> allRegions)
    {
-      this.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
+      for (ConvexPolygon2D convexPolygon : allRegions)
+      {
+         if (regionToIgnore.equals(convexPolygon))
+            continue;
+
+         if (convexPolygon.isPointInside(point))
+            return true;
+
+         for (Point2DReadOnly vertex : convexPolygon.getVertexBufferView())
+         {
+            if (vertex.epsilonEquals(point, 1e-8))
+               return true;
+         }
+      }
+
+      return false;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList, double projectInsideDelta, boolean projectInsideUsingConvexHull)
+   static ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck, List<ConvexPolygon2D> convexPolygons)
    {
-      this.planarRegionsList = planarRegionsList;
-      planarRegionConstraintData.clear();
-      this.projectionInsideDelta = projectInsideDelta;
-      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
+      int size = convexPolygons.size();
+      for (int i = 0; i < size; i++)
+      {
+         ConvexPolygon2DReadOnly convexPolygon = convexPolygons.get(i);
+         if (convexPolygon.isPointInside(pointToCheck))
+            return convexPolygon;
+      }
+
+      return null;
    }
 
-   public PlanarRegion findHighestRegion(Point2DReadOnly point)
+   public static PlanarRegion findHighestRegion(Point2DReadOnly point, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataParameters parameters)
    {
-      return findHighestRegion(point.getX(), point.getY());
+      return findHighestRegion(point.getX(), point.getY(), planarRegionList, parameters);
    }
 
-   public PlanarRegion findHighestRegion(double x, double y)
+   public static PlanarRegion findHighestRegion(double x, double y, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataParameters parameters)
    {
-      tempPolygon.clearAndUpdate();
+      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, - 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(- 0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
@@ -59,7 +68,7 @@ public class PlanarRegionSnapTools
       tempPolygon.update();
       tempPolygon.translate(x, y);
 
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionList);
       if (intersectingRegions == null || intersectingRegions.isEmpty())
       {
          return null;
@@ -83,14 +92,18 @@ public class PlanarRegionSnapTools
       return highestPlanarRegion;
    }
 
-   public PlanarRegion findHighestRegionWithProjection(Point2DReadOnly point, Vector2D projectionTranslationToPack)
+   public static PlanarRegion findHighestRegionWithProjection(Point2DReadOnly point, Vector2D projectionTranslationToPack,
+                                                       PlanarRegionConstraintDataHolder constraintDataHolder, List<PlanarRegion> planarRegionList,
+                                                       PlanarRegionConstraintDataParameters parameters)
    {
-      return findHighestRegionWithProjection(point.getX(), point.getY(), projectionTranslationToPack);
+      return findHighestRegionWithProjection(point.getX(), point.getY(), projectionTranslationToPack, constraintDataHolder, planarRegionList, parameters);
    }
 
-   public PlanarRegion findHighestRegionWithProjection(double x, double y, Vector2D projectionTranslationToPack)
+   public static PlanarRegion findHighestRegionWithProjection(double x, double y, Vector2D projectionTranslationToPack,
+                                                       PlanarRegionConstraintDataHolder constraintDataHolder, List<PlanarRegion> planarRegionList,
+                                                       PlanarRegionConstraintDataParameters parameters)
    {
-      tempPolygon.clearAndUpdate();
+      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, - 0.5 * FootstepNode.gridSizeXY);
       tempPolygon.addVertex(- 0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
@@ -98,7 +111,7 @@ public class PlanarRegionSnapTools
       tempPolygon.update();
       tempPolygon.translate(x, y);
 
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionList);
       if (intersectingRegions == null || intersectingRegions.isEmpty())
       {
          return null;
@@ -110,7 +123,7 @@ public class PlanarRegionSnapTools
       for (int i = 0; i < intersectingRegions.size(); i++)
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
-         Vector3D projectionTranslation = projectPointIntoRegion(planarRegion, x, y);
+         Vector3D projectionTranslation = projectPointIntoRegion(planarRegion, x, y, constraintDataHolder, parameters);
          double height;
 
          if(projectionTranslation.containsNaN())
@@ -134,7 +147,8 @@ public class PlanarRegionSnapTools
       return highestPlanarRegion;
    }
 
-   private Vector3D projectPointIntoRegion(PlanarRegion region, double x, double y)
+   private static Vector3D projectPointIntoRegion(PlanarRegion region, double x, double y, PlanarRegionConstraintDataHolder constraintDataHolder,
+                                           PlanarRegionConstraintDataParameters parameters)
    {
       Vector3D projectionTranslation = new Vector3D();
       Point3D pointToSnap = new Point3D();
@@ -143,7 +157,7 @@ public class PlanarRegionSnapTools
       region.transformFromWorldToLocal(pointToSnap);
       Point2D projectedPoint = new Point2D(pointToSnap);
 
-      ConvexPolygon2DReadOnly scaledRegionPolygon = getScaledRegionPolygon(region, projectedPoint);
+      ConvexPolygon2DReadOnly scaledRegionPolygon = constraintDataHolder.getScaledRegionPolygon(region, projectedPoint, parameters);
 
       // scale didn't work
       if(scaledRegionPolygon == null)
@@ -160,7 +174,7 @@ public class PlanarRegionSnapTools
          return projectionTranslation;
       }
 
-      if (enforceTranslationLessThanGridCell && signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
+      if (parameters.enforceTranslationLessThanGridCell && signedDistanceToPolygon >= 0.5 * FootstepNode.gridSizeXY)
       {
          // Projection distance is too big. Must be smaller than half of the grid size
          projectionTranslation.setToNaN();
@@ -182,19 +196,6 @@ public class PlanarRegionSnapTools
       return projectionTranslation;
    }
 
-   private ConvexPolygon2DReadOnly getScaledRegionPolygon(PlanarRegion planarRegion, Point2DReadOnly pointInLocal)
-   {
-      PlanarRegionConstraintData constraintData;
-      if (planarRegionConstraintData.containsKey(planarRegion))
-         constraintData = planarRegionConstraintData.get(planarRegion);
-      else
-      {
-         constraintData = new PlanarRegionConstraintData(polygonScaler, planarRegion, projectInsideUsingConvexHull, projectionInsideDelta);
-         planarRegionConstraintData.put(planarRegion, constraintData);
-      }
-
-      return constraintData.getScaledRegionPolygon(pointInLocal);
-   }
 
    public static RigidBodyTransform getSnapTransformToRegion(Point2DReadOnly pointToSnap, PlanarRegion planarRegionToSnapTo)
    {
