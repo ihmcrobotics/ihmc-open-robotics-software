@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
@@ -28,14 +29,21 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       super(parameters);
       this.projectionInsideDelta = projectionInsideDelta;
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, parameters::getProjectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
+      snapTools = new PlanarRegionSnapTools(enforceTranslationLessThanGridCell);
+   }
+
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      super.setPlanarRegions(planarRegionsList);
+      this.snapTools.setPlanarRegionsList(planarRegionsList, projectionInsideDelta.getValue(), parameters.getProjectInsideUsingConvexHull());
    }
 
    @Override
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestPlanarRegion = snapTools.findHighestRegion(footPosition, new Vector2D(), planarRegionsList.getPlanarRegionsAsList());
+      PlanarRegion highestPlanarRegion = snapTools.findHighestRegion(footPosition, new Vector2D());
 
       if (highestPlanarRegion == null)
       {
@@ -77,10 +85,10 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-      if (parameters.getProjectInsideUsingConvexHull())
+//      if (parameters.getProjectInsideUsingConvexHull())
          return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
-      else
-         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
+//      else
+//         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
    }
 
    private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal, PlanarRegion regionToWiggleInto)

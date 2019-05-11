@@ -17,34 +17,45 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class PlanarRegionSnapTools
 {
+   private PlanarRegionsList planarRegionsList;
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
    private final ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
 
-   private final DoubleProvider projectionInsideDelta;
-   private final BooleanProvider projectInsideUsingConvexHull;
+   private double projectionInsideDelta;
+   private boolean projectInsideUsingConvexHull;
    private final boolean enforceTranslationLessThanGridCell;
 
-   public PlanarRegionSnapTools(DoubleProvider projectionInsideDelta, BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
+   private final HashMap<PlanarRegion, PlanarRegionConstraintData> planarRegionConstraintData = new HashMap<>();
+
+   public PlanarRegionSnapTools(boolean enforceTranslationLessThanGridCell)
    {
-      this.projectionInsideDelta = projectionInsideDelta;
-      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
       this.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
    }
 
-   public PlanarRegion findHighestRegion(Point2DReadOnly point, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList, double projectInsideDelta, boolean projectInsideUsingConvexHull)
    {
-      return findHighestRegion(point.getX(), point.getY(), projectionTranslationToPack, planarRegions);
+      this.planarRegionsList = planarRegionsList;
+      planarRegionConstraintData.clear();
+      this.projectionInsideDelta = projectInsideDelta;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
    }
 
-   public PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack, List<PlanarRegion> planarRegions)
+   public PlanarRegion findHighestRegion(Point2DReadOnly point, Vector2D projectionTranslationToPack)
+   {
+      return findHighestRegion(point.getX(), point.getY(), projectionTranslationToPack);
+   }
+
+   public PlanarRegion findHighestRegion(double x, double y, Vector2D projectionTranslationToPack)
    {
       tempPolygon.clearAndUpdate();
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
@@ -54,7 +65,7 @@ public class PlanarRegionSnapTools
       tempPolygon.update();
       tempPolygon.translate(x, y);
 
-      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegions);
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
       if (intersectingRegions == null || intersectingRegions.isEmpty())
       {
          return null;
@@ -100,10 +111,10 @@ public class PlanarRegionSnapTools
       Point2D projectedPoint = new Point2D(pointToSnap);
 
       boolean successfulScale;
-      if (projectInsideUsingConvexHull.getValue())
-         successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionInsideDelta.getValue(), scaledRegionPolygon);
+      if (projectInsideUsingConvexHull)
+         successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionInsideDelta, scaledRegionPolygon);
       else
-         successfulScale = computeScaledPolygonRegionForConstraint(projectedPoint, region, projectionInsideDelta.getValue());
+         successfulScale = computeScaledPolygonRegionForConstraint(projectedPoint, region, projectionInsideDelta);
 
       // region is too small to wiggle inside
       if(!successfulScale)
@@ -146,50 +157,21 @@ public class PlanarRegionSnapTools
 
    private boolean computeScaledPolygonRegionForConstraint(Point2DReadOnly pointToCheck, PlanarRegion region, double projectionDistance)
    {
-      List<ConvexPolygon2D> allRegions = region.getConvexPolygons();
-      ConvexPolygon2DReadOnly containingRegion = getContainingRegion(pointToCheck, allRegions);
-      TIntArrayList indicesToIgnore = new TIntArrayList();
-
-      for (int index = 0; index < containingRegion.getNumberOfVertices(); index++)
+      PlanarRegionConstraintData constraintData;
+      if (planarRegionConstraintData.containsKey(region))
+         constraintData = planarRegionConstraintData.get(region);
+      else
       {
-         Point2DReadOnly vertex = containingRegion.getVertex(index);
-         Point2DReadOnly nextVertex = containingRegion.getNextVertex(index);
-         if (isPointInOtherRegion(vertex, containingRegion, allRegions) && isPointInOtherRegion(nextVertex, containingRegion, allRegions))
-            indicesToIgnore.add(index);
+         constraintData = new PlanarRegionConstraintData(region);
+         planarRegionConstraintData.put(region, constraintData);
       }
+      ConvexPolygon2DReadOnly containingRegion = constraintData.getContainingConvexRegion(pointToCheck);
+      if (containingRegion == null)
+         return false;
+
+      TIntArrayList indicesToIgnore = constraintData.getIndicesToIgnore(containingRegion);
 
       return polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon, indicesToIgnore.toArray());
-   }
-
-   private ConvexPolygon2DReadOnly getContainingRegion(Point2DReadOnly pointToCheck, List<ConvexPolygon2D> convexPolygons)
-   {
-      for (ConvexPolygon2D convexPolygon : convexPolygons)
-      {
-         if (convexPolygon.isPointInside(pointToCheck))
-            return convexPolygon;
-      }
-
-      return null;
-   }
-
-   private boolean isPointInOtherRegion(Point2DReadOnly point, ConvexPolygon2DReadOnly regionToIgnore, List<ConvexPolygon2D> allRegions)
-   {
-      for (ConvexPolygon2D convexPolygon : allRegions)
-      {
-         if (regionToIgnore.equals(convexPolygon))
-            continue;
-
-         if (convexPolygon.isPointInside(point))
-            return true;
-
-         for (Point2DReadOnly vertex : convexPolygon.getVertexBufferView())
-         {
-            if (vertex.epsilonEquals(point, 1e-8))
-               return true;
-         }
-      }
-
-      return false;
    }
 
    public static RigidBodyTransform getSnapTransformToRegion(Point2DReadOnly pointToSnap, PlanarRegion planarRegionToSnapTo)
