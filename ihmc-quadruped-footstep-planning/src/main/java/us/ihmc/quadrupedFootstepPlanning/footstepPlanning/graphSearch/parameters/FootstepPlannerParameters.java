@@ -78,6 +78,8 @@ public interface FootstepPlannerParameters
     */
    double getProjectInsideDistanceForPostProcessing();
 
+   boolean getProjectInsideUsingConvexHull();
+
    /***
     * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
     */
@@ -192,6 +194,7 @@ public interface FootstepPlannerParameters
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
       packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
       packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
+      packet.setProjectInsideUsingConvexHull(getProjectInsideUsingConvexHull());
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());

@@ -121,6 +121,13 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
       return 0.04;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHull()
+   {
+      return false;
+   }
+
    @Override
    public double getMaximumXYWiggleDistance()
    {
