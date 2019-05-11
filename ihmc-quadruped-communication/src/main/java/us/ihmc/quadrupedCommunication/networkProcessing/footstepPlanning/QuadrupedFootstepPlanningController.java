@@ -178,6 +178,15 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
+      if (planarRegionsList.isPresent())
+      {
+         planner.setPlanarRegionsList(planarRegionsList.get());
+      }
+      else
+      {
+         planner.setPlanarRegionsList(null);
+      }
+
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
@@ -229,15 +238,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       robotTimestamp.set(Conversions.nanosecondsToSeconds(robotTimestampNanos.get()));
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
-
-      if (planarRegionsList.isPresent())
-      {
-         planner.setPlanarRegionsList(planarRegionsList.get());
-      }
-      else
-      {
-         planner.setPlanarRegionsList(null);
-      }
 
       reportMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
 
