@@ -13,6 +13,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -21,13 +22,23 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    private final Point2D footPosition = new Point2D();
 
    private final PlanarRegionSnapTools snapTools;
+   private final DoubleProvider projectionInsideDelta;
 
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
                                                 boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, parameters::getProjectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
+      this.projectionInsideDelta = projectionInsideDelta;
+
+      snapTools = new PlanarRegionSnapTools(enforceTranslationLessThanGridCell);
+   }
+
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      super.setPlanarRegions(planarRegionsList);
+      this.snapTools.setPlanarRegionsList(planarRegionsList, projectionInsideDelta.getValue(), parameters.getProjectInsideUsingConvexHull());
    }
 
    @Override
@@ -61,7 +72,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
    private PlanarRegion findHighestRegion(Point2DReadOnly footPosition, Vector2D projectionTranslationToPack)
    {
-      return snapTools.findHighestRegion(footPosition,  projectionTranslationToPack, planarRegionsList.getPlanarRegionsAsList());
+      return snapTools.findHighestRegion(footPosition,  projectionTranslationToPack);
    }
 
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)
