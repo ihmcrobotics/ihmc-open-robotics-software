@@ -71,12 +71,6 @@ public class PlanarRegionConstraintData
       return indicesToIgnore;
    }
 
-   public TIntArrayList getPolygonIndicesToIgnore(Point2DReadOnly pointToCheck)
-   {
-      ConvexPolygon2DReadOnly polygonRegion = PlanarRegionSnapTools.getContainingConvexRegion(pointToCheck, convexPolygons);
-      return getPolygonIndicesToIgnore(polygonRegion);
-   }
-
    public TIntArrayList getPolygonIndicesToIgnore(ConvexPolygon2DReadOnly polygonRegion)
    {
       if (polygonIndicesToIgnore.containsKey(polygonRegion))
@@ -100,6 +94,9 @@ public class PlanarRegionConstraintData
       else
       {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(pointToCheck, convexPolygons);
+         if (containingRegion == null)
+            return null;
+
          if (scaledPolygons.containsKey(containingRegion))
             return scaledPolygons.get(containingRegion);
          else

@@ -97,7 +97,9 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       else
       {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(footPositionInLocal, regionToWiggleInto.getConvexPolygons());
-         TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, footPositionInLocal, constraintDataParameters);
+         if (containingRegion == null)
+            return null;
+         TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, containingRegion, constraintDataParameters);
          return PolygonWiggler.findWiggleTransform(footholdPolygon, containingRegion, wiggleParameters, indicesToExclude.toArray());
       }
    }
