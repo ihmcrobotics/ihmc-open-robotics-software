@@ -317,6 +317,27 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (result.validForExecution() && listener != null)
          listener.plannerFinished(null);
 
+      // checking path
+      List<FootstepNode> path = graph.getPathFromStart(endNode);
+      addGoalNodesToEnd(path);
+      for (int i = 0; i < path.size(); i++)
+      {
+         FootstepNode node = path.get(i);
+         RobotQuadrant robotQuadrant = node.getMovingQuadrant();
+
+         FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+         if (snapTransform.containsNaN())
+         {
+            if (debug)
+               System.out.println("Failed to snap in post processing.");
+            result =  FootstepPlanningResult.NO_PATH_EXISTS;
+            break;
+         }
+      }
+
+
       if (debug)
       {
          LogTools.info("A* Footstep planning statistics for " + result);
@@ -372,7 +393,11 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
-         position.applyTransform(snapData.getSnapTransform());
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+
+         if (snapTransform.containsNaN())
+            throw new RuntimeException("Failed to snap in post processing.");
+         position.applyTransform(snapTransform);
 
          newStep.setGoalPosition(position);
 

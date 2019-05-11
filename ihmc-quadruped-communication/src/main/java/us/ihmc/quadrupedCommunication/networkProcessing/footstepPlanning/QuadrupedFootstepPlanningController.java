@@ -253,7 +253,11 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          status = planner.plan();
       }
 
-      FootstepPlan footstepPlan = planner.getPlan();
+      FootstepPlan footstepPlan;
+      if (status.validForExecution())
+         footstepPlan = planner.getPlan();
+      else
+         footstepPlan = null;
 
       reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
 
