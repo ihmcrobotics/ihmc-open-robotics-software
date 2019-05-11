@@ -28,7 +28,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       super(parameters);
       this.projectionInsideDelta = projectionInsideDelta;
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, enforceTranslationLessThanGridCell);
+      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, parameters::getProjectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
    }
 
    @Override
@@ -77,10 +77,10 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-//      if (parameters.getWiggleIntoConvexHullOfPlanarRegions())
+      if (parameters.getProjectInsideUsingConvexHull())
          return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
-//      else
-//         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
+      else
+         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
    }
 
    private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal, PlanarRegion regionToWiggleInto)

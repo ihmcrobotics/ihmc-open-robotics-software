@@ -54,7 +54,7 @@ public class PolygonWiggler
    {
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2D bestMatch = null;
-      double overlap = 0.0;
+      double overlap = Double.NEGATIVE_INFINITY;
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
@@ -306,7 +306,7 @@ public class PolygonWiggler
       b.set(1, -b.get(0));
 
 
-      // set first point boundary line // // TODO: 5/2/17 add in deltaInside 
+      // set first point boundary line // // TODO: 5/2/17 add in deltaInside
       A.set(2, 0, -tempVector.getX());
       A.set(2, 1, -tempVector.getY());
       b.set(2, -deltaInside - firstPoint.getX() * tempVector.getX() - firstPoint.getY() * tempVector.getY());
