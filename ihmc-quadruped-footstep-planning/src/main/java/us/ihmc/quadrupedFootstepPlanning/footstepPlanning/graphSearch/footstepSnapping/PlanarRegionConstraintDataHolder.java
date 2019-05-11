@@ -25,10 +25,11 @@ public class PlanarRegionConstraintDataHolder
       return constraintData.getScaledRegionPolygon(pointInLocal);
    }
 
-   public TIntArrayList getIndicesToExclude(PlanarRegion planarRegion, Point2DReadOnly pointInLocal, PlanarRegionConstraintDataParameters parameters)
+   public TIntArrayList getIndicesToExclude(PlanarRegion planarRegion, ConvexPolygon2DReadOnly containingRegion,
+                                            PlanarRegionConstraintDataParameters parameters)
    {
       PlanarRegionConstraintData constraintData = getConstraintData(planarRegion, parameters);
-      return constraintData.getPolygonIndicesToIgnore(pointInLocal);
+      return constraintData.getPolygonIndicesToIgnore(containingRegion);
    }
 
    private PlanarRegionConstraintData getConstraintData(PlanarRegion planarRegion, PlanarRegionConstraintDataParameters parameters)
