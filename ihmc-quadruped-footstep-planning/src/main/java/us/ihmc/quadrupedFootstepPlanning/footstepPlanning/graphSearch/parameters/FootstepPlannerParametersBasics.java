@@ -52,6 +52,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setProjectInsideDistanceForPostProcessing(double projectionInsideDistanceForPostProcessing);
 
+   void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull);
+
    void setMaximumXYWiggleDistance(double wiggleDistance);
 
    void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
@@ -88,6 +90,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
       setProjectInsideDistanceForExpansion(other.getProjectInsideDistanceForExpansion());
       setProjectInsideDistanceForPostProcessing(other.getProjectInsideDistanceForPostProcessing());
+      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
       setMaximumXYWiggleDistance(other.getMaximumXYWiggleDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
@@ -155,5 +158,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
       if (other.getMinimumDistanceFromCliffTops() != other.NO_VALUE_DOUBLE)
          setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
+
+      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
    }
 }

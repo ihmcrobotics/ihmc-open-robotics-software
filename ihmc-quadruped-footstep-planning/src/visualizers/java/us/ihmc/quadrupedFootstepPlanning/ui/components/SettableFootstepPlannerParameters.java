@@ -39,6 +39,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
 
+   private boolean projectInsideUsingConvexHull;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
@@ -238,6 +240,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
+   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumXYWiggleDistance(double maximumWiggleDistance)
    {
       this.maximumXYWiggleDistance = maximumWiggleDistance;
@@ -414,6 +423,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getProjectInsideDistanceForPostProcessing()
    {
       return projectInsideDistanceForPostProcessing;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHull()
+   {
+      return projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
