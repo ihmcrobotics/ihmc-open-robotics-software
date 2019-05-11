@@ -28,7 +28,6 @@ public class PlanarRegionSnapTools
 {
    private PlanarRegionsList planarRegionsList;
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
-   private final ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
 
    private double projectionInsideDelta;
@@ -110,20 +109,14 @@ public class PlanarRegionSnapTools
       region.transformFromWorldToLocal(pointToSnap);
       Point2D projectedPoint = new Point2D(pointToSnap);
 
-      boolean successfulScale;
-      if (projectInsideUsingConvexHull)
-         successfulScale = polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionInsideDelta, scaledRegionPolygon);
-      else
-         successfulScale = computeScaledPolygonRegionForConstraint(projectedPoint, region, projectionInsideDelta);
+      ConvexPolygon2DReadOnly scaledRegionPolygon = getScaledRegionPolygon(region, projectedPoint);
 
-      // region is too small to wiggle inside
-      if(!successfulScale)
+      // scale didn't work
+      if(scaledRegionPolygon == null)
       {
          projectionTranslation.setToNaN();
          return projectionTranslation;
       }
-
-
 
       double signedDistanceToPolygon = scaledRegionPolygon.signedDistance(projectedPoint);
       if(signedDistanceToPolygon <= 0.0)
@@ -155,7 +148,22 @@ public class PlanarRegionSnapTools
       return projectionTranslation;
    }
 
-   private boolean computeScaledPolygonRegionForConstraint(Point2DReadOnly pointToCheck, PlanarRegion region, double projectionDistance)
+   private ConvexPolygon2DReadOnly getScaledRegionPolygon(PlanarRegion planarRegion, Point2DReadOnly pointInLocal)
+   {
+      PlanarRegionConstraintData constraintData;
+      if (planarRegionConstraintData.containsKey(planarRegion))
+         constraintData = planarRegionConstraintData.get(planarRegion);
+      else
+      {
+         constraintData = new PlanarRegionConstraintData(polygonScaler, planarRegion, projectInsideUsingConvexHull, projectionInsideDelta);
+         planarRegionConstraintData.put(planarRegion, constraintData);
+      }
+
+      return constraintData.getScaledRegionPolygon(pointInLocal);
+   }
+
+   /*
+   private boolean computeScaledPolygonRegionForConstraint(Point2DReadOnly pointToCheck, PlanarRegion region)
    {
       PlanarRegionConstraintData constraintData;
       if (planarRegionConstraintData.containsKey(region))
@@ -165,14 +173,16 @@ public class PlanarRegionSnapTools
          constraintData = new PlanarRegionConstraintData(region);
          planarRegionConstraintData.put(region, constraintData);
       }
+
       ConvexPolygon2DReadOnly containingRegion = constraintData.getContainingConvexRegion(pointToCheck);
       if (containingRegion == null)
          return false;
 
       TIntArrayList indicesToIgnore = constraintData.getIndicesToIgnore(containingRegion);
 
-      return polygonScaler.scaleConvexPolygon(region.getConvexHull(), projectionDistance, scaledRegionPolygon, indicesToIgnore.toArray());
+      return polygonScaler.scaleConvexPolygon(containingRegion, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray());
    }
+   */
 
    public static RigidBodyTransform getSnapTransformToRegion(Point2DReadOnly pointToSnap, PlanarRegion planarRegionToSnapTo)
    {

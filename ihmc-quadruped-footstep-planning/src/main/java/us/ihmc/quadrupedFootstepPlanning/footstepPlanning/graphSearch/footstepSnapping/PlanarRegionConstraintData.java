@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.HashMap;
@@ -13,25 +14,49 @@ public class PlanarRegionConstraintData
 {
    private final PlanarRegion planarRegion;
    private final List<ConvexPolygon2D> convexPolygons;
-   private final HashMap<ConvexPolygon2DReadOnly, TIntArrayList> sharedIndicesByRegion = new HashMap<>();
+   private final HashMap<ConvexPolygon2DReadOnly, ConvexPolygon2DReadOnly> scaledPolygons = new HashMap<>();
 
-   public PlanarRegionConstraintData(PlanarRegion planarRegion)
+   private final ConvexPolygonScaler polygonScaler;
+
+   private final ConvexPolygon2DReadOnly scaledConvexHull;
+
+   private final boolean projectInsideUsingConvexHull;
+   private final double projectionInsideDelta;
+
+   public PlanarRegionConstraintData(ConvexPolygonScaler polygonScaler, PlanarRegion planarRegion, boolean projectInsideUsingConvexHull, double projectionInsideDelta)
    {
+      this.polygonScaler = polygonScaler;
       this.planarRegion = planarRegion;
       this.convexPolygons = planarRegion.getConvexPolygons();
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
+      this.projectionInsideDelta = projectionInsideDelta;
 
-      computeIndicesToIgnoreForEachRegion();
+      if (projectInsideUsingConvexHull)
+         scaledConvexHull = computedScaledConvexHull(polygonScaler, projectionInsideDelta);
+      else
+         scaledConvexHull = null;
    }
 
-   private void computeIndicesToIgnoreForEachRegion()
+   private ConvexPolygon2DReadOnly computeScaledInternalPolygon(ConvexPolygon2DReadOnly region, ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
    {
-      for (ConvexPolygon2D region : convexPolygons)
-      {
-         sharedIndicesByRegion.put(region, computeIndicesToIgnoreForRegion(region, convexPolygons));
-      }
+      ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
+      TIntArrayList indicesToIgnore = computeIndicesToIgnoreForRegion(region, convexPolygons);
+      if (polygonScaler.scaleConvexPolygon(region, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray()))
+         return scaledRegionPolygon;
+      else
+         return null;
    }
 
-   private static TIntArrayList computeIndicesToIgnoreForRegion(ConvexPolygon2D containingRegion, List<ConvexPolygon2D> allRegions)
+   private ConvexPolygon2DReadOnly computedScaledConvexHull(ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
+   {
+      ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
+      if (polygonScaler.scaleConvexPolygon(planarRegion.getConvexHull(), projectionInsideDelta, scaledRegionPolygon))
+         return scaledRegionPolygon;
+      else
+         return null;
+   }
+
+   private static TIntArrayList computeIndicesToIgnoreForRegion(ConvexPolygon2DReadOnly containingRegion, List<ConvexPolygon2D> allRegions)
    {
       TIntArrayList indicesToIgnore = new TIntArrayList();
       for (int index = 0; index < containingRegion.getNumberOfVertices(); index++)
@@ -64,17 +89,32 @@ public class PlanarRegionConstraintData
       return false;
    }
 
-   public ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck)
+   public ConvexPolygon2DReadOnly getScaledRegionPolygon(Point2DReadOnly pointToCheck)
+   {
+      if (projectInsideUsingConvexHull)
+      {
+         return scaledConvexHull;
+      }
+      else
+      {
+         ConvexPolygon2DReadOnly containingRegion = getContainingConvexRegion(pointToCheck);
+         if (scaledPolygons.containsKey(containingRegion))
+            return scaledPolygons.get(containingRegion);
+         else
+         {
+            ConvexPolygon2DReadOnly scaledPolygon = computeScaledInternalPolygon(containingRegion, polygonScaler, projectionInsideDelta);
+            scaledPolygons.put(containingRegion, scaledPolygon);
+            return scaledPolygon;
+         }
+      }
+   }
+
+   private ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck)
    {
       return getContainingConvexRegion(pointToCheck, convexPolygons);
    }
 
-   public TIntArrayList getIndicesToIgnore(ConvexPolygon2DReadOnly region)
-   {
-      return sharedIndicesByRegion.get(region);
-   }
-
-   public static ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck, List<ConvexPolygon2D> convexPolygons)
+   private static ConvexPolygon2DReadOnly getContainingConvexRegion(Point2DReadOnly pointToCheck, List<ConvexPolygon2D> convexPolygons)
    {
       int size = convexPolygons.size();
       for (int i = 0; i < size; i++)
