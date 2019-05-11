@@ -96,13 +96,18 @@ public class PolygonWiggler
    /**
     * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
     * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
-    *
-    * @param polygonToWiggle
-    * @param planeToWiggleInto
-    * @param wiggleParameters
-    * @return
     */
    public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
+   {
+      return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, -1);
+   }
+
+   /**
+    * This method will find a transform that moves a convex polygon into a given convex region. The algorithm assumes a small rotation
+    * angle (it will linearize sin and cos around 0.0). For that reason it is possible to specify a maximum and a minimum rotation.
+    */
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters,
+                                                        int... startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
       Point2DReadOnly pointToRotateAbout = polygonToWiggle.getCentroid();
@@ -110,7 +115,7 @@ public class PolygonWiggler
       // This creates inequality constraints for points to lie inside the desired polygon.
       DenseMatrix64F A = new DenseMatrix64F(0);
       DenseMatrix64F b = new DenseMatrix64F(0);
-      convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside);
+      convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside, startingVerticesToIgnore);
 
       int constraintsPerPoint = A.getNumRows();
 
@@ -241,17 +246,21 @@ public class PolygonWiggler
 
    /**
     * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
-    *
-    * @param polygon
-    * @param A
-    * @param b
     */
    public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      convertToInequalityConstraints(polygon, A, b, deltaInside, -1);
+   }
+
+   /**
+    * Packs the matrices A and b such that any point x is inside the polygon if it satisfies the equation A*x <= b.
+    */
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside, int... startingVerticesToIgnore)
    {
       int constraints = polygon.getNumberOfVertices();
 
       if (constraints > 2)
-         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside);
+         convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside, startingVerticesToIgnore);
       else if (constraints > 1)
          convertToInequalityConstraintsLine(polygon, A, b, deltaInside);
       else
@@ -319,6 +328,11 @@ public class PolygonWiggler
 
    public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
+      convertToInequalityConstraintsPolygon(polygon, A, b, deltaInside, -1);
+   }
+
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside, int... startingVerticesToIgnore)
+   {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
@@ -334,14 +348,31 @@ public class PolygonWiggler
          x = x / norm;
          y = y / norm;
 
+         double desiredDistanceInside;
+         if (isAllowed(i, startingVerticesToIgnore))
+            desiredDistanceInside = deltaInside;
+         else
+            desiredDistanceInside = 0.0;
+
          A.set(i, 0, -y);
          A.set(i, 1, x);
-         b.set(i, -deltaInside + firstPoint.getY() * x - firstPoint.getX() * y);
+         b.set(i, -desiredDistanceInside + firstPoint.getY() * x - firstPoint.getX() * y);
 
          //         A.set(i, 0, firstPoint.y - secondPoint.y);
          //         A.set(i, 1, -firstPoint.x + secondPoint.x);
          //         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
       }
+   }
+
+   private static boolean isAllowed(int index, int... indicesToIgnore)
+   {
+      for (int i = 0; i < indicesToIgnore.length; i++)
+      {
+         if (index == indicesToIgnore[i])
+            return false;
+      }
+
+      return true;
    }
 
    public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
