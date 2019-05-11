@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -43,7 +42,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestPlanarRegion = snapTools.findHighestRegion(footPosition, new Vector2D());
+      PlanarRegion highestPlanarRegion = snapTools.findHighestRegion(footPosition);
 
       if (highestPlanarRegion == null)
       {
@@ -85,10 +84,10 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-//      if (parameters.getProjectInsideUsingConvexHull())
-         return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
-//      else
-//         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
+      if (parameters.getProjectInsideUsingConvexHull())
+         return PolygonWiggler.findWiggleTransform(footholdPolygon, regionToWiggleInto.getConvexHull(), wiggleParameters);
+      else
+         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, regionToWiggleInto, wiggleParameters);
    }
 
    private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal, PlanarRegion regionToWiggleInto)

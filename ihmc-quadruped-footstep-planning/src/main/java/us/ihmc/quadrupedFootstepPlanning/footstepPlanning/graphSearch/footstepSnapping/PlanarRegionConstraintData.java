@@ -15,6 +15,7 @@ public class PlanarRegionConstraintData
    private final PlanarRegion planarRegion;
    private final List<ConvexPolygon2D> convexPolygons;
    private final HashMap<ConvexPolygon2DReadOnly, ConvexPolygon2DReadOnly> scaledPolygons = new HashMap<>();
+   private final HashMap<ConvexPolygon2DReadOnly, TIntArrayList> polygonIndicesToIgnore = new HashMap<>();
 
    private final ConvexPolygonScaler polygonScaler;
 
@@ -37,11 +38,11 @@ public class PlanarRegionConstraintData
          scaledConvexHull = null;
    }
 
-   private ConvexPolygon2DReadOnly computeScaledInternalPolygon(ConvexPolygon2DReadOnly region, ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
+   private ConvexPolygon2DReadOnly computeScaledInternalPolygon(ConvexPolygon2DReadOnly internalRegionToScale, ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
    {
       ConvexPolygon2D scaledRegionPolygon = new ConvexPolygon2D();
-      TIntArrayList indicesToIgnore = computeIndicesToIgnoreForRegion(region, convexPolygons);
-      if (polygonScaler.scaleConvexPolygon(region, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray()))
+      TIntArrayList indicesToIgnore = getPolygonIndicesToIgnore(internalRegionToScale);
+      if (polygonScaler.scaleConvexPolygon(internalRegionToScale, projectionInsideDelta, scaledRegionPolygon, indicesToIgnore.toArray()))
          return scaledRegionPolygon;
       else
          return null;
@@ -87,6 +88,20 @@ public class PlanarRegionConstraintData
       }
 
       return false;
+   }
+
+   public TIntArrayList getPolygonIndicesToIgnore(ConvexPolygon2DReadOnly polygonRegion)
+   {
+      if (polygonIndicesToIgnore.containsKey(polygonRegion))
+      {
+         return polygonIndicesToIgnore.get(polygonRegion);
+      }
+      else
+      {
+         TIntArrayList indicesToIgnore = computeIndicesToIgnoreForRegion(polygonRegion, convexPolygons);
+         polygonIndicesToIgnore.put(polygonRegion, indicesToIgnore);
+         return indicesToIgnore;
+      }
    }
 
    public ConvexPolygon2DReadOnly getScaledRegionPolygon(Point2DReadOnly pointToCheck)
