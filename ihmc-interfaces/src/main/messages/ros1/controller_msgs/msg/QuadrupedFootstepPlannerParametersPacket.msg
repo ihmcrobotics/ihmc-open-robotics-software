@@ -69,7 +69,9 @@ float64 min_y_clearance_from_foot
 # Field default value -11.1
 float64 max_walking_speed_multiplier
 
-bool project_inside_using_convex_hull
+bool project_inside_using_convex_hull_during_expansion
+
+bool project_inside_using_convex_hull_during_post_processing
 
 # Field default value -11.1
 float64 projection_inside_distance_for_expansion

@@ -288,7 +288,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistanceForExpansion();
-      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
+      highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHullDuringExpansion();
       nodeChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
       postProcessingSnapper.setPlanarRegions(planarRegionsList);
@@ -336,7 +336,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             break;
          }
       }
-
 
       if (debug)
       {
@@ -395,8 +394,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
-         if (snapTransform.containsNaN())
-            throw new RuntimeException("Failed to snap in post processing.");
          position.applyTransform(snapTransform);
 
          newStep.setGoalPosition(position);
@@ -686,9 +683,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                                                              QuadrupedFootstepPlannerListener listener, FootstepNodeExpansion expansion,
                                                              YoVariableRegistry registry)
    {
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                              parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-                                                                                             false);
+                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);

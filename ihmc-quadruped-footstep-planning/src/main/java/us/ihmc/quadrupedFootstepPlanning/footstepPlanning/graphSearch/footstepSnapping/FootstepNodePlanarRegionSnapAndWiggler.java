@@ -7,12 +7,14 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
@@ -21,14 +23,16 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final DoubleProvider projectionInsideDelta;
+   private final BooleanProvider projectInsideUsingConvexHull;
    private final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
    private final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    public FootstepNodePlanarRegionSnapAndWiggler(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
-                                                boolean enforceTranslationLessThanGridCell)
+                                                 BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
       this.projectionInsideDelta = projectionInsideDelta;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
 
       constraintDataParameters.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
    }
@@ -38,7 +42,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    {
       super.setPlanarRegions(planarRegionsList);
       constraintDataHolder.clear();
-      constraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
+      constraintDataParameters.projectInsideUsingConvexHull = projectInsideUsingConvexHull.getValue();
       constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
    }
 
@@ -90,18 +94,18 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       footholdPolygon.addVertex(footPositionInLocal);
       footholdPolygon.update();
 
-      if (parameters.getProjectInsideUsingConvexHull())
-      {
-         return PolygonWiggler.findWiggleTransform(footholdPolygon, regionToWiggleInto.getConvexHull(), wiggleParameters);
-      }
-      else
-      {
+//      if (parameters.getProjectInsideUsingConvexHull())
+//      {
+//         return PolygonWiggler.findWiggleTransform(footholdPolygon, regionToWiggleInto.getConvexHull(), wiggleParameters);
+//      }
+//      else
+//      {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(footPositionInLocal, regionToWiggleInto.getConvexPolygons());
          if (containingRegion == null)
             return null;
          TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, containingRegion, constraintDataParameters);
          return PolygonWiggler.findWiggleTransform(footholdPolygon, containingRegion, wiggleParameters, indicesToExclude.toArray());
-      }
+//      }
    }
 
    private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal, PlanarRegion regionToWiggleInto)

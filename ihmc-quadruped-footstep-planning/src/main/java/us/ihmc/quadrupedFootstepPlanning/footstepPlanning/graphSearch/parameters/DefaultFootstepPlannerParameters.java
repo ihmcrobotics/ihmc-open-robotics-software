@@ -123,7 +123,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public boolean getProjectInsideUsingConvexHull()
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
    {
       return false;
    }

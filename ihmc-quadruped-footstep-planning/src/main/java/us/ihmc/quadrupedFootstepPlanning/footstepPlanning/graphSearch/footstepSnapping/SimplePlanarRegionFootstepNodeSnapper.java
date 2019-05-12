@@ -10,6 +10,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
@@ -17,15 +18,17 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    private final Point2D footPosition = new Point2D();
 
    private final DoubleProvider projectionInsideDelta;
+   private final BooleanProvider projectInsideUsingConvexHull;
    private final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
    private final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
-                                                boolean enforceTranslationLessThanGridCell)
+                                                BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
 
       this.projectionInsideDelta = projectionInsideDelta;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
 
       constraintDataParameters.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
    }
@@ -36,7 +39,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       super.setPlanarRegions(planarRegionsList);
       constraintDataHolder.clear();
       constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
-      constraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHull();
+      constraintDataParameters.projectInsideUsingConvexHull = projectInsideUsingConvexHull.getValue();
    }
 
    @Override
