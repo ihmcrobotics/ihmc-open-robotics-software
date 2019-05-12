@@ -39,7 +39,8 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
 
-   private boolean projectInsideUsingConvexHull;
+   private boolean projectInsideUsingConvexHullDuringExpansion;
+   private boolean projectInsideUsingConvexHullDuringPostProcessing;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -240,9 +241,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
    {
-      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
+      this.projectInsideUsingConvexHullDuringExpansion = projectInsideUsingConvexHull;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringPostProcessing = projectInsideUsingConvexHull;
    }
 
    /** {@inheritDoc} */
@@ -427,9 +435,16 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public boolean getProjectInsideUsingConvexHull()
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
    {
-      return projectInsideUsingConvexHull;
+      return projectInsideUsingConvexHullDuringExpansion;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return projectInsideUsingConvexHullDuringPostProcessing;
    }
 
    /** {@inheritDoc} */

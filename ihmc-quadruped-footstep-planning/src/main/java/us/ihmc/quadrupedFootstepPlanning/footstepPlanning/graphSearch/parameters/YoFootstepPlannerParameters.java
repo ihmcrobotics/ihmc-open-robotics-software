@@ -37,7 +37,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
    private final YoDouble minimumDistanceFromCliffTops = new YoDouble("minimumCliffHeightFromTops", registry);
-   private final YoBoolean projectInsideUsingConvexHull = new YoBoolean("projectInsideUsingConvexHull", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -190,9 +191,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull)
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
    {
-      this.projectInsideUsingConvexHull.set(projectInsideUsingConvexHull);
+      this.projectInsideUsingConvexHullDuringExpansion.set(projectInsideUsingConvexHull);
+   }
+
+   @Override
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringPostProcessing.set(projectInsideUsingConvexHull);
    }
 
    @Override
@@ -395,9 +402,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public boolean getProjectInsideUsingConvexHull()
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
    {
-      return projectInsideUsingConvexHull.getBooleanValue();
+      return projectInsideUsingConvexHullDuringExpansion.getBooleanValue();
+   }
+
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return projectInsideUsingConvexHullDuringPostProcessing.getBooleanValue();
    }
 
    /** {@inheritDoc} */

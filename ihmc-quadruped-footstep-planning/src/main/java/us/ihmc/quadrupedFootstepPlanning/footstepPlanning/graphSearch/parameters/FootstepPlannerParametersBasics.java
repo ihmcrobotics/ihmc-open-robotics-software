@@ -52,7 +52,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setProjectInsideDistanceForPostProcessing(double projectionInsideDistanceForPostProcessing);
 
-   void setProjectInsideUsingConvexHull(boolean projectInsideUsingConvexHull);
+   void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull);
+
+   void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull);
 
    void setMaximumXYWiggleDistance(double wiggleDistance);
 
@@ -90,7 +92,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
       setProjectInsideDistanceForExpansion(other.getProjectInsideDistanceForExpansion());
       setProjectInsideDistanceForPostProcessing(other.getProjectInsideDistanceForPostProcessing());
-      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
+      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
+      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
       setMaximumXYWiggleDistance(other.getMaximumXYWiggleDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
@@ -159,6 +162,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (other.getMinimumDistanceFromCliffTops() != other.NO_VALUE_DOUBLE)
          setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
 
-      setProjectInsideUsingConvexHull(other.getProjectInsideUsingConvexHull());
+      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
+      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
    }
 }

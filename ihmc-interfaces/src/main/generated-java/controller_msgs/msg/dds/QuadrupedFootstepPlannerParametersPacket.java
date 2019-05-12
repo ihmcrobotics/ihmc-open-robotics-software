@@ -38,7 +38,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double min_x_clearance_from_foot_ = -11.1;
    public double min_y_clearance_from_foot_ = -11.1;
    public double max_walking_speed_multiplier_ = -11.1;
-   public boolean project_inside_using_convex_hull_;
+   public boolean project_inside_using_convex_hull_during_expansion_;
+   public boolean project_inside_using_convex_hull_during_post_processing_;
    public double projection_inside_distance_for_expansion_ = -11.1;
    public double projection_inside_distance_for_post_processing_ = -11.1;
    public double maximum_xy_wiggle_distance_ = -11.1;
@@ -105,7 +106,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       max_walking_speed_multiplier_ = other.max_walking_speed_multiplier_;
 
-      project_inside_using_convex_hull_ = other.project_inside_using_convex_hull_;
+      project_inside_using_convex_hull_during_expansion_ = other.project_inside_using_convex_hull_during_expansion_;
+
+      project_inside_using_convex_hull_during_post_processing_ = other.project_inside_using_convex_hull_during_post_processing_;
 
       projection_inside_distance_for_expansion_ = other.projection_inside_distance_for_expansion_;
 
@@ -336,13 +339,22 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return max_walking_speed_multiplier_;
    }
 
-   public void setProjectInsideUsingConvexHull(boolean project_inside_using_convex_hull)
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean project_inside_using_convex_hull_during_expansion)
    {
-      project_inside_using_convex_hull_ = project_inside_using_convex_hull;
+      project_inside_using_convex_hull_during_expansion_ = project_inside_using_convex_hull_during_expansion;
    }
-   public boolean getProjectInsideUsingConvexHull()
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
    {
-      return project_inside_using_convex_hull_;
+      return project_inside_using_convex_hull_during_expansion_;
+   }
+
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean project_inside_using_convex_hull_during_post_processing)
+   {
+      project_inside_using_convex_hull_during_post_processing_ = project_inside_using_convex_hull_during_post_processing;
+   }
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return project_inside_using_convex_hull_during_post_processing_;
    }
 
    public void setProjectionInsideDistanceForExpansion(double projection_inside_distance_for_expansion)
@@ -472,7 +484,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_walking_speed_multiplier_, other.max_walking_speed_multiplier_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_, other.project_inside_using_convex_hull_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_during_expansion_, other.project_inside_using_convex_hull_during_expansion_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.project_inside_using_convex_hull_during_post_processing_, other.project_inside_using_convex_hull_during_post_processing_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.projection_inside_distance_for_expansion_, other.projection_inside_distance_for_expansion_, epsilon)) return false;
 
@@ -547,7 +561,9 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.max_walking_speed_multiplier_ != otherMyClass.max_walking_speed_multiplier_) return false;
 
-      if(this.project_inside_using_convex_hull_ != otherMyClass.project_inside_using_convex_hull_) return false;
+      if(this.project_inside_using_convex_hull_during_expansion_ != otherMyClass.project_inside_using_convex_hull_during_expansion_) return false;
+
+      if(this.project_inside_using_convex_hull_during_post_processing_ != otherMyClass.project_inside_using_convex_hull_during_post_processing_) return false;
 
       if(this.projection_inside_distance_for_expansion_ != otherMyClass.projection_inside_distance_for_expansion_) return false;
 
@@ -619,8 +635,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.min_y_clearance_from_foot_);      builder.append(", ");
       builder.append("max_walking_speed_multiplier=");
       builder.append(this.max_walking_speed_multiplier_);      builder.append(", ");
-      builder.append("project_inside_using_convex_hull=");
-      builder.append(this.project_inside_using_convex_hull_);      builder.append(", ");
+      builder.append("project_inside_using_convex_hull_during_expansion=");
+      builder.append(this.project_inside_using_convex_hull_during_expansion_);      builder.append(", ");
+      builder.append("project_inside_using_convex_hull_during_post_processing=");
+      builder.append(this.project_inside_using_convex_hull_during_post_processing_);      builder.append(", ");
       builder.append("projection_inside_distance_for_expansion=");
       builder.append(this.projection_inside_distance_for_expansion_);      builder.append(", ");
       builder.append("projection_inside_distance_for_post_processing=");
