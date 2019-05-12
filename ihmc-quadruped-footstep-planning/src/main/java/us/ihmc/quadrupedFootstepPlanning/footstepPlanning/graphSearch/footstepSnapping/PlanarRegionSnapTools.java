@@ -80,6 +80,9 @@ public class PlanarRegionSnapTools
       for (int i = 0; i < intersectingRegions.size(); i++)
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
+         if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+            continue;
+
          double height = planarRegion.getPlaneZGivenXY(x, y);
 
          if (height > highestPoint)
@@ -130,10 +133,14 @@ public class PlanarRegionSnapTools
          {
             // even if projection fails, remember highest region. this will be considered an obstacle
             height = planarRegion.getPlaneZGivenXY(x, y);
+            if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+               continue;
          }
          else
          {
             height = planarRegion.getPlaneZGivenXY(x + projectionTranslation.getX(), y + projectionTranslation.getY());
+            if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x + projectionTranslation.getX(), y + projectionTranslation.getY()))
+               continue;
          }
 
          if (height > highestPoint)
