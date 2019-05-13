@@ -7,4 +7,4 @@ int32 width
 
 int32 height
 
-int32[] rgbdata
+int32[<=4000000] rgbdata
