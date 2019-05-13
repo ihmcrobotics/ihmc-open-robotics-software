@@ -29,7 +29,6 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInte
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
@@ -85,7 +84,7 @@ public class PatrolBehavior
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
-   private final UpDownExplorer upDownExplorer;
+   private final UpDownFlatAreaFinder upDownFlatAreaFinder;
 
    private final Notification stopNotification = new Notification();
    private final Notification goNotification = new Notification();
@@ -93,6 +92,7 @@ public class PatrolBehavior
    private final Notification cancelPlanning = new Notification();
    private final Notification skipPerceive = new Notification();
 
+   private TypedNotification<Optional<FramePose3D>> upOrDownNotification = new TypedNotification<>();
    private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
@@ -142,7 +142,7 @@ public class PatrolBehavior
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
-      upDownExplorer = new UpDownExplorer(messager);
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
       waypointManager = WaypointManager.createForModule(messager,
                                                         WaypointsToModule,
@@ -159,7 +159,7 @@ public class PatrolBehavior
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
-         upDownExplorer.abortPlanning();
+         upDownFlatAreaFinder.abort();
       });
       messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
 
@@ -203,7 +203,7 @@ public class PatrolBehavior
 
    private void onNavigateStateEntry()
    {
-      if (upDownExploration.get()) // find up-down if. setup the waypoint
+      if (upDownExploration.get()) // find up-down or spin. setup the waypoint
       {
          upOrDownNotification = upDownFlatAreaFinder.upOrDownOnAThread(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
                                                                        PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
