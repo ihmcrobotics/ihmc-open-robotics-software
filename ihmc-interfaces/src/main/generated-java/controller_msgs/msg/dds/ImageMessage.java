@@ -20,7 +20,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
    public ImageMessage()
    {
-      rgbdata_ = new us.ihmc.idl.IDLSequence.Integer (100, "type_2");
+      rgbdata_ = new us.ihmc.idl.IDLSequence.Integer (4000000, "type_2");
 
    }
 
