@@ -164,12 +164,13 @@ public class FusionSensorObjectDetectionManager
 
    private void publishResults()
    {
+      BufferedImage image = leatestBufferedImage.get();
       for (ObjectType objectType : selectedObjectTypes)
       {
          RegionOfInterest detectedObjectROI = objectTypeToROIMap.get(objectType);
          if (detectedObjectROI != null)
          {
-            ImageVisualizationHelper.drawROIOnImage(leatestBufferedImage.get(), detectedObjectROI, objectType.getROIColor(), objectType.toString());
+            ImageVisualizationHelper.drawROIOnImage(image, detectedObjectROI, objectType.getROIColor(), objectType.toString());
             switch (objectType)
             {
             case Cup:
@@ -184,9 +185,9 @@ public class FusionSensorObjectDetectionManager
             default:
                break;
             }
-            messager.submitMessage(LidarImageFusionAPI.ImageResultState, leatestBufferedImage.getAndSet(null));
          }
       }
+      messager.submitMessage(LidarImageFusionAPI.ImageResultState, image);
    }
 
    /**
@@ -202,6 +203,6 @@ public class FusionSensorObjectDetectionManager
       doorParameterCalculator.calculate(handleROI);
       doorParameterCalculator.publish();
       long computingTime = System.nanoTime() - startTime;
-      LogTools.info("Door computing time is " + Conversions.nanosecondsToMicroseconds(computingTime));
+      LogTools.info("Door computing time is " + Conversions.nanosecondsToSeconds(computingTime));
    }
 }

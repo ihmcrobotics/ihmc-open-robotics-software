@@ -13,6 +13,7 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.Ros2Node;
 
@@ -42,6 +43,10 @@ public class DetectedObjectViewer
       double doorHeight = message.getDoorHeight();
       Point3D hingePoint = message.getHingedPointOnGround();
       Point3D endPoint = message.getEndPointOnGround();
+
+      LogTools.info("doorHeight " + doorHeight);
+      LogTools.info("hingePoint " + hingePoint);
+      LogTools.info("endPoint " + endPoint);
 
       List<Point3D> doorVertices = new ArrayList<Point3D>();
       doorVertices.add(hingePoint);
