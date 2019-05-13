@@ -25,7 +25,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -105,7 +104,6 @@ public class AvatarEstimatorThread
    private final DRCPoseCommunicator poseCommunicator;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame rootFrame;
 
    private final JointDesiredOutputWriter outputWriter;
 
@@ -127,8 +125,6 @@ public class AvatarEstimatorThread
    {
       this.robotVisualizer = robotVisualizer;
       estimatorFullRobotModel = robotModel.createFullRobotModel();
-      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
-      rootFrame = rootJoint.getFrameAfterJoint();
 
       processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
 
@@ -140,6 +136,7 @@ public class AvatarEstimatorThread
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(estimatorFullRobotModel.getControllableOneDoFJoints());
 
       sensorReaderFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+      FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, desiredJointDataHolder, estimatorRegistry);
 
       sensorReader = sensorReaderFactory.getSensorReader();
@@ -438,9 +435,6 @@ public class AvatarEstimatorThread
          {
             robotVisualizer.update(startTimestamp);
          }
-
-         rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
-         yoGraphicsListRegistry.setControllerTransformToWorld(rootToWorldTransform);
       }
       catch (Throwable e)
       {

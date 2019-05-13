@@ -19,8 +19,6 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -88,8 +86,6 @@ public class AvatarControllerThread
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 
-   private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame rootFrame;
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
@@ -105,7 +101,6 @@ public class AvatarControllerThread
       this.outputProcessor = outputProcessor;
       this.robotVisualizer = robotVisualizer;
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
-      this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
 
       processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
 
@@ -359,9 +354,6 @@ public class AvatarControllerThread
             robotVisualizer.update(controllerTimestamp.getLongValue(), registry);
             robotVisualizerUpdateTimer.stopMeasurement();
          }
-
-         rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
-         yoGraphicsListRegistry.setControllerTransformToWorld(rootToWorldTransform);
       }
       catch (Exception e)
       {
