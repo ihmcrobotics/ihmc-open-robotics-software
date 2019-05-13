@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -43,6 +44,7 @@ public class UpDownFlatAreaFinder
    private final UpDownResult upDownResultForVisualization = new UpDownResult(NUMBER_OF_VERTICES);
 
    private volatile boolean abort = false;
+   private volatile UpDown lastPlanUpDown = UpDown.DOWN;
 
    private ReferenceFrame midFeetZUpFrame;
    private PlanarRegionsList planarRegionsList;
@@ -124,6 +126,15 @@ public class UpDownFlatAreaFinder
          FramePose3D waypointPose = new FramePose3D();
          waypointPose.setFromReferenceFrame(midFeetZUpFrame);
          waypointPose.setPosition(centerPoint3D);
+
+         if (waypointPose.getZ() > midFeetZUpPose.getZ())
+         {
+            lastPlanUpDown = UpDown.UP;
+         }
+         else
+         {
+            lastPlanUpDown = UpDown.DOWN;
+         }
 
          LogTools.debug("Qualifying pose found at height {}: {}", centerPoint3D.getZ() - initialHeight, waypointPose);
 
@@ -237,6 +248,11 @@ public class UpDownFlatAreaFinder
       upDownResultForVisualization.setValid(true);
 
       return true;
+   }
+
+   public UpDown getLastPlanUpDown()
+   {
+      return lastPlanUpDown;
    }
 
    private ArrayList<PlanarRegion> findHighestRegions(PlanarRegionsList regionsList, int numberToGet)
