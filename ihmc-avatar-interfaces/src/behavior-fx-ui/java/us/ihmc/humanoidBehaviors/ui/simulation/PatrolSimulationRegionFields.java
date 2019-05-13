@@ -52,6 +52,25 @@ public class PatrolSimulationRegionFields
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList createUpDownTwoHighWithFlatBetween()
+   {
+      Random random = new Random(8349829898174L);
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+
+      generator.translate(1.0, -superGridSize / 2, 0.0);
+      addTopFlatRegion(generator);
+      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+
+      generator.rotate(Math.PI, Axis.Z);
+      generator.translate(2.0, -1.2, 0.0);
+      addTopFlatRegion(generator);
+      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+
+      return generator.getPlanarRegionsList();
+   }
+
    private static void addXFormationSlopes(Random random, PlanarRegionsListGenerator generator)
    {
       generator.translate(0.0, -superGridSize, 0.0);

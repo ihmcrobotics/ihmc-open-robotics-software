@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.patrol;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,7 +18,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -29,7 +27,7 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInte
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
+import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -84,7 +82,7 @@ public class PatrolBehavior
    private final RemoteRobotControllerInterface remoteRobotControllerInterface;
    private final RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private final RemoteFootstepPlannerInterface remoteFootstepPlannerInterface;
-   private final UpDownFlatAreaFinder upDownFlatAreaFinder;
+   private final UpDownExplorer upDownExplorer;
 
    private final Notification stopNotification = new Notification();
    private final Notification goNotification = new Notification();
@@ -92,15 +90,14 @@ public class PatrolBehavior
    private final Notification cancelPlanning = new Notification();
    private final Notification skipPerceive = new Notification();
 
-   private TypedNotification<Optional<FramePose3D>> upOrDownNotification = new TypedNotification<>();
    private TypedNotification<RemoteFootstepPlannerResult> footstepPlanResultNotification;
    private TypedNotification<WalkingStatusMessage> walkingCompleted;
 
    private final WaypointManager waypointManager;
    private final AtomicReference<Boolean> loop;
    private final AtomicReference<Boolean> swingOvers;
-   private final AtomicReference<Boolean> planReview;
-   private final AtomicReference<Boolean> upDownExploration;
+   private final AtomicReference<Boolean> planReviewEnabled;
+   private final AtomicReference<Boolean> upDownExplorationEnabled;
    private final AtomicReference<Double> exploreTurnAmount;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
@@ -142,7 +139,6 @@ public class PatrolBehavior
       remoteRobotControllerInterface = new RemoteRobotControllerInterface(ros2Node, robotModel);
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidFrames(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, messager);
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
       waypointManager = WaypointManager.createForModule(messager,
                                                         WaypointsToModule,
@@ -156,19 +152,21 @@ public class PatrolBehavior
       {
          planReviewResult.add(message);
       });
-      messager.registerTopicListener(CancelPlanning, object ->
-      {
-         cancelPlanning.set();
-         upDownFlatAreaFinder.abort();
-      });
       messager.registerTopicListener(SkipPerceive, object -> skipPerceive.set());
 
       loop = messager.createInput(Loop, false);
       swingOvers = messager.createInput(SwingOvers, false);
-      planReview = messager.createInput(PlanReviewEnabled, false);
-      upDownExploration = messager.createInput(UpDownExplorationEnabled, false);
+      planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
+      upDownExplorationEnabled = messager.createInput(UpDownExplorationEnabled, false);
       exploreTurnAmount = messager.createInput(ExplorationTurnAmount, 180.0);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
+
+      upDownExplorer = new UpDownExplorer(messager, upDownExplorationEnabled, exploreTurnAmount, remoteSyncedHumanoidFrames, planarRegionsList);
+      messager.registerTopicListener(CancelPlanning, object ->
+      {
+         cancelPlanning.set();
+         upDownExplorer.abortPlanning();
+      });
 
       ExceptionHandlingThreadScheduler patrolThread = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(),
                                                                                            DefaultExceptionHandler.PRINT_STACKTRACE,
@@ -193,7 +191,7 @@ public class PatrolBehavior
 
    private boolean transitionFromStop(double timeInState)
    {
-      boolean transition = goNotification.read() && (waypointManager.hasWaypoints() || upDownExploration.get());
+      boolean transition = goNotification.read() && (waypointManager.hasWaypoints() || upDownExplorationEnabled.get());
       if (transition)
       {
          LogTools.debug("STOP -> PLAN");
@@ -203,17 +201,16 @@ public class PatrolBehavior
 
    private void onNavigateStateEntry()
    {
-      if (upDownExploration.get()) // find up-down or spin. setup the waypoint
+      if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upOrDownNotification = upDownFlatAreaFinder.upOrDownOnAThread(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
-                                                                       PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+         upDownExplorer.onNavigateEntry();
       }
    }
 
    private void doNavigateStateAction(double timeInState)
    {
       pollInterrupts();
-      upOrDownNotification.poll();
+      upDownExplorer.poll();
    }
 
    private PatrolBehaviorState transitionFromNavigate(double timeInState)
@@ -226,7 +223,11 @@ public class PatrolBehavior
       {
          return NAVIGATE;
       }
-      else if (!upDownExploration.get() || upOrDownNotification.hasNext())
+      else if (!upDownExplorationEnabled.get())
+      {
+         return PLAN;
+      }
+      else if (upDownExplorer.shouldTransitionToPlan())
       {
          return PLAN;
       }
@@ -243,23 +244,9 @@ public class PatrolBehavior
 
       FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
-      if (upDownExploration.get() && upOrDownNotification.hasNext())
+      if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getPlanNotification().hasNext())
       {
-         waypointManager.clearWaypoints();
-         Waypoint newWaypoint = waypointManager.appendNewWaypoint();
-
-         if (upOrDownNotification.peek().isPresent()) // success
-         {
-            newWaypoint.getPose().set(upOrDownNotification.peek().get());
-         }
-         else // turn counter-clockwise to try and find an up-down
-         {
-            newWaypoint.getPose().set(midFeetZUpPose);
-            newWaypoint.getPose().appendYawRotation(Math.toRadians(exploreTurnAmount.get())); // TODO figure out another algorithm? state machine?
-         }
-
-         waypointManager.publish();
-         waypointManager.setNextFromIndex(0);
+         upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
 
       footstepPlanResultNotification
@@ -315,7 +302,7 @@ public class PatrolBehavior
       {
          return STOP;
       }
-      else if (!planReview.get()) // if review is disabled, proceed
+      else if (!planReviewEnabled.get()) // if review is disabled, proceed
       {
          return WALK;
       }
@@ -357,14 +344,14 @@ public class PatrolBehavior
       }
       else if (walkingCompleted.hasNext()) // TODO handle robot fell and more
       {
-         if (!upDownExploration.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and looping disabled
+         if (!upDownExplorationEnabled.get() && !loop.get() && waypointManager.incrementingWillLoop()) // stop in the acute case of not exploring and looping disabled
          {                                                                                      // and it's going to loop
             return STOP;
          }
          else
          {
             // next waypoint is far, gather more data to increase robustness
-            if (upDownExploration.get() // perceive everytime when updownenabled
+            if (upDownExplorationEnabled.get() // perceive everytime when updownenabled
              || remoteFootstepPlannerInterface.decidePlanType(
                    remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
                    waypointManager.peekAfterNextPose())
@@ -409,6 +396,10 @@ public class PatrolBehavior
          return STOP;
       }
       else if (skipPerceive.read())
+      {
+         return NAVIGATE;
+      }
+      else if (upDownExplorationEnabled.get() && upDownExplorer.shouldTransitionFromPerceive())
       {
          return NAVIGATE;
       }
