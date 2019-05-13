@@ -10,8 +10,8 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper
 
 public class LidarImageFusionDataTest
 {
-   private static final String pointCloudDataFileName = "FileName";
-   private static final String labeledImageDataFileName = "C:\\Users\\inhol\\source\\repos\\UnEvenData.txt";
+   private static final String pointCloudDataFileName = "C:\\Users\\inhol\\Desktop\\SavedData\\stereovisionpointcloud.txt";
+   private static final String labeledImageDataFileName = "C:\\Users\\inhol\\Desktop\\SavedData\\labeledimage.txt";
    private static final int imageWidth = 1024;
    private static final int imageHeight = 544;
 

@@ -17,6 +17,8 @@ public class LidarImageFusionRawDataLoader
 {
    private final Map<String, LidarImageFusionRawData> rawDataMap = new HashMap<String, LidarImageFusionRawData>();
 
+   private static final int maximumNumberOfPoints = 200000;
+
    public LidarImageFusionRawDataLoader()
    {
 
@@ -24,16 +26,65 @@ public class LidarImageFusionRawDataLoader
 
    private static Point3D[] loadPointCloudData(File pointCloudDataFile)
    {
-      return null;
+      Point3D[] pointCloud = new Point3D[maximumNumberOfPoints];
+
+      BufferedReader bufferedReader = null;
+      try
+      {
+         bufferedReader = new BufferedReader(new FileReader(pointCloudDataFile));
+      }
+      catch (FileNotFoundException e1)
+      {
+         e1.printStackTrace();
+      }
+
+      int lineIndex = 0;
+      while (true)
+      {
+         String lineJustFetched = null;
+         String[] idxyzcolorArray;
+         try
+         {
+            lineJustFetched = bufferedReader.readLine();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+         if (lineJustFetched == null)
+         {
+            break;
+         }
+         else
+         {
+            idxyzcolorArray = lineJustFetched.split("\t");
+            int id = Integer.parseInt(idxyzcolorArray[0]);
+            double x = Double.parseDouble(idxyzcolorArray[1]);
+            double y = Double.parseDouble(idxyzcolorArray[2]);
+            double z = Double.parseDouble(idxyzcolorArray[3]);
+            int rgb = Integer.parseInt(idxyzcolorArray[4]);
+
+            pointCloud[lineIndex] = new Point3D(x, y, z);
+            lineIndex++;
+         }
+      }
+
+      Point3D[] resizedPointCloud = new Point3D[lineIndex];
+      for (int i = 0; i < resizedPointCloud.length; i++)
+      {
+         resizedPointCloud[i] = pointCloud[i];
+      }
+
+      return resizedPointCloud;
    }
 
    public void loadLidarImageFusionRawData(String dataName, String pointCloudDataFileName, String labeledImageDataFileName, int imageWidth, int imageHeight,
                                            IntrinsicParameters intrinsicParameters)
    {
-      // File pointCloudDataFile = new File(pointCloudDataFileName);
+      File pointCloudDataFile = new File(pointCloudDataFileName);
       File labeledImageDataFile = new File(labeledImageDataFileName);
 
-      //      Point3D[] pointCloud = loadPointCloudData(pointCloudDataFile);
+      Point3D[] pointCloud = loadPointCloudData(pointCloudDataFile);
       BufferedImage bufferedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
       int[] labels = new int[imageWidth * imageHeight];
 
@@ -80,8 +131,8 @@ public class LidarImageFusionRawDataLoader
          }
       }
 
-      //      LidarImageFusionRawData rawData = new LidarImageFusionRawData(pointCloud, bufferedImage, labels, intrinsicParameters);
-      //      rawDataMap.put(dataName, rawData);
+      LidarImageFusionRawData rawData = new LidarImageFusionRawData(pointCloud, bufferedImage, labels, intrinsicParameters);
+      rawDataMap.put(dataName, rawData);
    }
 
    public LidarImageFusionRawData getRawData(String dataName)
