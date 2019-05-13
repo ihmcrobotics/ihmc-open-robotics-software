@@ -43,7 +43,6 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.CenterOfMassCalibrationTool;
 import us.ihmc.wholeBodyController.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
@@ -86,8 +85,6 @@ public class AvatarControllerThread
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 
-   private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextJointData processedJointData;
@@ -103,8 +100,6 @@ public class AvatarControllerThread
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
       processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
-
-      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
       crashNotificationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
@@ -386,11 +381,6 @@ public class AvatarControllerThread
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return controllerFullRobotModel;
-   }
-
-   public void dispose()
-   {
-      closeableAndDisposableRegistry.closeAndDispose();
    }
 
    public HumanoidRobotContextData getHumanoidRobotContextData()

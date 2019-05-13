@@ -57,7 +57,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
    @Override
    protected void cleanup()
    {
-      estimatorThread.dispose();
    }
 
    @Override
