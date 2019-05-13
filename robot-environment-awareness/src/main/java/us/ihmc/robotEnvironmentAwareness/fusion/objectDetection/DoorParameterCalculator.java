@@ -173,13 +173,13 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
          {
             minimumArea = area;
             bestPCARotationMatrix.set(searchingPCARotationMatrix);
-            LogTools.info("minimum area is " + minimumArea);
          }
 
          double rotatingAngle = Math.PI / 2.0 / numberOfSearchingRectangle;
          searchingPCARotationMatrix.appendYawRotation(rotatingAngle);
       }
       finiteRectangleCalculator.compute(bestPCARotationMatrix);
+      LogTools.info("minimum area is " + minimumArea);
       LogTools.info("final door area is " + finiteRectangleCalculator.area());
 
       for (DoorVertexName vertexName : DoorVertexName.values())
@@ -215,11 +215,12 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
          LogTools.info("doorVerticesInWorld vertexName " + vertexName + " " + doorVerticesInWorld.get(vertexName));
       }
 
-      newPacket.get().setDoorHeight(doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT).getZ());
+      double doorHeight = 0.0;
       if (handleROI == null)
       {
          newPacket.get().getHingedPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT));
          newPacket.get().getEndPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_RIGHT));
+         doorHeight = doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT).distance(doorVerticesInWorld.get(DoorVertexName.TOP_LEFT));
       }
       else
       {
@@ -232,15 +233,20 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
 
          if (marginXLeft < marginXRight)
          {
+            LogTools.info("Handle located right side.");
             newPacket.get().getHingedPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT));
             newPacket.get().getEndPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_RIGHT));
+            doorHeight = doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT).distance(doorVerticesInWorld.get(DoorVertexName.TOP_LEFT));
          }
          else
          {
+            LogTools.info("Handle located left side.");
             newPacket.get().getHingedPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_RIGHT));
             newPacket.get().getEndPointOnGround().set(doorVerticesInWorld.get(DoorVertexName.BOTTOM_LEFT));
+            doorHeight = doorVerticesInWorld.get(DoorVertexName.BOTTOM_RIGHT).distance(doorVerticesInWorld.get(DoorVertexName.TOP_RIGHT));
          }
       }
+      newPacket.get().setDoorHeight(doorHeight);
    }
 
    /**
