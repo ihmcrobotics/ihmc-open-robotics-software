@@ -469,10 +469,6 @@ public class AvatarEstimatorThread
       return sensorOutputMapReadOnly.getIMUProcessedOutputs();
    }
 
-   public void dispose()
-   {
-   }
-
    /**
     * used primarily for unit tests, but could be useful.
     */

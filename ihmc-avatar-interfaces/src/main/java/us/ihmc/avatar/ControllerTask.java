@@ -57,7 +57,6 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void cleanup()
    {
-      controllerThread.dispose();
    }
 
    @Override
