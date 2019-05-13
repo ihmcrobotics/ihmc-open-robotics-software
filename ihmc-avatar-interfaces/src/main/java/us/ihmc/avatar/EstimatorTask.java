@@ -49,9 +49,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
       lastStartTime = startTime;
 
       estimatorTick.increment();
-      estimatorThread.read(System.nanoTime());
       estimatorThread.run();
-      estimatorThread.write();
 
       estimatorTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
    }
@@ -65,6 +63,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
    @Override
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
+      estimatorThread.write();
       masterResolver.resolveHumanoidRobotContextDataEstimatorToController(estimatorThread.getHumanoidRobotContextData(), masterContext);
    }
 
@@ -72,6 +71,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
       estimatorResolver.resolveHumanoidRobotContextDataControllerToEstimator(masterContext, estimatorThread.getHumanoidRobotContextData());
+      estimatorThread.read();
    }
 
    @Override

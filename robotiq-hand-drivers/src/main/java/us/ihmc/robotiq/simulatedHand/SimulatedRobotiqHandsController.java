@@ -183,9 +183,7 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
    @Override
    public void execute()
    {
-      read();
       runInternal();
-      write();
    }
 
    public void read()
@@ -352,11 +350,13 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
    @Override
    protected void updateMasterContext(HumanoidRobotContextData context)
    {
+      write();
    }
 
    @Override
    protected void updateLocalContext(HumanoidRobotContextData context)
    {
       timestamp = context.getTimestamp();
+      read();
    }
 }

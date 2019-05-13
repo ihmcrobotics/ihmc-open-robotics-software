@@ -85,10 +85,6 @@ public class AvatarControllerThread
 
    private final ExecutionTimer robotVisualizerUpdateTimer;
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
-   private final YoLong controllerStartTime = new YoLong("controllerStartTime", registry);
-
-   private long lastReadSystemTime = 0L;
-   private final YoDouble actualControlDT = new YoDouble("actualControlDTInMillis", registry);
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 
@@ -289,7 +285,7 @@ public class AvatarControllerThread
    {
    }
 
-   public void read(long currentClockTime)
+   public void read()
    {
       runController.set(humanoidRobotContextData.getEstimatorRan());
       if (!runController.getValue())
@@ -299,17 +295,9 @@ public class AvatarControllerThread
 
       try
       {
-
          HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, processedJointData);
-
-         long nanoTime = System.nanoTime();
-         actualControlDT.set(Conversions.nanosecondsToMilliseconds((double) (nanoTime - lastReadSystemTime)));
-         lastReadSystemTime = nanoTime;
-
          controllerTimestamp.set(humanoidRobotContextData.getTimestamp());
          controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
-
-         controllerStartTime.set(currentClockTime);
       }
       catch (Exception e)
       {
