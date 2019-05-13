@@ -248,8 +248,6 @@ public class PatrolBehavior
          waypointManager.clearWaypoints();
          Waypoint newWaypoint = waypointManager.appendNewWaypoint();
 
-         upOrDownNotification.peek().get().set(new FramePose3D());
-
          if (upOrDownNotification.peek().isPresent()) // success
          {
             newWaypoint.getPose().set(upOrDownNotification.peek().get());
