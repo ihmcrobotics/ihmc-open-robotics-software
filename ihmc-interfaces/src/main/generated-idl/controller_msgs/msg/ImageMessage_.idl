@@ -19,7 +19,7 @@ module controller_msgs
         unsigned long sequence_id;
         long width;
         long height;
-        sequence<long> rgbdata;
+        sequence<long, 4000000> rgbdata;
       };
     };
   };
