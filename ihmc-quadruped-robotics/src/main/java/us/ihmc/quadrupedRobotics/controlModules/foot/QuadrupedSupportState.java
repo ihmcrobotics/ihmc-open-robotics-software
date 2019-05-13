@@ -47,8 +47,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
    private boolean footIsVerifiedAsLoaded = false;
 
-   private final DoubleProvider minimumTimeInSupportState;
-
    private final YoFramePoint3D groundPlanePosition;
    private final YoFramePoint3D upcomingGroundPlanePosition;
 
@@ -117,8 +115,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
       spatialFeedbackControlCommand.set(rootBody, footBody);
       spatialFeedbackControlCommand.setPrimaryBase(controllerToolbox.getFullRobotModel().getBody());
       spatialFeedbackControlCommand.setGainsFrames(soleZUpFrame, soleZUpFrame);
-
-      minimumTimeInSupportState = parameters.getMinimumTimeInSupportState();
 
       footBarelyLoaded = new GlitchFilteredYoBoolean(prefix + "_BarelyLoaded", registry, (int) (0.05 / controlDT));
       barelyLoadedWindowLength = parameters.getBarelyLoadedWindowLength();
@@ -245,9 +241,16 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       footBarelyLoaded.setWindowSize((int) (barelyLoadedWindowLength.getValue() / controlDT));
       if (footBarelyLoaded.getBooleanValue())
+      {
          footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footFullyLoadedThreshold.getValue()); // if it is barely loaded, make it harder to switch back to barely loaded by using a different threshold
+      }
       else
-         footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footBarelyLoadedThreshold.getValue());
+      {
+         if (footSwitch.computeFootLoadPercentage() < footBarelyLoadedThreshold.getValue())
+            footBarelyLoaded.set(true);
+         else
+            footBarelyLoaded.update(false);
+      }
    }
 
    private final FrameVector3D footVelocity = new FrameVector3D();

@@ -28,6 +28,11 @@ public class PlanarRegionsList
       regions = planarRegions;
    }
 
+   public PlanarRegionsList(PlanarRegionsList other)
+   {
+      this(other.getPlanarRegionsAsList());
+   }
+
    /**
     * Adds a planar region to this list of planar regions.
     *
