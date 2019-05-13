@@ -46,7 +46,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (4000000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -86,7 +86,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<cont
 
       cdr.write_type_2(data.getHeight());
 
-      if(data.getRgbdata().size() <= 100)
+      if(data.getRgbdata().size() <= 4000000)
       cdr.write_type_e(data.getRgbdata());else
           throw new RuntimeException("rgbdata field exceeds the maximum length");
 

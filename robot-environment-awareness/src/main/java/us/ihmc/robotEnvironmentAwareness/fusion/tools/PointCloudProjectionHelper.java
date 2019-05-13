@@ -17,7 +17,7 @@ public class PointCloudProjectionHelper
 
    /**
     * This method is to pack a pixel value (u, v) that is a point projected onto image.
-    * The author recommends to use parameter set of 'K' which placed in `CameraInfo` of Multisense.
+    * The author recommends to use parameter set of 'P' which placed in `CameraInfo` of Multisense.
     */
    public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel, IntrinsicParameters param)
    {
@@ -38,24 +38,20 @@ public class PointCloudProjectionHelper
 
       pixel.set(u, v);
    }
-   
+
    public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel)
    {
-      double fx = multisenseOnCartIntrinsicParameters.getFx();
-      double fy = multisenseOnCartIntrinsicParameters.getFy();
-      double cx = multisenseOnCartIntrinsicParameters.getCx();
-      double cy = multisenseOnCartIntrinsicParameters.getCy();
+      projectMultisensePointCloudOnImage(point, pixel, multisenseOnCartIntrinsicParameters);
+   }
 
-      double cameraX = -point.getY();
-      double cameraY = -point.getZ();
-      double cameraZ = point.getX();
+   public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel, int offsetU, int offsetV)
+   {
+      projectMultisensePointCloudOnImage(point, pixel, multisenseOnCartIntrinsicParameters, offsetU, offsetV);
+   }
 
-      double normX = cameraX / cameraZ;
-      double normY = cameraY / cameraZ;
-
-      int u = (int) (fx * normX + cx);
-      int v = (int) (fy * normY + cy);
-
-      pixel.set(u, v);
+   public static void projectMultisensePointCloudOnImage(Point3DBasics point, Point2DBasics pixel, IntrinsicParameters param, int offsetU, int offsetV)
+   {
+      projectMultisensePointCloudOnImage(point, pixel, param);
+      pixel.add(offsetU, offsetV);
    }
 }

@@ -31,7 +31,7 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSubscriber<PointCloud2>
 {
-   private static final int MAX_NUMBER_OF_POINTS = 100000;
+   private static final int MAX_NUMBER_OF_POINTS = 50000;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
@@ -51,11 +51,13 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
    public static final IntrinsicParameters multisenseOnCartIntrinsicParameters = new IntrinsicParameters();
    static
    {
-      multisenseOnCartIntrinsicParameters.setFx(601.5020141601562);
-      multisenseOnCartIntrinsicParameters.setFy(602.0339965820312);
-      multisenseOnCartIntrinsicParameters.setCx(520.92041015625);
-      multisenseOnCartIntrinsicParameters.setCy(273.5399169921875);
+      multisenseOnCartIntrinsicParameters.setFx(584.234619140625);
+      multisenseOnCartIntrinsicParameters.setFy(584.234619140625);
+      multisenseOnCartIntrinsicParameters.setCx(512.0);
+      multisenseOnCartIntrinsicParameters.setCy(272.0);
    }
+   private static final int offsetU = 12;
+   private static final int offsetV = 0;
 
    public MultisenseStereoVisionPointCloudReceiver() throws URISyntaxException
    {
@@ -74,17 +76,20 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
          @Override
          public void run()
          {
-            String command = commandScanner.next();
+            while (true)
+            {
+               String command = commandScanner.next();
 
-            if (command.contains(commandToSaveStereoVisionPointCloudData))
-            {
-               saveStereoVisionPointCloud.set(true);
-               System.out.println(commandToSaveStereoVisionPointCloudData + " pressed");
-            }
-            else if (command.contains(commandToSaveProjectedData))
-            {
-               saveProjectedData.set(true);
-               System.out.println(commandToSaveProjectedData + " pressed");
+               if (command.contains(commandToSaveStereoVisionPointCloudData))
+               {
+                  saveStereoVisionPointCloud.set(true);
+                  System.out.println(commandToSaveStereoVisionPointCloudData + " pressed");
+               }
+               else if (command.contains(commandToSaveProjectedData))
+               {
+                  saveProjectedData.set(true);
+                  System.out.println(commandToSaveProjectedData + " pressed");
+               }
             }
          }
       };
@@ -143,11 +148,12 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
             for (int i = 0; i < numberOfPoints; i++)
             {
                Point3D scanPoint = pointCloud[i];
-               String pointInfo = i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB();
+               String pointInfo = i + "\t" + scanPoint.getX() + "\t" + scanPoint.getY() + "\t" + scanPoint.getZ() + "\t" + colors[i].getRGB() + "\n";
                pointCloudDataString = pointCloudDataString + pointInfo;
             }
             fileWriter.write(pointCloudDataString);
             fileWriter.close();
+            System.out.println("saving is done");
          }
          catch (IOException e1)
          {
@@ -165,7 +171,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
             Point3D scanPoint = pointCloud[i];
             Point2D projectedPixel = new Point2D();
 
-            PointCloudProjectionHelper.projectMultisensePointCloudOnImage(scanPoint, projectedPixel, multisenseOnCartIntrinsicParameters);
+            PointCloudProjectionHelper.projectMultisensePointCloudOnImage(scanPoint, projectedPixel, multisenseOnCartIntrinsicParameters, offsetU, offsetV);
 
             boolean inImage = false;
             if (projectedPixel.getX() >= 0 && projectedPixel.getX() < projectionWidth)
@@ -180,6 +186,7 @@ public class MultisenseStereoVisionPointCloudReceiver extends AbstractRosTopicSu
          try
          {
             ImageIO.write(bufferedImage, "png", outputfile);
+            System.out.println("saving is done");
          }
          catch (IOException e)
          {
