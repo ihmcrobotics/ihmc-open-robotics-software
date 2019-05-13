@@ -90,10 +90,10 @@ public class LidarImageFusionRawData
       for (int i = 0; i < segmentedData.size(); i++)
       {
          Segment segment = segmentedData.get(i);
-         LogTools.info("Segment " + i + " adjacented by ");
-         int[] adjacentLabels = segment.getAdjacentSegmentLabels();
-         for (int j = 0; j < adjacentLabels.length; j++)
-            LogTools.info("" + adjacentLabels[j]);
+//         LogTools.info("Segment " + i + " adjacented by ");
+//         int[] adjacentLabels = segment.getAdjacentSegmentLabels();
+//         for (int j = 0; j < adjacentLabels.length; j++)
+//            LogTools.info("" + adjacentLabels[j]);
 
          segment.update();
       }
@@ -104,7 +104,7 @@ public class LidarImageFusionRawData
       return u + v * imageWidth;
    }
 
-   public int numberOfLabels()
+   public int getNumberOfLabels()
    {
       return segmentedData.size();
    }
