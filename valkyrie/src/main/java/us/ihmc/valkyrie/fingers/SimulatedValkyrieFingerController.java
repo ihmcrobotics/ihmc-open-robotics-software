@@ -214,9 +214,7 @@ public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
    @Override
    public void execute()
    {
-      read();
       runInternal();
-      write();
    }
 
    private void checkForNewHandDesiredConfigurationRequested()
@@ -401,11 +399,13 @@ public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
    @Override
    protected void updateMasterContext(HumanoidRobotContextData context)
    {
+      write();
    }
 
    @Override
    protected void updateLocalContext(HumanoidRobotContextData context)
    {
       timestamp = context.getTimestamp();
+      read();
    }
 }

@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorq
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
@@ -71,7 +70,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
 public class AvatarEstimatorThread
@@ -100,11 +98,7 @@ public class AvatarEstimatorThread
    private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
-   private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
-
-   private long lastReadSystemTime = 0L;
-   private final YoDouble actualEstimatorDT = new YoDouble("actualEstimatorDTInMillis", estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -353,34 +347,26 @@ public class AvatarEstimatorThread
       return estimatorRegistry;
    }
 
-   public void read(long currentClockTime)
+   public void read()
    {
       try
       {
-         long nanoTime = System.nanoTime();
-         actualEstimatorDT.set(Conversions.nanosecondsToMilliseconds((double) (nanoTime - lastReadSystemTime)));
-         lastReadSystemTime = nanoTime;
-
-         startClockTime.set(currentClockTime);
-
          controllerDataValid.set(humanoidRobotContextData.getControllerRan());
 
-         if (outputWriter != null)
+         if (outputWriter != null && controllerDataValid.getValue())
          {
-            if (controllerDataValid.getBooleanValue())
-            {
                if (!outputWriterInitialized.getBooleanValue())
                {
                   outputWriter.initialize();
                   outputWriterInitialized.set(true);
                }
 
-               outputWriter.writeBefore(currentClockTime);
-            }
+               // TODO: should this be the last estimator timestamp?
+               long nanoTime = System.nanoTime();
+               outputWriter.writeBefore(nanoTime);
          }
 
          sensorReader.read();
-
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
       }
       catch (Throwable e)
@@ -444,7 +430,7 @@ public class AvatarEstimatorThread
          }
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, processedJointData);
-         humanoidRobotContextData.setEstimatorRan(true);
+         humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
 
          long startTimestamp = estimatorTime.getLongValue();
          humanoidRobotContextData.setTimestamp(startTimestamp);

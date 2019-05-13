@@ -49,9 +49,7 @@ public class ControllerTask extends HumanoidRobotControlTask
       lastStartTime = startTime;
 
       controllerTick.increment();
-      controllerThread.read(startTime);
       controllerThread.run();
-      controllerThread.write();
 
       controllerTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
    }
@@ -65,6 +63,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
+      controllerThread.write();
       masterResolver.resolveHumanoidRobotContextDataControllerToEstimator(controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
@@ -72,6 +71,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
       controllerResolver.resolveHumanoidRobotContextDataEstimatorToController(masterContext, controllerThread.getHumanoidRobotContextData());
+      controllerThread.read();
    }
 
    @Override
