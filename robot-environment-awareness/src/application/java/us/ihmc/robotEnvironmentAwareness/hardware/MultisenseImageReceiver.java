@@ -62,17 +62,20 @@ public class MultisenseImageReceiver extends AbstractRosTopicSubscriber<Image>
          @Override
          public void run()
          {
-            String command = commandScanner.next();
+            while(true)
+            {
+               String command = commandScanner.next();
 
-            if (command.contains(commandToSaveImage))
-            {
-               saveImage.set(true);
-               System.out.println(commandToSaveImage + " pressed");
-            }
-            else if (command.contains(commandToShowCameraInfo))
-            {
-               showCameraInfo.set(true);
-               System.out.println(commandToShowCameraInfo + " pressed");
+               if (command.contains(commandToSaveImage))
+               {
+                  saveImage.set(true);
+                  System.out.println(commandToSaveImage + " pressed");
+               }
+               else if (command.contains(commandToShowCameraInfo))
+               {
+                  showCameraInfo.set(true);
+                  System.out.println(commandToShowCameraInfo + " pressed");
+               }
             }
          }
       };
