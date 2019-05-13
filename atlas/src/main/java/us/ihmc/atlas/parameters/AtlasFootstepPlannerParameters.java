@@ -28,12 +28,12 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double maxStepZ = 0.25;
    private double maxXYWiggle = 0.1;
    private double maxYawWiggle = 0.09;
-   private double minFootholdPercent = 0.7;
+   private double minFootholdPercent = 0.99;
    private double minStepLength = -0.6;
    private double minStepWidth = 0.0;
    private double minStepYaw = -0.5;
    private double minSurfaceIncline = 0.7853981633974483; // unused?
-   private double minXClearance = 0.3;
+   private double minXClearance = 0.22;
    private double minYClearance = 0.22;
    private double wiggleInsideDelta = 0.02;
    private double stepUpHeight   = 1.5;
@@ -54,44 +54,44 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 
    public AtlasFootstepPlannerParameters()
    {
-      Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
+//      Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
 
-      if (Files.exists(parametersPath))
-      {
-         File configurationFile = parametersPath.toFile();
-         FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
-
-         maxStepLength = filePropertyHelper.loadDoubleProperty("maxStepLength", maxStepLength);
-         maxStepWidth = filePropertyHelper.loadDoubleProperty("maxStepWidth", maxStepWidth);
-         minStepWidth = filePropertyHelper.loadDoubleProperty("minStepWidth", minStepWidth);
-         minStepLength = filePropertyHelper.loadDoubleProperty("minStepLength", minStepLength);
-         maxStepZ = filePropertyHelper.loadDoubleProperty("maxStepZ", maxStepZ);
-         minSurfaceIncline = filePropertyHelper.loadDoubleProperty("minSurfaceIncline", minSurfaceIncline);
-         maxStepYaw = filePropertyHelper.loadDoubleProperty("maxStepYaw", maxStepYaw);
-         minStepYaw = filePropertyHelper.loadDoubleProperty("minStepYaw", minStepYaw);
-         minFootholdPercent = filePropertyHelper.loadDoubleProperty("minFootholdPercent", minFootholdPercent);
-         minXClearance = filePropertyHelper.loadDoubleProperty("minXClearance", minXClearance);
-         minYClearance = filePropertyHelper.loadDoubleProperty("minYClearance", minYClearance);
-         cliffHeight = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner", cliffHeight);
-         cliffClearance = filePropertyHelper.loadDoubleProperty("cliffClearance", cliffClearance);
-         maxXYWiggle = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner", maxXYWiggle);
-         maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
-         wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
-
-         if (!printed)
-         {
-            printed = true;
-            LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
-         }
-      }
-      else
-      {
-         if (!printed)
-         {
-            printed = true;
-            LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
-         }
-      }
+//      if (Files.exists(parametersPath))
+//      {
+//         File configurationFile = parametersPath.toFile();
+//         FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
+//
+//         maxStepLength = filePropertyHelper.loadDoubleProperty("maxStepLength", maxStepLength);
+//         maxStepWidth = filePropertyHelper.loadDoubleProperty("maxStepWidth", maxStepWidth);
+//         minStepWidth = filePropertyHelper.loadDoubleProperty("minStepWidth", minStepWidth);
+//         minStepLength = filePropertyHelper.loadDoubleProperty("minStepLength", minStepLength);
+//         maxStepZ = filePropertyHelper.loadDoubleProperty("maxStepZ", maxStepZ);
+//         minSurfaceIncline = filePropertyHelper.loadDoubleProperty("minSurfaceIncline", minSurfaceIncline);
+//         maxStepYaw = filePropertyHelper.loadDoubleProperty("maxStepYaw", maxStepYaw);
+//         minStepYaw = filePropertyHelper.loadDoubleProperty("minStepYaw", minStepYaw);
+//         minFootholdPercent = filePropertyHelper.loadDoubleProperty("minFootholdPercent", minFootholdPercent);
+//         minXClearance = filePropertyHelper.loadDoubleProperty("minXClearance", minXClearance);
+//         minYClearance = filePropertyHelper.loadDoubleProperty("minYClearance", minYClearance);
+//         cliffHeight = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner", cliffHeight);
+//         cliffClearance = filePropertyHelper.loadDoubleProperty("cliffClearance", cliffClearance);
+//         maxXYWiggle = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner", maxXYWiggle);
+//         maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
+//         wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
+//
+//         if (!printed)
+//         {
+//            printed = true;
+//            LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
+//         }
+//      }
+//      else
+//      {
+//         if (!printed)
+//         {
+//            printed = true;
+//            LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
+//         }
+//      }
    }
 
    @Override
