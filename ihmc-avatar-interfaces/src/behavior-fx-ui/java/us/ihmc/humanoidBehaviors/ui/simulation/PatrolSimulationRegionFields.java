@@ -9,9 +9,11 @@ import java.util.Random;
 
 public class PatrolSimulationRegionFields
 {
+   public static final double CINDER_SLOPE_ANGLE = 15.0;
+   public static final double Z_STEP_UP_PER_ROW = 0.15;
    private static double cinderSquareSurfaceSize = 0.395;
    private static double cinderThickness = 0.145;
-   private static double topRegionHeight = 0.56 - cinderThickness;
+   private static double topRegionHeight = 5 * Z_STEP_UP_PER_ROW - cinderThickness;
    private static double superGridSize = cinderSquareSurfaceSize * 3;
    private static double topSquareSize = 20.0;
    private static int greenId = 6;
@@ -28,8 +30,8 @@ public class PatrolSimulationRegionFields
                                                          -0.03,
                                                          1.5,
                                                          0.0,
-                                                         Math.toRadians(15.0),
-                                                         Math.toRadians(15.0),
+                                                         Math.toRadians(CINDER_SLOPE_ANGLE),
+                                                         Math.toRadians(CINDER_SLOPE_ANGLE),
                                                          0.05,
                                                          false);
       return generator.getPlanarRegionsList();
@@ -93,26 +95,30 @@ public class PatrolSimulationRegionFields
    private static void generateSlope(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
       PlanarRegionsListExamples.generateCinderBlockSlope(generator,
-                                                         random, cinderSquareSurfaceSize, cinderThickness,
+                                                         random,
+                                                         cinderSquareSurfaceSize,
+                                                         cinderThickness,
                                                          3,
                                                          3,
-                                                         0.15,
+                                                         Z_STEP_UP_PER_ROW,
                                                          0.0,
                                                          0.0,
-                                                         Math.toRadians(15.0),
+                                                         Math.toRadians(CINDER_SLOPE_ANGLE),
                                                          0.0);
    }
 
    private static void generateCorner(Random random, PlanarRegionsListGenerator generator, double cinderSquareSurfaceSize, double cinderThickness)
    {
       PlanarRegionsListExamples.generateCinderBlockCornerSlope(generator,
-                                                               random, cinderSquareSurfaceSize, cinderThickness,
+                                                               random,
+                                                               cinderSquareSurfaceSize,
+                                                               cinderThickness,
                                                                3,
                                                                3,
-                                                               0.15,
+                                                               Z_STEP_UP_PER_ROW,
                                                                0.0,
                                                                0.0,
-                                                               Math.toRadians(15.0),
+                                                               Math.toRadians(CINDER_SLOPE_ANGLE),
                                                                0.0);
    }
 }
