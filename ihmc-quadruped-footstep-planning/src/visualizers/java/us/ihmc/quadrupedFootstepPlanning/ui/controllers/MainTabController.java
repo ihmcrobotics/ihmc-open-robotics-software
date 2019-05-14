@@ -25,6 +25,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
@@ -56,6 +57,8 @@ public class MainTabController
    private ComboBox<FootstepPlannerType> plannerType;
    @FXML
    private CheckBox acceptNewRegions;
+   @FXML
+   private CheckBox isPlanAdjustable;
    @FXML
    private CheckBox assumeFlatGround;
    @FXML
@@ -156,10 +159,24 @@ public class MainTabController
       }
 
       stepMessages.setIsExpressedInAbsoluteTime(false);
+      stepMessages.setAreStepsAdjustable(isPlanAdjustable.isSelected());
 
       if (verbose)
          PrintTools.info(this, "Sending step list...");
       messager.submitMessage(stepListMessageTopic, stepMessages);
+   }
+
+   @FXML
+   public void requestStopWalking()
+   {
+      messager.submitMessage(stepListMessageTopic, new QuadrupedTimedStepListMessage());
+      requestStanding();
+   }
+
+   private void requestStanding()
+   {
+      if (desiredSteppingStateNameTopic != null)
+         messager.submitMessage(desiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
    }
 
    @FXML
@@ -236,6 +253,7 @@ public class MainTabController
    private Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic;
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
+   private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -351,6 +369,11 @@ public class MainTabController
    public void setStepListMessageTopic(Topic<QuadrupedTimedStepListMessage> stepListMessageTopic)
    {
       this.stepListMessageTopic = stepListMessageTopic;
+   }
+
+   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic)
+   {
+      this.desiredSteppingStateNameTopic = desiredSteppingStateNameTopic;
    }
 
    public void bindControls()
@@ -603,7 +626,7 @@ public class MainTabController
 
       private final double frameDt = 0.005;
       // frames per call to handle()
-      final int playbackSpeed = 10;
+      final int playbackSpeed = 50;
       int playbackCounter = 0;
 
       // whether to show ghost robot

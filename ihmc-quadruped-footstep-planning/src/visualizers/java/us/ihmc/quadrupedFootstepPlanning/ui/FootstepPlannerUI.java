@@ -138,7 +138,7 @@ public class FootstepPlannerUI
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
-                                                                 GoalOrientationTopic, XGaitSettingsTopic);
+                                                                 GoalOrientationTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
                                                                        StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
                                                                        LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);

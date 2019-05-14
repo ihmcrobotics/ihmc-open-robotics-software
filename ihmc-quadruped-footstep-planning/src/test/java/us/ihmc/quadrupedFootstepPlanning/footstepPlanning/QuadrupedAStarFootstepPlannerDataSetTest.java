@@ -45,18 +45,18 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumStepReach()
+         public double getMaximumFrontStepReach()
          {
             return 0.7;
          }
 
-         public double getMaximumStepLength()
+         public double getMaximumFrontStepLength()
          {
             return 0.6;
          }
 
          @Override
-         public double getMinimumStepLength()
+         public double getMinimumFrontStepLength()
          {
             return -0.3;
          }

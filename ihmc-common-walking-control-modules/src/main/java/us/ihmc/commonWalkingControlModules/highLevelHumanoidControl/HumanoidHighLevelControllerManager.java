@@ -33,7 +33,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -55,7 +55,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
-   private final JointDesiredOutputListBasics lowLevelControllerOutput;
+   private final JointDesiredOutputList lowLevelControllerOutput;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
@@ -74,7 +74,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
                                              HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, JointDesiredOutputListBasics lowLevelControllerOutput)
+                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, JointDesiredOutputList lowLevelControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;

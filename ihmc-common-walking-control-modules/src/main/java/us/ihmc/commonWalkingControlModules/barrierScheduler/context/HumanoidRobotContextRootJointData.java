@@ -40,11 +40,6 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
       this.rootJointLinearAcceleration.set(src.rootJointLinearAcceleration);
    }
 
-   public void set(HumanoidRobotContextRootJointData other)
-   {
-      copyFrom(other);
-   }
-
    public void setRootJointOrientation(QuaternionReadOnly other)
    {
       this.rootJointOrientation.set(other);
@@ -163,35 +158,5 @@ public class HumanoidRobotContextRootJointData implements InPlaceCopyable<Humano
    public void getRootJointLinearAcceleration(Tuple3DBasics linearAccelerationToPack)
    {
       linearAccelerationToPack.set(rootJointLinearAcceleration);
-   }
-
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == this)
-      {
-         return true;
-      }
-      else if (obj instanceof HumanoidRobotContextRootJointData)
-      {
-         HumanoidRobotContextRootJointData other = (HumanoidRobotContextRootJointData) obj;
-         if (!rootJointOrientation.equals(other.rootJointOrientation))
-            return false;
-         if (!rootJointAngularVelocity.equals(other.rootJointAngularVelocity))
-            return false;
-         if (!rootJointAngularAcceleration.equals(other.rootJointAngularAcceleration))
-            return false;
-         if (!rootJointLocation.equals(other.rootJointLocation))
-            return false;
-         if (!rootJointLinearVelocity.equals(other.rootJointLinearVelocity))
-            return false;
-         if (!rootJointLinearAcceleration.equals(other.rootJointLinearAcceleration))
-            return false;
-         return true;
-      }
-      else
-      {
-         return false;
-      }
    }
 }

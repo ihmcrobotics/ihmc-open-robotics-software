@@ -48,17 +48,18 @@ public class FootstepPlan
       footsteps.addAll(other.footsteps);
    }
 
-   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, TimeInterval timeInterval)
+   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double groundClearance, TimeInterval timeInterval)
    {
-      return addFootstep(robotQuadrant, soleFramePoint, timeInterval.getStartTime(), timeInterval.getEndTime());
+      return addFootstep(robotQuadrant, soleFramePoint, timeInterval.getStartTime(), groundClearance, timeInterval.getEndTime());
    }
 
-   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double startTime, double endTime)
+   public QuadrupedTimedOrientedStep addFootstep(RobotQuadrant robotQuadrant, FramePoint3D soleFramePoint, double groundClearance, double startTime, double endTime)
    {
       QuadrupedTimedOrientedStep footstep = new QuadrupedTimedOrientedStep();
       footstep.setRobotQuadrant(robotQuadrant);
       footstep.setGoalPosition(soleFramePoint);
       footstep.getTimeInterval().setInterval(startTime, endTime);
+      footstep.setGroundClearance(groundClearance);
       footsteps.add(footstep);
       return footstep;
    }
