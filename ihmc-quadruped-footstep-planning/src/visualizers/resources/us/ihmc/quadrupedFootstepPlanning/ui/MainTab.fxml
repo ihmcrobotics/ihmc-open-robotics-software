@@ -44,8 +44,9 @@
                               <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
                               <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                              <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
-                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="1" />
+                               <CheckBox fx:id="isPlanAdjustable" text="Is plan adjustable" GridPane.columnIndex="3" GridPane.columnSpan="2"  />
+                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1"/>
+                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="2" />
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                               <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
