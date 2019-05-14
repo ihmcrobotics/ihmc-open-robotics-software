@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
@@ -46,6 +47,7 @@ public class UpDownExplorer
 
    }
 
+   private UpDownState candidateState = UpDownState.JUST_WENT_DOWN;
    private UpDownState state = UpDownState.JUST_WENT_DOWN;
 
    public UpDownExplorer(Messager messager, AtomicReference<Boolean> upDownExplorationEnabled,
@@ -106,11 +108,11 @@ public class UpDownExplorer
             UpDown foundUpOrDown = upDownFlatAreaFinder.getLastPlanUpDown();
             if (foundUpOrDown == UpDown.UP)
             {
-               state = UpDownState.JUST_WENT_UP;
+               candidateState = UpDownState.JUST_WENT_UP;
             }
             else
             {
-               state = UpDownState.JUST_WENT_DOWN;
+               candidateState = UpDownState.JUST_WENT_DOWN;
             }
 
          }
@@ -137,11 +139,23 @@ public class UpDownExplorer
          accumulatedTurnAmount += amountToTurn;
          newWaypoint.getPose().appendYawRotation(amountToTurn);
 
-         state = UpDownState.JUST_TURNED;
+         candidateState = UpDownState.JUST_TURNED;
       }
 
       waypointManager.publish();
       waypointManager.setNextFromIndex(0);
+   }
+
+   public void onPlanFinished(RemoteFootstepPlannerResult result)
+   {
+      if (result.isValidForExecution())
+      {
+         state = candidateState;
+      }
+      else
+      {
+         // TODO handle failed plan with upDownCenter
+      }
    }
 
    public boolean shouldTransitionFromPerceive()
