@@ -60,7 +60,13 @@ public class UpDownGoalGraphic
    {
       for (int i = 0; i < spheres.size(); i++)
       {
-         JavaFXGraphicTools.setNodeTransformFromPose(spheres.get(i), poses.get(i));
+         FramePose3D pose = poses.get(i);
+         if (Double.isNaN(pose.getZ()))
+         {
+            pose.setZ(0.0);
+         }
+
+         JavaFXGraphicTools.setNodeTransformFromPose(spheres.get(i), pose);
       }
    }
 

@@ -28,6 +28,9 @@ public class UpDownExplorer
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
    private TypedNotification<Optional<FramePose3D>> planNotification = new TypedNotification<>();
    private final AtomicReference<Double> exploreTurnAmount;
+
+   private double accumulatedTurnAmount = 0.0;
+
    private RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private ROS2Input<PlanarRegionsListMessage> planarRegionsList;
 
@@ -116,7 +119,19 @@ public class UpDownExplorer
       else // just went up
       {
          newWaypoint.getPose().set(midFeetZUpPose);
-         newWaypoint.getPose().appendYawRotation(Math.toRadians(exploreTurnAmount.get()));
+         double amountToTurn = Math.toRadians(exploreTurnAmount.get());
+
+         if (accumulatedTurnAmount > 0.0)
+         {
+            amountToTurn = -Math.abs(amountToTurn);
+         }
+         else
+         {
+            amountToTurn = Math.abs(amountToTurn);
+         }
+
+         accumulatedTurnAmount += amountToTurn;
+         newWaypoint.getPose().appendYawRotation(amountToTurn);
 
          state = UpDownState.JUST_TURNED;
       }
