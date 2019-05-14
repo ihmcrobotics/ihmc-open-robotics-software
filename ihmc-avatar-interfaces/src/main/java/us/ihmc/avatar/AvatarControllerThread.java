@@ -277,6 +277,10 @@ public class AvatarControllerThread
 
    public void read()
    {
+   }
+
+   public void run()
+   {
       runController.set(humanoidRobotContextData.getEstimatorRan());
       if (!runController.getValue())
       {
@@ -288,24 +292,7 @@ public class AvatarControllerThread
          HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, processedJointData);
          controllerTimestamp.set(humanoidRobotContextData.getTimestamp());
          controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
-      }
-      catch (Exception e)
-      {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_READ, e.getMessage()));
 
-         throw new RuntimeException(e);
-      }
-   }
-
-   public void run()
-   {
-      if (!runController.getValue())
-      {
-         return;
-      }
-
-      try
-      {
          if (firstTick.getBooleanValue())
          {
             robotController.initialize();
@@ -315,8 +302,10 @@ public class AvatarControllerThread
             }
             firstTick.set(false);
          }
+
          controllerTimer.startMeasurement();
          robotController.doControl();
+         humanoidRobotContextData.setControllerRan(true);
          controllerTimer.stopMeasurement();
       }
       catch (Exception e)
@@ -336,8 +325,6 @@ public class AvatarControllerThread
 
       try
       {
-         humanoidRobotContextData.setControllerRan(true);
-
          if (outputProcessor != null)
          {
             outputProcessor.processAfterController(controllerTimestamp.getLongValue());

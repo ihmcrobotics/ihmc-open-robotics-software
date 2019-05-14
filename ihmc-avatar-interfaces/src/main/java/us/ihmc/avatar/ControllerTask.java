@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotComm
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -22,6 +23,8 @@ public class ControllerTask extends HumanoidRobotControlTask
 
    private long lastStartTime;
 
+   private final MirroredYoVariableRegistry registry;
+
    public ControllerTask(AvatarControllerThread controllerThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
@@ -31,6 +34,8 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerTick = new YoLong("ControllerTick", controllerThread.getYoVariableRegistry());
       controllerDT = new YoDouble("ControllerDT", controllerThread.getYoVariableRegistry());
       controllerTimer = new YoDouble("ControllerTimer", controllerThread.getYoVariableRegistry());
+
+      registry = new MirroredYoVariableRegistry(controllerThread.getYoVariableRegistry());
    }
 
    @Override
@@ -63,6 +68,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       controllerThread.write();
+      // TODO: do the robot visualizer update here.
+      registry.updateMirror();
       masterResolver.resolveHumanoidRobotContextDataControllerToEstimator(controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
@@ -76,7 +83,7 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    public YoVariableRegistry getRegistry()
    {
-      return controllerThread.getYoVariableRegistry();
+      return registry;
    }
 
    @Override
