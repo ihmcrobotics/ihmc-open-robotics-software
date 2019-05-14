@@ -1,12 +1,18 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -32,6 +38,8 @@ public class HandTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<HandTrajectoryMessage> handTrajectoryPublisher;
    private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+   private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
+   private final ConcurrentListeningQueue<TaskspaceTrajectoryStatusMessage> taskSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 
    public HandTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
@@ -56,11 +64,13 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
+      createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
+      createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, taskSpaceTrajectoryStatus::put);
+
       handTrajectoryPublisher = createPublisherForController(HandTrajectoryMessage.class);
       stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
-   
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)
    {
       outgoingMessage = armTrajectoryMessage;
@@ -82,7 +92,33 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       {
          if (DEBUG)
             PrintTools.debug(this, robotSide + " HandTrajectoryBehavior setting isDone = true");
-         isDone.set(true);
+        // isDone.set(true);
+      }
+
+      /*
+       * if(jointSpaceTrajectoryStatus.get()!=null) {
+       * System.out.println("joint "+TrajectoryExecutionStatus.fromByte(
+       * jointSpaceTrajectoryStatus.get().getTrajectoryExecutionStatus())+
+       * "  "+jointSpaceTrajectoryStatus.get().joint_names_);
+       * if(TrajectoryExecutionStatus.fromByte(jointSpaceTrajectoryStatus.get().
+       * getTrajectoryExecutionStatus()) == TrajectoryExecutionStatus.COMPLETED)
+       * { //isDone.set(true); } }
+       */
+      
+      TaskspaceTrajectoryStatusMessage message;
+      while ((message = taskSpaceTrajectoryStatus.poll()) != null)
+      {
+         System.out.println(robotSide+" HandTrajectoryBehavior recieved the message: "+message.getEndEffectorNameAsString()+" " + TrajectoryExecutionStatus.fromByte(message.getTrajectoryExecutionStatus()));
+         String value = "r_hand";
+         if (RobotSide.fromByte(outgoingMessage.getRobotSide()) == RobotSide.LEFT)
+            value = "l_hand";
+         if (message.getEndEffectorNameAsString().equals(value)
+               && TrajectoryExecutionStatus.fromByte(message.getTrajectoryExecutionStatus()) == TrajectoryExecutionStatus.COMPLETED)
+         {
+            System.out.println(" HAND MOTION COMPLETE FOR " + message.getEndEffectorNameAsString());
+            isDone.set(true);
+         }
+
       }
 
       if (!hasPacketBeenSent.getBooleanValue() && (outgoingMessage != null))
@@ -190,6 +226,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
+      //System.out.println("isDone check "+robotSide+" "+RobotSide.fromByte(outgoingMessage.getRobotSide())+" " +isDone.getBooleanValue());
       return isDone.getBooleanValue();
    }
 
