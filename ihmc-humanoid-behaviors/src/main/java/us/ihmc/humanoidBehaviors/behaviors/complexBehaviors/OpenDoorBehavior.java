@@ -102,7 +102,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
 
       };
-      BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior, atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior, atlasPrimitiveActions.leftHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -218,7 +218,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, 10, point.getPosition(), point.getOrientation(),
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(side, 1, point.getPosition(), point.getOrientation(),
                                                                                                      CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
