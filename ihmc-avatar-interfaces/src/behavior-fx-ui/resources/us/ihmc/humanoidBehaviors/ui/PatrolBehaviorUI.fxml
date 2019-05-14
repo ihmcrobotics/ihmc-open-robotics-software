@@ -42,8 +42,8 @@
                         </CheckBox>
                      </children>
                   </HBox>
-                  <Label text="Turn amount" GridPane.rowIndex="3" />
-                  <Spinner fx:id="exploreTurnAmount" editable="true" maxWidth="80.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label text="Perceive duration" GridPane.rowIndex="3" />
+                  <Spinner fx:id="perceiveDuration" editable="true" maxWidth="80.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Button fx:id="cancelPlanning2" mnemonicParsing="false" onAction="#cancelPlanning2" text="Cancel Planning" GridPane.rowIndex="5" />
                   <BorderPane GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <left>
