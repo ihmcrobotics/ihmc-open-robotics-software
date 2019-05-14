@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.patrol;
 
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
@@ -57,6 +58,8 @@ public class PatrolBehaviorAPI
    public static final Topic<PatrolBehaviorState> CurrentState = topic("CurrentState");
    /** Output: to visualize up-down goal poses. */
    public static final Topic<UpDownResult> UpDownGoalPoses = topic("UpDownGoalPoses");
+   /** Output: to visualize up-down goal poses. */
+   public static final Topic<Point3D> UpDownCenter = topic("UpDownCenter");
 
    private static final <T> Topic<T> topic(String name)
    {

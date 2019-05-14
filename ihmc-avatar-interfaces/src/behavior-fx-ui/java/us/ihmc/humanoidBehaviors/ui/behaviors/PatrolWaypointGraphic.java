@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
-import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -10,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.SnappedPositionGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 
 public class PatrolWaypointGraphic extends Group implements PoseEditable
@@ -18,13 +17,13 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FramePose3D pose = new FramePose3D();
 
-   private final SnappedPositionGraphic snappedPositionGraphic;
+   private final PositionGraphic snappedPositionGraphic;
    private final OrientationGraphic orientationGraphic;
    private LabelGraphic labelGraphic;
 
    public PatrolWaypointGraphic(int index)
    {
-      snappedPositionGraphic = new SnappedPositionGraphic(Color.YELLOW);
+      snappedPositionGraphic = new PositionGraphic(Color.YELLOW, 0.05);
       orientationGraphic = new OrientationGraphic();
       labelGraphic = new LabelGraphic(String.valueOf(index));
 
@@ -47,7 +46,7 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
       updateGraphics();
    }
 
-   public SnappedPositionGraphic getSnappedPositionGraphic()
+   public PositionGraphic getSnappedPositionGraphic()
    {
       return snappedPositionGraphic;
    }

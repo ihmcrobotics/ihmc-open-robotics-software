@@ -1,15 +1,22 @@
 package us.ihmc.humanoidBehaviors.ui.editors;
 
+import com.sun.javafx.scene.CameraHelper;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.SubScene;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
+import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
@@ -19,7 +26,7 @@ import java.util.function.Consumer;
 
 public class SnappedPositionEditor
 {
-   private final Node sceneNode;
+   private final SubScene sceneNode;
    private final PrivateAnimationTimer positioningAnimationTimer;
 
    // these are necessary to keep a consistent reference
@@ -31,19 +38,23 @@ public class SnappedPositionEditor
    private final Notification mouseRightClicked = new Notification();
 
    private PositionEditable selectedGraphic;
-   private Consumer<FXUIStateTransitionTrigger> onExit;
+   private Consumer<FXUITrigger> onExit;
 
-   public SnappedPositionEditor(Node sceneNode)
+   public enum EditMode { REGION_SNAP, XY_PLANE}
+   private EditMode editMode = EditMode.REGION_SNAP;
+
+   public SnappedPositionEditor(SubScene sceneNode)
    {
       this.sceneNode = sceneNode;
 
       positioningAnimationTimer = new PrivateAnimationTimer(this::handlePositioning);
    }
 
-   public void edit(PositionEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   public void edit(EditMode editMode, PositionEditable selectedGraphic, Consumer<FXUITrigger> onExit)
    {
       this.selectedGraphic = selectedGraphic;
       this.onExit = onExit;
+      this.editMode = editMode;
 
       BehaviorUI.claimEditing(this);
 
@@ -71,16 +82,16 @@ public class SnappedPositionEditor
       if (mouseClickedMeshIntersection.hasNext())
       {
          LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.peek());
-         deactivate(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK);
+         deactivate(FXUITrigger.POSITION_LEFT_CLICK);
       }
 
       if (mouseRightClicked.poll())
       {
-         deactivate(FXUIStateTransitionTrigger.RIGHT_CLICK);
+         deactivate(FXUITrigger.RIGHT_CLICK);
       }
    }
 
-   private void deactivate(FXUIStateTransitionTrigger exitType)
+   private void deactivate(FXUITrigger exitType)
    {
       positioningAnimationTimer.stop();
 
@@ -131,23 +142,48 @@ public class SnappedPositionEditor
    private Point3D calculateMouseIntersection(MouseEvent event)
    {
       PickResult pickResult = event.getPickResult();
-      Node intersectedNode = pickResult.getIntersectedNode();
 
-      if (intersectedNode != null && intersectedNode instanceof MeshView) // TODO make sure it's a planar region
+      if (editMode == EditMode.REGION_SNAP)
       {
-         javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
-         javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
+         Node intersectedNode = pickResult.getIntersectedNode();
 
-         Point3D intersection = new Point3D();
-         intersection.setX(scenePoint.getX());
-         intersection.setY(scenePoint.getY());
-         intersection.setZ(scenePoint.getZ());
+         if (intersectedNode != null && intersectedNode instanceof MeshView) // TODO make sure it's a planar region
+         {
+            javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
+            javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
 
-         return intersection;
+            Point3D intersection = new Point3D();
+            intersection.setX(scenePoint.getX());
+            intersection.setY(scenePoint.getY());
+            intersection.setZ(scenePoint.getZ());
+
+            return intersection;
+         }
+         else
+         {
+            return null;
+         }
       }
-      else
+      else // XY_SNAP
       {
-         return null;
+         Point3D point1 = new Point3D();
+         point1.setX(sceneNode.getCamera().getLocalToSceneTransform().getTx());
+         point1.setY(sceneNode.getCamera().getLocalToSceneTransform().getTy());
+         point1.setZ(sceneNode.getCamera().getLocalToSceneTransform().getTz());
+
+         Point3D point2 = new Point3D();
+         javafx.geometry.Point3D pointOnProjectionPlane = CameraHelper.pickProjectPlane(sceneNode.getCamera(), event.getSceneX(), event.getSceneY());
+         point2.setX(pointOnProjectionPlane.getX());
+         point2.setY(pointOnProjectionPlane.getY());
+         point2.setZ(pointOnProjectionPlane.getZ());
+
+         Line3D line = new Line3D(point1, point2);
+
+         Point3DReadOnly pickPoint = new Point3D(0.0, 0.0, 0.0);
+         Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+         Point3D pickDirection = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, planeNormal, line.getPoint(), line.getDirection());
+
+         return pickDirection;
       }
    }
 }
