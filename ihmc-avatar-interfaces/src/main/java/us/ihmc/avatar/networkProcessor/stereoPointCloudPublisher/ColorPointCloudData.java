@@ -18,6 +18,18 @@ public class ColorPointCloudData
    private final Point3D[] pointCloud;
    private final int[] colors;
 
+   public ColorPointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
+   {
+      this.timestamp = timestamp;
+
+      if (scanPoints.length != scanColors.length)
+         throw new IllegalArgumentException("wrong size!");
+
+      this.pointCloud = scanPoints;
+      this.colors = scanColors;
+      this.numberOfPoints = scanPoints.length;
+   }
+
    public ColorPointCloudData(PointCloud2 rosPointCloud2, int maxSize)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
