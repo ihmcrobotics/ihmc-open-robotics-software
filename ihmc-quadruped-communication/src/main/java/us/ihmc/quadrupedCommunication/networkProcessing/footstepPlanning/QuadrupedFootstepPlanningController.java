@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -186,12 +187,27 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
-      FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getBodyPositionInWorld(), request.getBodyOrientationInWorld());
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(initialPose);
+
+      FootstepPlannerTargetType targetType = FootstepPlannerTargetType.fromByte(request.getStartTargetType());
+      if (targetType == FootstepPlannerTargetType.POSE_BETWEEN_FEET)
+      {
+         FramePose3D initialPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getBodyPositionInWorld(), request.getBodyOrientationInWorld());
+         start.setStartPose(initialPose);
+         start.setStartType(targetType);
+      }
+      else
+      {
+         start.setFootStartPosition(RobotQuadrant.FRONT_LEFT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getFrontLeftPositionInWorld()));
+         start.setFootStartPosition(RobotQuadrant.FRONT_RIGHT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getFrontRightPositionInWorld()));
+         start.setFootStartPosition(RobotQuadrant.HIND_LEFT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getHindLeftPositionInWorld()));
+         start.setFootStartPosition(RobotQuadrant.HIND_RIGHT, new FramePoint3D(ReferenceFrame.getWorldFrame(), request.getHindRightPositionInWorld()));
+         start.setStartType(FootstepPlannerTargetType.FOOTSTEPS);
+      }
+
       start.setInitialQuadrant(RobotQuadrant.fromByte(request.getInitialStepRobotQuadrant()));
       goal.setGoalPose(goalPose);
 
