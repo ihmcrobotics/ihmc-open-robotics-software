@@ -94,7 +94,7 @@ public class RemoteFootstepPlannerInterface
       SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
       if (decidePlanType(start, goal) == PlanType.CLOSE)
       {
-         settableFootstepPlannerParameters.setMaximumStepYaw(1.5); // enable quick turn arounds
+         settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
       }
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
