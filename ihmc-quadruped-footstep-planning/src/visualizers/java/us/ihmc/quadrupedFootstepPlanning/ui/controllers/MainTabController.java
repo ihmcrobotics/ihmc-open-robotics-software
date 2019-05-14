@@ -489,7 +489,7 @@ public class MainTabController
       QuadrantDependentList<Point3D> startFeetPositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint3D footPosition = new FramePoint3D(quadrupedReferenceFrames.getSoleZUpFrame(robotQuadrant));
+         FramePoint3D footPosition = new FramePoint3D(quadrupedReferenceFrames.getSoleFrame(robotQuadrant));
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          startFeetPositions.put(robotQuadrant, new Point3D(footPosition));
       }
