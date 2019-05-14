@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -50,8 +51,16 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegion(footPosition, planarRegionsList.getPlanarRegionsAsList(), constraintDataParameters);
+      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegion(footPosition, planarRegionsList.getPlanarRegionsAsList(), constraintDataHolder,
+                                                                                 constraintDataParameters);
 
+      return snapFromPointInWorld(footPosition, highestPlanarRegion);
+
+
+   }
+
+   private FootstepNodeSnapData snapFromPointInWorld(Point2DReadOnly footPosition, PlanarRegion highestPlanarRegion)
+   {
       if (highestPlanarRegion == null)
       {
          return FootstepNodeSnapData.emptyData();
@@ -63,11 +72,30 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
          if (snapTransform == null)
             return FootstepNodeSnapData.emptyData();
 
-         return doSnapAndWiggle(footPosition, highestPlanarRegion, snapTransform);
+
+         snapTransform = doSnapAndWiggle(footPosition, highestPlanarRegion, snapTransform);
+         if (snapTransform == null)
+            return FootstepNodeSnapData.emptyData();
+
+         Point3D pointInWorld = new Point3D(footPosition);
+         snapTransform.transform(pointInWorld);
+
+         PlanarRegion newRegion = PlanarRegionSnapTools.findHighestRegion(pointInWorld.getX(), pointInWorld.getY(), planarRegionsList.getPlanarRegionsAsList(),
+                                                                          constraintDataHolder, constraintDataParameters);
+
+         if (newRegion == null)
+            return FootstepNodeSnapData.emptyData();
+
+         if (!newRegion.equals(highestPlanarRegion))
+         {
+            return snapFromPointInWorld(new Point2D(pointInWorld), newRegion);
+         }
+
+         return new FootstepNodeSnapData(snapTransform);
       }
    }
 
-   private FootstepNodeSnapData doSnapAndWiggle(Point2DReadOnly footPosition, PlanarRegion regionToWiggleIn, RigidBodyTransform snapTransform)
+   private RigidBodyTransform doSnapAndWiggle(Point2DReadOnly footPosition, PlanarRegion regionToWiggleIn, RigidBodyTransform snapTransform)
    {
       Point3D footPosition3D = new Point3D(footPosition);
       regionToWiggleIn.transformFromWorldToLocal(footPosition3D);
@@ -76,13 +104,13 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       RigidBodyTransform wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footPositionInLocal, regionToWiggleIn);
 
       if (wiggleTransformLocalToLocal == null)
-         return FootstepNodeSnapData.emptyData();
+         return null;
 
       RigidBodyTransform wiggleTransformWorldToWorld = getWiggleTransformInWorldFrame(wiggleTransformLocalToLocal, regionToWiggleIn);
       RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform(wiggleTransformWorldToWorld);
       snapAndWiggleTransform.multiply(snapTransform);
 
-      return new FootstepNodeSnapData(snapAndWiggleTransform);
+      return snapAndWiggleTransform;
    }
 
 
@@ -94,18 +122,18 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       footholdPolygon.addVertex(footPositionInLocal);
       footholdPolygon.update();
 
-//      if (parameters.getProjectInsideUsingConvexHull())
-//      {
-//         return PolygonWiggler.findWiggleTransform(footholdPolygon, regionToWiggleInto.getConvexHull(), wiggleParameters);
-//      }
-//      else
-//      {
+      if (constraintDataParameters.projectInsideUsingConvexHull)
+      {
+         return PolygonWiggler.findWiggleTransform(footholdPolygon, regionToWiggleInto.getConvexHull(), wiggleParameters);
+      }
+      else
+      {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(footPositionInLocal, regionToWiggleInto.getConvexPolygons());
          if (containingRegion == null)
             return null;
          TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, containingRegion, constraintDataParameters);
          return PolygonWiggler.findWiggleTransform(footholdPolygon, containingRegion, wiggleParameters, indicesToExclude.toArray());
-//      }
+      }
    }
 
    private static RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal, PlanarRegion regionToWiggleInto)
