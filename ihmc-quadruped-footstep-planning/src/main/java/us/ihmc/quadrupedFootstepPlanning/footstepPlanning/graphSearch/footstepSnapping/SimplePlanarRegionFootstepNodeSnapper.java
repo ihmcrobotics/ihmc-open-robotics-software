@@ -75,6 +75,9 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)
    {
+      if (!constraintDataParameters.enforceTranslationLessThanGridCell)
+         return false;
+
       double maximumTranslationPerAxis = 0.5 * FootstepNode.gridSizeXY;
       return Math.abs(translation.getX()) > maximumTranslationPerAxis || Math.abs(translation.getY()) > maximumTranslationPerAxis;
    }
