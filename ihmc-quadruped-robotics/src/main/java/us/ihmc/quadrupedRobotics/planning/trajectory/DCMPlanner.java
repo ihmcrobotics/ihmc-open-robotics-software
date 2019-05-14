@@ -49,7 +49,7 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
-   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
+   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
