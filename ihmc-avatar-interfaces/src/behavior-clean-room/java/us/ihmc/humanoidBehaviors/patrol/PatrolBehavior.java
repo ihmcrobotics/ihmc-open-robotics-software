@@ -50,8 +50,6 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
  */
 public class PatrolBehavior
 {
-   public static final double TIME_TO_PERCEIVE = 20.0;
-
    public enum PatrolBehaviorState
    {
       /** Stop state that waits for or is triggered by a GoToWaypoint message */
@@ -97,7 +95,7 @@ public class PatrolBehavior
    private final AtomicReference<Boolean> swingOvers;
    private final AtomicReference<Boolean> planReviewEnabled;
    private final AtomicReference<Boolean> upDownExplorationEnabled;
-   private final AtomicReference<Double> exploreTurnAmount;
+   private final AtomicReference<Double> perceiveDuration;
 
    public PatrolBehavior(Messager messager, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -157,10 +155,10 @@ public class PatrolBehavior
       swingOvers = messager.createInput(SwingOvers, false);
       planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
       upDownExplorationEnabled = messager.createInput(UpDownExplorationEnabled, false);
-      exploreTurnAmount = messager.createInput(ExplorationTurnAmount, 180.0);
+      perceiveDuration = messager.createInput(PerceiveDuration, 20.0);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, upDownExplorationEnabled, exploreTurnAmount, planarRegionsList);
+      upDownExplorer = new UpDownExplorer(messager, planarRegionsList);
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -408,7 +406,7 @@ public class PatrolBehavior
       {
          return NAVIGATE;
       }
-      else if (timeInState > TIME_TO_PERCEIVE)
+      else if (timeInState > perceiveDuration.get())
       {
          return NAVIGATE;
       }

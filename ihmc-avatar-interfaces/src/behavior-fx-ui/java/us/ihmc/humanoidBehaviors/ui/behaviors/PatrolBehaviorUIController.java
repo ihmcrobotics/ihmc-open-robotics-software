@@ -52,7 +52,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private CheckBox operatorPlanReview;
    @FXML private CheckBox upDownExploration;
    @FXML private Button placeUpDownCenter;
-   @FXML private Spinner<Double> exploreTurnAmount;
+   @FXML private Spinner<Double> perceiveDuration;
    @FXML private Button replan;
    @FXML private Button sendPlan;
 
@@ -101,9 +101,8 @@ public class PatrolBehaviorUIController extends Group
          waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
          waypointIndex.setDisable(true);
-         exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 0.0, 1.0));
-         exploreTurnAmount.getValueFactory().valueProperty().addListener((ChangeListener) -> publishExploreTurnAmount());
-         exploreTurnAmount.setDisable(true);
+         perceiveDuration.setValueFactory(new DoubleSpinnerValueFactory(00.0, 500.0, 20.0, 1.0));
+         perceiveDuration.getValueFactory().valueProperty().addListener((ChangeListener) -> publishPerceiveDuration());
       });
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
       {
@@ -406,9 +405,9 @@ public class PatrolBehaviorUIController extends Group
       waypointManager.remove(lastId);
    }
 
-   public void publishExploreTurnAmount()
+   public void publishPerceiveDuration()
    {
-      behaviorMessager.submitMessage(ExplorationTurnAmount, exploreTurnAmount.getValue());
+      behaviorMessager.submitMessage(PerceiveDuration, perceiveDuration.getValue());
    }
 
    @FXML

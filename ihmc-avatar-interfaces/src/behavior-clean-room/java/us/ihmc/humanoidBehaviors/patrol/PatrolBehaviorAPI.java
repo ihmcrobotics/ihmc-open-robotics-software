@@ -47,7 +47,7 @@ public class PatrolBehaviorAPI
    /** Input: Enable/disable human plan review before walking. */
    public static final Topic<Boolean> UpDownExplorationEnabled = topic("UpDownExplorationEnabled");
    /** Input: Set the turn amount to find up or down. */
-   public static final Topic<Double> ExplorationTurnAmount = topic("ExplorationTurnAmount");
+   public static final Topic<Double> PerceiveDuration = topic("PerceiveDuration");
    /** Input: Enable/disable human plan review before walking. */
    public static final Topic<OperatorPlanReviewResult> PlanReviewResult = topic("PlanReviewResult");
    /** Input: For the UI to set the parameters published before walking. */

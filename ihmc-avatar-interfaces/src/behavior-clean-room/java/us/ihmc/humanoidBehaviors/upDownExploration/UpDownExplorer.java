@@ -35,11 +35,9 @@ public class UpDownExplorer
 {
    private static final double RADIAL_BOUNDARY = 1.0;
    private static final double FACING_CENTER_ALLOWED_ERROR = UpDownFlatAreaFinder.MAX_ANGLE_TO_SEARCH;
-   private static final double RANDOM_YAW = 0.8;
 
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
    private TypedNotification<Optional<FramePose3D>> upDownSearchNotification = new TypedNotification<>();
-   private final AtomicReference<Double> exploreTurnAmount;
    private final AtomicReference<Point3D> upDownCenter;
 
    private double accumulatedTurnAmount = 0.0;
@@ -58,11 +56,9 @@ public class UpDownExplorer
    private UpDownState state = UpDownState.TRAVERSING;
    private Notification plannerFailedOnLastRun = new Notification();
 
-   public UpDownExplorer(Messager messager, AtomicReference<Boolean> upDownExplorationEnabled,
-                         AtomicReference<Double> exploreTurnAmount,
+   public UpDownExplorer(Messager messager,
                          ROS2Input<PlanarRegionsListMessage> planarRegionsList)
    {
-      this.exploreTurnAmount = exploreTurnAmount;
       this.planarRegionsList = planarRegionsList;
 
       upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
