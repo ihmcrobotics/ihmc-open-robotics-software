@@ -64,12 +64,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
-   private FramePose3DReadOnly startPose;
    private FramePose3DReadOnly goalPose;
    private FootstepNode startNode;
    private FootstepNode goalNode;
@@ -111,7 +109,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                                         FootstepNodeSnapper snapper, FootstepNodeSnapper postProcessingSnapper, QuadrupedFootstepPlannerListener listener,
                                         YoVariableRegistry parentRegistry)
    {
-      this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
@@ -168,8 +165,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    public void setStart(QuadrupedFootstepPlannerStart start)
    {
       checkGoalType(start);
-
-      startPose = start.getTargetPose();
 
       startNode = getNodeFromTarget(start.getInitialQuadrant(), start);
       QuadrantDependentList<RigidBodyTransform> startNodeSnapTransforms = new QuadrantDependentList<>();
