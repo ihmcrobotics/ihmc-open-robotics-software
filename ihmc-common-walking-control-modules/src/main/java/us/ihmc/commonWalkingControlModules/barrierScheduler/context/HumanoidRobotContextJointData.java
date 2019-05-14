@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -16,57 +14,57 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRobotContextJointData>
 {
    private final HumanoidRobotContextRootJointData rootJointData = new HumanoidRobotContextRootJointData();
-   private final TDoubleArrayList jointQ = new TDoubleArrayList(50);
-   private final TDoubleArrayList jointQd = new TDoubleArrayList(50);
-   private final TDoubleArrayList jointQdd = new TDoubleArrayList(50);
-   private final TDoubleArrayList jointTau = new TDoubleArrayList(50);
+   private final double[] jointQ;
+   private final double[] jointQd;
+   private final double[] jointQdd;
+   private final double[] jointTau;
 
-   public HumanoidRobotContextJointData()
+   public HumanoidRobotContextJointData(int numberOfJoints)
    {
-   }
-
-   public HumanoidRobotContextJointData(int degreesOfFreedom)
-   {
-      for (int i = 0; i < degreesOfFreedom; i++)
-      {
-         addJoint(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-      }
-   }
-
-   public void clear()
-   {
-      jointQ.resetQuick();
-      jointQd.resetQuick();
-      jointQdd.resetQuick();
-      jointTau.resetQuick();
-   }
-
-   public void addJoint(double q, double qd, double qdd, double tau)
-   {
-      jointQ.add(q);
-      jointQd.add(qd);
-      jointQdd.add(qdd);
-      jointTau.add(tau);
+      jointQ = new double[numberOfJoints];
+      jointQd = new double[numberOfJoints];
+      jointQdd = new double[numberOfJoints];
+      jointTau = new double[numberOfJoints];
    }
 
    public void setJointQForIndex(int index, double value)
    {
-      this.jointQ.set(index, value);
+      this.jointQ[index] = value;
    }
 
    public void setJointQdForIndex(int index, double value)
    {
-      this.jointQd.set(index, value);
+      this.jointQd[index] = value;
    }
 
    public void setJointQddForIndex(int index, double value)
    {
-      this.jointQdd.set(index, value);
+      this.jointQdd[index] = value;
    }
 
    public void setJointTauForIndex(int index, double value)
    {
-      this.jointTau.set(index, value);
+      this.jointTau[index] = value;
+   }
+
+   public void setJointQs(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQ, 0, other.length);
+   }
+
+   public void setJointQds(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQd, 0, other.length);
+   }
+
+   public void setJointQdds(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointQdd, 0, other.length);
+   }
+
+   public void setJointTaus(double[] other)
+   {
+      System.arraycopy(other, 0, this.jointTau, 0, other.length);
    }
 
    public void setRootJointData(HumanoidRobotContextRootJointData other)
@@ -103,73 +101,59 @@ public class HumanoidRobotContextJointData implements InPlaceCopyable<HumanoidRo
       return rootJointData;
    }
 
+   public void getAndPackRootJointData(HumanoidRobotContextRootJointData dataToPack)
+   {
+      dataToPack.copyFrom(this.rootJointData);
+   }
+
+   public void getAndPackJointQ(double[] dataToPack)
+   {
+      System.arraycopy(this.jointQ, 0, dataToPack, 0, this.jointQ.length);
+   }
+
+   public void getAndPackJointQd(double[] dataToPack)
+   {
+      System.arraycopy(this.jointQd, 0, dataToPack, 0, this.jointQd.length);
+   }
+
+   public void getAndPackJointQdd(double[] dataToPack)
+   {
+      System.arraycopy(this.jointQdd, 0, dataToPack, 0, this.jointQdd.length);
+   }
+
+   public void getAndPackJointTau(double[] dataToPack)
+   {
+      System.arraycopy(this.jointTau, 0, dataToPack, 0, this.jointTau.length);
+   }
+
    public double getJointQForIndex(int index)
    {
-      return this.jointQ.get(index);
+      return this.jointQ[index];
    }
 
    public double getJointQdForIndex(int index)
    {
-      return this.jointQd.get(index);
+      return this.jointQd[index];
    }
 
    public double getJointQddForIndex(int index)
    {
-      return this.jointQdd.get(index);
+      return this.jointQdd[index];
    }
 
    public double getJointTauForIndex(int index)
    {
-      return this.jointTau.get(index);
-   }
-
-   public void set(HumanoidRobotContextJointData other)
-   {
-      copyFrom(other);
+      return this.jointTau[index];
    }
 
    @Override
    public void copyFrom(HumanoidRobotContextJointData src)
    {
-      copy(src.jointQ, jointQ);
-      copy(src.jointQd, jointQd);
-      copy(src.jointQdd, jointQdd);
-      copy(src.jointTau, jointTau);
+      System.arraycopy(src.jointQ, 0, this.jointQ, 0, this.jointQ.length);
+      System.arraycopy(src.jointQd, 0, this.jointQd, 0, this.jointQd.length);
+      System.arraycopy(src.jointQdd, 0, this.jointQdd, 0, this.jointQdd.length);
+      System.arraycopy(src.jointTau, 0, this.jointTau, 0, this.jointTau.length);
+
       this.rootJointData.copyFrom(src.rootJointData);
-   }
-
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == this)
-      {
-         return true;
-      }
-      else if (obj instanceof HumanoidRobotContextJointData)
-      {
-         HumanoidRobotContextJointData other = (HumanoidRobotContextJointData) obj;
-         if (!jointQ.equals(other.jointQ))
-            return false;
-         if (!jointQd.equals(other.jointQd))
-            return false;
-         if (!jointQdd.equals(other.jointQdd))
-            return false;
-         if (!jointTau.equals(other.jointTau))
-            return false;
-         if (!rootJointData.equals(other.rootJointData))
-            return false;
-         return true;
-      }
-      else
-      {
-         return false;
-      }
-   }
-
-   private static void copy(TDoubleList src, TDoubleArrayList dest)
-   {
-      dest.resetQuick();
-      for (int i = 0; i < src.size(); i++)
-         dest.add(src.get(i));
    }
 }
