@@ -49,6 +49,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,6 +77,9 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +95,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      cdr.write_type_7(data.getAreStepsAdjustable());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedTimedStepListMessage data, us.ihmc.idl.CDR cdr)
@@ -100,6 +107,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       data.setIsExpressedInAbsoluteTime(cdr.read_type_7());
       	
       controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      data.setAreStepsAdjustable(cdr.read_type_7());
+      	
 
    }
 
@@ -111,6 +120,7 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
       ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
+      ser.write_type_7("are_steps_adjustable", data.getAreStepsAdjustable());
    }
 
    @Override
@@ -121,6 +131,7 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
       ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
+      data.setAreStepsAdjustable(ser.read_type_7("are_steps_adjustable"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedTimedStepListMessage src, controller_msgs.msg.dds.QuadrupedTimedStepListMessage dest)

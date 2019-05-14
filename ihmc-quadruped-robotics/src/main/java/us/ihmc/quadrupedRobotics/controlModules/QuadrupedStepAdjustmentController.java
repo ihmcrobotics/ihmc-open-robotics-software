@@ -47,7 +47,9 @@ public class QuadrupedStepAdjustmentController
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
    private final DoubleParameter dcmErrorDeadbandForStepAdjustment = new DoubleParameter("dcmErrorDeadbandForStepAdjustment", registry, 0.0);
    private final BooleanParameter useTimeBasedStepAdjustment = new BooleanParameter("useTimeBasedStepAdjustment", registry, true);
-   private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
+   private final BooleanParameter allowStepAdjustment = new BooleanParameter("allowStepAdjustment", registry, true);
+
+   private final YoBoolean useStepAdjustment = new YoBoolean("useStepAdjustment", registry);
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
@@ -109,9 +111,12 @@ public class QuadrupedStepAdjustmentController
       recursionMultipliers.get(robotQuadrant).setToNaN();
    }
 
-   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition)
+   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition,
+                                                                  boolean stepPlanIsAdjustable)
    {
       adjustedActiveSteps.clear();
+
+      useStepAdjustment.set(stepPlanIsAdjustable && allowStepAdjustment.getValue());
 
       // compute step adjustment for ongoing steps (proportional to dcm tracking error)
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
