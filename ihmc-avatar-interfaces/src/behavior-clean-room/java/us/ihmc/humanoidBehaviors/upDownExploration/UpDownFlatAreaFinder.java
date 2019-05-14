@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,7 +31,7 @@ public class UpDownFlatAreaFinder
    private static final double LEVEL_EPSILON = 1e-3;
    private static final double HIGH_LOW_MINIMUM = 0.10;
    private static final double MINIMUM_AREA = 0.5 * 0.5; // square half meter
-   public static final double REQUIRED_FLAT_AREA_RADIUS = 0.35;
+   public static final double REQUIRED_FLAT_AREA_RADIUS = 0.30;
    public static final double MAX_NAVIGATION_DISTANCE = 4.0;
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
    public static final double ANGLE_STEP_SIZE = 0.05;
@@ -39,7 +40,6 @@ public class UpDownFlatAreaFinder
 
    private final Messager messager;
    private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
-   private final PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final UpDownResult upDownResultForVisualization = new UpDownResult(NUMBER_OF_VERTICES);
 
@@ -146,6 +146,7 @@ public class UpDownFlatAreaFinder
 
    private SingleAngleSearch searchAngle(double angle)
    {
+      PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
       polygonPoints.reset(midFeetZUpFrame);
       polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle)); // initial check step a bit out
       SingleAngleSearch resultType = STILL_SEARCHING;
@@ -154,7 +155,7 @@ public class UpDownFlatAreaFinder
          polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle));
          LogTools.trace("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
 
-         if (centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion())
+         if (centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints))
          {
             resultType = WAYPOINT_FOUND;
          }
@@ -171,34 +172,41 @@ public class UpDownFlatAreaFinder
 
          messager.submitMessage(PatrolBehaviorAPI.UpDownGoalPoses, upDownResultForVisualization);
          ThreadTools.sleepSeconds(0.02);
+
       }
       while (resultType == STILL_SEARCHING);
 
       return resultType;
    }
 
-   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion()
+   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints)
    {
+      boolean allPointsCollideAtLeastOnce = true;
+
       upDownResultForVisualization.setValid(false);
 
       // map points to their collisions
-      HashMap<FramePoint2D, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
+      HashMap<FramePoint2DReadOnly, TreeSet<Pair<PlanarRegion, Double>>> collisions = new HashMap<>();
       List<FramePoint2D> points = polygonPoints.getPoints();
       for (int i = 0; i < points.size(); i++)
       {
-         FramePoint2D point = points.get(i);
-         ReferenceFrame previousFrame = point.getReferenceFrame();
+         FramePoint2D point = new FramePoint2D(points.get(i));
          point.changeFrame(ReferenceFrame.getWorldFrame());
-         { // point frame changed block
-            TreeSet<Pair<PlanarRegion, Double>> singlePointCollisions = new TreeSet<>(Comparator.comparingDouble(o -> o.getRight()));
-            List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByVerticalLineIntersection(point);
 
-            if (collidedRegions == null || collidedRegions.isEmpty())
-            {
-               LogTools.trace("not every point collides once");
-               return false; // not every point collides once
-            }
+         TreeSet<Pair<PlanarRegion, Double>> singlePointCollisions = new TreeSet<>(Comparator.comparingDouble(o -> o.getRight()));
+         List<PlanarRegion> collidedRegions = planarRegionsList.findPlanarRegionsContainingPointByVerticalLineIntersection(point);
 
+         upDownResultForVisualization.getPoints().get(i).setX(point.getX());
+         upDownResultForVisualization.getPoints().get(i).setY(point.getY());
+
+         if (collidedRegions == null || collidedRegions.isEmpty())
+         {
+            LogTools.trace("not every point collides once");
+            allPointsCollideAtLeastOnce = false; // not every point collides once
+            upDownResultForVisualization.getPoints().get(i).setZ(0.0);
+         }
+         else
+         {
             for (PlanarRegion collidedRegion : collidedRegions)
             {
                singlePointCollisions.add(Pair.of(collidedRegion, collidedRegion.getPlaneZGivenXY(point.getX(), point.getY())));
@@ -206,12 +214,13 @@ public class UpDownFlatAreaFinder
 
             collisions.put(point, singlePointCollisions);
 
-            // pack 3D point for visualization
-            upDownResultForVisualization.getPoints().get(i).setX(point.getX());
-            upDownResultForVisualization.getPoints().get(i).setY(point.getY());
             upDownResultForVisualization.getPoints().get(i).setZ(singlePointCollisions.last().getRight());
-         } // point frame changed block
-         point.changeFrame(previousFrame);
+         }
+      }
+
+      if (allPointsCollideAtLeastOnce == false)
+      {
+         return false;
       }
 
       // find highest collision

@@ -54,6 +54,16 @@ public class PolygonPoints2D
       }
    }
 
+   public void changeFrame(ReferenceFrame referenceFrame)
+   {
+      centerPoint.changeFrame(referenceFrame);
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         points.get(i+ 1).changeFrame(referenceFrame);
+      }
+   }
+
    public void add(double x, double y)
    {
       for (FramePoint2D point : points)
@@ -70,5 +80,10 @@ public class PolygonPoints2D
    public List<FramePoint2D> getPoints()
    {
       return points;
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return centerPoint.getReferenceFrame();
    }
 }
