@@ -53,12 +53,14 @@ public class PlanarRegionSnapTools
       return null;
    }
 
-   public static PlanarRegion findHighestRegion(Point2DReadOnly point, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataParameters parameters)
+   public static PlanarRegion findHighestRegion(Point2DReadOnly point, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataHolder constraintDataHolder,
+                                                PlanarRegionConstraintDataParameters parameters)
    {
-      return findHighestRegion(point.getX(), point.getY(), planarRegionList, parameters);
+      return findHighestRegion(point.getX(), point.getY(), planarRegionList, constraintDataHolder, parameters);
    }
 
-   public static PlanarRegion findHighestRegion(double x, double y, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataParameters parameters)
+   public static PlanarRegion findHighestRegion(double x, double y, List<PlanarRegion> planarRegionList, PlanarRegionConstraintDataHolder constraintDataHolder,
+                                                PlanarRegionConstraintDataParameters parameters)
    {
       ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
       tempPolygon.addVertex(0.5 * FootstepNode.gridSizeXY, 0.5 * FootstepNode.gridSizeXY);
@@ -80,10 +82,23 @@ public class PlanarRegionSnapTools
       for (int i = 0; i < intersectingRegions.size(); i++)
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
-         if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
-            continue;
+         Vector3D projectionTranslation = projectPointIntoRegion(planarRegion, x, y, constraintDataHolder, parameters);
 
-         double height = planarRegion.getPlaneZGivenXY(x, y);
+         double height;
+         if(projectionTranslation.containsNaN())
+         {
+            // even if projection fails, remember highest region. this will be considered an obstacle
+            height = planarRegion.getPlaneZGivenXY(x, y);
+            if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+               continue;
+         }
+         else
+         {
+            height = planarRegion.getPlaneZGivenXY(x + projectionTranslation.getX(), y + projectionTranslation.getY());
+            if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x + projectionTranslation.getX(), y + projectionTranslation.getY()))
+               continue;
+         }
+
 
          if (height > highestPoint)
          {
