@@ -5,7 +5,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -31,7 +31,7 @@ public class ValkyrieRosControlOutputWriter implements DRCOutputProcessor, Contr
    }
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerCoreOutput)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerCoreOutput)
    {
       
    }

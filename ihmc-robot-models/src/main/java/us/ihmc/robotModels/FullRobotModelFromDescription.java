@@ -422,8 +422,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
       for(ForceSensorDescription sdfForceSensor : joint.getForceSensors())
       {
-         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransformToJoint());
-         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sensorFrame);
+         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransformToJoint());
          forceSensorDefinitions.add(forceSensorDefinition);
       }
 

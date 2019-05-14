@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
@@ -16,7 +16,7 @@ public class HumanoidRobotContextDataFactory
    protected final RequiredFactoryField<ForceSensorDataHolder> forceSensorDataHolder = new RequiredFactoryField<>("forceSensorDataHolder");
    protected final RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolder = new RequiredFactoryField<>("centerOfPressureDataHolder");
    protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
-   protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
+   protected final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
 
    public HumanoidRobotContextData createHumanoidRobotContextData()
    {
@@ -46,7 +46,7 @@ public class HumanoidRobotContextDataFactory
       this.robotMotionStatusHolder.set(value);
    }
 
-   public void setJointDesiredOutputList(LowLevelOneDoFJointDesiredDataHolder value)
+   public void setJointDesiredOutputList(JointDesiredOutputList value)
    {
       this.jointDesiredOutputList.set(value);
    }
