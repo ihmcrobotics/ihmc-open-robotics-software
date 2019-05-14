@@ -44,9 +44,19 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -83,9 +93,20 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPositionInWorld(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getBodyOrientationInWorld(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getFrontLeftPositionInWorld(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getFrontRightPositionInWorld(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getHindLeftPositionInWorld(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getHindRightPositionInWorld(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalPositionInWorld(), current_alignment);
 
@@ -118,8 +139,14 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
 
       cdr.write_type_9(data.getInitialStepRobotQuadrant());
 
+      cdr.write_type_9(data.getStartTargetType());
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBodyPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getBodyOrientationInWorld(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getFrontLeftPositionInWorld(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getFrontRightPositionInWorld(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getHindLeftPositionInWorld(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getHindRightPositionInWorld(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
       cdr.write_type_2(data.getPlannerRequestId());
@@ -141,8 +168,14 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
       	
       data.setInitialStepRobotQuadrant(cdr.read_type_9());
       	
+      data.setStartTargetType(cdr.read_type_9());
+      	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBodyPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getBodyOrientationInWorld(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getFrontLeftPositionInWorld(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getFrontRightPositionInWorld(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getHindLeftPositionInWorld(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getHindRightPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
       data.setPlannerRequestId(cdr.read_type_2());
@@ -164,9 +197,18 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("initial_step_robot_quadrant", data.getInitialStepRobotQuadrant());
+      ser.write_type_9("start_target_type", data.getStartTargetType());
       ser.write_type_a("body_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getBodyPositionInWorld());
 
       ser.write_type_a("body_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getBodyOrientationInWorld());
+
+      ser.write_type_a("front_left_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getFrontLeftPositionInWorld());
+
+      ser.write_type_a("front_right_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getFrontRightPositionInWorld());
+
+      ser.write_type_a("hind_left_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getHindLeftPositionInWorld());
+
+      ser.write_type_a("hind_right_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getHindRightPositionInWorld());
 
       ser.write_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
 
@@ -186,9 +228,18 @@ public class QuadrupedFootstepPlanningRequestPacketPubSubType implements us.ihmc
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setInitialStepRobotQuadrant(ser.read_type_9("initial_step_robot_quadrant"));
+      data.setStartTargetType(ser.read_type_9("start_target_type"));
       ser.read_type_a("body_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getBodyPositionInWorld());
 
       ser.read_type_a("body_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getBodyOrientationInWorld());
+
+      ser.read_type_a("front_left_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getFrontLeftPositionInWorld());
+
+      ser.read_type_a("front_right_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getFrontRightPositionInWorld());
+
+      ser.read_type_a("hind_left_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getHindLeftPositionInWorld());
+
+      ser.read_type_a("hind_right_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getHindRightPositionInWorld());
 
       ser.read_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
 
