@@ -28,10 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
@@ -244,6 +241,8 @@ public class MainTabController
    private Topic<Boolean> goalPositionEditModeEnabledTopic;
    private Topic<RobotQuadrant> initialSupportQuadrantTopic;
    private Topic<Point3D> startPositionTopic;
+   private Topic<FootstepPlannerTargetType> startTargetTypeTopic;
+   private Topic<QuadrantDependentList<Point3D>> startFeetPositionTopic;
    private Topic<Quaternion> startOrientationTopic;
    private Topic<Point3D> goalPositionTopic;
    private Topic<Quaternion> goalOrientationTopic;
@@ -329,7 +328,8 @@ public class MainTabController
    public void setStartGoalTopics(Topic<Boolean> editModeEnabledTopic, Topic<Boolean> startPositionEditModeEnabledTopic,
                                   Topic<Boolean> goalPositionEditModeEnabledTopic, Topic<RobotQuadrant> initialSupportQuadrantTopic,
                                   Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> goalPositionTopic,
-                                  Topic<Quaternion> goalOrientationTopic)
+                                  Topic<Quaternion> goalOrientationTopic, Topic<FootstepPlannerTargetType> startTargetTypeTopic,
+                                  Topic<QuadrantDependentList<Point3D>> startFeetPositionTopic)
    {
       this.editModeEnabledTopic = editModeEnabledTopic;
       this.startPositionEditModeEnabledTopic = startPositionEditModeEnabledTopic;
@@ -339,6 +339,8 @@ public class MainTabController
       this.startOrientationTopic = startOrientationTopic;
       this.goalPositionTopic = goalPositionTopic;
       this.goalOrientationTopic = goalOrientationTopic;
+      this.startTargetTypeTopic = startTargetTypeTopic;
+      this.startFeetPositionTopic = startFeetPositionTopic;
    }
 
    public void setAssumeFlatGroundTopic(Topic<Boolean> assumeFlatGroundTopic)
@@ -483,6 +485,17 @@ public class MainTabController
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       startPositionProperty.set(new Point3D(startPose.getPosition()));
       startRotationProperty.set(new Quaternion(startPose.getYaw(), 0.0, 0.0));
+
+      QuadrantDependentList<Point3D> startFeetPositions = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FramePoint3D footPosition = new FramePoint3D(quadrupedReferenceFrames.getSoleZUpFrame(robotQuadrant));
+         footPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         startFeetPositions.put(robotQuadrant, new Point3D(footPosition));
+      }
+
+      messager.submitMessage(startTargetTypeTopic, FootstepPlannerTargetType.FOOTSTEPS);
+      messager.submitMessage(startFeetPositionTopic, startFeetPositions);
    }
 
    /*
