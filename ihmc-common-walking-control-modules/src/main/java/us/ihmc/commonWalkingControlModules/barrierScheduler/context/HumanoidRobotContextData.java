@@ -1,16 +1,21 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
-import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>, Settable<HumanoidRobotContextData>
+public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>
 {
    /** Serves to synchronize the controller time to the estimator time. The estimator sets this, the controller reads it. */
    private long timestamp = Long.MIN_VALUE;
@@ -20,73 +25,63 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private boolean estimatorRan = false;
 
    private final HumanoidRobotContextJointData processedJointData;
+
    private final ForceSensorDataHolder forceSensorDataHolder;
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
-   private final LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
-   public HumanoidRobotContextData()
-   {
-      processedJointData = new HumanoidRobotContextJointData();
-      forceSensorDataHolder = new ForceSensorDataHolder();
-      centerOfPressureDataHolder = new CenterOfPressureDataHolder();
-      robotMotionStatusHolder = new RobotMotionStatusHolder();
-      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
-   }
+   private final ArrayList<RigidBodyBasics> robotFeet;
+   private final Map<String, FramePoint2D> copPoints = new HashMap<>();
 
-   public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
-                                   CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                   LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
+   protected HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
+                                      CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
+                                      JointDesiredOutputList jointDesiredOutputList)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
+
+      this.robotFeet = new ArrayList<>();
+      for (int i = 0; i < centerOfPressureDataHolder.getNumberOfBodiesWithCenterOfPressure(); i++)
+      {
+         robotFeet.add(centerOfPressureDataHolder.getRigidBody(i));
+      }
+
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.jointDesiredOutputList = jointDesiredOutputList;
-   }
 
-   public HumanoidRobotContextJointData getProcessedJointData()
-   {
-      return processedJointData;
-   }
-
-   public ForceSensorDataHolder getForceSensorDataHolder()
-   {
-      return forceSensorDataHolder;
-   }
-
-   public CenterOfPressureDataHolder getCenterOfPressureDataHolder()
-   {
-      return centerOfPressureDataHolder;
-   }
-
-   public RobotMotionStatusHolder getRobotMotionStatusHolder()
-   {
-      return robotMotionStatusHolder;
-   }
-
-   public LowLevelOneDoFJointDesiredDataHolder getJointDesiredOutputList()
-   {
-      return jointDesiredOutputList;
-   }
-
-   @Override
-   public void set(HumanoidRobotContextData other)
-   {
-      copyFrom(other);
+      for (int i = 0; i < robotFeet.size(); i++)
+      {
+         RigidBodyBasics foot = robotFeet.get(i);
+         copPoints.put(foot.getName(), new FramePoint2D());
+      }
    }
 
    @Override
    public void copyFrom(HumanoidRobotContextData src)
    {
       this.timestamp = src.timestamp;
-      this.controllerRan = src.controllerRan;
-      this.estimatorRan = src.estimatorRan;
-      this.processedJointData.set(src.processedJointData);
+
+      this.processedJointData.copyFrom(src.processedJointData);
+
       this.forceSensorDataHolder.set(src.forceSensorDataHolder);
-      this.centerOfPressureDataHolder.set(src.centerOfPressureDataHolder);
-      this.robotMotionStatusHolder.set(src.robotMotionStatusHolder);
-      this.jointDesiredOutputList.set(src.jointDesiredOutputList);
+
+      for (int i = 0; i < robotFeet.size(); i++)
+      {
+         RigidBodyBasics foot = robotFeet.get(i);
+         FramePoint2D copTmp = copPoints.get(foot.getName());
+
+         src.centerOfPressureDataHolder.getCenterOfPressure(copTmp, foot);
+         this.centerOfPressureDataHolder.setCenterOfPressure(copTmp, foot);
+      }
+
+      this.robotMotionStatusHolder.setCurrentRobotMotionStatus(src.robotMotionStatusHolder.getCurrentRobotMotionStatus());
+
+      for (int i = 0; i < this.jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         this.jointDesiredOutputList.getJointDesiredOutput(i).set(src.jointDesiredOutputList.getJointDesiredOutput(i));
+      }
    }
 
    public long getTimestamp()
@@ -117,39 +112,5 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    public boolean getEstimatorRan()
    {
       return estimatorRan;
-   }
-
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (obj == this)
-      {
-         return true;
-      }
-      else if (obj instanceof HumanoidRobotContextData)
-      {
-         HumanoidRobotContextData other = (HumanoidRobotContextData) obj;
-         if (timestamp != other.timestamp)
-            return false;
-         if (controllerRan ^ other.controllerRan)
-            return false;
-         if (estimatorRan ^ other.estimatorRan)
-            return false;
-         if (!processedJointData.equals(other.processedJointData))
-            return false;
-         if (!forceSensorDataHolder.equals(other.forceSensorDataHolder))
-            return false;
-         if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
-            return false;
-         if (!robotMotionStatusHolder.equals(other.robotMotionStatusHolder))
-            return false;
-         if (!jointDesiredOutputList.equals(other.jointDesiredOutputList))
-            return false;
-         return true;
-      }
-      else
-      {
-         return false;
-      }
    }
 }

@@ -7,7 +7,7 @@ import us.ihmc.robotics.math.filters.DelayedYoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
@@ -92,12 +92,12 @@ public class DRCSimulationOutputWriterForControllerThread implements DRCOutputPr
    }
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerOutput)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerOutput)
    {
 
       for (int i = 0; i < lowLevelControllerOutput.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         String jointName = lowLevelControllerOutput.getOneDoFJoint(i).getName();
+         String jointName = lowLevelControllerOutput.getJointName(i);
 
          OutputDataSet data = new OutputDataSet();
          data.rawJointTorque = new YoDouble("tau_desired_" + jointName, registry);

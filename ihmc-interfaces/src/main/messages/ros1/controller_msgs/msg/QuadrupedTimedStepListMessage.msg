@@ -11,4 +11,8 @@ bool is_expressed_in_absolute_time
 # Properties for queueing footstep lists.
 controller_msgs/QueueableMessage queueing_properties
 
+# Defines if the step list is adjustable
+# Field default value True
+bool are_steps_adjustable
+
 

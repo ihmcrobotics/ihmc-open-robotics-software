@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodePlanarRegionSnapAndWiggler;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.BodyPathHeuristics;
@@ -51,11 +52,10 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
 
       heuristics = new BodyPathHeuristics(parameters, this.bodyPathPlanner);
 
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
-//      FootstepNodeSnapper postProcessingSnapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing, false);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);
@@ -69,8 +69,8 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
-      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, expansion, footstepCost, postProcessingSnapper,
-                                                          null, registry);
+      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, expansion, footstepCost, snapper,
+                                                          postProcessingSnapper, null, registry);
 
       parentRegistry.addChild(registry);
    }

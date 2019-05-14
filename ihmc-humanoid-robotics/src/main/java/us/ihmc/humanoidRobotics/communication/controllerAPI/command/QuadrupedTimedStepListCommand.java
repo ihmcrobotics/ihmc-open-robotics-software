@@ -11,6 +11,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
 {
    private long sequenceId;
    private boolean isExpressedInAbsoluteTime;
+   private boolean isStepPlanAdjustable;
    private final RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = new RecyclingArrayList<>(30, QuadrupedTimedStepCommand.class);
 
    public QuadrupedTimedStepListCommand()
@@ -23,6 +24,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    {
       sequenceId = 0;
       isExpressedInAbsoluteTime = true;
+      isStepPlanAdjustable = true;
       stepCommands.clear();
       clearQueuableCommandVariables();
    }
@@ -34,6 +36,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
       sequenceId = message.getSequenceId();
 
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
+      isStepPlanAdjustable = message.getAreStepsAdjustable();
       List<QuadrupedTimedStepMessage> stepList = message.getQuadrupedStepList();
       if (stepList != null)
       {
@@ -51,6 +54,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
 
       sequenceId = other.sequenceId;
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
+      isStepPlanAdjustable = other.isStepPlanAdjustable;
       RecyclingArrayList<QuadrupedTimedStepCommand> otherFootsteps = other.getStepCommands();
       if (otherFootsteps != null)
       {
@@ -68,6 +72,11 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    public boolean isExpressedInAbsoluteTime()
    {
       return isExpressedInAbsoluteTime;
+   }
+
+   public boolean isStepPlanAdjustable()
+   {
+      return isStepPlanAdjustable;
    }
 
    public int getNumberOfSteps()
