@@ -28,7 +28,6 @@ import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
-import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -127,10 +126,10 @@ public class PatrolBehavior
       factory.getStateMap().get(PERCEIVE).setDoAction(this::doPerceiveStateAction);
       factory.addTransition(PERCEIVE, Lists.newArrayList(NAVIGATE, STOP), this::transitionFromPerceive);
       factory.getFactory().addStateChangedListener((from, to) ->
-                                                   {
-                                                      messager.submitMessage(CurrentState, to);
-                                                      LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
-                                                   });
+      {
+         messager.submitMessage(CurrentState, to);
+         LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+      });
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = factory.getFactory().build(STOP);
 

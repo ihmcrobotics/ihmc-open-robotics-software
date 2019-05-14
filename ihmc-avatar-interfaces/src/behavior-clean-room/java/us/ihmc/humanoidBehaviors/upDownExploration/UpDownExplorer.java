@@ -5,6 +5,7 @@ import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
@@ -15,6 +16,7 @@ import us.ihmc.tools.thread.TypedNotification;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
 
 /**
@@ -28,6 +30,7 @@ public class UpDownExplorer
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
    private TypedNotification<Optional<FramePose3D>> planNotification = new TypedNotification<>();
    private final AtomicReference<Double> exploreTurnAmount;
+   private final AtomicReference<Point3D> upDownCenter;
 
    private double accumulatedTurnAmount = 0.0;
 
@@ -57,6 +60,7 @@ public class UpDownExplorer
       upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.NO_STATE; });
+      upDownCenter = messager.createInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry()
