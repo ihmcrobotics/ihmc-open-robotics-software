@@ -1,20 +1,25 @@
 package us.ihmc.humanoidBehaviors.upDownExploration;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
@@ -28,70 +33,98 @@ import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownExplorati
  */
 public class UpDownExplorer
 {
+   private static final double RADIAL_BOUNDARY = 1.0;
+   private static final double FACING_CENTER_ALLOWED_ERROR = UpDownFlatAreaFinder.MAX_ANGLE_TO_SEARCH;
+   private static final double RANDOM_YAW = 0.8;
+
    private final UpDownFlatAreaFinder upDownFlatAreaFinder;
-   private TypedNotification<Optional<FramePose3D>> planNotification = new TypedNotification<>();
+   private TypedNotification<Optional<FramePose3D>> upDownSearchNotification = new TypedNotification<>();
    private final AtomicReference<Double> exploreTurnAmount;
    private final AtomicReference<Point3D> upDownCenter;
 
    private double accumulatedTurnAmount = 0.0;
+   private RobotSide turnDirection = RobotSide.LEFT;
 
-   private RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames;
    private ROS2Input<PlanarRegionsListMessage> planarRegionsList;
+   private Random random = new Random(System.nanoTime());
+   private FramePose3DReadOnly midFeetZUpPose;
 
    enum UpDownState
    {
-      NO_STATE,
-      JUST_WENT_UP,
-      JUST_WENT_DOWN,
-      JUST_TURNED,
-
+      TURNING,
+      TRAVERSING
    }
 
-   private UpDownState candidateState = UpDownState.JUST_WENT_DOWN;
-   private UpDownState state = UpDownState.JUST_WENT_DOWN;
+   private UpDownState state = UpDownState.TRAVERSING;
+   private Notification plannerFailedOnLastRun = new Notification();
 
    public UpDownExplorer(Messager messager, AtomicReference<Boolean> upDownExplorationEnabled,
                          AtomicReference<Double> exploreTurnAmount,
-                         RemoteSyncedHumanoidFrames remoteSyncedHumanoidFrames,
                          ROS2Input<PlanarRegionsListMessage> planarRegionsList)
    {
       this.exploreTurnAmount = exploreTurnAmount;
-      this.remoteSyncedHumanoidFrames = remoteSyncedHumanoidFrames;
       this.planarRegionsList = planarRegionsList;
 
       upDownFlatAreaFinder = new UpDownFlatAreaFinder(messager);
 
-      messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.NO_STATE; });
+      messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
       upDownCenter = messager.createInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
-   public void onNavigateEntry()
+   public void onNavigateEntry(HumanoidReferenceFrames humanoidReferenceFrames)
    {
       // TODO this should plan only if
 
-      if (shouldLookForUpDown())
+      FramePose3D midFeetZUpPose = new FramePose3D();
+      midFeetZUpPose.setFromReferenceFrame(humanoidReferenceFrames.getMidFeetZUpFrame());
+
+      state = decideNextAction(midFeetZUpPose);
+
+      if (state == UpDownState.TRAVERSING)
       {
-         planNotification = upDownFlatAreaFinder.upOrDownOnAThread(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames().getMidFeetZUpFrame(),
-                                                                   PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
+         upDownSearchNotification = upDownFlatAreaFinder.upOrDownOnAThread(humanoidReferenceFrames.getMidFeetZUpFrame(),
+                                                                           PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList.getLatest()));
       }
    }
 
-   private boolean shouldLookForUpDown()
+   private UpDownState decideNextAction(FramePose3DReadOnly midFeetZUpPose)
    {
-      return state == UpDownState.NO_STATE || state == UpDownState.JUST_WENT_DOWN || state == UpDownState.JUST_TURNED;
+      if (plannerFailedOnLastRun.poll())
+      {
+         LogTools.warn("Planner failed. Turning...");
+         return UpDownState.TURNING;
+      }
+
+      boolean isCloseToCenter = midFeetZUpPose.getPositionDistance(upDownCenter.get()) < RADIAL_BOUNDARY;
+
+      Vector3D robotToCenter = new Vector3D(upDownCenter.get());
+      robotToCenter.sub(midFeetZUpPose.getPosition());
+      double centerFacingYaw = Math.atan2(robotToCenter.getY(), robotToCenter.getX());
+      LogTools.debug("centerFacingYaw: {}", centerFacingYaw);
+
+      double robotYaw = midFeetZUpPose.getYaw();
+      LogTools.debug("robotYaw: {}", robotYaw);
+
+      double difference = AngleTools.computeAngleDifferenceMinusPiToPi(robotYaw, centerFacingYaw);
+      LogTools.debug("difference: {}", difference);
+
+      boolean isFacingCenter = Math.abs(difference) < FACING_CENTER_ALLOWED_ERROR;
+
+      LogTools.warn("isCloseToCenter {} || isFacingCenter {}", isCloseToCenter, isFacingCenter);
+      return isCloseToCenter || isFacingCenter ? UpDownState.TRAVERSING : UpDownState.TURNING;
    }
 
    public void poll()
    {
-      if (shouldLookForUpDown())
+      if (state == UpDownState.TRAVERSING)
       {
-         planNotification.poll();
+         upDownSearchNotification.poll();
       }
    }
 
    public boolean shouldTransitionToPlan()
    {
-      return !shouldLookForUpDown() || planNotification.hasNext();
+      return state == UpDownState.TURNING || upDownSearchNotification.hasNext();
    }
 
    public void onPlanEntry(FramePose3DReadOnly midFeetZUpPose, WaypointManager waypointManager)
@@ -99,77 +132,74 @@ public class UpDownExplorer
       waypointManager.clearWaypoints();
       Waypoint newWaypoint = waypointManager.appendNewWaypoint();
 
-      if (shouldLookForUpDown()) // going to what the updown found
+      if (state == UpDownState.TRAVERSING) // going to what the updown found
       {
-         if (planNotification.peek().isPresent()) // success
+         if (upDownSearchNotification.peek().isPresent()) // success
          {
-            newWaypoint.getPose().set(planNotification.peek().get());
-
-            UpDown foundUpOrDown = upDownFlatAreaFinder.getLastPlanUpDown();
-            if (foundUpOrDown == UpDown.UP)
-            {
-               candidateState = UpDownState.JUST_WENT_UP;
-            }
-            else
-            {
-               candidateState = UpDownState.JUST_WENT_DOWN;
-            }
-
+            newWaypoint.getPose().set(upDownSearchNotification.peek().get());
          }
          else
          {
-            // problem: assume doesn't happen
-            newWaypoint.getPose().set(midFeetZUpPose);
+            computeRandomTurn(midFeetZUpPose, newWaypoint);
          }
       }
-      else // just went up
+      else // if (state == UpDownState.TURNING)
       {
-         newWaypoint.getPose().set(midFeetZUpPose);
-         double amountToTurn = Math.toRadians(exploreTurnAmount.get());
-
-         if (accumulatedTurnAmount > 0.0)
-         {
-            amountToTurn = -Math.abs(amountToTurn);
-         }
-         else
-         {
-            amountToTurn = Math.abs(amountToTurn);
-         }
-
-         accumulatedTurnAmount += amountToTurn;
-         newWaypoint.getPose().appendYawRotation(amountToTurn);
-
-         candidateState = UpDownState.JUST_TURNED;
+         computeRandomTurn(midFeetZUpPose, newWaypoint);
       }
 
       waypointManager.publish();
       waypointManager.setNextFromIndex(0);
    }
 
+   private void computeRandomTurn(FramePose3DReadOnly midFeetZUpPose, Waypoint newWaypoint)
+   {
+      newWaypoint.getPose().set(midFeetZUpPose);
+
+      LogTools.debug("accumulatedTurnAmountBefore: {}", accumulatedTurnAmount);
+      double randomTurn = Math.PI / 4.0 + random.nextDouble() * (Math.PI / 4.0);
+
+      if (accumulatedTurnAmount >= 2.0 * Math.PI)
+      {
+         turnDirection = RobotSide.RIGHT;
+      }
+      else if (accumulatedTurnAmount <= -2.0 * Math.PI)
+      {
+         turnDirection = RobotSide.LEFT;
+      }
+
+      if (turnDirection == RobotSide.RIGHT)
+      {
+         randomTurn = -randomTurn;
+      }
+
+      LogTools.debug("amountToTurn: {}", randomTurn);
+
+      accumulatedTurnAmount += randomTurn;
+      LogTools.debug("accumulatedTurnAmountAfter: {}", accumulatedTurnAmount);
+      newWaypoint.getPose().appendYawRotation(randomTurn);
+   }
+
    public void onPlanFinished(RemoteFootstepPlannerResult result)
    {
-      if (result.isValidForExecution())
+      if (!result.isValidForExecution())
       {
-         state = candidateState;
+         plannerFailedOnLastRun.set();
       }
-      else
-      {
-         // TODO handle failed plan with upDownCenter
-      }
+   }
+
+   public void setMidFeetZUpPose(FramePose3DReadOnly midFeetZUpPose)
+   {
+      this.midFeetZUpPose = midFeetZUpPose;
    }
 
    public boolean shouldTransitionFromPerceive()
    {
-      return !shouldLookForUpDown();
+      return decideNextAction(midFeetZUpPose) == UpDownState.TURNING;
    }
 
    public void abortPlanning()
    {
       upDownFlatAreaFinder.abort();
-   }
-
-   public TypedNotification<Optional<FramePose3D>> getPlanNotification()
-   {
-      return planNotification;
    }
 }

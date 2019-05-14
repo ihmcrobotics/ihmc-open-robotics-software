@@ -101,8 +101,9 @@ public class PatrolBehaviorUIController extends Group
          waypointIndex.setValueFactory(new IntegerSpinnerValueFactory(-1, -1, -1, 1));
          waypointIndex.getValueFactory().valueProperty().setValue(-1);
          waypointIndex.setDisable(true);
-         exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 180.0, 1.0));
+         exploreTurnAmount.setValueFactory(new DoubleSpinnerValueFactory(-360.0, 360.0, 0.0, 1.0));
          exploreTurnAmount.getValueFactory().valueProperty().addListener((ChangeListener) -> publishExploreTurnAmount());
+         exploreTurnAmount.setDisable(true);
       });
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() ->
       {

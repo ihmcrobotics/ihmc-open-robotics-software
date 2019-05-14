@@ -160,7 +160,7 @@ public class PatrolBehavior
       exploreTurnAmount = messager.createInput(ExplorationTurnAmount, 180.0);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
-      upDownExplorer = new UpDownExplorer(messager, upDownExplorationEnabled, exploreTurnAmount, remoteSyncedHumanoidFrames, planarRegionsList);
+      upDownExplorer = new UpDownExplorer(messager, upDownExplorationEnabled, exploreTurnAmount, planarRegionsList);
       messager.registerTopicListener(CancelPlanning, object ->
       {
          cancelPlanning.set();
@@ -202,7 +202,7 @@ public class PatrolBehavior
    {
       if (upDownExplorationEnabled.get()) // find up-down if. setup the waypoint
       {
-         upDownExplorer.onNavigateEntry();
+         upDownExplorer.onNavigateEntry(remoteSyncedHumanoidFrames.pollHumanoidReferenceFrames());
       }
    }
 
@@ -243,7 +243,7 @@ public class PatrolBehavior
 
       FramePose3DReadOnly midFeetZUpPose = remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame);
 
-      if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getPlanNotification().hasNext())
+      if (upDownExplorationEnabled.get()) // TODO need this?? && upDownExplorer.getUpDownSearchNotification().hasNext())
       {
          upDownExplorer.onPlanEntry(midFeetZUpPose, waypointManager);
       }
@@ -391,6 +391,7 @@ public class PatrolBehavior
    private void doPerceiveStateAction(double timeInState)
    {
       pollInterrupts();
+      upDownExplorer.setMidFeetZUpPose(remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame));
    }
 
    private PatrolBehaviorState transitionFromPerceive(double timeInState)
