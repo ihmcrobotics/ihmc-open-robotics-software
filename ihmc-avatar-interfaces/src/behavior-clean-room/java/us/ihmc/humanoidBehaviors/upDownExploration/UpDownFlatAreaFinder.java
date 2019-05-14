@@ -146,7 +146,7 @@ public class UpDownFlatAreaFinder
 
    private SingleAngleSearch searchAngle(double angle)
    {
-      PolygonPoints2D polygonPoints = new PolygonPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
+      UpDownPolyonCheckPoints2D polygonPoints = new UpDownPolyonCheckPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
       polygonPoints.reset(midFeetZUpFrame);
       polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle)); // initial check step a bit out
       SingleAngleSearch resultType = STILL_SEARCHING;
@@ -179,7 +179,7 @@ public class UpDownFlatAreaFinder
       return resultType;
    }
 
-   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(PolygonPoints2D polygonPoints)
+   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(UpDownPolyonCheckPoints2D polygonPoints)
    {
       boolean allPointsCollideAtLeastOnce = true;
 

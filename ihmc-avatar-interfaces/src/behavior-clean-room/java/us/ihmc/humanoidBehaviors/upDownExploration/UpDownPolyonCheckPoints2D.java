@@ -19,14 +19,14 @@ import java.util.List;
  *
  * TODO add layers, like an onion
  */
-public class PolygonPoints2D
+public class UpDownPolyonCheckPoints2D
 {
    private final FramePoint2D centerPoint;
    private final ArrayList<FramePoint2D> points = new ArrayList<>();
    private final int numberOfVertices;
    private final double radius;
 
-   public PolygonPoints2D(int numberOfVertices, double radius)
+   public UpDownPolyonCheckPoints2D(int numberOfVertices, double radius)
    {
       this.numberOfVertices = numberOfVertices;
       this.radius = radius;
