@@ -58,6 +58,8 @@ public class MainTabController
    @FXML
    private CheckBox acceptNewRegions;
    @FXML
+   private CheckBox isPlanAdjustable;
+   @FXML
    private CheckBox assumeFlatGround;
    @FXML
    private Spinner<Double> timeout;
@@ -157,6 +159,7 @@ public class MainTabController
       }
 
       stepMessages.setIsExpressedInAbsoluteTime(false);
+      stepMessages.setAreStepsAdjustable(isPlanAdjustable.isSelected());
 
       if (verbose)
          PrintTools.info(this, "Sending step list...");
