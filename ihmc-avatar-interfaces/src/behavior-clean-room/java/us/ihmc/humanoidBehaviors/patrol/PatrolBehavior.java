@@ -258,6 +258,11 @@ public class PatrolBehavior
    {
       pollInterrupts();
       footstepPlanResultNotification.poll();
+
+      if (footstepPlanResultNotification.hasNext())
+      {
+         upDownExplorer.onPlanFinished(footstepPlanResultNotification.peek());
+      }
    }
 
    private PatrolBehaviorState transitionFromPlan(double timeInState)
