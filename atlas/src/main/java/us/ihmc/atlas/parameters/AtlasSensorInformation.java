@@ -1,13 +1,16 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -34,7 +37,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * PPS Parameters
     */
    private static final String MULTISENSE_SL_PPS_TOPIC = multisense_namespace + "/stamped_pps";
-
+   
    /**
     * Send robot data to ROS
     */
@@ -96,6 +99,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
    private static final String chestIMUSensor = "utorso_imu_sensor_chest";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
+   private static EnumMap<RobotTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(RobotTarget.class);
 
    /**
     * Stereo Parameters
@@ -171,6 +175,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
          pointCloudParameters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, MULTISENSE_STEREO_ID);
       }
 
+      setupHeadIMUFrames();
       cameraParameters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
@@ -186,6 +191,26 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 	   ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("head", "multisense/head_root", new RigidBodyTransform());
       staticTranformsForRos.add(headToHeadRootStaticTransform);
    }
+
+   private void setupHeadIMUFrames() {
+		for (RobotTarget target : RobotTarget.values()) {
+			RotationMatrix headIMUBasisWhenLevel;
+			if (target == RobotTarget.REAL_ROBOT) {
+				// each column is the unit vector of X,Y,Z axis in world frame
+				headIMUBasisWhenLevel = new RotationMatrix( 0, 0, 1,
+						                              0,  1, 0,
+						                             -1,  0, 0);
+
+			} else {
+				headIMUBasisWhenLevel = new RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+
+			}
+			headIMUFramesWhenLevel.put(target, ReferenceFrame .constructFrameWithUnchangingTransformToParent(
+							"head_imu", ReferenceFrame.getWorldFrame(),
+							new RigidBodyTransform(headIMUBasisWhenLevel, new Vector3D())));
+		}
+
+	}
 
    @Override
    public DRCRobotLidarParameters[] getLidarParameters()
@@ -310,11 +335,16 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       return isMultisenseHead;
    }
 
+
    @Override
-   public ReferenceFrame getHeadIMUFrameWhenLevel()
-   {
-      return null;
-   }
+   public ReferenceFrame getHeadIMUFrameWhenLevel() {
+	   return headIMUFramesWhenLevel.get(target);
+
+	}
+
+	public static EnumMap<RobotTarget, ReferenceFrame> getHeadIMUFramesWhenLevel() {
+		return headIMUFramesWhenLevel;
+	}
 
    @Override
    public SideDependentList<String> getFeetContactSensorNames()

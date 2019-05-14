@@ -21,16 +21,15 @@
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="176.0" prefWidth="1281.0">
          <children>
-            <SplitPane dividerPositions="0.4" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.4175136825645035, 0.8639562157935887" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="614.0">
                      <children>
                         <GridPane layoutX="23.0" layoutY="29.0">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="149.0" />
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="120.0" />
                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="132.0" />
-                              <ColumnConstraints />
                               <ColumnConstraints />
                               <ColumnConstraints />
                               <ColumnConstraints />
@@ -45,9 +44,9 @@
                               <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
                               <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                              <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
-                              <Region prefHeight="26.0" prefWidth="20.0" GridPane.columnIndex="5" GridPane.halignment="RIGHT" />
-                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="6" GridPane.columnSpan="1" />
+                               <CheckBox fx:id="isPlanAdjustable" text="Is plan adjustable" GridPane.columnIndex="3" GridPane.columnSpan="2"  />
+                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1"/>
+                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="2" />
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                               <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -60,7 +59,7 @@
                      </children>
                   </AnchorPane>
 
-                <AnchorPane minHeight="0.0" minWidth="0.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="174.0" prefWidth="561.0">
                      <children>
                         <Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Planner Status" textAlignment="CENTER" wrappingWidth="414.7294921875" />
                         <GridPane layoutX="10.0" layoutY="37.0">
@@ -88,25 +87,26 @@
                               <TextField fx:id="plannerStatus" layoutX="156.0" layoutY="42.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                            </children>
                         </GridPane>
-                     </children></AnchorPane>
+                     </children>
+                  </AnchorPane>
 
-                  <AnchorPane minHeight="0.0" minWidth="0.0">
+                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="308.0">
                       <children>
-                          <Text layoutX="46.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Step Dispatcher" textAlignment="CENTER" wrappingWidth="214.7294921875" />
                           <GridPane layoutX="10.0" layoutY="37.0">
                               <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="146.0" minWidth="10.0" prefWidth="150.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="125.0" prefWidth="125.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="125.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="150.0" prefWidth="150.0" />
+                                  <ColumnConstraints />
                               </columnConstraints>
                               <rowConstraints>
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
                               </rowConstraints>
+                              <children>
+                                  <Label layoutX="-13.0" layoutY="50.0" text="Step Dispatcher" textAlignment="CENTER" />
+                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.rowIndex="1" />
+                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#requestStopWalking" prefWidth="130.0" text="Stop Walking" GridPane.rowIndex="2" />
 
-                              <Button mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.halignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                              </children>
                           </GridPane>
                       </children></AnchorPane>
 

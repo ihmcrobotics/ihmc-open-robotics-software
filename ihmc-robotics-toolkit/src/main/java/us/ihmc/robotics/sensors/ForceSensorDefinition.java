@@ -1,43 +1,28 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
-public class ForceSensorDefinition implements Settable<ForceSensorDefinition>
+public class ForceSensorDefinition
 {
-   private String sensorName;
-   private RigidBodyBasics rigidBody;
-   private ReferenceFrame sensorFrame;
+   private final String sensorName;
+   private final String parentJointName;
+   private final RigidBodyBasics rigidBody;
 
-   public static ReferenceFrame createSensorFrame(String sensorName, RigidBodyBasics rigidBody, RigidBodyTransform transformFromSensorToParentJoint)
-   {
-      ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", frameAfterJoint, transformFromSensorToParentJoint);
-   }
+   private final RigidBodyTransform transformFromSensorToParentJoint;
+   private final ReferenceFrame sensorFrame;
 
-   public ForceSensorDefinition()
-   {
-   }
-
-   public ForceSensorDefinition(String sensorName, RigidBodyBasics rigidBody, ReferenceFrame sensorFrame)
-   {
-      set(sensorName, rigidBody, sensorFrame);
-   }
-
-   @Override
-   public void set(ForceSensorDefinition other)
-   {
-      set(other.sensorName, other.rigidBody, other.sensorFrame);
-   }
-
-   public void set(String sensorName, RigidBodyBasics rigidBody, ReferenceFrame sensorFrame)
+   public ForceSensorDefinition(String sensorName, RigidBodyBasics rigidBody, RigidBodyTransform transformFromSensorToParentJoint)
    {
       this.sensorName = sensorName;
       this.rigidBody = rigidBody;
-      this.sensorFrame = sensorFrame;
+      JointBasics parentJoint = rigidBody.getParentJoint();
+      this.parentJointName = parentJoint.getName();
+      this.transformFromSensorToParentJoint = new RigidBodyTransform(transformFromSensorToParentJoint);
+      ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
+      sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", frameAfterJoint, transformFromSensorToParentJoint);
    }
 
    public String getSensorName()
@@ -50,44 +35,42 @@ public class ForceSensorDefinition implements Settable<ForceSensorDefinition>
       return rigidBody;
    }
 
+   public String getParentJointName()
+   {
+      return parentJointName;
+   }
+
+   public void getTransformFromSensorToParentJoint(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(transformFromSensorToParentJoint);
+   }
+
    public ReferenceFrame getSensorFrame()
    {
       return sensorFrame;
    }
-
+   
    @Override
    public String toString()
    {
-      return "ForceSensorDefinition: " + sensorName + " attached to " + rigidBody.getName();
+      return "ForceSensorDefinition: " + sensorName + " attached to " + rigidBody.getName(); 
    }
-
+   
    @Override
    public int hashCode()
    {
-      return sensorName.hashCode();
+      return 17 + (31 * sensorName.hashCode()) + parentJointName.hashCode();
    }
-
+   
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(Object other)
    {
-      if (obj == this)
+      if(other instanceof ForceSensorDefinition)
       {
-         return true;
+         ForceSensorDefinition otherSensor = (ForceSensorDefinition) other;
+         return otherSensor.getSensorName().equals(getSensorName()) && otherSensor.getParentJointName().equals(getParentJointName());
       }
-      else if (obj instanceof ForceSensorDefinition)
-      {
-         ForceSensorDefinition other = (ForceSensorDefinition) obj;
-         if (!getSensorName().equals(other.getSensorName()))
-            return false;
-         if (rigidBody != other.rigidBody)
-            return false;
-         if (sensorFrame != other.sensorFrame)
-            return false;
-         return true;
-      }
-      else
-      {
-         return false;
-      }
+      
+      return false;
    }
 }
