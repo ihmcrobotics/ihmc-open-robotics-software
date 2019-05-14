@@ -268,9 +268,4 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    {
       return finalTurnProximity;
    }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> develop
 }
