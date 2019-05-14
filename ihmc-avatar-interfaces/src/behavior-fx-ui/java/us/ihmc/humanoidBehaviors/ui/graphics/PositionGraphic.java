@@ -6,17 +6,19 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
 
-public class SnappedPositionGraphic
+public class PositionGraphic implements PositionEditable
 {
    private final Sphere sphere;
    private final PhongMaterial material;
    private final FramePose3D pose = new FramePose3D();
 
-   public SnappedPositionGraphic(Color color)
+   public PositionGraphic(Color color, double radius)
    {
-      sphere = new Sphere(0.05);
+      sphere = new Sphere(radius);
       material = new PhongMaterial(color);
       sphere.setMaterial(material);
    }
@@ -34,5 +36,24 @@ public class SnappedPositionGraphic
    public Node getNode()
    {
       return sphere;
+   }
+
+   public void clear()
+   {
+      pose.getPosition().setToNaN();
+      update();
+   }
+
+   @Override
+   public void setPosition(Point3DReadOnly position)
+   {
+      pose.setPosition(position);
+      update();
+   }
+
+   @Override
+   public void setMouseTransparent(boolean transparent)
+   {
+      sphere.setMouseTransparent(transparent);
    }
 }

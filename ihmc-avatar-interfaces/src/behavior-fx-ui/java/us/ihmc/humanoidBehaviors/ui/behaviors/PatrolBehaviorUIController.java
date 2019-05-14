@@ -14,16 +14,20 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.PickResult;
+import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.UpDownGoalGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateMachine;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
+import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
+import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
@@ -47,6 +51,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML private CheckBox swingOverPlanarRegions;
    @FXML private CheckBox operatorPlanReview;
    @FXML private CheckBox upDownExploration;
+   @FXML private Button placeUpDownCenter;
    @FXML private Spinner<Double> exploreTurnAmount;
    @FXML private Button replan;
    @FXML private Button sendPlan;
@@ -57,12 +62,14 @@ public class PatrolBehaviorUIController extends Group
    private HashMap<Long, PatrolWaypointGraphic> waypointGraphics = new HashMap<>(); // map unique id to graphic
    private FootstepPlanGraphic footstepPlanGraphic;
    private UpDownGoalGraphic upDownGoalGraphic;
+   private PositionGraphic upDownCenterGraphic = new PositionGraphic(Color.AZURE, 0.03);
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
 
-   private FXUIStateMachine waypointPlacementStateMachine;
-   private FXUIStateMachine waypointInsertStateMachine;
+   private FXUIActionMap waypointPlacementActionMap;
+   private FXUIActionMap waypointInsertActionMap;
+   private FXUIActionMap upDownCenterPlacementActionMap;
 
    private int currentInsertIndex; // TODO this should be in extracted functionality
 
@@ -75,6 +82,8 @@ public class PatrolBehaviorUIController extends Group
 
       upDownGoalGraphic = new UpDownGoalGraphic();
       getChildren().addAll(upDownGoalGraphic.getNodes());
+      upDownCenterGraphic.clear();
+      getChildren().add(upDownCenterGraphic.getNode());
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
@@ -135,24 +144,24 @@ public class PatrolBehaviorUIController extends Group
                                                                   });
                                              });
 
-      waypointPlacementStateMachine = new FXUIStateMachine(trigger ->
+      waypointPlacementActionMap = new FXUIActionMap(trigger ->
       {
          placeWaypoints.setDisable(true);
          removeAllWaypointGraphics();
          waypointManager.clearWaypoints();
          goToNextWaypointPositionEdit();
       });
-      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
+      waypointPlacementActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
       {
          PatrolWaypointGraphic latestWaypoint = waypointGraphics.get(waypointManager.lastId());
          latestWaypoint.getOrientationGraphic().getNode().setVisible(true);
-         orientationYawEditor.edit(latestWaypoint, exitType -> waypointPlacementStateMachine.transition(exitType));
+         orientationYawEditor.edit(latestWaypoint, exitType -> waypointPlacementActionMap.triggerAction(exitType));
       });
-      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
+      waypointPlacementActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
          goToNextWaypointPositionEdit();
       });
-      waypointPlacementStateMachine.mapTransition(FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      waypointPlacementActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
       {
          LogTools.debug("Completed waypoint placement.");
          removeLastWaypoint();
@@ -160,27 +169,48 @@ public class PatrolBehaviorUIController extends Group
          placeWaypoints.setDisable(false);
       });
 
-      waypointInsertStateMachine = new FXUIStateMachine(trigger ->
+      waypointInsertActionMap = new FXUIActionMap(trigger ->
       {
          placeWaypoints.setDisable(true);
          goToNextInsertedWaypointPositionEdit();
       });
-      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.POSITION_LEFT_CLICK, trigger ->
+      waypointInsertActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
       {
          PatrolWaypointGraphic latestWaypoint = waypointGraphics.get(waypointManager.idFromIndex(currentInsertIndex));
          latestWaypoint.getOrientationGraphic().getNode().setVisible(true);
-         orientationYawEditor.edit(latestWaypoint, exitType -> waypointInsertStateMachine.transition(exitType));
+         orientationYawEditor.edit(latestWaypoint, exitType -> waypointInsertActionMap.triggerAction(exitType));
       });
-      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK, trigger ->
+      waypointInsertActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
          goToNextInsertedWaypointPositionEdit();
       });
-      waypointInsertStateMachine.mapTransition(FXUIStateTransitionTrigger.RIGHT_CLICK, trigger ->
+      waypointInsertActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
       {
          LogTools.debug("Completed waypoint insertion.");
          removeWaypointGraphic(currentInsertIndex);
          publishWaypointsToModule();
          placeWaypoints.setDisable(false);
+      });
+
+      upDownCenterPlacementActionMap = new FXUIActionMap(startAction ->
+      {
+         placeUpDownCenter.setDisable(true);
+         snappedPositionEditor.edit(EditMode.XY_PLANE, upDownCenterGraphic, exitType ->
+         {
+            upDownCenterPlacementActionMap.triggerAction(exitType);
+         });
+      });
+      upDownCenterPlacementActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
+      {
+         LogTools.debug("Place up-down center.");
+         behaviorMessager.submitMessage(UpDownCenter, new Point3D(upDownCenterGraphic.getPose().getPosition()));
+         placeUpDownCenter.setDisable(false);
+      });
+      upDownCenterPlacementActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
+      {
+         LogTools.debug("Aborted up-down center placement.");
+         upDownCenterGraphic.clear();
+         placeUpDownCenter.setDisable(false);
       });
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
@@ -191,9 +221,9 @@ public class PatrolBehaviorUIController extends Group
       PatrolWaypointGraphic waypointGraphic = createWaypointGraphic();
       LogTools.debug("Placing waypoint {}", waypointManager.size());
       waypointGraphics.values().forEach(waypoint -> waypoint.setMouseTransparent(true));
-      snappedPositionEditor.edit(waypointGraphic, exitType ->
+      snappedPositionEditor.edit(EditMode.REGION_SNAP, waypointGraphic, exitType ->
       {
-         waypointPlacementStateMachine.transition(exitType);
+         waypointPlacementActionMap.triggerAction(exitType);
          waypointGraphics.values().forEach(waypoint -> waypoint.setMouseTransparent(false));
       });
    }
@@ -205,9 +235,9 @@ public class PatrolBehaviorUIController extends Group
       PatrolWaypointGraphic insertedWaypoint = insertWaypointGraphic(currentInsertIndex);
       LogTools.debug("Inserting waypoint {}", waypointManager.size());
       waypointGraphics.values().forEach(waypoint -> waypoint.setMouseTransparent(true));
-      snappedPositionEditor.edit(insertedWaypoint, exitType ->
+      snappedPositionEditor.edit(EditMode.REGION_SNAP, insertedWaypoint, exitType ->
       {
-         waypointInsertStateMachine.transition(exitType);
+         waypointInsertActionMap.triggerAction(exitType);
          waypointGraphics.values().forEach(waypoint -> waypoint.setMouseTransparent(false));
       });
    }
@@ -218,6 +248,21 @@ public class PatrolBehaviorUIController extends Group
       {
          PickResult pickResult = event.getPickResult();
          Node intersectedNode = pickResult.getIntersectedNode();
+
+         if (upDownCenterGraphic.getNode() == intersectedNode)
+         {
+            if (event.getButton() == MouseButton.PRIMARY)
+            {
+               event.consume();
+               placeUpDownCenter();
+            }
+            else if (event.getButton() == MouseButton.MIDDLE) // remove
+            {
+               event.consume();
+               upDownCenterGraphic.clear();
+               behaviorMessager.submitMessage(UpDownCenter, new Point3D(upDownCenterGraphic.getPose().getPosition()));
+            }
+         }
 
          for (Long id : new ArrayList<>(waypointGraphics.keySet()))
          {
@@ -237,7 +282,7 @@ public class PatrolBehaviorUIController extends Group
                   int insertIndex = waypointManager.indexOfId(id);
                   LogTools.debug("Inserting patrol waypoint position: {}", insertIndex);
                   currentInsertIndex = insertIndex; // TODO avoid this global by extracting waypoint management
-                  waypointInsertStateMachine.start();
+                  waypointInsertActionMap.start();
                }
                else if (event.getButton() == MouseButton.MIDDLE) // delete
                {
@@ -267,7 +312,7 @@ public class PatrolBehaviorUIController extends Group
 
    private void editWaypoint(PatrolWaypointGraphic waypointToEdit)
    {
-      snappedPositionEditor.edit(waypointToEdit, exitType ->
+      snappedPositionEditor.edit(EditMode.REGION_SNAP, waypointToEdit, exitType ->
       {
          publishWaypointsToModule();
          placeWaypoints.setDisable(false);
@@ -368,7 +413,7 @@ public class PatrolBehaviorUIController extends Group
    @FXML
    public void placeWaypoints()
    {
-      waypointPlacementStateMachine.start();
+      waypointPlacementActionMap.start();
    }
 
    @FXML public void goToWaypoint()
@@ -421,5 +466,10 @@ public class PatrolBehaviorUIController extends Group
    {
       placeWaypoints.setDisable(upDownExploration.isSelected());
       behaviorMessager.submitMessage(UpDownExplorationEnabled, upDownExploration.isSelected());
+   }
+
+   @FXML public void placeUpDownCenter()
+   {
+      upDownCenterPlacementActionMap.start();
    }
 }

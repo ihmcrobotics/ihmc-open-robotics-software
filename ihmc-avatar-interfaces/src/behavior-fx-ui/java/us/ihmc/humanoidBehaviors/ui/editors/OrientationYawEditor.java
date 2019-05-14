@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIStateTransitionTrigger;
+import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
@@ -37,7 +37,7 @@ public class OrientationYawEditor
    private final Notification mouseRightClicked = new Notification();
 
    private PoseEditable selectedGraphic;
-   private Consumer<FXUIStateTransitionTrigger> onExit;
+   private Consumer<FXUITrigger> onExit;
 
    public OrientationYawEditor(SubScene sceneNode)
    {
@@ -46,7 +46,7 @@ public class OrientationYawEditor
       orientationAnimationTimer = new PrivateAnimationTimer(this::handleOrientation);
    }
 
-   public void edit(PoseEditable selectedGraphic, Consumer<FXUIStateTransitionTrigger> onExit)
+   public void edit(PoseEditable selectedGraphic, Consumer<FXUITrigger> onExit)
    {
       this.selectedGraphic = selectedGraphic;
       this.onExit = onExit;
@@ -77,16 +77,16 @@ public class OrientationYawEditor
       if (mouseClickedOrientation.hasNext())
       {
          LogTools.debug("Selected orientation is validated: {}", mouseClickedOrientation.peek());
-         deactivate(FXUIStateTransitionTrigger.ORIENTATION_LEFT_CLICK);
+         deactivate(FXUITrigger.ORIENTATION_LEFT_CLICK);
       }
 
       if (mouseRightClicked.poll())
       {
-         deactivate(FXUIStateTransitionTrigger.RIGHT_CLICK);
+         deactivate(FXUITrigger.RIGHT_CLICK);
       }
    }
 
-   private void deactivate(FXUIStateTransitionTrigger exitType)
+   private void deactivate(FXUITrigger exitType)
    {
       orientationAnimationTimer.stop();
 

@@ -25,7 +25,6 @@
                       <Spinner fx:id="waypointIndex" amountToStepBy="1" editable="true" initialValue="0" max="500" min="0" prefWidth="90.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                       <Button fx:id="stopWalking" onAction="#stopWalking" prefHeight="12.0" text="Stop" GridPane.rowIndex="6" />
                   <Label text="Up-Down Exploration" GridPane.rowIndex="2" />
-                  <CheckBox fx:id="upDownExploration" onAction="#upDownExploration" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <HBox GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <children>
                         <Label text="Loop:">
@@ -46,6 +45,18 @@
                   <Label text="Turn amount" GridPane.rowIndex="3" />
                   <Spinner fx:id="exploreTurnAmount" editable="true" maxWidth="80.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Button fx:id="cancelPlanning2" mnemonicParsing="false" onAction="#cancelPlanning2" text="Cancel Planning" GridPane.rowIndex="5" />
+                  <BorderPane GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <left>
+                        <CheckBox fx:id="upDownExploration" onAction="#upDownExploration" BorderPane.alignment="CENTER">
+                           <padding>
+                              <Insets right="10.0" />
+                           </padding>
+                        </CheckBox>
+                     </left>
+                     <right>
+                        <Button fx:id="placeUpDownCenter" mnemonicParsing="false" onAction="#placeUpDownCenter" text="Place Center" BorderPane.alignment="CENTER" />
+                     </right>
+                  </BorderPane>
                   </children>
                <columnConstraints>
                   <ColumnConstraints />
