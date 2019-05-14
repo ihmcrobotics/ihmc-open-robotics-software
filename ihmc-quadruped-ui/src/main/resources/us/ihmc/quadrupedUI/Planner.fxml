@@ -21,9 +21,9 @@
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="176.0" prefWidth="1281.0">
          <children>
-            <SplitPane dividerPositions="0.43471462079749806, 0.8491008600469117" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.44878811571540267, 0.8631743549648163" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="177.0" prefWidth="584.0">
                      <children>
                         <GridPane layoutX="23.0" layoutY="29.0">
                           <columnConstraints>
@@ -44,8 +44,9 @@
                               <Button fx:id="computePath" mnemonicParsing="false" onAction="#computePath" prefWidth="130.0" text="Compute Path" GridPane.halignment="CENTER" />
                               <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                               <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
-                              <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" />
-                              <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="1" />
+                               <CheckBox fx:id="isPlanAdjustable" text="Is plan adjustable" GridPane.columnIndex="3" GridPane.columnSpan="2"  />
+                               <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1"/>
+                               <Button onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="2" />
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                               <Label text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -96,11 +97,13 @@
                               </columnConstraints>
                               <rowConstraints>
                                   <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
                               </rowConstraints>
                               <children>
-                              <Label layoutX="-13.0" layoutY="50.0" text="Step Dispatcher" textAlignment="CENTER"/>
-                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.rowIndex="1"/>
-                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#requestStopWalking" prefWidth="130.0" text="Stop Walking" GridPane.rowIndex="2"/>
+                              <Label layoutX="-13.0" layoutY="50.0" text="Step Dispatcher" textAlignment="CENTER" />
+                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#sendPlan" prefWidth="130.0" text="Send Plan" GridPane.rowIndex="1" />
+                                  <Button layoutX="30.0" layoutY="63.0" mnemonicParsing="false" onAction="#requestStopWalking" prefWidth="130.0" text="Stop Walking" GridPane.rowIndex="2" />
 
                               </children>
                           </GridPane>
