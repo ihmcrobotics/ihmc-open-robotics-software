@@ -363,6 +363,7 @@ public class AvatarEstimatorThread
                outputWriter.writeBefore(nanoTime);
          }
 
+         // TODO: move this to the actual estimator thread and make it thread safe.
          sensorReader.read();
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
       }
@@ -402,6 +403,11 @@ public class AvatarEstimatorThread
          {
             forceSensorStateUpdater.updateForceSensorState();
          }
+
+         HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, processedJointData);
+         humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
+         humanoidRobotContextData.setTimestamp(estimatorTime.getLongValue());
+
          estimatorTimer.stopMeasurement();
       }
       catch (Throwable e)
@@ -426,14 +432,9 @@ public class AvatarEstimatorThread
             }
          }
 
-         HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, processedJointData);
-         humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
-
-         long startTimestamp = estimatorTime.getLongValue();
-         humanoidRobotContextData.setTimestamp(startTimestamp);
          if (robotVisualizer != null)
          {
-            robotVisualizer.update(startTimestamp);
+            robotVisualizer.update(estimatorTime.getLongValue());
          }
       }
       catch (Throwable e)
