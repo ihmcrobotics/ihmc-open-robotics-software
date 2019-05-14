@@ -86,6 +86,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -182,6 +186,12 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -255,6 +265,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMaxWalkingSpeedMultiplier());
 
+      cdr.write_type_7(data.getProjectInsideUsingConvexHullDuringExpansion());
+
+      cdr.write_type_7(data.getProjectInsideUsingConvexHullDuringPostProcessing());
+
       cdr.write_type_6(data.getProjectionInsideDistanceForExpansion());
 
       cdr.write_type_6(data.getProjectionInsideDistanceForPostProcessing());
@@ -319,6 +333,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMaxWalkingSpeedMultiplier(cdr.read_type_6());
       	
+      data.setProjectInsideUsingConvexHullDuringExpansion(cdr.read_type_7());
+      	
+      data.setProjectInsideUsingConvexHullDuringPostProcessing(cdr.read_type_7());
+      	
       data.setProjectionInsideDistanceForExpansion(cdr.read_type_6());
       	
       data.setProjectionInsideDistanceForPostProcessing(cdr.read_type_6());
@@ -362,6 +380,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("min_x_clearance_from_foot", data.getMinXClearanceFromFoot());
       ser.write_type_6("min_y_clearance_from_foot", data.getMinYClearanceFromFoot());
       ser.write_type_6("max_walking_speed_multiplier", data.getMaxWalkingSpeedMultiplier());
+      ser.write_type_7("project_inside_using_convex_hull_during_expansion", data.getProjectInsideUsingConvexHullDuringExpansion());
+      ser.write_type_7("project_inside_using_convex_hull_during_post_processing", data.getProjectInsideUsingConvexHullDuringPostProcessing());
       ser.write_type_6("projection_inside_distance_for_expansion", data.getProjectionInsideDistanceForExpansion());
       ser.write_type_6("projection_inside_distance_for_post_processing", data.getProjectionInsideDistanceForPostProcessing());
       ser.write_type_6("maximum_xy_wiggle_distance", data.getMaximumXyWiggleDistance());
@@ -397,6 +417,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMinXClearanceFromFoot(ser.read_type_6("min_x_clearance_from_foot"));
       data.setMinYClearanceFromFoot(ser.read_type_6("min_y_clearance_from_foot"));
       data.setMaxWalkingSpeedMultiplier(ser.read_type_6("max_walking_speed_multiplier"));
+      data.setProjectInsideUsingConvexHullDuringExpansion(ser.read_type_7("project_inside_using_convex_hull_during_expansion"));
+      data.setProjectInsideUsingConvexHullDuringPostProcessing(ser.read_type_7("project_inside_using_convex_hull_during_post_processing"));
       data.setProjectionInsideDistanceForExpansion(ser.read_type_6("projection_inside_distance_for_expansion"));
       data.setProjectionInsideDistanceForPostProcessing(ser.read_type_6("projection_inside_distance_for_post_processing"));
       data.setMaximumXyWiggleDistance(ser.read_type_6("maximum_xy_wiggle_distance"));

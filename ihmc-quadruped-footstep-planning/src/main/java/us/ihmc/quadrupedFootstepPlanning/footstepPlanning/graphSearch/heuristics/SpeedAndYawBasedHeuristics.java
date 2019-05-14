@@ -36,8 +36,6 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
 
       double stepHeuristicCost = 4.0 * parameters.getCostPerStep() * minSteps;
 
-      RigidBodyTransform nodeTransform = new RigidBodyTransform();
-      RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
 
       double heightCost = 0.0;
 
@@ -56,6 +54,9 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
             heightCost = 0.0;
             break;
          }
+
+         RigidBodyTransform nodeTransform = new RigidBodyTransform();
+         RigidBodyTransform goalNodeTransform = new RigidBodyTransform();
 
          FootstepNodeTools.getSnappedNodeTransformToWorld(nodeXIndex, nodeYIndex, nodeData.getSnapTransform(), nodeTransform);
          FootstepNodeTools.getSnappedNodeTransformToWorld(goalNodeXIndex, goalNodeYIndex, goalNodeData.getSnapTransform(), goalNodeTransform);
