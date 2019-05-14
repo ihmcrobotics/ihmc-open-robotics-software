@@ -1,19 +1,9 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 {
-   private static volatile boolean printed = false;
-
    private boolean wiggleIntoConvexHull = true;
    private boolean rejectIfCannotFullyWiggleInside = false;
    private boolean returnBestEffortPlan = false;
@@ -32,7 +22,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double minStepLength = -0.6;
    private double minStepWidth = 0.15;
    private double minStepYaw = -0.5;
-   private double minSurfaceIncline = 0.7853981633974483; // unused?
+   private double minSurfaceIncline = 0.7853981633974483;
    private double minXClearance = 0.22;
    private double minYClearance = 0.22;
    private double wiggleInsideDelta = 0.02;
@@ -41,8 +31,8 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double maxStepUpX     = 0.5;
    private double maxStepDownX   = 1.5;
    private double maxZPenetrationOnValleyRegions = Double.POSITIVE_INFINITY;
-   private double idealFootstepWidth = 0.22; // unused?
-   private double idealFootstepLength = 0.3; // unused?
+   private double idealFootstepWidth = 0.22;
+   private double idealFootstepLength = 0.3;
    private double bodyGroundClearance = 0.25;
    private double bodyBoxWidth = 0.7;
    private double bodyBoxHeight = 1.5;
@@ -54,44 +44,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 
    public AtlasFootstepPlannerParameters()
    {
-//      Path parametersPath = Paths.get(SettableFootstepPlannerParameters.CONFIGURATION_FILE_NAME).toAbsolutePath().normalize();
 
-//      if (Files.exists(parametersPath))
-//      {
-//         File configurationFile = parametersPath.toFile();
-//         FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
-//
-//         maxStepLength = filePropertyHelper.loadDoubleProperty("maxStepLength", maxStepLength);
-//         maxStepWidth = filePropertyHelper.loadDoubleProperty("maxStepWidth", maxStepWidth);
-//         minStepWidth = filePropertyHelper.loadDoubleProperty("minStepWidth", minStepWidth);
-//         minStepLength = filePropertyHelper.loadDoubleProperty("minStepLength", minStepLength);
-//         maxStepZ = filePropertyHelper.loadDoubleProperty("maxStepZ", maxStepZ);
-//         minSurfaceIncline = filePropertyHelper.loadDoubleProperty("minSurfaceIncline", minSurfaceIncline);
-//         maxStepYaw = filePropertyHelper.loadDoubleProperty("maxStepYaw", maxStepYaw);
-//         minStepYaw = filePropertyHelper.loadDoubleProperty("minStepYaw", minStepYaw);
-//         minFootholdPercent = filePropertyHelper.loadDoubleProperty("minFootholdPercent", minFootholdPercent);
-//         minXClearance = filePropertyHelper.loadDoubleProperty("minXClearance", minXClearance);
-//         minYClearance = filePropertyHelper.loadDoubleProperty("minYClearance", minYClearance);
-//         cliffHeight = filePropertyHelper.loadDoubleProperty("cliffHeightSpinner", cliffHeight);
-//         cliffClearance = filePropertyHelper.loadDoubleProperty("cliffClearance", cliffClearance);
-//         maxXYWiggle = filePropertyHelper.loadDoubleProperty("maxXYWiggleSpinner", maxXYWiggle);
-//         maxYawWiggle = filePropertyHelper.loadDoubleProperty("maxYawWiggleSpinner", maxYawWiggle);
-//         wiggleInsideDelta = filePropertyHelper.loadDoubleProperty("wiggleInsideDeltaSpinner", wiggleInsideDelta);
-//
-//         if (!printed)
-//         {
-//            printed = true;
-//            LogTools.info("Loaded footstep planner parameters from {}", parametersPath);
-//         }
-//      }
-//      else
-//      {
-//         if (!printed)
-//         {
-//            printed = true;
-//            LogTools.warn("Using defaults: Could not load parameters from {}", parametersPath);
-//         }
-//      }
    }
 
    @Override
@@ -315,4 +268,9 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    {
       return finalTurnProximity;
    }
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> develop
 }
