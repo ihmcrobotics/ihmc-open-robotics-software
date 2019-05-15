@@ -30,9 +30,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RemoteFootstepPlannerInterface
 {
-   private static final double CLOSE_PLAN_RADIUS = 1.0;
+   public static final double DEFAULT_TIMEOUT = 8.0;
 
    private volatile FootstepPlannerParameters footstepPlannerParameters;
+   private volatile double timeout;
 
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
@@ -42,11 +43,10 @@ public class RemoteFootstepPlannerInterface
 
    private final HashMap<Integer, TypedNotification<RemoteFootstepPlannerResult>> resultNotifications = new HashMap<>();
 
-   public enum PlanType { CLOSE, FAR }
-
    public RemoteFootstepPlannerInterface(Ros2Node ros2Node, DRCRobotModel robotModel, Messager messager)
    {
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      timeout = DEFAULT_TIMEOUT;
       if (messager != null)
       {
          messager.registerTopicListener(PatrolBehaviorAPI.PlannerParameters, parameters -> // TODO this class should not use patrol specific API
@@ -54,6 +54,7 @@ public class RemoteFootstepPlannerInterface
             SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
             parameters.packFootstepPlannerParameters(settableFootstepPlannerParameters);
             footstepPlannerParameters = settableFootstepPlannerParameters;
+            timeout = parameters.getTimeout();
          }); // updated from UI
       }
 
@@ -92,7 +93,7 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
       SettableFootstepPlannerParameters settableFootstepPlannerParameters = new SettableFootstepPlannerParameters(footstepPlannerParameters);
-      if (decidePlanType(start, goal) == PlanType.CLOSE)
+      if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
       {
          settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
       }
@@ -118,7 +119,7 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
       packet.getGoalOrientationInWorld().set(goal.getOrientation());
 
-      packet.setTimeout(5);
+      packet.setTimeout(timeout);
       packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
@@ -140,8 +141,8 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
    }
 
-   public PlanType decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
+   public PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
-      return start.getPositionDistance(goal) < CLOSE_PLAN_RADIUS ? PlanType.CLOSE : PlanType.FAR;
+      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 }

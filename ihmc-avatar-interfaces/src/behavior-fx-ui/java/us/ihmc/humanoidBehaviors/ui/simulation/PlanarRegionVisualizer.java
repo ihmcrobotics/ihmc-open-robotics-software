@@ -16,7 +16,7 @@ public class PlanarRegionVisualizer extends Application
       view3dFactory.addDefaultLighting();
 
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(PatrolSimulationRegionFields.createUpDownOpenHouseRegions());
+      regionsGraphic.generateMeshes(PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter());
       regionsGraphic.update();
 
       view3dFactory.addNodeToView(regionsGraphic);

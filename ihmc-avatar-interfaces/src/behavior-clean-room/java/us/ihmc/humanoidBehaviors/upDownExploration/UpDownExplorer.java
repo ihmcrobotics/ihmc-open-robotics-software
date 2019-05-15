@@ -155,19 +155,34 @@ public class UpDownExplorer
       LogTools.debug("accumulatedTurnAmountBefore: {}", accumulatedTurnAmount);
       double randomTurn = Math.PI / 4.0 + random.nextDouble() * (Math.PI / 4.0);
 
-      if (accumulatedTurnAmount >= 2.0 * Math.PI)
-      {
-         turnDirection = RobotSide.RIGHT;
-      }
-      else if (accumulatedTurnAmount <= -2.0 * Math.PI)
-      {
-         turnDirection = RobotSide.LEFT;
-      }
+      Vector3D robotToCenter = new Vector3D(upDownCenter.get());
+      robotToCenter.sub(midFeetZUpPose.getPosition());
+      double centerFacingYaw = Math.atan2(robotToCenter.getY(), robotToCenter.getX());
+      LogTools.debug("centerFacingYaw: {}", centerFacingYaw);
 
-      if (turnDirection == RobotSide.RIGHT)
+      double robotYaw = midFeetZUpPose.getYaw();
+      LogTools.debug("robotYaw: {}", robotYaw);
+
+      double positiveYawResult = robotYaw + randomTurn;
+      double negativeYawResult = robotYaw - randomTurn;
+      if (AngleTools.computeAngleDifferenceMinusPiToPi(robotYaw, negativeYawResult) < AngleTools.computeAngleDifferenceMinusPiToPi(robotYaw, positiveYawResult))
       {
          randomTurn = -randomTurn;
       }
+
+//      if (accumulatedTurnAmount >= 2.0 * Math.PI)
+//      {
+//         turnDirection = RobotSide.RIGHT;
+//      }
+//      else if (accumulatedTurnAmount <= -2.0 * Math.PI)
+//      {
+//         turnDirection = RobotSide.LEFT;
+//      }
+//
+//      if (turnDirection == RobotSide.RIGHT)
+//      {
+//         randomTurn = -randomTurn;
+//      }
 
       LogTools.debug("amountToTurn: {}", randomTurn);
 

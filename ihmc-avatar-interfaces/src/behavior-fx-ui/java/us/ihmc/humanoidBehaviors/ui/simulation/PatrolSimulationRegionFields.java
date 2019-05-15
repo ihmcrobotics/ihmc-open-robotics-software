@@ -9,8 +9,8 @@ import java.util.Random;
 
 public class PatrolSimulationRegionFields
 {
-   public static final double CINDER_SLOPE_ANGLE = 15.0;
-   public static final double Z_STEP_UP_PER_ROW = 0.15;
+   public static final double CINDER_SLOPE_ANGLE = 13.0;
+   public static final double Z_STEP_UP_PER_ROW = 0.10;
    private static double cinderSquareSurfaceSize = 0.395;
    private static double cinderThickness = 0.145;
    private static double topRegionHeight = 5 * Z_STEP_UP_PER_ROW - cinderThickness;
@@ -69,6 +69,66 @@ public class PatrolSimulationRegionFields
       generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
       return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList createUpDownFourHighWithFlatCenter()
+   {
+      Random random = new Random(8349829898174L);
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setId(greenId);
+      generator.addRectangle(topSquareSize, topSquareSize); // ground TODO form around terrain with no overlap?
+
+      generator.rotate(Math.PI/4, Axis.Z);
+
+      double xSize = 0.5;
+      double ySize = xSize + 2.0;
+      generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
+      addHighCorner(random, generator);
+      generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
+
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
+      addHighCorner(random, generator);
+      generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
+
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
+      addHighCorner(random, generator);
+      generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
+
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
+      addHighCorner(random, generator);
+      generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
+
+      return generator.getPlanarRegionsList();
+   }
+
+   private static void addHighCorner(Random random, PlanarRegionsListGenerator generator)
+   {
+      addTopFlatRegion(generator);
+
+      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generator.translate(2*superGridSize, -superGridSize, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(2*superGridSize, -superGridSize, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(2*superGridSize, -superGridSize, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generateSlope(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generator.translate(2*superGridSize, -superGridSize, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+
+      generator.translate(0.0, -superGridSize, 0.0);
+      generator.translate(3*superGridSize, 0.0, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(3*superGridSize, 0.0, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generator.translate(3*superGridSize, 0.0, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
+      generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
+      generator.translate(2*superGridSize, 0.0, 0.0);
+      generator.rotate(Math.PI/2, Axis.Z);
    }
 
    private static void addXFormationSlopes(Random random, PlanarRegionsListGenerator generator)
@@ -137,7 +197,7 @@ public class PatrolSimulationRegionFields
                                                                Z_STEP_UP_PER_ROW,
                                                                0.0,
                                                                0.0,
-                                                               Math.toRadians(CINDER_SLOPE_ANGLE),
+                                                               Math.toRadians(0.0),
                                                                0.0);
    }
 }

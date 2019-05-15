@@ -76,7 +76,7 @@ public class BehaviorUI
       mainPane.setCenter(subSceneWrappedInsidePane);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(false);
-      Scene mainScene = new Scene(mainPane, 1200, 800);
+      Scene mainScene = new Scene(mainPane, 1350, 900);
 
       primaryStage.setScene(mainScene);
    }

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.SettableFootstepPlannerParameters;
@@ -25,6 +25,7 @@ public class TunedFootstepPlannerParameters
    private double stepDownHeight    ;
    private double maxStepUpX        ;
    private double maxStepDownX      ;
+   private double timeout      ;
 
    public void setFromFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -272,5 +273,15 @@ public class TunedFootstepPlannerParameters
    public void setMaxStepDownX(double maxStepDownX)
    {
       this.maxStepDownX = maxStepDownX;
+   }
+
+   public double getTimeout()
+   {
+      return timeout;
+   }
+
+   public void setTimeout(double timeout)
+   {
+      this.timeout = timeout;
    }
 }

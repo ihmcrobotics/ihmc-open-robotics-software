@@ -18,6 +18,8 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="120.0" prefWidth="120.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="28.0" vgrow="SOMETIMES" />
@@ -70,6 +72,8 @@
             <Spinner fx:id="stepDownHeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="4" />
             <Spinner fx:id="maxStepUpX" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="6" />
             <Spinner fx:id="maxStepDownX" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+            <Label text="timeout" GridPane.columnIndex="6" />
+            <Spinner fx:id="timeout" editable="true" GridPane.columnIndex="7" />
          </children>
       </GridPane>
    </children>

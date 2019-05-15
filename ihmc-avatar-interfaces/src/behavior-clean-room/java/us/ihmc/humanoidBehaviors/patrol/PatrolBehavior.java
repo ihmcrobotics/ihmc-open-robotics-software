@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface.PlanType;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.PlanTravelDistance;
 import us.ihmc.humanoidBehaviors.tools.RemoteRobotControllerInterface;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidFrames;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
@@ -357,7 +357,7 @@ public class PatrolBehavior
              || remoteFootstepPlannerInterface.decidePlanType(
                    remoteSyncedHumanoidFrames.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame),
                    waypointManager.peekAfterNextPose())
-                == PlanType.FAR)
+                == PlanTravelDistance.FAR)
             {
                return PERCEIVE;
             }
