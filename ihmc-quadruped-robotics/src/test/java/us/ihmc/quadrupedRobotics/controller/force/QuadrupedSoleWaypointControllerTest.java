@@ -85,9 +85,14 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       FramePoint3D soleBasePosition = new FramePoint3D(referenceFrames.getSoleFrame(quadrantToTest));
       soleBasePosition.changeFrame(worldFrame);
 
-      runMovingFoot(quadrantToTest, soleBasePosition.getX(), soleBasePosition.getY(), soleBasePosition.getZ() + 0.05, 5.0, 0.02);
-
-      // todo touchdown
+      double epsilon = 0.05;
+      runMovingFoot(quadrantToTest, soleBasePosition.getX(), soleBasePosition.getY(), soleBasePosition.getZ() + 0.05, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX() + 0.1, soleBasePosition.getY(), soleBasePosition.getZ() + 0.1, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX() + 0.1, soleBasePosition.getY() + 0.1, soleBasePosition.getZ() + 0.1, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX() - 0.1, soleBasePosition.getY() - 0.1, soleBasePosition.getZ() + 0.1, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX() - 0.1, soleBasePosition.getY() + 0.1, soleBasePosition.getZ() + 0.1, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX() , soleBasePosition.getY(), soleBasePosition.getZ() + 0.05, 1.0, epsilon);
+      runMovingFoot(quadrantToTest, soleBasePosition.getX(), soleBasePosition.getY(), soleBasePosition.getZ() - 0.03, 1.0, epsilon);
    }
 
    private void runMovingFoot(RobotQuadrant robotQuadrant, double footPositionX, double footPositionY, double footPositionZ, double time, double translationDelta)
