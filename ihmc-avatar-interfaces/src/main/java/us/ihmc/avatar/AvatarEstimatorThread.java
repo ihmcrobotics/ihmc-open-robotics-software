@@ -326,10 +326,6 @@ public class AvatarEstimatorThread
       });
    }
 
-   public void initialize()
-   {
-   }
-
    public YoVariableRegistry getYoVariableRegistry()
    {
       return estimatorRegistry;

@@ -182,18 +182,6 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kdThumbJoint3);
    }
 
-   @Override
-   public boolean initialize()
-   {
-      return true;
-   }
-
-   @Override
-   public void execute()
-   {
-      runInternal();
-   }
-
    public void read()
    {
       handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
@@ -204,7 +192,8 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       }
    }
 
-   public void runInternal()
+   @Override
+   public void execute()
    {
       checkForNewHandDesiredConfigurationRequested();
 
