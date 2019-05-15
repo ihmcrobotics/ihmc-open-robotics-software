@@ -124,9 +124,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
-      transformToRegion.setTranslation(footInWorld);
       transformToRegion.setRotationYaw(footYaw);
-
 
 
       ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
@@ -146,6 +144,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       }
       tempPolygon.update();
       tempPolygon.applyTransform(transformToRegion);
+      tempPolygon.translate(footInWorld.getX(), footInWorld.getY());
 
       List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
 
