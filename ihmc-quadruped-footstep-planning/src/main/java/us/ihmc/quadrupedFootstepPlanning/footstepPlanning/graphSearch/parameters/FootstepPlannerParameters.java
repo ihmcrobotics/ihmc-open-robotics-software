@@ -35,6 +35,56 @@ public interface FootstepPlannerParameters
 
    double getMinimumStepWidth();
 
+   default double getMaximumFrontStepLengthWhenSteppingUp()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingUp()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingUp()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingUp()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingUp()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   default double getMaximumFrontStepLengthWhenSteppingDown()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingDown()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingDown()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingDown()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingDown()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
    double getMinimumStepYaw();
 
    double getMaximumStepYaw();
@@ -163,6 +213,16 @@ public interface FootstepPlannerParameters
       packet.setMaximumHindStepReach(getMaximumHindStepReach());
       packet.setMaximumHindStepLength(getMaximumHindStepLength());
       packet.setMinimumHindStepLength(getMinimumHindStepLength());
+      packet.setMaximumFrontStepLengthWhenSteppingUp(getMaximumFrontStepLengthWhenSteppingUp());
+      packet.setMinimumFrontStepLengthWhenSteppingUp(getMinimumFrontStepLengthWhenSteppingUp());
+      packet.setMaximumHindStepLengthWhenSteppingUp(getMaximumHindStepLengthWhenSteppingUp());
+      packet.setMinimumHindStepLengthWhenSteppingUp(getMinimumHindStepLengthWhenSteppingUp());
+      packet.setStepZForSteppingUp(getStepZForSteppingUp());
+      packet.setMaximumFrontStepLengthWhenSteppingDown(getMaximumFrontStepLengthWhenSteppingDown());
+      packet.setMinimumFrontStepLengthWhenSteppingDown(getMinimumFrontStepLengthWhenSteppingDown());
+      packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
+      packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
+      packet.setStepZForSteppingDown(getStepZForSteppingDown());
       packet.setMaximumStepWidth(getMaximumStepWidth());
       packet.setMinimumStepWidth(getMinimumStepWidth());
       packet.setMinimumStepYaw(getMinimumStepYaw());

@@ -86,11 +86,29 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -194,13 +212,40 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -252,6 +297,26 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       cdr.write_type_6(data.getMaximumHindStepLength());
 
       cdr.write_type_6(data.getMinimumHindStepLength());
+
+      cdr.write_type_6(data.getMaximumFrontStepLengthWhenSteppingUp());
+
+      cdr.write_type_6(data.getMinimumFrontStepLengthWhenSteppingUp());
+
+      cdr.write_type_6(data.getMaximumHindStepLengthWhenSteppingUp());
+
+      cdr.write_type_6(data.getMinimumHindStepLengthWhenSteppingUp());
+
+      cdr.write_type_6(data.getStepZForSteppingUp());
+
+      cdr.write_type_6(data.getMaximumFrontStepLengthWhenSteppingDown());
+
+      cdr.write_type_6(data.getMinimumFrontStepLengthWhenSteppingDown());
+
+      cdr.write_type_6(data.getMaximumHindStepLengthWhenSteppingDown());
+
+      cdr.write_type_6(data.getMinimumHindStepLengthWhenSteppingDown());
+
+      cdr.write_type_6(data.getStepZForSteppingDown());
 
       cdr.write_type_6(data.getMaximumStepWidth());
 
@@ -309,8 +374,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getMinimumLateralDistanceFromCliffBottoms());
 
-      cdr.write_type_6(data.getMinimumDistanceFromCliffTops());
-
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -328,6 +391,26 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMaximumHindStepLength(cdr.read_type_6());
       	
       data.setMinimumHindStepLength(cdr.read_type_6());
+      	
+      data.setMaximumFrontStepLengthWhenSteppingUp(cdr.read_type_6());
+      	
+      data.setMinimumFrontStepLengthWhenSteppingUp(cdr.read_type_6());
+      	
+      data.setMaximumHindStepLengthWhenSteppingUp(cdr.read_type_6());
+      	
+      data.setMinimumHindStepLengthWhenSteppingUp(cdr.read_type_6());
+      	
+      data.setStepZForSteppingUp(cdr.read_type_6());
+      	
+      data.setMaximumFrontStepLengthWhenSteppingDown(cdr.read_type_6());
+      	
+      data.setMinimumFrontStepLengthWhenSteppingDown(cdr.read_type_6());
+      	
+      data.setMaximumHindStepLengthWhenSteppingDown(cdr.read_type_6());
+      	
+      data.setMinimumHindStepLengthWhenSteppingDown(cdr.read_type_6());
+      	
+      data.setStepZForSteppingDown(cdr.read_type_6());
       	
       data.setMaximumStepWidth(cdr.read_type_6());
       	
@@ -385,8 +468,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMinimumLateralDistanceFromCliffBottoms(cdr.read_type_6());
       	
-      data.setMinimumDistanceFromCliffTops(cdr.read_type_6());
-      	
 
    }
 
@@ -400,6 +481,16 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("maximum_hind_step_reach", data.getMaximumHindStepReach());
       ser.write_type_6("maximum_hind_step_length", data.getMaximumHindStepLength());
       ser.write_type_6("minimum_hind_step_length", data.getMinimumHindStepLength());
+      ser.write_type_6("maximum_front_step_length_when_stepping_up", data.getMaximumFrontStepLengthWhenSteppingUp());
+      ser.write_type_6("minimum_front_step_length_when_stepping_up", data.getMinimumFrontStepLengthWhenSteppingUp());
+      ser.write_type_6("maximum_hind_step_length_when_stepping_up", data.getMaximumHindStepLengthWhenSteppingUp());
+      ser.write_type_6("minimum_hind_step_length_when_stepping_up", data.getMinimumHindStepLengthWhenSteppingUp());
+      ser.write_type_6("step_z_for_stepping_up", data.getStepZForSteppingUp());
+      ser.write_type_6("maximum_front_step_length_when_stepping_down", data.getMaximumFrontStepLengthWhenSteppingDown());
+      ser.write_type_6("minimum_front_step_length_when_stepping_down", data.getMinimumFrontStepLengthWhenSteppingDown());
+      ser.write_type_6("maximum_hind_step_length_when_stepping_down", data.getMaximumHindStepLengthWhenSteppingDown());
+      ser.write_type_6("minimum_hind_step_length_when_stepping_down", data.getMinimumHindStepLengthWhenSteppingDown());
+      ser.write_type_6("step_z_for_stepping_down", data.getStepZForSteppingDown());
       ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
       ser.write_type_6("minimum_step_width", data.getMinimumStepWidth());
       ser.write_type_6("minimum_step_yaw", data.getMinimumStepYaw());
@@ -428,7 +519,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms", data.getMinimumHindEndForwardDistanceFromCliffBottoms());
       ser.write_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms", data.getMinimumHindEndBackwardDistanceFromCliffBottoms());
       ser.write_type_6("minimum_lateral_distance_from_cliff_bottoms", data.getMinimumLateralDistanceFromCliffBottoms());
-      ser.write_type_6("minimum_distance_from_cliff_tops", data.getMinimumDistanceFromCliffTops());
    }
 
    @Override
@@ -441,6 +531,16 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMaximumHindStepReach(ser.read_type_6("maximum_hind_step_reach"));
       data.setMaximumHindStepLength(ser.read_type_6("maximum_hind_step_length"));
       data.setMinimumHindStepLength(ser.read_type_6("minimum_hind_step_length"));
+      data.setMaximumFrontStepLengthWhenSteppingUp(ser.read_type_6("maximum_front_step_length_when_stepping_up"));
+      data.setMinimumFrontStepLengthWhenSteppingUp(ser.read_type_6("minimum_front_step_length_when_stepping_up"));
+      data.setMaximumHindStepLengthWhenSteppingUp(ser.read_type_6("maximum_hind_step_length_when_stepping_up"));
+      data.setMinimumHindStepLengthWhenSteppingUp(ser.read_type_6("minimum_hind_step_length_when_stepping_up"));
+      data.setStepZForSteppingUp(ser.read_type_6("step_z_for_stepping_up"));
+      data.setMaximumFrontStepLengthWhenSteppingDown(ser.read_type_6("maximum_front_step_length_when_stepping_down"));
+      data.setMinimumFrontStepLengthWhenSteppingDown(ser.read_type_6("minimum_front_step_length_when_stepping_down"));
+      data.setMaximumHindStepLengthWhenSteppingDown(ser.read_type_6("maximum_hind_step_length_when_stepping_down"));
+      data.setMinimumHindStepLengthWhenSteppingDown(ser.read_type_6("minimum_hind_step_length_when_stepping_down"));
+      data.setStepZForSteppingDown(ser.read_type_6("step_z_for_stepping_down"));
       data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
       data.setMinimumStepWidth(ser.read_type_6("minimum_step_width"));
       data.setMinimumStepYaw(ser.read_type_6("minimum_step_yaw"));
@@ -469,7 +569,6 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMinimumHindEndForwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms"));
       data.setMinimumHindEndBackwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms"));
       data.setMinimumLateralDistanceFromCliffBottoms(ser.read_type_6("minimum_lateral_distance_from_cliff_bottoms"));
-      data.setMinimumDistanceFromCliffTops(ser.read_type_6("minimum_distance_from_cliff_tops"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket dest)
