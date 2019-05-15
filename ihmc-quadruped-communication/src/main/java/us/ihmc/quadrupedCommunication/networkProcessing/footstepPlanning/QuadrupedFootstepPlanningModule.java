@@ -90,8 +90,6 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processVisibilityGraphParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
-                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
    private void processRobotTimestamp(long timestamp)
@@ -146,12 +144,6 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processXGaitSettingsPacket(packet);
-   }
-
-   private void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processPlanarRegionsListMessage(message);
    }
 
    @Override

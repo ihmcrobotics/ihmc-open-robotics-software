@@ -76,8 +76,8 @@ public class ParameterLoaderHelper
       {
          String message = "I think something is off in your parameter file.";
          String additionalInfo = "Parameters in registry: " + registry.getAllParameters().size() + "\n" +
-                                 "Parameters using their default value: " + defaultParameters.size() + "\n" +
-                                 "Parameters in XML with no match: " + unmatchedParameters.size();
+               "Parameters using their default value: " + defaultParameters.size() + "\n" +
+               "Parameters in XML with no match: " + unmatchedParameters.size();
          Skully.say(message, additionalInfo);
       }
 

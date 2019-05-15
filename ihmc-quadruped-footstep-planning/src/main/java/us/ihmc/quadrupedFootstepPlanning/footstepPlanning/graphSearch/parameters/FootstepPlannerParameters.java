@@ -78,6 +78,10 @@ public interface FootstepPlannerParameters
     */
    double getProjectInsideDistanceForPostProcessing();
 
+   boolean getProjectInsideUsingConvexHullDuringExpansion();
+
+   boolean getProjectInsideUsingConvexHullDuringPostProcessing();
+
    /***
     * Maximum distance that the snap and wiggler is allowed to wiggle the footstep node.
     */
@@ -124,44 +128,29 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   default double getMinimumDistanceFromCliffBottoms()
+   default double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
       return 0.1;
    }
 
-   /**
-    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
-    * until it is minimumDistanceFromCliffBottoms away from it.
-    *
-    * <p>
-    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
-    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
-    * generator is capable of swinging over.
-    * </p>
-    */
-   default double getMinimumDistanceFromCliffTops()
+   default double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return 0.01;
+      return 0.1;
    }
 
-   default SteppableRegionFilter getSteppableRegionFilter()
+   default double getMinimumHindEndForwardDistanceFromCliffBottoms()
    {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
+      return 0.1;
+   }
 
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
+   default double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return 0.1;
+   }
 
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
-
-            return true;
-         }
-      };
+   default double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return 0.1;
    }
 
 
@@ -192,11 +181,16 @@ public interface FootstepPlannerParameters
       packet.setMinYClearanceFromFoot(getMinYClearanceFromFoot());
       packet.setProjectionInsideDistanceForExpansion(getProjectInsideDistanceForExpansion());
       packet.setProjectionInsideDistanceForPostProcessing(getProjectInsideDistanceForPostProcessing());
+      packet.setProjectInsideUsingConvexHullDuringExpansion(getProjectInsideUsingConvexHullDuringExpansion());
+      packet.setProjectInsideUsingConvexHullDuringPostProcessing(getProjectInsideUsingConvexHullDuringPostProcessing());
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
-      packet.setMinimumDistanceFromCliffBottoms(getMinimumDistanceFromCliffBottoms());
-      packet.setMinimumDistanceFromCliffTops(getMinimumDistanceFromCliffTops());
+      packet.setMinimumFrontEndForwardDistanceFromCliffBottoms(getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumFrontEndBackwardDistanceFromCliffBottoms(getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndForwardDistanceFromCliffBottoms(getMinimumHindEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndBackwardDistanceFromCliffBottoms(getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumLateralDistanceFromCliffBottoms(getMinimumLateralDistanceFromCliffBottoms());
 
       return packet;
    }

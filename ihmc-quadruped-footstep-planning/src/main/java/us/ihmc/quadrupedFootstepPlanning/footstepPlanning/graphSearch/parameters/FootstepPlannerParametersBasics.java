@@ -1,3 +1,4 @@
+
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
@@ -52,15 +53,25 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setProjectInsideDistanceForPostProcessing(double projectionInsideDistanceForPostProcessing);
 
+   void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull);
+
+   void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull);
+
    void setMaximumXYWiggleDistance(double wiggleDistance);
 
    void setMinimumSurfaceInclineRadians(double minimumSurfaceIncline);
 
    void setCliffHeightToAvoid(double cliffHeightToAvoid);
 
-   void setMinimumDistanceFromCliffBottoms(double distance);
+   void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance);
 
-   void setMinimumDistanceFromCliffTops(double distance);
+   void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance);
+
+   void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance);
+
+   void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance);
+
+   void setMinimumLateralDistanceFromCliffBottoms(double distance);
 
    default void set(FootstepPlannerParameters other)
    {
@@ -88,11 +99,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
       setProjectInsideDistanceForExpansion(other.getProjectInsideDistanceForExpansion());
       setProjectInsideDistanceForPostProcessing(other.getProjectInsideDistanceForPostProcessing());
+      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
+      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
       setMaximumXYWiggleDistance(other.getMaximumXYWiggleDistance());
       setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       setCliffHeightToAvoid(other.getCliffHeightToAvoid());
-      setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
-      setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
+      setMinimumFrontEndForwardDistanceFromCliffBottoms(other.getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      setMinimumFrontEndBackwardDistanceFromCliffBottoms(other.getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      setMinimumHindEndForwardDistanceFromCliffBottoms(other.getMinimumHindEndForwardDistanceFromCliffBottoms());
+      setMinimumHindEndBackwardDistanceFromCliffBottoms(other.getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
    }
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
@@ -151,9 +167,18 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumSurfaceInclineRadians(other.getMinimumSurfaceInclineRadians());
       if (other.getCliffHeightToAvoid() != other.NO_VALUE_DOUBLE)
          setCliffHeightToAvoid(other.getCliffHeightToAvoid());
-      if (other.getMinimumDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
-         setMinimumDistanceFromCliffBottoms(other.getMinimumDistanceFromCliffBottoms());
-      if (other.getMinimumDistanceFromCliffTops() != other.NO_VALUE_DOUBLE)
-         setMinimumDistanceFromCliffTops(other.getMinimumDistanceFromCliffTops());
+      if (other.getMinimumFrontEndForwardDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumFrontEndForwardDistanceFromCliffBottoms(other.getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      if (other.getMinimumFrontEndBackwardDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumFrontEndBackwardDistanceFromCliffBottoms(other.getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      if (other.getMinimumHindEndForwardDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumHindEndForwardDistanceFromCliffBottoms(other.getMinimumHindEndForwardDistanceFromCliffBottoms());
+      if (other.getMinimumHindEndBackwardDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumHindEndBackwardDistanceFromCliffBottoms(other.getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      if (other.getMinimumLateralDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
+         setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
+
+      setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
+      setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());
    }
 }
