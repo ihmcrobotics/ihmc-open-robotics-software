@@ -104,6 +104,14 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -213,6 +221,18 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -279,7 +299,15 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getCliffHeightToAvoid());
 
-      cdr.write_type_6(data.getMinimumDistanceFromCliffBottoms());
+      cdr.write_type_6(data.getMinimumFrontEndForwardDistanceFromCliffBottoms());
+
+      cdr.write_type_6(data.getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+
+      cdr.write_type_6(data.getMinimumHindEndForwardDistanceFromCliffBottoms());
+
+      cdr.write_type_6(data.getMinimumHindEndBackwardDistanceFromCliffBottoms());
+
+      cdr.write_type_6(data.getMinimumLateralDistanceFromCliffBottoms());
 
       cdr.write_type_6(data.getMinimumDistanceFromCliffTops());
 
@@ -347,7 +375,15 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setCliffHeightToAvoid(cdr.read_type_6());
       	
-      data.setMinimumDistanceFromCliffBottoms(cdr.read_type_6());
+      data.setMinimumFrontEndForwardDistanceFromCliffBottoms(cdr.read_type_6());
+      	
+      data.setMinimumFrontEndBackwardDistanceFromCliffBottoms(cdr.read_type_6());
+      	
+      data.setMinimumHindEndForwardDistanceFromCliffBottoms(cdr.read_type_6());
+      	
+      data.setMinimumHindEndBackwardDistanceFromCliffBottoms(cdr.read_type_6());
+      	
+      data.setMinimumLateralDistanceFromCliffBottoms(cdr.read_type_6());
       	
       data.setMinimumDistanceFromCliffTops(cdr.read_type_6());
       	
@@ -387,7 +423,11 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("maximum_xy_wiggle_distance", data.getMaximumXyWiggleDistance());
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
-      ser.write_type_6("minimum_distance_from_cliff_bottoms", data.getMinimumDistanceFromCliffBottoms());
+      ser.write_type_6("minimum_front_end_forward_distance_from_cliff_bottoms", data.getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      ser.write_type_6("minimum_front_end_backward_distance_from_cliff_bottoms", data.getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      ser.write_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms", data.getMinimumHindEndForwardDistanceFromCliffBottoms());
+      ser.write_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms", data.getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      ser.write_type_6("minimum_lateral_distance_from_cliff_bottoms", data.getMinimumLateralDistanceFromCliffBottoms());
       ser.write_type_6("minimum_distance_from_cliff_tops", data.getMinimumDistanceFromCliffTops());
    }
 
@@ -424,7 +464,11 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMaximumXyWiggleDistance(ser.read_type_6("maximum_xy_wiggle_distance"));
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));
-      data.setMinimumDistanceFromCliffBottoms(ser.read_type_6("minimum_distance_from_cliff_bottoms"));
+      data.setMinimumFrontEndForwardDistanceFromCliffBottoms(ser.read_type_6("minimum_front_end_forward_distance_from_cliff_bottoms"));
+      data.setMinimumFrontEndBackwardDistanceFromCliffBottoms(ser.read_type_6("minimum_front_end_backward_distance_from_cliff_bottoms"));
+      data.setMinimumHindEndForwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms"));
+      data.setMinimumHindEndBackwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms"));
+      data.setMinimumLateralDistanceFromCliffBottoms(ser.read_type_6("minimum_lateral_distance_from_cliff_bottoms"));
       data.setMinimumDistanceFromCliffTops(ser.read_type_6("minimum_distance_from_cliff_tops"));
    }
 

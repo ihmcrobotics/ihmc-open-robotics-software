@@ -78,7 +78,15 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double cliff_height_to_avoid;
         @defaultValue(value=-11.1)
-        double minimum_distance_from_cliff_bottoms;
+        double minimum_front_end_forward_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double minimum_front_end_backward_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double minimum_hind_end_forward_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double minimum_hind_end_backward_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double minimum_lateral_distance_from_cliff_bottoms;
         @defaultValue(value=-11.1)
         double minimum_distance_from_cliff_tops;
       };

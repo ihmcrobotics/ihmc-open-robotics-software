@@ -35,9 +35,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double projectInsideDistanceForExpansion;
    private double projectInsideDistanceForPostProcessing;
    private double maximumXYWiggleDistance;
+
    private double cliffHeightToAvoid;
-   private double minimumDistanceFromCliffTops;
-   private double minimumDistanceFromCliffBottoms;
+   private double minimumFrontEndForwardDistanceFromCliffBottoms;
+   private double minimumFrontEndBackwardDistanceFromCliffBottoms;
+   private double minimumHindEndForwardDistanceFromCliffBottoms;
+   private double minimumHindEndBackwardDistanceFromCliffBottoms;
+   private double minimumLateralDistanceFromCliffBottoms;
 
    private boolean projectInsideUsingConvexHullDuringExpansion;
    private boolean projectInsideUsingConvexHullDuringPostProcessing;
@@ -214,15 +218,34 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public void setMinimumDistanceFromCliffBottoms(double distance)
+   public void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance)
    {
-      this.minimumDistanceFromCliffBottoms = distance;
+      this.minimumFrontEndForwardDistanceFromCliffBottoms = distance;
    }
 
    @Override
-   public void setMinimumDistanceFromCliffTops(double distance)
+   public void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance)
    {
-      this.minimumDistanceFromCliffTops = distance;
+      this.minimumFrontEndBackwardDistanceFromCliffBottoms = distance;
+   }
+
+
+   @Override
+   public void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
+   {
+      this.minimumHindEndForwardDistanceFromCliffBottoms = distance;
+   }
+
+   @Override
+   public void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance)
+   {
+      this.minimumHindEndBackwardDistanceFromCliffBottoms = distance;
+   }
+
+   @Override
+   public void setMinimumLateralDistanceFromCliffBottoms(double distance)
+   {
+      this.minimumLateralDistanceFromCliffBottoms = distance;
    }
 
    /** {@inheritDoc} */
@@ -463,15 +486,35 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffBottoms()
+   public double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffBottoms;
+      return minimumFrontEndForwardDistanceFromCliffBottoms;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffTops()
+   public double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffTops;
+      return minimumFrontEndBackwardDistanceFromCliffBottoms;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndForwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndForwardDistanceFromCliffBottoms;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndBackwardDistanceFromCliffBottoms;
+   }
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return minimumLateralDistanceFromCliffBottoms;
    }
 }
