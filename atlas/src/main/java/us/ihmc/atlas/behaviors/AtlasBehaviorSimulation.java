@@ -45,6 +45,7 @@ public class AtlasBehaviorSimulation
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+      scsInitialSetup.setUsePerfectSensors(true);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
