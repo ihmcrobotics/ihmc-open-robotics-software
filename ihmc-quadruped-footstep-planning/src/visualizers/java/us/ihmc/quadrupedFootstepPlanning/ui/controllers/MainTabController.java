@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -42,6 +43,8 @@ import us.ihmc.robotics.time.TimeIntervalTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -111,6 +114,8 @@ public class MainTabController
    @FXML
    private Slider previewSlider;
 
+
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
    @FXML
    public void computePath()
@@ -489,7 +494,7 @@ public class MainTabController
       QuadrantDependentList<Point3D> startFeetPositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint3D footPosition = new FramePoint3D(quadrupedReferenceFrames.getSoleZUpFrame(robotQuadrant));
+         FramePoint3D footPosition = new FramePoint3D(quadrupedReferenceFrames.getSoleFrame(robotQuadrant));
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          startFeetPositions.put(robotQuadrant, new Point3D(footPosition));
       }
@@ -655,7 +660,9 @@ public class MainTabController
       {
          xGaitSettingsReference = messager.createInput(xGaitSettingsTopic);
 
-         messager.registerTopicListener(footstepPlanTopic, this::calculateFrames);
+         messager.registerTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+           calculateFrames(footstepPlan);
+         }));
       }
 
       void setPreviewFootstepPositions(QuadrantDependentList<Point3D> previewFootstepPositions)

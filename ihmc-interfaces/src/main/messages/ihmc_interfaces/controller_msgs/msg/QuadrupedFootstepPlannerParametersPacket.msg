@@ -27,6 +27,8 @@ float64 heuristics_weight -11.1
 float64 min_x_clearance_from_foot -11.1
 float64 min_y_clearance_from_foot -11.1
 float64 max_walking_speed_multiplier -11.1
+bool project_inside_using_convex_hull_during_expansion
+bool project_inside_using_convex_hull_during_post_processing
 float64 projection_inside_distance_for_expansion -11.1
 float64 projection_inside_distance_for_post_processing -11.1
 float64 maximum_xy_wiggle_distance -11.1

@@ -7,4 +7,6 @@ plan_then_snap_timeout 5.0
 a_star_timeout 10.0
 vis_graph_with_a_star_timeout 5.0
 quadruped_planner_status test
-quadruped_timeout 10.0
+quadruped_timeout 20.0
+quadruped_start_yaw 3.14
+quadruped_goal_yaw 3.14
