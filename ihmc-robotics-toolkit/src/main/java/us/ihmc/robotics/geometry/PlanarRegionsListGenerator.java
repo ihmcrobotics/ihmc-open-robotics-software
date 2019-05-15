@@ -21,6 +21,11 @@ public class PlanarRegionsListGenerator
 
    private int id = 0;
 
+   public void setId(int id)
+   {
+      this.id = id;
+   }
+
    public void addCubeReferencedAtCenter(double lengthX, double widthY, double heightZ)
    {
       RigidBodyTransformGenerator transformGeneratorTwo = new RigidBodyTransformGenerator(transformGenerator);
@@ -66,6 +71,15 @@ public class PlanarRegionsListGenerator
       translate(lengthX / 2.0, 0.0, -heightZ / 2.0);
    }
 
+   public void addCubeReferencedAtBottomNegativeXYCorner(double lengthX, double widthY, double heightZ)
+   {
+      double halfLengthX = lengthX / 2.0;
+      double halfWidthY = widthY / 2.0;
+      translate(halfLengthX, halfWidthY, 0.0);
+      addCubeReferencedAtBottomMiddle(lengthX, widthY, heightZ);
+      translate(-halfLengthX, -halfWidthY, 0.0);
+   }
+
    public void addRampReferencedAtBottomMiddle(double lengthX, double widthY, double heightZ)
    {
       RigidBodyTransformGenerator transformGeneratorTwo = new RigidBodyTransformGenerator(transformGenerator);
@@ -98,6 +112,13 @@ public class PlanarRegionsListGenerator
       transformGeneratorTwo.translate(0.0, -0.5 * widthY, 0.0);
       transformGeneratorTwo.rotate(0.5 * Math.PI, Axis.X);
       addPolygon(transformGeneratorTwo, rightSide);
+   }
+
+   public void addRectangleReferencedAtNegativeXYCorner(double lengthX, double widthY)
+   {
+      translate(lengthX / 2, widthY / 2, 0.0);
+      addRectangle(lengthX, widthY);
+      translate(-lengthX / 2, -widthY / 2, 0.0);
    }
 
    public void addRectangle(double lengthX, double widthY)
