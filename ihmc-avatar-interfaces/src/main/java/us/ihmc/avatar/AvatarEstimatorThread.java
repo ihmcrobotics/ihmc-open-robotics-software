@@ -242,7 +242,6 @@ public class AvatarEstimatorThread
       this.outputWriter = outputWriter;
       if (this.outputWriter != null)
       {
-         this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
          this.outputWriter.setJointDesiredOutputList(desiredJointDataHolder);
          if (this.outputWriter.getYoVariableRegistry() != null)
          {
