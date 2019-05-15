@@ -1,10 +1,9 @@
 package us.ihmc.sensorProcessing.sensors;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -16,7 +15,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
    private final List<OneDoFJointBasics> joints = new ArrayList<>();
    private final RecyclingArrayList<RawJointSensorDataHolder> rawJointSensorDataHolders = new RecyclingArrayList<>(RawJointSensorDataHolder.class);
 
-   private final transient Map<String, RawJointSensorDataHolder> rawJointSensorDataHolderMap = new HashMap<>();
+   private final transient TLongObjectHashMap<RawJointSensorDataHolder> rawJointSensorDataHolderMap = new TLongObjectHashMap<>();
 
    public RawJointSensorDataHolderMap()
    {
@@ -35,7 +34,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
    {
       joints.add(joint);
       RawJointSensorDataHolder rawData = rawJointSensorDataHolders.add();
-      if (rawJointSensorDataHolderMap.put(joint.getName(), rawData) != null)
+      if (rawJointSensorDataHolderMap.put(joint.hashCode(), rawData) != null)
       {
          throw new RuntimeException("Already have joint " + joint.getName());
       }
@@ -46,7 +45,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
       joints.add(joint);
       RawJointSensorDataHolder rawData = rawJointSensorDataHolders.add();
       rawData.set(rawJointSensorDataHolder);
-      if (rawJointSensorDataHolderMap.put(joint.getName(), rawData) != null)
+      if (rawJointSensorDataHolderMap.put(joint.hashCode(), rawData) != null)
       {
          throw new RuntimeException("Already have joint " + joint.getName());
       }
@@ -79,14 +78,14 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
       return joints.get(jointIndex);
    }
 
-   public RawJointSensorDataHolder get(String jointName)
-   {
-      return rawJointSensorDataHolderMap.get(jointName);
-   }
-
    public RawJointSensorDataHolder get(int jointIndex)
    {
       return rawJointSensorDataHolders.get(jointIndex);
+   }
+
+   public RawJointSensorDataHolder get(OneDoFJointBasics joint)
+   {
+      return rawJointSensorDataHolderMap.get(joint.hashCode());
    }
 
    @Override
@@ -104,7 +103,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
          for (int i = 0; i < getNumberOfJoints(); i++)
          {
             OneDoFJointBasics joint = getJoint(i);
-            if (!get(i).equals(other.get(joint.getName())))
+            if (!get(i).equals(other.get(joint)))
                return false;
          }
          return true;
