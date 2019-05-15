@@ -11,6 +11,16 @@ float64 minimum_front_step_length -11.1
 float64 maximum_hind_step_reach -11.1
 float64 maximum_hind_step_length -11.1
 float64 minimum_hind_step_length -11.1
+float64 maximum_front_step_length_when_stepping_up -11.1
+float64 minimum_front_step_length_when_stepping_up -11.1
+float64 maximum_hind_step_length_when_stepping_up -11.1
+float64 minimum_hind_step_length_when_stepping_up -11.1
+float64 step_z_for_stepping_up -11.1
+float64 maximum_front_step_length_when_stepping_down -11.1
+float64 minimum_front_step_length_when_stepping_down -11.1
+float64 maximum_hind_step_length_when_stepping_down -11.1
+float64 minimum_hind_step_length_when_stepping_down -11.1
+float64 step_z_for_stepping_down -11.1
 float64 maximum_step_width -11.1
 float64 minimum_step_width -11.1
 float64 minimum_step_yaw -11.1
