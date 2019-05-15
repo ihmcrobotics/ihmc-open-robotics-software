@@ -275,7 +275,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.outputWriter = outputWriter;
       if (this.outputWriter != null)
       {
-         this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
          this.outputWriter.setJointDesiredOutputList(estimatorDesiredJointDataHolder);
          if (this.outputWriter.getYoVariableRegistry() != null)
          {
