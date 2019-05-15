@@ -8,7 +8,7 @@ import java.util.List;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -25,24 +25,22 @@ import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
+public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 {
    private final boolean DEBUG = false;
 
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
-
-   private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
-   private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
+   private final YoDouble handControllerTime;
+   private final YoBoolean sendFingerJointGains;
 
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kdMap = new LinkedHashMap<>();
 
-   private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
+   private final YoDouble fingerTrajectoryTime;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
@@ -58,10 +56,17 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
 
    private long timestamp;
 
+   private final MirroredYoVariableRegistry registry;
+
    public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
                                           MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      handControllerTime = new YoDouble("handControllerTime", registry);
+      sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
+      fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
       sendFingerJointGains.set(true);
 
@@ -80,7 +85,7 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
 
-      setupGains(kpEnumMap, kdEnumMap);
+      setupGains(kpEnumMap, kdEnumMap, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -111,9 +116,12 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
             individualHandControllers.put(robotSide, individualHandController);
          }
       }
+
+      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
-   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap)
+   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap,
+                           YoVariableRegistry registry)
    {
       YoDouble kpFingerJoint1 = new YoDouble("kpFingerJoint1", registry);
       YoDouble kpFingerJoint2 = new YoDouble("kpFingerJoint2", registry);
@@ -351,6 +359,7 @@ public class SimulatedRobotiqHandsController extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData context)
    {
       write();
+      registry.updateMirror();
    }
 
    @Override

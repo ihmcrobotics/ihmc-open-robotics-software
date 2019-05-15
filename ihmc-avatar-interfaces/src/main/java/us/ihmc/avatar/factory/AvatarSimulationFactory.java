@@ -12,6 +12,8 @@ import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.RobotVisualizerList;
+import us.ihmc.avatar.SimulationRobotVisualizer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
@@ -238,7 +240,7 @@ public class AvatarSimulationFactory
       stateEstimationThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
                                                         robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
                                                         contextDataFactory, realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter,
-                                                        yoVariableServer, gravity.get());
+                                                        gravity.get());
    }
 
    private void setupControllerThread()
@@ -247,7 +249,7 @@ public class AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       controllerThread = new AvatarControllerThread(robotName, robotModel.get(), robotModel.get().getSensorInformation(),
                                                     highLevelHumanoidControllerFactory.get(), contextDataFactory, simulationOutputProcessor,
-                                                    realtimeRos2Node.get(), yoVariableServer, gravity.get(), robotModel.get().getEstimatorDT());
+                                                    realtimeRos2Node.get(), gravity.get(), robotModel.get().getEstimatorDT());
    }
 
    private void setupMultiThreadedRobotController()
@@ -259,11 +261,15 @@ public class AvatarSimulationFactory
       HumanoidRobotContextData masterContext = new HumanoidRobotContextData();
 
       // Create the tasks that will be run on their own threads.
-      int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
-      int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(stateEstimationThread, estimatorTicksPerSimulationTick, masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerTicksPerSimulationTick, masterFullRobotModel);
-      HumanoidRobotControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeRos2Node.get());
+      int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
+      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
+      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer();
+      SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer();
+      RobotVisualizerList estimatorRobotVisualizerList = new RobotVisualizerList(estimatorRobotVisualizer, yoVariableServer);
+      RobotVisualizerList controllerRobotVisualizerList = new RobotVisualizerList(controllerRobotVisualizer, yoVariableServer);
+      HumanoidRobotControlTask estimatorTask = new EstimatorTask(stateEstimationThread, estimatorDivisor, masterFullRobotModel, estimatorRobotVisualizerList);
+      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, masterFullRobotModel, controllerRobotVisualizerList);
+      SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeRos2Node.get());
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
       tasks.add(estimatorTask);
@@ -276,7 +282,7 @@ public class AvatarSimulationFactory
       if (!scsInitialSetup.get().getRunMultiThreaded())
       {
          LogTools.warn("Running simulation in single threaded mode");
-         robotController = new SingleThreadedRobotController<HumanoidRobotContextData>(controllerName, tasks, masterContext);
+         robotController = new SingleThreadedRobotController<>(controllerName, tasks, masterContext);
       }
       else
       {
@@ -284,12 +290,15 @@ public class AvatarSimulationFactory
          robotController = new BarrierScheduledRobotController<>(controllerName, tasks, masterContext, overrunBehavior);
       }
 
-      // Add task registry and graphics to the main controller registry and SCS.
-      tasks.forEach(task -> {
-         robotController.getYoVariableRegistry().addChild(task.getRegistry());
-         if (task.getYoGraphicsListRegistry() != null)
-            simulationConstructionSet.addYoGraphicsListRegistry(task.getYoGraphicsListRegistry());
-      });
+      // Add registry and graphics to SCS.
+      robotController.getYoVariableRegistry().addChild(estimatorRobotVisualizer.getRegistry());
+      if (estimatorRobotVisualizer.getGraphicsListRegistry() != null)
+         simulationConstructionSet.addYoGraphicsListRegistry(estimatorRobotVisualizer.getGraphicsListRegistry());
+      robotController.getYoVariableRegistry().addChild(controllerRobotVisualizer.getRegistry());
+      if (controllerRobotVisualizer.getGraphicsListRegistry() != null)
+         simulationConstructionSet.addYoGraphicsListRegistry(controllerRobotVisualizer.getGraphicsListRegistry());
+      if (handControlTask != null)
+         robotController.getYoVariableRegistry().addChild(handControlTask.getRegistry());
    }
 
    private void initializeStateEstimatorToActual()

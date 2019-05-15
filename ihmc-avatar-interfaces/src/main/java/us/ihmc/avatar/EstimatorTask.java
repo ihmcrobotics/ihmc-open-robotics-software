@@ -4,10 +4,8 @@ import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commons.Conversions;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -23,19 +21,22 @@ public class EstimatorTask extends HumanoidRobotControlTask
 
    private long lastStartTime;
 
-   private final MirroredYoVariableRegistry registry;
+   private final RobotVisualizer robotVisualizer;
 
-   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
+   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel, RobotVisualizer robotVisualizer)
    {
       super(divisor);
       this.estimatorThread = estimatorThread;
+      this.robotVisualizer = robotVisualizer;
+
       estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
       estimatorTick = new YoLong("EstimatorTick", estimatorThread.getYoVariableRegistry());
       estimatorDT = new YoDouble("EstimatorDT", estimatorThread.getYoVariableRegistry());
       estimatorTimer = new YoDouble("EstimatorTimer", estimatorThread.getYoVariableRegistry());
 
-      registry = new MirroredYoVariableRegistry(estimatorThread.getYoVariableRegistry());
+      robotVisualizer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
+                                      estimatorThread.getYoGraphicsListRegistry());
    }
 
    @Override
@@ -68,9 +69,8 @@ public class EstimatorTask extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       estimatorThread.write();
-      // TODO: do the robot visualizer update here.
-      registry.updateMirror();
       masterResolver.resolveHumanoidRobotContextDataEstimatorToController(estimatorThread.getHumanoidRobotContextData(), masterContext);
+      robotVisualizer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
    }
 
    @Override
@@ -78,18 +78,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       estimatorResolver.resolveHumanoidRobotContextDataControllerToEstimator(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorThread.read();
-   }
-
-   @Override
-   public YoVariableRegistry getRegistry()
-   {
-      return registry;
-   }
-
-   @Override
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return estimatorThread.getYoGraphicsListRegistry();
    }
 
 }

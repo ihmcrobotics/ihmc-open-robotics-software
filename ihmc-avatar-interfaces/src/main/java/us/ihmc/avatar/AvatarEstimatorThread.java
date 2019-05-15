@@ -34,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSenso
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -81,7 +80,6 @@ public class AvatarEstimatorThread
    private static final boolean USE_EKF_ESTIMATOR = false;
 
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
-   private final RobotVisualizer robotVisualizer;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -120,10 +118,8 @@ public class AvatarEstimatorThread
    public AvatarEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                                 DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
                                 HumanoidRobotContextDataFactory contextDataFactory, RealtimeRos2Node realtimeRos2Node,
-                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter,
-                                RobotVisualizer robotVisualizer, double gravity)
+                                PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter, double gravity)
    {
-      this.robotVisualizer = robotVisualizer;
       estimatorFullRobotModel = robotModel.createFullRobotModel();
 
       processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
@@ -307,11 +303,6 @@ public class AvatarEstimatorThread
          ekfStateEstimator = null;
       }
 
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel.getElevator(), yoGraphicsListRegistry);
-      }
-
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderFromController);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusFromController);
@@ -430,11 +421,6 @@ public class AvatarEstimatorThread
             {
                outputWriter.writeAfter();
             }
-         }
-
-         if (robotVisualizer != null)
-         {
-            robotVisualizer.update(estimatorTime.getLongValue());
          }
       }
       catch (Throwable e)

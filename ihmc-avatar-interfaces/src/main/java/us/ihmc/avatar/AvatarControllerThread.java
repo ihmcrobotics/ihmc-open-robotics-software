@@ -24,7 +24,6 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
@@ -64,7 +63,6 @@ public class AvatarControllerThread
    private static final boolean ALLOW_MODEL_CORRUPTION = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
-   private final RobotVisualizer robotVisualizer;
 
    private final YoDouble controllerTime = new YoDouble("controllerTime", registry);
    private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
@@ -80,7 +78,6 @@ public class AvatarControllerThread
 
    private final ModularRobotController robotController;
 
-   private final ExecutionTimer robotVisualizerUpdateTimer;
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
@@ -92,11 +89,9 @@ public class AvatarControllerThread
 
    public AvatarControllerThread(String robotName, DRCRobotModel robotModel, DRCRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
-                                 DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, RobotVisualizer robotVisualizer, double gravity,
-                                 double estimatorDT)
+                                 DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
    {
       this.outputProcessor = outputProcessor;
-      this.robotVisualizer = robotVisualizer;
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
       processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
@@ -136,16 +131,6 @@ public class AvatarControllerThread
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
-
-      if (robotVisualizer != null)
-      {
-         robotVisualizerUpdateTimer = new ExecutionTimer("robotVisualizerUpdateTimer", 10.0, registry);
-         robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
-      }
-      else
-      {
-         robotVisualizerUpdateTimer = null;
-      }
 
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
@@ -328,13 +313,6 @@ public class AvatarControllerThread
          if (outputProcessor != null)
          {
             outputProcessor.processAfterController(controllerTimestamp.getLongValue());
-         }
-
-         if (robotVisualizer != null)
-         {
-            robotVisualizerUpdateTimer.startMeasurement();
-            robotVisualizer.update(controllerTimestamp.getLongValue(), registry);
-            robotVisualizerUpdateTimer.stopMeasurement();
          }
       }
       catch (Exception e)
