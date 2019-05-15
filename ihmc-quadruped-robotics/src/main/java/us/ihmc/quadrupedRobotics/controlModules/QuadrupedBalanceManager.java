@@ -330,9 +330,10 @@ public class QuadrupedBalanceManager
          throw new IllegalArgumentException("Desired DCM Velocity contains NaN");
    }
 
-   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps)
+   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, boolean stepPlanIsAdjustable)
    {
-      RecyclingArrayList<QuadrupedStep> adjustedActiveSteps = stepAdjustmentController.computeStepAdjustment(activeSteps, yoDesiredDCMPosition);
+      RecyclingArrayList<QuadrupedStep> adjustedActiveSteps = stepAdjustmentController.computeStepAdjustment(activeSteps, yoDesiredDCMPosition,
+                                                                                                             stepPlanIsAdjustable);
 
       adjustActiveFootstepGraphics(activeSteps);
       return adjustedActiveSteps;

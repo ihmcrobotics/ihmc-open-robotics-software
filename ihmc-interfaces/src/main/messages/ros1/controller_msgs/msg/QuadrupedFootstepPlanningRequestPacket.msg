@@ -6,6 +6,10 @@ int8 ROBOT_QUADRANT_HIND_LEFT=2
 
 int8 ROBOT_QUADRANT_HIND_RIGHT=3
 
+int8 FOOTSTEP_PLANNER_TARGET_TYPE_POSE_BETWEEN_FEET=0
+
+int8 FOOTSTEP_PLANNER_TARGET_TYPE_FOOTSTEPS=1
+
 int32 NO_PLAN_ID=-1
 
 int8 FOOTSTEP_PLANNER_TYPE_SIMPLE_PATH_TURN_WALK_TURN=0
@@ -20,9 +24,19 @@ uint32 sequence_id
 # Field default value 255
 int8 initial_step_robot_quadrant
 
+int8 start_target_type
+
 geometry_msgs/Point body_position_in_world
 
 geometry_msgs/Quaternion body_orientation_in_world
+
+geometry_msgs/Point front_left_position_in_world
+
+geometry_msgs/Point front_right_position_in_world
+
+geometry_msgs/Point hind_left_position_in_world
+
+geometry_msgs/Point hind_right_position_in_world
 
 geometry_msgs/Point goal_position_in_world
 

@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,12 +12,10 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -28,7 +24,6 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
 public class StereoVisionPointCloudPublisher
 {
@@ -184,86 +179,6 @@ public class StereoVisionPointCloudPublisher
             pointcloudPublisher.publish(message);
          }
       };
-   }
-
-   public class ColorPointCloudData
-   {
-      private final long timestamp;
-      private final int numberOfPoints;
-      private final Point3D[] pointCloud;
-      private final int[] colors;
-
-      public ColorPointCloudData(PointCloud2 rosPointCloud2, int maxSize)
-      {
-         timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
-
-         UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(rosPointCloud2);
-         pointCloud = unpackPointsAndIntensities.getPoints();
-         colors = unpackPointsAndIntensities.getPointColorsRGB();
-
-         if (unpackPointsAndIntensities.getPoints().length <= maxSize)
-         {
-            numberOfPoints = pointCloud.length;
-         }
-         else
-         {
-            Random random = new Random();
-            int currentSize = pointCloud.length;
-
-            while (currentSize > maxSize)
-            {
-               int nextToRemove = random.nextInt(currentSize);
-               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
-               colors[nextToRemove] = colors[currentSize - 1];
-               pointCloud[currentSize - 1] = null;
-               colors[currentSize - 1] = -1;
-
-               currentSize--;
-            }
-            numberOfPoints = maxSize;
-         }
-      }
-
-      public long getTimestamp()
-      {
-         return timestamp;
-      }
-
-      public int[] getColors()
-      {
-         return colors;
-      }
-
-      public StereoVisionPointCloudMessage toStereoVisionPointCloudMessage()
-      {
-         long timestamp = this.timestamp;
-         float[] pointCloudBuffer = new float[3 * numberOfPoints];
-         int[] colorsInteger;
-
-         if (colors.length == numberOfPoints)
-            colorsInteger = colors;
-         else
-            colorsInteger = Arrays.copyOf(colors, numberOfPoints);
-
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            Point3D scanPoint = pointCloud[i];
-
-            pointCloudBuffer[3 * i + 0] = (float) scanPoint.getX();
-            pointCloudBuffer[3 * i + 1] = (float) scanPoint.getY();
-            pointCloudBuffer[3 * i + 2] = (float) scanPoint.getZ();
-         }
-
-         return MessageTools.createStereoVisionPointCloudMessage(timestamp, pointCloudBuffer, colorsInteger);
-      }
-
-      public void applyTransform(RigidBodyTransform transform)
-      {
-         for (int i = 0; i < numberOfPoints; i++)
-         {
-            pointCloud[i].applyTransform(transform);
-         }
-      }
    }
 
    public static interface StereoVisionWorldTransformCalculator

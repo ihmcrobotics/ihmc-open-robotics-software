@@ -44,6 +44,8 @@ public class QuadrupedStepMessageHandler
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
 
+   private final YoBoolean stepPlanIsAdjustable = new YoBoolean("stepPlanIsAdjustable", registry);
+
    private final double controlDt;
 
    public QuadrupedStepMessageHandler(YoDouble robotTimestamp, double controlDt, YoVariableRegistry parentRegistry)
@@ -82,6 +84,8 @@ public class QuadrupedStepMessageHandler
       double currentTime = robotTimestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
       RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
+
+      stepPlanIsAdjustable.set(command.isStepPlanAdjustable());
 
       receivedStepSequence.clear();
       for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
@@ -166,6 +170,11 @@ public class QuadrupedStepMessageHandler
    {
       return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp
             .getDoubleValue();
+   }
+
+   public boolean isStepPlanAdjustable()
+   {
+      return stepPlanIsAdjustable.getBooleanValue();
    }
 
    public void onTouchDown(RobotQuadrant robotQuadrant)

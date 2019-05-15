@@ -11,15 +11,13 @@ import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
@@ -79,6 +77,8 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerStatus> PlannerStatus = apiFactory.createTypedTopicTheme("PlannerStatus");
    private static final TypedTopicTheme<Number> Fraction = apiFactory.createTypedTopicTheme("Fraction");
    private static final TypedTopicTheme<Point3D> Point = apiFactory.createTypedTopicTheme("Point");
+   private static final TypedTopicTheme<QuadrantDependentList<Point3D>> QuadrantPoint = apiFactory.createTypedTopicTheme("QuadrantPoint");
+   private static final TypedTopicTheme<FootstepPlannerTargetType> FootstepPlannerTargetType = apiFactory.createTypedTopicTheme("FootstepPlannerTargetType");
    private static final TypedTopicTheme<Quaternion> Quaternion = apiFactory.createTypedTopicTheme("Quaternion");
    private static final TypedTopicTheme<RobotQuadrant> RobotQuadrant = apiFactory.createTypedTopicTheme("RobotQuadrant");
    private static final TypedTopicTheme<FootstepPlan> FootstepPlan = apiFactory.createTypedTopicTheme("FootstepPlan");
@@ -135,6 +135,8 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> ShowFootstepPreviewTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Show);
    public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Fraction);
    public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(Point);
+   public static final Topic<FootstepPlannerTargetType> StartTargetTypeTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(FootstepPlannerTargetType);
+   public static final Topic<QuadrantDependentList<Point3D>> StartFeetPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(QuadrantPoint);
    public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Orientation).topic(Quaternion);
    public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Position).topic(Point);
    public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Orientation).topic(Quaternion);

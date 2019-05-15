@@ -150,7 +150,7 @@ public class SQLBehaviorDatabaseManager
 
       //if it does not exist, create it and then return it. 
 
-      sqlUpdate("INSERT INTO operators (name) VALUES ('" + operatorName + "');");
+      sqlUpdate("INSERT INTO operators (operator_name) VALUES ('" + operatorName + "');");
       returnOperator = getOperator(operatorName);
 
       if (returnOperator != null)
@@ -171,7 +171,7 @@ public class SQLBehaviorDatabaseManager
 
       //if it does not exist, create it and then return it. 
 
-      sqlUpdate("INSERT INTO tasks (name) VALUES ('" + taskName + "');");
+      sqlUpdate("INSERT INTO tasks (task_name) VALUES ('" + taskName + "');");
       returnTask = getTask(taskName);
 
       if (returnTask != null)
@@ -186,7 +186,7 @@ public class SQLBehaviorDatabaseManager
       {
 
          PreparedStatement st = databaseConnection
-               .prepareStatement("INSERT INTO runs (operator,task,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING id;");
+               .prepareStatement("INSERT INTO runs (operator_id,task_id,is_successful,notes,log_file,date,time) VALUES (?,?,?,?,?,?,?) RETURNING run_id;");
          st.setInt(1, run.getOperatorID());
          st.setInt(2, run.getTaskID());
          st.setBoolean(3, run.isSuccessful());
@@ -268,7 +268,7 @@ public class SQLBehaviorDatabaseManager
       {
          stmt = databaseConnection.createStatement();
 
-         ResultSet rs = stmt.executeQuery("SELECT * FROM run_events WHERE id = " + runID + ";");
+         ResultSet rs = stmt.executeQuery("SELECT * FROM run_events WHERE run_id = " + runID + ";");
          while (rs.next())
          {
             returnValue++;

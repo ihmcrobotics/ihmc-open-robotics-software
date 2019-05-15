@@ -32,7 +32,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       generator.addRectangle(10.0, 10.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       int xIndex = -3;
@@ -70,7 +72,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       int xIndex = 4;
@@ -123,7 +127,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       int xIndex = 7;
@@ -158,7 +164,9 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       generator.addRectangle(1.0, 1.0);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(1000, 1);
@@ -181,10 +189,12 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistanceForExpansion();
       double expectedTranslation = projectionDistance - extraSquareWidth;
 
       // test snapping on front edge
@@ -249,7 +259,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
 
       double projectionDistance = 0.0;
       TestParameters parameters = new TestParameters(projectionDistance);
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       double expectedTranslation = - widthShrinkAmount;
@@ -318,7 +329,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
       TestParameters parameters = new TestParameters(projectionDistance);
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       // test snapping on front edge
@@ -410,10 +422,12 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistanceForExpansion();
       double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(rollAngle);
 
 
@@ -467,10 +481,12 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
-      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistance();
+      double projectionDistance = new DefaultFootstepPlannerParameters().getProjectInsideDistanceForExpansion();
       double expectedTranslation = (projectionDistance - extraSquareWidth) * Math.cos(pitchAngle);
 
       PlanarRegion region = planarRegionsList.getPlanarRegion(0);
@@ -521,7 +537,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       }
 
       @Override
-      public double getProjectInsideDistance()
+      public double getProjectInsideDistanceForExpansion()
       {
          return projectionDistance;
       }
