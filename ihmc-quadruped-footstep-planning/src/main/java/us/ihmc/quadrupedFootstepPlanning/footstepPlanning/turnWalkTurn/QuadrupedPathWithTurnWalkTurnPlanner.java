@@ -65,6 +65,19 @@ public abstract class QuadrupedPathWithTurnWalkTurnPlanner implements QuadrupedB
    {
    }
 
+
+   @Override
+   public WaypointsForQuadrupedFootstepPlanner getWaypointPathPlanner()
+   {
+      return waypointPathPlanner;
+   }
+
+   @Override
+   public QuadrupedFootstepPlanner getFootstepPlanner()
+   {
+      return this;
+   }
+
    @Override
   public double getPlanningDuration()
    {

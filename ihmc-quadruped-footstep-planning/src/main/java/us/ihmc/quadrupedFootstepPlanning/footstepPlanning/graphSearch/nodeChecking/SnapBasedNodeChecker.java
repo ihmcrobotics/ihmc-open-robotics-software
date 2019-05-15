@@ -142,33 +142,46 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       snapTransform.transform(newStepPosition);
 
       QuadrantDependentList<Point3D> previousSnappedStepPositions = getSnappedStepPositions(previousNode);
-      Point3D previousStepPosition = previousSnappedStepPositions.get(movingQuadrant);
+      if (!previousSnappedStepPositions.containsKey(movingQuadrant))
+      {
+         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         return false;
+      }
 
 
-      double heightChange = Math.abs(newStepPosition.getZ() - previousStepPosition.getZ());
-      if (heightChange > parameters.getMaximumStepChangeZ())
+      if (Math.abs(newStepPosition.getZ() - previousSnappedStepPositions.get(movingQuadrant).getZ()) > parameters.getMaximumStepChangeZ())
       {
          if (DEBUG)
          {
-            PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + nodeToCheck);
+            PrintTools.debug("Too much height difference (" + Math.round(100.0 * Math.abs(newStepPosition.getZ() - previousSnappedStepPositions.get(movingQuadrant).getZ())) + "cm) to previous node:\n" + nodeToCheck);
          }
          rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
          return false;
       }
 
       QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, previousOrientation);
+
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         FramePoint3D expectedXGaitPoint = new FramePoint3D(footFrames.get(robotQuadrant));
+         if (!footFrames.containsKey(robotQuadrant))
+            continue;
+
+         ReferenceFrame footFrame = footFrames.get(robotQuadrant);
+         FramePoint3D expectedXGaitPoint = new FramePoint3D(footFrame);
 
          double forwardOffset = movingQuadrant.getEnd() == robotQuadrant.getEnd() ? 0.0 : movingQuadrant.isQuadrantInFront() ? previousNode.getNominalStanceLength() : -previousNode.getNominalStanceLength();
          double sideOffset = movingQuadrant.getSide() == robotQuadrant.getSide() ? 0.0 : movingQuadrant.isQuadrantOnLeftSide() ? previousNode.getNominalStanceWidth() : -previousNode.getNominalStanceWidth();
          expectedXGaitPoint.add(forwardOffset, sideOffset, 0.0);
 
-         newStepPosition.changeFrame(footFrames.get(robotQuadrant));
+         newStepPosition.changeFrame(footFrame);
 
          // check total distance
-         if ((newStepPosition.distance(expectedXGaitPoint) > parameters.getMaximumStepLength()))
+         double maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+         double maxReach = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
+         double minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+
+         if ((newStepPosition.distance(expectedXGaitPoint) > maxReach))
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far.");
@@ -177,13 +190,13 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          }
 
          // check forward/backward
-         if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > parameters.getMaximumStepLength())
+         if ((newStepPosition.getX() - expectedXGaitPoint.getX()) > maxLength)
          {
 
             rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD);
             return false;
          }
-         else if (newStepPosition.getX() - expectedXGaitPoint.getX() < parameters.getMinimumStepLength())
+         else if (newStepPosition.getX() - expectedXGaitPoint.getX() < minLength)
          {
             if (DEBUG)
                PrintTools.debug("The node " + nodeToCheck + " is stepping too far backward.");
@@ -231,7 +244,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
 
 
-      if (hasPlanarRegions() && isObstacleBetweenSteps(newStepPosition, previousStepPosition, planarRegionsList.getPlanarRegionsAsList(),
+      if (hasPlanarRegions() && isObstacleBetweenSteps(newStepPosition, previousSnappedStepPositions.get(movingQuadrant), planarRegionsList.getPlanarRegionsAsList(),
                                                        parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
@@ -264,6 +277,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       {
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform footSnapTransform = snapData.getSnapTransform();
+         if (footSnapTransform.containsNaN())
+            continue;
+
          Point3D stepPosition = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          footSnapTransform.transform(stepPosition);
          snappedStepPositions.put(robotQuadrant, stepPosition);
@@ -277,6 +293,9 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       QuadrantDependentList<PoseReferenceFrame> footFrames = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         if (!stepPositions.containsKey(robotQuadrant))
+            continue;
+
          PoseReferenceFrame footFrame = new PoseReferenceFrame(robotQuadrant.getCamelCaseName() + "FootFrame", ReferenceFrame.getWorldFrame());
          footFrame.setPoseAndUpdate(stepPositions.get(robotQuadrant), orientation);
 
@@ -313,7 +332,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (robotQuadrant == newFootQuadrant)
+         if (robotQuadrant == newFootQuadrant || !previousStepPositions.containsKey(robotQuadrant))
             continue;
 
          PlanarRegion bodyPath = createBodyCollisionRegionFromTwoFeet(newFootPosition, previousStepPositions.get(robotQuadrant), groundClearance, 2.0);

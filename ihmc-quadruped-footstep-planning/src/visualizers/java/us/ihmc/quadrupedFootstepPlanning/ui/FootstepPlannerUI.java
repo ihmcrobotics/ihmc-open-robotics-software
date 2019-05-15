@@ -138,7 +138,7 @@ public class FootstepPlannerUI
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionDataTopic, ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic,
                                                                  StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic, GoalPositionTopic,
-                                                                 GoalOrientationTopic, XGaitSettingsTopic);
+                                                                 GoalOrientationTopic, XGaitSettingsTopic, PlanarRegionDataTopic);
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager, StartOrientationEditModeEnabledTopic, GoalOrientationEditModeEnabledTopic,
                                                                        StartPositionTopic, StartOrientationTopic, LowLevelGoalPositionTopic,
                                                                        LowLevelGoalOrientationTopic, GoalPositionTopic, GoalOrientationTopic);
@@ -270,7 +270,8 @@ public class FootstepPlannerUI
       mainTabController.setStartGoalTopics(FootstepPlannerMessagerAPI.EditModeEnabledTopic, FootstepPlannerMessagerAPI.StartPositionEditModeEnabledTopic,
                                            FootstepPlannerMessagerAPI.GoalPositionEditModeEnabledTopic, FootstepPlannerMessagerAPI.InitialSupportQuadrantTopic,
                                            FootstepPlannerMessagerAPI.StartPositionTopic, FootstepPlannerMessagerAPI.StartOrientationTopic,
-                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic);
+                                           FootstepPlannerMessagerAPI.GoalPositionTopic, FootstepPlannerMessagerAPI.GoalOrientationTopic,
+                                           FootstepPlannerMessagerAPI.StartTargetTypeTopic, FootstepPlannerMessagerAPI.StartFeetPositionTopic);
       mainTabController.setAssumeFlatGroundTopic(FootstepPlannerMessagerAPI.AssumeFlatGroundTopic);
       mainTabController.setGlobalResetTopic(FootstepPlannerMessagerAPI.GlobalResetTopic);
       mainTabController.setPlannerPlaybackFractionTopic(FootstepPlannerMessagerAPI.PlannerPlaybackFractionTopic);
