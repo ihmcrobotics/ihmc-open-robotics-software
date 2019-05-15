@@ -1,4 +1,9 @@
 regionId: 0, index: 1, origin: 0.0, 0.0, 0.0, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
-regionId: 1, index: 1, origin: 1.0, 0.0, 0.1524, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 1, index: 1, origin: 1.3048, 0.0, 0.1524, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
 regionId: 2, index: 1, origin: 1.9144, 0.0, 0.3048, normal: 0.0, 0.0, 1.0, concave hull size: 4, number of convex polygons: 1, [4]
-
+regionId: 3, index: 1, origin: 0.7968, 0.0, 0.0762, normal: 1.0, 0.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 4, index: 1, origin: 1.2032, 0.0, 0.2286, normal: 1.0, 0.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 5, index: 1, origin: 1.3048, 0.6096, 0.0762, normal: 0.0, 1.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 6, index: 1, origin: 1.3048, -0.6096, 0.0762, normal: 0.0, 1.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 7, index: 1, origin: 1.9144, 0.6096, 0.2286, normal: 0.0, 1.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
+regionId: 8, index: 1, origin: 1.9144, -0.6096, 0.2286, normal: 0.0, 1.0, 0.0, concave hull size: 4, number of convex polygons: 1, [4]
