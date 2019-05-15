@@ -51,7 +51,7 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
-      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegion(footPosition, planarRegionsList.getPlanarRegionsAsList(), constraintDataHolder,
+      PlanarRegion highestPlanarRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(footPosition, new Vector2D(), constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
                                                                                  constraintDataParameters);
 
       return snapFromPointInWorld(footPosition, highestPlanarRegion);
@@ -80,8 +80,8 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
          Point3D pointInWorld = new Point3D(footPosition);
          snapTransform.transform(pointInWorld);
 
-         PlanarRegion newRegion = PlanarRegionSnapTools.findHighestRegion(pointInWorld.getX(), pointInWorld.getY(), planarRegionsList.getPlanarRegionsAsList(),
-                                                                          constraintDataHolder, constraintDataParameters);
+         PlanarRegion newRegion = PlanarRegionSnapTools.findHighestRegionWithProjection(pointInWorld.getX(), pointInWorld.getY(),  new Vector2D(), constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
+                                                                         constraintDataParameters);
 
          if (newRegion == null)
             return FootstepNodeSnapData.emptyData();
@@ -130,7 +130,9 @@ public class FootstepNodePlanarRegionSnapAndWiggler extends FootstepNodeSnapper
       {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(footPositionInLocal, regionToWiggleInto.getConvexPolygons());
          if (containingRegion == null)
-            return null;
+         {
+            containingRegion = regionToWiggleInto.getConvexHull();
+         }
          TIntArrayList indicesToExclude = constraintDataHolder.getIndicesToExclude(regionToWiggleInto, containingRegion, constraintDataParameters);
          return PolygonWiggler.findWiggleTransform(footholdPolygon, containingRegion, wiggleParameters, indicesToExclude.toArray());
       }
