@@ -39,13 +39,6 @@ public class ControllerTask extends HumanoidRobotControlTask
    }
 
    @Override
-   protected boolean initialize()
-   {
-      controllerThread.initialize();
-      return true;
-   }
-
-   @Override
    protected void execute()
    {
       long startTime = System.nanoTime();
@@ -57,11 +50,6 @@ public class ControllerTask extends HumanoidRobotControlTask
       controllerThread.run();
 
       controllerTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
-   }
-
-   @Override
-   protected void cleanup()
-   {
    }
 
    @Override

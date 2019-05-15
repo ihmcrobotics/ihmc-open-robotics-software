@@ -40,13 +40,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
    }
 
    @Override
-   protected boolean initialize()
-   {
-      estimatorThread.initialize();
-      return true;
-   }
-
-   @Override
    protected void execute()
    {
       long startTime = System.nanoTime();
@@ -58,11 +51,6 @@ public class EstimatorTask extends HumanoidRobotControlTask
       estimatorThread.run();
 
       estimatorTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
-   }
-
-   @Override
-   protected void cleanup()
-   {
    }
 
    @Override

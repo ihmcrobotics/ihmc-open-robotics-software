@@ -256,10 +256,6 @@ public class AvatarControllerThread
       return inverseDynamicsStructure;
    }
 
-   public void initialize()
-   {
-   }
-
    public void read()
    {
    }

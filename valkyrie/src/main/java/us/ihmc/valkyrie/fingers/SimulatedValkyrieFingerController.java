@@ -169,7 +169,8 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
       }
    }
 
-   public void runInternal()
+   @Override
+   public void execute()
    {
       checkForNewHandDesiredConfigurationRequested();
       checkForNewValkyrieHandFingerTrajectoryRequested();
@@ -214,12 +215,6 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    public YoVariableRegistry getRegistry()
    {
       return registry;
-   }
-
-   @Override
-   public void execute()
-   {
-      runInternal();
    }
 
    private void checkForNewHandDesiredConfigurationRequested()
