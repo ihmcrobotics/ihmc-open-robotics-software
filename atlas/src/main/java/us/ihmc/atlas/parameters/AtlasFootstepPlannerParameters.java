@@ -27,7 +27,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double minYClearance = 0.22;
    private double wiggleInsideDelta = 0.02;
    private double stepUpHeight   = 1.5;
-   private double stepDownHeight = 1.5;
+   private double stepDownHeight = 1.0;
    private double maxStepUpX     = 0.5;
    private double maxStepDownX   = 1.5;
    private double maxZPenetrationOnValleyRegions = Double.POSITIVE_INFINITY;

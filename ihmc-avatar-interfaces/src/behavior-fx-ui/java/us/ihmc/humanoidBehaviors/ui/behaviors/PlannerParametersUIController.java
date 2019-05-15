@@ -2,13 +2,13 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.messager.Messager;
 
 public class PlannerParametersUIController
@@ -33,7 +33,7 @@ public class PlannerParametersUIController
    @FXML private Spinner<Double> stepDownHeight    ;
    @FXML private Spinner<Double> maxStepUpX        ;
    @FXML private Spinner<Double> maxStepDownX      ;
-   @FXML private Button cancelPlanning;
+   @FXML private Spinner<Double> timeout      ;
 
    private FootstepPlannerParameters footstepPlannerParameters;
    private Messager messager;
@@ -66,6 +66,8 @@ public class PlannerParametersUIController
       maxStepUpX          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReachWhenSteppingUp()  , 0.05   ));
       maxStepDownX        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepXWhenForwardAndDown()  , 0.05   ));
 
+      timeout.setValueFactory(new DoubleSpinnerValueFactory(0.0, 500.0, RemoteFootstepPlannerInterface.DEFAULT_TIMEOUT, 1.0));
+
       // add edit listeners to all fields and publish automatically
       cliffClearance.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       cliffHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
@@ -87,6 +89,7 @@ public class PlannerParametersUIController
       stepDownHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       maxStepUpX    .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       maxStepDownX  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
+      timeout  .getValueFactory().valueProperty().addListener((ChangeListener) -> publishParameters());
       });
    }
 
@@ -113,6 +116,7 @@ public class PlannerParametersUIController
       tunedFootstepPlannerParameters.setStepDownHeight                   ( stepDownHeight       .getValue()       );
       tunedFootstepPlannerParameters.setMaxStepUpX                       ( maxStepUpX           .getValue()       );
       tunedFootstepPlannerParameters.setMaxStepDownX                     ( maxStepDownX         .getValue()       );
+      tunedFootstepPlannerParameters.setTimeout                          ( timeout              .getValue()       );
 
       messager.submitMessage(PatrolBehaviorAPI.PlannerParameters, tunedFootstepPlannerParameters);
    }

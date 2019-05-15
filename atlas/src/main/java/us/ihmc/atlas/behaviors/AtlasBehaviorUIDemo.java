@@ -104,7 +104,8 @@ public class AtlasBehaviorUIDemo extends Application
    private PlanarRegionsList createPlanarRegions()
    {
 //      return PatrolSimulationRegionFields.createUpDownOpenHouseRegions();
-      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
+//      return PatrolSimulationRegionFields.createUpDownTwoHighWithFlatBetween();
+      return PatrolSimulationRegionFields.createUpDownFourHighWithFlatCenter();
    }
 
    @Override

@@ -82,7 +82,6 @@ public class PatrolBehaviorUIController extends Group
 
       upDownGoalGraphic = new UpDownGoalGraphic();
       getChildren().addAll(upDownGoalGraphic.getNodes());
-      upDownCenterGraphic.clear();
       getChildren().add(upDownCenterGraphic.getNode());
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);

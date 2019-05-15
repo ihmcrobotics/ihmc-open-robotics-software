@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
-import us.ihmc.humanoidBehaviors.tools.TunedFootstepPlannerParameters;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -16,7 +16,6 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PatrolBehaviorAPI
 {
