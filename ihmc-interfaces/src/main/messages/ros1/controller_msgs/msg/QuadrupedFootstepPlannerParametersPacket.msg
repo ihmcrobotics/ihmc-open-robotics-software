@@ -89,7 +89,19 @@ float64 minimum_surface_incline_radians
 float64 cliff_height_to_avoid
 
 # Field default value -11.1
-float64 minimum_distance_from_cliff_bottoms
+float64 minimum_front_end_forward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_front_end_backward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_hind_end_forward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_hind_end_backward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_lateral_distance_from_cliff_bottoms
 
 # Field default value -11.1
 float64 minimum_distance_from_cliff_tops

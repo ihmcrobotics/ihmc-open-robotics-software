@@ -95,8 +95,11 @@
                             <Spinner fx:id="projectInsideDistanceForPostProcessing" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                             <Spinner fx:id="maximumXYWiggleDistance" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="3" />
                             <Spinner fx:id="cliffHeightToAvoid" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="4" />
-                            <Spinner fx:id="minDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="5" />
-                            <Spinner fx:id="minDistanceFromCliffTops" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+                            <Spinner fx:id="minFrontEndForwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="5" />
+                            <Spinner fx:id="minFrontEndBackwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="6" />
+                            <Spinner fx:id="minHindEndForwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="7" />
+                            <Spinner fx:id="minHindEndBackwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="8" />
+                            <Spinner fx:id="minLateralDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="9" />
 
                             <Spinner fx:id="distanceWeight" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="1" />
                             <Spinner fx:id="yawWeight" editable="true" GridPane.columnIndex="7" GridPane.rowIndex="2" />
