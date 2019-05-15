@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFootstepPlannerParameters implements FootstepPlannerParametersBasics
@@ -36,6 +37,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
    private final YoDouble minimumDistanceFromCliffTops = new YoDouble("minimumCliffHeightFromTops", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -185,6 +188,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
    {
       this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
+   }
+
+   @Override
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringExpansion.set(projectInsideUsingConvexHull);
+   }
+
+   @Override
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringPostProcessing.set(projectInsideUsingConvexHull);
    }
 
    @Override
@@ -383,6 +398,19 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getProjectInsideDistanceForPostProcessing()
    {
       return projectionInsideDistanceForPostProcessing.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return projectInsideUsingConvexHullDuringExpansion.getBooleanValue();
+   }
+
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return projectInsideUsingConvexHullDuringPostProcessing.getBooleanValue();
    }
 
    /** {@inheritDoc} */

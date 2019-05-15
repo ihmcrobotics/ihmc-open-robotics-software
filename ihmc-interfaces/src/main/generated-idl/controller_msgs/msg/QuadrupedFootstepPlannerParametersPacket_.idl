@@ -65,6 +65,8 @@ module controller_msgs
         double min_y_clearance_from_foot;
         @defaultValue(value=-11.1)
         double max_walking_speed_multiplier;
+        boolean project_inside_using_convex_hull_during_expansion;
+        boolean project_inside_using_convex_hull_during_post_processing;
         @defaultValue(value=-11.1)
         double projection_inside_distance_for_expansion;
         @defaultValue(value=-11.1)

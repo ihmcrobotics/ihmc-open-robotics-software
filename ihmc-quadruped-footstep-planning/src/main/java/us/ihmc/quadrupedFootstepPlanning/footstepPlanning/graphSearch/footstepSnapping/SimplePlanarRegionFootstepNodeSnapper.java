@@ -1,32 +1,45 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
    private final Point2D footPosition = new Point2D();
 
-   private final PlanarRegionSnapTools snapTools;
+   private final DoubleProvider projectionInsideDelta;
+   private final BooleanProvider projectInsideUsingConvexHull;
+   private final PlanarRegionConstraintDataHolder constraintDataHolder = new PlanarRegionConstraintDataHolder();
+   private final PlanarRegionConstraintDataParameters constraintDataParameters = new PlanarRegionConstraintDataParameters();
 
    public SimplePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
-                                                boolean enforceTranslationLessThanGridCell)
+                                                BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters);
 
-      snapTools = new PlanarRegionSnapTools(projectionInsideDelta, enforceTranslationLessThanGridCell);
+      this.projectionInsideDelta = projectionInsideDelta;
+      this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
+
+      constraintDataParameters.enforceTranslationLessThanGridCell = enforceTranslationLessThanGridCell;
+   }
+
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      super.setPlanarRegions(planarRegionsList);
+      constraintDataHolder.clear();
+      constraintDataParameters.projectionInsideDelta = projectionInsideDelta.getValue();
+      constraintDataParameters.projectInsideUsingConvexHull = projectInsideUsingConvexHull.getValue();
    }
 
    @Override
@@ -34,9 +47,11 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    {
       FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
       Vector2D projectionTranslation = new Vector2D();
-      PlanarRegion highestRegion = findHighestRegion(footPosition, projectionTranslation);
+      PlanarRegion highestRegion = PlanarRegionSnapTools
+            .findHighestRegionWithProjection(footPosition, projectionTranslation, constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
+                                             constraintDataParameters);
 
-      if(highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
+      if (highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
          return FootstepNodeSnapData.emptyData();
       }
@@ -58,13 +73,11 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       }
    }
 
-   private PlanarRegion findHighestRegion(Point2DReadOnly footPosition, Vector2D projectionTranslationToPack)
-   {
-      return snapTools.findHighestRegion(footPosition,  projectionTranslationToPack, planarRegionsList.getPlanarRegionsAsList());
-   }
-
    private boolean isTranslationBiggerThanGridCell(Vector2D translation)
    {
+      if (!constraintDataParameters.enforceTranslationLessThanGridCell)
+         return false;
+
       double maximumTranslationPerAxis = 0.5 * FootstepNode.gridSizeXY;
       return Math.abs(translation.getX()) > maximumTranslationPerAxis || Math.abs(translation.getY()) > maximumTranslationPerAxis;
    }

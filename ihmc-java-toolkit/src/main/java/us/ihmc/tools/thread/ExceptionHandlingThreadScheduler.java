@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ExceptionHandlingThreadScheduler
 {
-   private static final ExceptionHandler DEFAULT_HANDLER = t ->
+   public static final ExceptionHandler DEFAULT_HANDLER = t ->
    {
       LogTools.error(t.getMessage());
       t.printStackTrace();
@@ -80,6 +80,15 @@ public class ExceptionHandlingThreadScheduler
       {
          LogTools.warn("Thread has already been scheduled");
       }
+
+      return scheduledFuture;
+   }
+
+   public ScheduledFuture<?> scheduleOnce(Runnable runnable)
+   {
+      this.runnable = runnable;
+      scheduledFuture = executorService.schedule(this::printingRunnableWrapper, 0, TimeUnit.MILLISECONDS);
+      running = true;
 
       return scheduledFuture;
    }
