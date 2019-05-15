@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -65,7 +66,8 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       if (minimumDistanceFromCliffBottoms > 0.0)
       {
          Point3D highestNearbyPoint = new Point3D();
-         double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, footInWorld, highestNearbyPoint, minimumDistanceFromCliffBottoms);
+         double yaw = node.getNominalYaw();
+         double maximumCliffZInSoleFrame = findHighestNearbyPoint2(node.getMovingQuadrant(), planarRegionsList, footInWorld, yaw, highestNearbyPoint);
 
          if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
          {
@@ -115,6 +117,54 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 
       return maxZInSoleFrame;
    }
+
+   private static double findHighestNearbyPoint2(RobotQuadrant robotQuadrant, PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
+                                                 Point3DBasics highestNearbyPointToPack)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+
+      RigidBodyTransform transformToRegion = new RigidBodyTransform();
+      transformToRegion.setTranslation(footInWorld);
+      transformToRegion.setRotationYaw(footYaw);
+
+
+
+      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+      if (robotQuadrant.isQuadrantInFront())
+      {
+         tempPolygon.addVertex(0.25, 0.1);
+         tempPolygon.addVertex(0.25, -0.1);
+         tempPolygon.addVertex(-0.1, 0.1);
+         tempPolygon.addVertex(-0.1, -0.1);
+      }
+      else
+      {
+         tempPolygon.addVertex(-0.25, 0.1);
+         tempPolygon.addVertex(-0.25, -0.1);
+         tempPolygon.addVertex(0.1, 0.1);
+         tempPolygon.addVertex(0.1, -0.1);
+      }
+      tempPolygon.update();
+      tempPolygon.applyTransform(transformToRegion);
+
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+
+      for (PlanarRegion intersectingRegion : intersectingRegions)
+      {
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(footInWorld, intersectingRegion);
+
+         double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
+
+         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()))
+         {
+            maxZInSoleFrame = heightOfPointFromFoot;
+            highestNearbyPointToPack.set(closestPointInWorld);
+         }
+      }
+
+      return maxZInSoleFrame;
+   }
+
 
    private static double findLowestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics lowestNearbyPointToPack,
                                                double minimumDistanceFromCliffTops)
