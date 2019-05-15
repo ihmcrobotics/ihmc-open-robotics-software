@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -50,9 +51,6 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       if (!Double.isFinite(cliffHeightToAvoid))
          return true;
 
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
-      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
-
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       int xIndex = node.getXIndex(movingQuadrant);
       int yIndex = node.getYIndex(movingQuadrant);
@@ -62,16 +60,14 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);
 
-      if (minimumDistanceFromCliffBottoms > 0.0)
-      {
-         Point3D highestNearbyPoint = new Point3D();
-         double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, footInWorld, highestNearbyPoint, minimumDistanceFromCliffBottoms);
+      Point3D highestNearbyPoint = new Point3D();
+      double yaw = node.getNominalYaw();
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(node.getMovingQuadrant(), planarRegionsList, footInWorld, yaw, highestNearbyPoint, parameters);
 
-         if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
-         {
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-            return false;
-         }
+      if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
+      {
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+         return false;
       }
 
       /*
@@ -107,6 +103,49 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
          double distanceToPoint = footInWorld.distanceXY(closestPointInWorld);
 
          if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromFoot > maxZInSoleFrame)
+         {
+            maxZInSoleFrame = heightOfPointFromFoot;
+            highestNearbyPointToPack.set(closestPointInWorld);
+         }
+      }
+
+      return maxZInSoleFrame;
+   }
+
+   private static double findHighestNearbyPoint2(RobotQuadrant robotQuadrant, PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
+                                                 Point3DBasics highestNearbyPointToPack, FootstepPlannerParameters parameters)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+
+      RigidBodyTransform transformToRegion = new RigidBodyTransform();
+      transformToRegion.setRotationYaw(footYaw);
+
+      double forward = robotQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndForwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndForwardDistanceFromCliffBottoms();
+      double backward = robotQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndBackwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndBackwardDistanceFromCliffBottoms();
+      double lateral = parameters.getMinimumLateralDistanceFromCliffBottoms();
+
+      ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+      tempPolygon.addVertex(forward, lateral);
+      tempPolygon.addVertex(forward, -lateral);
+      tempPolygon.addVertex(-backward, lateral);
+      tempPolygon.addVertex(-backward, -lateral);
+      tempPolygon.update();
+      tempPolygon.applyTransform(transformToRegion);
+      tempPolygon.translate(footInWorld.getX(), footInWorld.getY());
+
+      List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(tempPolygon, planarRegionsList.getPlanarRegionsAsList());
+
+      for (PlanarRegion intersectingRegion : intersectingRegions)
+      {
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(footInWorld, intersectingRegion);
+
+         double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
+
+         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()))
          {
             maxZInSoleFrame = heightOfPointFromFoot;
             highestNearbyPointToPack.set(closestPointInWorld);

@@ -35,8 +35,11 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
-   private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
-   private final YoDouble minimumDistanceFromCliffTops = new YoDouble("minimumCliffHeightFromTops", registry);
+   private final YoDouble minimumFrontEndForwardDistanceFromCliffBottoms = new YoDouble("minimumFrontEndForwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumFrontEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumFrontEndBackwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumHindEndForwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndForwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumHindEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndBackwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumLateralDistanceFromCliffBottoms = new YoDouble("minimumLateralCliffHeightFromBottoms", registry);
    private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
    private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
 
@@ -221,15 +224,33 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMinimumDistanceFromCliffBottoms(double distance)
+   public void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance)
    {
-      minimumDistanceFromCliffBottoms.set(distance);
+      minimumFrontEndForwardDistanceFromCliffBottoms.set(distance);
    }
 
    @Override
-   public void setMinimumDistanceFromCliffTops(double distance)
+   public void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance)
    {
-      minimumDistanceFromCliffTops.set(distance);
+      minimumFrontEndBackwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
+   {
+      minimumHindEndForwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance)
+   {
+      minimumHindEndBackwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumLateralDistanceFromCliffBottoms(double distance)
+   {
+      minimumLateralDistanceFromCliffBottoms.set(distance);
    }
 
    /** {@inheritDoc} */
@@ -436,15 +457,36 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffBottoms()
+   public double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffBottoms.getDoubleValue();
+      return minimumFrontEndForwardDistanceFromCliffBottoms.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffTops()
+   public double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffTops.getDoubleValue();
+      return minimumFrontEndBackwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndForwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndForwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndBackwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return minimumLateralDistanceFromCliffBottoms.getDoubleValue();
    }
 }

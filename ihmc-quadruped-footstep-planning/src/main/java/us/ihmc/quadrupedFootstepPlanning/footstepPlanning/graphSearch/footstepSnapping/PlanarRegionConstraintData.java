@@ -32,10 +32,7 @@ public class PlanarRegionConstraintData
       this.projectInsideUsingConvexHull = projectInsideUsingConvexHull;
       this.projectionInsideDelta = projectionInsideDelta;
 
-      if (projectInsideUsingConvexHull)
-         scaledConvexHull = computedScaledConvexHull(polygonScaler, projectionInsideDelta);
-      else
-         scaledConvexHull = null;
+      scaledConvexHull = computedScaledConvexHull(polygonScaler, projectionInsideDelta);
    }
 
    private ConvexPolygon2DReadOnly computeScaledInternalPolygon(ConvexPolygon2DReadOnly internalRegionToScale, ConvexPolygonScaler polygonScaler, double projectionInsideDelta)
@@ -95,7 +92,9 @@ public class PlanarRegionConstraintData
       {
          ConvexPolygon2DReadOnly containingRegion = PlanarRegionSnapTools.getContainingConvexRegion(pointToCheck, convexPolygons);
          if (containingRegion == null)
-            return null;
+         {
+            return scaledConvexHull;
+         }
 
          if (scaledPolygons.containsKey(containingRegion))
             return scaledPolygons.get(containingRegion);

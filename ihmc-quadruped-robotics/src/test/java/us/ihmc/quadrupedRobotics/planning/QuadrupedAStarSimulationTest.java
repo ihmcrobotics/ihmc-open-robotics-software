@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.QuadrupedFootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -10,14 +8,22 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
@@ -25,6 +31,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -33,6 +40,9 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
+import java.util.List;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobotTestInterface
 {
@@ -84,6 +94,19 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       testEnvironment(DataSetName._20190327_175227_QuadrupedEnvironment3);
    }
 
+   @Test
+   public void testWalkingOverPlatformEnvironment() throws IOException
+   {
+      testEnvironment(DataSetName._20190514_163532_QuadrupedPlatformEnvironment);
+   }
+
+   @Test
+   public void testWalkingOverShortPlatformEnvironment() throws IOException
+   {
+      testEnvironment(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment);
+   }
+
+
    public void testEnvironment(DataSetName dataSetName) throws IOException
    {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
@@ -107,21 +130,31 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
       stepTeleopManager.setShiftPlanBasedOnStepAdjustment(false);
 
+      stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.FAST);
+
       conductor.getScs().setCameraTracking(true, true, true, false);
+
+      ROS2Tools.MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
+
+      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
+                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
+      stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      stepTeleopManager.publishXGaitSettings(stepTeleopManager.getXGaitSettings());
+
       // forward footstep plan from planner to controller
-      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
-                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
-                                                                           ROS2TopicQualifier.OUTPUT),
-                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
+//      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
+//                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
+//                                                                           ROS2TopicQualifier.OUTPUT),
+//                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
 
       // make a body orientation trajectory to match the step plan
-      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
-                                                                           ROS2TopicQualifier.OUTPUT),
-                                           s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
+//      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
+//                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
+//                                                                           ROS2TopicQualifier.OUTPUT),
+//                                           s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       // construct planning request
       QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
@@ -133,7 +166,8 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       planningRequestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(plannerInput.getGoalYaw());
       planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
-      planningRequestPacket.planar_regions_list_message_.set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      planningRequestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      planningRequestPacket.setTimeout(plannerInput.getQuadrupedTimeout());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
 
@@ -144,5 +178,49 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       conductor.simulate();
 
       conductor.concludeTesting();
+   }
+
+   private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
+   {
+      QuadrupedTimedStepListMessage footstepDataListMessage = packet.getFootstepDataList();
+      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
+
+      assertTrue(result.validForExecution());
+
+      FootstepPlan footstepPlan = convertToFootstepPlan(footstepDataListMessage);
+
+      QuadrupedTimedStepListMessage stepMessages = new QuadrupedTimedStepListMessage();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         QuadrupedTimedStepMessage stepMessage = stepMessages.getQuadrupedStepList().add();
+         QuadrupedTimedStep step = footstepPlan.getFootstep(i);
+
+         stepMessage.getQuadrupedStepMessage().setRobotQuadrant(step.getRobotQuadrant().toByte());
+         stepMessage.getQuadrupedStepMessage().getGoalPosition().set(step.getGoalPosition());
+         stepMessage.getQuadrupedStepMessage().setGroundClearance(step.getGroundClearance());
+         stepMessage.getTimeInterval().setStartTime(step.getTimeInterval().getStartTime());
+         stepMessage.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
+      }
+
+      stepMessages.setIsExpressedInAbsoluteTime(false);
+      stepMessages.setAreStepsAdjustable(false);
+
+      stepTeleopManager.publishTimedStepListToController(stepMessages);
+   }
+
+   private static FootstepPlan convertToFootstepPlan(QuadrupedTimedStepListMessage footstepDataListMessage)
+   {
+      FootstepPlan footstepPlan = new FootstepPlan();
+
+      for (QuadrupedTimedStepMessage timedStepMessage : footstepDataListMessage.getQuadrupedStepList())
+      {
+         QuadrupedStepMessage stepMessage = timedStepMessage.getQuadrupedStepMessage();
+         TimeIntervalMessage timeInterval = timedStepMessage.getTimeInterval();
+         FramePoint3D stepPosition = new FramePoint3D();
+         stepPosition.set(stepMessage.getGoalPosition());
+         footstepPlan.addFootstep(RobotQuadrant.fromByte(stepMessage.getRobotQuadrant()), stepPosition, stepMessage.getGroundClearance(), timeInterval.getStartTime(), timeInterval.getEndTime());
+      }
+
+      return footstepPlan;
    }
 }
