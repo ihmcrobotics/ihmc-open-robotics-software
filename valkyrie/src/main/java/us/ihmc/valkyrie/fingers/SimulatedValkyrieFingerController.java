@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -24,15 +24,13 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
+public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
 {
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
-
-   private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
+   private final YoDouble handControllerTime;
    private final SimulatedValkyrieFingerJointAngleProducer jointAngleProducer;
 
    private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTimeForSim;
@@ -55,10 +53,15 @@ public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
 
    private long timestamp;
 
+   private final MirroredYoVariableRegistry registry;
+
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
                                             MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      handControllerTime = new YoDouble("handControllerTime", registry);
 
       if (realtimeRos2Node != null)
       {
@@ -138,6 +141,8 @@ public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
                                                  valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }
+
+      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
    @Override
@@ -400,6 +405,7 @@ public class SimulatedValkyrieFingerController extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData context)
    {
       write();
+      registry.updateMirror();
    }
 
    @Override
