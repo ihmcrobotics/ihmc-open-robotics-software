@@ -51,9 +51,6 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       if (!Double.isFinite(cliffHeightToAvoid))
          return true;
 
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
-      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
-
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       int xIndex = node.getXIndex(movingQuadrant);
       int yIndex = node.getYIndex(movingQuadrant);
@@ -63,17 +60,14 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);
 
-      if (minimumDistanceFromCliffBottoms > 0.0)
-      {
-         Point3D highestNearbyPoint = new Point3D();
-         double yaw = node.getNominalYaw();
-         double maximumCliffZInSoleFrame = findHighestNearbyPoint2(node.getMovingQuadrant(), planarRegionsList, footInWorld, yaw, highestNearbyPoint);
+      Point3D highestNearbyPoint = new Point3D();
+      double yaw = node.getNominalYaw();
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(node.getMovingQuadrant(), planarRegionsList, footInWorld, yaw, highestNearbyPoint, parameters);
 
-         if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
-         {
-            rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-            return false;
-         }
+      if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
+      {
+         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+         return false;
       }
 
       /*
@@ -119,29 +113,26 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
    }
 
    private static double findHighestNearbyPoint2(RobotQuadrant robotQuadrant, PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
-                                                 Point3DBasics highestNearbyPointToPack)
+                                                 Point3DBasics highestNearbyPointToPack, FootstepPlannerParameters parameters)
    {
       double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
       transformToRegion.setRotationYaw(footYaw);
 
+      double forward = robotQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndForwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndForwardDistanceFromCliffBottoms();
+      double backward = robotQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndBackwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndBackwardDistanceFromCliffBottoms();
+      double lateral = parameters.getMinimumLateralDistanceFromCliffBottoms();
 
       ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-      if (robotQuadrant.isQuadrantInFront())
-      {
-         tempPolygon.addVertex(0.25, 0.1);
-         tempPolygon.addVertex(0.25, -0.1);
-         tempPolygon.addVertex(-0.1, 0.1);
-         tempPolygon.addVertex(-0.1, -0.1);
-      }
-      else
-      {
-         tempPolygon.addVertex(-0.25, 0.1);
-         tempPolygon.addVertex(-0.25, -0.1);
-         tempPolygon.addVertex(0.1, 0.1);
-         tempPolygon.addVertex(0.1, -0.1);
-      }
+      tempPolygon.addVertex(forward, lateral);
+      tempPolygon.addVertex(forward, -lateral);
+      tempPolygon.addVertex(-backward, lateral);
+      tempPolygon.addVertex(-backward, -lateral);
       tempPolygon.update();
       tempPolygon.applyTransform(transformToRegion);
       tempPolygon.translate(footInWorld.getX(), footInWorld.getY());
@@ -163,7 +154,6 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 
       return maxZInSoleFrame;
    }
-
 
    private static double findLowestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, Point3DBasics lowestNearbyPointToPack,
                                                double minimumDistanceFromCliffTops)
