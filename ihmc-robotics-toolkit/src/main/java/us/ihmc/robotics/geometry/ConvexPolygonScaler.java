@@ -28,9 +28,9 @@ public class ConvexPolygonScaler
    private final Point2D referencePoint = new Point2D();
    private final Vector2D normalizedVector = new Vector2D();
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-   
+
    private final ArrayList<Line2D> edgePool = new ArrayList<Line2D>();
-   
+
    private final ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
    public ConvexPolygonScaler()
@@ -40,7 +40,7 @@ public class ConvexPolygonScaler
          edgePool.add(new Line2D());
       }
    }
-   
+
    private Line2D getARay(int index)
    {
       if (edgePool.size() <= index)
@@ -50,30 +50,40 @@ public class ConvexPolygonScaler
             edgePool.add(new Line2D());
          }
       }
-      
+
       return edgePool.get(index);
    }
-   
-   
+
    /**
     * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
-    * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
     */
    public boolean scaleConvexPolygon(ConvexPolygon2DReadOnly polygonQ, double distance, ConvexPolygon2DBasics polygonToPack)
+   {
+      return scaleConvexPolygon(polygonQ, distance, polygonToPack, -1);
+   }
+
+
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
+    */
+   public boolean scaleConvexPolygon(ConvexPolygon2DReadOnly polygonQ, double distance, ConvexPolygon2DBasics polygonToPack, int... vertexStartIndicesToNotScale)
    {
       if (Math.abs(distance) < 1.0e-10)
       {
          polygonToPack.set(polygonQ);
          return true;
       }
-      
+
       if (polygonQ.getNumberOfVertices() == 2)
       {
          Point2DReadOnly vertex0 = polygonQ.getVertex(0);
          Point2DReadOnly vertex1 = polygonQ.getVertex(1);
          polygonAsLineSegment.set(vertex0, vertex1);
-         
+
          if(distance < 0.0)
          {
             polygonToPack.clear();
@@ -81,10 +91,10 @@ public class ConvexPolygonScaler
             normalizedVector.scale(-distance);
             polygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
             polygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
-            
+
             polygonAsLineSegment.perpendicular(true, normalizedVector);
             normalizedVector.scale(distance);
-            
+
             polygonToPack.addVertex(vertex0.getX() + normalizedVector.getX(), vertex0.getY() + normalizedVector.getY());
             polygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
             polygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
@@ -92,13 +102,13 @@ public class ConvexPolygonScaler
             polygonToPack.update();
             return true;
          }
-         
+
          if (vertex0.distance(vertex1) < 2.0 * distance)
          {
             Point2D midPoint = new Point2D(vertex0);
             midPoint.add(vertex1);
             midPoint.scale(0.5);
-            
+
             polygonToPack.clear();
             polygonToPack.addVertex(midPoint);
             polygonToPack.update();
@@ -112,8 +122,8 @@ public class ConvexPolygonScaler
          polygonToPack.clear();
          polygonToPack.addVertex(newVertex0);
          polygonToPack.addVertex(newVertex1);
-         polygonToPack.update();;
-         
+         polygonToPack.update();
+
          return true;
       }
 
@@ -137,32 +147,43 @@ public class ConvexPolygonScaler
 
       int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
+      int vertexQIndex = leftMostIndexOnPolygonQ;
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
 
       for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
       {
          edgeOnQ.set(vertexQ, nextVertexQ);
-         edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
-         vectorPerpendicularToEdgeOnQ.negate();
-         linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
-         linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
          normalizedVector.set(edgeOnQ.getDirection());
-         
-         
+
+         if (!containsIndex(vertexQIndex, vertexStartIndicesToNotScale))
+         {
+            edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
+            vectorPerpendicularToEdgeOnQ.negate();
+            linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
+            linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
+         }
+         else
+         {
+            referencePoint.set(vertexQ);
+         }
+
+
          Line2D newEdge = getARay(rays.size());
          newEdge.set(referencePoint, normalizedVector);
          rays.add(newEdge);
 
-         vertexQ = nextVertexQ;
+         vertexQIndex = nextVertexQIndex;
          nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
+
+         vertexQ = nextVertexQ;
          nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
       }
 
 
       boolean foundSolution = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToPack);
-      if (!foundSolution) 
-      { 
+      if (!foundSolution)
+      {
          polygonToPack.clear();
          polygonToPack.addVertex(polygonQ.getCentroid());
          polygonToPack.update();
@@ -171,6 +192,19 @@ public class ConvexPolygonScaler
       return foundSolution;
    }
 
+   private static boolean containsIndex(int indexToCheck, int... indicesToCheck)
+   {
+      if (indexToCheck < 0)
+         return false;
+
+      for (int i = 0; i < indicesToCheck.length; i++)
+      {
+         if (indexToCheck == indicesToCheck[i])
+            return true;
+      }
+
+      return false;
+   }
 
    private final Vector2D vectorToInteriorPolygonVertex = new Vector2D();
 
@@ -355,16 +389,16 @@ public class ConvexPolygonScaler
    /**
     * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
-    * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
     */
    public void scaleConvexPolygon(FrameConvexPolygon2DReadOnly polygonQ, double distance, FrameConvexPolygon2D framePolygonToPack)
-   {      
+   {
       if (Math.abs(distance) < 1.0e-10)
       {
          framePolygonToPack.setIncludingFrame(polygonQ);
          return;
       }
-      
+
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
       scaleConvexPolygon((ConvexPolygon2DReadOnly) polygonQ, distance, (ConvexPolygon2DBasics) framePolygonToPack);
