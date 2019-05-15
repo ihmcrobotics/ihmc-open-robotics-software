@@ -67,6 +67,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final PlanarRegionConstraintDataHolder highLevelConstraintDataHolder = new PlanarRegionConstraintDataHolder();
    private final PlanarRegionConstraintDataParameters highLevelPlanarRegionConstraintDataParameters = new PlanarRegionConstraintDataParameters();
+   private final FootstepPlannerParameters parameters;
 
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
@@ -109,6 +110,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                                         FootstepNodeSnapper snapper, FootstepNodeSnapper postProcessingSnapper, QuadrupedFootstepPlannerListener listener,
                                         YoVariableRegistry parentRegistry)
    {
+      this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
       this.nodeChecker = nodeChecker;
       this.heuristics = heuristics;
