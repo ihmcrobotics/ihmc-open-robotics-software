@@ -56,7 +56,8 @@ public class PointFootSnapperVisualizer
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       Graphics3DObject snappedNodeGraphics = new Graphics3DObject();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion, true);
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
+                                                                                                parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
       snapper.setPlanarRegions(planarRegionsList);
 
       int minXIndex = (int) Math.round(minX / FootstepNode.gridSizeXY);
