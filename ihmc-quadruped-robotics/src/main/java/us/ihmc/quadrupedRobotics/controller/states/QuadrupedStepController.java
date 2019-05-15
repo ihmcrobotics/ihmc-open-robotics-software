@@ -91,7 +91,8 @@ public class QuadrupedStepController implements EventState
       balanceManager.compute();
 
       // update step adjustment and swing speed up
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(),
+                                                                                             stepMessageHandler.isStepPlanAdjustable());
       if (balanceManager.stepHasBeenAdjusted())
       {
          feetManager.adjustSteps(adjustedSteps);

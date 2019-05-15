@@ -52,6 +52,8 @@ public enum DataSetName
 	_20190219_182005_SimpleGaps,
 	_20171115_171243_SimplePlaneAndWall,
 	_20190327_175120_QuadrupedEnvironment2,
+	_20190514_163532_QuadrupedPlatformEnvironment,
+	_20190514_163532_QuadrupedShortPlatformEnvironment,
 	_20190219_182005_SimpleStepOnBoxTwo,
 	_20190219_182005_Corridor,
 	_20171215_210811_DoorwayWithCeiling,

@@ -1,15 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFootstepPlannerParameters implements FootstepPlannerParametersBasics
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoDouble maximumStepReach = new YoDouble("maximumStepReach", registry);
-   private final YoDouble maximumStepLength = new YoDouble("maximumStepLength", registry);
-   private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
+   private final YoDouble maximumFrontStepReach = new YoDouble("maximumFrontStepReach", registry);
+   private final YoDouble maximumFrontStepLength = new YoDouble("maximumFrontStepLength", registry);
+   private final YoDouble minimumFrontStepLength = new YoDouble("minimumFrontStepLength", registry);
+   private final YoDouble maximumHindStepReach = new YoDouble("maximumHindStepReach", registry);
+   private final YoDouble maximumHindStepLength = new YoDouble("maximumHindStepLength", registry);
+   private final YoDouble minimumHindStepLength = new YoDouble("minimumHindStepLength", registry);
    private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
    private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
    private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
@@ -26,11 +30,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minXClearanceFromFoot = new YoDouble("minXClearanceFromFoot", registry);
    private final YoDouble minYClearanceFromFoot = new YoDouble("minYClearanceFromFoot", registry);
    private final YoDouble maxWalkingSpeedMultiplier = new YoDouble("maxWalkingSpeedMultiplier", registry);
-   private final YoDouble projectionInsideDistance = new YoDouble("projectionInsideDistance", registry);
+   private final YoDouble projectionInsideDistanceForExpansion = new YoDouble("projectionInsideDistanceForExpansion", registry);
+   private final YoDouble projectionInsideDistanceForPostProcessing = new YoDouble("projectionInsideDistanceForPostProcessing", registry);
+   private final YoDouble maximumXYWiggleDistance = new YoDouble("maximumXYWiggleDistance", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble cliffHeightToAvoid = new YoDouble("cliffHeightToAvoid", registry);
-   private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumCliffHeightFromBottoms", registry);
-   private final YoDouble minimumDistanceFromCliffTops = new YoDouble("minimumCliffHeightFromTops", registry);
+   private final YoDouble minimumFrontEndForwardDistanceFromCliffBottoms = new YoDouble("minimumFrontEndForwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumFrontEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumFrontEndBackwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumHindEndForwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndForwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumHindEndBackwardDistanceFromCliffBottoms = new YoDouble("minimumHindEndBackwardCliffHeightFromBottoms", registry);
+   private final YoDouble minimumLateralDistanceFromCliffBottoms = new YoDouble("minimumLateralCliffHeightFromBottoms", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
+   private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -39,21 +50,39 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMaximumStepReach(double maximumStepReach)
+   public void setMaximumFrontStepReach(double maximumStepReach)
    {
-      this.maximumStepReach.set(maximumStepReach);
+      this.maximumFrontStepReach.set(maximumStepReach);
    }
 
    @Override
-   public void setMaximumStepLength(double maximumStepLength)
+   public void setMaximumFrontStepLength(double maximumStepLength)
    {
-      this.maximumStepLength.set(maximumStepLength);
+      this.maximumFrontStepLength.set(maximumStepLength);
    }
 
    @Override
-   public void setMinimumStepLength(double minimumStepLength)
+   public void setMinimumFrontStepLength(double minimumStepLength)
    {
-      this.minimumStepLength.set(minimumStepLength);
+      this.minimumFrontStepLength.set(minimumStepLength);
+   }
+
+   @Override
+   public void setMaximumHindStepReach(double maximumStepReach)
+   {
+      this.maximumHindStepReach.set(maximumStepReach);
+   }
+
+   @Override
+   public void setMaximumHindStepLength(double maximumStepLength)
+   {
+      this.maximumHindStepLength.set(maximumStepLength);
+   }
+
+   @Override
+   public void setMinimumHindStepLength(double minimumStepLength)
+   {
+      this.minimumHindStepLength.set(minimumStepLength);
    }
 
    @Override
@@ -153,9 +182,33 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setProjectInsideDistance(double projectionInsideDistance)
+   public void setProjectInsideDistanceForExpansion(double projectionInsideDistance)
    {
-      this.projectionInsideDistance.set(projectionInsideDistance);
+      this.projectionInsideDistanceForExpansion.set(projectionInsideDistance);
+   }
+
+   @Override
+   public void setProjectInsideDistanceForPostProcessing(double projectionInsideDistance)
+   {
+      this.projectionInsideDistanceForPostProcessing.set(projectionInsideDistance);
+   }
+
+   @Override
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringExpansion.set(projectInsideUsingConvexHull);
+   }
+
+   @Override
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringPostProcessing.set(projectInsideUsingConvexHull);
+   }
+
+   @Override
+   public void setMaximumXYWiggleDistance(double wiggleDistance)
+   {
+      this.maximumXYWiggleDistance.set(wiggleDistance);
    }
 
    @Override
@@ -171,36 +224,75 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setMinimumDistanceFromCliffBottoms(double distance)
+   public void setMinimumFrontEndForwardDistanceFromCliffBottoms(double distance)
    {
-      minimumDistanceFromCliffBottoms.set(distance);
+      minimumFrontEndForwardDistanceFromCliffBottoms.set(distance);
    }
 
    @Override
-   public void setMinimumDistanceFromCliffTops(double distance)
+   public void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double distance)
    {
-      minimumDistanceFromCliffTops.set(distance);
+      minimumFrontEndBackwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
+   {
+      minimumHindEndForwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumHindEndBackwardDistanceFromCliffBottoms(double distance)
+   {
+      minimumHindEndBackwardDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setMinimumLateralDistanceFromCliffBottoms(double distance)
+   {
+      minimumLateralDistanceFromCliffBottoms.set(distance);
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepReach()
+   public double getMaximumFrontStepReach()
    {
-      return maximumStepReach.getDoubleValue();
+      return maximumFrontStepReach.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepLength()
+   public double getMaximumFrontStepLength()
    {
-      return maximumStepLength.getDoubleValue();
+      return maximumFrontStepLength.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepLength()
+   public double getMinimumFrontStepLength()
    {
-      return minimumStepLength.getDoubleValue();
+      return minimumFrontStepLength.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepReach()
+   {
+      return maximumHindStepReach.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepLength()
+   {
+      return maximumHindStepLength.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindStepLength()
+   {
+      return minimumHindStepLength.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -317,9 +409,36 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getProjectInsideDistance()
+   public double getProjectInsideDistanceForExpansion()
    {
-      return projectionInsideDistance.getDoubleValue();
+      return projectionInsideDistanceForExpansion.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getProjectInsideDistanceForPostProcessing()
+   {
+      return projectionInsideDistanceForPostProcessing.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return projectInsideUsingConvexHullDuringExpansion.getBooleanValue();
+   }
+
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return projectInsideUsingConvexHullDuringPostProcessing.getBooleanValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return maximumXYWiggleDistance.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -338,15 +457,36 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffBottoms()
+   public double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffBottoms.getDoubleValue();
+      return minimumFrontEndForwardDistanceFromCliffBottoms.getDoubleValue();
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumDistanceFromCliffTops()
+   public double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return minimumDistanceFromCliffTops.getDoubleValue();
+      return minimumFrontEndBackwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndForwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndForwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return minimumHindEndBackwardDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return minimumLateralDistanceFromCliffBottoms.getDoubleValue();
    }
 }

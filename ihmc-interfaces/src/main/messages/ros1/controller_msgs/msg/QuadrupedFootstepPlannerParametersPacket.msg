@@ -4,13 +4,22 @@ float64 NO_VALUE_DOUBLE=-11.1
 uint32 sequence_id
 
 # Field default value -11.1
-float64 maximum_step_reach
+float64 maximum_front_step_reach
 
 # Field default value -11.1
-float64 maximum_step_length
+float64 maximum_front_step_length
 
 # Field default value -11.1
-float64 minimum_step_length
+float64 minimum_front_step_length
+
+# Field default value -11.1
+float64 maximum_hind_step_reach
+
+# Field default value -11.1
+float64 maximum_hind_step_length
+
+# Field default value -11.1
+float64 minimum_hind_step_length
 
 # Field default value -11.1
 float64 maximum_step_width
@@ -60,8 +69,18 @@ float64 min_y_clearance_from_foot
 # Field default value -11.1
 float64 max_walking_speed_multiplier
 
+bool project_inside_using_convex_hull_during_expansion
+
+bool project_inside_using_convex_hull_during_post_processing
+
 # Field default value -11.1
-float64 projection_inside_distance
+float64 projection_inside_distance_for_expansion
+
+# Field default value -11.1
+float64 projection_inside_distance_for_post_processing
+
+# Field default value -11.1
+float64 maximum_xy_wiggle_distance
 
 # Field default value -11.1
 float64 minimum_surface_incline_radians
@@ -70,7 +89,19 @@ float64 minimum_surface_incline_radians
 float64 cliff_height_to_avoid
 
 # Field default value -11.1
-float64 minimum_distance_from_cliff_bottoms
+float64 minimum_front_end_forward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_front_end_backward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_hind_end_forward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_hind_end_backward_distance_from_cliff_bottoms
+
+# Field default value -11.1
+float64 minimum_lateral_distance_from_cliff_bottoms
 
 # Field default value -11.1
 float64 minimum_distance_from_cliff_tops
