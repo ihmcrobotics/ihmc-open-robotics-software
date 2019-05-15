@@ -39,6 +39,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumDistanceFromCliffTops;
    private double minimumDistanceFromCliffBottoms;
 
+   private boolean projectInsideUsingConvexHullDuringExpansion;
+   private boolean projectInsideUsingConvexHullDuringPostProcessing;
+
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
       set(footstepPlannerParameters);
@@ -238,6 +241,20 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
+   public void setProjectInsideUsingConvexHullDuringExpansion(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringExpansion = projectInsideUsingConvexHull;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setProjectInsideUsingConvexHullDuringPostProcessing(boolean projectInsideUsingConvexHull)
+   {
+      this.projectInsideUsingConvexHullDuringPostProcessing = projectInsideUsingConvexHull;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public void setMaximumXYWiggleDistance(double maximumWiggleDistance)
    {
       this.maximumXYWiggleDistance = maximumWiggleDistance;
@@ -414,6 +431,20 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getProjectInsideDistanceForPostProcessing()
    {
       return projectInsideDistanceForPostProcessing;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringExpansion()
+   {
+      return projectInsideUsingConvexHullDuringExpansion;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
+   {
+      return projectInsideUsingConvexHullDuringPostProcessing;
    }
 
    /** {@inheritDoc} */

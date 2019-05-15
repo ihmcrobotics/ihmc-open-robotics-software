@@ -103,15 +103,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       steppingStateChangeMessage.set(message);
    }
 
-   public void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
-   {
-      for (FootstepPlannerType plannerKey : plannerMap.keySet())
-      {
-         QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(plannerKey);
-         planner.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
-      }
-   }
-
    public void processGroundPlaneMessage(QuadrupedGroundPlaneMessage message)
    {
       for (FootstepPlannerType plannerKey : plannerMap.keySet())
@@ -187,6 +178,15 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
+      if (planarRegionsList.isPresent())
+      {
+         planner.setPlanarRegionsList(planarRegionsList.get());
+      }
+      else
+      {
+         planner.setPlanarRegionsList(null);
+      }
+
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), request.getGoalPositionInWorld(), request.getGoalOrientationInWorld());
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
@@ -239,15 +239,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
 
       QuadrupedBodyPathAndFootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
-      if (planarRegionsList.isPresent())
-      {
-         planner.setPlanarRegionsList(planarRegionsList.get());
-      }
-      else
-      {
-         planner.setPlanarRegionsList(null);
-      }
-
       reportMessage(packStatus(FootstepPlannerStatus.PLANNING_PATH));
 
       FootstepPlanningResult status = planner.planPath();
@@ -262,7 +253,11 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
          status = planner.plan();
       }
 
-      FootstepPlan footstepPlan = planner.getPlan();
+      FootstepPlan footstepPlan;
+      if (status.validForExecution())
+         footstepPlan = planner.getPlan();
+      else
+         footstepPlan = null;
 
       reportMessage(packStepResult(footstepPlan, bodyPathPlan, status));
 
