@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.concurrent.TimeUnit;
@@ -52,34 +53,15 @@ public class ManualStepTabController extends Group
    private int jointNameHash;
    private QuadrupedReferenceFrames referenceFrames;
 
-   @FXML
-   private Spinner<Double> swingHeight;
-
-   @FXML
-   private Spinner<Double> stepDuration;
-
-   @FXML
-   private Spinner<Double> stepHeight;
-
-   @FXML
-   private Spinner<Double> stepLength;
-
-   @FXML
-   private Spinner<Double> stepWidth;
-
-   @FXML ComboBox<RobotQuadrant> firstFoot;
-
-   @FXML
-   private Spinner<Integer> numberOfSteps;
-
-   @FXML
-   private Spinner<Double> dwellTime;
-
-   @FXML
-   private Button stepButton;
-
-   @FXML
-   private CheckBox useTrot;
+   @FXML private Spinner<Double> swingHeight;
+   @FXML private Spinner<Double> stepDuration;
+   @FXML private Spinner<Double> stepHeight;
+   @FXML private Spinner<Double> stepLength;
+   @FXML private Spinner<Double> stepWidth;
+   @FXML private ComboBox<RobotQuadrant> firstFoot;
+   @FXML private Spinner<Integer> numberOfSteps;
+   @FXML private Spinner<Double> dwellTime;
+   @FXML private CheckBox useTrot;
 
    @FXML private ComboBox<String> flamingoFoot;
    @FXML private Spinner<Double> flamingoTrajectoryTime;
@@ -94,31 +76,9 @@ public class ManualStepTabController extends Group
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       allJoints = fullRobotModel.getOneDoFJoints();
-      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
    }
-
-   private static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
-   {
-      CRC32 crc = new CRC32();
-      for (OneDoFJointBasics joint : joints)
-      {
-         crc.update(joint.getName().getBytes());
-      }
-
-      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
-      {
-         crc.update(forceSensorDefinition.getSensorName().getBytes());
-      }
-
-      for (IMUDefinition imuDefinition : imuDefinitions)
-      {
-         crc.update(imuDefinition.getName().getBytes());
-      }
-
-      return (int) crc.getValue();
-   }
-
 
    public void attachMessager(JavaFXMessager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings)
    {
@@ -148,8 +108,6 @@ public class ManualStepTabController extends Group
       referenceFrames.updateFrames();
    }
 
-
-
    public void bindControls()
    {
       swingHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.01, 0.2, defaultStepHeight, 0.01));
@@ -167,7 +125,6 @@ public class ManualStepTabController extends Group
                                                           RobotQuadrant.HIND_RIGHT.getTitleCaseName()));
       flamingoTrajectoryTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 500.0, 2.0, 0.1));
       useTrot.setSelected(false);
-
       firstFoot.getSelectionModel().select(RobotQuadrant.FRONT_RIGHT);
       flamingoFoot.getSelectionModel().select(NO_FLAMINGO_QUADRANT_SELECTED);
    }
@@ -260,7 +217,6 @@ public class ManualStepTabController extends Group
       useTrotOverCrawl.set(useTrot.isSelected());
    }
 
-
    private void handleTrotRequest()
    {
       RobotQuadrant firstFootQuadrant = firstFoot.getValue();
@@ -304,7 +260,6 @@ public class ManualStepTabController extends Group
       double timeDelay = 0.0;
       double lengthOffset = 0.0;
       double widthOffset = 0.0;
-
 
       for (int i = 0; i < numberOfSteps; i++)
       {
@@ -393,7 +348,6 @@ public class ManualStepTabController extends Group
          nominalPosition.addY(0.5 * robotQuadrant.getSide().negateIfRightSide(stanceWidth));
          nominalPositions.put(robotQuadrant, nominalPosition);
       }
-
 
       double lengthOffset = 0.0;
       double widthOffset = 0.0;
