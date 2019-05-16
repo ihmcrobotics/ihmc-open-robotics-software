@@ -51,36 +51,35 @@ public class AtlasNetworkProcessor
 
       if (config.success())
       {
-    	  DRCRobotModel model;
+         DRCRobotModel model;
 
-    	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+         networkModuleParams.enableUiModule(false);
+         networkModuleParams.enableBehaviorModule(false);
+         networkModuleParams.enableSensorModule(true);
+         networkModuleParams.enableBehaviorVisualizer(false);
+         networkModuleParams.setDrillDetectionModuleEnabled(false);
+         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
+         networkModuleParams.enableHeightQuadTreeToolbox(false);
+         networkModuleParams.enableKinematicsToolboxVisualizer(false);
+         networkModuleParams.enableMocapModule(false);
+         networkModuleParams.enableKinematicsToolboxVisualizer(false);
+         networkModuleParams.enableFootstepPlanningToolbox(false);
+         networkModuleParams.enableKinematicsToolbox(true);
+         networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
+         networkModuleParams.setFilterControllerInputMessages(true);
+         networkModuleParams.setEnableJoystickBasedStepping(true);
+         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
+         networkModuleParams.enableAutoREAStateUpdater(true);
+         networkModuleParams.enableWalkingPreviewToolbox(true);
+         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 
-        networkModuleParams.enableUiModule(false);
-        networkModuleParams.enableBehaviorModule(false);
-        networkModuleParams.enableSensorModule(true);
-        networkModuleParams.enableBehaviorVisualizer(false);
-        networkModuleParams.setDrillDetectionModuleEnabled(false);
-        networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
-        networkModuleParams.enableHeightQuadTreeToolbox(false);
-        networkModuleParams.enableKinematicsToolboxVisualizer(false);
-        networkModuleParams.enableMocapModule(false);
-        networkModuleParams.enableKinematicsToolboxVisualizer(false);
-        networkModuleParams.enableFootstepPlanningToolbox(false);
-        networkModuleParams.enableKinematicsToolbox(true);
-        networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-        networkModuleParams.setFilterControllerInputMessages(true);
-        networkModuleParams.setEnableJoystickBasedStepping(true);
-        networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
-        networkModuleParams.enableAutoREAStateUpdater(true);
-        networkModuleParams.enableWalkingPreviewToolbox(true);
-        networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
-
-        URI rosuri = NetworkParameters.getROSURI();
-        if(rosuri != null)
-        {
-           networkModuleParams.enableRosModule(true);
-           networkModuleParams.setRosUri(rosuri);
-           System.out.println("ROS_MASTER_URI="+rosuri);
+         URI rosuri = NetworkParameters.getROSURI();
+         if (rosuri != null)
+         {
+            networkModuleParams.enableRosModule(true);
+            networkModuleParams.setRosUri(rosuri);
+            System.out.println("ROS_MASTER_URI=" + rosuri);
 
             createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
          }
