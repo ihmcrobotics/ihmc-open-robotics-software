@@ -77,10 +77,15 @@ public class QuadrupedBalanceManager
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
+   private final DoubleProvider maxDcmErrorBeforeLiftOffX;
+   private final DoubleProvider maxDcmErrorBeforeLiftOffY;
+
    private final BooleanProvider updateLipmHeightFromDesireds = new BooleanParameter("updateLipmHeightFromDesireds", registry, true);
 
    private final BooleanProvider useSimpleSwingSpeedUpCalculation = new BooleanParameter("useSimpleSwingSpeedUpCalculation", registry, true);
    private final DoubleProvider durationForEmergencySwingSpeedUp = new DoubleParameter("durationForEmergencySwingSpeedUp", registry, 0.35);
+
+   private final YoDouble normalizedDcmErrorForDelayedLiftOff = new YoDouble("normalizedDcmErrorForDelayedLiftOff", registry);
 
    private final YoDouble normalizedDcmErrorForSwingSpeedUp = new YoDouble("normalizedDcmErrorForSpeedUp", registry);
    private final DoubleProvider maxDcmErrorForSpeedUpX = new DoubleParameter("maxDcmErrorForSpeedUpX", registry, 0.12);
@@ -124,6 +129,8 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
+      maxDcmErrorBeforeLiftOffX = new DoubleParameter("maxDcmErrorBeforeLiftOffX", registry, 0.03);
+      maxDcmErrorBeforeLiftOffY = new DoubleParameter("maxDcmErrorBeforeLiftOffY", registry, 0.02);
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
@@ -359,6 +366,11 @@ public class QuadrupedBalanceManager
       return computeNormalizedEllipticDcmError(maxDcmErrorForSpeedUpX.getValue(), maxDcmErrorForSpeedUpY.getValue(), normalizedDcmErrorForSwingSpeedUp);
    }
 
+   public double computeNormalizedEllipticDcmErrorForDelayedLiftOff()
+   {
+      return computeNormalizedEllipticDcmError(maxDcmErrorBeforeLiftOffX.getValue(), maxDcmErrorBeforeLiftOffY.getValue(), normalizedDcmErrorForDelayedLiftOff);
+   }
+
    private double computeNormalizedEllipticDcmError(double maxXError, double maxYError, YoDouble normalizedError)
    {
       dcmError2d.setIncludingFrame(momentumRateOfChangeModule.getDcmError());
@@ -368,6 +380,13 @@ public class QuadrupedBalanceManager
 
       return normalizedError.getDoubleValue();
    }
+
+
+   public FrameVector3DReadOnly getDcmError()
+   {
+      return momentumRateOfChangeModule.getDcmError();
+   }
+
 
    public boolean stepHasBeenAdjusted()
    {
@@ -420,7 +439,7 @@ public class QuadrupedBalanceManager
    private final FramePoint2D actualICP2d = new FramePoint2D();
 
    /** FIXME This is a hack 6/26/2018 Robert Griffin **/
-   private final FramePoint2D dcmError2d = new FramePoint2D();
+   private final FrameVector2D dcmError2d = new FrameVector2D();
    private final FrameLine2D adjustedICPDynamicsLine = new FrameLine2D();
    private final FramePoint3D perfectCMP = new FramePoint3D();
 
@@ -431,6 +450,7 @@ public class QuadrupedBalanceManager
       actualICP2d.setIncludingFrame(actualCapturePointPosition);
       dcmPlanner.getDesiredECMPPosition(perfectCMP);
       perfectCMP.changeFrame(worldFrame);
+      dcmError2d.setToZero(worldFrame);
 
       /**
        * FIXME This is a hack 6/26/2018 Robert Griffin
