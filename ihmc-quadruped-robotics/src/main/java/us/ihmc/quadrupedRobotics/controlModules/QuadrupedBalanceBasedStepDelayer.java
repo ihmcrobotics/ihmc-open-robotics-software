@@ -53,6 +53,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final FrameVector2D vectorToFoot = new FrameVector2D();
 
    private final BooleanProvider allowDelayingSteps = new BooleanParameter("allowingDelayingSteps", registry, false);
+   private final BooleanProvider delayAllSubsequentSteps = new BooleanParameter("delayAllSubsequentSteps", registry, true);
    private final DoubleProvider icpErrorInFootDirectionForDelay = new DoubleParameter("icpErrorInFootDirectionForDelay", registry, 0.01);
    private final DoubleProvider maximumDelayDuration = new DoubleParameter("maximumDelayDuration", registry, 0.1);
    private final IntegerProvider controlTicksToDelay = new IntegerParameter("controlTicksToDelay", registry, 2);
@@ -88,10 +89,17 @@ public class QuadrupedBalanceBasedStepDelayer
       parentRegistry.addChild(registry);
    }
 
-   public boolean delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps, FrameVector3DReadOnly dcmError, double normalizedDcmEllipticalError)
+   private final List<QuadrupedTimedStep> inactiveSteps = new ArrayList<>();
+   public boolean delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps, List<? extends QuadrupedTimedStep> allOtherSteps,
+                                        FrameVector3DReadOnly dcmError, double normalizedDcmEllipticalError)
    {
       if (!allowDelayingSteps.getValue() && normalizedDcmEllipticalError < 1.0)
          return false;
+
+      inactiveSteps.clear();
+      for (int i = 0; i < allOtherSteps.size(); i++)
+         inactiveSteps.add(allOtherSteps.get(i));
+
 
       icpError.setIncludingFrame(dcmError);
       icpError.scale(-1.0);
@@ -109,11 +117,15 @@ public class QuadrupedBalanceBasedStepDelayer
       for (int i = 0; i < activeSteps.size(); i++)
       {
          QuadrupedTimedStep activeStep = activeSteps.get(i);
+         inactiveSteps.remove(activeStep);
+
          if (contactStates.get(activeStep.getRobotQuadrant()).inContact())
             stepsStarting.add(activeStep);
       }
 
+      double delayAmount = controlTicksToDelay.getValue() * controlDt;
       boolean stepWasDelayed = false;
+
       for (int i = 0; i < stepsStarting.size(); i++)
       {
          QuadrupedTimedStep stepStarting = stepsStarting.get(i);
@@ -128,7 +140,6 @@ public class QuadrupedBalanceBasedStepDelayer
 
          if (icpErrorInFootDirection.getDoubleValue() > icpErrorInFootDirectionForDelay.getValue())
          {
-            double delayAmount = controlTicksToDelay.getValue() * controlDt;
             YoDouble delayDuration = delayDurations.get(quadrantStarting);
 
             if (delayDuration.getDoubleValue() + delayAmount < maximumDelayDuration.getValue())
@@ -140,6 +151,16 @@ public class QuadrupedBalanceBasedStepDelayer
                areFeetDelayed.get(quadrantStarting).set(true);
                stepWasDelayed = true;
             }
+         }
+      }
+
+      if (stepWasDelayed && delayAllSubsequentSteps.getValue())
+      {
+         for (int i = 0; i < inactiveSteps.size(); i++)
+         {
+            QuadrupedTimedStep inactiveStep = inactiveSteps.get(i);
+            double startTime = inactiveStep.getTimeInterval().getStartTime();
+            inactiveStep.getTimeInterval().setStartTime(startTime + delayAmount);
          }
       }
 
