@@ -2,21 +2,19 @@ package us.ihmc.quadrupedUI.uiControllers;
 
 import com.sun.javafx.collections.ImmutableObservableList;
 import controller_msgs.msg.dds.*;
-import javafx.event.Event;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
@@ -33,7 +31,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -88,9 +85,11 @@ public class ManualStepTabController extends Group
    @FXML private ComboBox<String> flamingoFoot;
    @FXML private Spinner<Double> flamingoTrajectoryTime;
    private PositionGraphic flamingoFootGraphic;
-   private volatile boolean keyIsHeld = false;
+   private volatile boolean flamingoKeyIsHeld = false;
+   private Vector3D flamingoVectorToAdd = new Vector3D();
+   private final long flamingoMsPerMove = 10;
+   private final double flamingoStepAmount = 0.002;
    private ExceptionHandlingThreadScheduler flamigoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
-   private ScheduledFuture<?> lastFlamingoFuture;
 
    public void setFullRobotModelFactory(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
@@ -181,62 +180,46 @@ public class ManualStepTabController extends Group
       getChildren().add(flamingoFootGraphic.getNode());
 
       subScene.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
+      flamingoFoot.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
+
+      flamigoPoseKeyHeldMover.schedule(() ->
+      {
+         if (flamingoKeyIsHeld)
+         {
+            Platform.runLater(() ->
+            {
+               flamingoFootGraphic.getPose().appendTranslation(flamingoVectorToAdd);
+               flamingoFootGraphic.update();
+            });
+         }
+      }, flamingoMsPerMove, TimeUnit.MILLISECONDS);
    }
 
    private void onKeyEvent(KeyEvent keyEvent)
    {
       // pressed and released only use code field
-      if (keyEvent.getEventType() == KeyEvent.KEY_PRESSED && !keyIsHeld)
+      if (keyEvent.getEventType() == KeyEvent.KEY_PRESSED && !flamingoKeyIsHeld)
       {
-         if (isArrowKey(keyEvent))
+         if (isNumpadKey(keyEvent))
          {
-            keyIsHeld = true;
+            flamingoKeyIsHeld = true;
             keyEvent.consume();
-            Vector3D vectorToAdd = new Vector3D();
-            double amountToMoveInOneSecond = 0.5;
-            long msPerMove = 5;
-            double secondsPerStep = Conversions.millisecondsToSeconds(msPerMove);
-            double stepsIn1Second = amountToMoveInOneSecond / secondsPerStep;
-            double stepAmount = amountToMoveInOneSecond / stepsIn1Second;
 
-            if      (!keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.UP)     vectorToAdd.setY( stepAmount);
-            else if (!keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.DOWN)   vectorToAdd.setY(-stepAmount);
-            else if ( keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.UP)     vectorToAdd.setZ( stepAmount);
-            else if ( keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.DOWN)   vectorToAdd.setZ(-stepAmount);
-            else if (                             keyEvent.getCode() == KeyCode.LEFT)   vectorToAdd.setX(-stepAmount);
-            else if (                             keyEvent.getCode() == KeyCode.RIGHT)  vectorToAdd.setX( stepAmount);
-
-            try
-            {
-               flamigoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
-               lastFlamingoFuture = flamigoPoseKeyHeldMover.schedule(() ->
-            {
-               flamingoFootGraphic.getPose().appendTranslation(vectorToAdd);
-               flamingoFootGraphic.update();
-            }, msPerMove, TimeUnit.MILLISECONDS);
-
-            }
-            catch (Exception e)
-            {
-               LogTools.error(e.getMessage());
-            }
+            if      (keyEvent.getCode() == KeyCode.NUMPAD8) flamingoVectorToAdd.setY( flamingoStepAmount);
+            else if (keyEvent.getCode() == KeyCode.NUMPAD2) flamingoVectorToAdd.setY(-flamingoStepAmount);
+            else if (keyEvent.getCode() == KeyCode.NUMPAD7) flamingoVectorToAdd.setZ( flamingoStepAmount);
+            else if (keyEvent.getCode() == KeyCode.NUMPAD1) flamingoVectorToAdd.setZ(-flamingoStepAmount);
+            else if (keyEvent.getCode() == KeyCode.NUMPAD4) flamingoVectorToAdd.setX(-flamingoStepAmount);
+            else if (keyEvent.getCode() == KeyCode.NUMPAD6) flamingoVectorToAdd.setX( flamingoStepAmount);
          }
       }
-      else if (keyEvent.getEventType() == KeyEvent.KEY_RELEASED && keyIsHeld)
+      else if (keyEvent.getEventType() == KeyEvent.KEY_RELEASED && flamingoKeyIsHeld)
       {
-         if (isArrowKey(keyEvent))
+         if (isNumpadKey(keyEvent))
          {
-            keyIsHeld = false;
+            flamingoKeyIsHeld = false;
             keyEvent.consume();
-            try
-         {
-            lastFlamingoFuture.cancel(true);
-//            flamigoPoseKeyHeldMover.shutdown();
-         }
-            catch (Exception e)
-         {
-            LogTools.error(e.getMessage());
-         }
+            flamingoVectorToAdd.setToZero();
          }
       }
       else if (keyEvent.getEventType() == KeyEvent.KEY_TYPED)
@@ -249,12 +232,14 @@ public class ManualStepTabController extends Group
       }
    }
 
-   private boolean isArrowKey(KeyEvent keyEvent)
+   private boolean isNumpadKey(KeyEvent keyEvent)
    {
-      return keyEvent.getCode() == KeyCode.UP
-            || keyEvent.getCode() == KeyCode.DOWN
-            || keyEvent.getCode() == KeyCode.LEFT
-            || keyEvent.getCode() == KeyCode.RIGHT;
+      return   keyEvent.getCode() == KeyCode.NUMPAD8
+            || keyEvent.getCode() == KeyCode.NUMPAD2
+            || keyEvent.getCode() == KeyCode.NUMPAD7
+            || keyEvent.getCode() == KeyCode.NUMPAD1
+            || keyEvent.getCode() == KeyCode.NUMPAD4
+            || keyEvent.getCode() == KeyCode.NUMPAD6;
    }
 
    public void sendSteps()
