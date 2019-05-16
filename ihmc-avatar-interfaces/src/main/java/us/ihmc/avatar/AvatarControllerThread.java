@@ -30,7 +30,6 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -76,8 +75,6 @@ public class AvatarControllerThread
    private final DRCOutputProcessor outputProcessor;
 
    private final ModularRobotController robotController;
-
-   private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
 
    private final YoBoolean runController = new YoBoolean("runController", registry);
 
@@ -281,10 +278,8 @@ public class AvatarControllerThread
             firstTick.set(false);
          }
 
-         controllerTimer.startMeasurement();
          robotController.doControl();
          humanoidRobotContextData.setControllerRan(true);
-         controllerTimer.stopMeasurement();
       }
       catch (Exception e)
       {
