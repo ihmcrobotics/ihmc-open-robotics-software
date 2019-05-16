@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -17,30 +16,26 @@ import us.ihmc.communication.configuration.NetworkParameters;
 
 public class AtlasNetworkProcessor
 {
-   private static final boolean ENABLE_BEHAVIOR_MODULE = true;
-   private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
-   private static final boolean ENABLE_MOCAP_MODULE = false;
-
-   public static void main(String[] args) throws URISyntaxException, JSAPException
+   public static void main(String[] args) throws JSAPException
    {
       JSAP jsap = new JSAP();
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model")
-                                                                   .setShortFlag('m')
-                                                                   .setRequired(true)
-                                                                   .setStringParser(JSAP.STRING_PARSER);
+                                                                .setShortFlag('m')
+                                                                .setRequired(true)
+                                                                .setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
 
       FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand")
-                                                                       .setShortFlag('l')
-                                                                       .setRequired(false)
-                                                                       .setStringParser(JSAP.STRING_PARSER);
+                                                                    .setShortFlag('l')
+                                                                    .setRequired(false)
+                                                                    .setStringParser(JSAP.STRING_PARSER);
       FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand")
-                                                                         .setShortFlag('r')
-                                                                         .setRequired(false)
-                                                                         .setStringParser(JSAP.STRING_PARSER);
+                                                                      .setShortFlag('r')
+                                                                      .setRequired(false)
+                                                                      .setStringParser(JSAP.STRING_PARSER);
 
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
@@ -58,14 +53,14 @@ public class AtlasNetworkProcessor
 
          DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
          networkModuleParams.enableUiModule(true);
-         networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
+         networkModuleParams.enableBehaviorModule(true);
          networkModuleParams.enableSensorModule(true);
          networkModuleParams.enableBehaviorVisualizer(true);
          networkModuleParams.setDrillDetectionModuleEnabled(true);
          networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
          networkModuleParams.enableHeightQuadTreeToolbox(true);
-         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
-         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
+         networkModuleParams.enableKinematicsToolboxVisualizer(true);
+         networkModuleParams.enableMocapModule(false);
          networkModuleParams.enableKinematicsToolboxVisualizer(true);
          networkModuleParams.enableFootstepPlanningToolbox(false);
          networkModuleParams.enableKinematicsToolbox(true);
