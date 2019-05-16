@@ -20,6 +20,7 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.manual.QuadrupedManualPawstepPlanGenerator;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
+import us.ihmc.quadrupedUI.graphics.ManualStepPlanGraphic;
 import us.ihmc.quadrupedUI.graphics.PositionGraphic;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
@@ -40,6 +41,7 @@ public class ManualStepTabController extends Group
 
    private final AtomicBoolean useTrotOverCrawl = new AtomicBoolean(false);
    private final QuadrupedManualPawstepPlanGenerator manualPlanGenerator = new QuadrupedManualPawstepPlanGenerator();
+   private final ManualStepPlanGraphic manualStepPlanGraphic = new ManualStepPlanGraphic();
 
    private JavaFXMessager messager;
    private AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
@@ -58,6 +60,7 @@ public class ManualStepTabController extends Group
    @FXML private Spinner<Integer> numberOfSteps;
    @FXML private Spinner<Double> dwellTime;
    @FXML private CheckBox useTrot;
+   @FXML private CheckBox visualizeManualStepPlan;
 
    @FXML private ComboBox<String> flamingoFoot;
    @FXML private Spinner<Double> flamingoTrajectoryTime;
@@ -114,6 +117,15 @@ public class ManualStepTabController extends Group
       dwellTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.0, defaultDwellTime, 0.05));
       numberOfSteps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1));
       firstFoot.setItems(new ImmutableObservableList<>(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT));
+      swingHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      stepHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      stepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      stepWidth.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      stepDuration.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      dwellTime.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      numberOfSteps.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      firstFoot.valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
+      useTrot.selectedProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
       flamingoFoot.setItems(new ImmutableObservableList<>(NO_FLAMINGO_QUADRANT_SELECTED,
                                                           RobotQuadrant.FRONT_LEFT.getTitleCaseName(),
                                                           RobotQuadrant.FRONT_RIGHT.getTitleCaseName(),
@@ -127,6 +139,8 @@ public class ManualStepTabController extends Group
 
    public void initScene(SubScene subScene)
    {
+      getChildren().add(manualStepPlanGraphic);
+
       flamingoFootGraphic = new PositionGraphic(Color.PINK, 0.03);
       flamingoFootGraphic.clear();
       getChildren().add(flamingoFootGraphic.getNode());
@@ -194,7 +208,7 @@ public class ManualStepTabController extends Group
             || keyEvent.getCode() == KeyCode.NUMPAD6;
    }
 
-   public void sendSteps()
+   @FXML public void sendSteps()
    {
       if (firstFoot.getSelectionModel().isEmpty())
       {
@@ -223,6 +237,18 @@ public class ManualStepTabController extends Group
    public void setUseTrot()
    {
       useTrotOverCrawl.set(useTrot.isSelected());
+   }
+
+   @FXML public void visualizeManualStepPlan()
+   {
+      if (visualizeManualStepPlan.isSelected())
+      {
+         manualStepPlanGraphic.generateMeshesAsynchronously(generateManualStepPlan());
+      }
+      else
+      {
+         manualStepPlanGraphic.clear();
+      }
    }
 
    @FXML public void flamingoFoot() // add/remove virtual graphic
