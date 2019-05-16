@@ -19,9 +19,4 @@ public class RemoteBehaviorInterface
                  "KryoMessagerAsyncConnectionThread").start();
       return moduleMessager;
    }
-
-   public static Messager createForTest(Messager messager)
-   {
-      return messager;
-   }
 }
