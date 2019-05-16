@@ -492,6 +492,5 @@ public class ManualStepTabController extends Group
 
          messager.submitMessage(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, soleTrajectoryMessage);
       }
-
    }
 }
