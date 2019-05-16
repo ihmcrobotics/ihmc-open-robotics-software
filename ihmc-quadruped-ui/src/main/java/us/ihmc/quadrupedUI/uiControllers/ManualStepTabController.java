@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -89,7 +88,7 @@ public class ManualStepTabController extends Group
    private Vector3D flamingoVectorToAdd = new Vector3D();
    private final long flamingoMsPerMove = 10;
    private final double flamingoStepAmount = 0.002;
-   private ExceptionHandlingThreadScheduler flamigoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
+   private ExceptionHandlingThreadScheduler flamingoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
 
    public void setFullRobotModelFactory(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
@@ -182,7 +181,7 @@ public class ManualStepTabController extends Group
       subScene.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
       flamingoFoot.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
 
-      flamigoPoseKeyHeldMover.schedule(() ->
+      flamingoPoseKeyHeldMover.schedule(() ->
       {
          if (flamingoKeyIsHeld)
          {
