@@ -26,6 +26,7 @@ import java.util.List;
 
 public class QuadrupedStepMessageHandler
 {
+   private static final double timeEpsilonForStepSelection = 0.05;
    private static final int STEP_QUEUE_SIZE = 200;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -223,7 +224,7 @@ public class QuadrupedStepMessageHandler
       {
          if (touchdownTrigger.get(robotQuadrant).isTrue())
          {
-            int index = getIndexOfFirstStep(robotQuadrant, 0.2);
+            int index = getIndexOfFirstStep(robotQuadrant, timeEpsilonForStepSelection);
             if (index != -1)
                receivedStepSequence.remove(index);
 
