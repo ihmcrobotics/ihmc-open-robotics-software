@@ -17,6 +17,9 @@ import us.ihmc.communication.configuration.NetworkParameters;
 
 public class AtlasNetworkProcessor
 {
+   private static final boolean ENABLE_BEHAVIOR_MODULE = true;
+   private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
+   private static final boolean ENABLE_MOCAP_MODULE = false;
 
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -42,75 +45,76 @@ public class AtlasNetworkProcessor
 
       if (config.success())
       {
-    	  DRCRobotModel model;
+         DRCRobotModel model;
 
-    	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
+         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
 
-        networkModuleParams.enableUiModule(false);
-        networkModuleParams.enableBehaviorModule(false);
-        networkModuleParams.enableSensorModule(true);
-        networkModuleParams.enableBehaviorVisualizer(false);
-        networkModuleParams.setDrillDetectionModuleEnabled(false);
-        networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
-        networkModuleParams.enableHeightQuadTreeToolbox(false);
-        networkModuleParams.enableKinematicsToolboxVisualizer(false);
-        networkModuleParams.enableMocapModule(false);
-        networkModuleParams.enableKinematicsToolboxVisualizer(false);
-        networkModuleParams.enableFootstepPlanningToolbox(false);
-        networkModuleParams.enableKinematicsToolbox(true);
-        networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
-        networkModuleParams.setFilterControllerInputMessages(true);
-        networkModuleParams.setEnableJoystickBasedStepping(true);
-        networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
-        networkModuleParams.enableAutoREAStateUpdater(true);
-        networkModuleParams.enableWalkingPreviewToolbox(true);
-        networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
+         networkModuleParams.enableUiModule(true);
+         networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
+         networkModuleParams.enableSensorModule(true);
+         networkModuleParams.enableBehaviorVisualizer(true);
+         networkModuleParams.setDrillDetectionModuleEnabled(true);
+         networkModuleParams.enableRobotEnvironmentAwerenessModule(false);
+         networkModuleParams.enableHeightQuadTreeToolbox(true);
+         networkModuleParams.enableKinematicsToolboxVisualizer(ENABLE_KINEMATICS_TOOLBOX_SERVER);
+         networkModuleParams.enableMocapModule(ENABLE_MOCAP_MODULE);
+         networkModuleParams.enableKinematicsToolboxVisualizer(true);
+         networkModuleParams.enableFootstepPlanningToolbox(false);
+         networkModuleParams.enableKinematicsToolbox(true);
+         networkModuleParams.enableFootstepPlanningToolboxVisualizer(false);
+         networkModuleParams.setFilterControllerInputMessages(true);
+         networkModuleParams.setEnableJoystickBasedStepping(true);
+         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
+         networkModuleParams.enableAutoREAStateUpdater(true);
+         networkModuleParams.enableWalkingPreviewToolbox(true);
 
-        URI rosuri = NetworkParameters.getROSURI();
-        if(rosuri != null)
-        {
-           networkModuleParams.enableRosModule(true);
-           networkModuleParams.setRosUri(rosuri);
-           System.out.println("ROS_MASTER_URI="+rosuri);
+         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
+
+         URI rosuri = NetworkParameters.getROSURI();
+         if(rosuri != null)
+         {
+            networkModuleParams.enableRosModule(true);
+            networkModuleParams.setRosUri(rosuri);
+            System.out.println("ROS_MASTER_URI="+rosuri);
 
             createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
-        }
-    	  try
-    	  {
-    	     RobotTarget target;
-    	     if(config.getBoolean(runningOnRealRobot.getID()))
-    	     {
-    	        target = RobotTarget.REAL_ROBOT;
-    	     }
-    	     else if(config.getBoolean(runningOnGazebo.getID()))
-    	     {
-    	       target = RobotTarget.GAZEBO;
-    	     }
-    	     else
-    	     {
-    	        target = RobotTarget.SCS;
-    	     }
-    		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
-           if(model.getHandModel()!=null)
-              networkModuleParams.enableHandModule(true);
-    	  }
-    	  catch (IllegalArgumentException e)
-    	  {
-    		  System.err.println("Incorrect robot model " + config.getString("robotModel"));
-    		  System.out.println(jsap.getHelp());
+         }
+         try
+         {
+            RobotTarget target;
+            if(config.getBoolean(runningOnRealRobot.getID()))
+            {
+               target = RobotTarget.REAL_ROBOT;
+            }
+            else if(config.getBoolean(runningOnGazebo.getID()))
+            {
+               target = RobotTarget.GAZEBO;
+            }
+            else
+            {
+               target = RobotTarget.SCS;
+            }
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
+            if(model.getHandModel()!=null)
+               networkModuleParams.enableHandModule(true);
+         }
+         catch (IllegalArgumentException e)
+         {
+            System.err.println("Incorrect robot model " + config.getString("robotModel"));
+            System.out.println(jsap.getHelp());
 
-    		  return;
-    	  }
+            return;
+         }
 
-    	  System.out.println("Using the " + model + " model");
+         System.out.println("Using the " + model + " model");
 
-        URI rosMasterURI = NetworkParameters.getROSURI();
-        networkModuleParams.setRosUri(rosMasterURI);
+         URI rosMasterURI = NetworkParameters.getROSURI();
+         networkModuleParams.setRosUri(rosMasterURI);
 
 
-    	  networkModuleParams.enableLocalControllerCommunicator(false);
+         networkModuleParams.enableLocalControllerCommunicator(false);
 
-    	  new DRCNetworkProcessor(model, networkModuleParams);
+         new DRCNetworkProcessor(model, networkModuleParams);
       }
       else
       {
@@ -123,12 +127,12 @@ public class AtlasNetworkProcessor
    private static void createAuxiliaryRobotDataRosPublisher(DRCNetworkModuleParameters networkModuleParams, URI rosuri)
    {
       // FIXME Do we still need that?
-//      RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosuri, defaultRosNameSpace);
-//      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER,
-//            new IHMCCommunicationKryoNetClassList());
-//      
-//      packetCommunicator.attachListener(AtlasAuxiliaryRobotData.class, auxiliaryRobotDataPublisher::receivedPacket);
-//
-//      networkModuleParams.addRobotSpecificModuleCommunicatorPort(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER, PacketDestination.AUXILIARY_ROBOT_DATA_PUBLISHER);
+      //      RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosuri, defaultRosNameSpace);
+      //      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER,
+      //            new IHMCCommunicationKryoNetClassList());
+      //
+      //      packetCommunicator.attachListener(AtlasAuxiliaryRobotData.class, auxiliaryRobotDataPublisher::receivedPacket);
+      //
+      //      networkModuleParams.addRobotSpecificModuleCommunicatorPort(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER, PacketDestination.AUXILIARY_ROBOT_DATA_PUBLISHER);
    }
 }
