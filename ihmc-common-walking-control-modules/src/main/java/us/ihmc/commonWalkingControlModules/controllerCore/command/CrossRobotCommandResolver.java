@@ -38,6 +38,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.SensorDataContext;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
@@ -79,6 +80,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -179,12 +181,17 @@ public class CrossRobotCommandResolver
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
-      resolveHumanoidRobotContextDataControllerToEstimator(in, out);
-      resolveHumanoidRobotContextDataEstimatorToController(in, out);
+      resolveHumanoidRobotContextDataScheduler(in, out);
+      resolveHumanoidRobotContextDataController(in, out);
+      resolveHumanoidRobotContextDataEstimator(in, out);
    }
 
-   // TODO: split context up in part that goes from controller to estimator and other way.
-   public void resolveHumanoidRobotContextDataControllerToEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   public void resolveHumanoidRobotContextDataScheduler(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveSensorDataContext(in.getSensorDataContext(), out.getSensorDataContext());
+   }
+
+   public void resolveHumanoidRobotContextDataController(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
       resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
@@ -192,8 +199,7 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
-   // TODO: split context up in part that goes from controller to estimator and other way.
-   public void resolveHumanoidRobotContextDataEstimatorToController(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   public void resolveHumanoidRobotContextDataEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
@@ -205,6 +211,16 @@ public class CrossRobotCommandResolver
    {
       resolveRawJointSensorDataHolderMap(in.getRawJointSensorDataHolderMap(), out.getRawJointSensorDataHolderMap());
       resolveHumanoidRobotContextData(in, out);
+   }
+
+   public void resolveSensorDataContext(SensorDataContext in, SensorDataContext out)
+   {
+      out.set(in);
+   }
+
+   public void resolveImuData(ImuData in, ImuData out)
+   {
+      out.set(in);
    }
 
    public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)
