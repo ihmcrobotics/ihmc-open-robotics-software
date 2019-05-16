@@ -52,7 +52,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final FramePoint3D tempFootPoint = new FramePoint3D();
    private final FrameVector2D vectorToFoot = new FrameVector2D();
 
-   private final BooleanProvider allowDelayingSteps = new BooleanParameter("allowingDelayingSteps", registry, false);
+   private final BooleanProvider allowDelayingSteps = new BooleanParameter("allowingDelayingSteps", registry, true);
    private final DoubleProvider icpErrorInFootDirectionForDelay = new DoubleParameter("icpErrorInFootDirectionForDelay", registry, 0.005);
    private final DoubleProvider maximumDelayDuration = new DoubleParameter("maximumDelayDuration", registry, 0.1);
    private final IntegerProvider controlTicksToDelay = new IntegerParameter("controlTicksToDelay", registry, 2);
