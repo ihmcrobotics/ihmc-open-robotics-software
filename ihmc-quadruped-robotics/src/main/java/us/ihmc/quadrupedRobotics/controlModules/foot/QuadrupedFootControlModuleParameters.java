@@ -213,9 +213,9 @@ public class QuadrupedFootControlModuleParameters
       return coefficientOfFrictionWhenNotSlipping.getValue();
    }
 
-   public DoubleProvider getMinimumTimeInSupportState()
+   public double getMinimumTimeInSupportState()
    {
-      return minimumTimeInSupportState;
+      return minimumTimeInSupportState.getValue();
    }
 
    public FrameVector3DReadOnly getTouchdownVelocity()

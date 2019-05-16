@@ -46,6 +46,7 @@ public class QuadrupedFootControlModule
 
    // window after support is triggered by touchdown but before step time is up to make sure swing isn't triggered again
    // TODO find a better solution. could be done by indexing steps
+   private final QuadrupedFootControlModuleParameters parameters;
    private static final double supportToSwingGlitchWindow = 0.15;
    private final YoBoolean isFirstStep;
 
@@ -60,6 +61,7 @@ public class QuadrupedFootControlModule
       this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
+      parameters = controllerToolbox.getFootControlModuleParameters();
 
       supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
       swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
@@ -169,7 +171,7 @@ public class QuadrupedFootControlModule
       }
       else
       {
-         return footStateMachine.getTimeInCurrentState() > supportToSwingGlitchWindow;
+         return footStateMachine.getTimeInCurrentState() > parameters.getMinimumTimeInSupportState();
       }
    }
 
