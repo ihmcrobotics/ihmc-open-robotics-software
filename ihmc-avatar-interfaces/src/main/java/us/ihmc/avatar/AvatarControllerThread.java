@@ -63,9 +63,11 @@ public class AvatarControllerThread
 
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
 
-   private final YoDouble controllerTime = new YoDouble("controllerTime", registry);
-   private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
-   private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
+   private final YoDouble controllerTime = new YoDouble("ControllerTime", registry);
+   private final YoLong timestampOffset = new YoLong("TimestampOffsetController", registry);
+   private final YoLong timestamp = new YoLong("TimestampController", registry);
+   private final YoBoolean firstTick = new YoBoolean("FirstTick", registry);
+   private final YoBoolean runController = new YoBoolean("RunController", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
@@ -75,8 +77,6 @@ public class AvatarControllerThread
    private final DRCOutputProcessor outputProcessor;
 
    private final ModularRobotController robotController;
-
-   private final YoBoolean runController = new YoBoolean("runController", registry);
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
@@ -265,10 +265,15 @@ public class AvatarControllerThread
       try
       {
          HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotContextData.getProcessedJointData());
-         controllerTimestamp.set(humanoidRobotContextData.getTimestamp());
-         controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
+         timestamp.set(humanoidRobotContextData.getTimestamp());
+         if (firstTick.getValue())
+         {
+            // Record this to have time start at 0.0 on the real robot for viewing pleasure.
+            timestampOffset.set(timestamp.getValue());
+         }
+         controllerTime.set(Conversions.nanosecondsToSeconds(timestamp.getValue() - timestampOffset.getValue()));
 
-         if (firstTick.getBooleanValue())
+         if (firstTick.getValue())
          {
             robotController.initialize();
             if (outputProcessor != null)
@@ -300,7 +305,7 @@ public class AvatarControllerThread
       {
          if (outputProcessor != null)
          {
-            outputProcessor.processAfterController(controllerTimestamp.getLongValue());
+            outputProcessor.processAfterController(timestamp.getValue());
          }
       }
       catch (Exception e)
