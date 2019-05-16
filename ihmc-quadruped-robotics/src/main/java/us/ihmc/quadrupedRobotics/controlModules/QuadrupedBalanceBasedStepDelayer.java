@@ -158,11 +158,7 @@ public class QuadrupedBalanceBasedStepDelayer
       if (stepWasDelayed && delayAllSubsequentSteps.getValue())
       {
          for (int i = 0; i < inactiveSteps.size(); i++)
-         {
-            QuadrupedTimedStep inactiveStep = inactiveSteps.get(i);
-            double startTime = inactiveStep.getTimeInterval().getStartTime();
-            inactiveStep.getTimeInterval().setStartTime(startTime + delayAmount);
-         }
+            inactiveSteps.get(i).getTimeInterval().shiftInterval(delayAmount);
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
