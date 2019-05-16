@@ -22,6 +22,36 @@ float64 maximum_hind_step_length
 float64 minimum_hind_step_length
 
 # Field default value -11.1
+float64 maximum_front_step_length_when_stepping_up
+
+# Field default value -11.1
+float64 minimum_front_step_length_when_stepping_up
+
+# Field default value -11.1
+float64 maximum_hind_step_length_when_stepping_up
+
+# Field default value -11.1
+float64 minimum_hind_step_length_when_stepping_up
+
+# Field default value -11.1
+float64 step_z_for_stepping_up
+
+# Field default value -11.1
+float64 maximum_front_step_length_when_stepping_down
+
+# Field default value -11.1
+float64 minimum_front_step_length_when_stepping_down
+
+# Field default value -11.1
+float64 maximum_hind_step_length_when_stepping_down
+
+# Field default value -11.1
+float64 minimum_hind_step_length_when_stepping_down
+
+# Field default value -11.1
+float64 step_z_for_stepping_down
+
+# Field default value -11.1
 float64 maximum_step_width
 
 # Field default value -11.1
@@ -102,8 +132,5 @@ float64 minimum_hind_end_backward_distance_from_cliff_bottoms
 
 # Field default value -11.1
 float64 minimum_lateral_distance_from_cliff_bottoms
-
-# Field default value -11.1
-float64 minimum_distance_from_cliff_tops
 
 

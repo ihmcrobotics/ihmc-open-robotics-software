@@ -14,7 +14,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -249,7 +249,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final LinkedHashMap<JointDesiredOutputBasics, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputList lowLevelControllerCoreOutput)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerCoreOutput)
    {
       if(drcOutputProcessor != null)
       {
