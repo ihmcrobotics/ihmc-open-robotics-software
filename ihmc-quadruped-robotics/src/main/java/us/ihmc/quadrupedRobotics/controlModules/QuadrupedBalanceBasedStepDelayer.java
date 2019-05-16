@@ -90,7 +90,7 @@ public class QuadrupedBalanceBasedStepDelayer
 
    public boolean delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps, FrameVector3DReadOnly dcmError, double normalizedDcmEllipticalError)
    {
-      if (normalizedDcmEllipticalError < 1.0 && !allowDelayingSteps.getValue())
+      if (!allowDelayingSteps.getValue() && normalizedDcmEllipticalError < 1.0)
          return false;
 
       icpError.setIncludingFrame(dcmError);
