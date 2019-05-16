@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.SensorDataContext;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -10,6 +11,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
+@SuppressWarnings("serial")
 public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>, Settable<HumanoidRobotContextData>
 {
    /**
@@ -28,7 +30,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * The joint measurements.
     * TODO: should be set by the main robot thread
     */
-//   private final XXX measuredJointState;
+   private final SensorDataContext sensorDataContext;
 
    /**
     * Serves to inform the controller that the estimator ran and populated the estimated values in this context.
@@ -73,17 +75,19 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
+      sensorDataContext = new SensorDataContext();
    }
 
    public HumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
                                    CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                   LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
+                                   LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, SensorDataContext sensorDataContext)
    {
       this.processedJointData = processedJointData;
       this.forceSensorDataHolder = forceSensorDataHolder;
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.jointDesiredOutputList = jointDesiredOutputList;
+      this.sensorDataContext = sensorDataContext;
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
@@ -111,6 +115,11 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       return jointDesiredOutputList;
    }
 
+   public SensorDataContext getSensorDataContext()
+   {
+      return sensorDataContext;
+   }
+
    @Override
    public void set(HumanoidRobotContextData other)
    {
@@ -128,6 +137,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.centerOfPressureDataHolder.set(src.centerOfPressureDataHolder);
       this.robotMotionStatusHolder.set(src.robotMotionStatusHolder);
       this.jointDesiredOutputList.set(src.jointDesiredOutputList);
+      this.sensorDataContext.set(src.sensorDataContext);
    }
 
    public long getTimestamp()
@@ -185,6 +195,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
          if (!robotMotionStatusHolder.equals(other.robotMotionStatusHolder))
             return false;
          if (!jointDesiredOutputList.equals(other.jointDesiredOutputList))
+            return false;
+         if (!sensorDataContext.equals(other.sensorDataContext))
             return false;
          return true;
       }

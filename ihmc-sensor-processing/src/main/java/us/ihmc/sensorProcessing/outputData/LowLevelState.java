@@ -1,6 +1,8 @@
 package us.ihmc.sensorProcessing.outputData;
 
-public class LowLevelState implements LowLevelStateReadOnly
+import us.ihmc.euclid.interfaces.Settable;
+
+public class LowLevelState implements LowLevelStateReadOnly, Settable<LowLevelState>
 {
    private double position;
    private double velocity;
@@ -32,6 +34,19 @@ public class LowLevelState implements LowLevelStateReadOnly
       this.isVelocityValid = true;
       this.isAccelerationValid = true;
       this.isEffortValid = true;
+   }
+
+   @Override
+   public void set(LowLevelState other)
+   {
+      this.position = other.position;
+      this.velocity = other.velocity;
+      this.acceleration = other.acceleration;
+      this.effort = other.effort;
+      this.isPositionValid = other.isPositionValid;
+      this.isVelocityValid = other.isVelocityValid;
+      this.isAccelerationValid = other.isAccelerationValid;
+      this.isEffortValid = other.isEffortValid;
    }
 
    public void set(LowLevelStateReadOnly other)
@@ -161,5 +176,49 @@ public class LowLevelState implements LowLevelStateReadOnly
    public boolean isEffortValid()
    {
       return isEffortValid;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof LowLevelState)
+      {
+         LowLevelState other = (LowLevelState) obj;
+         if (isPositionValid ^ other.isPositionValid)
+            return false;
+         if (isVelocityValid ^ other.isVelocityValid)
+            return false;
+         if (isAccelerationValid ^ other.isAccelerationValid)
+            return false;
+         if (isEffortValid ^ other.isEffortValid)
+            return false;
+         if (Double.compare(position, other.position) != 0)
+            return false;
+         if (Double.compare(velocity, other.velocity) != 0)
+            return false;
+         if (Double.compare(acceleration, other.acceleration) != 0)
+            return false;
+         if (Double.compare(effort, other.effort) != 0)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = "Position " + position + (isPositionValid ? " (valid)" : "");
+      ret += "\nVelocity " + velocity + (isVelocityValid ? " (valid)" : "");
+      ret += "\nAcceleration " + acceleration + (isAccelerationValid ? " (valid)" : "");
+      ret += "\nEffort " + effort + (isEffortValid ? " (valid)" : "");
+      return ret;
    }
 }

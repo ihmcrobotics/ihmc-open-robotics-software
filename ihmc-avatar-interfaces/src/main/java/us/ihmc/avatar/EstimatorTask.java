@@ -45,14 +45,14 @@ public class EstimatorTask extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       estimatorThread.write();
-      masterResolver.resolveHumanoidRobotContextDataEstimatorToController(estimatorThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
       robotVisualizer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
    }
 
    @Override
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
-      estimatorResolver.resolveHumanoidRobotContextDataControllerToEstimator(masterContext, estimatorThread.getHumanoidRobotContextData());
+      estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorThread.read();
    }
 

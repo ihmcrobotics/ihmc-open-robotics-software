@@ -44,14 +44,14 @@ public class ControllerTask extends HumanoidRobotControlTask
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
       controllerThread.write();
-      masterResolver.resolveHumanoidRobotContextDataControllerToEstimator(controllerThread.getHumanoidRobotContextData(), masterContext);
+      masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
       robotVisualizer.update(masterContext.getTimestamp(), controllerThread.getYoVariableRegistry());
    }
 
    @Override
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
-      controllerResolver.resolveHumanoidRobotContextDataEstimatorToController(masterContext, controllerThread.getHumanoidRobotContextData());
+      controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerThread.read();
    }
 
