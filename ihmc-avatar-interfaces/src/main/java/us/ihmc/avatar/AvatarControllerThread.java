@@ -69,7 +69,6 @@ public class AvatarControllerThread
    private final YoBoolean firstTick = new YoBoolean("firstTick", registry);
 
    private final FullHumanoidRobotModel controllerFullRobotModel;
-   private final LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -84,7 +83,6 @@ public class AvatarControllerThread
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
-   private final HumanoidRobotContextJointData processedJointData;
    private final HumanoidRobotContextData humanoidRobotContextData;
 
    public AvatarControllerThread(String robotName, DRCRobotModel robotModel, DRCRobotSensorInformation sensorInformation,
@@ -94,7 +92,17 @@ public class AvatarControllerThread
       this.outputProcessor = outputProcessor;
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
-      processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
+      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
+      ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
+      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
+      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
+      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
+      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
+      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
+      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setProcessedJointData(processedJointData);
+      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       crashNotificationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
@@ -108,17 +116,13 @@ public class AvatarControllerThread
          fullRobotModelCorruptor = null;
       }
 
-      ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
-      CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
 
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
-      desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
                                                   forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator, sensorInformation,
                                                   desiredJointDataHolder, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
-      RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
 
       firstTick.set(true);
@@ -131,13 +135,6 @@ public class AvatarControllerThread
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
-
-      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
-      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
-      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
-      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
-      contextDataFactory.setProcessedJointData(processedJointData);
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters<RobotSide> robotModel,
@@ -270,7 +267,7 @@ public class AvatarControllerThread
 
       try
       {
-         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, processedJointData);
+         HumanoidRobotContextTools.updateRobot(controllerFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          controllerTimestamp.set(humanoidRobotContextData.getTimestamp());
          controllerTime.set(Conversions.nanosecondsToSeconds(controllerTimestamp.getLongValue()));
 
@@ -351,7 +348,7 @@ public class AvatarControllerThread
 
    public JointDesiredOutputListBasics getDesiredJointDataHolder()
    {
-      return desiredJointDataHolder;
+      return humanoidRobotContextData.getJointDesiredOutputList();
    }
 
 }
