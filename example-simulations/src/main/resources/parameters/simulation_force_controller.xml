@@ -101,21 +101,8 @@
                     </registry>
                     <registry name="QuadrupedMomentumRateOfChangeModule">
                         <registry name="DivergentComponentOfMotionController">
-                            <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
-                            <parameter name="kpX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
-                            <parameter name="kpY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
-                            <parameter name="kpZ_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="zetaX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="zetaY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="zetaZ_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="kiX_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="kiY_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="kiZ_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="maxIntegralError_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                            <parameter name="maxDerivativeError_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                            <parameter name="maxProportionalError_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                            <parameter name="maximumFeedback_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
-                            <parameter name="maximumFeedbackRate_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
+                            <parameter name="captureKpParallel" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="captureKpOrthogonal" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         </registry>
                         <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         <parameter name="kpX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
