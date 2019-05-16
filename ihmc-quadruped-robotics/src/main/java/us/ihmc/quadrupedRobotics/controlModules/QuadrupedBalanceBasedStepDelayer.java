@@ -96,6 +96,7 @@ public class QuadrupedBalanceBasedStepDelayer
          return false;
 
       icpError.setIncludingFrame(dcmError);
+      icpError.scale(-1.0);
       icpError.changeFrame(supportPolygons.getMidFeetZUpFrame());
 
       stepsStarting.clear();
