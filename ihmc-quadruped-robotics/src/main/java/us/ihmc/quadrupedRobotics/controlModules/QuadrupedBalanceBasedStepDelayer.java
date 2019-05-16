@@ -134,6 +134,7 @@ public class QuadrupedBalanceBasedStepDelayer
          tempFootPoint.setToZero(referenceFrames.getSoleFrame(quadrantStarting));
          tempFootPoint.changeFrame(supportPolygons.getMidFeetZUpFrame());
          vectorToFoot.setIncludingFrame(tempFootPoint);
+         vectorToFoot.normalize();
 
          YoDouble icpErrorInFootDirection = icpErrorInFootDirections.get(quadrantStarting);
          icpErrorInFootDirection.set(icpError.dot(vectorToFoot));
