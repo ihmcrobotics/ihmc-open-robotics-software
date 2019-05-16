@@ -476,17 +476,14 @@ public class PlanarRegion
     */
    public Point3D intersectWithLine(Line3D projectionLineInWorld)
    {
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      getTransformToWorld(regionToWorld);
-
       Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
       Point3DReadOnly pointOnPlane = new Point3D(getConvexPolygon(0).getVertex(0));
 
       Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
       Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
 
-      pointOnLineInLocal.applyInverseTransform(regionToWorld);
-      directionOfLineInLocal.applyInverseTransform(regionToWorld);
+      transformFromWorldToLocal(pointOnLineInLocal);
+      transformFromWorldToLocal(directionOfLineInLocal);
 
       Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
                                                                                                      planeNormal,
@@ -499,7 +496,7 @@ public class PlanarRegion
 
       if (isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
       {
-         intersectionWithPlaneInLocal.applyTransform(regionToWorld);
+         transformFromLocalToWorld(intersectionWithPlaneInLocal);
          return intersectionWithPlaneInLocal;
       }
 
