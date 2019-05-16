@@ -45,10 +45,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final FootSwitchInterface footSwitch;
 
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
-   private boolean footIsVerifiedAsLoaded = false;
-
-   private final YoFramePoint3D groundPlanePosition;
-   private final YoFramePoint3D upcomingGroundPlanePosition;
 
    private final SpatialAcceleration footAcceleration = new SpatialAcceleration();
 
@@ -88,8 +84,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
-      this.groundPlanePosition = controllerToolbox.getGroundPlanePositions().get(robotQuadrant);
-      this.upcomingGroundPlanePosition = controllerToolbox.getUpcomingGroundPlanePositions().get(robotQuadrant);
       this.contactState = controllerToolbox.getFootContactState(robotQuadrant);
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.footBody = contactState.getRigidBody();
@@ -142,8 +136,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
 
-      footIsVerifiedAsLoaded = false;
-
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
 
@@ -154,13 +146,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
    }
 
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
    @Override
    public void doAction(double timeInState)
    {
       // determine foot state
-
-
       updateIsFootBarelyLoadedEstimate();
       updateIsFootSlippingEstimate();
 
@@ -283,7 +272,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public void onExit()
    {
-      footIsVerifiedAsLoaded = false;
       footBarelyLoaded.set(false);
       isFootSlipping.set(false);
       footPlanarVelocity.setToNaN();
