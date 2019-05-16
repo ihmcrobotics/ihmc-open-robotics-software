@@ -12,6 +12,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -91,8 +93,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       Vector2D offsetVector = new Vector2D(nodeToCheck.getX(movingQuadrant), nodeToCheck.getY(movingQuadrant));
       offsetVector.sub(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant));
 
-      AxisAngle previousOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
-      previousOrientation.transform(offsetVector);
+      AxisAngle previousYawOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
+      previousYawOrientation.transform(offsetVector);
 
       if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
       {
@@ -111,7 +113,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
          offsetVector.set(nodeToCheck.getX(movingQuadrant), nodeToCheck.getY(movingQuadrant));
          offsetVector.sub(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant));
-         previousOrientation.transform(offsetVector);
+         previousYawOrientation.transform(offsetVector);
 
          if (Math.abs(offsetVector.getX()) < parameters.getMinXClearanceFromFoot() && Math.abs(offsetVector.getY()) < parameters.getMinYClearanceFromFoot())
          {
@@ -162,13 +164,13 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, previousOrientation);
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, yaw);
 
 
+      boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
+      boolean isSteppingDown = stepHeight > parameters.getStepZForSteppingDown();
 
       {
-         boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
-         boolean isSteppingDown = stepHeight > parameters.getStepZForSteppingDown();
          boolean steppingWithFront = movingQuadrant.isQuadrantInFront();
 
          if (isSteppingUp || isSteppingDown)
@@ -235,9 +237,23 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          newStepPosition.changeFrame(footFrame);
 
          // check total distance
-         double maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
          double maxReach = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
-         double minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+         double maxLength, minLength;
+         if (isSteppingUp)
+         {
+            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingUp() : parameters.getMaximumHindStepLengthWhenSteppingUp();
+            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingUp() : parameters.getMinimumHindStepLengthWhenSteppingUp();
+         }
+         else if (isSteppingDown)
+         {
+            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingDown() : parameters.getMaximumHindStepLengthWhenSteppingDown();
+            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingDown() : parameters.getMinimumHindStepLengthWhenSteppingDown();
+         }
+         else
+         {
+            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+         }
 
          if ((newStepPosition.distance(expectedXGaitPoint) > maxReach))
          {
@@ -345,9 +361,22 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       return snappedStepPositions;
    }
 
-   private static QuadrantDependentList<PoseReferenceFrame> getFootFrames(QuadrantDependentList<Point3D> stepPositions, Orientation3DReadOnly orientation)
+   private static QuadrantDependentList<PoseReferenceFrame> getFootFrames(QuadrantDependentList<Point3D> stepPositions, double yaw)
    {
+      int numberOfVertices = 0;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (!stepPositions.containsKey(robotQuadrant))
+            continue;
+
+         numberOfVertices++;
+      }
+
+      double nominalPitch= QuadrupedSupportPolygon.getNominalPitch(stepPositions, numberOfVertices);
+      Quaternion orientation = new Quaternion(yaw, nominalPitch, 0.0);
+
       QuadrantDependentList<PoseReferenceFrame> footFrames = new QuadrantDependentList<>();
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (!stepPositions.containsKey(robotQuadrant))
