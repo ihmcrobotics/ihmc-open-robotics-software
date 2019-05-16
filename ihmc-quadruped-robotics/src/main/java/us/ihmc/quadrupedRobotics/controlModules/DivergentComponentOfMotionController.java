@@ -1,20 +1,23 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsProvider;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -30,6 +33,9 @@ public class DivergentComponentOfMotionController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final Vector2dZUpFrame dcmVelocityDirectionFrame = new Vector2dZUpFrame("dcmVelocityDirectionFrame", worldFrame);
+   private final DoubleProvider maxVRPDistanceFromSupport = new DoubleParameter("maxVRPDistanceFromSupport", registry, Double.POSITIVE_INFINITY);
+
+   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
    private final ICPControlGainsProvider capturePositionGains;
 
@@ -41,16 +47,23 @@ public class DivergentComponentOfMotionController
    private final YoFrameVector2D cumulativeDcmError;
 
    private final RateLimitedYoFramePoint yoLimitedVrpPositionSetpoint;
+   private final YoFramePoint3D yoProjectedVrpPositionSetpoint;
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FrameVector3D dcmVelocitySetpoint = new FrameVector3D();
 
-   public DivergentComponentOfMotionController(ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry)
+   private final FrameConvexPolygon2DReadOnly supportPolygonInMidZUpFrame;
+   private final FrameConvexPolygon2D scaledPolygon;
+
+   public DivergentComponentOfMotionController(QuadrupedSupportPolygons supportPolygons, ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry)
    {
       this.comZUpFrame = comZUpFrame;
       this.controlDT = controlDT;
       this.lipModel = lipModel;
+
+      supportPolygonInMidZUpFrame = supportPolygons.getSupportPolygonInMidFeetZUp();
+      scaledPolygon = new FrameConvexPolygon2D(supportPolygonInMidZUpFrame.getReferenceFrame());
 
       dcmError = new YoFrameVector3D("dcmError", comZUpFrame, registry);
 
@@ -69,6 +82,7 @@ public class DivergentComponentOfMotionController
       capturePositionGains = new ParameterizedICPControlGains("", defaultIcpControlGains, registry);
 
       yoLimitedVrpPositionSetpoint = new RateLimitedYoFramePoint("vrpPositionSetpointInCoMZUpFrame", "", registry, capturePositionGains.getYoFeedbackPartMaxRate(), controlDT, comZUpFrame);
+      yoProjectedVrpPositionSetpoint = new YoFramePoint3D("projectedVrpPositionSetpointInCoMZUpFrame", comZUpFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -79,6 +93,9 @@ public class DivergentComponentOfMotionController
       yoLimitedVrpPositionSetpoint.reset();
    }
 
+
+   private final FramePoint2D unprojectedPoint = new FramePoint2D();
+   private final FramePoint2D projectedPoint = new FramePoint2D();
 
    public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint,
                        FrameVector3DReadOnly dcmVelocitySetpoint)
@@ -107,7 +124,37 @@ public class DivergentComponentOfMotionController
 
       yoLimitedVrpPositionSetpoint.update(vrpPositionSetpoint);
 
-      vrpPositionSetpointToPack.setMatchingFrame(yoLimitedVrpPositionSetpoint);
+      if (Double.isFinite(maxVRPDistanceFromSupport.getValue()))
+      {
+         scaledPolygon.clear();
+         scaledPolygon.setReferenceFrame(supportPolygonInMidZUpFrame.getReferenceFrame());
+         polygonScaler.scaleConvexPolygon(supportPolygonInMidZUpFrame, -maxVRPDistanceFromSupport.getValue(), scaledPolygon);
+
+         unprojectedPoint.setToZero(comZUpFrame);
+         projectedPoint.setToZero(comZUpFrame);
+
+         unprojectedPoint.set(yoLimitedVrpPositionSetpoint);
+
+         scaledPolygon.changeFrame(comZUpFrame);
+         if (scaledPolygon.isPointInside(unprojectedPoint))
+         {
+            projectedPoint.set(unprojectedPoint);
+         }
+         else
+         {
+            scaledPolygon.orthogonalProjection(unprojectedPoint, projectedPoint);
+         }
+
+         yoProjectedVrpPositionSetpoint.set(yoLimitedVrpPositionSetpoint);
+         yoProjectedVrpPositionSetpoint.set(projectedPoint);
+      }
+      else
+      {
+         yoProjectedVrpPositionSetpoint.set(yoLimitedVrpPositionSetpoint);
+      }
+
+      vrpPositionSetpointToPack.setMatchingFrame(yoProjectedVrpPositionSetpoint);
+
    }
 
    private final FrameVector2D tmpProportionalAction = new FrameVector2D();
