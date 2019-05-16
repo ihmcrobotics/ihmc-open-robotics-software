@@ -82,8 +82,6 @@ public class QuadrupedStepMessageHandler
    {
       if (haltFlag.getBooleanValue())
          pruneHaltedSteps();
-
-      updateActiveSteps();
    }
 
    private final TimeInterval tempTimeInterval = new TimeInterval();
@@ -233,7 +231,7 @@ public class QuadrupedStepMessageHandler
       return activeSteps;
    }
 
-   private void updateActiveSteps()
+   public void updateActiveSteps()
    {
       // remove steps with a triggered touchdown
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
