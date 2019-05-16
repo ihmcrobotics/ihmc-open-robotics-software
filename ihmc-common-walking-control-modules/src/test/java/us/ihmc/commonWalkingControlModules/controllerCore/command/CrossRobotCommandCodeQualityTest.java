@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -674,8 +675,10 @@ public class CrossRobotCommandCodeQualityTest
    private static Set<Class<?>> safeTypes()
    {
       Set<Class<?>> safeTypes = new HashSet<>();
+      safeTypes.add(String.class);
       safeTypes.add(ArrayList.class);
       safeTypes.add(List.class);
+      safeTypes.add(AtomicReference.class);
       safeTypes.add(TDoubleArrayList.class);
       safeTypes.add(ReferenceFrame.class);
       safeTypes.add(MovingReferenceFrame.class);
@@ -711,7 +714,7 @@ public class CrossRobotCommandCodeQualityTest
 
    private static List<Field> getAllFields(Class<?> clazz)
    {
-      if (clazz == null)
+      if (clazz == null || clazz.isEnum())
          return Collections.emptyList();
       List<Field> declaredFields = new ArrayList<Field>(Arrays.asList(clazz.getDeclaredFields()));
       declaredFields.addAll(getAllFields(clazz.getSuperclass()));
@@ -752,6 +755,18 @@ public class CrossRobotCommandCodeQualityTest
                                                                                   ReferenceFrame.getWorldFrame());
          Object fieldInstance = field.get(ownerInstance);
          Object object = ((SideDependentList<?>) fieldInstance).get(RobotSide.LEFT);
+         if (object == null)
+            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in side dependent list " + field.getName() + ".");
+         return object.getClass();
+      }
+      if (fieldType == AtomicReference.class)
+      {
+         field.setAccessible(true);
+         Object ownerInstance = CrossRobotCommandRandomTools.nextTypeInstance(ownerType, new Random(), true,
+                                                                              new RigidBody("Dummy", ReferenceFrame.getWorldFrame()),
+                                                                              ReferenceFrame.getWorldFrame());
+         Object fieldInstance = field.get(ownerInstance);
+         Object object = ((AtomicReference<?>) fieldInstance).get();
          if (object == null)
             fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in side dependent list " + field.getName() + ".");
          return object.getClass();

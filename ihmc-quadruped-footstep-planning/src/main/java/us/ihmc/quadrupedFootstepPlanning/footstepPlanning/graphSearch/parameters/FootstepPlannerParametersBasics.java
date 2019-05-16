@@ -21,6 +21,26 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinimumStepWidth(double minimumStepWidth);
 
+   void setMaximumFrontStepLengthWhenSteppingUp(double maximumStepLength);
+
+   void setMinimumFrontStepLengthWhenSteppingUp(double minimumStepLength);
+
+   void setMaximumHindStepLengthWhenSteppingUp(double maximumStepLength);
+
+   void setMinimumHindStepLengthWhenSteppingUp(double minimumStepLength);
+
+   void setStepZForSteppingUp(double stepZ);
+
+   void setMaximumFrontStepLengthWhenSteppingDown(double maximumStepLength);
+
+   void setMinimumFrontStepLengthWhenSteppingDown(double minimumStepLength);
+
+   void setMaximumHindStepLengthWhenSteppingDown(double maximumStepLength);
+
+   void setMinimumHindStepLengthWhenSteppingDown(double minimumStepLength);
+
+   void setStepZForSteppingDown(double stepZ);
+
    void setMinimumStepYaw(double minimumStepYaw);
 
    void setMaximumStepYaw(double maximumStepYaw);
@@ -81,6 +101,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaximumHindStepReach(other.getMaximumHindStepReach());
       setMaximumHindStepLength(other.getMaximumHindStepLength());
       setMinimumHindStepLength(other.getMinimumHindStepLength());
+      setMaximumFrontStepLengthWhenSteppingUp(other.getMaximumFrontStepLengthWhenSteppingUp());
+      setMinimumFrontStepLengthWhenSteppingUp(other.getMinimumFrontStepLengthWhenSteppingUp());
+      setMaximumHindStepLengthWhenSteppingUp(other.getMaximumHindStepLengthWhenSteppingUp());
+      setMinimumHindStepLengthWhenSteppingUp(other.getMinimumHindStepLengthWhenSteppingUp());
+      setStepZForSteppingUp(other.getStepZForSteppingUp());
+      setMaximumFrontStepLengthWhenSteppingDown(other.getMaximumFrontStepLengthWhenSteppingDown());
+      setMinimumFrontStepLengthWhenSteppingDown(other.getMinimumFrontStepLengthWhenSteppingDown());
+      setMaximumHindStepLengthWhenSteppingDown(other.getMaximumHindStepLengthWhenSteppingDown());
+      setMinimumHindStepLengthWhenSteppingDown(other.getMinimumHindStepLengthWhenSteppingDown());
+      setStepZForSteppingDown(other.getStepZForSteppingDown());
       setMaximumStepWidth(other.getMaximumStepWidth());
       setMinimumStepWidth(other.getMinimumStepWidth());
       setMinimumStepYaw(other.getMinimumStepYaw());
@@ -125,6 +155,26 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumHindStepLength(other.getMaximumHindStepLength());
       if (other.getMinimumHindStepLength() != other.NO_VALUE_DOUBLE)
          setMinimumHindStepLength(other.getMinimumHindStepLength());
+      if (other.getMaximumFrontStepLengthWhenSteppingUp() != other.NO_VALUE_DOUBLE)
+         setMaximumFrontStepLengthWhenSteppingUp(other.getMaximumFrontStepLengthWhenSteppingUp());
+      if (other.getMinimumFrontStepLengthWhenSteppingUp() != other.NO_VALUE_DOUBLE)
+         setMinimumFrontStepLengthWhenSteppingUp(other.getMinimumFrontStepLengthWhenSteppingUp());
+      if (other.getMaximumHindStepLengthWhenSteppingUp() != other.NO_VALUE_DOUBLE)
+         setMaximumHindStepLengthWhenSteppingUp(other.getMaximumHindStepLengthWhenSteppingUp());
+      if (other.getMinimumHindStepLengthWhenSteppingUp() != other.NO_VALUE_DOUBLE)
+         setMinimumHindStepLengthWhenSteppingUp(other.getMinimumHindStepLengthWhenSteppingUp());
+      if (other.getStepZForSteppingUp() != other.NO_VALUE_DOUBLE)
+         setStepZForSteppingUp(other.getStepZForSteppingUp());
+      if (other.getMaximumFrontStepLengthWhenSteppingDown() != other.NO_VALUE_DOUBLE)
+         setMaximumFrontStepLengthWhenSteppingDown(other.getMaximumFrontStepLengthWhenSteppingDown());
+      if (other.getMinimumFrontStepLengthWhenSteppingDown() != other.NO_VALUE_DOUBLE)
+         setMinimumFrontStepLengthWhenSteppingDown(other.getMinimumFrontStepLengthWhenSteppingDown());
+      if (other.getMaximumHindStepLengthWhenSteppingDown() != other.NO_VALUE_DOUBLE)
+         setMaximumHindStepLengthWhenSteppingDown(other.getMaximumHindStepLengthWhenSteppingDown());
+      if (other.getMinimumHindStepLengthWhenSteppingDown() != other.NO_VALUE_DOUBLE)
+         setMinimumHindStepLengthWhenSteppingDown(other.getMinimumHindStepLengthWhenSteppingDown());
+      if (other.getStepZForSteppingDown() != other.NO_VALUE_DOUBLE)
+         setStepZForSteppingDown(other.getStepZForSteppingDown());
       if (other.getMaximumStepWidth() != other.NO_VALUE_DOUBLE)
          setMaximumStepWidth(other.getMaximumStepWidth());
       if (other.getMinimumStepWidth() != other.NO_VALUE_DOUBLE)

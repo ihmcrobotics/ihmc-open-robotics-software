@@ -12,6 +12,18 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double maximumHindStepLength;
    private double minimumHindStepLength;
 
+   private double maximumFrontStepLengthWhenSteppingUp;
+   private double minimumFrontStepLengthWhenSteppingUp;
+   private double maximumHindStepLengthWhenSteppingUp;
+   private double minimumHindStepLengthWhenSteppingUp;
+   private double stepZForSteppingUp;
+
+   private double maximumFrontStepLengthWhenSteppingDown;
+   private double minimumFrontStepLengthWhenSteppingDown;
+   private double maximumHindStepLengthWhenSteppingDown;
+   private double minimumHindStepLengthWhenSteppingDown;
+   private double stepZForSteppingDown;
+
    private double maximumStepWidth;
    private double minimumStepWidth;
    private double minimumStepYaw;
@@ -91,6 +103,76 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMinimumHindStepLength(double minimumStepLength)
    {
       this.minimumHindStepLength = minimumStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumFrontStepLengthWhenSteppingUp(double stepLength)
+   {
+      maximumFrontStepLengthWhenSteppingUp = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumFrontStepLengthWhenSteppingUp(double stepLength)
+   {
+      minimumFrontStepLengthWhenSteppingUp = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumHindStepLengthWhenSteppingUp(double stepLength)
+   {
+      maximumHindStepLengthWhenSteppingUp = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumHindStepLengthWhenSteppingUp(double stepLength)
+   {
+      minimumHindStepLengthWhenSteppingUp = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setStepZForSteppingUp(double stepZ)
+   {
+      stepZForSteppingUp = stepZ;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumFrontStepLengthWhenSteppingDown(double stepLength)
+   {
+      maximumFrontStepLengthWhenSteppingDown = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumFrontStepLengthWhenSteppingDown(double stepLength)
+   {
+      minimumFrontStepLengthWhenSteppingDown = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMaximumHindStepLengthWhenSteppingDown(double stepLength)
+   {
+      maximumHindStepLengthWhenSteppingDown = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setMinimumHindStepLengthWhenSteppingDown(double stepLength)
+   {
+      minimumHindStepLengthWhenSteppingDown = stepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setStepZForSteppingDown(double stepZ)
+   {
+      stepZForSteppingDown = stepZ;
    }
 
    /** {@inheritDoc} */
@@ -323,6 +405,76 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMinimumHindStepLength()
    {
       return minimumHindStepLength;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumFrontStepLengthWhenSteppingUp()
+   {
+      return maximumFrontStepLengthWhenSteppingUp;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumFrontStepLengthWhenSteppingUp()
+   {
+      return minimumFrontStepLengthWhenSteppingUp;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepLengthWhenSteppingUp()
+   {
+      return maximumHindStepLengthWhenSteppingUp;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindStepLengthWhenSteppingUp()
+   {
+      return minimumHindStepLengthWhenSteppingUp;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStepZForSteppingUp()
+   {
+      return stepZForSteppingUp;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumFrontStepLengthWhenSteppingDown()
+   {
+      return maximumFrontStepLengthWhenSteppingDown;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumFrontStepLengthWhenSteppingDown()
+   {
+      return minimumFrontStepLengthWhenSteppingDown;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaximumHindStepLengthWhenSteppingDown()
+   {
+      return maximumHindStepLengthWhenSteppingDown;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinimumHindStepLengthWhenSteppingDown()
+   {
+      return minimumHindStepLengthWhenSteppingDown;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStepZForSteppingDown()
+   {
+      return stepZForSteppingDown;
    }
 
    /** {@inheritDoc} */
