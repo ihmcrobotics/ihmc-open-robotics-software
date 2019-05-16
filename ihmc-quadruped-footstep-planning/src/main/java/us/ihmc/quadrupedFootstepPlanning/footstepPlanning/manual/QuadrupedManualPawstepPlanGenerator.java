@@ -9,8 +9,48 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 
-public class QuadrupedStraightPawstepPlanGenerator
+public class QuadrupedManualPawstepPlanGenerator
 {
+   public QuadrupedTimedStepListMessage generateSteps(boolean trot,
+                                                      RobotQuadrant firstFoot,
+                                                      double swingHeight,
+                                                      double stepHeight,
+                                                      double stepLength,
+                                                      double stepWidth,
+                                                      double stepDuration,
+                                                      double dwellTime,
+                                                      int numberOfSteps,
+                                                      QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                                      CommonQuadrupedReferenceFrames referenceFrames)
+   {
+      if (trot)
+      {
+         return generateTrotSteps(firstFoot,
+                                  swingHeight,
+                                  stepHeight,
+                                  stepLength,
+                                  stepWidth,
+                                  stepDuration,
+                                  dwellTime,
+                                  numberOfSteps,
+                                  xGaitSettings,
+                                  referenceFrames);
+      }
+      else
+      {
+         return generateCrawlSteps(firstFoot,
+                                   swingHeight,
+                                   stepHeight,
+                                   stepLength,
+                                   stepWidth,
+                                   stepDuration,
+                                   dwellTime,
+                                   numberOfSteps,
+                                   xGaitSettings,
+                                   referenceFrames);
+      }
+   }
+
    public QuadrupedTimedStepListMessage generateTrotSteps(RobotQuadrant firstFoot,
                                                           double swingHeight,
                                                           double stepHeight,

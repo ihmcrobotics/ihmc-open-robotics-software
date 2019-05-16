@@ -10,32 +10,26 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.manual.QuadrupedStraightPawstepPlanGenerator;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.manual.QuadrupedManualPawstepPlanGenerator;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
 import us.ihmc.quadrupedUI.graphics.PositionGraphic;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.CRC32;
 
 public class ManualStepTabController extends Group
 {
@@ -45,7 +39,7 @@ public class ManualStepTabController extends Group
    private static final String NO_FLAMINGO_QUADRANT_SELECTED = "None";
 
    private final AtomicBoolean useTrotOverCrawl = new AtomicBoolean(false);
-   private final QuadrupedStraightPawstepPlanGenerator manualPlanGenerator = new QuadrupedStraightPawstepPlanGenerator();
+   private final QuadrupedManualPawstepPlanGenerator manualPlanGenerator = new QuadrupedManualPawstepPlanGenerator();
 
    private JavaFXMessager messager;
    private AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
@@ -208,32 +202,22 @@ public class ManualStepTabController extends Group
          return;
       }
 
-      if (useTrot.isSelected())
-      {
-         messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, manualPlanGenerator.generateTrotSteps(firstFoot.getValue(),
-                                                                                                                          swingHeight.getValue(),
-                                                                                                                          stepHeight.getValue(),
-                                                                                                                          stepLength.getValue(),
-                                                                                                                          stepWidth.getValue(),
-                                                                                                                          stepDuration.getValue(),
-                                                                                                                          dwellTime.getValue(),
-                                                                                                                          numberOfSteps.getValue(),
-                                                                                                                          xGaitSettingsReference.get(),
-                                                                                                                          referenceFrames));
-      }
-      else
-      {
-         messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, manualPlanGenerator.generateCrawlSteps(firstFoot.getValue(),
-                                                                                                                           swingHeight.getValue(),
-                                                                                                                           stepHeight.getValue(),
-                                                                                                                           stepLength.getValue(),
-                                                                                                                           stepWidth.getValue(),
-                                                                                                                           stepDuration.getValue(),
-                                                                                                                           dwellTime.getValue(),
-                                                                                                                           numberOfSteps.getValue(),
-                                                                                                                           xGaitSettingsReference.get(),
-                                                                                                                           referenceFrames));
-      }
+      messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, generateManualStepPlan());
+   }
+
+   private QuadrupedTimedStepListMessage generateManualStepPlan()
+   {
+      return manualPlanGenerator.generateSteps(useTrot.isSelected(),
+                                               firstFoot.getValue(),
+                                               swingHeight.getValue(),
+                                               stepHeight.getValue(),
+                                               stepLength.getValue(),
+                                               stepWidth.getValue(),
+                                               stepDuration.getValue(),
+                                               dwellTime.getValue(),
+                                               numberOfSteps.getValue(),
+                                               xGaitSettingsReference.get(),
+                                               referenceFrames);
    }
 
    public void setUseTrot()
