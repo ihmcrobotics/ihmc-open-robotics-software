@@ -1,36 +1,50 @@
 package us.ihmc.quadrupedUI.uiControllers;
 
 import com.sun.javafx.collections.ImmutableObservableList;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
+import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.SubScene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
+import us.ihmc.quadrupedUI.graphics.PositionGraphic;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.CRC32;
 
-public class ManualStepTabController
+public class ManualStepTabController extends Group
 {
    private static final double defaultStepHeight = 0.05;
    private static final double defaultStepDuration = 0.4;
    private static final double defaultDwellTime = 0.2;
+   private static final String NO_FLAMINGO_QUADRANT_SELECTED = "None";
 
    private final AtomicBoolean useTrotOverCrawl = new AtomicBoolean(false);
 
@@ -41,7 +55,6 @@ public class ManualStepTabController
    private OneDoFJointBasics[] allJoints;
    private int jointNameHash;
    private QuadrupedReferenceFrames referenceFrames;
-
 
    @FXML
    private Spinner<Double> swingHeight;
@@ -71,6 +84,13 @@ public class ManualStepTabController
 
    @FXML
    private CheckBox useTrot;
+
+   @FXML private ComboBox<String> flamingoFoot;
+   @FXML private Spinner<Double> flamingoTrajectoryTime;
+   private PositionGraphic flamingoFootGraphic;
+   private volatile boolean keyIsHeld = false;
+   private ExceptionHandlingThreadScheduler flamigoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
+   private ScheduledFuture<?> lastFlamingoFuture;
 
    public void setFullRobotModelFactory(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
@@ -142,9 +162,99 @@ public class ManualStepTabController
       dwellTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.0, defaultDwellTime, 0.05));
       numberOfSteps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1));
       firstFoot.setItems(new ImmutableObservableList<>(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT));
+      flamingoFoot.setItems(new ImmutableObservableList<>(NO_FLAMINGO_QUADRANT_SELECTED,
+                                                          RobotQuadrant.FRONT_LEFT.getTitleCaseName(),
+                                                          RobotQuadrant.FRONT_RIGHT.getTitleCaseName(),
+                                                          RobotQuadrant.HIND_LEFT.getTitleCaseName(),
+                                                          RobotQuadrant.HIND_RIGHT.getTitleCaseName()));
+      flamingoTrajectoryTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 500.0, 2.0, 0.1));
       useTrot.setSelected(false);
 
       firstFoot.getSelectionModel().select(RobotQuadrant.FRONT_RIGHT);
+      flamingoFoot.getSelectionModel().select(NO_FLAMINGO_QUADRANT_SELECTED);
+   }
+
+   public void initScene(SubScene subScene)
+   {
+      flamingoFootGraphic = new PositionGraphic(Color.PINK, 0.03);
+      flamingoFootGraphic.clear();
+      getChildren().add(flamingoFootGraphic.getNode());
+
+      subScene.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
+   }
+
+   private void onKeyEvent(KeyEvent keyEvent)
+   {
+      // pressed and released only use code field
+      if (keyEvent.getEventType() == KeyEvent.KEY_PRESSED && !keyIsHeld)
+      {
+         if (isArrowKey(keyEvent))
+         {
+            keyIsHeld = true;
+            keyEvent.consume();
+            Vector3D vectorToAdd = new Vector3D();
+            double amountToMoveInOneSecond = 0.5;
+            long msPerMove = 5;
+            double secondsPerStep = Conversions.millisecondsToSeconds(msPerMove);
+            double stepsIn1Second = amountToMoveInOneSecond / secondsPerStep;
+            double stepAmount = amountToMoveInOneSecond / stepsIn1Second;
+
+            if      (!keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.UP)     vectorToAdd.setY( stepAmount);
+            else if (!keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.DOWN)   vectorToAdd.setY(-stepAmount);
+            else if ( keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.UP)     vectorToAdd.setZ( stepAmount);
+            else if ( keyEvent.isControlDown() && keyEvent.getCode() == KeyCode.DOWN)   vectorToAdd.setZ(-stepAmount);
+            else if (                             keyEvent.getCode() == KeyCode.LEFT)   vectorToAdd.setX(-stepAmount);
+            else if (                             keyEvent.getCode() == KeyCode.RIGHT)  vectorToAdd.setX( stepAmount);
+
+            try
+            {
+               flamigoPoseKeyHeldMover = new ExceptionHandlingThreadScheduler(getClass().getSimpleName() + "Flamingo");
+               lastFlamingoFuture = flamigoPoseKeyHeldMover.schedule(() ->
+            {
+               flamingoFootGraphic.getPose().appendTranslation(vectorToAdd);
+               flamingoFootGraphic.update();
+            }, msPerMove, TimeUnit.MILLISECONDS);
+
+            }
+            catch (Exception e)
+            {
+               LogTools.error(e.getMessage());
+            }
+         }
+      }
+      else if (keyEvent.getEventType() == KeyEvent.KEY_RELEASED && keyIsHeld)
+      {
+         if (isArrowKey(keyEvent))
+         {
+            keyIsHeld = false;
+            keyEvent.consume();
+            try
+         {
+            lastFlamingoFuture.cancel(true);
+//            flamigoPoseKeyHeldMover.shutdown();
+         }
+            catch (Exception e)
+         {
+            LogTools.error(e.getMessage());
+         }
+         }
+      }
+      else if (keyEvent.getEventType() == KeyEvent.KEY_TYPED)
+      {
+         if (keyEvent.getCharacter().equals(" ")) // typed only uses character field
+         {
+            keyEvent.consume();
+            sendFlamingoFootPose();
+         }
+      }
+   }
+
+   private boolean isArrowKey(KeyEvent keyEvent)
+   {
+      return keyEvent.getCode() == KeyCode.UP
+            || keyEvent.getCode() == KeyCode.DOWN
+            || keyEvent.getCode() == KeyCode.LEFT
+            || keyEvent.getCode() == KeyCode.RIGHT;
    }
 
    public void sendSteps()
@@ -363,5 +473,40 @@ public class ManualStepTabController
       }
 
       messager.submitMessage(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, stepListMessage);
+   }
+
+   @FXML public void flamingoFoot() // add/remove virtual graphic
+   {
+      String quadrantSelection = flamingoFoot.getValue();
+
+      if (!quadrantSelection.equals(NO_FLAMINGO_QUADRANT_SELECTED))
+      {
+         FramePose3D solePose = new FramePose3D();
+         solePose.setFromReferenceFrame(referenceFrames.getSoleFrame(RobotQuadrant.guessQuadrantFromName(flamingoFoot.getValue())));
+
+         flamingoFootGraphic.setPosition(solePose.getPosition());
+         flamingoFootGraphic.update();
+      }
+      else
+      {
+         flamingoFootGraphic.clear();
+      }
+   }
+
+   public void sendFlamingoFootPose()
+   {
+      String quadrantSelection = flamingoFoot.getValue();
+
+      if (!quadrantSelection.equals(NO_FLAMINGO_QUADRANT_SELECTED))
+      {
+         SoleTrajectoryMessage soleTrajectoryMessage = new SoleTrajectoryMessage();
+         soleTrajectoryMessage.setRobotQuadrant(RobotQuadrant.guessQuadrantFromName(quadrantSelection).toByte());
+         EuclideanTrajectoryPointMessage trajectoryPointMessage = soleTrajectoryMessage.getPositionTrajectory().getTaskspaceTrajectoryPoints().add();
+         trajectoryPointMessage.setTime(flamingoTrajectoryTime.getValue());
+         trajectoryPointMessage.getPosition().set(flamingoFootGraphic.getPose().getPosition());
+
+         messager.submitMessage(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, soleTrajectoryMessage);
+      }
+
    }
 }

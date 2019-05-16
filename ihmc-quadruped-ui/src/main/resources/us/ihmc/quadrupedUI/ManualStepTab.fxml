@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="150.0" prefWidth="817.0"
-            xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedUI.uiControllers.ManualStepTabController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="150.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.quadrupedUI.uiControllers.ManualStepTabController">
     <children>
-        <GridPane hgap="12.0" vgap="4.0" layoutX="30" layoutY="15.0">
+        <GridPane hgap="12.0" layoutX="30" layoutY="15.0" vgap="4.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints minWidth="10.0" prefWidth="120.0" />
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
             </rowConstraints>
 
             <children>
@@ -21,26 +37,36 @@
                 <Label text="Number of Steps" GridPane.columnIndex="0" GridPane.rowIndex="3" />
 
 
-                <Spinner fx:id="swingHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                <Spinner fx:id="stepDuration" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Spinner fx:id="dwellTime" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <Spinner fx:id="numberOfSteps" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Spinner fx:id="swingHeight" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Spinner fx:id="stepDuration" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Spinner fx:id="dwellTime" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Spinner fx:id="numberOfSteps" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <Label text="Step Height (m)" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                 <Label text="Step Length (m)" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <Label text="Step Width (m)" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
-                <Spinner fx:id="stepHeight" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
-                <Spinner fx:id="stepLength" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                <Spinner fx:id="stepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Spinner fx:id="stepHeight" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                <Spinner fx:id="stepLength" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                <Spinner fx:id="stepWidth" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
 
 
-                <Label text="First Foot" GridPane.columnIndex="4" GridPane.rowIndex="0"/>
-                <Label text="Use Trot" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                <Label text="First Foot" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+                <Label text="Use Trot" GridPane.columnIndex="4" GridPane.rowIndex="1" />
 
-                <ComboBox fx:id="firstFoot" GridPane.columnIndex="5" GridPane.rowIndex="0"/>
-                <CheckBox fx:id="useTrot" GridPane.columnIndex="5" GridPane.rowIndex="1" onAction="#setUseTrot"/>
-                <Button fx:id="stepButton" GridPane.columnIndex="5" GridPane.rowIndex="2" text="Send Steps" onAction="#sendSteps"/>
+                <ComboBox fx:id="firstFoot" GridPane.columnIndex="5" GridPane.rowIndex="0" />
+                <CheckBox fx:id="useTrot" onAction="#setUseTrot" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                <Button fx:id="stepButton" onAction="#sendSteps" text="Send Steps" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+            <Label text="Flamingo foot:" GridPane.columnIndex="6" />
+            <ComboBox fx:id="flamingoFoot" onAction="#flamingoFoot" prefWidth="150.0" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+            <BorderPane GridPane.columnIndex="6" GridPane.rowIndex="2">
+               <left>
+                  <Label text="Time" BorderPane.alignment="CENTER" />
+               </left>
+               <center>
+                  <Spinner fx:id="flamingoTrajectoryTime" editable="true" prefWidth="80.0" BorderPane.alignment="CENTER" />
+               </center>
+            </BorderPane>
 
             </children>
         </GridPane>
