@@ -18,7 +18,7 @@ public class TimeIntervalTools
       if (intervalB.intervalContains(intervalA.getStartTime()))
          return true;
 
-      return intervalB.intervalContains(intervalB.getEndTime());
+      return intervalB.intervalContains(intervalA.getEndTime());
    }
 
    static public void sortByStartTime(List<? extends TimeIntervalProvider> timeIntervalProviders)

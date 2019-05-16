@@ -234,6 +234,29 @@ public class PlanarRegionsList
       return containers;
    }
 
+   public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(Point2DReadOnly point)
+   {
+      return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
+   }
+
+   public List<PlanarRegion> findPlanarRegionsContainingPointByVerticalLineIntersection(double x, double y)
+   {
+      List<PlanarRegion> containers = null;
+
+      for (int i = 0; i < regions.size(); i++)
+      {
+         PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isPointInsideByVerticalLineIntersection(x, y))
+         {
+            if (containers == null)
+               containers = new ArrayList<>();
+            containers.add(candidateRegion);
+         }
+      }
+
+      return containers;
+   }
+
    /**
     * Find the closest planar region to the given point. The algorithm is equivalent to
     * projecting all the regions onto the XY-plane and then finding the closest one to the point.
