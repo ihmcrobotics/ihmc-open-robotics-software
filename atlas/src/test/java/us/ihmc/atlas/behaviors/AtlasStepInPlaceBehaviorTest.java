@@ -40,15 +40,14 @@ public class AtlasStepInPlaceBehaviorTest
       BehaviorModule.createForTest(robotModel, messager);
 
       LogTools.info("Creating behavior messager");
-      Messager behaviorMessager = RemoteBehaviorInterface.createForTest(messager);
 
       LogTools.info("Set stepping true");
-      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
+      messager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
 
       AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
 
-      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
-      behaviorMessager.submitMessage(StepInPlaceBehavior.API.Abort, true);
+      messager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
+      messager.submitMessage(StepInPlaceBehavior.API.Abort, true);
 
       AtlasTestScripts.wait(conductor, variables, 3.0);
 

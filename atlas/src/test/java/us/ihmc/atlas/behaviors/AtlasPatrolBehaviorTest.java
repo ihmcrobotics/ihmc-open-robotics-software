@@ -14,6 +14,9 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
+import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
+import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -52,29 +55,22 @@ public class AtlasPatrolBehaviorTest
       BehaviorModule.createForTest(robotModel, messager);
 
       LogTools.info("Creating behavior messager");
-      Messager behaviorMessager = RemoteBehaviorInterface.createForTest(messager);
-      behaviorMessager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));
+      messager.registerTopicListener(PatrolBehaviorAPI.CurrentState, state -> LogTools.info("Patrol state: {}", state));
 
       AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
 
-      ArrayList<Pose3D> waypoints = new ArrayList<Pose3D>();
+      WaypointManager waypointManager = WaypointManager.createForUI(messager,
+                                                                    PatrolBehaviorAPI.WaypointsToUI,
+                                                                    PatrolBehaviorAPI.WaypointsToModule,
+                                                                    () -> {});
 
-      waypoints.add(new Pose3D(1.0, -0.2, 0.0, 20.0, 0.0, 0.0));
-      waypoints.add(new Pose3D(1.0, -1.0, 0.0, 180.0, 0.0, 0.0));
+      waypointManager.appendNewWaypoint().getPose().set(1.0, -0.2, 0.0, 20.0, 0.0, 0.0);
+      waypointManager.appendNewWaypoint().getPose().set(1.0, -1.0, 0.0, 180.0, 0.0, 0.0);
+      waypointManager.publish();
 
-//      behaviorMessager.submitMessage(PatrolBehaviorAPI.WaypointsToModule, waypoints);
+      messager.submitMessage(PatrolBehaviorAPI.GoToWaypoint, 0);
 
-      behaviorMessager.submitMessage(PatrolBehaviorAPI.GoToWaypoint, 0);
-
-
-//      FramePose3D currentGoalWaypoint = new FramePose3D();
-//      currentGoalWaypoint.prependTranslation(2.0, 0.0, 0.0);
-
-      AtlasTestScripts.wait(conductor, variables, 10000.0);  // allows to update frames
-
-//      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
-//
-//      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.takeSteps(conductor, variables, 5, 5.0);
    }
 
    @AfterEach
