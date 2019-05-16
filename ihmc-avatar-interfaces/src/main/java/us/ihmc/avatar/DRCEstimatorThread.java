@@ -212,7 +212,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          CenterOfMassDataHolder centerOfMassDataHolderForEstimator = threadDataSynchronizer.getEstimatorCenterOfMassDataHolder();
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
+                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolderForEstimator)
                          .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);

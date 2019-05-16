@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
-import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -32,12 +31,10 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -69,8 +66,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class AvatarEstimatorThread
 {
-   private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
-
    /** Set this to true to create and run, but not use the EKF estimator */
    private static final boolean CREATE_EKF_ESTIMATOR = false;
    /** Set this to true to use the EKF estimator */
@@ -115,11 +110,11 @@ public class AvatarEstimatorThread
       estimatorFullRobotModel = robotModel.createFullRobotModel();
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
-      ForceSensorDataHolder forceSensorDataHolderForEstimator = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       CenterOfPressureDataHolder centerOfPressureDataHolderFromController = new CenterOfPressureDataHolder(estimatorFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(estimatorFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
-      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolder);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderFromController);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusFromController);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
@@ -129,10 +124,11 @@ public class AvatarEstimatorThread
       IMUDefinition[] imuDefinitions = estimatorFullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = estimatorFullRobotModel.getForceSensorDefinitions();
 
-      sensorReaderFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+      // This is only used by the perfect sensor reader if we are not using the estimator. It will update the data structure.
+      sensorReaderFactory.setForceSensorDataHolder(forceSensorDataHolder);
+
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, desiredJointDataHolder, estimatorRegistry);
-
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");
@@ -149,8 +145,9 @@ public class AvatarEstimatorThread
 
       if (sensorReaderFactory.useStateEstimator())
       {
+         // Updates the force sensor data when running with the estimator.
          forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(), sensorOutputMapReadOnly,
-                                                               forceSensorDataHolderForEstimator, stateEstimatorParameters, gravity,
+                                                               forceSensorDataHolder, stateEstimatorParameters, gravity,
                                                                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
 
          if (realtimeRos2Node != null)
@@ -183,7 +180,7 @@ public class AvatarEstimatorThread
                                                                additionalContactTransforms.get(i));
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
+                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolder)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
@@ -197,25 +194,13 @@ public class AvatarEstimatorThread
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
       estimatorController.addRobotController(robotJointLimitWatcher);
 
-      if (USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR)
-      {
-         for (ForceSensorDefinition forceSensorDefinition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
-         {
-            String sensorName = forceSensorDefinition.getSensorName();
-            RigidBodyBasics sensorLink = forceSensorDefinition.getRigidBody();
-            ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
-            ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
-            estimatorController.addRobotController(footSensorToJointTorqueProjector);
-         }
-      }
-
       if (realtimeRos2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
          if (sensorReaderFactory.useStateEstimator() && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
             forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
          else
-            forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
+            forceSensorDataHolderToSend = forceSensorDataHolder;
 
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
                                                                                                            forceSensorDataHolderToSend);
