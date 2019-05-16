@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -22,12 +24,15 @@ public class QuadrupedStepPlanarRegionProjection
 
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(100, PlanarRegion::new);
    private final QuadrantDependentList<PlanarRegion> regionMap = new QuadrantDependentList<>();
+   private final QuadrantDependentList<MutableBoolean> hasCheckedForRegion = new QuadrantDependentList<>(MutableBoolean::new);
 
-   private final Point2D tempPoint2D = new Point2D();
-   private final Point3D tempPoint3D = new Point3D();
    private final ConvexPolygon2D planarRegionPolygon = new ConvexPolygon2D();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
    private final ConvexPolygon2D shrunkPolygon = new ConvexPolygon2D();
+
+   private final Point2D tempPoint2D = new Point2D();
+   private final Point3D tempPoint3D = new Point3D();
+   private final Vector3D tempVector3D = new Vector3D();
 
    public QuadrupedStepPlanarRegionProjection(YoVariableRegistry parentRegistry)
    {
@@ -43,9 +48,10 @@ public class QuadrupedStepPlanarRegionProjection
       }
 
       // at the start of the step, assign a region to the quadrant. subsequent projections will always keep the step inside this region
-      if (regionMap.get(quadrant) == null)
+      if (regionMap.get(quadrant) == null && hasCheckedForRegion.get(quadrant).isFalse())
       {
          regionMap.put(quadrant, findTouchdownRegion(goalPosition));
+         hasCheckedForRegion.get(quadrant).setTrue();
       }
 
       // if no region is found, do nothing
@@ -69,15 +75,16 @@ public class QuadrupedStepPlanarRegionProjection
       planarRegionPolygon.set(region.getConvexHull());
       double minimumDistanceToRegionEdge = this.minimumDistanceToRegionEdge.getValue();
 
-      if (planarRegionPolygon.signedDistance(tempPoint2D) > -minimumDistanceToRegionEdge)
+      if (planarRegionPolygon.signedDistance(tempPoint2D) > - minimumDistanceToRegionEdge)
       {
          scaler.scaleConvexPolygon(planarRegionPolygon, minimumDistanceToRegionEdge, shrunkPolygon);
          shrunkPolygon.orthogonalProjection(tempPoint2D);
 
-         tempPoint3D.set(tempPoint2D.getX(), tempPoint2D.getY(), 0.0);
-         region.transformFromLocalToWorld(tempPoint3D);
+         tempVector3D.set(tempPoint2D.getX(), tempPoint2D.getY(), 0.0);
+         tempVector3D.sub(tempPoint3D.getX(), tempPoint3D.getY(), 0.0);
+         region.transformFromLocalToWorld(tempVector3D);
 
-         goalPosition.set(tempPoint3D);
+         goalPosition.add(tempVector3D);
       }
    }
 
@@ -86,7 +93,6 @@ public class QuadrupedStepPlanarRegionProjection
       ReferenceFrame referenceFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // region containing xy point
       PlanarRegion highestIntersectingRegion = null;
       double highestRegionHeight = Double.NEGATIVE_INFINITY;
       double x = goalPosition.getX();
@@ -95,7 +101,7 @@ public class QuadrupedStepPlanarRegionProjection
       for (int i = 0; i < planarRegions.size(); i++)
       {
          PlanarRegion planarRegion = planarRegions.get(i);
-         if (!planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+         if (!isPointInsideByProjectionOntoXYPlane(planarRegion, x, y))
          {
             continue;
          }
@@ -119,9 +125,31 @@ public class QuadrupedStepPlanarRegionProjection
       }
    }
 
+   /**
+    * Garbage free version of {@link PlanarRegion#isPointInsideByProjectionOntoXYPlane(double, double)}
+    */
+   private boolean isPointInsideByProjectionOntoXYPlane(PlanarRegion planarRegion, double x, double y)
+   {
+      tempPoint3D.setX(x);
+      tempPoint3D.setY(y);
+      tempPoint3D.setZ(planarRegion.getPlaneZGivenXY(x, y));
+      planarRegion.transformFromWorldToLocal(tempPoint3D);
+
+      for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
+      {
+         if(planarRegion.getConvexPolygon(i).isPointInside(tempPoint3D.getX(), tempPoint3D.getY()))
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
    public void completedStep(RobotQuadrant quadrant)
    {
       regionMap.put(quadrant, null);
+      hasCheckedForRegion.get(quadrant).setFalse();
    }
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand command)
@@ -131,5 +159,17 @@ public class QuadrupedStepPlanarRegionProjection
       {
          command.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
       }
+
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+      {
+         regionMap.put(quadrant, null);
+         hasCheckedForRegion.get(quadrant).setFalse();
+      }
+   }
+
+   // getter for tests
+   protected double getMinimumDistanceToRegionEdge()
+   {
+      return minimumDistanceToRegionEdge.getValue();
    }
 }
