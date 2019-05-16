@@ -12,17 +12,58 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
  */
 public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotContextData>, Settable<HumanoidRobotContextData>
 {
-   /** Serves to synchronize the controller time to the estimator time. The estimator sets this, the controller reads it. */
+   /**
+    * Serves to synchronize the time across threads.
+    * TODO: should be set by the main robot thread
+    */
    private long timestamp = Long.MIN_VALUE;
-   /** Serves to inform the estimator that the controller ran and populated the desired values in this context. Set by the controller. */
-   private boolean controllerRan = false;
-   /** Serves to inform the controller that the estimator ran and populated the estimated values in this context. Set by the estimator. */
+
+   /**
+    * The measured force sensor data.
+    * TODO: should be set by the main robot thread
+    */
+   private final ForceSensorDataHolder forceSensorDataHolder;
+
+   /**
+    * The joint measurements.
+    * TODO: should be set by the main robot thread
+    */
+//   private final XXX measuredJointState;
+
+   /**
+    * Serves to inform the controller that the estimator ran and populated the estimated values in this context.
+    * Set by the estimator.
+    */
    private boolean estimatorRan = false;
 
+   /**
+    * Estimated state of the robot.
+    * Set by the estimator.
+    */
    private final HumanoidRobotContextJointData processedJointData;
-   private final ForceSensorDataHolder forceSensorDataHolder;
+
+   /**
+    * Serves to inform the estimator that the controller ran and populated the desired values in this context.
+    * Set by the controller.
+    */
+   private boolean controllerRan = false;
+
+   /**
+    * The controller desired center of pressure.
+    * Set by the controller.
+    */
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
+
+   /**
+    * The motion status of the robot.
+    * Set by the controller.
+    */
    private final RobotMotionStatusHolder robotMotionStatusHolder;
+
+   /**
+    * The desired joint data to be set on the robot.
+    * Set by the controller.
+    */
    private final LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
 
    public HumanoidRobotContextData()
