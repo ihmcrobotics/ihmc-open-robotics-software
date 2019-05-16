@@ -386,6 +386,11 @@ public class QuadrupedBalanceManager
       return momentumRateOfChangeModule.getDcmError();
    }
 
+   public FramePoint3DReadOnly getDesiredDcmPosition()
+   {
+      return yoDesiredDCMPosition;
+   }
+
 
    public boolean stepHasBeenAdjusted()
    {
