@@ -61,6 +61,7 @@ public class AtlasFootstepPlanBehaviorTest
       AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
    }
 
+   @Disabled
    @Test
    public void testWalkNegativePiToPi() throws IOException
    {
