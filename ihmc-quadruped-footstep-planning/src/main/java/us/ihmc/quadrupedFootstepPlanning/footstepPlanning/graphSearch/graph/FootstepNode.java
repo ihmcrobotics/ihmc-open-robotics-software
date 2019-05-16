@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class FootstepNode
 {
-   public static double gridSizeXY = 0.08;
+   public static double gridSizeXY = 0.05;
    public static final double gridSizeYaw = 0.10;
 
    public static final double PRECISION = 0.05;
