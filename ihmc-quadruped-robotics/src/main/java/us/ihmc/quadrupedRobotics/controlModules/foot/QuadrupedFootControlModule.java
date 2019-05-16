@@ -19,8 +19,11 @@ import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
+import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedFootControlModule
 {
@@ -43,11 +46,11 @@ public class QuadrupedFootControlModule
    private final QuadrupedMoveViaWaypointsState moveViaWaypointsState;
    private final EventTrigger eventTrigger;
    private final StateMachine<QuadrupedFootStates, QuadrupedFootState> footStateMachine;
+   private final DoubleProvider currentTime;
 
    // window after support is triggered by touchdown but before step time is up to make sure swing isn't triggered again
    // TODO find a better solution. could be done by indexing steps
    private final QuadrupedFootControlModuleParameters parameters;
-   private static final double supportToSwingGlitchWindow = 0.15;
    private final YoBoolean isFirstStep;
 
    private final QuadrupedSwingState swingState;
@@ -62,6 +65,7 @@ public class QuadrupedFootControlModule
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
       parameters = controllerToolbox.getFootControlModuleParameters();
+      currentTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
       swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
@@ -154,7 +158,7 @@ public class QuadrupedFootControlModule
 
    public void triggerStep(QuadrupedTimedStep stepCommand)
    {
-      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger())
+      if (footStateMachine.getCurrentStateKey() == QuadrupedFootStates.SUPPORT && isValidTrigger(stepCommand))
       {
          this.currentStepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
@@ -162,8 +166,17 @@ public class QuadrupedFootControlModule
       }
    }
 
-   private boolean isValidTrigger()
+   private boolean isValidTrigger(QuadrupedTimedStep desiredStep)
    {
+      if (currentStepCommand.epsilonEquals(desiredStep, 1e-3))
+         return false;
+
+      TimeIntervalReadOnly timeInterval = desiredStep.getTimeInterval();
+      double timeInStep = currentTime.getValue() - timeInterval.getStartTime();
+      double phaseThroughStep = timeInStep / timeInterval.getDuration();
+      if (phaseThroughStep > parameters.getMaximumPhaseThroughStepToAllowStart())
+         return false;
+
       if (isFirstStep.getBooleanValue())
       {
          isFirstStep.set(false);
