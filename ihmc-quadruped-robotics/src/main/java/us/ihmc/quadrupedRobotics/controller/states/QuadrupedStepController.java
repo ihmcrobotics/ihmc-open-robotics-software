@@ -82,7 +82,7 @@ public class QuadrupedStepController implements EventState
       stepMessageHandler.process();
       stepMessageHandler.updateActiveSteps();
 
-      boolean stepWasDelayed = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(), stepMessageHandler.getStepSequence(), balanceManager.getDcmError(),
+      boolean stepWasDelayed = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(), stepMessageHandler.getStepSequence(), balanceManager.getDesiredDcmPosition(),
                                                                  balanceManager.computeNormalizedEllipticDcmErrorForDelayedLiftOff());
       if (stepWasDelayed)
          stepMessageHandler.updateActiveSteps();
