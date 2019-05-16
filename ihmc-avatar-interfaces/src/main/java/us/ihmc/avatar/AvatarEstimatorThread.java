@@ -42,7 +42,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -88,12 +87,10 @@ public class AvatarEstimatorThread
 
    private final SensorReader sensorReader;
 
-   private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
+   private final YoLong timestamp = new YoLong("Timestamp", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
    private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
-
-   private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -344,7 +341,7 @@ public class AvatarEstimatorThread
 
          // TODO: move this to the actual estimator thread and make it thread safe.
          sensorReader.read();
-         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+         timestamp.set(sensorOutputMapReadOnly.getTimestamp());
       }
       catch (Throwable e)
       {
@@ -370,7 +367,6 @@ public class AvatarEstimatorThread
             firstTick.set(false);
          }
 
-         estimatorTimer.startMeasurement();
          if (reinitializeEKF != null && reinitializeEKF.getValue())
          {
             reinitializeEKF.set(false);
@@ -385,9 +381,7 @@ public class AvatarEstimatorThread
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
-         humanoidRobotContextData.setTimestamp(estimatorTime.getLongValue());
-
-         estimatorTimer.stopMeasurement();
+         humanoidRobotContextData.setTimestamp(timestamp.getValue());
       }
       catch (Throwable e)
       {

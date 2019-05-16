@@ -3,11 +3,9 @@ package us.ihmc.avatar;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
-import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.robotics.time.ThreadTimer;
 
 public class ControllerTask extends HumanoidRobotControlTask
 {
@@ -15,13 +13,10 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final CrossRobotCommandResolver masterResolver;
 
    private final AvatarControllerThread controllerThread;
-   private final YoLong controllerTick;
-   private final YoDouble controllerDT;
-   private final YoDouble controllerTimer;
-
-   private long lastStartTime;
 
    private final RobotVisualizer robotVisualizer;
+
+   private final ThreadTimer timer;
 
    public ControllerTask(AvatarControllerThread controllerThread, long divisor, FullHumanoidRobotModel masterFullRobotModel, RobotVisualizer robotVisualizer)
    {
@@ -31,9 +26,8 @@ public class ControllerTask extends HumanoidRobotControlTask
 
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
-      controllerTick = new YoLong("ControllerTick", controllerThread.getYoVariableRegistry());
-      controllerDT = new YoDouble("ControllerDT", controllerThread.getYoVariableRegistry());
-      controllerTimer = new YoDouble("ControllerTimer", controllerThread.getYoVariableRegistry());
+
+      timer = new ThreadTimer("Controller", controllerThread.getYoVariableRegistry());
 
       robotVisualizer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
    }
@@ -41,15 +35,9 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void execute()
    {
-      long startTime = System.nanoTime();
-      if (lastStartTime != 0)
-         controllerDT.set(Conversions.nanosecondsToMilliseconds((double) (startTime - lastStartTime)));
-      lastStartTime = startTime;
-
-      controllerTick.increment();
+      timer.start();
       controllerThread.run();
-
-      controllerTimer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
+      timer.stop();
    }
 
    @Override
