@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface DRCRobotSensorInformation
+public interface AvatarHumanoidRobotSensorInformation
 {
    public String[] getIMUSensorsToUseInStateEstimator();
 
@@ -22,17 +22,17 @@ public interface DRCRobotSensorInformation
 
    public String getPrimaryBodyImu();
 
-   public DRCRobotCameraParameters[] getCameraParameters();
+   public AvatarRobotCameraParameters[] getCameraParameters();
 
-   public DRCRobotLidarParameters[] getLidarParameters();
+   public AvatarRobotLidarParameters[] getLidarParameters();
 
-   public DRCRobotPointCloudParameters[] getPointCloudParameters();
+   public AvatarRobotPointCloudParameters[] getPointCloudParameters();
 
-   public DRCRobotCameraParameters getCameraParameters(int cameraId);
+   public AvatarRobotCameraParameters getCameraParameters(int cameraId);
 
-   public DRCRobotLidarParameters getLidarParameters(int lidarId);
+   public AvatarRobotLidarParameters getLidarParameters(int lidarId);
 
-   public DRCRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
+   public AvatarRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
 
    @Deprecated // Unused, remove.
    public ReferenceFrame getHeadIMUFrameWhenLevel();

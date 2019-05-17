@@ -28,7 +28,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
 import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
@@ -74,7 +74,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
                                              final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-                                             DRCRobotSensorInformation sensorInformation, JointNameMap jointMap, String rosNameSpace,
+                                             AvatarHumanoidRobotSensorInformation sensorInformation, JointNameMap jointMap, String rosNameSpace,
                                              RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();

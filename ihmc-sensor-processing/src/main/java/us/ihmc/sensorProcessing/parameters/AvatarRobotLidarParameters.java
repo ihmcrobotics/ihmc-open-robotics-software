@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.parameters;
 
-public class DRCRobotLidarParameters implements DRCRobotSensorParameters
+public class AvatarRobotLidarParameters implements AvatarRobotSensorParameters
 {
    private final String lidarSensorName;
    private final String laserTopic;
@@ -14,8 +14,8 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    private final boolean useRosForTransformFromPoseToSensor;
    private final int lidarId;
 
-   public DRCRobotLidarParameters(boolean useRosForTransformFromPoseToSensor, String lidarSensorName, String laserTopic, String groundCloudTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
-         String poseFrameName, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
+   public AvatarRobotLidarParameters(boolean useRosForTransformFromPoseToSensor, String lidarSensorName, String laserTopic, String groundCloudTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
+                                     String poseFrameName, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
    {
       this.useRosForTransformFromPoseToSensor = useRosForTransformFromPoseToSensor;
       this.lidarSensorName = lidarSensorName;//"head_hokuyo_sensor"
@@ -87,8 +87,8 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    }
 
    @Override
-   public DRCRobotSensorType getSensorType()
+   public AvatarRobotVisionSensorType getSensorType()
    {
-      return DRCRobotSensorType.LIDAR;
+      return AvatarRobotVisionSensorType.LIDAR;
    }
 }

@@ -8,9 +8,9 @@ import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -25,14 +25,14 @@ public class MultiSenseSensorManager
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
-   private final DRCRobotCameraParameters cameraParameters;
+   private final AvatarRobotCameraParameters cameraParameters;
 
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
    public MultiSenseSensorManager(FullHumanoidRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode, Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-                                  DRCRobotCameraParameters cameraParameters, DRCRobotLidarParameters lidarParameters,
-                                  DRCRobotPointCloudParameters stereoParameters, boolean setROSParameters)
+                                  AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
+                                  AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;

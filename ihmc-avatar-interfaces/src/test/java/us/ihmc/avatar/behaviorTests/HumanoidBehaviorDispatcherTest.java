@@ -24,7 +24,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -57,7 +56,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -154,7 +153,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       CapturePointUpdatable capturePointUpdatable = createCapturePointUpdateable(drcSimulationTestHelper, registry, yoGraphicsListRegistry);
       behaviorDispatcher.addUpdatable(capturePointUpdatable);
 
-      DRCRobotSensorInformation sensorInfo = getRobotModel().getSensorInformation();
+      AvatarHumanoidRobotSensorInformation sensorInfo = getRobotModel().getSensorInformation();
       for (RobotSide robotSide : RobotSide.values)
       {
          WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(drcSimulationTestHelper.getRobotName(), robotSide,
