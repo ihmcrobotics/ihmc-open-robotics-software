@@ -23,6 +23,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -142,7 +143,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          private final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink();
 
          @Override
-         public void computeTransformToWorld(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
          {
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
             neckFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());

@@ -94,10 +94,12 @@ public class PelvisLinearStateUpdater
 
    private final BooleanProvider useGroundReactionForcesToComputeCenterOfMassVelocity;
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
+   private final YoInteger numberOfEndEffectorsFilteredByLoad = new YoInteger("numberOfEndEffectorsFilteredByLoad", registry);
 
    private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<>();
    private final IntegerProvider optimalNumberOfTrustedFeet;
-   private final DoubleProvider forceZInPercentThresholdToFilterFoot;
+   private final DoubleProvider forceZInPercentThresholdToTrustFoot;
+   private final DoubleProvider forceZInPercentThresholdToNotTrustFoot;
 
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, FixedFrameVector3DBasics> footForces = new LinkedHashMap<>();
@@ -105,6 +107,7 @@ public class PelvisLinearStateUpdater
    private final DoubleProvider delayTimeBeforeTrustingFoot;
    private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoBoolean> wereFeetTrustedLastTick = new LinkedHashMap<>();
    private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<>();
    private final List<RigidBodyBasics> listOfUnTrustedFeet = new ArrayList<>();
 
@@ -200,7 +203,8 @@ public class PelvisLinearStateUpdater
 
       delayTimeBeforeTrustingFoot = new DoubleParameter("delayTimeBeforeTrustingFoot", registry, stateEstimatorParameters.getDelayTimeForTrustingFoot());
       optimalNumberOfTrustedFeet = new IntegerParameter("optimalNumberOfTrustedFeet", registry, 2);
-      forceZInPercentThresholdToFilterFoot = new DoubleParameter("forceZInPercentThresholdToFilterFootUserParameter", registry, stateEstimatorParameters.getForceInPercentOfWeightThresholdToTrustFoot());
+      forceZInPercentThresholdToTrustFoot = new DoubleParameter("forceZInPercentThresholdToTrustFoot", registry, stateEstimatorParameters.getForceInPercentOfWeightThresholdToTrustFoot());
+      forceZInPercentThresholdToNotTrustFoot = new DoubleParameter("forceZInPercentThresholdToNotTrustFoot", registry, stateEstimatorParameters.getForceInPercentOfWeightThresholdToNotTrustFoot());
       trustImuWhenNoFeetAreInContact = new BooleanParameter("trustImuWhenNoFeetAreInContact", registry, stateEstimatorParameters.getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact());
       useGroundReactionForcesToComputeCenterOfMassVelocity = new BooleanParameter("useGRFToComputeCoMVelocity", registry, stateEstimatorParameters.useGroundReactionForcesToComputeCenterOfMassVelocity());
 
@@ -236,11 +240,14 @@ public class PelvisLinearStateUpdater
          haveFeetHitGroundFiltered.put(foot, hasFootHitTheGroundFiltered);
 
          YoBoolean isFootTrusted = new YoBoolean("is" + footPrefix + "FootTrusted", registry);
+         YoBoolean wasFootTrusted = new YoBoolean("was" + footPrefix + "FootTrustedLastTick", registry);
          if (i == 0)
          {
             isFootTrusted.set(true);
+            wasFootTrusted.set(true);
          }
          areFeetTrusted.put(foot, isFootTrusted);
+         wereFeetTrustedLastTick.put(foot, wasFootTrusted);
 
          YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
@@ -315,6 +322,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.updateKinematics();
 
       numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
+      numberOfEndEffectorsFilteredByLoad.set(0);
 
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
       {
@@ -403,6 +411,7 @@ public class PelvisLinearStateUpdater
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
+         wereFeetTrustedLastTick.get(foot).set(areFeetTrusted.get(foot).getValue());
          haveFeetHitGroundFiltered.get(foot).setWindowSize(windowSize);
 
          if (footSwitches.get(foot).hasFootHitGround())
@@ -532,14 +541,14 @@ public class PelvisLinearStateUpdater
       return lowestFootInContact;
    }
 
-   private final List<RigidBodyBasics> filteredTrustedFeet = new ArrayList<>(6);
-
    private int filterTrustedFeetBasedOnContactForces(int numberOfEndEffectorsTrusted)
    {
       double totalForceZ = 0.0;
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
+         if (!areFeetTrusted.get(foot).getBooleanValue())
+            continue;
          Wrench footWrench = footWrenches.get(foot);
          footSwitches.get(foot).computeAndPackFootWrench(footWrench);
          FixedFrameVector3DBasics footForce = footForces.get(foot);
@@ -547,35 +556,38 @@ public class PelvisLinearStateUpdater
          totalForceZ += footForce.getZ();
       }
 
-      filteredTrustedFeet.clear();
+      int filteredNumberOfEndEffectorsTrusted = 0;
 
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
+         if (!areFeetTrusted.get(foot).getBooleanValue())
+            continue;
+
          FixedFrameVector3DBasics footForce = footForces.get(foot);
          YoDouble footLoad = footForcesZInPercentOfTotalForce.get(foot);
          footLoad.set(footForce.getZ() / totalForceZ);
 
-         double percentForce = forceZInPercentThresholdToFilterFoot.getValue();
+         double percentForceToTrustFootAgain = forceZInPercentThresholdToTrustFoot.getValue();
+         double percentForceToNotTrustFoot = forceZInPercentThresholdToNotTrustFoot.getValue();
+         percentForceToTrustFootAgain = MathTools.clamp(percentForceToTrustFootAgain, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
+         percentForceToNotTrustFoot = MathTools.clamp(percentForceToNotTrustFoot, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
 
-         percentForce = MathTools.clamp(percentForce, minForceZInPercentThresholdToFilterFoot, maxForceZInPercentThresholdToFilterFoot);
+         double magnitudeForTrust;
+         if (wereFeetTrustedLastTick.get(foot).getValue())
+            magnitudeForTrust = percentForceToNotTrustFoot;
+         else
+            magnitudeForTrust = percentForceToTrustFootAgain;
 
-         if (footLoad.getValue() >= percentForce)
-            filteredTrustedFeet.add(foot);
+         if (footLoad.getValue() < magnitudeForTrust)
+            areFeetTrusted.get(foot).set(false);
+         else
+            filteredNumberOfEndEffectorsTrusted++;
       }
 
-      if (!filteredTrustedFeet.isEmpty())
-      {
-         numberOfEndEffectorsTrusted = filteredTrustedFeet.size();
+      numberOfEndEffectorsFilteredByLoad.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
 
-         for (int i = 0; i < feet.size(); i++)
-         {
-            RigidBodyBasics foot = feet.get(i);
-            areFeetTrusted.get(foot).set(filteredTrustedFeet.remove(foot));
-         }
-      }
-
-      return numberOfEndEffectorsTrusted;
+      return filteredNumberOfEndEffectorsTrusted;
    }
 
    private final FrameVector3D pelvisVelocityIMUPart = new FrameVector3D();
