@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,18 +20,22 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
+import us.ihmc.quadrupedRobotics.planning.WeightDistributionCalculator;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
 public class DCMPlanner implements DCMPlannerInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private static final boolean VISUALIZE = true;
@@ -42,9 +47,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final YoFrameTrajectory3D dcmTransitionTrajectory;
 
-   private final DoubleParameter initialTransitionDuration = new DoubleParameter("initialTransitionDuration", registry, 0.5);
-   private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.1);
-   private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.5);
+   private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
@@ -57,33 +60,17 @@ public class DCMPlanner implements DCMPlannerInterface
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
-   private final YoBoolean isUsingSpline = new YoBoolean("isUsingSpline", registry);
-   private final YoBoolean isInitialTransfer = new YoBoolean("isInitialTransfer", registry);
-   private final YoDouble splineStartTime = new YoDouble("splineStartTime", registry);
-   private final YoDouble splineEndTime = new YoDouble("splineEndTime", registry);
 
    private final ReferenceFrame supportFrame;
-   private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", worldFrame, registry);
-   private final YoFrameVector3D dcmVelocityAtStartOfState = new YoFrameVector3D("dcmVelocityAtStartOfState", worldFrame, registry);
-   private final YoFramePoint3D dcmPositionAtEndOfTransition = new YoFramePoint3D("dcmPositionAtEndOfTransition", worldFrame, registry);
-   private final YoFrameVector3D dcmVelocityAtEndOfTransition = new YoFrameVector3D("dcmVelocityAtEndOfTransition", worldFrame, registry);
-   private final YoFramePoint3D dcmPositionAtStartOfSpline = new YoFramePoint3D("dcmPositionAtStartOfSpline", worldFrame, registry);
-   private final YoFrameVector3D dcmVelocityAtStartOfSpline = new YoFrameVector3D("dcmVelocityAtStartOfSpline", worldFrame, registry);
-   private final YoFramePoint3D dcmPositionAtEndOfSpline = new YoFramePoint3D("dcmPositionAtEndOfSpline", worldFrame, registry);
-   private final YoFrameVector3D dcmVelocityAtEndOfSpline = new YoFrameVector3D("dcmVelocityAtEndOfSpline", worldFrame, registry);
+   private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D dcmVelocityAtStartOfState = new YoFrameVector3D("dcmVelocityAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D dcmPositionAtEndOfTransition = new YoFramePoint3D("dcmPositionAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D dcmVelocityAtEndOfTransition = new YoFrameVector3D("dcmVelocityAtEndOfTransition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
-   private final YoDouble timeInState = new YoDouble("timeInState", registry);
-
    private final FramePoint3D initialTransitionDCMPosition = new FramePoint3D();
    private final FrameVector3D initialTransitionDCMVelocity = new FrameVector3D();
    private final FramePoint3D finalTransitionDCMPosition = new FramePoint3D();
    private final FrameVector3D finalTransitionDCMVelocity = new FrameVector3D();
-
-   private final FramePoint3D initialSplineDCMPosition = new FramePoint3D();
-   private final FrameVector3D initialSplineDCMVelocity = new FrameVector3D();
-   private final FramePoint3D finalSplineDCMPosition = new FramePoint3D();
-   private final FrameVector3D finalSplineDCMVelocity = new FrameVector3D();
-
    private final FramePoint3D finalDCM = new FramePoint3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
@@ -106,6 +93,7 @@ public class DCMPlanner implements DCMPlannerInterface
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
+
 
       DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
@@ -166,7 +154,6 @@ public class DCMPlanner implements DCMPlannerInterface
                                      FrameVector3DReadOnly currentDCMVelocity)
    {
       isStanding.set(false);
-      isInitialTransfer.set(true);
 
       double currentTime = controllerTime.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
@@ -179,23 +166,8 @@ public class DCMPlanner implements DCMPlannerInterface
          dcmPositionAtStartOfState.setMatchingFrame(currentDCMPosition);
          dcmVelocityAtStartOfState.setMatchingFrame(currentDCMVelocity);
          timeAtStartOfState.set(controllerTime.getDoubleValue());
-         computeInitialTransitionTrajectory();
+         computeTransitionTrajectory();
       }
-   }
-
-   public void beganStep()
-   {
-      dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
-      dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
-      timeAtStartOfState.set(controllerTime.getDoubleValue());
-   }
-
-   public void completedStep()
-   {
-      dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
-      dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
-      timeAtStartOfState.set(controllerTime.getDoubleValue());
-      isInitialTransfer.set(false);
    }
 
    private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
@@ -217,27 +189,10 @@ public class DCMPlanner implements DCMPlannerInterface
                                          piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
    }
 
-   private void computeInitialTransitionTrajectory()
+   private void computeTransitionTrajectory()
    {
-      double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
-      boolean initialPhaseIsLongEnough = currentIntervalDuration > initialTransitionDuration.getValue();
-
       double transitionStartTime = timeAtStartOfState.getDoubleValue();
-      double transitionEndTime;
-      if (initialPhaseIsLongEnough)
-      {
-         transitionEndTime = transitionStartTime + initialTransitionDuration.getValue();
-      }
-      else
-      {
-         double desiredTimeInNextPhase = initialTransitionDuration.getValue() - currentIntervalDuration;
-         desiredTimeInNextPhase = Math.min(desiredTimeInNextPhase, minimumSplineDuration.getValue());
-         desiredTimeInNextPhase = Math.max(desiredTimeInNextPhase, piecewiseConstantCopTrajectory.getIntervalDuration(1));
-         transitionEndTime = desiredTimeInNextPhase + piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1);
-      }
-
-      splineStartTime.set(transitionStartTime);
-      splineEndTime.set(transitionEndTime);
+      double transitionEndTime = Math.min(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1), transitionStartTime + initialTransitionDurationParameter.getValue());
 
       dcmTrajectory.computeTrajectory(transitionEndTime);
       dcmTrajectory.getPosition(finalTransitionDCMPosition);
@@ -259,50 +214,6 @@ public class DCMPlanner implements DCMPlannerInterface
 
       if (debug)
          runTransitionDebugChecks(transitionStartTime, transitionEndTime);
-   }
-
-   private void computeTransitionTrajectory()
-   {
-      double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
-      double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
-
-      double splineStartTime = timeAtStartOfState.getDoubleValue();
-      dcmPositionAtStartOfSpline.set(dcmPositionAtStartOfState);
-      dcmVelocityAtStartOfSpline.set(dcmVelocityAtStartOfState);
-
-      double splineEndTime;
-      if (nextIntervalDuration < minimumSplineDuration.getValue())
-      {
-         splineEndTime = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(1);
-      }
-      else
-      {
-         double desiredSplineDuration = Math.max(splineSplitFraction.getValue() * nextIntervalDuration, minimumSplineDuration.getValue());
-         splineEndTime = piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + desiredSplineDuration;
-      }
-
-      this.splineStartTime.set(splineStartTime);
-      this.splineEndTime.set(splineEndTime);
-
-      dcmTrajectory.computeTrajectory(splineEndTime);
-      dcmTrajectory.getPosition(finalSplineDCMPosition);
-      dcmTrajectory.getVelocity(finalSplineDCMVelocity);
-
-      dcmPositionAtEndOfSpline.setMatchingFrame(finalSplineDCMPosition);
-      dcmVelocityAtEndOfSpline.setMatchingFrame(finalSplineDCMVelocity);
-      initialSplineDCMPosition.setIncludingFrame(dcmPositionAtStartOfSpline);
-      initialSplineDCMVelocity.setIncludingFrame(dcmVelocityAtStartOfSpline);
-
-      initialSplineDCMPosition.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      initialSplineDCMVelocity.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      finalSplineDCMPosition.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-      finalSplineDCMVelocity.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
-
-      dcmTransitionTrajectory.setCubic(splineStartTime, splineEndTime, initialSplineDCMPosition, initialSplineDCMVelocity, finalSplineDCMPosition,
-                                       finalSplineDCMVelocity);
-
-      if (debug)
-         runTransitionDebugChecks(splineStartTime, splineEndTime);
    }
 
    private void runTransitionDebugChecks(double transitionStartTime, double transitionEndTime)
@@ -331,12 +242,8 @@ public class DCMPlanner implements DCMPlannerInterface
    public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
-      timeInState.set(controllerTime.getDoubleValue() - timeAtStartOfState.getValue());
-
       if (isStanding.getBooleanValue())
       {
-         isUsingSpline.set(false);
-
          // update desired dcm position
          desiredDCMPosition.setToZero(supportFrame);
          desiredDCMPosition.setZ(comHeight.getDoubleValue());
@@ -346,23 +253,18 @@ public class DCMPlanner implements DCMPlannerInterface
       {
          computeDcmTrajectory(currentContactStates);
 
-         if (isInitialTransfer.getBooleanValue())
-            computeInitialTransitionTrajectory();
-         else
-            computeTransitionTrajectory();
-
          double currentTime = controllerTime.getDoubleValue();
          dcmTrajectory.computeTrajectory(currentTime);
-         if (dcmTransitionTrajectory.timeIntervalContains(currentTime))
+         if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
-            isUsingSpline.set(true);
+            computeTransitionTrajectory();
+
             dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
          }
          else
          {
-            isUsingSpline.set(false);
             dcmTrajectory.getPosition(desiredDCMPosition);
             dcmTrajectory.getVelocity(desiredDCMVelocity);
          }
@@ -382,12 +284,18 @@ public class DCMPlanner implements DCMPlannerInterface
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
    }
 
+
    private void runOutputDebugChecks()
    {
       if (desiredDCMPosition.containsNaN())
          throw new IllegalArgumentException("Desired DCM Position contains NaN.");
       if (desiredDCMVelocity.containsNaN())
          throw new IllegalArgumentException("Desired DCM Velocity contains NaN.");
+   }
+
+   public void getDCMAtEndOfTransition(FixedFramePoint3DBasics finalDesiredDCMToPack)
+   {
+      finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCMPosition);
    }
 
    public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
@@ -399,5 +307,10 @@ public class DCMPlanner implements DCMPlannerInterface
    public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
    {
       desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
+   }
+
+   public double getFinalTime()
+   {
+      return dcmTransitionTrajectory.getFinalTime();
    }
 }
