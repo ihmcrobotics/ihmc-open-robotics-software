@@ -129,8 +129,8 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
-      maxDcmErrorBeforeLiftOffX = new DoubleParameter("maxDcmErrorBeforeLiftOffX", registry, 0.05);
-      maxDcmErrorBeforeLiftOffY = new DoubleParameter("maxDcmErrorBeforeLiftOffY", registry, 0.03);
+      maxDcmErrorBeforeLiftOffX = new DoubleParameter("maxDcmErrorBeforeLiftOffX", registry, 0.06);
+      maxDcmErrorBeforeLiftOffY = new DoubleParameter("maxDcmErrorBeforeLiftOffY", registry, 0.04);
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
