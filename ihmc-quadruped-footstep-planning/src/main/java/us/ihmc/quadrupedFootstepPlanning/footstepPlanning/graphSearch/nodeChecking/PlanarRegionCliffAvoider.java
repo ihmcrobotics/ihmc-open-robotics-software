@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -62,7 +63,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 
       Point3D highestNearbyPoint = new Point3D();
       double yaw = node.getNominalYaw();
-      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(node.getMovingQuadrant(), planarRegionsList, footInWorld, yaw, highestNearbyPoint, parameters);
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(movingQuadrant, planarRegionsList, footInWorld, yaw, highestNearbyPoint, parameters);
 
       if (maximumCliffZInSoleFrame > cliffHeightToAvoid)
       {
