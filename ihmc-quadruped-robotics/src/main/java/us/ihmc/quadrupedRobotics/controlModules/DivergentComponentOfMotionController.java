@@ -157,6 +157,11 @@ public class DivergentComponentOfMotionController
 
    }
 
+   public FrameVector3DReadOnly getDcmError()
+   {
+      return dcmError;
+   }
+
    private final FrameVector2D tmpProportionalAction = new FrameVector2D();
 
    private FrameVector2DReadOnly computeProportionalAction()
