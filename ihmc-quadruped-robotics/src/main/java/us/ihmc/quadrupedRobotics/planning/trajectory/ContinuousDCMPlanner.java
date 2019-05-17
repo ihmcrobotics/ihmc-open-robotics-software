@@ -261,7 +261,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       firstSplineStartTime.set(timeAtStartOfState.getDoubleValue());
       firstSplineEndTime.set(firstSplineStartTime.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
       secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
-      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) - secondSplineTimeSpentOnExitCMP);
+      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
 
       dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfState);
       dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfState);
@@ -309,14 +309,20 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
+      if (firstSplineStartTime.getValue() > timeAtStartOfState.getValue())
+      {
+         firstSplineStartTime.set(timeAtStartOfState.getDoubleValue());
+         dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfState);
+         dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfState);
+         vrpPositionAtStartOfFirstSpline.set(vrpPositionAtStartOfState);
+      }
+      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
+
       double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
       double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
-
-      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-
-      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
       secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
-      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) - secondSplineTimeSpentOnExitCMP);
+      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
 
 
       dcmTrajectory.computeTrajectory(firstSplineEndTime.getDoubleValue());
@@ -414,7 +420,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       }
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), desiredVRPPosition);
-      desiredVRPPosition.subZ(comHeight.getDoubleValue());
+      desiredECMPPosition.set(desiredVRPPosition);
+      desiredECMPPosition.subZ(comHeight.getDoubleValue());
 
       desiredDCMPositionToPack.setMatchingFrame(desiredDCMPosition);
       desiredDCMVelocityToPack.setMatchingFrame(desiredDCMVelocity);
