@@ -60,6 +60,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
+   private final YoBoolean isUsingSpline = new YoBoolean("isUsingSpline", registry);
 
    private final ReferenceFrame supportFrame;
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
@@ -170,6 +171,20 @@ public class DCMPlanner implements DCMPlannerInterface
       }
    }
 
+   public void beganStep()
+   {
+      dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
+      dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
+      timeAtStartOfState.set(controllerTime.getDoubleValue());
+   }
+
+   public void completedStep()
+   {
+      dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
+      dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
+      timeAtStartOfState.set(controllerTime.getDoubleValue());
+   }
+
    private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
    {
       // compute piecewise constant center of pressure plan
@@ -244,6 +259,8 @@ public class DCMPlanner implements DCMPlannerInterface
    {
       if (isStanding.getBooleanValue())
       {
+         isUsingSpline.set(false);
+
          // update desired dcm position
          desiredDCMPosition.setToZero(supportFrame);
          desiredDCMPosition.setZ(comHeight.getDoubleValue());
@@ -252,19 +269,20 @@ public class DCMPlanner implements DCMPlannerInterface
       else
       {
          computeDcmTrajectory(currentContactStates);
+         computeTransitionTrajectory();
 
          double currentTime = controllerTime.getDoubleValue();
          dcmTrajectory.computeTrajectory(currentTime);
          if (currentTime <= dcmTransitionTrajectory.getFinalTime())
          {
-            computeTransitionTrajectory();
-
+            isUsingSpline.set(true);
             dcmTransitionTrajectory.compute(currentTime);
             dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
             dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
          }
          else
          {
+            isUsingSpline.set(false);
             dcmTrajectory.getPosition(desiredDCMPosition);
             dcmTrajectory.getVelocity(desiredDCMVelocity);
          }
@@ -284,18 +302,12 @@ public class DCMPlanner implements DCMPlannerInterface
       CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
    }
 
-
    private void runOutputDebugChecks()
    {
       if (desiredDCMPosition.containsNaN())
          throw new IllegalArgumentException("Desired DCM Position contains NaN.");
       if (desiredDCMVelocity.containsNaN())
          throw new IllegalArgumentException("Desired DCM Velocity contains NaN.");
-   }
-
-   public void getDCMAtEndOfTransition(FixedFramePoint3DBasics finalDesiredDCMToPack)
-   {
-      finalDesiredDCMToPack.setMatchingFrame(finalTransitionDCMPosition);
    }
 
    public void getFinalDCMPosition(FixedFramePoint3DBasics finalDesiredDCMToPack)
@@ -307,10 +319,5 @@ public class DCMPlanner implements DCMPlannerInterface
    public void getDesiredECMPPosition(FramePoint3DBasics desiredECMPPositionToPack)
    {
       desiredECMPPositionToPack.setIncludingFrame(perfectCMPPosition);
-   }
-
-   public double getFinalTime()
-   {
-      return dcmTransitionTrajectory.getFinalTime();
    }
 }

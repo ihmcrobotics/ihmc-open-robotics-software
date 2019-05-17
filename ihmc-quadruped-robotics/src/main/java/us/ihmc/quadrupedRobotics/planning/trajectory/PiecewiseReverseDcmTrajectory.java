@@ -144,12 +144,6 @@ public class PiecewiseReverseDcmTrajectory
       computeTrajectory(this.timesAtStartOfSteps[0]);
    }
 
-   public void initializeTrajectory(double initialTime, FramePoint3DReadOnly initialCMPPosition, double finalTime, FramePoint3D finalDcmPosition)
-   {
-      this.temporaryDouble.get(0).setValue(initialTime);
-      this.temporaryFramePoints.get(0).setIncludingFrame(initialCMPPosition);
-      this.initializeTrajectory(1, temporaryDouble, temporaryFramePoints, finalTime, finalDcmPosition);
-   }
 
    public void computeTrajectory(double currentTime)
    {
