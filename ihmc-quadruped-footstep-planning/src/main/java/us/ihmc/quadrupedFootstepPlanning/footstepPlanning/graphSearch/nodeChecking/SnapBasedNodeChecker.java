@@ -170,6 +170,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
       boolean isSteppingDown = stepHeight > parameters.getStepZForSteppingDown();
 
+      /*
       {
          boolean steppingWithFront = movingQuadrant.isQuadrantInFront();
 
@@ -220,6 +221,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
             }
          }
       }
+      */
 
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -241,18 +243,18 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          double maxLength, minLength;
          if (isSteppingUp)
          {
-            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingUp() : parameters.getMaximumHindStepLengthWhenSteppingUp();
-            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingUp() : parameters.getMinimumHindStepLengthWhenSteppingUp();
+            maxLength = movingQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingUp() : parameters.getMaximumHindStepLengthWhenSteppingUp();
+            minLength = movingQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingUp() : parameters.getMinimumHindStepLengthWhenSteppingUp();
          }
          else if (isSteppingDown)
          {
-            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingDown() : parameters.getMaximumHindStepLengthWhenSteppingDown();
-            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingDown() : parameters.getMinimumHindStepLengthWhenSteppingDown();
+            maxLength = movingQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLengthWhenSteppingDown() : parameters.getMaximumHindStepLengthWhenSteppingDown();
+            minLength = movingQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLengthWhenSteppingDown() : parameters.getMinimumHindStepLengthWhenSteppingDown();
          }
          else
          {
-            maxLength = robotQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
-            minLength = robotQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+            maxLength = movingQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+            minLength = movingQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
          }
 
          if ((newStepPosition.distance(expectedXGaitPoint) > maxReach))
