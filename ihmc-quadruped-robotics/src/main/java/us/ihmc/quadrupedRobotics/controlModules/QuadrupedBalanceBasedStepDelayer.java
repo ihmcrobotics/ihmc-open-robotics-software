@@ -51,6 +51,8 @@ public class QuadrupedBalanceBasedStepDelayer
 
    private final BooleanProvider allowDelayingSteps = new BooleanParameter("allowingDelayingSteps", registry, true);
    private final BooleanProvider delayAllSubsequentSteps = new BooleanParameter("delayAllSubsequentSteps", registry, true);
+   private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
+
    private final DoubleProvider maximumDelayDuration = new DoubleParameter("maximumDelayDuration", registry, 0.1);
    private final IntegerProvider controlTicksToDelay = new IntegerParameter("controlTicksToDelay", registry, 1);
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
@@ -165,6 +167,8 @@ public class QuadrupedBalanceBasedStepDelayer
 
       double delayAmount = controlTicksToDelay.getValue() * controlDt;
       boolean stepWasDelayed = false;
+      
+      boolean forceDelay = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
 
       for (int i = 0; i < stepsStarting.size(); i++)
       {
@@ -181,12 +185,12 @@ public class QuadrupedBalanceBasedStepDelayer
             scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
 
          timeScaledEllipticalError.get(quadrantStarting).set(scaledNormalizedDCMEllipticalError);
-         if (scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
+         if (!forceDelay && scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
             continue;
 
          icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
-         if (isFootPushingAgainstError(quadrantStarting, currentICP))
+         if (isFootPushingAgainstError(quadrantStarting, currentICP) || forceDelay)
          {
             YoDouble delayDuration = delayDurations.get(quadrantStarting);
 
