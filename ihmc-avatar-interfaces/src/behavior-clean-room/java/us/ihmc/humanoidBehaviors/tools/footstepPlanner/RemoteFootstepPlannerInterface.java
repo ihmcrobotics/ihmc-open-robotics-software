@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RemoteFootstepPlannerInterface
 {
-   public static final double DEFAULT_TIMEOUT = 8.0;
+   public static final double DEFAULT_TIMEOUT = 12.0;
 
    private volatile FootstepPlannerParameters footstepPlannerParameters;
    private volatile double timeout;
