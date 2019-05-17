@@ -252,7 +252,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel,
                                                     jointConfigurationGathererAndProducer,
-                                                    sensorReader,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                                     realtimeRos2Node,
                                                     sensorOutputMapReadOnly,

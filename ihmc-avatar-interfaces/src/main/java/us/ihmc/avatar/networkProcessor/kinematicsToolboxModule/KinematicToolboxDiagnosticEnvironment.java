@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
@@ -27,7 +26,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
-import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -54,15 +52,14 @@ public class KinematicToolboxDiagnosticEnvironment
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitionList);
       JointConfigurationGatherer jointConfigurationGatherer = new JointConfigurationGatherer(humanoidFullRobotModel, forceSensorDataHolder);
 
-      AuxiliaryRobotDataProvider auxiliaryRobotDataProvider = initializeAuxiliaryRobotDataProvider();
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
-      final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
-                                                                           publisherTopicNameGenerator, realtimeRos2Node, sensorOutputMapReadOnly,
-                                                                           sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
+      final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, publisherTopicNameGenerator,
+                                                                           realtimeRos2Node, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
+                                                                           robotMotionStatusFromController, sensorInformation);
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
       scheduler2.schedule(new Runnable()
       {
@@ -81,19 +78,6 @@ public class KinematicToolboxDiagnosticEnvironment
       parameters.enableLocalControllerCommunicator(true);
       parameters.setEnableJoystickBasedStepping(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
-   }
-
-   private AuxiliaryRobotDataProvider initializeAuxiliaryRobotDataProvider()
-   {
-      return new AuxiliaryRobotDataProvider()
-      {
-
-         @Override
-         public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-         {
-            return null;
-         }
-      };
    }
 
    private SensorRawOutputMapReadOnly initializeSensorRawOutputMapReadOnly()
@@ -151,12 +135,6 @@ public class KinematicToolboxDiagnosticEnvironment
 
          @Override
          public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
-         {
-            return null;
-         }
-
-         @Override
-         public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
          {
             return null;
          }

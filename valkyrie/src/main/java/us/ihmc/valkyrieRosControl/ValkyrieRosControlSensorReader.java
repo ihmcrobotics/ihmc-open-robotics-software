@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -177,12 +176,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
    }
 
    @Override
