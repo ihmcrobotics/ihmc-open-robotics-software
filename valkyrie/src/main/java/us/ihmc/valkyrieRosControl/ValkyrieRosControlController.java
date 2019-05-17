@@ -45,6 +45,7 @@ import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
@@ -349,11 +350,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
 
-      /*
-       * Create output writer
-       */
-      ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
-
+      JointDesiredOutputWriter outputWriter = null;
       DRCOutputProcessor drcOutputProcessor = null;
       if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
          drcOutputProcessor = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
@@ -370,7 +367,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), sensorInformation, contactPointParameters, robotModel,
                                                                   stateEstimatorParameters, sensorReaderFactory, threadDataSynchronizer,
-                                                                  estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, valkyrieLowLevelOutputWriter,
+                                                                  estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, outputWriter,
                                                                   yoVariableServer, gravity);
 
       if (ENABLE_FINGER_JOINTS)
