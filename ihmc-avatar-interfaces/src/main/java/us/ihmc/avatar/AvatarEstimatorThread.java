@@ -48,6 +48,7 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -62,7 +63,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoLong;
 
 public class AvatarEstimatorThread
 {
@@ -82,7 +82,6 @@ public class AvatarEstimatorThread
 
    private final SensorReader sensorReader;
 
-   private final YoLong timestamp = new YoLong("Timestamp", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
    private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
@@ -119,6 +118,7 @@ public class AvatarEstimatorThread
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusFromController);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
       contextDataFactory.setProcessedJointData(processedJointData);
+      contextDataFactory.setSensorDataContext(new SensorDataContext(estimatorFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       IMUDefinition[] imuDefinitions = estimatorFullRobotModel.getIMUDefinitions();
@@ -305,7 +305,7 @@ public class AvatarEstimatorThread
       return estimatorRegistry;
    }
 
-   public void read()
+   public void read(HumanoidRobotContextData contextData)
    {
       try
       {
@@ -324,9 +324,8 @@ public class AvatarEstimatorThread
                outputWriter.writeBefore(nanoTime);
          }
 
-         // TODO: move this to the actual estimator thread and make it thread safe.
-         sensorReader.read();
-         timestamp.set(sensorOutputMapReadOnly.getTimestamp());
+         long timestamp = sensorReader.read(contextData.getSensorDataContext());
+         contextData.setTimestamp(timestamp);
       }
       catch (Throwable e)
       {
@@ -358,6 +357,8 @@ public class AvatarEstimatorThread
             estimatorFullRobotModel.getRootJoint().getJointConfiguration(rootToWorldTransform);
             ekfStateEstimator.initializeEstimator(rootToWorldTransform);
          }
+
+         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
          estimatorController.doControl();
          if (forceSensorStateUpdater != null)
          {
@@ -366,7 +367,6 @@ public class AvatarEstimatorThread
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
-         humanoidRobotContextData.setTimestamp(timestamp.getValue());
       }
       catch (Throwable e)
       {

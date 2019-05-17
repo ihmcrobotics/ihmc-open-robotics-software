@@ -49,11 +49,12 @@ public class DRCPerfectSensorReader implements SensorReader
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContext)
    {
-      if(rawSensorReader != null)
+      if (rawSensorReader != null)
       {
          rawSensorReader.read();
       }
+      return sensorOutputMapReadOnly.getTimestamp();
    }
 }
