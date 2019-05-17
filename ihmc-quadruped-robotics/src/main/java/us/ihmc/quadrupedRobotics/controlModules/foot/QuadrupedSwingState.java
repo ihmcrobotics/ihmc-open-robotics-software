@@ -273,7 +273,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
 
       PositionTrajectoryGenerator activeTrajectory;
-      if (timeInState > swingDuration.getDoubleValue())
+      if (timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
          activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
