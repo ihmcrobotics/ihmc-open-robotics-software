@@ -14,6 +14,7 @@ import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -26,6 +27,7 @@ import java.util.List;
 
 public class QuadrupedStepMessageHandler
 {
+   private static final double timeEpsilonForStepSelection = 0.05;
    private static final int STEP_QUEUE_SIZE = 200;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -40,6 +42,7 @@ public class QuadrupedStepMessageHandler
    private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
    private final QuadrantDependentList<MutableBoolean> touchdownTrigger = new QuadrantDependentList<>(MutableBoolean::new);
    private final YoPreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
+   private final QuadrantDependentList<YoQuadrupedTimedStep> mostRecentCompletedStep = new QuadrantDependentList<>();
 
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -57,7 +60,11 @@ public class QuadrupedStepMessageHandler
       initialTransferDurationForShifting.set(1.00);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class, SoleTrajectoryCommand::set));
+         this.mostRecentCompletedStep.put(robotQuadrant, new YoQuadrupedTimedStep(robotQuadrant.getShortName() + "_LastCompletedStep", registry));
+
+      }
 
       // the look-ahead step adjustment was doing integer division which was 1.0 for step 0 and 0.0 after, so effectively having a one step recovery
       // TODO tune this value
@@ -79,6 +86,8 @@ public class QuadrupedStepMessageHandler
       updateActiveSteps();
    }
 
+   private final TimeInterval tempTimeInterval = new TimeInterval();
+
    public void handleQuadrupedTimedStepListCommand(QuadrupedTimedStepListCommand command)
    {
       double currentTime = robotTimestamp.getDoubleValue();
@@ -94,9 +103,17 @@ public class QuadrupedStepMessageHandler
          double touchdownTime = stepCommands.get(i).getTimeIntervalCommand().getEndTime();
          if (touchdownTime + timeShift >= currentTime)
          {
+            QuadrupedTimedStepCommand stepCommand = stepCommands.get(i);
+            QuadrupedTimedStep mostRecentStepOnThatQuadrant = mostRecentCompletedStep.get(stepCommand.getRobotQuadrant());
+            stepCommand.getTimeIntervalCommand().getTimeInterval(tempTimeInterval);
+            tempTimeInterval.shiftInterval(timeShift);
+
+            if (TimeIntervalTools.doIntervalsOverlap(mostRecentStepOnThatQuadrant.getTimeInterval(), tempTimeInterval))
+               continue;
+
             receivedStepSequence.add();
             YoQuadrupedTimedStep step = receivedStepSequence.get(receivedStepSequence.size() - 1);
-            step.set(stepCommands.get(i));
+            step.set(stepCommand);
             step.getTimeInterval().shiftInterval(timeShift);
          }
       }
@@ -223,9 +240,12 @@ public class QuadrupedStepMessageHandler
       {
          if (touchdownTrigger.get(robotQuadrant).isTrue())
          {
-            int index = getIndexOfFirstStep(robotQuadrant, 0.2);
+            int index = getIndexOfFirstStep(robotQuadrant, timeEpsilonForStepSelection);
             if (index != -1)
-               receivedStepSequence.remove(index);
+            {
+               QuadrupedTimedStep completedStep = receivedStepSequence.remove(index);
+               mostRecentCompletedStep.get(completedStep.getRobotQuadrant()).set(completedStep);
+            }
 
             touchdownTrigger.get(robotQuadrant).setFalse();
          }
