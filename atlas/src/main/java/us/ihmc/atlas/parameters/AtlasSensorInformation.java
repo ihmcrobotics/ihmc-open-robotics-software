@@ -6,7 +6,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -305,12 +304,6 @@ public class AtlasSensorInformation implements AvatarHumanoidRobotSensorInformat
    public boolean isMultisenseHead()
    {
       return isMultisenseHead;
-   }
-
-   @Override
-   public ReferenceFrame getHeadIMUFrameWhenLevel()
-   {
-      return null;
    }
 
    @Override
