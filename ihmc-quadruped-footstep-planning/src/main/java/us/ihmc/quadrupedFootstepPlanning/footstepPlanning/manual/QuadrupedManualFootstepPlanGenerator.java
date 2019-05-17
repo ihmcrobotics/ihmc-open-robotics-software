@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 
-public class QuadrupedManualPawstepPlanGenerator
+public class QuadrupedManualFootstepPlanGenerator
 {
    public QuadrupedTimedStepListMessage generateSteps(boolean trot,
                                                       RobotQuadrant firstFoot,
