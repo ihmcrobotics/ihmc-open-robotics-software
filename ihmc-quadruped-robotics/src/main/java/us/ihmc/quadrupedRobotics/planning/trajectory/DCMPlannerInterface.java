@@ -10,8 +10,6 @@ public interface DCMPlannerInterface
 {
    void clearStepSequence();
 
-   void setNominalCoMHeight(double comHeight);
-
    void addStepToSequence(QuadrupedTimedStep step);
 
    void initializeForStanding();
