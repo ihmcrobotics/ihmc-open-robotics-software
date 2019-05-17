@@ -73,41 +73,41 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
    @Test
    public void testWalkingOverEnvironment0() throws IOException
    {
-      testEnvironment(DataSetName._20190327_163532_QuadrupedEnvironment0);
+      testEnvironment(DataSetName._20190327_163532_QuadrupedEnvironment0, true);
    }
 
    @Test
    public void testWalkingOverEnvironment1() throws IOException
    {
-      testEnvironment(DataSetName._20190327_174535_QuadrupedEnvironment1);
+      testEnvironment(DataSetName._20190327_174535_QuadrupedEnvironment1, false);
    }
 
    @Test
    public void testWalkingOverEnvironment2() throws IOException
    {
-      testEnvironment(DataSetName._20190327_175120_QuadrupedEnvironment2);
+      testEnvironment(DataSetName._20190327_175120_QuadrupedEnvironment2, false);
    }
 
    @Test
    public void testWalkingOverEnvironment3() throws IOException
    {
-      testEnvironment(DataSetName._20190327_175227_QuadrupedEnvironment3);
+      testEnvironment(DataSetName._20190327_175227_QuadrupedEnvironment3, false);
    }
 
    @Test
    public void testWalkingOverPlatformEnvironment() throws IOException
    {
-      testEnvironment(DataSetName._20190514_163532_QuadrupedPlatformEnvironment);
+      testEnvironment(DataSetName._20190514_163532_QuadrupedPlatformEnvironment, false);
    }
 
    @Test
    public void testWalkingOverShortPlatformEnvironment() throws IOException
    {
-      testEnvironment(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment);
+      testEnvironment(DataSetName._20190514_163532_QuadrupedShortPlatformEnvironment, false);
    }
 
 
-   public void testEnvironment(DataSetName dataSetName) throws IOException
+   public void testEnvironment(DataSetName dataSetName, boolean stepsAreAdjustable) throws IOException
    {
       SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setUseAutoGroundGraphics(false);
@@ -137,24 +137,15 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       ROS2Tools.MessageTopicNameGenerator footstepPlannerPubGenerator = FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+                                           s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.getXGaitSettings().setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       stepTeleopManager.publishXGaitSettings(stepTeleopManager.getXGaitSettings());
 
-      // forward footstep plan from planner to controller
-//      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
-//                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
-//                                                                           ROS2TopicQualifier.OUTPUT),
-//                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
-
-      // make a body orientation trajectory to match the step plan
-//      ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
-//                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
-//                                                                           ROS2TopicQualifier.OUTPUT),
-//                                           s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+      stepTeleopManager.submitPlanarRegionsList(planarRegionsList);
 
       // construct planning request
       QuadrupedFootstepPlanningRequestPacket planningRequestPacket = new QuadrupedFootstepPlanningRequestPacket();
@@ -166,7 +157,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       planningRequestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
       planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(plannerInput.getGoalYaw());
       planningRequestPacket.setRequestedFootstepPlannerType(FootstepPlannerType.A_STAR.toByte());
-      planningRequestPacket.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      planningRequestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       planningRequestPacket.setTimeout(plannerInput.getQuadrupedTimeout());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);
@@ -180,7 +171,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       conductor.concludeTesting();
    }
 
-   private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
+   private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet, boolean stepsAreAdjustable)
    {
       QuadrupedTimedStepListMessage footstepDataListMessage = packet.getFootstepDataList();
       FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
@@ -203,7 +194,7 @@ public abstract class QuadrupedAStarSimulationTest implements QuadrupedMultiRobo
       }
 
       stepMessages.setIsExpressedInAbsoluteTime(false);
-      stepMessages.setAreStepsAdjustable(false);
+      stepMessages.setAreStepsAdjustable(stepsAreAdjustable);
 
       stepTeleopManager.publishTimedStepListToController(stepMessages);
    }
