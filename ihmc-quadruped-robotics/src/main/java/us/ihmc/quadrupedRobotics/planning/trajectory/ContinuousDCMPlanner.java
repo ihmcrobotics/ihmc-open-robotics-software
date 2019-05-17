@@ -152,11 +152,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       numberOfStepsInPlanner.set(0);
    }
 
-   public void setNominalCoMHeight(double comHeight)
-   {
-      this.comHeight.set(comHeight);
-   }
-
    public void addStepToSequence(QuadrupedTimedStep step)
    {
       stepSequence.add(step);
@@ -211,6 +206,11 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfSecondSpline);
       firstSplineStartTime.set(secondSplineStartTime.getDoubleValue());
       timeAtStartOfState.set(controllerTime.getDoubleValue());
+
+      if (firstSplineStartTime.getValue() > timeAtStartOfState.getValue())
+      {
+         setFirstSplineStartFromCurrentState();
+      }
    }
 
    private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
@@ -232,14 +232,16 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private void computeInitialTransitionTrajectory()
    {
+      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.001, 0.5);
+
       double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
       firstSplineTimeSpentOnEntryCMP = Math.max(firstSplineTimeSpentOnEntryCMP, initialTransitionDuration.getValue());
 
-      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
 
       boolean initialPhaseIsLongEnough = currentIntervalDuration > firstSplineTimeSpentOnEntryCMP + secondSplineTimeSpentOnEntryCMP;
 
@@ -259,17 +261,14 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private void computeTransitionTrajectory()
    {
+      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.001, 0.5);
+
       double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      if (firstSplineStartTime.getValue() > timeAtStartOfState.getValue())
-      {
-         setFirstSplineStartFromCurrentState();
-      }
-      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-
-      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
 
       firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
       secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
