@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.tools;
 
+import controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -15,6 +16,7 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
 {
    private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
    private final IHMCROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
+   private final IHMCROS2Publisher<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
 
    public AtlasDirectRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -24,6 +26,9 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
       bdiBehaviorPublisher = ROS2Tools.createPublisher(ros2Node,
                                                        BDIBehaviorCommandPacket.class,
                                                        ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+      desiredPumpPSIPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                          AtlasDesiredPumpPSIPacket.class,
+                                                          ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
    }
 
    @Override
@@ -47,5 +52,13 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
    {
       BDIBehaviorCommandPacket message = HumanoidMessageTools.createBDIBehaviorCommandPacket(true);
       bdiBehaviorPublisher.publish(message);
+   }
+
+   @Override
+   public void setHydraulicPumpPSI(int psi)
+   {
+      AtlasDesiredPumpPSIPacket message = new AtlasDesiredPumpPSIPacket();
+      message.setDesiredPumpPsi(psi);
+      desiredPumpPSIPublisher.publish(message);
    }
 }
