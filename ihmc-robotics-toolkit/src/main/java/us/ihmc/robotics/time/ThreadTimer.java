@@ -9,7 +9,7 @@ public class ThreadTimer
 {
    private final YoLong tick;
    private final YoDouble dt;
-   private final YoDouble time;
+   private final YoDouble timer;
 
    private long lastStartTime;
 
@@ -17,7 +17,7 @@ public class ThreadTimer
    {
       tick = new YoLong(name + "Tick", registry);
       dt = new YoDouble(name + "DT", registry);
-      time = new YoDouble(name + "Time", registry);
+      timer = new YoDouble(name + "Timer", registry);
    }
 
    public void start()
@@ -31,6 +31,6 @@ public class ThreadTimer
 
    public void stop()
    {
-      time.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
+      timer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
    }
 }
