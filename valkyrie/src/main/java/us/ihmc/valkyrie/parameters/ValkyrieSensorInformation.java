@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -321,12 +320,6 @@ public class ValkyrieSensorInformation implements AvatarHumanoidRobotSensorInfor
    public boolean isMultisenseHead()
    {
       return true;
-   }
-
-   @Override
-   public ReferenceFrame getHeadIMUFrameWhenLevel()
-   {
-      return null;
    }
 
    public String getRightTrunkIMUSensor()
