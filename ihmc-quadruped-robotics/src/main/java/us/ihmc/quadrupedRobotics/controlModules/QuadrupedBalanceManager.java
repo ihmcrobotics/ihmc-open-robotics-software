@@ -15,6 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyTrajectoryCommand;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
@@ -210,6 +211,10 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.handleBodyTrajectoryCommand(command);
    }
 
+   public void handlePlanarRegionsListCommand(PlanarRegionsListCommand command)
+   {
+      stepAdjustmentController.handlePlanarRegionsListCommand(command);
+   }
 
    public void clearStepSequence()
    {
