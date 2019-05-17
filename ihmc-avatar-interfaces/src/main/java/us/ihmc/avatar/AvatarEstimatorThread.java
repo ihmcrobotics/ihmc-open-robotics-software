@@ -205,7 +205,7 @@ public class AvatarEstimatorThread
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
                                                                                                            forceSensorDataHolderToSend);
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader,
+         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
                                                     sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
