@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceBasedStepDelayer;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -33,6 +34,8 @@ public class QuadrupedStepController implements EventState
    private final YoDouble clampedSpeedUpTime = new YoDouble("clampedSpeedUpTime", registry);
    private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
 
+   private final QuadrupedBalanceBasedStepDelayer stepDelayer;
+
    public QuadrupedStepController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
@@ -43,6 +46,8 @@ public class QuadrupedStepController implements EventState
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+
+      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, parentRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -75,6 +80,12 @@ public class QuadrupedStepController implements EventState
    public void doAction(double timeInState)
    {
       stepMessageHandler.process();
+      stepMessageHandler.updateActiveSteps();
+
+      boolean stepWasDelayed = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(), stepMessageHandler.getStepSequence(), balanceManager.getDesiredDcmPosition(),
+                                                                 balanceManager.computeNormalizedEllipticDcmErrorForDelayedLiftOff());
+      if (stepWasDelayed)
+         stepMessageHandler.updateActiveSteps();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());

@@ -154,7 +154,6 @@ public class DivergentComponentOfMotionController
       }
 
       vrpPositionSetpointToPack.setMatchingFrame(yoProjectedVrpPositionSetpoint);
-
    }
 
    public FrameVector3DReadOnly getDcmError()
