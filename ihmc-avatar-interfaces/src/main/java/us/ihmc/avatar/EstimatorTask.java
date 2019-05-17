@@ -47,9 +47,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
       estimatorThread.write();
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
       robotVisualizer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
-
-      // Sets sensor data and timestamp on the master context.
-      estimatorThread.read(masterContext);
+      estimatorThread.read();
    }
 
    @Override

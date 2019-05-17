@@ -19,19 +19,13 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
 {
    /**
     * Serves to synchronize the time across threads.
-    * TODO: should be set by the main robot thread
+    * Set by the scheduler thread.
     */
    private long timestamp = Long.MIN_VALUE;
 
    /**
-    * The measured force sensor data.
-    * TODO: should be set by the main robot thread
-    */
-   private final ForceSensorDataHolder forceSensorDataHolder;
-
-   /**
-    * The joint measurements.
-    * TODO: should be set by the main robot thread
+    * The robot measurements.
+    * Set by the scheduler thread.
     */
    private final SensorDataContext sensorDataContext;
 
@@ -46,6 +40,12 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
     * Set by the estimator.
     */
    private final HumanoidRobotContextJointData processedJointData;
+
+   /**
+    * The processed force sensor data.
+    * Set by the estimator.
+    */
+   private final ForceSensorDataHolder forceSensorDataHolder;
 
    /**
     * Serves to inform the estimator that the controller ran and populated the desired values in this context.

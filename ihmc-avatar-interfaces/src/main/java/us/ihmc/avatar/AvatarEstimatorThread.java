@@ -305,7 +305,7 @@ public class AvatarEstimatorThread
       return estimatorRegistry;
    }
 
-   public void read(HumanoidRobotContextData contextData)
+   public void read()
    {
       try
       {
@@ -323,9 +323,6 @@ public class AvatarEstimatorThread
                long nanoTime = System.nanoTime();
                outputWriter.writeBefore(nanoTime);
          }
-
-         long timestamp = sensorReader.read(contextData.getSensorDataContext());
-         contextData.setTimestamp(timestamp);
       }
       catch (Throwable e)
       {
@@ -434,5 +431,11 @@ public class AvatarEstimatorThread
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;
+   }
+
+   @Deprecated // TODO: Split up the sensor reader and move the part needed outside out of this class!
+   public SensorReader getSensorReader()
+   {
+      return sensorReader;
    }
 }
