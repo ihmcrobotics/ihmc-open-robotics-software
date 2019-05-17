@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.parameters;
 
-public interface DRCRobotSensorParameters
+public interface AvatarRobotSensorParameters
 {
    public boolean useRosForTransformFromPoseToSensor();
    public String getSensorNameInSdf();
@@ -9,5 +9,5 @@ public interface DRCRobotSensorParameters
    public String getBaseFrameForRosTransform();
    public String getEndFrameForRosTransform();
    public int getSensorId();
-   public DRCRobotSensorType getSensorType();
+   public AvatarRobotVisionSensorType getSensorType();
 }
