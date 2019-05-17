@@ -91,6 +91,16 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
+   public void setFootContactState(boolean hasFootHitGround)
+   {
+      // switching to lift off
+      if (controllerThinksHasTouchedDown.getBooleanValue() && !hasFootHitGround)
+         touchdownDetected.set(false);
+
+      super.setFootContactState(hasFootHitGround);
+   }
+
+   @Override
    public boolean hasFootHitGround()
    {
       boolean thinksInSupport = controllerThinksHasTouchedDown.getBooleanValue();
