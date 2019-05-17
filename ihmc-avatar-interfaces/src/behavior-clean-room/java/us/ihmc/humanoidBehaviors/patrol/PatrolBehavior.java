@@ -155,7 +155,7 @@ public class PatrolBehavior
       swingOvers = messager.createInput(SwingOvers, false);
       planReviewEnabled = messager.createInput(PlanReviewEnabled, false);
       upDownExplorationEnabled = messager.createInput(UpDownExplorationEnabled, false);
-      perceiveDuration = messager.createInput(PerceiveDuration, 20.0);
+      perceiveDuration = messager.createInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
       messager.registerTopicListener(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
       upDownExplorer = new UpDownExplorer(messager, planarRegionsList);
