@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.planning.trajectory.ContinuousDCMPlanner;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
@@ -122,11 +123,11 @@ public class QuadrupedBalanceManager
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
-      double nominalHeight = physicalProperties.getNominalBodyHeight();
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      dcmPlanner = new DCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame,
-                                  referenceFrames.getSoleFrames(), registry, yoGraphicsListRegistry, debug);
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
+      dcmPlanner = new ContinuousDCMPlanner(runtimeEnvironment.getDCMPlannerParameters(), linearInvertedPendulumModel.getYoNaturalFrequency(),
+                                            runtimeEnvironment.getGravity(), robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
+                                            yoGraphicsListRegistry);
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
       maxDcmErrorBeforeLiftOffX = new DoubleParameter("maxDcmErrorBeforeLiftOffX", registry, 0.06);
@@ -311,8 +312,14 @@ public class QuadrupedBalanceManager
       dcmPlanner.initializeForStepping(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
    }
 
+   public void beganStep()
+   {
+      dcmPlanner.beganStep();
+   }
+
    public void completedStep(RobotQuadrant robotQuadrant)
    {
+      dcmPlanner.completedStep();
       stepAdjustmentController.completedStep(robotQuadrant);
    }
 
@@ -324,7 +331,6 @@ public class QuadrupedBalanceManager
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-      dcmPlanner.setNominalCoMHeight(linearInvertedPendulumModel.getLipmHeight());
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
