@@ -21,8 +21,5 @@ public interface AvatarRobotVisionSensorInformation
 
    public AvatarRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
 
-   @Deprecated // Unused, remove.
-   public ReferenceFrame getHeadIMUFrameWhenLevel();
-
    public boolean isMultisenseHead();
 }
