@@ -69,31 +69,24 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final YoFramePoint3D dcmPositionAtStartOfFirstSpline = new YoFramePoint3D("dcmPositionAtStartOfFirstSpline", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtStartOfFirstSpline = new YoFrameVector3D("dcmVelocityAtStartOfFirstSpline", worldFrame, registry);
-   private final YoFramePoint3D vrpPositionAtStartOfFirstSpline = new YoFramePoint3D("vrpPositionAtStartOfFirstSpline", worldFrame, registry);
    private final YoFramePoint3D dcmPositionAtEndOfFirstSpline = new YoFramePoint3D("dcmPositionAtEndOfFirstSpline", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtEndOfFirstSpline = new YoFrameVector3D("dcmVelocityAtEndOfFirstSpline", worldFrame, registry);
-   private final YoFramePoint3D vrpPositionAtEndOfFirstSpline = new YoFramePoint3D("vrpPositionAtEndOfFirstSpline", worldFrame, registry);
 
    private final YoFramePoint3D dcmPositionAtStartOfSecondSpline = new YoFramePoint3D("dcmPositionAtStartOfSecondSpline", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtStartOfSecondSpline = new YoFrameVector3D("dcmVelocityAtStartOfSecondSpline", worldFrame, registry);
-   private final YoFramePoint3D vrpPositionAtStartOfSecondSpline = new YoFramePoint3D("vrpPositionAtStartOfSecondSpline", worldFrame, registry);
    private final YoFramePoint3D dcmPositionAtEndOfSecondSpline = new YoFramePoint3D("dcmPositionAtEndOfSecondSpline", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtEndOfSecondSpline = new YoFrameVector3D("dcmVelocityAtEndOfSecondSpline", worldFrame, registry);
-   private final YoFramePoint3D vrpPositionAtEndOfSecondSpline = new YoFramePoint3D("vrpPositionAtEndOfSecondSpline", worldFrame, registry);
 
    private final FramePoint3D splineInitialPosition;
    private final FrameVector3D splineInitialVelocity;
-   private final FrameVector3D splineInitialVrp;
    private final FramePoint3D splineFinalPosition;
    private final FrameVector3D splineFinalVelocity;
-   private final FrameVector3D splineFinalVrp;
 
    private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
    private final YoDouble timeInState = new YoDouble("timeInState", registry);
 
    private final YoFramePoint3D dcmPositionAtStartOfState = new YoFramePoint3D("dcmPositionAtStartOfState", worldFrame, registry);
    private final YoFrameVector3D dcmVelocityAtStartOfState = new YoFrameVector3D("dcmVelocityAtStartOfState", worldFrame, registry);
-   private final YoFramePoint3D vrpPositionAtStartOfState = new YoFramePoint3D("vrpPositionAtStartOfState", worldFrame, registry);
 
    private final YoFramePoint3D desiredDCMPosition = new YoFramePoint3D("plannerDesiredDCMPosition", worldFrame, registry);
    private final YoFrameVector3D desiredDCMVelocity = new YoFrameVector3D("plannerDesiredDCMVelocity", worldFrame, registry);
@@ -117,10 +110,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
       splineInitialPosition = new FramePoint3D(supportFrame);
       splineInitialVelocity = new FrameVector3D(supportFrame);
-      splineInitialVrp = new FrameVector3D(supportFrame);
       splineFinalPosition = new FramePoint3D(supportFrame);
       splineFinalVelocity = new FrameVector3D(supportFrame);
-      splineFinalVrp = new FrameVector3D(supportFrame);
 
       omega.addVariableChangedListener(v ->
             comHeight.set(gravity / MathTools.square(omega.getDoubleValue())));
@@ -218,7 +209,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
       dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfSecondSpline);
       dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfSecondSpline);
-      vrpPositionAtStartOfFirstSpline.set(vrpPositionAtStartOfSecondSpline);
       firstSplineStartTime.set(secondSplineStartTime.getDoubleValue());
       timeAtStartOfState.set(controllerTime.getDoubleValue());
    }
@@ -245,11 +235,11 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
-
       double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
       firstSplineTimeSpentOnEntryCMP = Math.max(firstSplineTimeSpentOnEntryCMP, initialTransitionDuration.getValue());
+
+      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
 
       boolean initialPhaseIsLongEnough = currentIntervalDuration > firstSplineTimeSpentOnEntryCMP + secondSplineTimeSpentOnEntryCMP;
 
@@ -258,50 +248,13 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          secondSplineTimeSpentOnEntryCMP = minimumSplineDuration.getValue();
          firstSplineTimeSpentOnEntryCMP = currentIntervalDuration - minimumSplineDuration.getValue();
       }
-      firstSplineStartTime.set(timeAtStartOfState.getDoubleValue());
-      firstSplineEndTime.set(firstSplineStartTime.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
+      setFirstSplineStartFromCurrentState();
+      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
+
       secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
       secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
 
-      dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfState);
-      dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfState);
-      vrpPositionAtStartOfFirstSpline.set(vrpPositionAtStartOfState);
-
-      dcmTrajectory.computeTrajectory(firstSplineEndTime.getDoubleValue());
-      dcmTrajectory.getPosition(dcmPositionAtEndOfFirstSpline);
-      dcmTrajectory.getVelocity(dcmVelocityAtEndOfFirstSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtEndOfFirstSpline, dcmVelocityAtEndOfFirstSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtEndOfFirstSpline);
-
-      dcmTrajectory.computeTrajectory(secondSplineStartTime.getDoubleValue());
-      dcmTrajectory.getPosition(dcmPositionAtStartOfSecondSpline);
-      dcmTrajectory.getVelocity(dcmVelocityAtStartOfSecondSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtStartOfSecondSpline, dcmVelocityAtStartOfSecondSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtStartOfSecondSpline);
-
-      dcmTrajectory.computeTrajectory(secondSplineEndTime.getDoubleValue());
-      dcmTrajectory.getPosition(dcmPositionAtEndOfSecondSpline);
-      dcmTrajectory.getVelocity(dcmVelocityAtEndOfSecondSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtEndOfSecondSpline, dcmVelocityAtEndOfSecondSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtEndOfSecondSpline);
-
-      splineInitialPosition.setMatchingFrame(dcmPositionAtStartOfFirstSpline);
-      splineInitialVelocity.setMatchingFrame(dcmVelocityAtStartOfFirstSpline);
-      splineInitialVrp.setMatchingFrame(vrpPositionAtStartOfFirstSpline);
-      splineFinalPosition.setMatchingFrame(dcmPositionAtEndOfFirstSpline);
-      splineFinalVelocity.setMatchingFrame(dcmVelocityAtEndOfFirstSpline);
-      splineFinalVrp.setMatchingFrame(vrpPositionAtEndOfFirstSpline);
-      dcmFirstSpline.setCubic(firstSplineStartTime.getDoubleValue(), firstSplineEndTime.getDoubleValue(), splineInitialPosition, splineInitialVelocity,
-                              splineFinalPosition, splineFinalVelocity);
-
-      splineInitialPosition.setMatchingFrame(dcmPositionAtStartOfSecondSpline);
-      splineInitialVelocity.setMatchingFrame(dcmVelocityAtStartOfSecondSpline);
-      splineInitialVrp.setMatchingFrame(vrpPositionAtStartOfSecondSpline);
-      splineFinalPosition.setMatchingFrame(dcmPositionAtEndOfSecondSpline);
-      splineFinalVelocity.setMatchingFrame(dcmVelocityAtEndOfSecondSpline);
-      splineFinalVrp.setMatchingFrame(vrpPositionAtEndOfSecondSpline);
-      dcmSecondSpline.setCubic(secondSplineStartTime.getDoubleValue(), secondSplineEndTime.getDoubleValue(), splineInitialPosition, splineInitialVelocity,
-                              splineFinalPosition, splineFinalVelocity);
+      updateSplines();
    }
 
    private void computeTransitionTrajectory()
@@ -311,58 +264,55 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
       if (firstSplineStartTime.getValue() > timeAtStartOfState.getValue())
       {
-         firstSplineStartTime.set(timeAtStartOfState.getDoubleValue());
-         dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfState);
-         dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfState);
-         vrpPositionAtStartOfFirstSpline.set(vrpPositionAtStartOfState);
+         setFirstSplineStartFromCurrentState();
       }
       double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
 
       double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction.getValue() * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
       double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction.getValue() * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
+
+      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
       secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
       secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
 
+      updateSplines();
+   }
 
+   private void setFirstSplineStartFromCurrentState()
+   {
+      firstSplineStartTime.set(timeAtStartOfState.getDoubleValue());
+      dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfState);
+      dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfState);
+   }
+
+   private void updateSplines()
+   {
       dcmTrajectory.computeTrajectory(firstSplineEndTime.getDoubleValue());
       dcmTrajectory.getPosition(dcmPositionAtEndOfFirstSpline);
       dcmTrajectory.getVelocity(dcmVelocityAtEndOfFirstSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtEndOfFirstSpline, dcmVelocityAtEndOfFirstSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtEndOfFirstSpline);
 
       dcmTrajectory.computeTrajectory(secondSplineStartTime.getDoubleValue());
       dcmTrajectory.getPosition(dcmPositionAtStartOfSecondSpline);
       dcmTrajectory.getVelocity(dcmVelocityAtStartOfSecondSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtStartOfSecondSpline, dcmVelocityAtStartOfSecondSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtStartOfSecondSpline);
 
       dcmTrajectory.computeTrajectory(secondSplineEndTime.getDoubleValue());
       dcmTrajectory.getPosition(dcmPositionAtEndOfSecondSpline);
       dcmTrajectory.getVelocity(dcmVelocityAtEndOfSecondSpline);
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(dcmPositionAtEndOfSecondSpline, dcmVelocityAtEndOfSecondSpline, omega.getDoubleValue(),
-                                                              vrpPositionAtEndOfSecondSpline);
 
       splineInitialPosition.setMatchingFrame(dcmPositionAtStartOfFirstSpline);
       splineInitialVelocity.setMatchingFrame(dcmVelocityAtStartOfFirstSpline);
-      splineInitialVrp.setMatchingFrame(vrpPositionAtStartOfFirstSpline);
       splineFinalPosition.setMatchingFrame(dcmPositionAtEndOfFirstSpline);
       splineFinalVelocity.setMatchingFrame(dcmVelocityAtEndOfFirstSpline);
-      splineFinalVrp.setMatchingFrame(vrpPositionAtEndOfFirstSpline);
       dcmFirstSpline.setCubic(firstSplineStartTime.getDoubleValue(), firstSplineEndTime.getDoubleValue(), splineInitialPosition, splineInitialVelocity,
                               splineFinalPosition, splineFinalVelocity);
 
       splineInitialPosition.setMatchingFrame(dcmPositionAtStartOfSecondSpline);
       splineInitialVelocity.setMatchingFrame(dcmVelocityAtStartOfSecondSpline);
-      splineInitialVrp.setMatchingFrame(vrpPositionAtStartOfSecondSpline);
       splineFinalPosition.setMatchingFrame(dcmPositionAtEndOfSecondSpline);
       splineFinalVelocity.setMatchingFrame(dcmVelocityAtEndOfSecondSpline);
-      splineFinalVrp.setMatchingFrame(vrpPositionAtEndOfSecondSpline);
       dcmSecondSpline.setCubic(secondSplineStartTime.getDoubleValue(), secondSplineEndTime.getDoubleValue(), splineInitialPosition, splineInitialVelocity,
                                splineFinalPosition, splineFinalVelocity);
    }
-
-
 
    public void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
