@@ -36,8 +36,7 @@ public class UpDownFlatAreaFinder
    public static final double CHECK_STEP_SIZE = REQUIRED_FLAT_AREA_RADIUS;
    public static final double ANGLE_STEP_SIZE = 0.05;
    public static final double MAX_ANGLE_TO_SEARCH = 0.6;
-   public static final int NUMBER_OF_VERTICES = 6;
-   public static final double MINIMUM_NO_HEIGHT_CHANGE_DISTANCE = 0.5;
+   public static final int NUMBER_OF_VERTICES = 5;
 
    private final Messager messager;
    private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
@@ -73,12 +72,10 @@ public class UpDownFlatAreaFinder
       this.messager = messager;
    }
 
-   public TypedNotification<Optional<FramePose3D>> upOrDownOnAThread(ReferenceFrame midFeetZUpFrame,
-                                                                     PlanarRegionsList planarRegionsList,
-                                                                     boolean requireHeightChange)
+   public TypedNotification<Optional<FramePose3D>> upOrDownOnAThread(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
    {
       TypedNotification<Optional<FramePose3D>> typedNotification = new TypedNotification<>();
-      scheduler.scheduleOnce(() -> typedNotification.add(upOrDown(midFeetZUpFrame, planarRegionsList, requireHeightChange)));
+      scheduler.scheduleOnce(() -> typedNotification.add(upOrDown(midFeetZUpFrame, planarRegionsList)));
       return typedNotification;
    }
 
@@ -87,9 +84,7 @@ public class UpDownFlatAreaFinder
       abort = true;
    }
 
-   public Optional<FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame,
-                                         PlanarRegionsList planarRegionsList,
-                                         boolean requireHeightChange)
+   public Optional<FramePose3D> upOrDown(ReferenceFrame midFeetZUpFrame, PlanarRegionsList planarRegionsList)
    {
       abort = false;
       this.midFeetZUpFrame = midFeetZUpFrame;
@@ -105,11 +100,11 @@ public class UpDownFlatAreaFinder
       MultiAngleSearch resultType = STILL_ANGLING;
       do
       {
-         if (searchAngle(searchAngle, requireHeightChange) == WAYPOINT_FOUND)
+         if (searchAngle(searchAngle) == WAYPOINT_FOUND)
          {
             resultType = ANGLE_SUCCESS;
          }
-         else if (searchAngle > 0.0 && searchAngle(-searchAngle, requireHeightChange) == WAYPOINT_FOUND)
+         else if (searchAngle > 0.0 && searchAngle(-searchAngle) == WAYPOINT_FOUND)
          {
             resultType = ANGLE_SUCCESS;
          }
@@ -149,25 +144,18 @@ public class UpDownFlatAreaFinder
       return Optional.empty();
    }
 
-   private SingleAngleSearch searchAngle(double angle, boolean requireHeightChange)
+   private SingleAngleSearch searchAngle(double angle)
    {
       UpDownPolyonCheckPoints2D polygonPoints = new UpDownPolyonCheckPoints2D(NUMBER_OF_VERTICES, REQUIRED_FLAT_AREA_RADIUS);
       polygonPoints.reset(midFeetZUpFrame);
-      if (requireHeightChange)
-      {
-         polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle)); // initial check step a bit out
-      }
-      else
-      {
-         polygonPoints.add(MINIMUM_NO_HEIGHT_CHANGE_DISTANCE * Math.cos(angle), MINIMUM_NO_HEIGHT_CHANGE_DISTANCE * Math.sin(angle)); // initial check step a bit out
-      }
+      polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle)); // initial check step a bit out
       SingleAngleSearch resultType = STILL_SEARCHING;
       do
       {
          polygonPoints.add(CHECK_STEP_SIZE * Math.cos(angle), CHECK_STEP_SIZE * Math.sin(angle));
          LogTools.trace("Stepping virtual polygon points forward by {}", CHECK_STEP_SIZE);
 
-         if (centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints, requireHeightChange))
+         if (centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(polygonPoints))
          {
             resultType = WAYPOINT_FOUND;
          }
@@ -191,8 +179,7 @@ public class UpDownFlatAreaFinder
       return resultType;
    }
 
-   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(UpDownPolyonCheckPoints2D polygonPoints,
-                                                                                      boolean requireHeightChange)
+   private boolean centerPointOfPolygonWhenPointsShareHighestCollisionsWithSameRegion(UpDownPolyonCheckPoints2D polygonPoints)
    {
       boolean allPointsCollideAtLeastOnce = true;
 
@@ -247,7 +234,7 @@ public class UpDownFlatAreaFinder
          }
       }
 
-      if (requireHeightChange && Math.abs(highestCollision.getRight() - initialHeight) <  HIGH_LOW_MINIMUM) // make sure to go up or down
+      if (Math.abs(highestCollision.getRight() - initialHeight) <  HIGH_LOW_MINIMUM) // make sure to go up or down
       {
          LogTools.trace("doesn't go up or down");
          return false;

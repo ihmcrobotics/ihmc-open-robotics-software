@@ -8,7 +8,6 @@ import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXGraphicTools;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
 import us.ihmc.log.LogTools;
 
@@ -27,7 +26,7 @@ public class UpDownGoalGraphic
 
    public UpDownGoalGraphic()
    {
-      for (int i = 0; i < UpDownFlatAreaFinder.NUMBER_OF_VERTICES + 1; i++)
+      for (int i = 0; i < 6; i++)
       {
          spheres.add(new Sphere(0.015));
          spheres.get(i).setMaterial(new PhongMaterial(INVALID_COLOR));
