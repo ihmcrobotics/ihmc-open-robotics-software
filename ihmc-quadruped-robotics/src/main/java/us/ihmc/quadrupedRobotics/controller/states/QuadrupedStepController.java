@@ -47,7 +47,7 @@ public class QuadrupedStepController implements EventState
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
-      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, parentRegistry);
+      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, registry);
 
       parentRegistry.addChild(registry);
    }
