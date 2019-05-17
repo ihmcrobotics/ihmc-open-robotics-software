@@ -55,6 +55,11 @@ public class QuadrupedBalanceBasedStepDelayer
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
 
+   private final YoDouble timeScaledEllipticalError = new YoDouble("timeScaledEllipticalError", registry);
+   private final DoubleProvider timeScaledEllipticalErrorThreshold = new DoubleParameter("timeScaledEllipticalErrorThreshold", registry, 1.0);
+   private final DoubleProvider thresholdScalerForNoFeetOnSide = new DoubleParameter("thresholdScalerForNoFeetOnSide", registry, 4.0);
+
+   private final DoubleProvider omega;
    private final ReferenceFrame midZUpFrame;
    private final QuadrupedControllerToolbox controllerToolbox;
    private final double controlDt;
@@ -63,6 +68,8 @@ public class QuadrupedBalanceBasedStepDelayer
    {
       this.controllerToolbox = controllerToolbox;
       referenceFrames = controllerToolbox.getReferenceFrames();
+
+      omega = controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency();
 
       midZUpFrame = controllerToolbox.getSupportPolygons().getMidFeetZUpFrame();
       contactStates = controllerToolbox.getFootContactStates();
@@ -95,7 +102,7 @@ public class QuadrupedBalanceBasedStepDelayer
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          delayedFootLocations.get(robotQuadrant).setToNaN();
 
-      if (!allowDelayingSteps.getValue() || normalizedDcmEllipticalError < 0.1)
+      if (!allowDelayingSteps.getValue())
       {
          return false;
       }
@@ -153,21 +160,26 @@ public class QuadrupedBalanceBasedStepDelayer
       }
 
 
-
       icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
-      if (normalizedDcmEllipticalError < 1.0)
+
+      double maxScaledNormalizedError = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < stepsStarting.size(); i++)
       {
-         if (icpError.getY() > 0.0)
-         {
-            if (!aboutToHaveNoLeftFoot.getBooleanValue())
-               return false;
-         }
-         else
-         {
-            if (!aboutToHaveNoRightFoot.getBooleanValue())
-               return false;
-         }
+         QuadrupedTimedStep step = stepsStarting.get(i);
+         double scaledNormalizedDCMEllipticalError = Math.exp(omega.getValue() * step.getTimeInterval().getDuration()) * normalizedDcmEllipticalError;
+
+         if (icpError.getY() > 0.0 && step.getRobotQuadrant().isQuadrantOnLeftSide() && aboutToHaveNoLeftFoot.getBooleanValue())
+            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+         else if (icpError.getY() < 0.0 && step.getRobotQuadrant().isQuadrantOnRightSide() && aboutToHaveNoRightFoot.getBooleanValue())
+            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+
+         maxScaledNormalizedError = Math.max(maxScaledNormalizedError, scaledNormalizedDCMEllipticalError);
       }
+
+      timeScaledEllipticalError.set(Math.max(maxScaledNormalizedError, 0.0));
+
+      if (maxScaledNormalizedError < timeScaledEllipticalErrorThreshold.getValue())
+         return false;
 
       icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
