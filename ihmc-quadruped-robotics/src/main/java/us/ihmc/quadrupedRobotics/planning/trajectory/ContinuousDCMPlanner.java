@@ -195,11 +195,12 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    public void completedStep()
    {
       onStateChange();
-      isInitialTransfer.set(false);
    }
 
    private void onStateChange()
    {
+      isInitialTransfer.set(false);
+
       dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
       dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
       timeAtStartOfState.set(controllerTime.getDoubleValue());
