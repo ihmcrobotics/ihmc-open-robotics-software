@@ -31,7 +31,9 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -76,6 +78,13 @@ public class QuadrupedBalanceManager
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
    private final BooleanProvider updateLipmHeightFromDesireds = new BooleanParameter("updateLipmHeightFromDesireds", registry, true);
+
+   private final BooleanProvider useSimpleSwingSpeedUpCalculation = new BooleanParameter("useSimpleSwingSpeedUpCalculation", registry, true);
+   private final DoubleProvider durationForEmergencySwingSpeedUp = new DoubleParameter("durationForEmergencySwingSpeedUp", registry, 0.35);
+
+   private final YoDouble normalizedDcmErrorForSwingSpeedUp = new YoDouble("normalizedDcmErrorForSpeedUp", registry);
+   private final DoubleProvider maxDcmErrorForSpeedUpX = new DoubleParameter("maxDcmErrorForSpeedUpX", registry, 0.12);
+   private final DoubleProvider maxDcmErrorForSpeedUpY = new DoubleParameter("maxDcmErrorForSpeedUpY", registry, 0.08);
 
    private final ReferenceFrame supportFrame;
 
@@ -142,7 +151,8 @@ public class QuadrupedBalanceManager
                                                                    YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired eCMP", yoDesiredECMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
       YoGraphicPosition yoVRPPositionSetpointViz = new YoGraphicPosition("Desired VRP", yoVrpPositionSetpoint, 0.012, YoAppearance.Purple());
-      YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved eCMP", yoAchievedECMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved eCMP", yoAchievedECMP, 0.005, DarkRed(),
+                                                               YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       graphicsList.add(desiredDCMViz);
       graphicsList.add(finalDesiredDCMViz);
@@ -232,7 +242,7 @@ public class QuadrupedBalanceManager
       centerOfMassHeightManager.setActiveSteps(activeSteps);
    }
 
-   private void updateActiveSteps(List<? extends  QuadrupedTimedStep> steps)
+   private void updateActiveSteps(List<? extends QuadrupedTimedStep> steps)
    {
       activeSteps.clear();
 
@@ -337,11 +347,26 @@ public class QuadrupedBalanceManager
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, boolean stepPlanIsAdjustable)
    {
-      RecyclingArrayList<QuadrupedStep> adjustedActiveSteps = stepAdjustmentController.computeStepAdjustment(activeSteps, yoDesiredDCMPosition,
-                                                                                                             stepPlanIsAdjustable);
+      RecyclingArrayList<QuadrupedStep> adjustedActiveSteps = stepAdjustmentController
+            .computeStepAdjustment(activeSteps, yoDesiredDCMPosition, stepPlanIsAdjustable);
 
       adjustActiveFootstepGraphics(activeSteps);
       return adjustedActiveSteps;
+   }
+
+   public double computeNormalizedEllipticDcmErrorForSpeedUp()
+   {
+      return computeNormalizedEllipticDcmError(maxDcmErrorForSpeedUpX.getValue(), maxDcmErrorForSpeedUpY.getValue(), normalizedDcmErrorForSwingSpeedUp);
+   }
+
+   private double computeNormalizedEllipticDcmError(double maxXError, double maxYError, YoDouble normalizedError)
+   {
+      dcmError2d.setIncludingFrame(momentumRateOfChangeModule.getDcmError());
+      ReferenceFrame midZUpFrame = controllerToolbox.getSupportPolygons().getMidFeetZUpFrame();
+      dcmError2d.changeFrame(midZUpFrame);
+      normalizedError.set(MathTools.square(dcmError2d.getX() / maxXError) + MathTools.square(dcmError2d.getY() / maxYError));
+
+      return normalizedError.getDoubleValue();
    }
 
    public boolean stepHasBeenAdjusted()
@@ -351,11 +376,36 @@ public class QuadrupedBalanceManager
 
    public double estimateSwingSpeedUpTimeUnderDisturbance()
    {
+      if (computeNormalizedEllipticDcmErrorForSpeedUp() < 1.0)
+         return 0.0;
+
       if (activeSteps.isEmpty())
          return 0.0;
 
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(dcmPositionEstimate);
+
+      double deltaTimeToBeAccounted;
+      if (useSimpleSwingSpeedUpCalculation.getValue())
+      {
+         double shortestSpeedUp = Double.POSITIVE_INFINITY;
+         double currentTime = robotTimestamp.getDoubleValue();
+         for (int i = 0; i < activeSteps.size(); i++)
+         {
+            QuadrupedTimedStep activeStep = activeSteps.get(i);
+            double duration = activeStep.getTimeInterval().getDuration();
+            double phaseThroughStep = (currentTime - activeStep.getTimeInterval().getStartTime()) / duration;
+            double nominalRemainingTime = durationForEmergencySwingSpeedUp.getValue() * (1.0 - phaseThroughStep);
+            double actualRemainingTime = duration - nominalRemainingTime;
+
+            shortestSpeedUp = Math.min(shortestSpeedUp, actualRemainingTime - nominalRemainingTime);
+         }
+
+         deltaTimeToBeAccounted = Math.max(shortestSpeedUp, 0.0);
+      }
+      else
+      {
+         deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(dcmPositionEstimate);
+      }
 
       if (Double.isNaN(deltaTimeToBeAccounted))
          return 0.0;
@@ -381,8 +431,6 @@ public class QuadrupedBalanceManager
       actualICP2d.setIncludingFrame(actualCapturePointPosition);
       dcmPlanner.getDesiredECMPPosition(perfectCMP);
       perfectCMP.changeFrame(worldFrame);
-
-
 
       /**
        * FIXME This is a hack 6/26/2018 Robert Griffin
@@ -412,7 +460,6 @@ public class QuadrupedBalanceManager
          desiredICPToFinalICPLine.set(desiredICP2d, finalICP2d);
          desiredICPToFinalICPLine.orthogonalProjection(actualICP2d);
       }
-
 
       double actualDistanceDueToDisturbance = perfectCMP.distanceXY(actualICP2d);
       double expectedDistanceAccordingToPlan = perfectCMP.distanceXY(desiredICP2d);
