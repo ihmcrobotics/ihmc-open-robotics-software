@@ -372,7 +372,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       double lastStepStartTime = 0;
 
-      for (int i = 0; i < path.size(); i++)
+      for (int i = 1; i < path.size(); i++)
       {
          FootstepNode node = path.get(i);
 
@@ -383,7 +383,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          newStep.setGroundClearance(xGaitSettings.getStepGroundClearance());
 
          double endTimeShift;
-         if (i == 0)
+         if (i == 1)
          {
             endTimeShift = 0.0;
          }
@@ -394,8 +394,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
          double thisStepStartTime = lastStepStartTime + endTimeShift;
          double thisStepEndTime = thisStepStartTime + xGaitSettings.getStepDuration();
 
-         TimeIntervalBasics timeInterval = newStep.getTimeInterval();
-         timeInterval.setInterval(thisStepStartTime, thisStepEndTime);
+         newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
          FootstepNodeSnapData snapData = postProcessingSnapper.snapFootstepNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
