@@ -546,7 +546,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       getYoTrajectory(axis).setDirectly(coefficients);
    }
 
-   public FramePoint3D getFramePosition()
+   public FramePoint3DReadOnly getFramePosition()
    {
       framePosition.setToZero(referenceFrame);
       framePosition.set(getPosition());
@@ -575,7 +575,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       positionToPack.set(getPosition());
    }
 
-   public FrameVector3D getFrameVelocity()
+   public FrameVector3DReadOnly getFrameVelocity()
    {
       frameVelocity.setToZero(referenceFrame);
       frameVelocity.set(getVelocity());
@@ -588,7 +588,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       velocityToPack.set(getVelocity());
    }
 
-   public FrameVector3D getFrameAcceleration()
+   public FrameVector3DReadOnly getFrameAcceleration()
    {
       frameAcceleration.setToZero(referenceFrame);
       frameAcceleration.set(getAcceleration());
