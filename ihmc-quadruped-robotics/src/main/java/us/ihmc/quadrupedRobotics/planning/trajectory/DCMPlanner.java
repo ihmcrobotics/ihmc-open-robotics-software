@@ -266,24 +266,9 @@ public class DCMPlanner implements DCMPlannerInterface
       double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double splineStartTime;
-      if (currentIntervalDuration < minimumSplineDuration.getValue())
-      {
-         splineStartTime = timeAtStartOfState.getDoubleValue();
-         dcmPositionAtStartOfSpline.set(dcmPositionAtStartOfState);
-         dcmVelocityAtStartOfSpline.set(dcmVelocityAtStartOfState);
-      }
-      else
-      {
-         double desiredSplineDuration = Math.max(splineSplitFraction.getValue() * currentIntervalDuration, minimumSplineDuration.getValue());
-         splineStartTime = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - desiredSplineDuration;
-
-         dcmTrajectory.computeTrajectory(splineStartTime);
-         dcmTrajectory.getPosition(initialSplineDCMPosition);
-         dcmTrajectory.getVelocity(initialSplineDCMVelocity);
-         dcmPositionAtStartOfSpline.setMatchingFrame(initialSplineDCMPosition);
-         dcmVelocityAtStartOfSpline.setMatchingFrame(initialSplineDCMVelocity);
-      }
+      double splineStartTime = timeAtStartOfState.getDoubleValue();
+      dcmPositionAtStartOfSpline.set(dcmPositionAtStartOfState);
+      dcmVelocityAtStartOfSpline.set(dcmVelocityAtStartOfState);
 
       double splineEndTime;
       if (nextIntervalDuration < minimumSplineDuration.getValue())
