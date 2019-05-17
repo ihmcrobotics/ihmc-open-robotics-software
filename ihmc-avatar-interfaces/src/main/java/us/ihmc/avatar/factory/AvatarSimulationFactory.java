@@ -106,6 +106,8 @@ public class AvatarSimulationFactory
    private DisposableRobotController robotController;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
+   private FullHumanoidRobotModel masterFullRobotModel;
+   private HumanoidRobotContextData masterContext;
 
    private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
@@ -193,7 +195,7 @@ public class AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(humanoidFloatingRootJointRobot);
+      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(humanoidFloatingRootJointRobot, masterContext);
    }
 
    private void setupSimulationOutputProcessor()
@@ -252,13 +254,16 @@ public class AvatarSimulationFactory
                                                     realtimeRos2Node.get(), gravity.get(), robotModel.get().getEstimatorDT());
    }
 
+   private void createMasterContext()
+   {
+      // Create intermediate data buffer for threading.
+      masterFullRobotModel = robotModel.get().createFullRobotModel();
+      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+   }
+
    private void setupMultiThreadedRobotController()
    {
       DRCRobotModel robotModel = this.robotModel.get();
-
-      // Create intermediate data buffer for threading.
-      FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
-      HumanoidRobotContextData masterContext = new HumanoidRobotContextData();
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
@@ -468,6 +473,7 @@ public class AvatarSimulationFactory
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       createHumanoidFloatingRootJointRobot();
+      createMasterContext();
       setupYoVariableServer();
       setupSimulationConstructionSet();
       setupSensorReaderFactory();

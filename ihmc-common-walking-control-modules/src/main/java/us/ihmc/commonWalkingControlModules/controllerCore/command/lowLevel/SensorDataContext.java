@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.ejml.data.DenseMatrix64F;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.LowLevelState;
@@ -30,6 +32,17 @@ public class SensorDataContext implements Settable<SensorDataContext>
    private final List<DenseMatrix64F> forceSensorMeasurements = new ArrayList<>();
    private final transient TLongSet forceSensorSet = new TLongHashSet();
    private final transient Map<String, DenseMatrix64F> forceSensorMeasurementMap = new HashMap<>();
+
+   public SensorDataContext()
+   {
+   }
+
+   public SensorDataContext(FullHumanoidRobotModel fullRobotModel)
+   {
+      Arrays.asList(fullRobotModel.getOneDoFJoints()).forEach(joint -> registerJoint(joint.getName()));
+      Arrays.asList(fullRobotModel.getIMUDefinitions()).forEach(imu -> registerImu(imu.getName()));
+      Arrays.asList(fullRobotModel.getForceSensorDefinitions()).forEach(forceSensor -> registerForceSensor(forceSensor.getSensorName()));
+   }
 
    public LowLevelState registerJoint(String jointName)
    {

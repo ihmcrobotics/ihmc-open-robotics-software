@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
+import java.util.Arrays;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.SensorDataContext;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 
@@ -88,6 +91,16 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.robotMotionStatusHolder = robotMotionStatusHolder;
       this.jointDesiredOutputList = jointDesiredOutputList;
       this.sensorDataContext = sensorDataContext;
+   }
+
+   public HumanoidRobotContextData(FullHumanoidRobotModel masterFullRobotModel)
+   {
+      processedJointData = new HumanoidRobotContextJointData(masterFullRobotModel.getOneDoFJoints().length);
+      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(masterFullRobotModel.getForceSensorDefinitions()));
+      centerOfPressureDataHolder = new CenterOfPressureDataHolder(masterFullRobotModel);
+      robotMotionStatusHolder = new RobotMotionStatusHolder();
+      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(masterFullRobotModel.getControllableOneDoFJoints());
+      sensorDataContext = new SensorDataContext(masterFullRobotModel);
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
