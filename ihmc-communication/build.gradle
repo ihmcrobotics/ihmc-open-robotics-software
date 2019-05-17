@@ -13,7 +13,7 @@ ihmc {
 
 mainDependencies {
    compile group: "net.sf.trove4j", name: "trove4j", version: "3.0.3"
-   compile group: "kryonet-all", name: "kryonet", version: "2.21"
+   compile group: "kryonet", name: "kryonet-all", version: "2.21"
    compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.5"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "org.boofcv", name: "geo", version: "0.24.1"
