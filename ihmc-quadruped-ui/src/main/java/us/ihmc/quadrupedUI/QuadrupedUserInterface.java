@@ -141,6 +141,7 @@ public class QuadrupedUserInterface
 
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
+      manualStepTabController.initScene(view3dFactory.getSubScene());
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
@@ -156,6 +157,7 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       view3dFactory.addNodeToView(pawPathViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
+      view3dFactory.addNodeToView(manualStepTabController);
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();
