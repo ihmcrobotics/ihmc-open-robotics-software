@@ -49,9 +49,9 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -424,7 +424,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -508,14 +508,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       if (createSCSSimulatedSensors)
       {
-         DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+         AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = avatarSimulation.getSimulatedRobotTimeProvider();
          HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
          printIfDebug("Streaming SCS Video");
-         DRCRobotCameraParameters cameraParameters = sensorInformation.getCameraParameters(0);
+         AvatarRobotCameraParameters cameraParameters = sensorInformation.getCameraParameters(0);
          if (cameraParameters != null)
          {
             String cameraName = cameraParameters.getSensorNameInSdf();
@@ -532,7 +532,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                               framesPerSecond);
          }
 
-         for (DRCRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
+         for (AvatarRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
          {
             DRCLidar.setupDRCRobotLidar(robot, graphics3dAdapter, scsSensorOutputPacketCommunicator, jointMap, lidarParams, timeStampProvider, true);
          }

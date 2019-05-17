@@ -37,8 +37,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -49,7 +47,7 @@ import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
@@ -368,7 +366,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
 
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();

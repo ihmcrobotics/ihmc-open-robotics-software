@@ -31,8 +31,8 @@ import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -48,7 +48,7 @@ public class RosModule
 
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final DRCRobotSensorInformation sensorInformation;
+   private final AvatarHumanoidRobotSensorInformation sensorInformation;
    private final String robotName;
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
@@ -78,10 +78,10 @@ public class RosModule
       {
          publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
 
-         DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
+         AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
          if (lidarParameters.length > 0)
          {
-            DRCRobotLidarParameters primaryLidar = lidarParameters[0];
+            AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
             robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
          }
       }
@@ -103,7 +103,7 @@ public class RosModule
          PrintTools.debug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, AvatarHumanoidRobotSensorInformation sensorInformation,
                                                ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
