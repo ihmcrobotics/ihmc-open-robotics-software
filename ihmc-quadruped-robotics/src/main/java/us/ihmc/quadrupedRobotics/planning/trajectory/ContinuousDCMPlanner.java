@@ -202,15 +202,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    {
       dcmPositionAtStartOfState.setMatchingFrame(desiredDCMPosition);
       dcmVelocityAtStartOfState.setMatchingFrame(desiredDCMVelocity);
-      dcmPositionAtStartOfFirstSpline.set(dcmPositionAtStartOfSecondSpline);
-      dcmVelocityAtStartOfFirstSpline.set(dcmVelocityAtStartOfSecondSpline);
-      firstSplineStartTime.set(secondSplineStartTime.getDoubleValue());
       timeAtStartOfState.set(controllerTime.getDoubleValue());
 
-      if (firstSplineStartTime.getValue() > timeAtStartOfState.getValue())
-      {
-         setFirstSplineStartFromCurrentState();
-      }
+      setFirstSplineStartFromCurrentState();
    }
 
    private void computeDcmTrajectory(QuadrantDependentList<YoEnum<ContactState>> currentContactStates)
