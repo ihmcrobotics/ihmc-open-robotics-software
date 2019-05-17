@@ -40,6 +40,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final QuadrantDependentList<YoBoolean> areFeetDelayed = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFramePoint3D> delayedFootLocations = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoDouble> delayDurations = new QuadrantDependentList<>();
+   private final QuadrantDependentList<YoDouble> timeScaledEllipticalError = new QuadrantDependentList<>();
 
    private final List<QuadrupedTimedStep> stepsStarting = new ArrayList<>();
 
@@ -55,8 +56,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
 
-   private final YoDouble timeScaledEllipticalError = new YoDouble("timeScaledEllipticalError", registry);
-   private final DoubleProvider timeScaledEllipticalErrorThreshold = new DoubleParameter("timeScaledEllipticalErrorThreshold", registry, 1.0);
+   private final DoubleProvider timeScaledEllipticalErrorThreshold = new DoubleParameter("timeScaledEllipticalErrorThreshold", registry, 5.0);
    private final DoubleProvider thresholdScalerForNoFeetOnSide = new DoubleParameter("thresholdScalerForNoFeetOnSide", registry, 4.0);
 
    private final DoubleProvider omega;
@@ -82,6 +82,7 @@ public class QuadrupedBalanceBasedStepDelayer
       {
          areFeetDelayed.put(robotQuadrant, new YoBoolean(robotQuadrant.getCamelCaseName() + "_IsFootDelayed", registry));
          delayDurations.put(robotQuadrant, new YoDouble(robotQuadrant.getCamelCaseName() + "_DelayDuration", registry));
+         timeScaledEllipticalError.put(robotQuadrant, new YoDouble(robotQuadrant.getCamelCaseName() + "TimeScaledEllipticalError", registry));
 
          String name = robotQuadrant.getCamelCaseName() + "_DelayedStepLocation";
          YoFramePoint3D delayedFootLocation = new YoFramePoint3D(name, worldFrame, registry);
@@ -162,27 +163,6 @@ public class QuadrupedBalanceBasedStepDelayer
 
       icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
 
-      double maxScaledNormalizedError = Double.NEGATIVE_INFINITY;
-      for (int i = 0; i < stepsStarting.size(); i++)
-      {
-         QuadrupedTimedStep step = stepsStarting.get(i);
-         double scaledNormalizedDCMEllipticalError = Math.exp(omega.getValue() * step.getTimeInterval().getDuration()) * normalizedDcmEllipticalError;
-
-         if (icpError.getY() > 0.0 && step.getRobotQuadrant().isQuadrantOnLeftSide() && aboutToHaveNoLeftFoot.getBooleanValue())
-            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
-         else if (icpError.getY() < 0.0 && step.getRobotQuadrant().isQuadrantOnRightSide() && aboutToHaveNoRightFoot.getBooleanValue())
-            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
-
-         maxScaledNormalizedError = Math.max(maxScaledNormalizedError, scaledNormalizedDCMEllipticalError);
-      }
-
-      timeScaledEllipticalError.set(Math.max(maxScaledNormalizedError, 0.0));
-
-      if (maxScaledNormalizedError < timeScaledEllipticalErrorThreshold.getValue())
-         return false;
-
-      icpError.changeFrameAndProjectToXYPlane(worldFrame);
-
       double delayAmount = controlTicksToDelay.getValue() * controlDt;
       boolean stepWasDelayed = false;
 
@@ -190,6 +170,21 @@ public class QuadrupedBalanceBasedStepDelayer
       {
          QuadrupedTimedStep stepStarting = stepsStarting.get(i);
          RobotQuadrant quadrantStarting = stepStarting.getRobotQuadrant();
+
+         double scaledNormalizedDCMEllipticalError = Math.exp(omega.getValue() * stepStarting.getTimeInterval().getDuration()) * normalizedDcmEllipticalError;
+
+         icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
+
+         if (icpError.getY() > 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnLeftSide() && aboutToHaveNoLeftFoot.getBooleanValue())
+            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+         else if (icpError.getY() < 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnRightSide() && aboutToHaveNoRightFoot.getBooleanValue())
+            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+
+         timeScaledEllipticalError.get(quadrantStarting).set(scaledNormalizedDCMEllipticalError);
+         if (scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
+            continue;
+
+         icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
          if (isFootPushingAgainstError(quadrantStarting, currentICP))
          {
@@ -199,7 +194,10 @@ public class QuadrupedBalanceBasedStepDelayer
             {
                TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
                double currentStartTime = timeInterval.getStartTime();
-               stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
+               if (delayAllSubsequentSteps.getValue())
+                  stepStarting.getTimeInterval().shiftInterval(delayAmount);
+               else
+                  stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
                delayDuration.add(delayAmount);
                areFeetDelayed.get(quadrantStarting).set(true);
                stepWasDelayed = true;
