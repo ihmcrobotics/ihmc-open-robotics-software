@@ -45,7 +45,9 @@
       
                       <ComboBox fx:id="firstFoot" GridPane.columnIndex="5" GridPane.rowIndex="0" />
                       <CheckBox fx:id="useTrot" onAction="#setUseTrot" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                      <Button fx:id="stepButton" onAction="#sendSteps" text="Send Steps" GridPane.columnIndex="5" GridPane.rowIndex="2" />
+                      <Button fx:id="stepButton" onAction="#sendSteps" text="Send Steps" GridPane.columnIndex="5" GridPane.rowIndex="3" />
+                  <Label text="Visualize" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                  <CheckBox fx:id="visualizeManualStepPlan" mnemonicParsing="false" onAction="#visualizeManualStepPlan" GridPane.columnIndex="5" GridPane.rowIndex="2" />
       
                   </children>
                <columnConstraints>
