@@ -24,7 +24,7 @@ import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -65,7 +65,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final IHMCROS2Publisher<HandCollisionDetectedPacket> publisher;
 
-   public WristForceSensorFilteredUpdatable(String robotName, RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
+   public WristForceSensorFilteredUpdatable(String robotName, RobotSide robotSide, FullRobotModel fullRobotModel, AvatarHumanoidRobotSensorInformation sensorInfo,
                                             ForceSensorDataHolder forceSensorDataHolder, double DT, Ros2Node ros2Node, YoVariableRegistry registry)
    {
       this.DT = DT;

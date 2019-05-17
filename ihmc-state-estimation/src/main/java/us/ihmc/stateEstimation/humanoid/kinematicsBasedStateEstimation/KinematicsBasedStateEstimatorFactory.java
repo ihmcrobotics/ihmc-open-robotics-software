@@ -24,7 +24,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -40,7 +40,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class KinematicsBasedStateEstimatorFactory
 {
    private RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField = new RequiredFactoryField<>("estimatorFullRobotModelField");
-   private RequiredFactoryField<DRCRobotSensorInformation> sensorInformationField = new RequiredFactoryField<>("sensorInformationField");
+   private RequiredFactoryField<AvatarHumanoidRobotSensorInformation> sensorInformationField = new RequiredFactoryField<>("sensorInformationField");
 
    private RequiredFactoryField<SensorOutputMapReadOnly> sensorOutputMapReadOnlyField = new RequiredFactoryField<>("sensorOutputMapReadOnlyField");
    private RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravityField");
@@ -62,7 +62,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public KinematicsBasedStateEstimatorFactory setSensorInformation(DRCRobotSensorInformation sensorInformation)
+   public KinematicsBasedStateEstimatorFactory setSensorInformation(AvatarHumanoidRobotSensorInformation sensorInformation)
    {
       this.sensorInformationField.set(sensorInformation);
       return this;
@@ -143,7 +143,7 @@ public class KinematicsBasedStateEstimatorFactory
       Map<RigidBodyBasics, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBodyBasics, FootSwitchInterface>();
       Map<RigidBodyBasics, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBodyBasics, ContactablePlaneBody>();
 
-      DRCRobotSensorInformation sensorInformation = sensorInformationField.get();
+      AvatarHumanoidRobotSensorInformation sensorInformation = sensorInformationField.get();
       ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate = estimatorForceSensorDataHolderToUpdateField.get();
       StateEstimatorParameters stateEstimatorParameters = stateEstimatorParametersField.get();
       FootSwitchFactory footSwitchFactory = stateEstimatorParameters.getFootSwitchFactory();
