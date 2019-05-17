@@ -14,6 +14,7 @@ import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationConstructionSetTools.simulatedSensors.SimulatedContactBasedFootSwitch;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -70,7 +71,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContextToSet)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          otherFootSwitches.get(robotQuadrant).updateMeasurement();
@@ -82,6 +83,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
 
       super.read();
+      return getTimestamp();
    }
 
    @Override

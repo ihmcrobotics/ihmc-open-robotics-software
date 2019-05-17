@@ -71,6 +71,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -813,7 +814,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, robotModel.getJointMap());
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
-      drcPerfectSensorReaderFactory.getSensorReader().read();
+      SensorDataContext sensorDataContext = new SensorDataContext();
+      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
+      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
 
       return initialFullRobotModel;
    }

@@ -54,6 +54,7 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -122,6 +123,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
    private final ForceSensorStateUpdater forceSensorStateUpdater;
+
+   private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public DRCEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
@@ -416,7 +419,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             }
          }
 
-         sensorReader.read();
+         long timestamp = sensorReader.read(sensorDataContext);
+         sensorReader.compute(timestamp, sensorDataContext);
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
       }

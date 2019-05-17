@@ -51,8 +51,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    @Override
    protected void updateLocalContext(HumanoidRobotContextData masterContext)
    {
+      controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
-      controllerThread.read();
    }
 
 }

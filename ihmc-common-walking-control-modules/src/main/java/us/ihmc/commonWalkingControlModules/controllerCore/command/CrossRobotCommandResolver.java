@@ -189,6 +189,7 @@ public class CrossRobotCommandResolver
    public void resolveHumanoidRobotContextDataScheduler(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveSensorDataContext(in.getSensorDataContext(), out.getSensorDataContext());
+      out.setTimestamp(in.getTimestamp());
    }
 
    public void resolveHumanoidRobotContextDataController(HumanoidRobotContextData in, HumanoidRobotContextData out)
@@ -203,7 +204,6 @@ public class CrossRobotCommandResolver
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
-      out.setTimestamp(in.getTimestamp());
       out.setEstimatorRan(in.getEstimatorRan());
    }
 

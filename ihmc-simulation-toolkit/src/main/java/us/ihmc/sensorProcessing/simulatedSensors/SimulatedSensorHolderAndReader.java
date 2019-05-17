@@ -96,7 +96,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContextToSet)
    {
       for (int i = 0; i < jointPositionSensors.size(); i++)
       {
@@ -147,5 +147,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();
+      return timestamp;
    }
 }

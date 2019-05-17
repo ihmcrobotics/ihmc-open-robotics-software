@@ -14,6 +14,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -86,10 +87,11 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContext)
    {
       readSensors();
       writeCommandsToRobot();
+      return timestampProvider.getTimestamp();
    }
 
    public void writeCommandsToRobot()
