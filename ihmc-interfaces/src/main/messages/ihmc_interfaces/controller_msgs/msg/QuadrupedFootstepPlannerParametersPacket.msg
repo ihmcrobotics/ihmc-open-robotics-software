@@ -11,6 +11,16 @@ float64 minimum_front_step_length -11.1
 float64 maximum_hind_step_reach -11.1
 float64 maximum_hind_step_length -11.1
 float64 minimum_hind_step_length -11.1
+float64 maximum_front_step_length_when_stepping_up -11.1
+float64 minimum_front_step_length_when_stepping_up -11.1
+float64 maximum_hind_step_length_when_stepping_up -11.1
+float64 minimum_hind_step_length_when_stepping_up -11.1
+float64 step_z_for_stepping_up -11.1
+float64 maximum_front_step_length_when_stepping_down -11.1
+float64 minimum_front_step_length_when_stepping_down -11.1
+float64 maximum_hind_step_length_when_stepping_down -11.1
+float64 minimum_hind_step_length_when_stepping_down -11.1
+float64 step_z_for_stepping_down -11.1
 float64 maximum_step_width -11.1
 float64 minimum_step_width -11.1
 float64 minimum_step_yaw -11.1
@@ -34,5 +44,8 @@ float64 projection_inside_distance_for_post_processing -11.1
 float64 maximum_xy_wiggle_distance -11.1
 float64 minimum_surface_incline_radians -11.1
 float64 cliff_height_to_avoid -11.1
-float64 minimum_distance_from_cliff_bottoms -11.1
-float64 minimum_distance_from_cliff_tops -11.1
+float64 minimum_front_end_forward_distance_from_cliff_bottoms -11.1
+float64 minimum_front_end_backward_distance_from_cliff_bottoms -11.1
+float64 minimum_hind_end_forward_distance_from_cliff_bottoms -11.1
+float64 minimum_hind_end_backward_distance_from_cliff_bottoms -11.1
+float64 minimum_lateral_distance_from_cliff_bottoms -11.1

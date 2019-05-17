@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -79,7 +80,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoDouble timeInStateWithSwingSpeedUp;
    private final YoDouble timeRemainingInState;
    private final YoDouble timeRemainingInStateWithSwingSpeedUp;
-   private final YoDouble timestamp;
+   private final DoubleProvider timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean hasMinimumTimePassed;
 
@@ -217,7 +218,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
-      setFootstepDurationInternal(currentStepCommand.getTimeInterval().getDuration());
+      double swingDuration = Math.max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
+      setFootstepDurationInternal(swingDuration);
 
       activeTrajectoryType.set(TrajectoryType.DEFAULT);
 
@@ -271,7 +273,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
 
       PositionTrajectoryGenerator activeTrajectory;
-      if (timeInState > swingDuration.getDoubleValue())
+      if (timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
          activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
@@ -323,7 +325,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          touchdownTrigger.update(footSwitch.hasFootHitGround());
       }
 
-      double currentTime = timestamp.getDoubleValue();
+      double currentTime = timestamp.getValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
       double startTime = currentStepCommand.getTimeInterval().getStartTime();
       double percentDone = (currentTime - startTime) / (touchDownTime - startTime);

@@ -39,6 +39,28 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minStepWidth;
 
    @FXML
+   private Spinner<Double> maxFrontStepLengthWhenSteppingUp;
+   @FXML
+   private Spinner<Double> minFrontStepLengthWhenSteppingUp;
+   @FXML
+   private Spinner<Double> maxHindStepLengthWhenSteppingUp;
+   @FXML
+   private Spinner<Double> minHindStepLengthWhenSteppingUp;
+   @FXML
+   private Spinner<Double> stepZForSteppingUp;
+
+   @FXML
+   private Spinner<Double> maxFrontStepLengthWhenSteppingDown;
+   @FXML
+   private Spinner<Double> minFrontStepLengthWhenSteppingDown;
+   @FXML
+   private Spinner<Double> maxHindStepLengthWhenSteppingDown;
+   @FXML
+   private Spinner<Double> minHindStepLengthWhenSteppingDown;
+   @FXML
+   private Spinner<Double> stepZForSteppingDown;
+
+   @FXML
    private Spinner<Double> maxStepYaw;
    @FXML
    private Spinner<Double> minStepYaw;
@@ -66,9 +88,15 @@ public class FootstepPlannerParametersUIController
    @FXML
    private Spinner<Double> cliffHeightToAvoid;
    @FXML
-   private Spinner<Double> minDistanceFromCliffBottoms;
+   private Spinner<Double> minFrontEndForwardDistanceFromCliffBottoms;
    @FXML
-   private Spinner<Double> minDistanceFromCliffTops;
+   private Spinner<Double> minFrontEndBackwardDistanceFromCliffBottoms;
+   @FXML
+   private Spinner<Double> minHindEndForwardDistanceFromCliffBottoms;
+   @FXML
+   private Spinner<Double> minHindEndBackwardDistanceFromCliffBottoms;
+   @FXML
+   private Spinner<Double> minLateralDistanceFromCliffBottoms;
 
    @FXML
    private Spinner<Double> distanceWeight;
@@ -135,32 +163,48 @@ public class FootstepPlannerParametersUIController
       maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
       minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.01));
 
+      maxFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      maxHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      stepZForSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
+
+      maxFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      maxHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
+      minHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      stepZForSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
+
+
       maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.05));
       minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-0.3, 0.0, 0.0, 0.05));
       maxStepChangeZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.05));
 
       maxWalkingSpeedMultiplier.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.01));
 
-      bodyGroundClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.05));
+      bodyGroundClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
       minXClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
       minYClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
-      minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
+      minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.8, 0.0, 0.05));
 
       projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
       projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
       maximumXYWiggleDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
       cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.4, 0.0, 0.05));
-      minDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
-      minDistanceFromCliffTops.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+      minFrontEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
+      minFrontEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+      minHindEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
+      minHindEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+      minLateralDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
 
-      distanceWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
-      yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
-      xGaitWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
+      distanceWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
+      yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
+      xGaitWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
 
-      costPerStep.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
-      stepUpWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
-      stepDownWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
-      heuristicsWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 2.0, 0.0, 0.1));
+      costPerStep.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
+      stepUpWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
+      stepDownWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
+      heuristicsWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
    }
 
    public void bindControls()
@@ -176,6 +220,18 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMaximumStepWidth(maxStepWidth.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepWidth(minStepWidth.getValueFactory().valueProperty());
 
+      parametersProperty.bidirectionalBindMaximumFrontStepLengthWhenSteppingUp(maxFrontStepLengthWhenSteppingUp.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumFrontStepLengthWhenSteppingUp(minFrontStepLengthWhenSteppingUp.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumHindStepLengthWhenSteppingUp(maxHindStepLengthWhenSteppingUp.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumHindStepLengthWhenSteppingUp(minHindStepLengthWhenSteppingUp.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindStepZForSteppingUp(stepZForSteppingUp.getValueFactory().valueProperty());
+
+      parametersProperty.bidirectionalBindMaximumFrontStepLengthWhenSteppingDown(maxFrontStepLengthWhenSteppingDown.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumFrontStepLengthWhenSteppingDown(minFrontStepLengthWhenSteppingDown.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMaximumHindStepLengthWhenSteppingDown(maxHindStepLengthWhenSteppingDown.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinimumHindStepLengthWhenSteppingDown(minHindStepLengthWhenSteppingDown.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindStepZForSteppingDown(stepZForSteppingDown.getValueFactory().valueProperty());
+
       parametersProperty.bidirectionalBindMaximumStepYaw(maxStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepYaw(minStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumStepChangeZ(maxStepChangeZ.getValueFactory().valueProperty());
@@ -190,9 +246,13 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindProjectInsideDistanceForExpansion(projectInsideDistanceForExpansion.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindProjectInsideDistanceForPostProcessing(projectInsideDistanceForPostProcessing.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumXYWiggleDistance(maximumXYWiggleDistance.getValueFactory().valueProperty());
+
       parametersProperty.bidirectionalBindCliffHeightToAvoid(cliffHeightToAvoid.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinDistanceFromCliffBottoms(minDistanceFromCliffBottoms.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMinDistanceFromCliffTops(minDistanceFromCliffTops.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinFrontEndForwardDistanceFromCliffBottoms(minFrontEndForwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinFrontEndBackwardDistanceFromCliffBottoms(minFrontEndBackwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinHindEndForwardDistanceFromCliffBottoms(minHindEndForwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinHindEndBackwardDistanceFromCliffBottoms(minHindEndBackwardDistanceFromCliffBottoms.getValueFactory().valueProperty());
+      parametersProperty.bidirectionalBindMinLateralDistanceFromCliffBottoms(minLateralDistanceFromCliffBottoms.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindDistanceWeight(distanceWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
@@ -226,6 +286,18 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("maxStepWidth", maxStepWidth.getValue());
       filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
 
+      filePropertyHelper.saveProperty("maxFrontStepLengthWhenSteppingUp", maxFrontStepLengthWhenSteppingUp.getValue());
+      filePropertyHelper.saveProperty("minFrontStepLengthWhenSteppingUp", minFrontStepLengthWhenSteppingUp.getValue());
+      filePropertyHelper.saveProperty("maxHindStepLengthWhenSteppingUp", maxHindStepLengthWhenSteppingUp.getValue());
+      filePropertyHelper.saveProperty("minHindStepLengthWhenSteppingUp", minHindStepLengthWhenSteppingUp.getValue());
+      filePropertyHelper.saveProperty("stepZForSteppingUp", stepZForSteppingUp.getValue());
+
+      filePropertyHelper.saveProperty("maxFrontStepLengthWhenSteppingDown", maxFrontStepLengthWhenSteppingDown.getValue());
+      filePropertyHelper.saveProperty("minFrontStepLengthWhenSteppingDown", minFrontStepLengthWhenSteppingDown.getValue());
+      filePropertyHelper.saveProperty("maxHindStepLengthWhenSteppingDown", maxHindStepLengthWhenSteppingDown.getValue());
+      filePropertyHelper.saveProperty("minHindStepLengthWhenSteppingDown", minHindStepLengthWhenSteppingDown.getValue());
+      filePropertyHelper.saveProperty("stepZForSteppingDown", stepZForSteppingDown.getValue());
+
       filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
       filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
       filePropertyHelper.saveProperty("maxStepChangeZ", maxStepChangeZ.getValue());
@@ -240,8 +312,11 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("projectInsideDistanceForExpansion", projectInsideDistanceForExpansion.getValue());
       filePropertyHelper.saveProperty("projectInsideDistanceForPostProcessing", projectInsideDistanceForPostProcessing.getValue());
       filePropertyHelper.saveProperty("cliffHeightToAvoid", cliffHeightToAvoid.getValue());
-      filePropertyHelper.saveProperty("minDistanceFromCliffBottoms", minDistanceFromCliffBottoms.getValue());
-      filePropertyHelper.saveProperty("minDistanceFromCliffTops", minDistanceFromCliffTops.getValue());
+      filePropertyHelper.saveProperty("minFrontEndForwardDistanceFromCliffBottoms", minFrontEndForwardDistanceFromCliffBottoms.getValue());
+      filePropertyHelper.saveProperty("minFrontEndBackwardDistanceFromCliffBottoms", minFrontEndBackwardDistanceFromCliffBottoms.getValue());
+      filePropertyHelper.saveProperty("minHindEndForwardDistanceFromCliffBottoms", minHindEndForwardDistanceFromCliffBottoms.getValue());
+      filePropertyHelper.saveProperty("minHindEndBackwardDistanceFromCliffBottoms", minHindEndBackwardDistanceFromCliffBottoms.getValue());
+      filePropertyHelper.saveProperty("minLateralDistanceFromCliffBottoms", minLateralDistanceFromCliffBottoms.getValue());
 
       filePropertyHelper.saveProperty("distanceWeight", distanceWeight.getValue());
       filePropertyHelper.saveProperty("yawWeight", yawWeight.getValue());
@@ -278,6 +353,28 @@ public class FootstepPlannerParametersUIController
       if ((value = filePropertyHelper.loadDoubleProperty("minStepWidth")) != null)
          minStepWidth.getValueFactory().setValue(value);
 
+      if ((value = filePropertyHelper.loadDoubleProperty("maxFrontStepLengthWhenSteppingUp")) != null)
+         maxFrontStepLengthWhenSteppingUp.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFrontStepLengthWhenSteppingUp")) != null)
+         minFrontStepLengthWhenSteppingUp.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxHindStepLengthWhenSteppingUp")) != null)
+         maxHindStepLengthWhenSteppingUp.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minHindStepLengthWhenSteppingUp")) != null)
+         minHindStepLengthWhenSteppingUp.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("stepZForSteppingUp")) != null)
+         stepZForSteppingUp.getValueFactory().setValue(value);
+
+      if ((value = filePropertyHelper.loadDoubleProperty("maxFrontStepLengthWhenSteppingDown")) != null)
+         maxFrontStepLengthWhenSteppingDown.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFrontStepLengthWhenSteppingDown")) != null)
+         minFrontStepLengthWhenSteppingDown.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("maxHindStepLengthWhenSteppingDown")) != null)
+         maxHindStepLengthWhenSteppingDown.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minHindStepLengthWhenSteppingDown")) != null)
+         minHindStepLengthWhenSteppingDown.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("stepZForSteppingDown")) != null)
+         stepZForSteppingDown.getValueFactory().setValue(value);
+
       if ((value = filePropertyHelper.loadDoubleProperty("maxStepYaw")) != null)
          maxStepYaw.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("minStepYaw")) != null)
@@ -303,10 +400,16 @@ public class FootstepPlannerParametersUIController
          projectInsideDistanceForPostProcessing.getValueFactory().setValue(value);
       if ((value = filePropertyHelper.loadDoubleProperty("cliffHeightToAvoid")) != null)
          cliffHeightToAvoid.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minDistanceFromCliffBottoms")) != null)
-         minDistanceFromCliffBottoms.getValueFactory().setValue(value);
-      if ((value = filePropertyHelper.loadDoubleProperty("minDistanceFromCliffTops")) != null)
-         minDistanceFromCliffTops.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFrontEndForwardDistanceFromCliffBottoms")) != null)
+         minFrontEndForwardDistanceFromCliffBottoms.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minFrontEndBackwardDistanceFromCliffBottoms")) != null)
+         minFrontEndBackwardDistanceFromCliffBottoms.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minHindEndForwardDistanceFromCliffBottoms")) != null)
+         minHindEndForwardDistanceFromCliffBottoms.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minHindEndBackwardDistanceFromCliffBottoms")) != null)
+         minHindEndBackwardDistanceFromCliffBottoms.getValueFactory().setValue(value);
+      if ((value = filePropertyHelper.loadDoubleProperty("minLateralDistanceFromCliffBottoms")) != null)
+         minLateralDistanceFromCliffBottoms.getValueFactory().setValue(value);
 
       if ((value = filePropertyHelper.loadDoubleProperty("distanceWeight")) != null)
          distanceWeight.getValueFactory().setValue(value);
