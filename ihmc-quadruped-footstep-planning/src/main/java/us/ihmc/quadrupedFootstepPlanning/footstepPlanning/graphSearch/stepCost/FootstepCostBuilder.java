@@ -14,7 +14,6 @@ public class FootstepCostBuilder
    private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
-   private final OptionalFactoryField<Boolean> includePitchAndRollCost = new OptionalFactoryField<>("includePitchAndRollCost");
 
    public void setFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -36,22 +35,16 @@ public class FootstepCostBuilder
       this.includeHeightCost.set(includeHeightCost);
    }
 
-   public void setIncludePitchAndRollCost(boolean includePitchAndRollCost)
-   {
-      this.includePitchAndRollCost.set(includePitchAndRollCost);
-   }
-
    public FootstepCost buildCost()
    {
       includeHeightCost.setDefaultValue(false);
-      includePitchAndRollCost.setDefaultValue(false);
 
       CompositeFootstepCost compositeFootstepCost = new CompositeFootstepCost();
 
       if (includeHeightCost.get())
          compositeFootstepCost.addFootstepCost(new HeightCost(footstepPlannerParameters.get(), snapper.get()));
 
-//      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
+      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get(), xGaitSettings.get()));
       compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get(), snapper.get()));
       compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
 

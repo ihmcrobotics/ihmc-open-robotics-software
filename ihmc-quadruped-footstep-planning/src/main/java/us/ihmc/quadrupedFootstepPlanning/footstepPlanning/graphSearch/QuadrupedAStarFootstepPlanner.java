@@ -708,7 +708,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludePitchAndRollCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
