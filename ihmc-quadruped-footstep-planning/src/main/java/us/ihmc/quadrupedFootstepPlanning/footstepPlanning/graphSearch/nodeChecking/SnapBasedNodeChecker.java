@@ -129,8 +129,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
 
 
-      double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(currentYaw, previousYaw);
-      if (!MathTools.intervalContains(yaw, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
+      double yawChange = AngleTools.computeAngleDifferenceMinusPiToPi(currentYaw, previousYaw);
+      if (!MathTools.intervalContains(yawChange, parameters.getMinimumStepYaw(), parameters.getMaximumStepYaw()))
       {
          if (DEBUG)
          {
@@ -164,7 +164,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          return false;
       }
 
-      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, yaw);
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(previousSnappedStepPositions, previousYaw);
 
 
       boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
@@ -375,8 +375,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
       double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(stepPositions, numberOfVertices);
-//      double nominalPitch = 0;
-      Quaternion orientation = new Quaternion(yaw, nominalPitch, 0.0);
+      Orientation3DReadOnly orientation = new Quaternion(yaw, nominalPitch, 0.0);
 
       QuadrantDependentList<PoseReferenceFrame> footFrames = new QuadrantDependentList<>();
 
