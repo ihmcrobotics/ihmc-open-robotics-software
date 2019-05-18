@@ -82,7 +82,7 @@ public interface FootstepPlannerParameters
 
    default double getStepZForSteppingDown()
    {
-      return Double.POSITIVE_INFINITY;
+      return Double.NEGATIVE_INFINITY;
    }
 
    double getMinimumStepYaw();

@@ -168,7 +168,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
 
       boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
-      boolean isSteppingDown = stepHeight > parameters.getStepZForSteppingDown();
+      boolean isSteppingDown = stepHeight < parameters.getStepZForSteppingDown();
 
       /*
       {
