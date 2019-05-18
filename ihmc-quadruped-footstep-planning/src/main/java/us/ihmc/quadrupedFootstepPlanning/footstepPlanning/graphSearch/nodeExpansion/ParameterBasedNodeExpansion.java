@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CliffDetectionTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -59,13 +58,16 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       nodeOrientation.transform(clearanceVector);
 
       boolean isMovingFront = movingQuadrant.isQuadrantInFront();
+      boolean isMovingLeft = movingQuadrant.isQuadrantOnLeftSide();
       double maxReach = isMovingFront ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
       double minLength = isMovingFront ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
       double maxLength = isMovingFront ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+      double maxWidth = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
+      double minWidth = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
 
       for (double movingX = minLength; movingX < maxLength; movingX += resolution)
       {
-         for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += resolution)
+         for (double movingY = minWidth; movingY < maxWidth; movingY += resolution)
          {
             if (EuclidCoreTools.norm(movingX, movingY) > maxReach)
                continue;
