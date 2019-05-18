@@ -62,7 +62,7 @@
                                 <Label text="Step up weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                                 <Label text="Step down weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                                 <Label text="Heuristics weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                                
+
                                 <Spinner fx:id="maxWalkingSpeedMultiplier" editable="true" GridPane.columnIndex="1" />
                                 <Spinner fx:id="bodyGroundClearance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Spinner fx:id="minXClearanceFromFoot" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
