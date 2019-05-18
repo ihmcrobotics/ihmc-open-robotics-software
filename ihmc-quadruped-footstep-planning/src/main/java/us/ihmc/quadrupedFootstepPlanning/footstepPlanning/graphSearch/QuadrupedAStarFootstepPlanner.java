@@ -24,6 +24,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristicsBuilder;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.SpeedAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
@@ -688,8 +689,6 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    {
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-//      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-//                                                                              parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
                                                                                              parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
@@ -698,7 +697,13 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
-      CostToGoHeuristics heuristics = new SpeedAndYawBasedHeuristics(snapper, parameters, xGaitSettings);
+      CostToGoHeuristicsBuilder heuristicsBuilder = new CostToGoHeuristicsBuilder();
+      heuristicsBuilder.setFootstepPlannerParameters(parameters);
+      heuristicsBuilder.setXGaitSettings(xGaitSettings);
+      heuristicsBuilder.setSnapper(snapper);
+      heuristicsBuilder.setUseDistanceBasedHeuristics(true);
+
+      CostToGoHeuristics heuristics = heuristicsBuilder.buildHeuristics();
 
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
