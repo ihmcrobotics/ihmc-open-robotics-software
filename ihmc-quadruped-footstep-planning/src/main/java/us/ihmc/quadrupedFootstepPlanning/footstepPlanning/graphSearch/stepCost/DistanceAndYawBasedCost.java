@@ -10,12 +10,12 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class StepDistanceAndYawCost implements FootstepCost
+public class DistanceAndYawBasedCost implements FootstepCost
 {
    private final FootstepPlannerParameters plannerParameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   public StepDistanceAndYawCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   public DistanceAndYawBasedCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.plannerParameters = plannerParameters;
       this.xGaitSettings = xGaitSettings;
