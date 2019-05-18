@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.tools.factories.FactoryTools;
@@ -11,7 +11,7 @@ public class FootstepCostBuilder
 {
    private final RequiredFactoryField<FootstepPlannerParameters> footstepPlannerParameters = new RequiredFactoryField<>("footstepPlannerParameters");
    private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
-   private final RequiredFactoryField<FootstepNodeSnapperReadOnly> snapper = new RequiredFactoryField<>("snapper");
+   private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
    private final OptionalFactoryField<Boolean> includePitchAndRollCost = new OptionalFactoryField<>("includePitchAndRollCost");
@@ -26,7 +26,7 @@ public class FootstepCostBuilder
       this.xGaitSettings.set(xGaitSettings);
    }
 
-   public void setSnapper(FootstepNodeSnapperReadOnly snapper)
+   public void setSnapper(FootstepNodeSnapper snapper)
    {
       this.snapper.set(snapper);
    }
@@ -52,7 +52,7 @@ public class FootstepCostBuilder
          compositeFootstepCost.addFootstepCost(new HeightCost(footstepPlannerParameters.get(), snapper.get()));
 
 //      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get()));
-      compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get()));
+      compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get(), snapper.get()));
       compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
 
       FactoryTools.disposeFactory(this);

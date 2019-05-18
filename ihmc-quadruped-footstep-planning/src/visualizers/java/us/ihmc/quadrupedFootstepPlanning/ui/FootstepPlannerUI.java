@@ -63,6 +63,8 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
+   private PlannerReachParametersUIController plannerReachParametersUIController;
+   @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
    private FootstepPlannerDataExporterAnchorPaneController dataExporterAnchorPaneController;
@@ -104,11 +106,13 @@ public class FootstepPlannerUI
       mainPane = loader.load();
 
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepNodeCheckingUIController.attachMessager(messager);
       dataExporterAnchorPaneController.attachMessager(messager);
@@ -117,18 +121,21 @@ public class FootstepPlannerUI
 
       setMainTabTopics();
       footstepPlannerParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
+      plannerReachParametersUIController.setPlannerParametersTopic(FootstepPlannerMessagerAPI.PlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       mainTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepNodeCheckingUIController.bindControls();
       visibilityGraphsVizController.bindControls();
       footstepPlannerVizController.bindControls();
 
       footstepPlannerParametersUIController.loadFromFile();
+      plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
