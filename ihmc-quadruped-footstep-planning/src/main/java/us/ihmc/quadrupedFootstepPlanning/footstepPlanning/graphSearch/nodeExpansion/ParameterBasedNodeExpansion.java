@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpan
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -18,7 +19,7 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
-   private final FootstepPlannerParameters parameters;
+   protected final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
@@ -31,12 +32,12 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
       HashSet<FootstepNode> expansion = new HashSet<>();
-      addDefaultFootsteps(node, expansion);
+      addDefaultFootsteps(node, expansion, FootstepNode.gridSizeXY);
 
       return expansion;
    }
 
-   private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack)
+   protected void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack, double resolution)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       RobotQuadrant nextQuadrant;
@@ -56,13 +57,21 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
       nodeOrientation.transform(clearanceVector);
 
-      double minLength = movingQuadrant.isQuadrantInFront() ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
-      double maxLength = movingQuadrant.isQuadrantInFront() ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+      boolean isMovingFront = movingQuadrant.isQuadrantInFront();
+      boolean isMovingLeft = movingQuadrant.isQuadrantOnLeftSide();
+      double maxReach = isMovingFront ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
+      double minLength = isMovingFront ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+      double maxLength = isMovingFront ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+      double maxWidth = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
+      double minWidth = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
 
-      for (double movingX = minLength; movingX < maxLength; movingX += FootstepNode.gridSizeXY)
+      for (double movingX = minLength; movingX < maxLength; movingX += resolution)
       {
-         for (double movingY = parameters.getMinimumStepWidth(); movingY < parameters.getMaximumStepWidth(); movingY += FootstepNode.gridSizeXY)
+         for (double movingY = minWidth; movingY < maxWidth; movingY += resolution)
          {
+            if (EuclidCoreTools.norm(movingX, movingY) > maxReach)
+               continue;
+
             Vector2D movingVector = new Vector2D(movingX, movingY);
             nodeOrientation.transform(movingVector);
 

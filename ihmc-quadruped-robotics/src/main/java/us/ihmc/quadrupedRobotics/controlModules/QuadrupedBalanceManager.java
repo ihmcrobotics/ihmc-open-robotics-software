@@ -89,8 +89,8 @@ public class QuadrupedBalanceManager
    private final YoDouble normalizedDcmErrorForDelayedLiftOff = new YoDouble("normalizedDcmErrorForDelayedLiftOff", registry);
 
    private final YoDouble normalizedDcmErrorForSwingSpeedUp = new YoDouble("normalizedDcmErrorForSpeedUp", registry);
-   private final DoubleProvider maxDcmErrorForSpeedUpX = new DoubleParameter("maxDcmErrorForSpeedUpX", registry, 0.12);
-   private final DoubleProvider maxDcmErrorForSpeedUpY = new DoubleParameter("maxDcmErrorForSpeedUpY", registry, 0.08);
+   private final DoubleProvider maxDcmErrorForSpeedUpX = new DoubleParameter("maxDcmErrorForSpeedUpX", registry, 0.08);
+   private final DoubleProvider maxDcmErrorForSpeedUpY = new DoubleParameter("maxDcmErrorForSpeedUpY", registry, 0.06);
 
    private final ReferenceFrame supportFrame;
 

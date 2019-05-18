@@ -47,7 +47,7 @@ public class QuadrupedStepController implements EventState
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
-      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, parentRegistry);
+      stepDelayer = new QuadrupedBalanceBasedStepDelayer(controllerToolbox, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -107,10 +107,8 @@ public class QuadrupedStepController implements EventState
       if (balanceManager.stepHasBeenAdjusted())
       {
          feetManager.adjustSteps(adjustedSteps);
-
-         // update swing speed up
-         requestSwingSpeedUpIfNeeded();
       }
+      requestSwingSpeedUpIfNeeded();
 
 
       // update desired body orientation, angular velocity, and torque

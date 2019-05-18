@@ -37,6 +37,12 @@
                         <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
                     </content>
                 </Tab>
+                <Tab text="Reach Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
+                    </content>
+                </Tab>
 
                 <Tab text="Visibility Graph Parameters">
                     <content>
