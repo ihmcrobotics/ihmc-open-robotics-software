@@ -587,7 +587,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       if (!validGoalNode.getBooleanValue())
          return false;
 
-      if (nodeToExpand.xGaitGeometricallyEquals(goalNode))
+      if (nodeToExpand.geometricallyEquals(goalNode) || nodeToExpand.xGaitGeometricallyEquals(goalNode))
       {
          endNode = nodeToExpand;
          return true;

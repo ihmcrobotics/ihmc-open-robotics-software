@@ -16,10 +16,7 @@ import java.util.Random;
 public class FootstepNode
 {
    public static double gridSizeXY = 0.04;
-   public static final double gridSizeYaw = 0.10;
-
-   public static final double PRECISION = 0.05;
-   public static final double INV_PRECISION = 1.0 / PRECISION;
+   public static final double gridSizeYaw = 0.1;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
@@ -35,7 +32,6 @@ public class FootstepNode
    private Point2D xGaitCenterPoint;
 
    private final int hashCode;
-   private final int planarRegionsHashCode;
 
    private final RobotQuadrant movingQuadrant;
 
@@ -114,7 +110,6 @@ public class FootstepNode
       yawIndex = (int) Math.round(nominalYaw / gridSizeYaw);
 
       hashCode = computeHashCode(this);
-      planarRegionsHashCode = computePlanarRegionsHashCode(this);
    }
 
    public RobotQuadrant getMovingQuadrant()
@@ -204,11 +199,6 @@ public class FootstepNode
       return hashCode;
    }
 
-   public int getPlanarRegionsHashCode()
-   {
-      return planarRegionsHashCode;
-   }
-
    private static int computeHashCode(FootstepNode node)
    {
       final int prime = 31;
@@ -220,36 +210,6 @@ public class FootstepNode
       return result;
    }
 
-   public double getRoundedX(RobotQuadrant robotQuadrant)
-   {
-      return round(getX(robotQuadrant));
-   }
-
-   public double getRoundedY(RobotQuadrant robotQuadrant)
-   {
-      return round(getY(robotQuadrant));
-   }
-
-   public static int computePlanarRegionsHashCode(FootstepNode node)
-   {
-      Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-      return computePlanarRegionsHashCode(round(xGaitCenterPoint.getX()), round(xGaitCenterPoint.getY()));
-   }
-
-   public static int computePlanarRegionsHashCode(double roundedX, double roundedY)
-   {
-      final long prime = 31L;
-      long bits = 1L;
-      bits = prime * bits + Double.doubleToLongBits(roundedX);
-      bits = prime * bits + Double.doubleToLongBits(roundedY);
-
-      return (int) (bits ^ bits >> 32);
-   }
-
-   public static double round(double value)
-   {
-      return Math.round(value * INV_PRECISION) * PRECISION;
-   }
 
    public static int snapToGrid(double location)
    {

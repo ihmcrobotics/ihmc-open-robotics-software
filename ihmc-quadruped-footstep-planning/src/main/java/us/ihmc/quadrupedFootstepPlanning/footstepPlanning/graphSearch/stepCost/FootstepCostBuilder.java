@@ -12,6 +12,7 @@ public class FootstepCostBuilder
 {
    private final RequiredFactoryField<FootstepPlannerParameters> footstepPlannerParameters = new RequiredFactoryField<>("footstepPlannerParameters");
    private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
+   private final RequiredFactoryField<DesiredVelocityCalculator> desiredvelocityCalculator = new RequiredFactoryField<>("desiredvelocityCalculator");
    private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
@@ -25,6 +26,11 @@ public class FootstepCostBuilder
    public void setXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.xGaitSettings.set(xGaitSettings);
+   }
+
+   public void setDesiredVelocityCalculator(DesiredVelocityCalculator desiredvelocityCalculator)
+   {
+      this.desiredvelocityCalculator.set(desiredvelocityCalculator);
    }
 
    public void setSnapper(FootstepNodeSnapper snapper)

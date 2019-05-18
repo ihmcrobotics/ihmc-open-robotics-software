@@ -107,10 +107,8 @@ public class QuadrupedStepController implements EventState
       if (balanceManager.stepHasBeenAdjusted())
       {
          feetManager.adjustSteps(adjustedSteps);
-
-         // update swing speed up
-         requestSwingSpeedUpIfNeeded();
       }
+      requestSwingSpeedUpIfNeeded();
 
 
       // update desired body orientation, angular velocity, and torque
