@@ -41,14 +41,14 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMaximumStepYaw()
    {
-      return 1.0;
+      return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinimumStepYaw()
    {
-      return -1.0;
+      return -0.5;
    }
 
    /** {@inheritDoc} */
@@ -132,7 +132,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
    {
-      return true;
+      return false;
    }
 
    @Override
@@ -144,12 +144,12 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMinXClearanceFromFoot()
    {
-      return 0.01;
+      return 0.05;
    }
 
    @Override
    public double getMinYClearanceFromFoot()
    {
-      return 0.01;
+      return 0.05;
    }
 }

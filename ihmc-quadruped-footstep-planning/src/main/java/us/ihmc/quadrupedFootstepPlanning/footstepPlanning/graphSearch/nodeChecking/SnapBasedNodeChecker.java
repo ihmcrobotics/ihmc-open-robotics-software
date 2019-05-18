@@ -374,8 +374,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
          numberOfVertices++;
       }
 
-//      double nominalPitch= QuadrupedSupportPolygon.getNominalPitch(stepPositions, numberOfVertices);
-      double nominalPitch = 0;
+      double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(stepPositions, numberOfVertices);
+//      double nominalPitch = 0;
       Quaternion orientation = new Quaternion(yaw, nominalPitch, 0.0);
 
       QuadrantDependentList<PoseReferenceFrame> footFrames = new QuadrantDependentList<>();
