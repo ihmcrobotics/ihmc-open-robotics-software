@@ -170,60 +170,6 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       boolean isSteppingUp = stepHeight > parameters.getStepZForSteppingUp();
       boolean isSteppingDown = stepHeight < parameters.getStepZForSteppingDown();
 
-      /*
-      {
-         boolean steppingWithFront = movingQuadrant.isQuadrantInFront();
-
-         if (isSteppingUp || isSteppingDown)
-         {
-            QuadrupedFootstepPlannerNodeRejectionReason forwardReason;
-            QuadrupedFootstepPlannerNodeRejectionReason backwardReason;
-            double maxLength;
-            double minLength;
-
-            if (isSteppingUp)
-            {
-               maxLength = steppingWithFront ? parameters.getMaximumFrontStepLengthWhenSteppingUp() : parameters.getMaximumHindStepLengthWhenSteppingUp();
-               minLength = steppingWithFront ? parameters.getMinimumFrontStepLengthWhenSteppingUp() : parameters.getMinimumHindStepLengthWhenSteppingUp();
-               forwardReason = QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD_AND_UP;
-               backwardReason = QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD_AND_UP;
-            }
-            else
-            {
-               maxLength = steppingWithFront ? parameters.getMaximumFrontStepLengthWhenSteppingDown() : parameters.getMaximumHindStepLengthWhenSteppingDown();
-               minLength = steppingWithFront ? parameters.getMinimumFrontStepLengthWhenSteppingDown() : parameters.getMinimumHindStepLengthWhenSteppingDown();
-               forwardReason = QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_FORWARD_AND_DOWN;
-               backwardReason = QuadrupedFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_BACKWARD_AND_DOWN;
-            }
-
-            FramePoint3D expectedXGaitPoint = new FramePoint3D(worldFrame, previousNode.getOrComputeXGaitCenterPoint());
-            newStepPosition.changeFrame(footFrames.get(movingQuadrant));
-            expectedXGaitPoint.changeFrame(footFrames.get(movingQuadrant));
-
-            double forwardOffset = steppingWithFront ? previousNode.getNominalStanceLength() : -previousNode.getNominalStanceLength();
-            double sideOffset = movingQuadrant.isQuadrantOnLeftSide() ? previousNode.getNominalStanceWidth() : -previousNode.getNominalStanceWidth();
-
-            expectedXGaitPoint.add(forwardOffset, sideOffset, 0.0);
-
-            if (newStepPosition.getX() - expectedXGaitPoint.getX() > maxLength)
-            {
-               if (DEBUG)
-                  PrintTools.debug("The node " + nodeToCheck + " is stepping too far forward.");
-               rejectNode(nodeToCheck, previousNode, forwardReason);
-               return false;
-            }
-            else if (newStepPosition.getX() - expectedXGaitPoint.getX() < minLength)
-            {
-               if (DEBUG)
-                  PrintTools.debug("The node " + nodeToCheck + " is stepping too far backward.");
-               rejectNode(nodeToCheck, previousNode, backwardReason);
-               return false;
-            }
-         }
-      }
-      */
-
-
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (!footFrames.containsKey(robotQuadrant))
