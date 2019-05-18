@@ -16,15 +16,15 @@ import java.util.List;
 
 public class CliffDetectionTools
 {
-   public static boolean isNearCliff(RobotQuadrant robotQuadrant, PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
-                                      FootstepPlannerParameters parameters)
+   public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw, FootstepPlannerParameters parameters,
+                                     double forward, double backward, double left, double right)
    {
       double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
       if (!Double.isFinite(cliffHeightToAvoid))
          return true;
 
       Point3D highestNearbyPoint = new Point3D();
-      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(robotQuadrant, planarRegionsList, footInWorld, footYaw, highestNearbyPoint, parameters);
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(planarRegionsList, footInWorld, footYaw, highestNearbyPoint, forward, backward, left, right);
 
       return maximumCliffZInSoleFrame > cliffHeightToAvoid;
    }
@@ -54,27 +54,20 @@ public class CliffDetectionTools
       return maxZInSoleFrame;
    }
 
-   public static double findHighestNearbyPoint2(RobotQuadrant robotQuadrant, PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
-                                                 Point3DBasics highestNearbyPointToPack, FootstepPlannerParameters parameters)
+   public static double findHighestNearbyPoint2(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw,
+                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
       double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
       transformToRegion.setRotationYaw(footYaw);
 
-      double forward = robotQuadrant.isQuadrantInFront() ?
-            parameters.getMinimumFrontEndForwardDistanceFromCliffBottoms() :
-            parameters.getMinimumHindEndForwardDistanceFromCliffBottoms();
-      double backward = robotQuadrant.isQuadrantInFront() ?
-            parameters.getMinimumFrontEndBackwardDistanceFromCliffBottoms() :
-            parameters.getMinimumHindEndBackwardDistanceFromCliffBottoms();
-      double lateral = parameters.getMinimumLateralDistanceFromCliffBottoms();
 
       ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
-      tempPolygon.addVertex(forward, lateral);
-      tempPolygon.addVertex(forward, -lateral);
-      tempPolygon.addVertex(-backward, lateral);
-      tempPolygon.addVertex(-backward, -lateral);
+      tempPolygon.addVertex(forward, left);
+      tempPolygon.addVertex(forward, right);
+      tempPolygon.addVertex(backward, left);
+      tempPolygon.addVertex(backward, right);
       tempPolygon.update();
       tempPolygon.applyTransform(transformToRegion);
       tempPolygon.translate(footInWorld.getX(), footInWorld.getY());
