@@ -64,24 +64,24 @@ public class XGaitCost implements FootstepCost
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
       double desiredSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
 
-      Vector2D desiredDistance = new Vector2D(durationBetweenSteps * desiredSpeed, 0.0);
+      Vector3D desiredDistance = new Vector3D(durationBetweenSteps * desiredSpeed, 0.0, 0.0);
 
       AxisAngle bodyOrientation = new AxisAngle(startNode.getNominalYaw(), nominalPitch, 0.0);
 
       bodyOrientation.transform(desiredDistance);
 
-      Vector2D forward = new Vector2D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0);
-      Vector2D side = new Vector2D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()));
+      Vector3D forward = new Vector3D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0, 0.0);
+      Vector3D side = new Vector3D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()), 0.0);
 
       bodyOrientation.transform(forward);
       bodyOrientation.transform(side);
 
       Point2D endXGaitCenter = new Point2D(startXGaitCenter);
-      endXGaitCenter.add(desiredDistance);
+      endXGaitCenter.add(desiredDistance.getX(), desiredDistance.getY());
 
       Point2D endFoot = new Point2D(endXGaitCenter);
-      endFoot.add(forward);
-      endFoot.add(side);
+      endFoot.add(forward.getX(), forward.getY());
+      endFoot.add(side.getX(), forward.getY());
 
       return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }
