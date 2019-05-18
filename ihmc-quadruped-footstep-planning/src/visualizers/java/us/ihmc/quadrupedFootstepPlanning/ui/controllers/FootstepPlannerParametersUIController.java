@@ -154,31 +154,31 @@ public class FootstepPlannerParametersUIController
 
    public void setupControls()
    {
-      maxFrontStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
-      maxFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
-      maxHindStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
-      maxHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
-      maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
-      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.01));
+      maxFrontStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      maxFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      minFrontStepLength.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
+      maxHindStepReach.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      maxHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      minHindStepLength.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
+      maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.02));
+      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.01));
 
-      maxFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
-      maxHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
+      maxFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      minFrontStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
+      maxHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      minHindStepLengthWhenSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
       stepZForSteppingUp.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
 
-      maxFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
-      maxHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.6, 0.0, 0.05));
-      minHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.0, 0.0, 0.05));
-      stepZForSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.05));
+      maxFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.05));
+      minFrontStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
+      maxHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.6, 0.0, 0.05));
+      minHindStepLengthWhenSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.05));
+      stepZForSteppingDown.setValueFactory(new DoubleSpinnerValueFactory(-0.5, 0.5, 0.0, 0.05));
 
 
-      maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.05));
-      minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-0.3, 0.0, 0.0, 0.05));
-      maxStepChangeZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.05));
+      maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+      minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.0, 0.0, 0.0, 0.05));
+      maxStepChangeZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
 
       maxWalkingSpeedMultiplier.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.01));
 
@@ -187,15 +187,15 @@ public class FootstepPlannerParametersUIController
       minYClearanceFromFoot.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.05));
       minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.8, 0.0, 0.05));
 
-      projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
-      projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
-      maximumXYWiggleDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.12, 0.0, 0.01));
-      cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.4, 0.0, 0.05));
-      minFrontEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-      minFrontEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
-      minHindEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-      minHindEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
-      minLateralDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.2, 0.0, 0.01));
+      projectInsideDistanceForExpansion.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      projectInsideDistanceForPostProcessing.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      maximumXYWiggleDistance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.01));
+      cliffHeightToAvoid.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
+      minFrontEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      minFrontEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      minHindEndForwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      minHindEndBackwardDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      minLateralDistanceFromCliffBottoms.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
 
       distanceWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
       yawWeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 5.0, 0.0, 0.1));
