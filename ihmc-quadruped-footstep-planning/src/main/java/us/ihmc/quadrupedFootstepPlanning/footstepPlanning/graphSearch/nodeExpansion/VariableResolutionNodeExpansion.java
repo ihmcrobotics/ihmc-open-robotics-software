@@ -46,7 +46,15 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);
 
-      if (CliffDetectionTools.isNearCliff(movingQuadrant, snapper.getPlanarRegionsList(), footInWorld, node.getNominalYaw(), parameters))
+      boolean isMovingFront = movingQuadrant.isQuadrantInFront();
+      boolean isMovingLeft = movingQuadrant.isQuadrantOnLeftSide();
+
+      double forward = isMovingFront ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
+      double backward = isMovingFront ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
+      double left = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
+      double right = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
+
+      if (CliffDetectionTools.isNearCliff(snapper.getPlanarRegionsList(), footInWorld, node.getNominalYaw(), parameters, forward, backward, left, right))
          return FootstepNode.gridSizeXY;
 
       return 2 * FootstepNode.gridSizeXY;

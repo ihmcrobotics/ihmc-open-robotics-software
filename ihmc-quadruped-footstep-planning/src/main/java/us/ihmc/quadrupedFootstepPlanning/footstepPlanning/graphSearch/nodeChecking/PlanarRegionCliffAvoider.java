@@ -39,8 +39,6 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       if (!hasPlanarRegions())
          return true;
 
-
-
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       int xIndex = node.getXIndex(movingQuadrant);
       int yIndex = node.getYIndex(movingQuadrant);
@@ -50,7 +48,16 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);
 
-      boolean isNearCliff = CliffDetectionTools.isNearCliff(movingQuadrant, planarRegionsList, footInWorld, node.getNominalYaw(), parameters);
+      double forward = movingQuadrant.isQuadrantInFront() ?
+            parameters.getMinimumFrontEndForwardDistanceFromCliffBottoms() :
+            parameters.getMinimumHindEndForwardDistanceFromCliffBottoms();
+      double backward = movingQuadrant.isQuadrantInFront() ?
+            -parameters.getMinimumFrontEndBackwardDistanceFromCliffBottoms() :
+            -parameters.getMinimumHindEndBackwardDistanceFromCliffBottoms();
+      double left = parameters.getMinimumLateralDistanceFromCliffBottoms();
+      double right = -parameters.getMinimumLateralDistanceFromCliffBottoms();
+
+      boolean isNearCliff = CliffDetectionTools.isNearCliff(planarRegionsList, footInWorld, node.getNominalYaw(), parameters, forward, backward, left, right);
 
       if (isNearCliff)
       {
@@ -60,6 +67,4 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 
       return true;
    }
-
-
 }
