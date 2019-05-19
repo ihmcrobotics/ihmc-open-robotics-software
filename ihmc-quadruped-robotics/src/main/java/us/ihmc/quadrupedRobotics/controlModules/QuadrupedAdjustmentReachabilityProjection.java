@@ -128,6 +128,11 @@ public class QuadrupedAdjustmentReachabilityProjection
       goalPositionToPack.setY(tempVertex.getY());
    }
 
+   public void completedStep(RobotQuadrant stepQuadrant)
+   {
+      updateReachabilityPolygonInSupport(stepQuadrant);
+   }
+
    private final FramePoint2D tempVertex = new FramePoint2D();
    private void updateReachabilityPolygonInSwing(RobotQuadrant robotQuadrant)
    {
