@@ -136,18 +136,33 @@ public class QuadrupedAdjustmentReachabilityProjection
       List<YoFramePoint2D> verticesInWorld = reachabilityVerticesInWorld.get(robotQuadrant);
       YoFrameConvexPolygon2D polygonInWorld = reachabilityPolygonsInWorld.get(robotQuadrant);
 
-      // create an ellipsoid around the center of the forward and backward reachable limits
-      double xRadius = 0.5 * (lengthLimit.getValue() - lengthBackLimit.getValue());
-      double yRadius = 0.5 * (outerLimit.getValue() - innerLimit.getValue());
-      double centerX = lengthLimit.getValue() - xRadius;
-      double centerY = outerLimit.getValue() - yRadius;
-
       // compute the vertices on the edge of the ellipsoid
       for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
       {
          double angle = 2.0 * Math.PI * vertexIdx / (vertices.size() - 1);
-         double x = centerX + xRadius * Math.cos(angle);
-         double y = robotQuadrant.getSide().negateIfLeftSide(centerY + yRadius * Math.sin(angle));
+         double x, y;
+         if (angle < Math.PI / 2.0)
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = robotQuadrant.getSide().negateIfRightSide(innerLimit.getValue() * Math.sin(angle));
+         }
+         else if (angle < Math.PI)
+         {
+            x = -lengthBackLimit.getValue() * Math.cos(angle);
+            y = robotQuadrant.getSide().negateIfRightSide(innerLimit.getValue() * Math.sin(angle));
+         }
+         else if (angle < 1.5 * Math.PI)
+         {
+            x = -lengthBackLimit.getValue() * Math.cos(angle);
+            y = robotQuadrant.getSide().negateIfRightSide(-outerLimit.getValue() * Math.sin(angle));
+         }
+         else
+         {
+            x = lengthLimit.getValue() * Math.cos(angle);
+            y = robotQuadrant.getSide().negateIfRightSide(-outerLimit.getValue() * Math.sin(angle));
+         }
+
+
          FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
          vertex.set(x, y);
 
