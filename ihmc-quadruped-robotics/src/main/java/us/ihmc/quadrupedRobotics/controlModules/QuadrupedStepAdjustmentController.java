@@ -58,7 +58,7 @@ public class QuadrupedStepAdjustmentController
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final QuadrupedStepPlanarRegionProjection planarRegionProjection;
-   private final QuadrupedAdjustmentReachabilityConstraint reachabilityProjection;
+   private final QuadrupedAdjustmentReachabilityProjection reachabilityProjection;
    private final LinearInvertedPendulumModel lipModel;
 
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
@@ -106,7 +106,7 @@ public class QuadrupedStepAdjustmentController
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
-      reachabilityProjection = new QuadrupedAdjustmentReachabilityConstraint(controllerToolbox, registry);
+      reachabilityProjection = new QuadrupedAdjustmentReachabilityProjection(controllerToolbox, registry);
       planarRegionProjection = new QuadrupedStepPlanarRegionProjection(registry);
 
       parentRegistry.addChild(registry);
@@ -217,6 +217,7 @@ public class QuadrupedStepAdjustmentController
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(limitedInstantaneousStepAdjustment);
 
+         reachabilityProjection.project(tempPoint, robotQuadrant);
          crossoverProjection.project(tempPoint, robotQuadrant);
          if (projectAdjustmentIntoPlanarRegions.getValue())
             planarRegionProjection.project(tempPoint, robotQuadrant);
