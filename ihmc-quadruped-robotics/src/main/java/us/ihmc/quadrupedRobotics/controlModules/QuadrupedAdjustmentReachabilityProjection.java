@@ -55,10 +55,10 @@ public class QuadrupedAdjustmentReachabilityProjection
    {
       contactStates = controllerToolbox.getFootContactStates();
 
-      lengthLimit = new DoubleParameter("MaxReachabilityLength", registry, 0.35);
-      lengthBackLimit = new DoubleParameter("MaxReachabilityBackwardLength", registry, -0.3);
-      innerLimit = new DoubleParameter("MaxReachabilityWidth", registry, -0.15);
-      outerLimit = new DoubleParameter("MinReachabilityWidth", registry, 0.2);
+      lengthLimit = new DoubleParameter("MaxReachabilityLength", registry, 0.5);
+      lengthBackLimit = new DoubleParameter("MaxReachabilityBackwardLength", registry, -0.45);
+      innerLimit = new DoubleParameter("MaxReachabilityWidth", registry, -0.2);
+      outerLimit = new DoubleParameter("MinReachabilityWidth", registry, 0.4);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getRuntimeEnvironment().getGraphicsListRegistry();
 
