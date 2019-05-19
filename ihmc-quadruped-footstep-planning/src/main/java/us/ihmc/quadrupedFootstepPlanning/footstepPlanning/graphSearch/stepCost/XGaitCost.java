@@ -25,7 +25,7 @@ public class XGaitCost implements FootstepCost
 {
    private final FootstepPlannerParameters plannerParameters;
    private final FootstepNodeSnapper snapper;
-   final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final QuadrantDependentList<Point3D> startFootPositions = new QuadrantDependentList<>();
 
 
@@ -81,7 +81,7 @@ public class XGaitCost implements FootstepCost
 
       Point2D endFoot = new Point2D(endXGaitCenter);
       endFoot.add(forward.getX(), forward.getY());
-      endFoot.add(side.getX(), forward.getY());
+      endFoot.add(side.getX(), side.getY());
 
       return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }

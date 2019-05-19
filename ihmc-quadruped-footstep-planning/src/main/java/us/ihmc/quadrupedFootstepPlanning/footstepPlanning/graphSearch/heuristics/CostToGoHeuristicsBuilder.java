@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
+package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -7,13 +7,13 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
-public class FootstepCostBuilder
+public class CostToGoHeuristicsBuilder
 {
    private final RequiredFactoryField<FootstepPlannerParameters> footstepPlannerParameters = new RequiredFactoryField<>("footstepPlannerParameters");
    private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
    private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
 
-   private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
+   private final OptionalFactoryField<Boolean> useDistanceBasedHeuristics = new OptionalFactoryField<>("useDistanceBasedHeuristics");
 
    public void setFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -30,27 +30,30 @@ public class FootstepCostBuilder
       this.snapper.set(snapper);
    }
 
-   public void setIncludeHeightCost(boolean includeHeightCost)
+   public void setUseDistanceBasedHeuristics(boolean useDistanceBasedHeuristics)
    {
-      this.includeHeightCost.set(includeHeightCost);
+      this.useDistanceBasedHeuristics.set(useDistanceBasedHeuristics);
    }
 
-   public FootstepCost buildCost()
+   public CostToGoHeuristics buildHeuristics()
    {
-      includeHeightCost.setDefaultValue(false);
+      useDistanceBasedHeuristics.setDefaultValue(false);
 
-      CompositeFootstepCost compositeFootstepCost = new CompositeFootstepCost();
+      CompositeCostToGoHeuristics costToGoHeuristics = new CompositeCostToGoHeuristics(footstepPlannerParameters.get());
 
-      if (includeHeightCost.get())
-         compositeFootstepCost.addFootstepCost(new HeightCost(footstepPlannerParameters.get(), snapper.get()));
-
-      compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get(), xGaitSettings.get()));
-      compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get(), snapper.get()));
-      compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
+      if (useDistanceBasedHeuristics.get())
+      {
+         costToGoHeuristics.addCostToGoHeuristic(new DistanceAndYawBasedHeuristics(snapper.get(), footstepPlannerParameters.get()));
+         costToGoHeuristics.addCostToGoHeuristic(new SpeedBasedHeuristics(footstepPlannerParameters.get(), xGaitSettings.get()));
+      }
+      else
+      {
+         costToGoHeuristics.addCostToGoHeuristic(new SpeedAndYawBasedHeuristics(snapper.get(), footstepPlannerParameters.get(), xGaitSettings.get()));
+      }
 
       FactoryTools.disposeFactory(this);
 
-      return compositeFootstepCost;
+      return costToGoHeuristics;
    }
 
 }
