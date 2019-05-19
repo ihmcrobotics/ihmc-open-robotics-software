@@ -178,7 +178,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
 
-      graphicsListRegistry.registerYoGraphic("SwingState", new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red()));
+      YoGraphicPosition graphic = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
+      graphicsListRegistry.registerYoGraphic("SwingState", graphic);
+      graphicsListRegistry.registerArtifact("SwingState", graphic.createArtifact());
    }
 
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
