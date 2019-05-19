@@ -32,7 +32,7 @@ public class QuadrupedAdjustmentReachabilityConstraint
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean visualize = true;
-   private static final int numberOfVertices = 4;
+   private static final int numberOfVertices = 9;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -76,11 +76,11 @@ public class QuadrupedAdjustmentReachabilityConstraint
          for (int i = 0; i < yoNumberOfReachabilityVertices.getValue(); i++)
          {
             YoFramePoint2D vertex = new YoFramePoint2D(prefix + "ReachabilityVertex" + i, referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
-            YoFramePoint2D vertexInWorld = new YoFramePoint2D(prefix + "ReachabilityVertexInWorld" + i, ReferenceFrame.getWorldFrame(), registry);
+            YoFramePoint2D vertexInWorld = new YoFramePoint2D(prefix + "ReachabilityVertexInWorld" + i, worldFrame, registry);
             reachabilityVertices.add(vertex);
             reachabilityVerticesInWorld.add(vertexInWorld);
          }
-         YoFrameConvexPolygon2D reachabilityPolygonInWorld = new YoFrameConvexPolygon2D(reachabilityVerticesInWorld, yoNumberOfReachabilityVertices, ReferenceFrame.getWorldFrame());
+         YoFrameConvexPolygon2D reachabilityPolygonInWorld = new YoFrameConvexPolygon2D(reachabilityVerticesInWorld, yoNumberOfReachabilityVertices, worldFrame);
 
          this.reachabilityVertices.put(robotQuadrant, reachabilityVertices);
          this.reachabilityVerticesInWorld.put(robotQuadrant, reachabilityVerticesInWorld);
@@ -107,9 +107,7 @@ public class QuadrupedAdjustmentReachabilityConstraint
             updateReachabilityPolygonInSupport(robotQuadrant);
          else
             updateReachabilityPolygonInSwing(robotQuadrant);
-
       }
-
    }
 
    private final FramePoint2D tempVertex = new FramePoint2D();
@@ -125,51 +123,19 @@ public class QuadrupedAdjustmentReachabilityConstraint
       double centerX = lengthLimit.getValue() - xRadius;
       double centerY = outerLimit.getValue() - yRadius;
 
-
-      FixedFramePoint2DBasics frontLeft = vertices.get(0);
-      FixedFramePoint2DBasics frontRight = vertices.get(1);
-      FixedFramePoint2DBasics hindLeft = vertices.get(2);
-      FixedFramePoint2DBasics hindRight = vertices.get(3);
-      frontLeft.set(robotQuadrant.getEnd().negateIfHindEnd(lengthLimit.getValue()), robotQuadrant.getSide().negateIfRightSide(outerLimit.getValue()));
-      frontRight.set(robotQuadrant.getEnd().negateIfHindEnd(lengthLimit.getValue()), robotQuadrant.getSide().negateIfRightSide(innerLimit.getValue()));
-      hindLeft.set(robotQuadrant.getEnd().negateIfHindEnd(lengthBackLimit.getValue()), robotQuadrant.getSide().negateIfRightSide(outerLimit.getValue()));
-      hindRight.set(robotQuadrant.getEnd().negateIfHindEnd(lengthBackLimit.getValue()), robotQuadrant.getSide().negateIfRightSide(innerLimit.getValue()));
-
-      tempVertex.setIncludingFrame(frontLeft);
-      tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
-      verticesInWorld.get(0).set(tempVertex);
-
-      tempVertex.setIncludingFrame(frontRight);
-      tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
-      verticesInWorld.get(1).set(tempVertex);
-
-
-      tempVertex.setIncludingFrame(hindLeft);
-      tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
-      verticesInWorld.get(2).set(tempVertex);
-
-
-      tempVertex.setIncludingFrame(hindRight);
-      tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
-      verticesInWorld.get(3).set(tempVertex);
-
-
-
       // compute the vertices on the edge of the ellipsoid
-      /*
       for (int vertexIdx = 0; vertexIdx < vertices.size(); vertexIdx++)
       {
-         double angle = Math.PI * vertexIdx / (vertices.size() - 1);
+         double angle = 2.0 * Math.PI * vertexIdx / (vertices.size() - 1);
          double x = centerX + xRadius * Math.cos(angle);
          double y = robotQuadrant.getSide().negateIfLeftSide(centerY + yRadius * Math.sin(angle));
          FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
          vertex.set(x, y);
 
          tempVertex.setIncludingFrame(vertex);
-         tempVertex.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+         tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
          verticesInWorld.get(vertexIdx).set(tempVertex);
       }
-      */
 
       polygonInWorld.notifyVerticesChanged();
    }
