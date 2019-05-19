@@ -58,6 +58,7 @@ public class QuadrupedStepAdjustmentController
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final QuadrupedStepPlanarRegionProjection planarRegionProjection;
+   private final QuadrupedAdjustmentReachabilityConstraint reachabilityProjection;
    private final LinearInvertedPendulumModel lipModel;
 
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
@@ -105,6 +106,7 @@ public class QuadrupedStepAdjustmentController
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
+      reachabilityProjection = new QuadrupedAdjustmentReachabilityConstraint(controllerToolbox, registry);
       planarRegionProjection = new QuadrupedStepPlanarRegionProjection(registry);
 
       parentRegistry.addChild(registry);
@@ -122,10 +124,11 @@ public class QuadrupedStepAdjustmentController
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition,
                                                                   boolean stepPlanIsAdjustable)
    {
+      reachabilityProjection.update();
+
       adjustedActiveSteps.clear();
 
       useStepAdjustment.set(stepPlanIsAdjustable && allowStepAdjustment.getValue());
-
       // compute step adjustment for ongoing steps (proportional to dcm tracking error)
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPositionEstimate.changeFrame(worldFrame);
