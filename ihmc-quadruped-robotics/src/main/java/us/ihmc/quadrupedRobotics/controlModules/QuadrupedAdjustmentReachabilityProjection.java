@@ -48,22 +48,18 @@ public class QuadrupedAdjustmentReachabilityProjection
    private final DoubleProvider innerLimit;
    private final DoubleProvider outerLimit;
 
-   private final ReferenceFrame bodyZUpFrame;
-   private final QuadrupedReferenceFrames referenceFrames;
-
    public QuadrupedAdjustmentReachabilityProjection(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       contactStates = controllerToolbox.getFootContactStates();
 
       lengthLimit = new DoubleParameter("MaxReachabilityLength", registry, 0.5);
       lengthBackLimit = new DoubleParameter("MaxReachabilityBackwardLength", registry, -0.45);
-      innerLimit = new DoubleParameter("MaxReachabilityWidth", registry, -0.2);
-      outerLimit = new DoubleParameter("MinReachabilityWidth", registry, 0.4);
+      innerLimit = new DoubleParameter("MinReachabilityWidth", registry, -0.2);
+      outerLimit = new DoubleParameter("MaxReachabilityWidth", registry, 0.4);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getRuntimeEnvironment().getGraphicsListRegistry();
 
-      referenceFrames = controllerToolbox.getReferenceFrames();
-      bodyZUpFrame = referenceFrames.getBodyZUpFrame();
+      QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
