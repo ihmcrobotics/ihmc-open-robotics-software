@@ -80,7 +80,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getYawWeight()
    {
-      return 0.5;
+      return 1.0;
    }
 
    @Override
@@ -104,9 +104,8 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getHeuristicsInflationWeight()
    {
-      return 1.0;
+      return 1.75;
    }
-
    /** {@inheritDoc} */
    @Override
    public double getProjectInsideDistanceForExpansion()
