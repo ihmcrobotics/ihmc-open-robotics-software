@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -28,7 +29,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuadrupedAdjustmentReachabilityConstraint
+public class QuadrupedAdjustmentReachabilityProjection
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean visualize = true;
@@ -50,7 +51,7 @@ public class QuadrupedAdjustmentReachabilityConstraint
    private final ReferenceFrame bodyZUpFrame;
    private final QuadrupedReferenceFrames referenceFrames;
 
-   public QuadrupedAdjustmentReachabilityConstraint(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedAdjustmentReachabilityProjection(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       contactStates = controllerToolbox.getFootContactStates();
 
@@ -110,6 +111,23 @@ public class QuadrupedAdjustmentReachabilityConstraint
       }
    }
 
+   public void project(FixedFramePoint3DBasics goalPositionToPack, RobotQuadrant stepQuadrant)
+   {
+      tempVertex.setIncludingFrame(goalPositionToPack);
+      tempVertex.changeFrameAndProjectToXYPlane(worldFrame);
+
+      FrameConvexPolygon2DReadOnly reachabilityPolygonInWorld = reachabilityPolygonsInWorld.get(stepQuadrant);
+
+      if (reachabilityPolygonInWorld.isPointInside(tempVertex))
+         return;
+
+      reachabilityPolygonsInWorld.get(stepQuadrant).orthogonalProjection(tempVertex);
+
+      tempVertex.changeFrameAndProjectToXYPlane(goalPositionToPack.getReferenceFrame());
+      goalPositionToPack.setX(tempVertex.getX());
+      goalPositionToPack.setY(tempVertex.getY());
+   }
+
    private final FramePoint2D tempVertex = new FramePoint2D();
    private void updateReachabilityPolygonInSwing(RobotQuadrant robotQuadrant)
    {
@@ -138,6 +156,7 @@ public class QuadrupedAdjustmentReachabilityConstraint
       }
 
       polygonInWorld.notifyVerticesChanged();
+      polygonInWorld.update();
    }
 
    private void updateReachabilityPolygonInSupport(RobotQuadrant supportQuadrant)
@@ -152,5 +171,6 @@ public class QuadrupedAdjustmentReachabilityConstraint
          verticesInWorld.get(vertexIdx).setToNaN();
       }
       polygonInWorld.notifyVerticesChanged();
+      polygonInWorld.update();
    }
 }
