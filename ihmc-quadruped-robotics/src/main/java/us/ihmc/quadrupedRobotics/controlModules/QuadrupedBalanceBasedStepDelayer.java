@@ -17,10 +17,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -43,6 +41,8 @@ public class QuadrupedBalanceBasedStepDelayer
    private final QuadrantDependentList<YoDouble> timeScaledEllipticalError = new QuadrantDependentList<>();
 
    private final List<QuadrupedTimedStep> stepsStarting = new ArrayList<>();
+   private final List<QuadrupedTimedStep> stepsAlreadyActive = new ArrayList<>();
+   private final List<QuadrupedTimedStep> updatedActiveSteps = new ArrayList<>();
 
    private final FramePoint3D tempFootPoint3D = new FramePoint3D();
    private final FramePoint2D tempFootPoint2D = new FramePoint2D();
@@ -53,8 +53,8 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider delayAllSubsequentSteps = new BooleanParameter("delayAllSubsequentSteps", registry, true);
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
 
-   private final DoubleProvider maximumDelayDuration = new DoubleParameter("maximumDelayDuration", registry, 0.1);
-   private final IntegerProvider controlTicksToDelay = new IntegerParameter("controlTicksToDelay", registry, 1);
+   private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 5.0);
+   private final DoubleParameter timeToDelayLiftOff = new DoubleParameter("timeToDelayLiftOff", registry, 0.05);
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
 
@@ -64,7 +64,6 @@ public class QuadrupedBalanceBasedStepDelayer
    private final DoubleProvider omega;
    private final ReferenceFrame midZUpFrame;
    private final QuadrupedControllerToolbox controllerToolbox;
-   private final double controlDt;
 
    public QuadrupedBalanceBasedStepDelayer(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
@@ -75,8 +74,6 @@ public class QuadrupedBalanceBasedStepDelayer
 
       midZUpFrame = controllerToolbox.getSupportPolygons().getMidFeetZUpFrame();
       contactStates = controllerToolbox.getFootContactStates();
-
-      controlDt = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getRuntimeEnvironment().getGraphicsListRegistry();
 
@@ -99,16 +96,22 @@ public class QuadrupedBalanceBasedStepDelayer
 
    private final List<QuadrupedTimedStep> inactiveSteps = new ArrayList<>();
 
-   public boolean delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps, List<? extends QuadrupedTimedStep> allOtherSteps,
-                                        FramePoint3DReadOnly desiredDcm, double normalizedDcmEllipticalError)
+   public List<? extends QuadrupedTimedStep> delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps,
+                                                                   List<? extends QuadrupedTimedStep> allOtherSteps, FramePoint3DReadOnly desiredDcm,
+                                                                   double normalizedDcmEllipticalError)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          delayedFootLocations.get(robotQuadrant).setToNaN();
 
       if (!allowDelayingSteps.getValue())
       {
-         return false;
+         return activeSteps;
       }
+
+      stepsStarting.clear();
+      inactiveSteps.clear();
+      stepsAlreadyActive.clear();
+      updatedActiveSteps.clear();
 
       controllerToolbox.getDCMPositionEstimate(currentDCM);
       currentICP.setIncludingFrame(currentDCM);
@@ -128,11 +131,8 @@ public class QuadrupedBalanceBasedStepDelayer
             numberOfRightSideFeetInContact++;
       }
 
-      inactiveSteps.clear();
       for (int i = 0; i < allOtherSteps.size(); i++)
          inactiveSteps.add(allOtherSteps.get(i));
-
-      stepsStarting.clear();
 
       boolean leftSideHasStartingStep = false;
       boolean rightSideHasStartingStep = false;
@@ -150,6 +150,10 @@ public class QuadrupedBalanceBasedStepDelayer
                rightSideHasStartingStep = true;
             stepsStarting.add(activeStep);
          }
+         else
+         {
+            stepsAlreadyActive.add(activeStep);
+         }
       }
 
       aboutToHaveNoLeftFoot.set(leftSideHasStartingStep && numberOfLeftSideFeetInContact == 1);
@@ -162,12 +166,13 @@ public class QuadrupedBalanceBasedStepDelayer
             delayDurations.get(robotQuadrant).set(0.0);
       }
 
-
       icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
 
-      double delayAmount = controlTicksToDelay.getValue() * controlDt;
+      double delayAmount = timeToDelayLiftOff.getValue();
       boolean stepWasDelayed = false;
-      
+
+
+
       boolean forceDelay = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
 
       for (int i = 0; i < stepsStarting.size(); i++)
@@ -186,26 +191,32 @@ public class QuadrupedBalanceBasedStepDelayer
 
          timeScaledEllipticalError.get(quadrantStarting).set(scaledNormalizedDCMEllipticalError);
          if (!forceDelay && scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
+         {
+            updatedActiveSteps.add(stepStarting);
             continue;
+         }
 
          icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
-         if (isFootPushingAgainstError(quadrantStarting, currentICP) || forceDelay)
-         {
-            YoDouble delayDuration = delayDurations.get(quadrantStarting);
+         YoDouble delayDuration = delayDurations.get(quadrantStarting);
+         boolean delayStep = isFootPushingAgainstError(quadrantStarting, currentICP) || forceDelay;
+         delayStep &= delayDuration.getDoubleValue() + delayAmount < (maximumDelayFraction.getValue() * stepStarting.getTimeInterval().getDuration());
 
-            if (delayDuration.getDoubleValue() + delayAmount < maximumDelayDuration.getValue())
-            {
-               TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
-               double currentStartTime = timeInterval.getStartTime();
-               if (delayAllSubsequentSteps.getValue())
-                  stepStarting.getTimeInterval().shiftInterval(delayAmount);
-               else
-                  stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
-               delayDuration.add(delayAmount);
-               areFeetDelayed.get(quadrantStarting).set(true);
-               stepWasDelayed = true;
-            }
+         if (delayStep)
+         {
+            TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
+            double currentStartTime = timeInterval.getStartTime();
+            if (delayAllSubsequentSteps.getValue())
+               stepStarting.getTimeInterval().shiftInterval(delayAmount);
+            else
+               stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
+            delayDuration.add(delayAmount);
+            areFeetDelayed.get(quadrantStarting).set(true);
+            stepWasDelayed = true;
+         }
+         else
+         {
+            updatedActiveSteps.add(stepStarting);
          }
       }
 
@@ -230,7 +241,10 @@ public class QuadrupedBalanceBasedStepDelayer
          }
       }
 
-      return stepWasDelayed;
+      for (int i = 0; i < stepsAlreadyActive.size(); i++)
+         updatedActiveSteps.add(stepsAlreadyActive.get(i));
+
+      return updatedActiveSteps;
    }
 
    private final FramePoint3D tempOtherFootPoint = new FramePoint3D();
@@ -252,7 +266,8 @@ public class QuadrupedBalanceBasedStepDelayer
          tempOtherFootPoint.changeFrame(worldFrame);
          tempOtherFootPoint2D.setIncludingFrame(tempOtherFootPoint);
 
-         if (EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(currentDcmPosition, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         if (EuclidGeometryTools
+               .intersectionBetweenRay2DAndLineSegment2D(currentDcmPosition, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
             return true;
       }
 
@@ -262,7 +277,8 @@ public class QuadrupedBalanceBasedStepDelayer
          tempOtherFootPoint.changeFrame(worldFrame);
          tempOtherFootPoint2D.setIncludingFrame(tempOtherFootPoint);
 
-         if (EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(currentDcmPosition, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         if (EuclidGeometryTools
+               .intersectionBetweenRay2DAndLineSegment2D(currentDcmPosition, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
             return true;
       }
 
