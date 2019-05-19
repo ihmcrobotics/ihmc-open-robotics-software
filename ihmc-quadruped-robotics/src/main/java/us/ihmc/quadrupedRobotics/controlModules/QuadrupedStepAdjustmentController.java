@@ -119,6 +119,7 @@ public class QuadrupedStepAdjustmentController
       dcmStepAdjustmentMultipliers.get(robotQuadrant).setToNaN();
       recursionMultipliers.get(robotQuadrant).setToNaN();
       planarRegionProjection.completedStep(robotQuadrant);
+      reachabilityProjection.completedStep(robotQuadrant);
    }
 
    public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition,
