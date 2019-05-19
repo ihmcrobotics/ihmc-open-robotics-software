@@ -293,7 +293,6 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
 
       double halfCurrentIntervalDuration = 0.5 * currentIntervalDuration;
-      double halfNextIntervalDuration = 0.5 * nextIntervalDuration;
 
       if (splineDurationOnEntryCMP < minimumSplineDuration.getValue())
       {
@@ -313,19 +312,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
       if (secondSplineTimeSpentOnExitCMP < minimumSplineDuration.getValue())
       {
-         if (halfNextIntervalDuration < minimumSplineDuration.getValue())
-         {
-            firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + splineDurationOnEntryCMP);
-            secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - splineDurationOnEntryCMP);
-
-            double timeOnFinal = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(2));
-            secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(2) + timeOnFinal);
-
-            updateSplines();
-            return;
-         }
-
-         secondSplineTimeSpentOnExitCMP = minimumSplineDuration.getValue();
+         secondSplineTimeSpentOnExitCMP = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(1));
       }
 
       firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + splineDurationOnEntryCMP);
