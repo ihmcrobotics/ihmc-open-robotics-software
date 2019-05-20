@@ -15,7 +15,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    private double maxStepLength = 0.45;
    private double maxStepWidth = 0.4;
    private double maxStepYaw = 0.4;
-   private double maxStepZ = 0.25;
+   private double maxStepZ = 0.18;
    private double maxXYWiggle = 0.1;
    private double maxYawWiggle = 0.09;
    private double minFootholdPercent = 0.99;
