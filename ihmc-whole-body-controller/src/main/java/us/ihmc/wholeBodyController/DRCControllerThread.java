@@ -3,6 +3,8 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -109,6 +111,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
+   private final HumanoidRobotContextJointData proccessedJointData = new HumanoidRobotContextJointData();
+
    public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, DRCRobotSensorInformation sensorInformation,
                               HighLevelHumanoidControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
                               DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, RobotVisualizer robotVisualizer, double gravity,
@@ -153,7 +157,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       registry.addChild(robotController.getYoVariableRegistry());
       if (outputProcessor != null)
       {
-         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder());
+         outputProcessor.setLowLevelControllerCoreOutput(proccessedJointData, threadDataSynchronizer.getControllerDesiredJointDataHolder());
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
@@ -365,6 +369,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                robotController.initialize();
                if (outputProcessor != null)
                {
+                  HumanoidRobotContextTools.updateContext(controllerFullRobotModel, proccessedJointData);
                   outputProcessor.initialize();
                }
                firstTick.set(false);
@@ -391,6 +396,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             if (outputProcessor != null)
             {
+               HumanoidRobotContextTools.updateContext(controllerFullRobotModel, proccessedJointData);
                outputProcessor.processAfterController(controllerTimestamp.getLongValue());
             }
             totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
