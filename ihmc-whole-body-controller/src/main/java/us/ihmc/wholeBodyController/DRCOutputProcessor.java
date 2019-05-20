@@ -11,6 +11,7 @@ public interface DRCOutputProcessor
    
    public abstract void processAfterController(long timestamp);
 
+   // TODO: Remove full robot model as it is only used to carry the estimated state. Instead use the context!
    public abstract void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerCoreOutput);
 
    public abstract void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController);
