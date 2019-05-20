@@ -106,9 +106,6 @@ public class RemoteRobotControllerInterface
          footstepPlan = calculateSwingOverTrajectoryExpansions(footstepPlan, humanoidReferenceFrames, planarRegionsList);
       }
 
-      footstepPlan.setDefaultTransferDuration(2.0);
-      footstepPlan.setDefaultSwingDuration(1.5);
-
       LogTools.debug("Tasking {} footstep(s) to the robot", footstepPlan.getFootstepDataList().size());
 
       footstepDataListPublisher.publish(footstepPlan);
