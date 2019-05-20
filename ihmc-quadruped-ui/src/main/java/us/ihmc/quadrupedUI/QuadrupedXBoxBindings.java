@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedCommunication.networkProcessing.xBox;
+package us.ihmc.quadrupedUI;
 
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
