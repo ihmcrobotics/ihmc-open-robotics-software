@@ -1,26 +1,45 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
+import com.vividsolutions.jts.geomgraph.Quadrant;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class XGaitCost implements FootstepCost
 {
    private final FootstepPlannerParameters plannerParameters;
-   final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final FootstepNodeSnapper snapper;
+   private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final QuadrantDependentList<Point3D> startFootPositions = new QuadrantDependentList<>();
 
-   public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
+
+   public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapper snapper)
    {
       this.plannerParameters = plannerParameters;
       this.xGaitSettings = xGaitSettings;
+      this.snapper = snapper;
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         startFootPositions.put(robotQuadrant, new Point3D());
    }
+
+
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
@@ -34,27 +53,35 @@ public class XGaitCost implements FootstepCost
 
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
 
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(startNode.getXIndex(robotQuadrant), startNode.getYIndex(robotQuadrant));
+         startFootPositions.get(robotQuadrant).set(startNode.getX(robotQuadrant), startNode.getY(robotQuadrant), 0.0);
+         snapData.getSnapTransform().transform(startFootPositions.get(robotQuadrant));
+      }
+
+      double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
       double desiredSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
 
-      Vector2D desiredDistance = new Vector2D(durationBetweenSteps * desiredSpeed, 0.0);
+      Vector3D desiredDistance = new Vector3D(durationBetweenSteps * desiredSpeed, 0.0, 0.0);
 
-      AxisAngle bodyOrientation = new AxisAngle(startNode.getNominalYaw(), 0.0, 0.0);
+      AxisAngle bodyOrientation = new AxisAngle(startNode.getNominalYaw(), nominalPitch, 0.0);
 
       bodyOrientation.transform(desiredDistance);
 
-      Vector2D forward = new Vector2D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0);
-      Vector2D side = new Vector2D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()));
+      Vector3D forward = new Vector3D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0, 0.0);
+      Vector3D side = new Vector3D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()), 0.0);
 
       bodyOrientation.transform(forward);
       bodyOrientation.transform(side);
 
       Point2D endXGaitCenter = new Point2D(startXGaitCenter);
-      endXGaitCenter.add(desiredDistance);
+      endXGaitCenter.add(desiredDistance.getX(), desiredDistance.getY());
 
       Point2D endFoot = new Point2D(endXGaitCenter);
-      endFoot.add(forward);
-      endFoot.add(side);
+      endFoot.add(forward.getX(), forward.getY());
+      endFoot.add(side.getX(), side.getY());
 
       return plannerParameters.getXGaitWeight() * (MathTools.square(endFoot.getX() - endNode.getX(movingQuadrant)) + MathTools.square(endFoot.getY() - endNode.getY(movingQuadrant)));
    }

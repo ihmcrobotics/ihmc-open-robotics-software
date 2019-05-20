@@ -35,6 +35,56 @@ public interface FootstepPlannerParameters
 
    double getMinimumStepWidth();
 
+   default double getMaximumFrontStepLengthWhenSteppingUp()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingUp()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingUp()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingUp()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingUp()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   default double getMaximumFrontStepLengthWhenSteppingDown()
+   {
+      return getMaximumFrontStepLength();
+   }
+
+   default double getMinimumFrontStepLengthWhenSteppingDown()
+   {
+      return getMinimumFrontStepLength();
+   }
+
+   default double getMaximumHindStepLengthWhenSteppingDown()
+   {
+      return getMaximumHindStepLength();
+   }
+
+   default double getMinimumHindStepLengthWhenSteppingDown()
+   {
+      return getMinimumHindStepLength();
+   }
+
+   default double getStepZForSteppingDown()
+   {
+      return Double.NEGATIVE_INFINITY;
+   }
+
    double getMinimumStepYaw();
 
    double getMaximumStepYaw();
@@ -128,44 +178,29 @@ public interface FootstepPlannerParameters
     * generator is capable of swinging over.
     * </p>
     */
-   default double getMinimumDistanceFromCliffBottoms()
+   default double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
       return 0.1;
    }
 
-   /**
-    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
-    * until it is minimumDistanceFromCliffBottoms away from it.
-    *
-    * <p>
-    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
-    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
-    * generator is capable of swinging over.
-    * </p>
-    */
-   default double getMinimumDistanceFromCliffTops()
+   default double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return 0.01;
+      return 0.1;
    }
 
-   default SteppableRegionFilter getSteppableRegionFilter()
+   default double getMinimumHindEndForwardDistanceFromCliffBottoms()
    {
-      return new SteppableRegionFilter()
-      {
-         private Vector3D vertical = new Vector3D(0.0, 0.0, 1.0);
+      return 0.1;
+   }
 
-         @Override
-         public boolean isPlanarRegionSteppable(PlanarRegion query)
-         {
-            double angle = query.getNormal().angle(vertical);
+   default double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return 0.1;
+   }
 
-            if (angle > getMinimumSurfaceInclineRadians() + 1e-5)
-               return false;
-
-            return true;
-         }
-      };
+   default double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return 0.1;
    }
 
 
@@ -178,6 +213,16 @@ public interface FootstepPlannerParameters
       packet.setMaximumHindStepReach(getMaximumHindStepReach());
       packet.setMaximumHindStepLength(getMaximumHindStepLength());
       packet.setMinimumHindStepLength(getMinimumHindStepLength());
+      packet.setMaximumFrontStepLengthWhenSteppingUp(getMaximumFrontStepLengthWhenSteppingUp());
+      packet.setMinimumFrontStepLengthWhenSteppingUp(getMinimumFrontStepLengthWhenSteppingUp());
+      packet.setMaximumHindStepLengthWhenSteppingUp(getMaximumHindStepLengthWhenSteppingUp());
+      packet.setMinimumHindStepLengthWhenSteppingUp(getMinimumHindStepLengthWhenSteppingUp());
+      packet.setStepZForSteppingUp(getStepZForSteppingUp());
+      packet.setMaximumFrontStepLengthWhenSteppingDown(getMaximumFrontStepLengthWhenSteppingDown());
+      packet.setMinimumFrontStepLengthWhenSteppingDown(getMinimumFrontStepLengthWhenSteppingDown());
+      packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
+      packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
+      packet.setStepZForSteppingDown(getStepZForSteppingDown());
       packet.setMaximumStepWidth(getMaximumStepWidth());
       packet.setMinimumStepWidth(getMinimumStepWidth());
       packet.setMinimumStepYaw(getMinimumStepYaw());
@@ -201,8 +246,11 @@ public interface FootstepPlannerParameters
       packet.setMaximumXyWiggleDistance(getMaximumXYWiggleDistance());
       packet.setMinimumSurfaceInclineRadians(getMinimumSurfaceInclineRadians());
       packet.setCliffHeightToAvoid(getCliffHeightToAvoid());
-      packet.setMinimumDistanceFromCliffBottoms(getMinimumDistanceFromCliffBottoms());
-      packet.setMinimumDistanceFromCliffTops(getMinimumDistanceFromCliffTops());
+      packet.setMinimumFrontEndForwardDistanceFromCliffBottoms(getMinimumFrontEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumFrontEndBackwardDistanceFromCliffBottoms(getMinimumFrontEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndForwardDistanceFromCliffBottoms(getMinimumHindEndForwardDistanceFromCliffBottoms());
+      packet.setMinimumHindEndBackwardDistanceFromCliffBottoms(getMinimumHindEndBackwardDistanceFromCliffBottoms());
+      packet.setMinimumLateralDistanceFromCliffBottoms(getMinimumLateralDistanceFromCliffBottoms());
 
       return packet;
    }

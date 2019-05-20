@@ -28,7 +28,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.5"
    compile group: "us.ihmc", name: "IHMCRosControl", version: "0.5.0", changing: true
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"

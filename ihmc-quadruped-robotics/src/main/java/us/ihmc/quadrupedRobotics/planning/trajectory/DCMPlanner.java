@@ -55,6 +55,7 @@ public class DCMPlanner implements DCMPlannerInterface
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoDouble controllerTime;
+   private final YoDouble omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final YoInteger numberOfStepsInPlanner = new YoInteger("numberOfStepsInPlanner", registry);
    private final YoFramePoint3D perfectCMPPosition = new YoFramePoint3D("perfectCMPPosition", worldFrame, registry);
@@ -77,26 +78,31 @@ public class DCMPlanner implements DCMPlannerInterface
 
    private final boolean debug;
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(dcmPlannerParameters, gravity, nominalHeight, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
+      this(dcmPlannerParameters, omega, gravity, robotTimestamp, supportFrame, soleFrames, parentRegistry, yoGraphicsListRegistry, false);
    }
 
-   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
+   public DCMPlanner(DCMPlannerParameters dcmPlannerParameters, YoDouble omega, double gravity, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<MovingReferenceFrame> soleFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                      boolean debug)
 
    {
+      this.omega = omega;
       this.controllerTime = robotTimestamp;
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
       this.debug = debug;
       this.dcmTransitionTrajectory = new YoFrameTrajectory3D("dcmTransitionTrajectory", 4, supportFrame, registry);
 
+      omega.addVariableChangedListener(v ->
+            comHeight.set(gravity / MathTools.square(omega.getDoubleValue()))
+      );
+
 
       DCMPlannerParameters yoDcmPlannerParameters = new YoDCMPlannerParameters(dcmPlannerParameters, registry);
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, omega, gravity, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, yoDcmPlannerParameters, registry);
 
       parentRegistry.addChild(registry);
@@ -131,9 +137,12 @@ public class DCMPlanner implements DCMPlannerInterface
       numberOfStepsInPlanner.set(0);
    }
 
-   public void setNominalCoMHeight(double comHeight)
+   public void beganStep()
    {
-      this.comHeight.set(comHeight);
+   }
+
+   public void completedStep()
+   {
    }
 
    public void addStepToSequence(QuadrupedTimedStep step)
@@ -183,7 +192,6 @@ public class DCMPlanner implements DCMPlannerInterface
       tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       tempPoint.add(0, 0, comHeight.getDoubleValue());
 
-      dcmTrajectory.setComHeight(comHeight.getDoubleValue());
       dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(),
                                          piecewiseConstantCopTrajectory.getCopPositionsAtStartOfInterval(),
                                          piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
@@ -281,7 +289,7 @@ public class DCMPlanner implements DCMPlannerInterface
       desiredDCMPositionToPack.set(desiredDCMPosition);
       desiredDCMVelocityToPack.set(desiredDCMVelocity);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, dcmTrajectory.getNaturalFrequency(), perfectCMPPosition);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredDCMPosition, desiredDCMVelocity, omega.getDoubleValue(), perfectCMPPosition);
    }
 
 

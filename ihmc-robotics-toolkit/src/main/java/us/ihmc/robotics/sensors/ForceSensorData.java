@@ -2,25 +2,41 @@ package us.ihmc.robotics.sensors;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
-public class ForceSensorData implements ForceSensorDataReadOnly
+public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceSensorData>
 {
    private final DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   private final ReferenceFrame measurementFrame;
-   private final RigidBodyBasics measurementLink;
+   private ReferenceFrame measurementFrame;
+   private RigidBodyBasics measurementLink;
+
+   public ForceSensorData()
+   {
+   }
 
    public ForceSensorData(ForceSensorDefinition forceSensorDefinition)
    {
-      measurementFrame = forceSensorDefinition.getSensorFrame();
-      measurementLink = forceSensorDefinition.getRigidBody();
+      setFrameAndBody(forceSensorDefinition);
+   }
+
+   public void setFrameAndBody(ForceSensorDefinition forceSensorDefinition)
+   {
+      setFrameAndBody(forceSensorDefinition.getSensorFrame(), forceSensorDefinition.getRigidBody());
+   }
+
+   public void setFrameAndBody(ReferenceFrame measurementFrame, RigidBodyBasics measurementLink)
+   {
+      this.measurementFrame = measurementFrame;
+      this.measurementLink = measurementLink;
    }
 
    public void setWrench(Vector3DReadOnly moment, Vector3DReadOnly force)
@@ -90,9 +106,41 @@ public class ForceSensorData implements ForceSensorDataReadOnly
       }
    }
 
-   public void set(ForceSensorData forceSensorData)
+   @Override
+   public void set(ForceSensorData other)
    {
-      this.wrench.set(forceSensorData.wrench);
+      set((ForceSensorDataReadOnly) other);
+   }
+
+   public void set(ForceSensorDataReadOnly other)
+   {
+      measurementFrame = other.getMeasurementFrame();
+      measurementLink = other.getMeasurementLink();
+      other.getWrench(wrench);
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (obj == this)
+      {
+         return true;
+      }
+      else if (obj instanceof ForceSensorData)
+      {
+         ForceSensorData other = (ForceSensorData) obj;
+         if (measurementFrame != other.measurementFrame)
+            return false;
+         if (measurementLink != other.measurementLink)
+            return false;
+         if (!MatrixTools.equals(wrench, other.wrench))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    public void calculateChecksum(GenericCRC32 checksum)
