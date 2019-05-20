@@ -29,7 +29,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private static final int pollRateMillis = 50;
    private static final double maximumBodyHeightOffset = 0.1;
    private static final double bodyHeightDeltaPerClick = 0.01;
-   private static final double maxBodyYaw = 0.15;
+   private static final double maxBodyYaw = 0.25;
    private static final double maxBodyRoll = 0.15;
    private static final double maxBodyPitch = 0.15;
    private static final double bodyOrientationShiftTime = 0.1;
@@ -65,6 +65,8 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       {
          channels.put(channel, 0.0);
       }
+      channels.put(XBoxOneMapping.LEFT_TRIGGER, -1.0);
+      channels.put(XBoxOneMapping.RIGHT_TRIGGER, -1.0);
 
       enabled = messager.createInput(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
@@ -139,8 +141,9 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
       double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
 
-      double bodyYawLeft = channels.get(negativeYawRateMapping);
-      double bodyYawRight = channels.get(positiveYawRateMapping);
+      // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
+      double bodyYawLeft = 0.5 * (channels.get(negativeYawRateMapping) + 1.0);
+      double bodyYawRight = 0.5 * (channels.get(positiveYawRateMapping) + 1.0);
       double yawRate = (bodyYawLeft - bodyYawRight) * maxVelocityYaw.getValue();
 
       QuadrupedTeleopDesiredVelocity desiredVelocity = new QuadrupedTeleopDesiredVelocity();
@@ -158,8 +161,9 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX;
       double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY;
 
-      double bodyYawLeft = channels.get(negativeYawMapping);
-      double bodyYawRight = channels.get(positiveYawMapping);
+      // triggers go (-1.0, 1.0). If this is remapped to not be a trigger, this needs to be updated
+      double bodyYawLeft = 0.5 * (channels.get(negativeYawMapping) + 1.0);
+      double bodyYawRight = 0.5 * (channels.get(positiveYawMapping) + 1.0);
       double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw;
 
       QuadrupedTeleopDesiredPose desiredPoseMessage = new QuadrupedTeleopDesiredPose();
