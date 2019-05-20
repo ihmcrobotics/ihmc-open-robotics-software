@@ -15,6 +15,7 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
@@ -30,6 +31,8 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
+import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 
 public class QuadrupedUserInterface
 {
@@ -47,6 +50,7 @@ public class QuadrupedUserInterface
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
+   private final AnimationTimer joystickModule;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -65,7 +69,7 @@ public class QuadrupedUserInterface
    @FXML
    private ManualStepTabController manualStepTabController;
 
-   public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
+   public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
                                  FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
                                  QuadrupedXGaitSettingsReadOnly xGaitSettings)
          throws Exception
@@ -180,6 +184,17 @@ public class QuadrupedUserInterface
          }
       };
 
+      if (Joystick.isAJoystickConnectedToSystem())
+      {
+         Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+         joystickModule = new QuadrupedJoystickModule(messager, xGaitSettings, nominalBodyHeight, joystick);
+         joystickModule.start();
+      }
+      else
+      {
+         joystickModule = null;
+         LogTools.warn("No joystick detected, running without xbox module");
+      }
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
@@ -222,6 +237,9 @@ public class QuadrupedUserInterface
       bodyPathMeshViewer.stop();
       cameraTracking.stop();
 
+      if(joystickModule != null)
+         joystickModule.stop();
+
       try
       {
          robotVisualizer.stop();
@@ -261,12 +279,12 @@ public class QuadrupedUserInterface
       plannerTabController.setDesiredSteppingStateNameTopic(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic);
    }
 
-
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                                             FootstepPlannerParameters footstepPlannerParameters,
-                                                            VisibilityGraphsParameters visibilityGraphsParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
-         throws Exception
+                                                            VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
+                                                            QuadrupedXGaitSettingsReadOnly xGaitSettings) throws Exception
    {
-      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, footstepPlannerParameters, visibilityGraphsParameters, xGaitSettings);
+      return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, footstepPlannerParameters, visibilityGraphsParameters,
+                                        xGaitSettings);
    }
 }

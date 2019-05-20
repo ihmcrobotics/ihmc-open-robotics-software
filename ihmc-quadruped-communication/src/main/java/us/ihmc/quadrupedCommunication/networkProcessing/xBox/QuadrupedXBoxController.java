@@ -3,15 +3,14 @@ package us.ihmc.quadrupedCommunication.networkProcessing.xBox;
 import controller_msgs.msg.dds.*;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
+import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.input.InputValueIntegrator;
-import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
-import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
@@ -24,8 +23,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.quadrupedCommunication.networkProcessing.xBox.QuadrupedXBoxBindings.*;
 
 public class QuadrupedXBoxController extends QuadrupedToolboxController implements JoystickEventListener
 {
@@ -127,19 +124,19 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    @Override
    public void updateInternal()
    {
-      xGaitSettingsPacket = null;
-      desiredVelocityMessage = null;
-      desiredPoseMessage = null;
-      desiredHeightMessage = null;
-
-      processJoystickHeightCommands();
-      processJoystickBodyCommands();
-      processJoystickStepCommands();
-
-      reportMessage(xGaitSettingsPacket);
-      reportMessage(desiredVelocityMessage);
-      reportMessage(desiredPoseMessage);
-      reportMessage(desiredHeightMessage);
+//      xGaitSettingsPacket = null;
+//      desiredVelocityMessage = null;
+//      desiredPoseMessage = null;
+//      desiredHeightMessage = null;
+//
+//      processJoystickHeightCommands();
+//      processJoystickBodyCommands();
+//      processJoystickStepCommands();
+//
+//      reportMessage(xGaitSettingsPacket);
+//      reportMessage(desiredVelocityMessage);
+//      reportMessage(desiredPoseMessage);
+//      reportMessage(desiredHeightMessage);
    }
 
    @Override
@@ -153,18 +150,18 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void configureJoystickFilters(Joystick device)
    {
-      device.setCustomizationFilter(new JoystickCustomizationFilter(xVelocityMapping, xVelocityInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(yVelocityMapping, yVelocityInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawRateMapping, negativeYawRateInvert, 0.05, 1, 1.0));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawRateMapping, positiveYawRateInvert, 0.05, 1, 1.0));
-
-      device.setCustomizationFilter(new JoystickCustomizationFilter(xTranslationMapping, xTranslationInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(yTranslationMapping, yTranslationInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawMapping, negativeYawInvert, 0.05, 1, 1.0));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawMapping, positiveYawInvert, 0.05, 1, 1.0));
-
-      device.setCustomizationFilter(new JoystickCustomizationFilter(rollMapping, rollInvert, 0.1, 1));
-      device.setCustomizationFilter(new JoystickCustomizationFilter(pitchMapping, pitchInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(xVelocityMapping, xVelocityInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(yVelocityMapping, yVelocityInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawRateMapping, negativeYawRateInvert, 0.05, 1, 1.0));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawRateMapping, positiveYawRateInvert, 0.05, 1, 1.0));
+//
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(xTranslationMapping, xTranslationInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(yTranslationMapping, yTranslationInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(negativeYawMapping, negativeYawInvert, 0.05, 1, 1.0));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(positiveYawMapping, positiveYawInvert, 0.05, 1, 1.0));
+//
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(rollMapping, rollInvert, 0.1, 1));
+//      device.setCustomizationFilter(new JoystickCustomizationFilter(pitchMapping, pitchInvert, 0.1, 1));
    }
 
    private void processJoystickHeightCommands()
@@ -185,85 +182,84 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void processJoystickBodyCommands()
    {
-      double bodyRoll = channels.get(rollMapping) * maxBodyRoll.getValue();
-      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch.getValue();
-
-      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX.getValue();
-      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY.getValue();
-
-      double bodyYawLeft = channels.get(negativeYawMapping);
-      double bodyYawRight = channels.get(positiveYawMapping);
-      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw.getValue();
-
-      desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, bodyHeight.value());
-      desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
-      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
+//      double bodyRoll = channels.get(rollMapping) * maxBodyRoll.getValue();
+//      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch.getValue();
+//
+//      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX.getValue();
+//      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY.getValue();
+//
+//      double bodyYawLeft = channels.get(negativeYawMapping);
+//      double bodyYawRight = channels.get(positiveYawMapping);
+//      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw.getValue();
+//
+//      desiredPoseMessage = new QuadrupedTeleopDesiredPose();
+//      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, bodyHeight.value());
+//      desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
+//      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
    }
 
    private void processJoystickStepCommands()
    {
-      maxVelocityY.set(maxYSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
-      maxVelocityYaw.set(maxYawSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
-
-
-      double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
-      double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
-
-      double bodyYawLeft = channels.get(negativeYawRateMapping);
-      double bodyYawRight = channels.get(positiveYawRateMapping);
-      double yawRate = (bodyYawLeft - bodyYawRight) * maxVelocityYaw.getValue();
-
-      desiredVelocityMessage = new QuadrupedTeleopDesiredVelocity();
-      desiredVelocityMessage.setDesiredXVelocity(xVelocity);
-      desiredVelocityMessage.setDesiredYVelocity(yVelocity);
-      desiredVelocityMessage.setDesiredYawVelocity(yawRate);
+//      maxVelocityY.set(maxYSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
+//      maxVelocityYaw.set(maxYawSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
+//
+//      double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
+//      double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
+//
+//      double bodyYawLeft = channels.get(negativeYawRateMapping);
+//      double bodyYawRight = channels.get(positiveYawRateMapping);
+//      double yawRate = (bodyYawLeft - bodyYawRight) * maxVelocityYaw.getValue();
+//
+//      desiredVelocityMessage = new QuadrupedTeleopDesiredVelocity();
+//      desiredVelocityMessage.setDesiredXVelocity(xVelocity);
+//      desiredVelocityMessage.setDesiredYVelocity(yVelocity);
+//      desiredVelocityMessage.setDesiredYawVelocity(yawRate);
    }
 
    private void processStateChangeRequests(Event event)
    {
-      if (event.getValue() < 0.5 || xGaitSettings == null)
-         return;
-
-      XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
-
-      //      if (mapping == XBoxOneMapping.START)
-      //      {
-      //         stepTeleopManager.requestStandPrep();
-      //      }
-      //      else if (mapping == XBoxOneMapping.A)
-      //      {
-      //         stepTeleopManager.requestWalkingState();
-      //         if (stepTeleopManager.isWalking())
-      //            stepTeleopManager.requestStanding();
-      //      }
-      //      else if (mapping == XBoxOneMapping.X)
-      //      {
-      //         stepTeleopManager.requestXGait();
-      //      }
-      if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
-      {
-         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - 90.0);
-      }
-      else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
-      {
-         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + 90.0);
-      }
-      //      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
-      //      {
-      //         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
-      //      }
-
-      xGaitSettingsPacket = xGaitSettings.getAsPacket();
+//      if (event.getValue() < 0.5 || xGaitSettings == null)
+//         return;
+//
+//      XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
+//
+//      //      if (mapping == XBoxOneMapping.START)
+//      //      {
+//      //         stepTeleopManager.requestStandPrep();
+//      //      }
+//      //      else if (mapping == XBoxOneMapping.A)
+//      //      {
+//      //         stepTeleopManager.requestWalkingState();
+//      //         if (stepTeleopManager.isWalking())
+//      //            stepTeleopManager.requestStanding();
+//      //      }
+//      //      else if (mapping == XBoxOneMapping.X)
+//      //      {
+//      //         stepTeleopManager.requestXGait();
+//      //      }
+//      if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
+//      {
+//         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - 90.0);
+//      }
+//      else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
+//      {
+//         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + 90.0);
+//      }
+//      //      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
+//      //      {
+//      //         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
+//      //      }
+//
+//      xGaitSettingsPacket = xGaitSettings.getAsPacket();
    }
 
    @Override
    public void processEvent(Event event)
    {
-      // Handle events that should trigger once immediately after the event is triggered.
-      processStateChangeRequests(event);
-
-      // Store updated value in a cache so historical values for all channels can be used.
-      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
+//      // Handle events that should trigger once immediately after the event is triggered.
+//      processStateChangeRequests(event);
+//
+//      // Store updated value in a cache so historical values for all channels can be used.
+//      channels.put(XBoxOneMapping.getMapping(event), (double) event.getValue());
    }
 }
