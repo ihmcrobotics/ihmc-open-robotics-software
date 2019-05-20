@@ -21,6 +21,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -47,7 +48,8 @@ public class QuadrupedBodyOrientationManager
    private final GroundPlaneEstimator groundPlaneEstimator;
 
    private final MovingReferenceFrame bodyFrame;
-   private final YoFrameYawPitchRoll yoBodyOrientationSetpoint;
+   private final DoubleParameter maximumBodyOrientationRate = new DoubleParameter("maximumBodyOrientationRate", registry, 0.1);
+   private final RateLimitedYoFrameOrientation yoBodyOrientationSetpoint;
    private final YoFrameVector3D yoBodyAngularVelocitySetpoint;
    private final YoFrameVector3D yoBodyAngularAccelerationSetpoint;
 
@@ -89,7 +91,8 @@ public class QuadrupedBodyOrientationManager
       bodyAngularWeight = new ParameterVector3D("bodyAngularWeight", new Vector3D(2.5, 2.5, 1.0), registry);
 
       ReferenceFrame bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
-      yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
+      yoBodyOrientationSetpoint = new RateLimitedYoFrameOrientation("bodyOrientationSetpoint", "", registry, maximumBodyOrientationRate, controllerToolbox.getRuntimeEnvironment().getControlDT(),
+                                                                    worldFrame);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
       yoBodyAngularAccelerationSetpoint = new YoFrameVector3D("bodyAngularAccelerationSetpoint", worldFrame, registry);
 
@@ -262,7 +265,7 @@ public class QuadrupedBodyOrientationManager
          throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
 
-      yoBodyOrientationSetpoint.set(desiredBodyOrientation);
+      yoBodyOrientationSetpoint.update(desiredBodyOrientation);
       yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
       yoBodyAngularAccelerationSetpoint.set(desiredBodyAngularAcceleration);
    }

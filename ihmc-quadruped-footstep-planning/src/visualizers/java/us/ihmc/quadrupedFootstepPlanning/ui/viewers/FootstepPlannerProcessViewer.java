@@ -67,7 +67,6 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setIncludePitchAndRollCost(true);
 
       costCalculator = costBuilder.buildCost();
 

@@ -18,21 +18,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleParameter slopTimeParameter = new DoubleParameter("stateChangeSmootherSlopTime", registry, 0.04);
-   private final DoubleParameter slopBreakFrequencyParameter = new DoubleParameter("stateChangeSmootherSlopBreakFrequency", registry, 30.0);
 
    private final PairList<JointDesiredOutputBasics, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new PairList<>();
    private final YoDouble alphaJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
 
    private final AtomicBoolean hasHighLevelControllerStateChanged = new AtomicBoolean(false);
    private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
-   private final double controlDT;
+   private final DoubleParameter slopTime = new DoubleParameter("slopTimeForSmoothedJointTorques", registry, 0.15);
    private final YoDouble controlTimestamp;
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public StateChangeSmootherComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = runtimeEnvironment.getControlDT();
       this.controlTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
 
@@ -75,9 +72,14 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
       double currentTime = controlTimestamp.getDoubleValue();
       double deltaTime = Math.max(currentTime - timeAtHighLevelControllerStateChange.getDoubleValue(), 0.0);
 
-      double breakFrequencyInHz = slopBreakFrequencyParameter.getValue() * (deltaTime / slopTimeParameter.getValue());
-      double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyInHz, controlDT);
-      alphaJointTorqueForStateChanges.set(alpha);
+      if (deltaTime < slopTime.getValue())
+      {
+         alphaJointTorqueForStateChanges.set(1.0 - deltaTime / slopTime.getValue());
+      }
+      else
+      {
+         alphaJointTorqueForStateChanges.set(0.0);
+      }
 
       for (int i = 0; i < jointTorquesSmoothedAtStateChange.size(); i++)
       {

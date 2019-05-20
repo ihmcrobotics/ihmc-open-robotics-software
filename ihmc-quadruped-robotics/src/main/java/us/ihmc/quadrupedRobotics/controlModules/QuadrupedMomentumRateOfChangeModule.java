@@ -121,6 +121,11 @@ public class QuadrupedMomentumRateOfChangeModule
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
    }
 
+   public FrameVector3DReadOnly getDcmError()
+   {
+      return dcmPositionController.getDcmError();
+   }
+
    public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumRateCommand;

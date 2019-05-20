@@ -200,7 +200,10 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         legAttachementFrames.get(robotQuadrant).update();
          soleFrames.get(robotQuadrant).update();
+         soleZUpFrames.get(robotQuadrant).update();
+         ankleZUpFrames.get(robotQuadrant).update();
       }
 
       for (RobotSide robotSide : RobotSide.values)

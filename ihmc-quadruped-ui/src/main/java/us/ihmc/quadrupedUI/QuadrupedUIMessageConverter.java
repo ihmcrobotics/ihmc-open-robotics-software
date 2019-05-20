@@ -87,6 +87,7 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<QuadrupedFootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
+   private IHMCRealtimeROS2Publisher<SoleTrajectoryMessage> soleTrajectoryMessagePublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
 
 
@@ -181,6 +182,7 @@ public class QuadrupedUIMessageConverter
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
+      soleTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, SoleTrajectoryMessage.class, controllerSubGenerator);
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
 
       enableBodyTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopInputTopicGenerator);
@@ -211,6 +213,7 @@ public class QuadrupedUIMessageConverter
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, this::publishQuadrupedXGaitSettings);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.ManualStepsListMessageTopic, this::publishStepListMessage);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, this::publishSoleTrajectoryMessage);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.FootstepPlannerTimedStepsTopic, this::publishStepListMessage);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.ComputePathTopic, request -> requestNewPlan());
@@ -347,6 +350,11 @@ public class QuadrupedUIMessageConverter
       QuadrupedRequestedSteppingStateMessage message = new QuadrupedRequestedSteppingStateMessage();
       message.setQuadrupedSteppingRequestedEvent(steppingStateName.toByte());
       desiredSteppingStatePublisher.publish(message);
+   }
+
+   private void publishSoleTrajectoryMessage(SoleTrajectoryMessage soleTrajectoryMessage)
+   {
+      soleTrajectoryMessagePublisher.publish(soleTrajectoryMessage);
    }
 
    public void publishDesiredBodyHeight(double desiredBodyHeight)
