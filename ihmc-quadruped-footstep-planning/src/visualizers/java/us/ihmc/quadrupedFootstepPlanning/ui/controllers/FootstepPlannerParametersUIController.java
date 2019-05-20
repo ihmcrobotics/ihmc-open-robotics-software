@@ -4,6 +4,7 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
@@ -51,6 +52,7 @@ public class FootstepPlannerParametersUIController
    private Spinner<Double> minHindEndBackwardDistanceFromCliffBottoms;
    @FXML
    private Spinner<Double> minLateralDistanceFromCliffBottoms;
+   
 
    @FXML
    private Spinner<Double> distanceWeight;
@@ -165,6 +167,8 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindHeuristicsWeight(heuristicsWeight.getValueFactory().valueProperty());
+      
+
 
       messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
    }
