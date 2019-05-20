@@ -31,6 +31,15 @@
                     </content>
                 </Tab>
 
+                <Tab text="Reach Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <children>
+                            <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
+                        </children>
+                    </content>
+                </Tab>
+
                 <Tab text="Visibility Graph Parameters">
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />

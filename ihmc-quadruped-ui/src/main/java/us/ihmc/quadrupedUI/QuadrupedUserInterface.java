@@ -20,10 +20,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
@@ -62,6 +59,8 @@ public class QuadrupedUserInterface
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
+   private PlannerReachParametersUIController plannerReachParametersUIController;
+   @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
    private ManualStepTabController manualStepTabController;
@@ -80,12 +79,14 @@ public class QuadrupedUserInterface
       mainPane = loader.load();
 
       footstepPlannerParametersUIController.setPlannerParameters(footstepPlannerParameters);
+      plannerReachParametersUIController.setPlannerParameters(footstepPlannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
 
       plannerTabController.attachMessager(messager);
       robotControlTabController.attachMessager(messager);
       xGaitSettingsController.attachMessager(messager, xGaitSettings);
       footstepPlannerParametersUIController.attachMessager(messager);
+      plannerReachParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       manualStepTabController.attachMessager(messager, xGaitSettings);
 
@@ -93,16 +94,19 @@ public class QuadrupedUserInterface
 
       setPlannerTabTopics();
       footstepPlannerParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
+      plannerReachParametersUIController.setPlannerParametersTopic(QuadrupedUIMessagerAPI.FootstepPlannerParametersTopic);
       visibilityGraphsParametersUIController.setVisibilityGraphsParametersTopic(QuadrupedUIMessagerAPI.VisibilityGraphsParametersTopic);
 
       plannerTabController.bindControls();
       robotControlTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      plannerReachParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       xGaitSettingsController.bindControls();
       manualStepTabController.bindControls();
 
       footstepPlannerParametersUIController.loadFromFile();
+      plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -141,6 +145,7 @@ public class QuadrupedUserInterface
 
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
+      manualStepTabController.initScene(view3dFactory.getSubScene());
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
@@ -156,6 +161,7 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
       view3dFactory.addNodeToView(pawPathViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
+      view3dFactory.addNodeToView(manualStepTabController);
 
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();

@@ -22,6 +22,16 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double maximum_hind_step_reach_ = -11.1;
    public double maximum_hind_step_length_ = -11.1;
    public double minimum_hind_step_length_ = -11.1;
+   public double maximum_front_step_length_when_stepping_up_ = -11.1;
+   public double minimum_front_step_length_when_stepping_up_ = -11.1;
+   public double maximum_hind_step_length_when_stepping_up_ = -11.1;
+   public double minimum_hind_step_length_when_stepping_up_ = -11.1;
+   public double step_z_for_stepping_up_ = -11.1;
+   public double maximum_front_step_length_when_stepping_down_ = -11.1;
+   public double minimum_front_step_length_when_stepping_down_ = -11.1;
+   public double maximum_hind_step_length_when_stepping_down_ = -11.1;
+   public double minimum_hind_step_length_when_stepping_down_ = -11.1;
+   public double step_z_for_stepping_down_ = -11.1;
    public double maximum_step_width_ = -11.1;
    public double minimum_step_width_ = -11.1;
    public double minimum_step_yaw_ = -11.1;
@@ -45,8 +55,11 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double maximum_xy_wiggle_distance_ = -11.1;
    public double minimum_surface_incline_radians_ = -11.1;
    public double cliff_height_to_avoid_ = -11.1;
-   public double minimum_distance_from_cliff_bottoms_ = -11.1;
-   public double minimum_distance_from_cliff_tops_ = -11.1;
+   public double minimum_front_end_forward_distance_from_cliff_bottoms_ = -11.1;
+   public double minimum_front_end_backward_distance_from_cliff_bottoms_ = -11.1;
+   public double minimum_hind_end_forward_distance_from_cliff_bottoms_ = -11.1;
+   public double minimum_hind_end_backward_distance_from_cliff_bottoms_ = -11.1;
+   public double minimum_lateral_distance_from_cliff_bottoms_ = -11.1;
 
    public QuadrupedFootstepPlannerParametersPacket()
    {
@@ -73,6 +86,26 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       maximum_hind_step_length_ = other.maximum_hind_step_length_;
 
       minimum_hind_step_length_ = other.minimum_hind_step_length_;
+
+      maximum_front_step_length_when_stepping_up_ = other.maximum_front_step_length_when_stepping_up_;
+
+      minimum_front_step_length_when_stepping_up_ = other.minimum_front_step_length_when_stepping_up_;
+
+      maximum_hind_step_length_when_stepping_up_ = other.maximum_hind_step_length_when_stepping_up_;
+
+      minimum_hind_step_length_when_stepping_up_ = other.minimum_hind_step_length_when_stepping_up_;
+
+      step_z_for_stepping_up_ = other.step_z_for_stepping_up_;
+
+      maximum_front_step_length_when_stepping_down_ = other.maximum_front_step_length_when_stepping_down_;
+
+      minimum_front_step_length_when_stepping_down_ = other.minimum_front_step_length_when_stepping_down_;
+
+      maximum_hind_step_length_when_stepping_down_ = other.maximum_hind_step_length_when_stepping_down_;
+
+      minimum_hind_step_length_when_stepping_down_ = other.minimum_hind_step_length_when_stepping_down_;
+
+      step_z_for_stepping_down_ = other.step_z_for_stepping_down_;
 
       maximum_step_width_ = other.maximum_step_width_;
 
@@ -120,9 +153,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       cliff_height_to_avoid_ = other.cliff_height_to_avoid_;
 
-      minimum_distance_from_cliff_bottoms_ = other.minimum_distance_from_cliff_bottoms_;
+      minimum_front_end_forward_distance_from_cliff_bottoms_ = other.minimum_front_end_forward_distance_from_cliff_bottoms_;
 
-      minimum_distance_from_cliff_tops_ = other.minimum_distance_from_cliff_tops_;
+      minimum_front_end_backward_distance_from_cliff_bottoms_ = other.minimum_front_end_backward_distance_from_cliff_bottoms_;
+
+      minimum_hind_end_forward_distance_from_cliff_bottoms_ = other.minimum_hind_end_forward_distance_from_cliff_bottoms_;
+
+      minimum_hind_end_backward_distance_from_cliff_bottoms_ = other.minimum_hind_end_backward_distance_from_cliff_bottoms_;
+
+      minimum_lateral_distance_from_cliff_bottoms_ = other.minimum_lateral_distance_from_cliff_bottoms_;
 
    }
 
@@ -193,6 +232,96 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double getMinimumHindStepLength()
    {
       return minimum_hind_step_length_;
+   }
+
+   public void setMaximumFrontStepLengthWhenSteppingUp(double maximum_front_step_length_when_stepping_up)
+   {
+      maximum_front_step_length_when_stepping_up_ = maximum_front_step_length_when_stepping_up;
+   }
+   public double getMaximumFrontStepLengthWhenSteppingUp()
+   {
+      return maximum_front_step_length_when_stepping_up_;
+   }
+
+   public void setMinimumFrontStepLengthWhenSteppingUp(double minimum_front_step_length_when_stepping_up)
+   {
+      minimum_front_step_length_when_stepping_up_ = minimum_front_step_length_when_stepping_up;
+   }
+   public double getMinimumFrontStepLengthWhenSteppingUp()
+   {
+      return minimum_front_step_length_when_stepping_up_;
+   }
+
+   public void setMaximumHindStepLengthWhenSteppingUp(double maximum_hind_step_length_when_stepping_up)
+   {
+      maximum_hind_step_length_when_stepping_up_ = maximum_hind_step_length_when_stepping_up;
+   }
+   public double getMaximumHindStepLengthWhenSteppingUp()
+   {
+      return maximum_hind_step_length_when_stepping_up_;
+   }
+
+   public void setMinimumHindStepLengthWhenSteppingUp(double minimum_hind_step_length_when_stepping_up)
+   {
+      minimum_hind_step_length_when_stepping_up_ = minimum_hind_step_length_when_stepping_up;
+   }
+   public double getMinimumHindStepLengthWhenSteppingUp()
+   {
+      return minimum_hind_step_length_when_stepping_up_;
+   }
+
+   public void setStepZForSteppingUp(double step_z_for_stepping_up)
+   {
+      step_z_for_stepping_up_ = step_z_for_stepping_up;
+   }
+   public double getStepZForSteppingUp()
+   {
+      return step_z_for_stepping_up_;
+   }
+
+   public void setMaximumFrontStepLengthWhenSteppingDown(double maximum_front_step_length_when_stepping_down)
+   {
+      maximum_front_step_length_when_stepping_down_ = maximum_front_step_length_when_stepping_down;
+   }
+   public double getMaximumFrontStepLengthWhenSteppingDown()
+   {
+      return maximum_front_step_length_when_stepping_down_;
+   }
+
+   public void setMinimumFrontStepLengthWhenSteppingDown(double minimum_front_step_length_when_stepping_down)
+   {
+      minimum_front_step_length_when_stepping_down_ = minimum_front_step_length_when_stepping_down;
+   }
+   public double getMinimumFrontStepLengthWhenSteppingDown()
+   {
+      return minimum_front_step_length_when_stepping_down_;
+   }
+
+   public void setMaximumHindStepLengthWhenSteppingDown(double maximum_hind_step_length_when_stepping_down)
+   {
+      maximum_hind_step_length_when_stepping_down_ = maximum_hind_step_length_when_stepping_down;
+   }
+   public double getMaximumHindStepLengthWhenSteppingDown()
+   {
+      return maximum_hind_step_length_when_stepping_down_;
+   }
+
+   public void setMinimumHindStepLengthWhenSteppingDown(double minimum_hind_step_length_when_stepping_down)
+   {
+      minimum_hind_step_length_when_stepping_down_ = minimum_hind_step_length_when_stepping_down;
+   }
+   public double getMinimumHindStepLengthWhenSteppingDown()
+   {
+      return minimum_hind_step_length_when_stepping_down_;
+   }
+
+   public void setStepZForSteppingDown(double step_z_for_stepping_down)
+   {
+      step_z_for_stepping_down_ = step_z_for_stepping_down;
+   }
+   public double getStepZForSteppingDown()
+   {
+      return step_z_for_stepping_down_;
    }
 
    public void setMaximumStepWidth(double maximum_step_width)
@@ -402,22 +531,49 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return cliff_height_to_avoid_;
    }
 
-   public void setMinimumDistanceFromCliffBottoms(double minimum_distance_from_cliff_bottoms)
+   public void setMinimumFrontEndForwardDistanceFromCliffBottoms(double minimum_front_end_forward_distance_from_cliff_bottoms)
    {
-      minimum_distance_from_cliff_bottoms_ = minimum_distance_from_cliff_bottoms;
+      minimum_front_end_forward_distance_from_cliff_bottoms_ = minimum_front_end_forward_distance_from_cliff_bottoms;
    }
-   public double getMinimumDistanceFromCliffBottoms()
+   public double getMinimumFrontEndForwardDistanceFromCliffBottoms()
    {
-      return minimum_distance_from_cliff_bottoms_;
+      return minimum_front_end_forward_distance_from_cliff_bottoms_;
    }
 
-   public void setMinimumDistanceFromCliffTops(double minimum_distance_from_cliff_tops)
+   public void setMinimumFrontEndBackwardDistanceFromCliffBottoms(double minimum_front_end_backward_distance_from_cliff_bottoms)
    {
-      minimum_distance_from_cliff_tops_ = minimum_distance_from_cliff_tops;
+      minimum_front_end_backward_distance_from_cliff_bottoms_ = minimum_front_end_backward_distance_from_cliff_bottoms;
    }
-   public double getMinimumDistanceFromCliffTops()
+   public double getMinimumFrontEndBackwardDistanceFromCliffBottoms()
    {
-      return minimum_distance_from_cliff_tops_;
+      return minimum_front_end_backward_distance_from_cliff_bottoms_;
+   }
+
+   public void setMinimumHindEndForwardDistanceFromCliffBottoms(double minimum_hind_end_forward_distance_from_cliff_bottoms)
+   {
+      minimum_hind_end_forward_distance_from_cliff_bottoms_ = minimum_hind_end_forward_distance_from_cliff_bottoms;
+   }
+   public double getMinimumHindEndForwardDistanceFromCliffBottoms()
+   {
+      return minimum_hind_end_forward_distance_from_cliff_bottoms_;
+   }
+
+   public void setMinimumHindEndBackwardDistanceFromCliffBottoms(double minimum_hind_end_backward_distance_from_cliff_bottoms)
+   {
+      minimum_hind_end_backward_distance_from_cliff_bottoms_ = minimum_hind_end_backward_distance_from_cliff_bottoms;
+   }
+   public double getMinimumHindEndBackwardDistanceFromCliffBottoms()
+   {
+      return minimum_hind_end_backward_distance_from_cliff_bottoms_;
+   }
+
+   public void setMinimumLateralDistanceFromCliffBottoms(double minimum_lateral_distance_from_cliff_bottoms)
+   {
+      minimum_lateral_distance_from_cliff_bottoms_ = minimum_lateral_distance_from_cliff_bottoms;
+   }
+   public double getMinimumLateralDistanceFromCliffBottoms()
+   {
+      return minimum_lateral_distance_from_cliff_bottoms_;
    }
 
 
@@ -451,6 +607,26 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_hind_step_length_, other.maximum_hind_step_length_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_step_length_, other.minimum_hind_step_length_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_front_step_length_when_stepping_up_, other.maximum_front_step_length_when_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_front_step_length_when_stepping_up_, other.minimum_front_step_length_when_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_hind_step_length_when_stepping_up_, other.maximum_hind_step_length_when_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_step_length_when_stepping_up_, other.minimum_hind_step_length_when_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_z_for_stepping_up_, other.step_z_for_stepping_up_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_front_step_length_when_stepping_down_, other.maximum_front_step_length_when_stepping_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_front_step_length_when_stepping_down_, other.minimum_front_step_length_when_stepping_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_hind_step_length_when_stepping_down_, other.maximum_hind_step_length_when_stepping_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_step_length_when_stepping_down_, other.minimum_hind_step_length_when_stepping_down_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_z_for_stepping_down_, other.step_z_for_stepping_down_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_, other.maximum_step_width_, epsilon)) return false;
 
@@ -498,9 +674,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_height_to_avoid_, other.cliff_height_to_avoid_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_bottoms_, other.minimum_distance_from_cliff_bottoms_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_front_end_forward_distance_from_cliff_bottoms_, other.minimum_front_end_forward_distance_from_cliff_bottoms_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_tops_, other.minimum_distance_from_cliff_tops_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_front_end_backward_distance_from_cliff_bottoms_, other.minimum_front_end_backward_distance_from_cliff_bottoms_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_end_forward_distance_from_cliff_bottoms_, other.minimum_hind_end_forward_distance_from_cliff_bottoms_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_end_backward_distance_from_cliff_bottoms_, other.minimum_hind_end_backward_distance_from_cliff_bottoms_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_lateral_distance_from_cliff_bottoms_, other.minimum_lateral_distance_from_cliff_bottoms_, epsilon)) return false;
 
 
       return true;
@@ -528,6 +710,26 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       if(this.maximum_hind_step_length_ != otherMyClass.maximum_hind_step_length_) return false;
 
       if(this.minimum_hind_step_length_ != otherMyClass.minimum_hind_step_length_) return false;
+
+      if(this.maximum_front_step_length_when_stepping_up_ != otherMyClass.maximum_front_step_length_when_stepping_up_) return false;
+
+      if(this.minimum_front_step_length_when_stepping_up_ != otherMyClass.minimum_front_step_length_when_stepping_up_) return false;
+
+      if(this.maximum_hind_step_length_when_stepping_up_ != otherMyClass.maximum_hind_step_length_when_stepping_up_) return false;
+
+      if(this.minimum_hind_step_length_when_stepping_up_ != otherMyClass.minimum_hind_step_length_when_stepping_up_) return false;
+
+      if(this.step_z_for_stepping_up_ != otherMyClass.step_z_for_stepping_up_) return false;
+
+      if(this.maximum_front_step_length_when_stepping_down_ != otherMyClass.maximum_front_step_length_when_stepping_down_) return false;
+
+      if(this.minimum_front_step_length_when_stepping_down_ != otherMyClass.minimum_front_step_length_when_stepping_down_) return false;
+
+      if(this.maximum_hind_step_length_when_stepping_down_ != otherMyClass.maximum_hind_step_length_when_stepping_down_) return false;
+
+      if(this.minimum_hind_step_length_when_stepping_down_ != otherMyClass.minimum_hind_step_length_when_stepping_down_) return false;
+
+      if(this.step_z_for_stepping_down_ != otherMyClass.step_z_for_stepping_down_) return false;
 
       if(this.maximum_step_width_ != otherMyClass.maximum_step_width_) return false;
 
@@ -575,9 +777,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.cliff_height_to_avoid_ != otherMyClass.cliff_height_to_avoid_) return false;
 
-      if(this.minimum_distance_from_cliff_bottoms_ != otherMyClass.minimum_distance_from_cliff_bottoms_) return false;
+      if(this.minimum_front_end_forward_distance_from_cliff_bottoms_ != otherMyClass.minimum_front_end_forward_distance_from_cliff_bottoms_) return false;
 
-      if(this.minimum_distance_from_cliff_tops_ != otherMyClass.minimum_distance_from_cliff_tops_) return false;
+      if(this.minimum_front_end_backward_distance_from_cliff_bottoms_ != otherMyClass.minimum_front_end_backward_distance_from_cliff_bottoms_) return false;
+
+      if(this.minimum_hind_end_forward_distance_from_cliff_bottoms_ != otherMyClass.minimum_hind_end_forward_distance_from_cliff_bottoms_) return false;
+
+      if(this.minimum_hind_end_backward_distance_from_cliff_bottoms_ != otherMyClass.minimum_hind_end_backward_distance_from_cliff_bottoms_) return false;
+
+      if(this.minimum_lateral_distance_from_cliff_bottoms_ != otherMyClass.minimum_lateral_distance_from_cliff_bottoms_) return false;
 
 
       return true;
@@ -603,6 +811,26 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.maximum_hind_step_length_);      builder.append(", ");
       builder.append("minimum_hind_step_length=");
       builder.append(this.minimum_hind_step_length_);      builder.append(", ");
+      builder.append("maximum_front_step_length_when_stepping_up=");
+      builder.append(this.maximum_front_step_length_when_stepping_up_);      builder.append(", ");
+      builder.append("minimum_front_step_length_when_stepping_up=");
+      builder.append(this.minimum_front_step_length_when_stepping_up_);      builder.append(", ");
+      builder.append("maximum_hind_step_length_when_stepping_up=");
+      builder.append(this.maximum_hind_step_length_when_stepping_up_);      builder.append(", ");
+      builder.append("minimum_hind_step_length_when_stepping_up=");
+      builder.append(this.minimum_hind_step_length_when_stepping_up_);      builder.append(", ");
+      builder.append("step_z_for_stepping_up=");
+      builder.append(this.step_z_for_stepping_up_);      builder.append(", ");
+      builder.append("maximum_front_step_length_when_stepping_down=");
+      builder.append(this.maximum_front_step_length_when_stepping_down_);      builder.append(", ");
+      builder.append("minimum_front_step_length_when_stepping_down=");
+      builder.append(this.minimum_front_step_length_when_stepping_down_);      builder.append(", ");
+      builder.append("maximum_hind_step_length_when_stepping_down=");
+      builder.append(this.maximum_hind_step_length_when_stepping_down_);      builder.append(", ");
+      builder.append("minimum_hind_step_length_when_stepping_down=");
+      builder.append(this.minimum_hind_step_length_when_stepping_down_);      builder.append(", ");
+      builder.append("step_z_for_stepping_down=");
+      builder.append(this.step_z_for_stepping_down_);      builder.append(", ");
       builder.append("maximum_step_width=");
       builder.append(this.maximum_step_width_);      builder.append(", ");
       builder.append("minimum_step_width=");
@@ -649,10 +877,16 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
       builder.append("cliff_height_to_avoid=");
       builder.append(this.cliff_height_to_avoid_);      builder.append(", ");
-      builder.append("minimum_distance_from_cliff_bottoms=");
-      builder.append(this.minimum_distance_from_cliff_bottoms_);      builder.append(", ");
-      builder.append("minimum_distance_from_cliff_tops=");
-      builder.append(this.minimum_distance_from_cliff_tops_);
+      builder.append("minimum_front_end_forward_distance_from_cliff_bottoms=");
+      builder.append(this.minimum_front_end_forward_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("minimum_front_end_backward_distance_from_cliff_bottoms=");
+      builder.append(this.minimum_front_end_backward_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("minimum_hind_end_forward_distance_from_cliff_bottoms=");
+      builder.append(this.minimum_hind_end_forward_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("minimum_hind_end_backward_distance_from_cliff_bottoms=");
+      builder.append(this.minimum_hind_end_backward_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("minimum_lateral_distance_from_cliff_bottoms=");
+      builder.append(this.minimum_lateral_distance_from_cliff_bottoms_);
       builder.append("}");
       return builder.toString();
    }
