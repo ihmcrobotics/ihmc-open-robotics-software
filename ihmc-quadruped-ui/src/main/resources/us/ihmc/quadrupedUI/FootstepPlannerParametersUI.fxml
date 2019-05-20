@@ -44,16 +44,18 @@
                                 <Label text="Min x clearance" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                                 <Label text="Min y clearance" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                                 <Label text="Max surface incline" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-
                                 <Label text="Expansion project inside distance" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                                 <Label text="Post project inside distance" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
                                 <Label text="Maximum xy wiggle distance" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
+                                
                                 <Label text="Cliff height to avoid" GridPane.columnIndex="2" GridPane.halignment="RIGHT" />
                                 <Label text="Min front forward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                                 <Label text="Min front backward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
                                 <Label text="Min hind forward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                                 <Label text="Min hind backward from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                                 <Label text="Min lateral from cliffs" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                                
+                                
 
                                 <Label text="Distance weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" />
                                 <Label text="Yaw weight" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
@@ -68,16 +70,18 @@
                                 <Spinner fx:id="minXClearanceFromFoot" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                 <Spinner fx:id="minYClearanceFromFoot" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                 <Spinner fx:id="minSurfaceIncline" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-
                                 <Spinner fx:id="projectInsideDistanceForExpansion" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                 <Spinner fx:id="projectInsideDistanceForPostProcessing" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                                 <Spinner fx:id="maximumXYWiggleDistance" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                                
                                 <Spinner fx:id="cliffHeightToAvoid" editable="true" GridPane.columnIndex="3" />
                                 <Spinner fx:id="minFrontEndForwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                                 <Spinner fx:id="minFrontEndBackwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                                 <Spinner fx:id="minHindEndForwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                                 <Spinner fx:id="minHindEndBackwardDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                                 <Spinner fx:id="minLateralDistanceFromCliffBottoms" editable="true" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                                
+
 
                                 <Spinner fx:id="distanceWeight" editable="true" GridPane.columnIndex="5" />
                                 <Spinner fx:id="yawWeight" editable="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
