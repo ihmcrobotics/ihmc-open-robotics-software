@@ -10,14 +10,16 @@ public interface DCMPlannerInterface
 {
    void clearStepSequence();
 
-   void setNominalCoMHeight(double comHeight);
-
    void addStepToSequence(QuadrupedTimedStep step);
 
    void initializeForStanding();
 
    void initializeForStepping(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FramePoint3DReadOnly currentDCMPosition,
                               FrameVector3DReadOnly currentDCMVelocity);
+
+   void beganStep();
+
+   void completedStep();
 
    void computeDcmSetpoints(QuadrantDependentList<YoEnum<ContactState>> currentContactStates, FixedFramePoint3DBasics desiredDCMPositionToPack,
                             FixedFrameVector3DBasics desiredDCMVelocityToPack);
