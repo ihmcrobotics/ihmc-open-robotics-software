@@ -128,7 +128,7 @@ public class AvatarControllerThread
       registry.addChild(robotController.getYoVariableRegistry());
       if (outputProcessor != null)
       {
-         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, desiredJointDataHolder);
+         outputProcessor.setLowLevelControllerCoreOutput(processedJointData, desiredJointDataHolder);
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
