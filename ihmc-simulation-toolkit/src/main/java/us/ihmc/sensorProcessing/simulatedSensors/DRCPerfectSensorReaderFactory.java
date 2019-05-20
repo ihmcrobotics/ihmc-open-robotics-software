@@ -8,7 +8,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -22,18 +22,29 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final DRCPerfectSensorReader perfectSensorReader;
-   private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
+   private ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
    public DRCPerfectSensorReaderFactory(FloatingRootJointRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
    {
+      this(robot, estimateDT);
+      setForceSensorDataHolder(forceSensorDataHolderToUpdate);
+   }
+
+   public DRCPerfectSensorReaderFactory(FloatingRootJointRobot robot, double estimateDT)
+   {
       this.robot = robot;
       perfectSensorReader = new DRCPerfectSensorReader(estimateDT);
+   }
+
+   @Override
+   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolderToUpdate)
+   {
       this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
    }
 
    @Override
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       final Joint scsRootJoint = robot.getRootJoints().get(0);
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
@@ -41,7 +52,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCaclculators = new ArrayList<WrenchCalculatorInterface>();
       robot.getForceSensors(groundContactPointBasedWrenchCaclculators);
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-            scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators);
+            scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators, imuDefinitions, forceSensorDefinitions);
       stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
 
       SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderToUpdate, null);

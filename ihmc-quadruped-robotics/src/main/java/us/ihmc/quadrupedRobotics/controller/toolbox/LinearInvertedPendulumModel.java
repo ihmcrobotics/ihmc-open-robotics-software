@@ -40,7 +40,7 @@ public class LinearInvertedPendulumModel
       return omega0.getDoubleValue();
    }
 
-   public DoubleProvider getYoNaturalFrequency()
+   public YoDouble getYoNaturalFrequency()
    {
       return omega0;
    }
