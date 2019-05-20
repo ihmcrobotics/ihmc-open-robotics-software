@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
@@ -685,7 +686,6 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
     * Get the radius and center point of the largest
     * circle that can be drawn in the polygon.
     *
-    * @param center of circle point to pack
     * @return radius of the in circle
     */
    public double getInCircle2d(FramePoint3D inCircleCenterToPack)
@@ -839,24 +839,34 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
     */
    double getNominalPitch()
    {
-      if (getNumberOfVertices() >= 3)
+      return getNominalPitch(footsteps, getNumberOfVertices());
+   }
+
+   /**
+    * Computes a nominal pitch angle. If triangle support, then the angle from the front to back support foot on the same side.
+    * If a quad, then the average of the two front to back angles.
+    * @return double
+    */
+   public static double getNominalPitch(QuadrantDependentList<? extends Point3DReadOnly> solePositions, int numberOfVertices)
+   {
+      if (numberOfVertices >= 3)
       {
          double deltaX = 0.0;
          double deltaY = 0.0;
          double deltaZ = 0.0;
 
-         if ((footsteps.containsQuadrant(RobotQuadrant.FRONT_LEFT) && footsteps.containsQuadrant(RobotQuadrant.HIND_LEFT)))
+         if ((solePositions.containsKey(RobotQuadrant.FRONT_LEFT) && solePositions.containsKey(RobotQuadrant.HIND_LEFT)))
          {
-            deltaX += getFootstep(RobotQuadrant.FRONT_LEFT).getX() - getFootstep(RobotQuadrant.HIND_LEFT).getX();
-            deltaY += getFootstep(RobotQuadrant.FRONT_LEFT).getY() - getFootstep(RobotQuadrant.HIND_LEFT).getY();
-            deltaZ += getFootstep(RobotQuadrant.FRONT_LEFT).getZ() - getFootstep(RobotQuadrant.HIND_LEFT).getZ();
+            deltaX += solePositions.get(RobotQuadrant.FRONT_LEFT).getX() - solePositions.get(RobotQuadrant.HIND_LEFT).getX();
+            deltaY += solePositions.get(RobotQuadrant.FRONT_LEFT).getY() - solePositions.get(RobotQuadrant.HIND_LEFT).getY();
+            deltaZ += solePositions.get(RobotQuadrant.FRONT_LEFT).getZ() - solePositions.get(RobotQuadrant.HIND_LEFT).getZ();
          }
 
-         if (footsteps.containsQuadrant(RobotQuadrant.FRONT_RIGHT) && footsteps.containsQuadrant(RobotQuadrant.HIND_RIGHT))
+         if (solePositions.containsKey(RobotQuadrant.FRONT_RIGHT) && solePositions.containsKey(RobotQuadrant.HIND_RIGHT))
          {
-            deltaX += getFootstep(RobotQuadrant.FRONT_RIGHT).getX() - getFootstep(RobotQuadrant.HIND_RIGHT).getX();
-            deltaY += getFootstep(RobotQuadrant.FRONT_RIGHT).getY() - getFootstep(RobotQuadrant.HIND_RIGHT).getY();
-            deltaZ += getFootstep(RobotQuadrant.FRONT_RIGHT).getZ() - getFootstep(RobotQuadrant.HIND_RIGHT).getZ();
+            deltaX += solePositions.get(RobotQuadrant.FRONT_RIGHT).getX() - solePositions.get(RobotQuadrant.HIND_RIGHT).getX();
+            deltaY += solePositions.get(RobotQuadrant.FRONT_RIGHT).getY() - solePositions.get(RobotQuadrant.HIND_RIGHT).getY();
+            deltaZ += solePositions.get(RobotQuadrant.FRONT_RIGHT).getZ() - solePositions.get(RobotQuadrant.HIND_RIGHT).getZ();
          }
 
          double length = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
@@ -870,7 +880,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       }
       else
       {
-         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + getNumberOfVertices());
+         throw new UndefinedOperationException("Undefined for less than 3 vertices. vertices = " + numberOfVertices);
       }
    }
 

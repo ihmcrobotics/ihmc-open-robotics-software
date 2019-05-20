@@ -18,6 +18,18 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, SettableFootstepPlannerParameters::setMinimumStepYaw);
    private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, SettableFootstepPlannerParameters::setMaximumStepYaw);
 
+   private final DoubleField maximumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumFrontStepLengthWhenSteppingUp);
+   private final DoubleField minimumFrontStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMinimumFrontStepLengthWhenSteppingUp);
+   private final DoubleField maximumHindStepLengthWhenSteppingUp= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingUp);
+   private final DoubleField minimumHindStepLengthWhenSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLengthWhenSteppingUp, SettableFootstepPlannerParameters::setMinimumHindStepLengthWhenSteppingUp);
+   private final DoubleField stepZForSteppingUp = new DoubleField(SettableFootstepPlannerParameters::getStepZForSteppingUp, SettableFootstepPlannerParameters::setStepZForSteppingUp);
+
+   private final DoubleField maximumFrontStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMaximumFrontStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMaximumFrontStepLengthWhenSteppingDown);
+   private final DoubleField minimumFrontStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMinimumFrontStepLengthWhenSteppingDown);
+   private final DoubleField maximumHindStepLengthWhenSteppingDown= new DoubleField(SettableFootstepPlannerParameters::getMaximumHindStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMaximumHindStepLengthWhenSteppingDown);
+   private final DoubleField minimumHindStepLengthWhenSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindStepLengthWhenSteppingDown, SettableFootstepPlannerParameters::setMinimumHindStepLengthWhenSteppingDown);
+   private final DoubleField stepZForSteppingDown = new DoubleField(SettableFootstepPlannerParameters::getStepZForSteppingDown, SettableFootstepPlannerParameters::setStepZForSteppingDown);
+
    private final DoubleField maximumStepChangeZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepChangeZ, SettableFootstepPlannerParameters::setMaximumStepChangeZ);
    private final DoubleField bodyGroundClearance = new DoubleField(SettableFootstepPlannerParameters::getBodyGroundClearance, SettableFootstepPlannerParameters::setBodyGroundClearance);
 
@@ -27,8 +39,11 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField projectInsideDistanceForPostProcessing = new DoubleField(SettableFootstepPlannerParameters::getProjectInsideDistanceForPostProcessing, SettableFootstepPlannerParameters::setProjectInsideDistanceForPostProcessing);
    private final DoubleField maximumXYWiggleDistance = new DoubleField(SettableFootstepPlannerParameters::getMaximumXYWiggleDistance, SettableFootstepPlannerParameters::setMaximumXYWiggleDistance);
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
-   private final DoubleField minDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffBottoms);
-   private final DoubleField minDistanceFromCliffTops = new DoubleField(SettableFootstepPlannerParameters::getMinimumDistanceFromCliffTops, SettableFootstepPlannerParameters::setMinimumDistanceFromCliffTops);
+   private final DoubleField minFrontEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndForwardDistanceFromCliffBottoms);
+   private final DoubleField minFrontEndBackwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndBackwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndBackwardDistanceFromCliffBottoms);
+   private final DoubleField minHindEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndBackwardDistanceFromCliffBottoms);
+   private final DoubleField minHindEndBackwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndBackwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndBackwardDistanceFromCliffBottoms);
+   private final DoubleField minLateralDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumLateralDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumLateralDistanceFromCliffBottoms);
 
    private final DoubleField distanceWeight = new DoubleField(SettableFootstepPlannerParameters::getDistanceHeuristicWeight, SettableFootstepPlannerParameters::setDistanceHeuristicWeight);
    private final DoubleField xGaitWeight = new DoubleField(SettableFootstepPlannerParameters::getXGaitWeight, SettableFootstepPlannerParameters::setXGaitWeight);
@@ -93,6 +108,56 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumHindStepLength);
    }
 
+   public void bidirectionalBindMaximumFrontStepLengthWhenSteppingUp(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumFrontStepLengthWhenSteppingUp);
+   }
+
+   public void bidirectionalBindMinimumFrontStepLengthWhenSteppingUp(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minimumFrontStepLengthWhenSteppingUp);
+   }
+
+   public void bidirectionalBindMaximumHindStepLengthWhenSteppingUp(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumHindStepLengthWhenSteppingUp);
+   }
+
+   public void bidirectionalBindMinimumHindStepLengthWhenSteppingUp(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minimumHindStepLengthWhenSteppingUp);
+   }
+
+   public void bidirectionalBindStepZForSteppingUp(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepZForSteppingUp);
+   }
+
+   public void bidirectionalBindMaximumFrontStepLengthWhenSteppingDown(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumFrontStepLengthWhenSteppingDown);
+   }
+
+   public void bidirectionalBindMinimumFrontStepLengthWhenSteppingDown(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minimumFrontStepLengthWhenSteppingDown);
+   }
+
+   public void bidirectionalBindMaximumHindStepLengthWhenSteppingDown(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, maximumHindStepLengthWhenSteppingDown);
+   }
+
+   public void bidirectionalBindMinimumHindStepLengthWhenSteppingDown(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minimumHindStepLengthWhenSteppingDown);
+   }
+
+   public void bidirectionalBindStepZForSteppingDown(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, stepZForSteppingDown);
+   }
+
    public void bidirectionalBindMaxWalkingSpeedMultiplier(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maxWalkingSpeedMultiplier);
@@ -118,14 +183,29 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, maximumXYWiggleDistance);
    }
 
-   public void bidirectionalBindMinDistanceFromCliffBottoms(Property<? extends Number> property)
+   public void bidirectionalBindMinFrontEndForwardDistanceFromCliffBottoms(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, minDistanceFromCliffBottoms);
+      bindFieldBidirectionalToNumberProperty(property, minFrontEndForwardDistanceFromCliffBottoms);
    }
 
-   public void bidirectionalBindMinDistanceFromCliffTops(Property<? extends Number> property)
+   public void bidirectionalBindMinFrontEndBackwardDistanceFromCliffBottoms(Property<? extends Number> property)
    {
-      bindFieldBidirectionalToNumberProperty(property, minDistanceFromCliffTops);
+      bindFieldBidirectionalToNumberProperty(property, minFrontEndBackwardDistanceFromCliffBottoms);
+   }
+
+   public void bidirectionalBindMinHindEndForwardDistanceFromCliffBottoms(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minHindEndForwardDistanceFromCliffBottoms);
+   }
+
+   public void bidirectionalBindMinHindEndBackwardDistanceFromCliffBottoms(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minHindEndBackwardDistanceFromCliffBottoms);
+   }
+
+   public void bidirectionalBindMinLateralDistanceFromCliffBottoms(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, minLateralDistanceFromCliffBottoms);
    }
 
    public void bidirectionalBindMaximumStepWidth(Property<? extends Number> property)

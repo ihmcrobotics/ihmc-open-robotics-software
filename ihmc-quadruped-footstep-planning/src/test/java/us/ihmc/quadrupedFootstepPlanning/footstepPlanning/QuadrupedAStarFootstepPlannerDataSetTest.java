@@ -73,10 +73,9 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
             return 0.35;
          }
       };
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       AStarMessagerListener listener = new AStarMessagerListener(messager);
 
-      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, expansion, registry);
+      return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, registry);
    }
 
    @Override

@@ -39,6 +39,11 @@ public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
       snapDataHolder.clear();
    }
 
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
+   }
+
    public boolean hasPlanarRegions()
    {
       return planarRegionsList != null && !planarRegionsList.isEmpty();

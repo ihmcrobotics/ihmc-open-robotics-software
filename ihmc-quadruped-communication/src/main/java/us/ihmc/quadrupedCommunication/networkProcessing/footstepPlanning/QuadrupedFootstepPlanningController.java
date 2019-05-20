@@ -18,8 +18,6 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxControll
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.VisibilityGraphWithAStarPlanner;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.YoFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.turnWalkTurn.QuadrupedSplineWithTurnWalkTurnPlanner;
@@ -75,7 +73,6 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       visibilityGraphParameters = new YoVisibilityGraphParameters(defaultVisibilityGraphParameters, registry);
       footstepPlannerParameters = new YoFootstepPlannerParameters(defaultFootstepPlannerParameters, registry);
 
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(defaultFootstepPlannerParameters, xGaitSettings);
       if (robotDataReceiver != null)
       {
          plannerMap.put(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN,
@@ -85,7 +82,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
                                                                      robotDataReceiver.getReferenceFrames(), null, registry));
       }
       plannerMap.put(FootstepPlannerType.A_STAR,
-                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, expansion, registry));
+                     QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, xGaitSettings, null, registry));
       plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
                                                                                                     visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);

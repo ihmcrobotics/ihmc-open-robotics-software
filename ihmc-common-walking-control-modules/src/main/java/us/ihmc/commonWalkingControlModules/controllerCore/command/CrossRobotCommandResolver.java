@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.AtlasHumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -69,10 +72,16 @@ import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.ForceSensorData;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 /**
  * The objective of this class is to help the passing commands between two instances of the same
@@ -85,7 +94,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
  * The main challenge when passing commands is to retrieve the joints, rigid-bodies, and reference
  * frames properly.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class CrossRobotCommandResolver
@@ -97,7 +106,7 @@ public class CrossRobotCommandResolver
    public CrossRobotCommandResolver(FullHumanoidRobotModel fullRobotModel)
    {
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
-      referenceFrameHashCodeResolver.putAllFullRobotModelReferenceFrames(fullRobotModel);
+      referenceFrameHashCodeResolver.putAllChildren(fullRobotModel.getRootJoint().getFrameAfterJoint());
       rigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(fullRobotModel);
       jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
    }
@@ -131,7 +140,7 @@ public class CrossRobotCommandResolver
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(), out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
    }
 
-   private void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
+   public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
    {
       out.clear();
       for (int i = 0; i < in.getNumberOfBodiesWithCenterOfPressure(); i++)
@@ -139,6 +148,78 @@ public class CrossRobotCommandResolver
          out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
          resolveFrameTuple2D(in.getCenterOfPressure(i), out.getCenterOfPressure(i));
       }
+   }
+
+   public void resolveForceSensorDataHolder(ForceSensorDataHolder in, ForceSensorDataHolder out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfForceSensors(); i++)
+      {
+         ForceSensorDefinition inDefinition = in.getForceSensorDefinitions().get(i);
+         ForceSensorData inData = in.get(inDefinition);
+         out.registerForceSensor(inDefinition);
+         ForceSensorDefinition outDefinition = out.getForceSensorDefinitions().get(i);
+         ForceSensorData outData = out.get(outDefinition);
+
+         resolveForceSensorDefinition(inDefinition, outDefinition);
+         resolveForceSensorData(inData, outData);
+      }
+   }
+
+   public void resolveForceSensorData(ForceSensorData in, ForceSensorData out)
+   {
+      out.set(in);
+      out.setFrameAndBody(resolveReferenceFrame(in.getMeasurementFrame()), resolveRigidBody(in.getMeasurementLink()));
+   }
+
+   public void resolveForceSensorDefinition(ForceSensorDefinition in, ForceSensorDefinition out)
+   {
+      out.set(in.getSensorName(), resolveRigidBody(in.getRigidBody()), resolveReferenceFrame(in.getSensorFrame()));
+   }
+
+   public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveHumanoidRobotContextDataControllerToEstimator(in, out);
+      resolveHumanoidRobotContextDataEstimatorToController(in, out);
+   }
+
+   // TODO: split context up in part that goes from controller to estimator and other way.
+   public void resolveHumanoidRobotContextDataControllerToEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
+      resolveRobotMotionStatusHolder(in.getRobotMotionStatusHolder(), out.getRobotMotionStatusHolder());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getJointDesiredOutputList(), out.getJointDesiredOutputList());
+      out.setControllerRan(in.getControllerRan());
+   }
+
+   // TODO: split context up in part that goes from controller to estimator and other way.
+   public void resolveHumanoidRobotContextDataEstimatorToController(HumanoidRobotContextData in, HumanoidRobotContextData out)
+   {
+      resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
+      resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      out.setTimestamp(in.getTimestamp());
+      out.setEstimatorRan(in.getEstimatorRan());
+   }
+
+   public void resolveAtlasHumanoidRobotContextData(AtlasHumanoidRobotContextData in, AtlasHumanoidRobotContextData out)
+   {
+      resolveRawJointSensorDataHolderMap(in.getRawJointSensorDataHolderMap(), out.getRawJointSensorDataHolderMap());
+      resolveHumanoidRobotContextData(in, out);
+   }
+
+   public void resolveRawJointSensorDataHolderMap(RawJointSensorDataHolderMap in, RawJointSensorDataHolderMap out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfJoints(); i++)
+      {
+         out.registerJoint(resolveJoint(in.getJoint(i)));
+         resolveRawJointSensorDataHolder(in.get(i), out.get(i));
+      }
+   }
+
+   public void resolveRawJointSensorDataHolder(RawJointSensorDataHolder in, RawJointSensorDataHolder out)
+   {
+      out.set(in);
    }
 
    public void resolveInverseDynamicsCommandList(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
@@ -699,12 +780,22 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
    }
 
-   private void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
+   public void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
    {
       out.setIsAdjustable(in.getIsAdjustable());
       out.setRobotSide(in.getRobotSide());
       resolveFramePose3D(in.getSoleFramePose(), out.getSoleFramePose());
       out.setFoothold(in.getFoothold());
+   }
+
+   public void resolveHumanoidRobotContextJointData(HumanoidRobotContextJointData in, HumanoidRobotContextJointData out)
+   {
+      out.set(in);
+   }
+
+   public void resolveRobotMotionStatusHolder(RobotMotionStatusHolder in, RobotMotionStatusHolder out)
+   {
+      out.set(in);
    }
 
    public void resolveWrench(WrenchReadOnly in, WrenchBasics out)

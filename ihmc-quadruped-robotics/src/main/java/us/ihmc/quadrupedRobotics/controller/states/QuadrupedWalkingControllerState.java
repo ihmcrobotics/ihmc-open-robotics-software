@@ -264,6 +264,8 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       footstepStatusMessage.getDesiredTouchdownPositionInWorld().set(step.getGoalPosition());
       statusMessageOutputManager.reportStatusMessage(footstepStatusMessage);
 
+      balanceManager.beganStep();
+
       controllerToolbox.getFallDetector().setNextFootstep(quadrant, step);
    }
 
