@@ -5,13 +5,12 @@ import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
 import javafx.animation.AnimationTimer;
 import net.java.games.input.Event;
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.Messager;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedPlanning.stepStream.input.InputValueIntegrator;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
@@ -21,33 +20,35 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.quadrupedUI.QuadrupedXBoxBindings.*;
 
 public class QuadrupedJoystickModule extends AnimationTimer implements JoystickEventListener
 {
    private static final int pollRateMillis = 50;
+   private static final double maximumBodyHeightOffset = 0.1;
+   private static final double bodyHeightDeltaPerClick = 0.01;
+   private static final double maxBodyYaw = 0.15;
+   private static final double maxBodyRoll = 0.15;
+   private static final double maxBodyPitch = 0.15;
+   private static final double bodyOrientationShiftTime = 0.1;
+   private static final double maxTranslationX = 0.25;
+   private static final double maxTranslationY = 0.15;
+   private static final double maxYSpeedFraction = 0.5;
+   private static final double maxYawSpeedFraction = 0.75;
 
-   private final MutableDouble maxBodyYaw = new MutableDouble();
-   private final MutableDouble maxBodyRoll = new MutableDouble();
-   private final MutableDouble maxBodyPitch = new MutableDouble();
-   private final MutableDouble maxBodyHeightVelocity = new MutableDouble();
-   private final MutableDouble maxTranslationX = new MutableDouble();
-   private final MutableDouble maxTranslationY = new MutableDouble();
-   private final MutableDouble maxYSpeedFraction = new MutableDouble();
-   private final MutableDouble maxYawSpeedFraction = new MutableDouble();
    private final MutableDouble maxVelocityY = new MutableDouble();
    private final MutableDouble maxVelocityYaw = new MutableDouble();
-   private final MutableDouble bodyOrientationShiftTime = new MutableDouble();
-   private final InputValueIntegrator bodyHeight = new InputValueIntegrator(Conversions.millisecondsToSeconds(pollRateMillis), 0.0);
+   private final MutableDouble bodyHeightOffset = new MutableDouble();
 
    private final Messager messager;
+   private final double nominalBodyHeight;
    private final Map<XBoxOneMapping, Double> channels = Collections.synchronizedMap(new EnumMap<>(XBoxOneMapping.class));
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final AtomicBoolean joystickPollFlag = new AtomicBoolean();
-   private final double nominalBodyHeight;
 
-   private final AtomicBoolean enabled = new AtomicBoolean(false);
+   private final AtomicReference<Boolean> enabled;
    private final AtomicBoolean resetBodyPose = new AtomicBoolean(false);
 
    public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, Joystick joystick)
@@ -65,17 +66,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
          channels.put(channel, 0.0);
       }
 
-      maxBodyYaw.setValue(0.15);
-      maxBodyRoll.setValue(0.15);
-      maxBodyPitch.setValue(0.15);
-      maxBodyHeightVelocity.setValue(0.1);
-      maxTranslationX.setValue(0.25);
-      maxTranslationY.setValue(0.15);
-      maxYSpeedFraction.setValue(0.5);
-      maxYawSpeedFraction.setValue(0.75);
-      bodyOrientationShiftTime.setValue(0.1);
-      bodyHeight.reset(nominalBodyHeight);
-
+      enabled = messager.createInput(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, state ->
       {
@@ -129,21 +120,21 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
    private void sendResetCommands()
    {
-      bodyHeight.reset(nominalBodyHeight);
+      bodyHeightOffset.setValue(0.0);
 
       QuadrupedTeleopDesiredPose desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(0.0, 0.0, bodyHeight.value());
+      desiredPoseMessage.getPose().getPosition().set(0.0, 0.0, nominalBodyHeight);
       desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
-      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
+      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime);
 
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, desiredPoseMessage);
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, bodyHeight.value());
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, nominalBodyHeight);
    }
 
    private void processJoystickStepCommands()
    {
-      maxVelocityY.setValue(maxYSpeedFraction.getValue() * xGaitSettings.getMaxSpeed());
-      maxVelocityYaw.setValue(maxYawSpeedFraction.getValue() * xGaitSettings.getMaxSpeed());
+      maxVelocityY.setValue(maxYSpeedFraction * xGaitSettings.getMaxSpeed());
+      maxVelocityYaw.setValue(maxYawSpeedFraction * xGaitSettings.getMaxSpeed());
 
       double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
       double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
@@ -161,20 +152,20 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
    private void processJoystickBodyCommands()
    {
-      double bodyRoll = channels.get(rollMapping) * maxBodyRoll.getValue();
-      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch.getValue();
+      double bodyRoll = channels.get(rollMapping) * maxBodyRoll;
+      double bodyPitch = channels.get(pitchMapping) * maxBodyPitch;
 
-      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX.getValue();
-      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY.getValue();
+      double bodyXTranslation = channels.get(xTranslationMapping) * maxTranslationX;
+      double bodyYTranslation = channels.get(yTranslationMapping) * maxTranslationY;
 
       double bodyYawLeft = channels.get(negativeYawMapping);
       double bodyYawRight = channels.get(positiveYawMapping);
-      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw.getValue();
+      double bodyYaw = (bodyYawLeft - bodyYawRight) * maxBodyYaw;
 
       QuadrupedTeleopDesiredPose desiredPoseMessage = new QuadrupedTeleopDesiredPose();
-      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, bodyHeight.value());
+      desiredPoseMessage.getPose().getPosition().set(bodyXTranslation, bodyYTranslation, nominalBodyHeight + bodyHeightOffset.getValue());
       desiredPoseMessage.getPose().getOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
-      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime.getValue());
+      desiredPoseMessage.setPoseShiftTime(bodyOrientationShiftTime);
       messager.submitMessage(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, desiredPoseMessage);
    }
 
@@ -182,16 +173,15 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    {
       if (channels.get(XBoxOneMapping.DPAD) == 0.25)
       {
-         double bodyHeightVelocity = maxBodyHeightVelocity.getValue();
-         bodyHeight.update(bodyHeightVelocity);
+         bodyHeightOffset.add(bodyHeightDeltaPerClick);
       }
       else if (channels.get(XBoxOneMapping.DPAD) == 0.75)
       {
-         double bodyHeightVelocity = -maxBodyHeightVelocity.getValue();
-         bodyHeight.update(bodyHeightVelocity);
+         bodyHeightOffset.add(- bodyHeightDeltaPerClick);
       }
 
-      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, bodyHeight.value());
+      bodyHeightOffset.setValue(MathTools.clamp(bodyHeightOffset.getValue(), maximumBodyHeightOffset));
+      messager.submitMessage(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, nominalBodyHeight + bodyHeightOffset.getValue());
    }
 
    private void processStateChangeRequests(Event event)
@@ -212,7 +202,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
       if (mapping == XBoxOneMapping.START)
       {
-         enabled.set(!enabled.get());
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, !enabled.get());
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
       }
 
