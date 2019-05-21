@@ -60,6 +60,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final FrameVector3D finalVelocityNoTimeDiemension = new FrameVector3D();
    private final FrameVector3D tempWaypointVelocity = new FrameVector3D();
 
+   private final FramePoint3D tempPoint3D = new FramePoint3D();
+
    private final BagOfBalls waypointViz;
 
    private RobotSide swingSide = null;
@@ -422,6 +424,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    @Override
    public void hideVisualization()
    {
+      waypointViz.hideAll();
+      tempPoint3D.setToNaN();
+      for (int i = 0; i < numberWaypoints; i++)
+         waypointViz.setBall(tempPoint3D, i);
       trajectory.hideVisualization();
    }
 

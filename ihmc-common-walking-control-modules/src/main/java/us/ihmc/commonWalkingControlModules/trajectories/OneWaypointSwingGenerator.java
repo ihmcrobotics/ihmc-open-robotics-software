@@ -298,9 +298,14 @@ public class OneWaypointSwingGenerator implements SwingGenerator
       trajectory.showVisualization();
    }
 
+   private final FramePoint3D tempPoint3D = new FramePoint3D();
    @Override
    public void hideVisualization()
    {
+      waypointViz.hideAll();
+      tempPoint3D.setToNaN();
+      for (int i = 0; i < numberWaypoints; i++)
+         waypointViz.setBall(tempPoint3D, i);
       trajectory.hideVisualization();
    }
 
