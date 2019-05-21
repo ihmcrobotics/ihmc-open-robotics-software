@@ -10,7 +10,7 @@ import us.ihmc.ros2.Ros2Node;
 public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorService
 {
 
-   private int numberToAverage = 5;
+   private int numberToAverage = 10;
    private ArrayList<FramePose3D> originPoses;
    private ArrayList<FramePose3D> doorPoses;
 

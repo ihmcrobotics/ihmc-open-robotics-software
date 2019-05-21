@@ -33,6 +33,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    {
       publishTextToSpeech("watching the door");
       doorOpenDetectorBehaviorService.initialize();
+      doorOpenDetectorBehaviorService.run(true);
    }
 
    @Override
