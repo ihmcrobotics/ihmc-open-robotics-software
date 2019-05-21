@@ -29,6 +29,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private static final int pollRateMillis = 50;
    private static final double maximumBodyHeightOffset = 0.1;
    private static final double bodyHeightDeltaPerClick = 0.01;
+   private static final double endPhaseDeltaPerClick = 90.0;
    private static final double maxBodyYaw = 0.25;
    private static final double maxBodyRoll = 0.15;
    private static final double maxBodyPitch = 0.15;
@@ -48,7 +49,11 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private final QuadrupedXGaitSettingsBasics xGaitSettings;
    private final AtomicBoolean joystickPollFlag = new AtomicBoolean();
 
-   private final AtomicReference<Boolean> enabled;
+   private final AtomicReference<Boolean> joystickEnabled;
+   private final AtomicReference<Boolean> stepTeleopEnabled;
+   private final AtomicReference<Boolean> heightTeleopEnabled;
+   private final AtomicReference<Boolean> bodyPoseTeleopEnabled;
+
    private final AtomicBoolean resetBodyPose = new AtomicBoolean(false);
 
    public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, Joystick joystick)
@@ -68,13 +73,17 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       channels.put(XBoxOneMapping.LEFT_TRIGGER, -1.0);
       channels.put(XBoxOneMapping.RIGHT_TRIGGER, -1.0);
 
-      enabled = messager.createInput(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
+      joystickEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
+      stepTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
+      heightTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, false);
+      bodyPoseTeleopEnabled = messager.createInput(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, false);
+
       messager.registerTopicListener(QuadrupedUIMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, state ->
       {
          if (state != HighLevelControllerName.WALKING)
          {
-            enabled.set(false);
+            messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
          }
       });
    }
@@ -108,7 +117,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
          sendResetCommands();
       }
 
-      if (!enabled.get())
+      if (!joystickEnabled.get())
       {
          return;
       }
@@ -197,22 +206,33 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
 
       if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
       {
-         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - 90.0);
+         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - endPhaseDeltaPerClick);
       }
       else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
       {
-         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + 90.0);
+         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + endPhaseDeltaPerClick);
       }
-
-      if (mapping == XBoxOneMapping.START)
+      else if (mapping == XBoxOneMapping.START)
       {
-         messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, !enabled.get());
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, !joystickEnabled.get());
          messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
       }
-
-      if (mapping == XBoxOneMapping.B)
+      else if (mapping == XBoxOneMapping.SELECT)
       {
          resetBodyPose.set(true);
+      }
+
+      else if (mapping == XBoxOneMapping.A)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableHeightTeleopTopic, !heightTeleopEnabled.get());
+      }
+      else if (mapping == XBoxOneMapping.B)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableBodyTeleopTopic, !bodyPoseTeleopEnabled.get());
+      }
+      else if (mapping == XBoxOneMapping.Y)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, !stepTeleopEnabled.get());
       }
    }
 
