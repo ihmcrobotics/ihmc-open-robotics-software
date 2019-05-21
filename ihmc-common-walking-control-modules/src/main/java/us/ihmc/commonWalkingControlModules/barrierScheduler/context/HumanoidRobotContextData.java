@@ -93,14 +93,14 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       this.sensorDataContext = sensorDataContext;
    }
 
-   public HumanoidRobotContextData(FullHumanoidRobotModel masterFullRobotModel)
+   public HumanoidRobotContextData(FullHumanoidRobotModel fullRobotModel)
    {
-      processedJointData = new HumanoidRobotContextJointData(masterFullRobotModel.getOneDoFJoints().length);
-      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(masterFullRobotModel.getForceSensorDefinitions()));
-      centerOfPressureDataHolder = new CenterOfPressureDataHolder(masterFullRobotModel);
+      processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
+      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      centerOfPressureDataHolder = new CenterOfPressureDataHolder(fullRobotModel);
       robotMotionStatusHolder = new RobotMotionStatusHolder();
-      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(masterFullRobotModel.getControllableOneDoFJoints());
-      sensorDataContext = new SensorDataContext(masterFullRobotModel);
+      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      sensorDataContext = new SensorDataContext(fullRobotModel);
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()
