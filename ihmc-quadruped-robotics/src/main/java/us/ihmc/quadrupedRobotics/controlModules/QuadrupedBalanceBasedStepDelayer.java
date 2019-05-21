@@ -60,7 +60,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
 
    private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 0.2);
-   private final DoubleProvider minimumTimeForStep = new DoubleParameter("maximumDelayFraction", registry, 0.4);
+   private final DoubleProvider minimumTimeForStep = new DoubleParameter("minimumDurationForDelayedStep", registry, 0.4);
    private final DoubleParameter timeToDelayLiftOff = new DoubleParameter("timeToDelayLiftOff", registry, 0.005);
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
