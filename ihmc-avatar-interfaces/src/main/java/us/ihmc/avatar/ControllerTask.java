@@ -45,6 +45,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       controllerThread.write();
       masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
+
+      // Abuse the fact that this is running on the scheduler thread to safely update the robot visualizer.
       robotVisualizer.update(masterContext.getTimestamp(), controllerThread.getYoVariableRegistry());
    }
 

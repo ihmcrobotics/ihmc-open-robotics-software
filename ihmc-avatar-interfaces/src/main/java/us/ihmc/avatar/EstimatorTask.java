@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotComm
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 
 public class EstimatorTask extends HumanoidRobotControlTask
 {
@@ -13,6 +14,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
    private final CrossRobotCommandResolver masterResolver;
 
    private final AvatarEstimatorThread estimatorThread;
+   private final SensorReader sensorReader;
 
    private final RobotVisualizer robotVisualizer;
 
@@ -22,6 +24,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       super(divisor);
       this.estimatorThread = estimatorThread;
+      this.sensorReader = estimatorThread.getSensorReader();
       this.robotVisualizer = robotVisualizer;
 
       estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
@@ -46,7 +49,14 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       estimatorThread.write();
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
+
+      // Abuse the fact that this is running on the scheduler thread to safely update the robot visualizer.
       robotVisualizer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
+
+      // Abuse the fact that this is running on the robot synchronized thread to update the sensor data and the time.
+      long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+      masterContext.setTimestamp(newTimestamp);
+
       estimatorThread.read();
    }
 

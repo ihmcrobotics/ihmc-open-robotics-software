@@ -47,7 +47,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -285,16 +284,15 @@ public class AvatarSimulationFactory
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
-      SensorReader sensorReader = stateEstimationThread.getSensorReader();
       if (!scsInitialSetup.get().getRunMultiThreaded())
       {
          LogTools.warn("Running simulation in single threaded mode");
-         robotController = new HumanoidSingleThreadedRobotController(controllerName, tasks, masterContext, sensorReader);
+         robotController = new SingleThreadedRobotController<>(controllerName, tasks, masterContext);
       }
       else
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new HumanoidBarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, sensorReader);
+         robotController = new BarrierScheduledRobotController<>(controllerName, tasks, masterContext, overrunBehavior);
       }
 
       // Add registry and graphics to SCS.
