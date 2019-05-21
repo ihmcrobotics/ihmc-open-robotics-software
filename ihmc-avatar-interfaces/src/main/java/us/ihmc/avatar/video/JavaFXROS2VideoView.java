@@ -44,18 +44,14 @@ public class JavaFXROS2VideoView extends ImageView
    public void start()
    {
       running = true;
-
       new ROS2Callback<>(ros2Node, VideoPacket.class, null, null, null, this::acceptVideo);
-
       animationTimer.start();
    }
 
    public void stop()
    {
       running = false;
-
       animationTimer.stop();
-
       executorService.shutdownNow();
    }
 
