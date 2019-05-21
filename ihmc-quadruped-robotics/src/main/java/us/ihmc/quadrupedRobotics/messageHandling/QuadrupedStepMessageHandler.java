@@ -89,6 +89,13 @@ public class QuadrupedStepMessageHandler
 
    public void handleQuadrupedTimedStepListCommand(QuadrupedTimedStepListCommand command)
    {
+      // if paused, resume when new steps are received
+      if (isPaused.getBooleanValue())
+      {
+         isPaused.set(false);
+         pauseTime.set(Double.NaN);
+      }
+
       double currentTime = robotTimestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
       RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
