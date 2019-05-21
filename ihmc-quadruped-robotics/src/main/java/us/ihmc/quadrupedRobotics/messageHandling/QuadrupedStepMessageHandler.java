@@ -190,6 +190,11 @@ public class QuadrupedStepMessageHandler
       }
    }
 
+   public void clearUpcomingSteps()
+   {
+      TimeIntervalTools.removeStartTimesGreaterThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
+   }
+
    public void clearFootTrajectory(RobotQuadrant robotQuadrant)
    {
       upcomingFootTrajectoryCommandList.get(robotQuadrant).clear();
