@@ -26,6 +26,8 @@ public class SimulationRobotVisualizer implements RobotVisualizer
       if (registry != originalRegistry)
          throw new RuntimeException("Must call update with the original registry.");
       this.registry.updateMirror();
+      if (graphicsListRegistry != null)
+         graphicsListRegistry.update();
    }
 
    @Override
@@ -63,5 +65,12 @@ public class SimulationRobotVisualizer implements RobotVisualizer
    public YoGraphicsListRegistry getGraphicsListRegistry()
    {
       return graphicsListRegistry;
+   }
+
+   public void updateGraphics()
+   {
+      registry.updateChangedValues();
+      if (graphicsListRegistry != null)
+         graphicsListRegistry.update();
    }
 }
