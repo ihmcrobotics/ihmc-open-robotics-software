@@ -7,6 +7,7 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
@@ -46,6 +47,7 @@ public class RemoteQuadrupedTeleopManager
    private final IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListControllerPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingMessagePublisher;
+   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingMessagePublisher;
 
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
    private final IHMCROS2Publisher<QuadrupedTeleopDesiredHeight> desiredHeightPublisher;
@@ -95,11 +97,11 @@ public class RemoteQuadrupedTeleopManager
       bodyOrientationPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
       planarRegionsListControllerPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, controllerSubGenerator);
       pauseWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      abortWalkingMessagePublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
 
       desiredVelocityPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
       desiredPosePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredPose.class, bodyTeleopSubGenerator);
       desiredHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTeleopDesiredHeight.class, heightTeleopSubGenerator);
-
 
       stepTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
       heightTeleopStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, heightTeleopSubGenerator);
@@ -169,6 +171,11 @@ public class RemoteQuadrupedTeleopManager
    public void requestPauseWalking(boolean pauseWalking)
    {
       pauseWalkingMessagePublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(pauseWalking));
+   }
+
+   public void requestAbortWalking()
+   {
+      abortWalkingMessagePublisher.publish(new AbortWalkingMessage());
    }
 
    private void requestStopWalking()
