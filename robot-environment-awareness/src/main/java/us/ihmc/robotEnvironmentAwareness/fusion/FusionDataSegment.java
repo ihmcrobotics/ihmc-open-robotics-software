@@ -11,7 +11,7 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 public class FusionDataSegment
 {
    private int id = -1;
-   
+
    private final int imageSegmentLabel;
    private final TIntArrayList adjacentSegmentLabels = new TIntArrayList();
    private final List<Point3D> points = new ArrayList<>();
@@ -23,6 +23,10 @@ public class FusionDataSegment
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 
+   private static final boolean useAdjacentScore = true;
+   private static final int numberOfAdjacentPixels = 20;
+   private final TIntArrayList adjacentScore = new TIntArrayList();
+
    public FusionDataSegment(int labelID)
    {
       imageSegmentLabel = labelID;
@@ -30,12 +34,28 @@ public class FusionDataSegment
 
    public boolean contains(int otherLabel)
    {
-      return adjacentSegmentLabels.contains(otherLabel);
+      if (useAdjacentScore)
+      {
+         for (int i = 0; i < adjacentSegmentLabels.size(); i++)
+         {
+            if (adjacentSegmentLabels.get(i) == otherLabel)
+            {
+               adjacentScore.replace(i, adjacentScore.get(i) + 1);
+               return true;
+            }
+         }
+         return false;
+      }
+      else
+      {
+         return adjacentSegmentLabels.contains(otherLabel);
+      }
    }
 
    public void addAdjacentSegmentLabel(int otherLabel)
    {
       adjacentSegmentLabels.add(otherLabel);
+      adjacentScore.add(1);
    }
 
    public void addPoint(Point3D point)
@@ -45,28 +65,40 @@ public class FusionDataSegment
 
    public void update()
    {
+      if (useAdjacentScore)
+      {
+         TIntArrayList newAdjacentSegmentLabels = new TIntArrayList();
+         TIntArrayList newAdjacentScore = new TIntArrayList();
+         for (int i = 0; i < adjacentSegmentLabels.size(); i++)
+         {
+            if (adjacentScore.get(i) > numberOfAdjacentPixels)
+            {
+               newAdjacentSegmentLabels.add(adjacentSegmentLabels.get(i));
+               newAdjacentScore.add(adjacentScore.get(i));
+            }
+         }
+         adjacentSegmentLabels.clear();
+         adjacentSegmentLabels.addAll(newAdjacentSegmentLabels);
+         adjacentScore.clear();
+         adjacentScore.addAll(newAdjacentScore);
+      }
+
       pca.clear();
       points.stream().forEach(point -> pca.addPoint(point.getX(), point.getY(), point.getZ()));
       pca.compute();
 
       pca.getMean(center);
       pca.getThirdVector(normal);
-      
-      if(normal.getZ() < 0.0)
+
+      if (normal.getZ() < 0.0)
          normal.negate();
-      
+
       pca.getStandardDeviation(standardDeviation);
    }
-   
+
    public void setID(int id)
    {
       this.id = id;
-   }
-
-   // TODO: handle if this label does not have enough number of points.
-   public boolean isEmpty()
-   {
-      return points.size() < 4;
    }
 
    public boolean isSparse(double threshold)
@@ -93,17 +125,17 @@ public class FusionDataSegment
    {
       return normal;
    }
-   
+
    public int getId()
    {
       return id;
    }
-   
+
    public int getImageSegmentLabel()
    {
       return imageSegmentLabel;
    }
-   
+
    public List<Point3D> getPoints()
    {
       return points;

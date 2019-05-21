@@ -12,7 +12,7 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class LidarImageFusionDataFeatureUpdater
 {
-   private static final double sparceThreshold = 0.01;
+   private static final double sparseThreshold = 0.01;
 
    private static final double proximityThreshold = 0.03;
    private static final double planarityThresholdAngle = 30.0;
@@ -21,7 +21,6 @@ public class LidarImageFusionDataFeatureUpdater
    private static final boolean updateNodeDataWithExtendedData = false;
    private static final double extendingPlaneDistanceThreshold = 0.01;
    private static final double extendingDistanceThreshold = 0.03;
-   private static final int numberOfNeighborsToExtend = 50;
 
    private static final int maximumNumberOfTrialsToFindUnIdLabel = 100;
 
@@ -33,9 +32,13 @@ public class LidarImageFusionDataFeatureUpdater
 
    public LidarImageFusionDataFeatureUpdater(LidarImageFusionRawData lidarImageFusionData)
    {
-      System.out.println(planarityThreshold);
       data = lidarImageFusionData;
       numberOfLabels = data.getNumberOfLabels();
+   }
+
+   public int getNumberOfSegments()
+   {
+      return segments.size();
    }
 
    public List<Point3D> getPointsOnSegment(int segmentId)
@@ -61,7 +64,7 @@ public class LidarImageFusionDataFeatureUpdater
    public boolean iterateSegmenataionPropagation(int segmentId)
    {
       int nonIDLabel = selectRandomNonIdentifiedLabel();
-      LogTools.info("randomSeedLabel " + nonIDLabel);
+      LogTools.info("" + segmentId + " randomSeedLabel " + nonIDLabel);
 
       if (nonIDLabel == -1)
          return false;
@@ -84,6 +87,7 @@ public class LidarImageFusionDataFeatureUpdater
       //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
 
       FusionDataSegment seedImageSegment = data.getFusionDataSegment(seedLabel);
+      seedImageSegment.setID(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
 
       boolean isPropagating = true;
@@ -99,7 +103,7 @@ public class LidarImageFusionDataFeatureUpdater
             //LogTools.info("   candidate label is " + adjacentLabels[i]);
             FusionDataSegment candidate = data.getFusionDataSegment(adjacentLabel);
 
-            if (candidate.isSparse(sparceThreshold))
+            if (candidate.isSparse(sparseThreshold))
             {
                //LogTools.info("is too sparce "+candidate.getImageSegmentLabel());
                continue;
@@ -145,7 +149,7 @@ public class LidarImageFusionDataFeatureUpdater
       for (int i = 0; i < maximumNumberOfTrialsToFindUnIdLabel; i++)
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
-         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1 && !data.getFusionDataSegment(randomSeedLabel).isSparse(sparceThreshold))
+         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1 && !data.getFusionDataSegment(randomSeedLabel).isSparse(sparseThreshold))
             return randomSeedLabel;
       }
       return -1;
@@ -190,7 +194,6 @@ public class LidarImageFusionDataFeatureUpdater
          pointsInSegment.addAll(fusionDataSegment.getPoints());
       }
 
-      // TODO : add filtering out far points.
       void extend(FusionDataSegment fusionDataSegment, double threshold, boolean updateNodeData)
       {
          for (Point3D point : fusionDataSegment.getPoints())
@@ -198,15 +201,9 @@ public class LidarImageFusionDataFeatureUpdater
             double distance = distancePlaneToPoint(normal, center, point);
             if (distance < threshold)
             {
-               int numberOfNeighbors = 0;
                for (Point3D pointInSegment : pointsInSegment)
                {
                   if (pointInSegment.distance(point) < extendingDistanceThreshold)
-                  {
-                     numberOfNeighbors++;
-                  }
-
-                  if (numberOfNeighbors > numberOfNeighborsToExtend)
                   {
                      pointsInSegment.add(point);
                      break;

@@ -58,6 +58,12 @@ public class LidarImageFusionRawData
    {
       return u + v * imageWidth;
    }
+   
+   public void clear()
+   {
+      for(FusionDataSegment fusionDataSegment:fusionDataSegments)
+         fusionDataSegment.setID(-1);
+   }
 
    public void initializeSegments()
    {
