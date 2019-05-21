@@ -297,14 +297,21 @@ public class AvatarSimulationFactory
       }
 
       // Add registry and graphics to SCS.
-      robotController.getYoVariableRegistry().addChild(estimatorRobotVisualizer.getRegistry());
-      if (estimatorRobotVisualizer.getGraphicsListRegistry() != null)
-         simulationConstructionSet.addYoGraphicsListRegistry(estimatorRobotVisualizer.getGraphicsListRegistry());
-      robotController.getYoVariableRegistry().addChild(controllerRobotVisualizer.getRegistry());
-      if (controllerRobotVisualizer.getGraphicsListRegistry() != null)
-         simulationConstructionSet.addYoGraphicsListRegistry(controllerRobotVisualizer.getGraphicsListRegistry());
+      addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
+      addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
       if (handControlTask != null)
          robotController.getYoVariableRegistry().addChild(handControlTask.getRegistry());
+   }
+
+   private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoVariableRegistry registry, SimulationConstructionSet scs)
+   {
+      registry.addChild(visualizer.getRegistry());
+      if (visualizer.getGraphicsListRegistry() != null)
+      {
+         scs.attachSimulationRewoundListener(() -> visualizer.updateGraphics());
+         scs.attachPlayCycleListener(tick -> visualizer.updateGraphics());
+         scs.addYoGraphicsListRegistry(visualizer.getGraphicsListRegistry(), false);
+      }
    }
 
    private void initializeStateEstimatorToActual()
