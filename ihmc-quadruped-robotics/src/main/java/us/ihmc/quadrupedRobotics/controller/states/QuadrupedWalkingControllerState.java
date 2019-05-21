@@ -209,9 +209,6 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // Manually triggered events to transition to main controllers.
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
 
-      Runnable stepToStandCallback = stepController::halt;
-      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
-
       factory.addStateChangedListener(new StateChangedListener<QuadrupedSteppingStateEnum>()
       {
          @Override
