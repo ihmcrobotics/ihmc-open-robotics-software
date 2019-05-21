@@ -20,7 +20,7 @@ public class JavaFXROS2VideoViewer extends Application
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "video_viewer");
 
-      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, width, height);
+      JavaFXROS2VideoView ros2VideoView = new JavaFXROS2VideoView(ros2Node, width, height, false, false);
 
       StackPane stackPaneNode = new StackPane(ros2VideoView);
       stackPaneNode.setPrefSize(width, height);
