@@ -242,7 +242,6 @@ public abstract class AbstractBehavior implements RobotController
    {
       publishTextToSpeech("Resuming Behavior");
       isPaused.set(false);
-      isPaused.set(false);
 
       for (BehaviorService behaviorService : behaviorsServices)
       {

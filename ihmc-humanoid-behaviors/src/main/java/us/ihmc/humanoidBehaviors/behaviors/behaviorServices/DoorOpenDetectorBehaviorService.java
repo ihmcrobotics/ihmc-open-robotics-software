@@ -18,7 +18,7 @@ public class DoorOpenDetectorBehaviorService extends FiducialDetectorBehaviorSer
    private FramePose3D averageCurrentDoorLocation;
    public FramePose3D newPose = null;
    private boolean doorOpen = false;
-   private float openDistance = 0.0227f;
+   private float openDistance = 0.0254f;
    private boolean run = false;
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)

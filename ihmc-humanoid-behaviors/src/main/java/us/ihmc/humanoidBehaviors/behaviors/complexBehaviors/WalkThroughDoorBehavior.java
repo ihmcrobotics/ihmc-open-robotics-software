@@ -280,14 +280,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             lookDown();
             doorOpenDetectorBehaviorService.reset();
             doorOpenDetectorBehaviorService.run(true);
-            System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
             if (DEBUG)
             {
                publishTextToSpeech("open door action");
             }
             openDoorBehavior.setGrabLocation(searchForDoorBehavior.getLocation());
-            System.out.println("SET OPEN DOOR ACTION INPUT" + searchForDoorBehavior.getLocation());
-
          }
       };
 
@@ -345,7 +342,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            sleepBehavior.setSleepTime(3000);
+            sleepBehavior.setSleepTime(1);
             publishTextToSpeech("Finished Walking Through Door");
          }
       };
