@@ -22,18 +22,21 @@ public class JavaFXROS2VideoView extends ImageView
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::handle);
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
+   private final WritableImage writableImage;
    private final int width;
    private final int height;
+   private final boolean flipX;
+   private final boolean flipY;
 
    private volatile boolean running = false;
-   private WritableImage writableImage;
 
-   // TODO add flip option
-   public JavaFXROS2VideoView(Ros2Node ros2Node, int width, int height)
+   public JavaFXROS2VideoView(Ros2Node ros2Node, int width, int height, boolean flipX, boolean flipY)
    {
       this.ros2Node = ros2Node;
       this.width = width;
       this.height = height;
+      this.flipX = flipX;
+      this.flipY = flipY;
 
       writableImage = new WritableImage(width, height);
    }
@@ -73,7 +76,9 @@ public class JavaFXROS2VideoView extends ImageView
                {
                   for (int y = 0; y < bufferedImage.getHeight(); y++)
                   {
-                     pixelWriter.setArgb(x, y, bufferedImage.getRGB(x, y));
+                     pixelWriter.setArgb(flipX ? bufferedImage.getWidth()  - 1 - x : x,
+                                         flipY ? bufferedImage.getHeight() - 1 - y : y,
+                                         bufferedImage.getRGB(x, y));
                   }
                }
             }
