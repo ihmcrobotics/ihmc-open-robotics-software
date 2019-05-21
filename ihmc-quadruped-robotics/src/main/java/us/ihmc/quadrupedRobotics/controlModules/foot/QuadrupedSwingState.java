@@ -151,9 +151,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double maxSwingHeight = 0.3;
       double defaultSwingHeight = 0.04;
 
-      oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
+      oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix + "1", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                            graphicsListRegistry);
-      twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
+      twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                            graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
