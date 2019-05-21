@@ -377,6 +377,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
                   .setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
          else
             twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());
+         waypointCalculator.initialize();
       }
 
       for (int i = 0; i < waypointCalculator.getNumberOfWaypoints(); i++)
