@@ -34,6 +34,15 @@
                </children>
              </content>
           </Tab>
+          <Tab text="StereoREA">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                 <children>
+                    <fx:include fx:id="stereoREAAnchorPane" source="StereoREAAnchorPane.fxml" />
+                 </children>
+              </AnchorPane>
+            </content>
+          </Tab>
         </tabs>
       </TabPane>
    </bottom>

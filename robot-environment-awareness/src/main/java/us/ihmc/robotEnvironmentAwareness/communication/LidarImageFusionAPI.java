@@ -31,6 +31,7 @@ public class LidarImageFusionAPI
    private static final CategoryTheme Image = apiFactory.createCategoryTheme("Image");
    private static final CategoryTheme Object = apiFactory.createCategoryTheme("Object");
    private static final CategoryTheme Socket = apiFactory.createCategoryTheme("Socket");
+   private static final CategoryTheme REA = apiFactory.createCategoryTheme("REA");
    
    private static final CategoryTheme Result = apiFactory.createCategoryTheme("Result");
 
@@ -58,5 +59,21 @@ public class LidarImageFusionAPI
    public static final Topic<List<ObjectType>> SelectedObjecTypes = ObjectDetectionCategory.topic(ObjecTypes);
    public static final Topic<List<RegionOfInterest>> ReceivedROIs = ObjectDetectionCategory.topic(ROIs);
 
+   private static final CategoryTheme Load = apiFactory.createCategoryTheme("Load");
+   private static final CategoryTheme Viz = apiFactory.createCategoryTheme("Viz");
+   private static final CategoryTheme All = apiFactory.createCategoryTheme("All");
+   private static final CategoryTheme Pro = apiFactory.createCategoryTheme("Pro");
+   private static final CategoryTheme Pla = apiFactory.createCategoryTheme("Pla");
+   private static final CategoryTheme End = apiFactory.createCategoryTheme("End");
+   private static final TypedTopicTheme<Integer> Label = apiFactory.createTypedTopicTheme("Seed");
+   
+   public static final Topic<Boolean> LoadData = UICategory.child(REA).child(Load).topic(Request);
+   public static final Topic<Boolean> ClearViz = UICategory.child(REA).child(Viz).topic(Request);
+   public static final Topic<Boolean> VisualizeAll = UICategory.child(REA).child(All).topic(Request);
+   public static final Topic<Boolean> Propagate = UICategory.child(REA).child(Pro).topic(Request);
+   public static final Topic<Boolean> PlanarRegion = UICategory.child(REA).child(Pla).topic(Request);
+   public static final Topic<Boolean> EndToEnd = UICategory.child(REA).child(End).topic(Request);
+   public static final Topic<Integer> Seed = UICategory.child(REA).topic(Label);
+   
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
