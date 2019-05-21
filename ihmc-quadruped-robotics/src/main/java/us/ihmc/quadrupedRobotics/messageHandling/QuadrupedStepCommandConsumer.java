@@ -52,6 +52,11 @@ public class QuadrupedStepCommandConsumer
       {
          stepMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
       }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AbortWalkingCommand.class))
+      {
+         commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class);
+         stepMessageHandler.clearUpcomingSteps();
+      }
    }
 
    public void consumeBodyCommands()
