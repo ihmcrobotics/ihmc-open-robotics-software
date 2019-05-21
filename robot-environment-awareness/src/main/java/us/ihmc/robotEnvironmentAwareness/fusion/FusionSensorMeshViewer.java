@@ -107,6 +107,7 @@ public class FusionSensorMeshViewer
    private void clearViz()
    {
       root.getChildren().clear();
+      rawData.clear();
    }
 
    private void visualizeAll()
@@ -124,10 +125,6 @@ public class FusionSensorMeshViewer
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, Color.PINK);
          meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, Color.RED);
-         for(Point3D point:rawData.getFusionDataSegment(i).getPoints())
-         {
-            //meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, Color.GREEN);
-         }
       }
       MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
       newScanMeshView.setMaterial(meshBuilder.generateMaterial());
@@ -177,8 +174,9 @@ public class FusionSensorMeshViewer
    private void endToEnd()
    {
       updater.initialize();
+      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
       long startTime = System.nanoTime();
-      int numberOfIterate = 50;
+      int numberOfIterate = 600;
       for (int i = 0; i < numberOfIterate; i++)
       {
          if (!updater.iterateSegmenataionPropagation(i))
@@ -191,19 +189,25 @@ public class FusionSensorMeshViewer
          double randomG = random.nextDouble();
          double randomR = random.nextDouble();
          Color color = new Color(randomR, randomG, randomB, 1.0);
-
-         JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
          List<Point3D> pointsOnSegment = updater.getPointsOnSegment(i);
          for (Point3D point : pointsOnSegment)
          {
             meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
          }
-         MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
-         newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+         Point3D labelCenter = updater.getSegmentCenter(i);
+         Vector3D labelNormal = updater.getSegmentNormal(i);
+         Point3D labelNormalEnd = new Point3D(labelNormal);
+         labelNormalEnd.scaleAdd(0.05, labelCenter);
 
-         root.getChildren().add(newScanMeshView);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
+         meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
       }
-      LogTools.info("endToEnd " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+      LogTools.info("endToEnd " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime)+" sec, "+updater.getNumberOfSegments());
+      
+      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
+      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+
+      root.getChildren().add(newScanMeshView);
    }
 
    public void start()
