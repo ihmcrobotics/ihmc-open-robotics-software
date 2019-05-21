@@ -293,6 +293,7 @@ public class AvatarSimulationFactory
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
          robotController = new BarrierScheduledRobotController<>(controllerName, tasks, masterContext, overrunBehavior);
+         tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
       // Add registry and graphics to SCS.

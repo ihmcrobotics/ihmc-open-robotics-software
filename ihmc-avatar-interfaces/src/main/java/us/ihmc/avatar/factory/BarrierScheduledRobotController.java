@@ -22,12 +22,6 @@ public class BarrierScheduledRobotController<C> implements DisposableRobotContro
       registry = new YoVariableRegistry(name);
 
       timer = new ThreadTimer("Scheduler", registry);
-
-      // Start the task threads.
-      for (int i = 0; i < tasks.size(); i++)
-      {
-         new Thread(tasks.get(i), tasks.get(i).getClass().getSimpleName() + "Thread").start();
-      }
    }
 
    @Override
