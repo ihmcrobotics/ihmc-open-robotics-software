@@ -11,7 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 
 public class LidarImageFusionRawDataLoader
 {
@@ -131,8 +133,10 @@ public class LidarImageFusionRawDataLoader
          }
       }
 
+      long startTime = System.nanoTime();
       LidarImageFusionRawData rawData = new LidarImageFusionRawData(pointCloud, bufferedImage, labels, intrinsicParameters);
       rawDataMap.put(dataName, rawData);
+      LogTools.info("raw data constructing time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
    }
 
    public LidarImageFusionRawData getRawData(String dataName)

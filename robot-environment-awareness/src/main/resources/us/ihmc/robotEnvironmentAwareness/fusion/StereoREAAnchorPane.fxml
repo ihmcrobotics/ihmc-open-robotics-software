@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="251.0" prefWidth="477.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController">
+   <children>
+      <HBox layoutX="20.0" layoutY="14.0" prefHeight="205.0" prefWidth="338.0" spacing="5.0">
+         <children>
+            <VBox prefHeight="205.0" prefWidth="155.0" spacing="5.0">
+               <children>
+                  <Button fx:id="btnLoadData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#load" text="Load Data" />
+                  <Button fx:id="btnClearViz" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear Viz" />
+                  <Button fx:id="btnAll" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#all" text="All Center and Normal" />
+               </children>
+            </VBox>
+            <VBox prefHeight="205.0" prefWidth="166.0" spacing="5.0">
+               <children>
+                  <TextField fx:id="tfSeedLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="87.0" text="403" />
+                  <Button fx:id="btnPropagate" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#propagate" prefHeight="25.0" prefWidth="170.0" text="Propagate" />
+                  <Button fx:id="btnPlanarRegion" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#planar" prefHeight="25.0" prefWidth="170.0" text="Planar" />
+                  <Button fx:id="btnEndToEnd" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#endToEnd" text="End to End" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </children>
+</AnchorPane>
