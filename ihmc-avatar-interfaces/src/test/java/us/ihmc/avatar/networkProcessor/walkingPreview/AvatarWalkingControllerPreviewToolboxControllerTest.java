@@ -27,7 +27,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -182,7 +182,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 
       getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, getRobotModel().getJointMap());
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(fullRobotModelAtInitialConfiguration);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(fullRobotModelAtInitialConfiguration);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
       SideDependentList<Pose3DReadOnly> footPoses = new SideDependentList<>();
@@ -285,7 +285,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(controllerFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(controllerFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
       SideDependentList<Pose3DReadOnly> footPoses = new SideDependentList<>();
@@ -457,7 +457,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       assertTrue(success);
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      RobotConfigurationData robotConfigurationData = AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(controllerFullRobotModel);
+      RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(controllerFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
       SideDependentList<Pose3DReadOnly> footPoses = new SideDependentList<>();

@@ -36,7 +36,9 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
       quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
       quadrupedCommands.add(HighLevelControllerStateCommand.class);
-//      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
+      quadrupedCommands.add(PlanarRegionsListCommand.class);
+
+      //      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
 //      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
 //      quadrupedCommands.add(GoHomeCommand.class); // todo
 //      quadrupedCommands.add(QuadrupedBodyTranslationCommand.class); // todo

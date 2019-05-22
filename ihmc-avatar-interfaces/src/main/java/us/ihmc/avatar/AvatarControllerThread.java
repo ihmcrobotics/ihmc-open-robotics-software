@@ -36,8 +36,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.JointAxisVisualizer;
@@ -87,7 +87,7 @@ public class AvatarControllerThread
    private final HumanoidRobotContextJointData processedJointData;
    private final HumanoidRobotContextData humanoidRobotContextData;
 
-   public AvatarControllerThread(String robotName, DRCRobotModel robotModel, DRCRobotSensorInformation sensorInformation,
+   public AvatarControllerThread(String robotName, DRCRobotModel robotModel, HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
    {
@@ -141,11 +141,11 @@ public class AvatarControllerThread
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters<RobotSide> robotModel,
-                                                          DRCRobotSensorInformation sensorInformation)
+                                                          HumanoidRobotSensorInformation sensorInformation)
    {
       ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
 
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
+      AvatarRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       if (lidarParameters != null)
       {
          listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
@@ -187,7 +187,8 @@ public class AvatarControllerThread
                                                             YoDouble yoTime, double controlDT, double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                            DRCRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            HumanoidRobotSensorInformation sensorInformation,
+                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
