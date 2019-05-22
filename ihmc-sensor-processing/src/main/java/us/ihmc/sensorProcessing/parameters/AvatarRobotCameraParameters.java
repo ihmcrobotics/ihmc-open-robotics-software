@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.parameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class DRCRobotCameraParameters implements DRCRobotSensorParameters
+public class AvatarRobotCameraParameters implements AvatarRobotSensorParameters
 {
    private final String rosCompressedTopicName;
    private final String rosCameraInfoTopicName;
@@ -15,24 +15,24 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    private final int cameraId;
    private RigidBodyTransform staticTransform;
 
-   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic,RigidBodyTransform staticTransform, int cameraId)
+   public AvatarRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, RigidBodyTransform staticTransform, int cameraId)
    {
       this(robotSide, cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
       this.staticTransform = staticTransform;
    }
    
-   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, int cameraId)
+   public AvatarRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, int cameraId)
    {
       this(robotSide, cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
    }
 
-   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, int cameraId)
+   public AvatarRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, int cameraId)
    {
       this(robotSide, cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
    }
 
-   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
-         String rosEndFrameName, int cameraId)
+   public AvatarRobotCameraParameters(RobotSide robotSide, String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
+                                      String rosEndFrameName, int cameraId)
    {
       this.rosCompressedTopicName = rosCameraTopic;
       this.rosCameraInfoTopicName = rosInfoTopic;
@@ -97,9 +97,9 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    }
 
    @Override
-   public DRCRobotSensorType getSensorType()
+   public AvatarRobotVisionSensorType getSensorType()
    {
-      return DRCRobotSensorType.CAMERA;
+      return AvatarRobotVisionSensorType.CAMERA;
    }
 
    public boolean useStaticTransformFromHeadFrameToSensor()
