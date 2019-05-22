@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.parameters;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
