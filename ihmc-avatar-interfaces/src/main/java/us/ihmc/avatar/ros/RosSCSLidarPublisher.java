@@ -7,7 +7,7 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosLidarPublisher;
 
@@ -16,14 +16,14 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
    private final RosLidarPublisher[] lidarPublisher;
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final DRCRobotLidarParameters[] lidarParameters;
+   private final AvatarRobotLidarParameters[] lidarParameters;
    private final int nSensors;
 
    public RosSCSLidarPublisher(ObjectCommunicator localObjectCommunicator,
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          FullRobotModel fullRobotModel,
-         DRCRobotLidarParameters[] lidarParameters)
+         AvatarRobotLidarParameters[] lidarParameters)
    {
       nSensors = lidarParameters.length;
       this.rosMainNode = rosMainNode;

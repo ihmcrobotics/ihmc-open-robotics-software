@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -18,11 +18,11 @@ import us.ihmc.utilities.ros.RosServiceClient;
 public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
 {
    private final RosServiceClient<TransformProviderRequest, TransformProviderResponse> client;
-   private final DRCRobotSensorParameters cameraParameters;
+   private final AvatarRobotSensorParameters cameraParameters;
 
    private final RigidBodyTransform headToCameraTransform = new RigidBodyTransform();
 
-   public ROSHeadTransformFrame(ReferenceFrame headFrame, RosMainNode rosMainNode, DRCRobotSensorParameters cameraParameters)
+   public ROSHeadTransformFrame(ReferenceFrame headFrame, RosMainNode rosMainNode, AvatarRobotSensorParameters cameraParameters)
    {
       super("rosHeadToCameraFrame", headFrame);
       this.cameraParameters = cameraParameters;

@@ -48,7 +48,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -115,8 +115,9 @@ public class AvatarEstimatorThread
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
 
    @SuppressWarnings("unused")
-   public AvatarEstimatorThread(String robotName, DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
-                                DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
+   public AvatarEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation,
+                                RobotContactPointParameters<RobotSide> contactPointParameters, DRCRobotModel robotModel,
+                                StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
                                 HumanoidRobotContextDataFactory contextDataFactory, RealtimeRos2Node realtimeRos2Node,
                                 PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, JointDesiredOutputWriter outputWriter, double gravity)
    {
@@ -339,15 +340,15 @@ public class AvatarEstimatorThread
 
          if (outputWriter != null && controllerDataValid.getValue())
          {
-               if (!outputWriterInitialized.getBooleanValue())
-               {
-                  outputWriter.initialize();
-                  outputWriterInitialized.set(true);
-               }
+            if (!outputWriterInitialized.getBooleanValue())
+            {
+               outputWriter.initialize();
+               outputWriterInitialized.set(true);
+            }
 
-               // TODO: should this be the last estimator timestamp?
-               long nanoTime = System.nanoTime();
-               outputWriter.writeBefore(nanoTime);
+            // TODO: should this be the last estimator timestamp?
+            long nanoTime = System.nanoTime();
+            outputWriter.writeBefore(nanoTime);
          }
 
          // TODO: move this to the actual estimator thread and make it thread safe.

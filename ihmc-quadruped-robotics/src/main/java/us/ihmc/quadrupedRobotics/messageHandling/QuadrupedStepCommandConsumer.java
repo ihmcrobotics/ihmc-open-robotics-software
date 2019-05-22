@@ -43,6 +43,11 @@ public class QuadrupedStepCommandConsumer
       {
          stepMessageHandler.handleSoleTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(SoleTrajectoryCommand.class));
       }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      {
+         balanceManager.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
+         commandConsumerWithDelayBuffers.clearCommands(PlanarRegionsListCommand.class);
+      }
    }
 
    public void consumeBodyCommands()

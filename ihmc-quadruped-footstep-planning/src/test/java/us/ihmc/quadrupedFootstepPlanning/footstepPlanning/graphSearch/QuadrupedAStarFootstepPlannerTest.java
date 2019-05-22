@@ -208,13 +208,12 @@ public class QuadrupedAStarFootstepPlannerTest
       xGaitSettings.getAmbleMediumTimings().setStepDuration(0.4);
       xGaitSettings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.35);
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
       QuadrupedAStarFootstepPlannerVisualizer visualizer;
       if (activelyVisualize)
          visualizer = new QuadrupedAStarFootstepPlannerVisualizer(planarRegionsList);
       else
          visualizer = null;
-      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, expansion, registry);
+      QuadrupedAStarFootstepPlanner planner = QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, visualizer, registry);
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
