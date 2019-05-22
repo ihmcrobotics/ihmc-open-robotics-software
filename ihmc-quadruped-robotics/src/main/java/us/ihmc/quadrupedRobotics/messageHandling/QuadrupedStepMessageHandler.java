@@ -98,6 +98,7 @@ public class QuadrupedStepMessageHandler
       RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
 
       stepPlanIsAdjustable.set(command.isStepPlanAdjustable());
+      offsettingHeightPlanWithStepError.set(command.getOffsetStepsHeightWithExecutionError());
 
       receivedStepSequence.clear();
       for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
