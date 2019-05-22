@@ -31,7 +31,7 @@ import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
@@ -48,7 +48,7 @@ public class RosModule
 
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final AvatarHumanoidRobotSensorInformation sensorInformation;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final String robotName;
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
@@ -103,7 +103,7 @@ public class RosModule
          PrintTools.debug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, AvatarHumanoidRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
                                                ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)

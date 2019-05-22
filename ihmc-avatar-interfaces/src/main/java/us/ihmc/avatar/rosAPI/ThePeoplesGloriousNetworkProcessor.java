@@ -42,7 +42,7 @@ import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -150,7 +150,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
 //      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-//      AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+//      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 //      DRCRobotJointMap jointMap = robotModel.getJointMap();
 //
 //      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
@@ -190,7 +190,7 @@ public class ThePeoplesGloriousNetworkProcessor
    }
 
    @SuppressWarnings("unused")
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, AvatarHumanoidRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
          RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
