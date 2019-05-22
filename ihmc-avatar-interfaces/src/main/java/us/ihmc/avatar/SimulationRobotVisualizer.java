@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import org.apache.commons.lang3.NotImplementedException;
-
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -54,7 +52,7 @@ public class SimulationRobotVisualizer implements RobotVisualizer
    @Override
    public long getLatestTimestamp()
    {
-      throw new NotImplementedException();
+      throw new UnsupportedOperationException();
    }
 
    public YoVariableRegistry getRegistry()
