@@ -38,6 +38,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
+   private final ArrayList<MutableDouble> timeAtEndOfInterval;
    private final ArrayList<YoFramePoint3D> copPositionsAtStartOfInterval;
    private final ArrayList<YoFrameVector2D> stanceShifts;
    private final ArrayList<YoFrameVector2D> stepShifts;
@@ -54,6 +55,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       copPositionAtCurrentTime = new FramePoint3D();
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
+      timeAtEndOfInterval = new ArrayList<>(maxIntervals);
       copPositionsAtStartOfInterval = new ArrayList<>(maxIntervals);
       stanceShifts = new ArrayList<>(maxIntervals);
       stepShifts = new ArrayList<>(maxIntervals);
@@ -61,6 +63,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
+         timeAtEndOfInterval.add(i, new MutableDouble(0.0));
          copPositionsAtStartOfInterval.add(i, new YoFramePoint3D("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
 
 
@@ -144,6 +147,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          constrainToPolygon(contactState, solePosition, copPositionAtStartOfInterval);
 
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
+         timeAtEndOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getEndTime());
       }
 
       computeTrajectory(timeAtStartOfInterval.get(0).doubleValue());
@@ -175,6 +179,16 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    public double getTimeAtStartOfInterval(int interval)
    {
       return timeAtStartOfInterval.get(interval).doubleValue();
+   }
+
+   public double getTimeAtEndOfInterval(int interval)
+   {
+      return timeAtEndOfInterval.get(interval).doubleValue();
+   }
+
+   public double getIntervalDuration(int interval)
+   {
+      return getTimeAtEndOfInterval(interval) - getTimeAtStartOfInterval(interval);
    }
 
    public FixedFramePoint3DBasics getCopPositionAtStartOfInterval(int interval)

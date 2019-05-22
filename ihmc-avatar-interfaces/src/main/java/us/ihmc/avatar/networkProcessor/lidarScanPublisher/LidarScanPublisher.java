@@ -256,19 +256,19 @@ public class LidarScanPublisher
    private final Point3D lidarPosition = new Point3D();
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   public void readAndPublish()
+   public LidarScanMessage readAndPublish()
    {
       if (publisherTask != null)
          throw new RuntimeException("The publisher is running using its own thread, cannot manually update it.");
 
-      readAndPublishInternal();      
+      return readAndPublishInternal();      
    }
 
-   private void readAndPublishInternal()
+   private LidarScanMessage readAndPublishInternal()
    {
       ScanData scanData = scanDataToPublish.getAndSet(null);
       if (scanData == null)
-         return;
+         return null;
 
       long robotTimestamp;
 
@@ -284,7 +284,7 @@ public class LidarScanPublisher
          boolean waitForTimestamp = true;
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
          if (!success)
-            return;
+            return null;
       }
 
       if (!scanPointsFrame.isWorldFrame())
@@ -345,6 +345,8 @@ public class LidarScanPublisher
          lidarScanPublisher.publish(message);
       else
          lidarScanRealtimePublisher.publish(message);
+      
+      return message;
    }
 
    public static class ScanData

@@ -483,9 +483,9 @@ public class AccelerationLimitedYoVariableSCSTest
       YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dT);
-      processed.setMaximumRate(maxRate);
-      processed.setMaximumAcceleration(maxAcceleration);
-      
+      maxRateYo.set(maxRate);
+     maxAccelerationYo.set(maxAcceleration);
+
       for(double displacement = 1.0; displacement < 10000.0; displacement += 1000.0)
       {
          processed.update(displacement);
@@ -505,16 +505,16 @@ public class AccelerationLimitedYoVariableSCSTest
       YoDouble maxAccelerationYo = new YoDouble("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      
-      processed.setMaximumRate(maxRate);
-      processed.setMaximumAcceleration(maxAcceleration);
+
+      maxRateYo.set(maxRate);
+      maxAccelerationYo.set(maxAcceleration);
       assertEquals(maxRate, processed.getMaximumRate(), EPSILON);
       assertEquals(maxAcceleration, processed.getMaximumAcceleration(), EPSILON);
       
       maxRate = 8.5;
       maxAcceleration = 4.5;
-      processed.setMaximumRate(maxRate);
-      processed.setMaximumAcceleration(maxAcceleration);
+      maxRateYo.set(maxRate);
+      maxAccelerationYo.set(maxAcceleration);
       assertEquals(maxRate, processed.getMaximumRate(), EPSILON);
       assertEquals(maxAcceleration, processed.getMaximumAcceleration(), EPSILON);
    }
@@ -539,8 +539,8 @@ public class AccelerationLimitedYoVariableSCSTest
 
       double breakFrequencyHertz = 20.0; //16.0;
       smoothedYoVariable.setGainsByPolePlacement(2.0 * Math.PI * breakFrequencyHertz, 1.0);
-      smoothedYoVariable.setMaximumAcceleration(400.0);
-      smoothedYoVariable.setMaximumRate(12.0);
+      maxAccelerationYo.set(400.0);
+      maxRateYo.set(12.0);
 
       YoFunctionGenerator functionGenerator = new YoFunctionGenerator("functionGenerator", registry);
       functionGenerator.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);
