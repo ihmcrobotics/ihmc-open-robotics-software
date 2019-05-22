@@ -46,7 +46,7 @@ import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -89,7 +89,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          jointList.addAll(Arrays.asList("leftForearmYaw", "leftWristRoll", "leftWristPitch"));
          jointList.addAll(Arrays.asList("rightForearmYaw", "rightWristRoll", "rightWristPitch"));
       }
-      
+
       if (ENABLE_FINGER_JOINTS)
       {
          jointList.addAll(Arrays.asList("leftIndexFingerMotorPitch1", "leftMiddleFingerMotorPitch1", "leftPinkyMotorPitch1", "leftThumbMotorRoll", "leftThumbMotorPitch1", "leftThumbMotorPitch2"));
@@ -166,7 +166,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private ValkyrieCalibrationControllerStateFactory calibrationStateFactory = null;
 
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
-                                                                               DRCRobotSensorInformation sensorInformation)
+                                                                               HumanoidRobotSensorInformation sensorInformation)
    {
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
