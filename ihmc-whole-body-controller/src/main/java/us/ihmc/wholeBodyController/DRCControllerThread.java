@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -109,7 +109,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
-   public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, AvatarHumanoidRobotSensorInformation sensorInformation,
+   public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, HumanoidRobotSensorInformation sensorInformation,
                               HighLevelHumanoidControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
                               DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, RobotVisualizer robotVisualizer, double gravity,
                               double estimatorDT)
@@ -176,7 +176,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
                                                                    WholeBodyControllerParameters<RobotSide> robotModel,
-                                                                   AvatarHumanoidRobotSensorInformation sensorInformation)
+                                                                   HumanoidRobotSensorInformation sensorInformation)
    {
       ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
 
@@ -222,7 +222,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                                                             YoDouble yoTime, double controlDT, double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                            AvatarHumanoidRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            HumanoidRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {

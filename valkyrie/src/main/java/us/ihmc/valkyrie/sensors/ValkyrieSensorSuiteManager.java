@@ -28,7 +28,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -40,7 +40,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
 
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final AvatarHumanoidRobotSensorInformation sensorInformation;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final LidarScanPublisher lidarScanPublisher;
@@ -49,7 +49,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final String robotName;
 
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, AvatarHumanoidRobotSensorInformation sensorInformation,
+                                     DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, HumanoidRobotSensorInformation sensorInformation,
                                      ValkyrieJointMap jointMap, RobotTarget target)
    {
       this.robotName = robotName;

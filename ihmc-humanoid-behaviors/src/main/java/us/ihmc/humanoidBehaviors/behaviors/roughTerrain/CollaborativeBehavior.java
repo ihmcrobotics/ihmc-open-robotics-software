@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class CollaborativeBehavior extends AbstractBehavior
 {
@@ -24,7 +24,7 @@ public class CollaborativeBehavior extends AbstractBehavior
    private boolean testImage = false;
 
    public CollaborativeBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames,
-                                FullHumanoidRobotModel fullHumanoidRobotModel, AvatarHumanoidRobotSensorInformation robotSensorInfo,
+                                FullHumanoidRobotModel fullHumanoidRobotModel, HumanoidRobotSensorInformation robotSensorInfo,
                                 WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(robotName, ros2Node);
