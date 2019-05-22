@@ -19,7 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -42,7 +42,7 @@ public abstract class AvatarCollaborativeBehaviorTest implements MultiRobotTestI
    public void testBehavior() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
-      AvatarHumanoidRobotSensorInformation robotSensorInfo = robotModel.getSensorInformation();
+      HumanoidRobotSensorInformation robotSensorInfo = robotModel.getSensorInformation();
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableBehaviorModule(true);

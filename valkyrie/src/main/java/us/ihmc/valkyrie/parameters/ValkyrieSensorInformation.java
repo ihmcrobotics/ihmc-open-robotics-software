@@ -18,7 +18,7 @@ import us.ihmc.sensorProcessing.parameters.*;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
-public class ValkyrieSensorInformation implements AvatarHumanoidRobotSensorInformation
+public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
 {
    public static final String[] forceSensorNames;
    private static final SideDependentList<String> feetForceSensorNames;

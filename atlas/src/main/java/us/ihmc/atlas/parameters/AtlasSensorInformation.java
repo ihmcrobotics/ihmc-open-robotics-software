@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.*;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 
-public class AtlasSensorInformation implements AvatarHumanoidRobotSensorInformation
+public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";

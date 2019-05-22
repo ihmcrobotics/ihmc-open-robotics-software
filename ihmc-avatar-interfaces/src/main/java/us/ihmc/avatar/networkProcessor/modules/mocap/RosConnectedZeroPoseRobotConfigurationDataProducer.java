@@ -31,7 +31,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosTools;
 
 public class RosConnectedZeroPoseRobotConfigurationDataProducer extends AbstractNodeMain
@@ -92,7 +92,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
    protected void setupSubscribers(ConnectedNode connectedNode)
    {
-      AvatarHumanoidRobotSensorInformation sensorInforamtion = robotModel.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInforamtion = robotModel.getSensorInformation();
       AvatarRobotLidarParameters lidarParameters = sensorInforamtion.getLidarParameters(0);
       if (lidarParameters != null && lidarParameters.getLidarSpindleJointTopic() != null)
       {
