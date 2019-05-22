@@ -21,14 +21,14 @@ import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.SCSCameraDataReceiver;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -40,7 +40,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
 
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final DRCRobotSensorInformation sensorInformation;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
    private final LidarScanPublisher lidarScanPublisher;
@@ -49,7 +49,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final String robotName;
 
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
+                                     DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, HumanoidRobotSensorInformation sensorInformation,
                                      ValkyrieJointMap jointMap, RobotTarget target)
    {
       this.robotName = robotName;
@@ -57,7 +57,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
 
-      DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
+      AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
       String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
       lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
@@ -82,7 +82,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
-      DRCRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
+      AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(), fullRobotModelFactory,
                                                                         multisenseLeftEyeCameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer,
                                                                         scsSensorsCommunicator, ros2Node, ppsTimestampOffsetProvider);
@@ -105,9 +105,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       RosMainNode rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");
 
-      DRCRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
-      DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
-      DRCRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
+      AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
+      AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
+      AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.MULTISENSE_STEREO_ID);
       boolean shouldUseRosParameterSetters = sensorInformation.setupROSParameterSetters();
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
@@ -142,7 +142,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          private final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = ValkyrieSensorInformation.getTransformFromHeadToUpperNeckPitchLink();
 
          @Override
-         public void computeTransformToWorld(FullHumanoidRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
+         public void computeTransformToWorld(FullRobotModel fullRobotModel, ReferenceFrame scanPointsFrame, RigidBodyTransform transformToWorldToPack, Pose3DBasics sensorPoseToPack)
          {
             ReferenceFrame neckFrame = fullRobotModel.getHeadBaseFrame();
             neckFrame.getTransformToDesiredFrame(transformToWorldToPack, ReferenceFrame.getWorldFrame());

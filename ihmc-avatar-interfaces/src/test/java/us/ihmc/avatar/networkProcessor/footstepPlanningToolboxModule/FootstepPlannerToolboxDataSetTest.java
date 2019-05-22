@@ -94,7 +94,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -852,7 +852,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       }
 
       @Override
-      public DRCRobotSensorInformation getSensorInformation()
+      public HumanoidRobotSensorInformation getSensorInformation()
       {
          return null;
       }

@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
+public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
 {
    private static final boolean VERBOSE = false;
 

@@ -2,12 +2,9 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
 import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodePlanarRegionSnapAndWiggler;
@@ -24,8 +21,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.F
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -64,7 +59,6 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(false);
-      costBuilder.setIncludePitchAndRollCost(true);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
