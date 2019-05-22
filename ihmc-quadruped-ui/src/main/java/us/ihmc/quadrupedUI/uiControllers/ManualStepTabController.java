@@ -286,7 +286,7 @@ public class ManualStepTabController extends Group
          EuclideanTrajectoryPointMessage trajectoryPointMessage = soleTrajectoryMessage.getPositionTrajectory().getTaskspaceTrajectoryPoints().add();
          trajectoryPointMessage.setTime(flamingoTrajectoryTime.getValue());
          trajectoryPointMessage.getPosition().set(flamingoFootGraphic.getPose().getPosition());
-
+         
          messager.submitMessage(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, soleTrajectoryMessage);
       }
    }

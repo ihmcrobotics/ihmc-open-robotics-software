@@ -166,6 +166,11 @@ public class QuadrupedStepMessageHandler
 
    public void handlePauseWalkingCommand(PauseWalkingCommand pauseWalkingCommand)
    {
+      if(isPaused.getBooleanValue() == pauseWalkingCommand.isPauseRequested())
+      {
+         return;
+      }
+
       this.isPaused.set(pauseWalkingCommand.isPauseRequested());
 
       if (pauseWalkingCommand.isPauseRequested())
