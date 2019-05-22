@@ -1,10 +1,7 @@
 package us.ihmc.quadrupedCommunication;
 
 import static us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor.NO_ID;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyHeightMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyOrientationMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,10 +85,10 @@ public class QuadrupedControllerAPIDefinition
       validators.put(QuadrupedBodyOrientationMessage.class, message -> validateQuadrupedBodyOrientationMessage((QuadrupedBodyOrientationMessage) message));
       validators.put(QuadrupedBodyHeightMessage.class, message -> validateQuadrupedBodyHeightMessage((QuadrupedBodyHeightMessage) message));
       validators.put(QuadrupedTimedStepListMessage.class, message -> validateQuadrupedTimedStepListMessage((QuadrupedTimedStepListMessage) message));
+      validators.put(QuadrupedFootLoadBearingMessage.class, message -> validateQuadrupedFootLoadBearingRequestMessage((QuadrupedFootLoadBearingMessage) message));
 
       //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
       //      validators.put(GoHomeMessage.class, message -> validateGoHomeMessage((GoHomeMessage) message));
-      //      validators.put(FootLoadBearingMessage.class, message -> validateFootLoadBearingMessage((FootLoadBearingMessage) message));
 
       return message -> validators.containsKey(message.getClass()) ? validators.get(message.getClass()).validate(message) : null;
    }
