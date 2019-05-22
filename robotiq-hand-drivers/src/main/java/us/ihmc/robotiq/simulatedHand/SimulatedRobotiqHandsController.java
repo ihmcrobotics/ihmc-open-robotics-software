@@ -8,51 +8,39 @@ import java.util.List;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 
-public class SimulatedRobotiqHandsController implements MultiThreadedRobotControlElement, RobotController
+public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 {
    private final boolean DEBUG = false;
 
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
-
-   private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
-   private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
-   private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
+   private final YoDouble handControllerTime;
+   private final YoBoolean sendFingerJointGains;
 
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kdMap = new LinkedHashMap<>();
 
-   private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
-
-   private final long controlDTInNS;
-   private final long estimatorDTInNS;
-
-   private final ThreadDataSynchronizerInterface threadDataSynchronizer;
+   private final YoDouble fingerTrajectoryTime;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
@@ -66,21 +54,27 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
-   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel,
-                                          ThreadDataSynchronizerInterface threadDataSynchronizer, RealtimeRos2Node realtimeRos2Node,
-                                          MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator,
-                                          CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   private long timestamp;
+
+   private final MirroredYoVariableRegistry registry;
+
+   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
+                                          MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
    {
-      this.threadDataSynchronizer = threadDataSynchronizer;
-      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
+      super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      handControllerTime = new YoDouble("handControllerTime", registry);
+      sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
+      fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
+
       sendFingerJointGains.set(true);
 
       if (realtimeRos2Node != null)
       {
          IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
                                                                                                          pubTopicNameGenerator);
-         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot, closeableAndDisposableRegistry);
+         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
       {
@@ -91,7 +85,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
       EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap = new EnumMap<>(RobotiqHandJointNameMinimal.class);
 
-      setupGains(kpEnumMap, kdEnumMap);
+      setupGains(kpEnumMap, kdEnumMap, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -122,9 +116,12 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             individualHandControllers.put(robotSide, individualHandController);
          }
       }
+
+      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
-   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap)
+   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap,
+                           YoVariableRegistry registry)
    {
       YoDouble kpFingerJoint1 = new YoDouble("kpFingerJoint1", registry);
       YoDouble kpFingerJoint2 = new YoDouble("kpFingerJoint2", registry);
@@ -185,33 +182,9 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kdThumbJoint3);
    }
 
-   @Override
-   public void initialize()
+   public void read()
    {
-   }
-
-   // To be able to extend RobotController so the kinematics walking controller can use it easily
-   @Override
-   public void doControl()
-   {
-      read(0L);
-      run();
-      write(0L);
-   }
-
-   @Override
-   public void read(long currentClockTime)
-   {
-      long timestamp;
-      if (threadDataSynchronizer != null)
-      {
-         timestamp = threadDataSynchronizer.getTimestamp();
-         handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
-      }
-      else
-      {
-         handControllerTime.add(Conversions.nanosecondsToSeconds(controlDTInNS));
-      }
+      handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
       if (jointAngleProducer != null)
       {
@@ -220,7 +193,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    }
 
    @Override
-   public void run()
+   public void execute()
    {
       checkForNewHandDesiredConfigurationRequested();
 
@@ -247,7 +220,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                                                                                                                       .getDesiredHandConfiguration());
 
             if (DEBUG)
-               PrintTools.debug(this, "Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);
+               LogTools.debug("Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);
             switch (handDesiredConfiguration)
             {
             case OPEN:
@@ -328,8 +301,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       }
    }
 
-   @Override
-   public void write(long timestamp)
+   public void write()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -353,34 +325,9 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoVariableRegistry getRegistry()
    {
       return registry;
-   }
-
-   @Override
-   public String getName()
-   {
-      return name;
-   }
-
-   @Override
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return null;
-   }
-
-   @Override
-   public long nextWakeupTime()
-   {
-      if (lastEstimatorStartTime.getLongValue() == Long.MIN_VALUE)
-      {
-         return Long.MIN_VALUE;
-      }
-      else
-      {
-         return lastEstimatorStartTime.getLongValue() + controlDTInNS + estimatorDTInNS;
-      }
    }
 
    public SideDependentList<List<OneDegreeOfFreedomJoint>> getAllFingerJoints()
@@ -389,8 +336,25 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    }
 
    @Override
-   public String getDescription()
+   protected void cleanup()
    {
-      return registry.getName();
+      if (jointAngleProducer != null)
+      {
+         jointAngleProducer.cleanup();
+      }
+   }
+
+   @Override
+   protected void updateMasterContext(HumanoidRobotContextData context)
+   {
+      write();
+      registry.updateMirror();
+   }
+
+   @Override
+   protected void updateLocalContext(HumanoidRobotContextData context)
+   {
+      timestamp = context.getTimestamp();
+      read();
    }
 }
