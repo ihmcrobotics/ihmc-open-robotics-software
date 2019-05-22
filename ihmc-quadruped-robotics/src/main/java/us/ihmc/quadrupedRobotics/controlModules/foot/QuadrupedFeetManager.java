@@ -159,6 +159,11 @@ public class QuadrupedFeetManager
          footControlModules.get(robotQuadrant).requestSupport();
    }
 
+   public void requestContact(RobotQuadrant robotQuadrant)
+   {
+      footControlModules.get(robotQuadrant).requestSupport();
+   }
+
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
