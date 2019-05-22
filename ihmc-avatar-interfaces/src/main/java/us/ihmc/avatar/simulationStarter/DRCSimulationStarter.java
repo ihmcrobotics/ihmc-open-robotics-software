@@ -49,7 +49,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -424,7 +424,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
-      AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -508,7 +508,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       if (createSCSSimulatedSensors)
       {
-         AvatarHumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+         HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = avatarSimulation.getSimulatedRobotTimeProvider();
          HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();

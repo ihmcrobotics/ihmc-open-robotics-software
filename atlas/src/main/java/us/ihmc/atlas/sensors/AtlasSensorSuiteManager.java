@@ -24,7 +24,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.parameters.AvatarHumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
@@ -39,14 +39,14 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final StereoVisionPointCloudPublisher stereoVisionPointCloudPublisher;
 
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final AvatarHumanoidRobotSensorInformation sensorInformation;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final FullHumanoidRobotModelFactory modelFactory;
 
    private final String robotName;
 
    public AtlasSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
-                                  DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, AvatarHumanoidRobotSensorInformation sensorInformation,
+                                  DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, HumanoidRobotSensorInformation sensorInformation,
                                   DRCRobotJointMap jointMap, RobotPhysicalProperties physicalProperties, RobotTarget targetDeployment)
    {
       this.robotName = robotName;

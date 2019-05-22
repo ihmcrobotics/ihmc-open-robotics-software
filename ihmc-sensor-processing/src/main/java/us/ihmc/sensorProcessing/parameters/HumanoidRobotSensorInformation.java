@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.parameters;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public interface AvatarHumanoidRobotSensorInformation extends AvatarRobotVisionSensorInformation, AvatarRobotRosIntegratedSensorInformation
+public interface HumanoidRobotSensorInformation extends AvatarRobotVisionSensorInformation, AvatarRobotRosIntegratedSensorInformation
 {
    public String[] getIMUSensorsToUseInStateEstimator();
 
