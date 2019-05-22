@@ -100,6 +100,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().addZ(stepHeightOffset));
 
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
       stepTeleopManager.publishTimedStepListToController(message);
 
       // check robot is still upright and walked forward
@@ -120,6 +121,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       offset.setZ(0.0);
       steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().add(offset));
       message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
       stepTeleopManager.publishTimedStepListToController(message);
 
       // check robot is still upright and walked forward
