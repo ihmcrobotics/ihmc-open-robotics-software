@@ -6,7 +6,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+
+import java.util.List;
 
 public class QuadrupedStepCommandConsumer
 {
@@ -16,6 +19,7 @@ public class QuadrupedStepCommandConsumer
 
    private final QuadrupedBalanceManager balanceManager;
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
+   private final QuadrupedFeetManager feetManager;
 
    public QuadrupedStepCommandConsumer(CommandInputManager commandInputManager, QuadrupedStepMessageHandler stepMessageHandler,
                                        QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
@@ -26,6 +30,7 @@ public class QuadrupedStepCommandConsumer
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = managerFactory.getOrCreateBodyOrientationManager();
+      feetManager = managerFactory.getOrCreateFeetManager();
    }
 
    public void update()
@@ -56,6 +61,14 @@ public class QuadrupedStepCommandConsumer
       {
          commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class);
          stepMessageHandler.clearUpcomingSteps();
+      }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(QuadrupedFootLoadBearingCommand.class))
+      {
+         List<QuadrupedFootLoadBearingCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(QuadrupedFootLoadBearingCommand.class);
+         for (int i = 0; i < commands.size(); i++)
+         {
+            feetManager.requestContact(commands.get(i).getRobotQuadrant());
+         }
       }
    }
 

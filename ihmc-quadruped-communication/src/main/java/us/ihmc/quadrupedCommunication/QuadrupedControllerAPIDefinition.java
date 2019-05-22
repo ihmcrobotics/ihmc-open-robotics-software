@@ -40,9 +40,9 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class);
       quadrupedCommands.add(PauseWalkingCommand.class);
       quadrupedCommands.add(AbortWalkingCommand.class);
+      quadrupedCommands.add(QuadrupedFootLoadBearingCommand.class);
 
 //      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
-//      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
 //      quadrupedCommands.add(GoHomeCommand.class); // TODO
 //      quadrupedCommands.add(QuadrupedBodyTranslationCommand.class); // TODO
 //      quadrupedCommands.add(QuadrupedBodyPositionCommand.class); // TODO
@@ -59,7 +59,6 @@ public class QuadrupedControllerAPIDefinition
       quadrupedStatusMessages.add(ControllerCrashNotificationPacket.class);
 
       quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
-
    }
 
    public static List<Class<? extends Command<?, ?>>> getQuadrupedSupportedCommands()
