@@ -178,7 +178,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
 
-      graphicsListRegistry.registerYoGraphic("SwingState", new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red()));
+      YoGraphicPosition finalGraphic = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
+      YoGraphicPosition desiredGraphic = new YoGraphicPosition(namePrefix + "DesiredPosition", desiredSolePosition, 0.015, YoAppearance.Green());
+      graphicsListRegistry.registerYoGraphic("SwingState", finalGraphic);
+      graphicsListRegistry.registerYoGraphic("SwingState", desiredGraphic);
+      graphicsListRegistry.registerArtifact("SwingState", finalGraphic.createArtifact());
    }
 
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
@@ -273,8 +277,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
 
       PositionTrajectoryGenerator activeTrajectory;
-      if (timeInState > swingDuration.getDoubleValue())
-         activeTrajectory = touchdownTrajectory;
+      if (!timeRemainingInStateWithSwingSpeedUp.isNaN() && timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
+            activeTrajectory = touchdownTrajectory;
+      else if (timeRemainingInState.getValue() < 0.0)
+            activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
 
