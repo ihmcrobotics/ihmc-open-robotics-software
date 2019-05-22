@@ -51,6 +51,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +82,9 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -97,6 +102,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
       cdr.write_type_7(data.getAreStepsAdjustable());
 
+      cdr.write_type_7(data.getOffsetStepsHeightWithExecutionError());
+
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedTimedStepListMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +115,8 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       	
       controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
       data.setAreStepsAdjustable(cdr.read_type_7());
+      	
+      data.setOffsetStepsHeightWithExecutionError(cdr.read_type_7());
       	
 
    }
@@ -121,6 +130,7 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       ser.write_type_7("are_steps_adjustable", data.getAreStepsAdjustable());
+      ser.write_type_7("offset_steps_height_with_execution_error", data.getOffsetStepsHeightWithExecutionError());
    }
 
    @Override
@@ -132,6 +142,7 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       data.setAreStepsAdjustable(ser.read_type_7("are_steps_adjustable"));
+      data.setOffsetStepsHeightWithExecutionError(ser.read_type_7("offset_steps_height_with_execution_error"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedTimedStepListMessage src, controller_msgs.msg.dds.QuadrupedTimedStepListMessage dest)
