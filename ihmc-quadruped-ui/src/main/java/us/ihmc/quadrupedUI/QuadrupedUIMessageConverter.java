@@ -91,7 +91,7 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
    private IHMCRealtimeROS2Publisher<SoleTrajectoryMessage> soleTrajectoryMessagePublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
-
+   private IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
@@ -138,7 +138,9 @@ public class QuadrupedUIMessageConverter
       ROS2Tools
             .createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> processRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
-                                           s -> processControllerStateChangeMessage(s.takeNextData()));
+                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
+                                           s -> processSteppingStateStateChangeMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s -> messager.submitMessage(QuadrupedUIMessagerAPI.FootstepStatusMessageTopic, s.takeNextData()));
 
@@ -189,6 +191,7 @@ public class QuadrupedUIMessageConverter
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
       soleTrajectoryMessagePublisher = ROS2Tools.createPublisher(ros2Node, SoleTrajectoryMessage.class, controllerSubGenerator);
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
 
       enableBodyTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopInputTopicGenerator);
       enableStepTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopInputTopicGenerator);
@@ -229,6 +232,12 @@ public class QuadrupedUIMessageConverter
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, this::publishDesiredVelocity);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, this::publishDesiredBodyPose);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.PauseWalkingTopic, request ->
+      {
+         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+         pauseWalkingMessage.setPause(request);
+         pauseWalkingPublisher.publish(pauseWalkingMessage);
+      });
    }
 
    private void processRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -236,10 +245,16 @@ public class QuadrupedUIMessageConverter
       messager.submitMessage(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, robotConfigurationData);
    }
 
-   private void processControllerStateChangeMessage(HighLevelStateChangeStatusMessage stateChangeStatusMessage)
+   private void processHighLevelStateChangeMessage(HighLevelStateChangeStatusMessage stateChangeStatusMessage)
    {
       HighLevelControllerName currentState = HighLevelControllerName.fromByte(stateChangeStatusMessage.getEndHighLevelControllerName());
       messager.submitMessage(QuadrupedUIMessagerAPI.CurrentControllerNameTopic, currentState);
+   }
+
+   private void processSteppingStateStateChangeMessage(QuadrupedSteppingStateChangeMessage stateChangeStatusMessage)
+   {
+      QuadrupedSteppingStateEnum currentState = QuadrupedSteppingStateEnum.fromByte(stateChangeStatusMessage.getEndQuadrupedSteppingStateEnum());
+      messager.submitMessage(QuadrupedUIMessagerAPI.CurrentSteppingStateNameTopic, currentState);
    }
 
    private void processFootstepPlanningRequestPacket(QuadrupedFootstepPlanningRequestPacket packet)
