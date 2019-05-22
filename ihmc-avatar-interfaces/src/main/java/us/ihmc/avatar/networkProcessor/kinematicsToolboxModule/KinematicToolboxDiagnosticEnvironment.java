@@ -23,7 +23,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -58,7 +58,7 @@ public class KinematicToolboxDiagnosticEnvironment
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
-      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
+      HumanoidRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
       MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName());
       final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
                                                                            publisherTopicNameGenerator, realtimeRos2Node, sensorOutputMapReadOnly,

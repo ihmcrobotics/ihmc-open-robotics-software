@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.parameters;
 
 public interface RGBDCameraParameters
 {
-   public DRCRobotCameraParameters getCameraParameters();
+   public AvatarRobotCameraParameters getCameraParameters();
 
-   public DRCRobotPointCloudParameters getPointCloudParameters();
+   public AvatarRobotPointCloudParameters getPointCloudParameters();
 }

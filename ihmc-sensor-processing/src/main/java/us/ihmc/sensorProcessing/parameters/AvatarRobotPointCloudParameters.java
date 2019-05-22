@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.parameters;
 
 
-public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
+public class AvatarRobotPointCloudParameters implements AvatarRobotSensorParameters
 {
    private final String pointCloudSensorName;
    private final String pointCloudTopic;
@@ -11,7 +11,7 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
    private final boolean useRosForTransformFromPoseToSensor;
    private final int pointCloudId;
    
-   public DRCRobotPointCloudParameters(String pointCloudSensorName, String pointCloudTopic, String sdflinkNameForSensorPose, int stereoId)
+   public AvatarRobotPointCloudParameters(String pointCloudSensorName, String pointCloudTopic, String sdflinkNameForSensorPose, int stereoId)
    {
       this.pointCloudSensorName = pointCloudSensorName;
       this.pointCloudTopic = pointCloudTopic;
@@ -22,7 +22,7 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
       this.pointCloudId = stereoId;
    }
 
-   public DRCRobotPointCloudParameters(String pointCloudSensorName, String pointCloudTopic, String lidarToRosHandoffFrameInSdf, String pointCloudBaseFrameForRos, String pointCloudEndFrameForRos, int stereoId)
+   public AvatarRobotPointCloudParameters(String pointCloudSensorName, String pointCloudTopic, String lidarToRosHandoffFrameInSdf, String pointCloudBaseFrameForRos, String pointCloudEndFrameForRos, int stereoId)
    {
       this.pointCloudSensorName = pointCloudSensorName;
       this.pointCloudTopic = pointCloudTopic;
@@ -70,8 +70,8 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
    }
 
    @Override
-   public DRCRobotSensorType getSensorType()
+   public AvatarRobotVisionSensorType getSensorType()
    {
-      return DRCRobotSensorType.POINTCLOUD;
+      return AvatarRobotVisionSensorType.POINTCLOUD;
    }
 }
