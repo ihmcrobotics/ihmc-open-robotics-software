@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
@@ -111,7 +110,8 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
                                                                                 0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
             atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.298, -0.147, 1.097, 1.2554068994570775, 0.03416782147174632,
-
+                                                                               0.26586161890007015, RobotSide.LEFT, "Moving Left Hand To Door",3));
+                                                                               
 
          }
       };
