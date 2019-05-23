@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraphMessagesConverter;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
@@ -34,8 +35,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
-
-import us.ihmc.messager.Messager;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -93,6 +92,7 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
    private IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
    private IHMCRealtimeROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
+   private IHMCRealtimeROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingRequestPublisher;
 
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
@@ -194,6 +194,7 @@ public class QuadrupedUIMessageConverter
       bodyHeightPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
       pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
       abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
+      loadBearingRequestPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
 
       enableBodyTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, bodyTeleopInputTopicGenerator);
       enableStepTeleopPublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, stepTeleopInputTopicGenerator);
@@ -234,14 +235,19 @@ public class QuadrupedUIMessageConverter
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopVelocity, this::publishDesiredVelocity);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredTeleopBodyPoseTopic, this::publishDesiredBodyPose);
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortWalkingTopic, m -> abortWalkingPublisher.publish(new AbortWalkingMessage()));
       messager.registerTopicListener(QuadrupedUIMessagerAPI.PauseWalkingTopic, request ->
       {
          PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
          pauseWalkingMessage.setPause(request);
          pauseWalkingPublisher.publish(pauseWalkingMessage);
       });
-
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.AbortWalkingTopic, m -> abortWalkingPublisher.publish(new AbortWalkingMessage()));
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.LoadBearingRequestTopic, quadrant ->
+      {
+         QuadrupedFootLoadBearingMessage loadBearingMessage = new QuadrupedFootLoadBearingMessage();
+         loadBearingMessage.setRobotQuadrant(quadrant.toByte());
+         loadBearingRequestPublisher.publish(loadBearingMessage);
+      });
    }
 
    private void processRobotConfigurationData(RobotConfigurationData robotConfigurationData)
