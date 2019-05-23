@@ -67,6 +67,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider coefficientOfFrictionWhenSlipping = new DoubleParameter("coefficientOfFrictionWhenSlipping", finalRegistry, 0.6);
    private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 0.9);
 
+   private final DoubleProvider touchdownDuration = new DoubleParameter("touchdownDuration", finalRegistry, 0.1);
 
 
    public QuadrupedFootControlModuleParameters()
@@ -83,8 +84,8 @@ public class QuadrupedFootControlModuleParameters
       holdPositionDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
       holdPositionGains = new ParameterizedPID3DGains("_holdPosition", GainCoupling.NONE, false, holdPositionDefaultGains, finalRegistry);
    }
-   
-   
+
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return finalRegistry;
@@ -243,5 +244,10 @@ public class QuadrupedFootControlModuleParameters
    public static int getDefaultTouchdownTriggerWindow()
    {
       return defaultTouchdownTriggerWindow;
+   }
+
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration.getValue();
    }
 }
