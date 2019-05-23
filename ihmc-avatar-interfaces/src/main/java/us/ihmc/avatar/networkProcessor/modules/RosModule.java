@@ -21,6 +21,7 @@ import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
@@ -28,7 +29,6 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 import java.io.IOException;
 import java.net.URI;
@@ -55,7 +55,7 @@ public class RosModule
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-                    AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, DRCRobotJointMap jointMap,
+                    AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap jointMap,
                     URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
