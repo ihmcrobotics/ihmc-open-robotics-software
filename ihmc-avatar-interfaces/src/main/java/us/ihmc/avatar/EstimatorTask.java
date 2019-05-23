@@ -20,6 +20,8 @@ public class EstimatorTask extends HumanoidRobotControlTask
 
    private final ThreadTimer timer;
 
+   private boolean sensorsRead = false;
+
    public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel, RobotVisualizer robotVisualizer)
    {
       super(divisor);
@@ -39,6 +41,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
    @Override
    protected void execute()
    {
+      if (!sensorsRead)
+         return;
+
       timer.start();
       estimatorThread.run();
       timer.stop();
@@ -56,6 +61,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
       // Abuse the fact that this is running on the robot synchronized thread to update the sensor data and the time.
       long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
       masterContext.setTimestamp(newTimestamp);
+      sensorsRead = true;
 
       estimatorThread.read();
    }
