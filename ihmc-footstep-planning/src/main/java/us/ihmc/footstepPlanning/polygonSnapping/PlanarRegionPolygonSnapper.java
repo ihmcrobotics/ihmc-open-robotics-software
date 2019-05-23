@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,7 +20,7 @@ public class PlanarRegionPolygonSnapper
     * @param planarRegionToSnapTo
     * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2DBasics polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3D highestVertexInWorld)
+   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2DReadOnly polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3D highestVertexInWorld)
    {
       ArrayList<ConvexPolygon2D> polygonIntersections = new ArrayList<>();
       planarRegionToSnapTo.getPolygonIntersectionsWhenProjectedVertically(polygonToSnap, polygonIntersections);
