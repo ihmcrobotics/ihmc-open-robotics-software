@@ -68,6 +68,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 0.9);
 
    private final DoubleProvider touchdownDuration = new DoubleParameter("touchdownDuration", finalRegistry, 0.1);
+   private final DoubleProvider loadingMaxMagnitude = new DoubleParameter("loadingMaxMagnitude", finalRegistry, 500.0);
 
 
    public QuadrupedFootControlModuleParameters()
@@ -250,4 +251,10 @@ public class QuadrupedFootControlModuleParameters
    {
       return touchdownDuration.getValue();
    }
+
+   public double getLoadingMaxMagnitude()
+   {
+      return loadingMaxMagnitude.getValue();
+   }
+
 }

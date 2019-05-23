@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -8,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -99,7 +103,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
 
       footControlModuleParameters = controllerToolbox.getFootControlModuleParameters();
-      double rhoWeight = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings().getRhoWeight();
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings();
+      double rhoWeight = controllerCoreOptimizationSettings.getRhoWeight();
       rhoRamping = new ContactStateRhoRamping<>(robotQuadrant, contactState, rhoWeight, registry);
 
       ReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotQuadrant);
@@ -169,10 +174,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       updateHoldPositionSetpoints();
 
-      if (timeInState > footControlModuleParameters.getTouchdownDuration())
-         rhoRamping.resetContactState();
-      else
-         rhoRamping.update(timeInState);
+      updateTouchdownSetpoints(timeInState);
 
       // assemble acceleration command
       ReferenceFrame bodyFixedFrame = contactState.getRigidBody().getBodyFixedFrame();
@@ -220,6 +222,32 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
+   }
+
+   private void updateTouchdownSetpoints(double timeInState)
+   {
+      double touchdownDuration = footControlModuleParameters.getTouchdownDuration();
+
+      if (timeInState > touchdownDuration)
+      {
+         rhoRamping.resetContactState();
+         for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = contactState.getContactPoints().get(i);
+            contactState.setMaxContactPointNormalForce(contactPoint, Double.POSITIVE_INFINITY);
+         }
+      }
+      else
+      {
+         rhoRamping.update(timeInState);
+         rhoMaxSetpoint.set(InterpolationTools.linearInterpolate(0.0, footControlModuleParameters.getLoadingMaxMagnitude(), timeInState / touchdownDuration));
+
+         for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+         {
+            YoContactPoint contactPoint = contactState.getContactPoints().get(i);
+            contactState.setMaxContactPointNormalForce(contactPoint, rhoMaxSetpoint.getDoubleValue());
+         }
+      }
    }
 
    private void updateHoldPositionSetpoints()
