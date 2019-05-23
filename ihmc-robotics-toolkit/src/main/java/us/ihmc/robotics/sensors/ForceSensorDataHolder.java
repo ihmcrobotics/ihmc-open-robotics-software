@@ -34,14 +34,6 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
 
    public ForceSensorData registerForceSensor(ForceSensorDefinition forceSensorDefinition)
    {
-      ForceSensorData forceSensorData = forceSensorMap.get(forceSensorDefinition);
-      if (forceSensorData == null)
-      {
-         forceSensorData = new ForceSensorData();
-         forceSensorMap.put(forceSensorDefinition, forceSensorData);
-      }
-      forceSensorDatas.add(forceSensorData);
-
       ForceSensorDefinition definition = sensorNameToDefintionMap.get(forceSensorDefinition.getSensorName());
       if (definition == null)
       {
@@ -49,9 +41,17 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
          sensorNameToDefintionMap.put(forceSensorDefinition.getSensorName(), definition);
       }
       forceSensorDefinitions.add(definition);
-
-      forceSensorData.setFrameAndBody(forceSensorDefinition);
       definition.set(forceSensorDefinition);
+
+      ForceSensorData forceSensorData = forceSensorMap.get(definition);
+      if (forceSensorData == null)
+      {
+         forceSensorData = new ForceSensorData();
+         forceSensorMap.put(definition, forceSensorData);
+      }
+      forceSensorDatas.add(forceSensorData);
+      forceSensorData.setFrameAndBody(forceSensorDefinition);
+
       return forceSensorData;
    }
 

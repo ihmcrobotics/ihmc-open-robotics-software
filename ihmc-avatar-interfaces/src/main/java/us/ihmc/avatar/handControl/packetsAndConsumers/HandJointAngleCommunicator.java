@@ -10,10 +10,8 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
-public class HandJointAngleCommunicator implements CloseableAndDisposable
+public class HandJointAngleCommunicator
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
@@ -27,15 +25,12 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
 
    private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
 
-   public HandJointAngleCommunicator(RobotSide side, IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher,
-                                     CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public HandJointAngleCommunicator(RobotSide side, IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher)
    {
       this.side = side;
       this.publisher = publisher;
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       executor = startWriterThread();
-
-      closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
    }
 
    private ScheduledExecutorService startWriterThread()
@@ -111,8 +106,7 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
       connected.set(true);
    }
 
-   @Override
-   public void closeAndDispose()
+   public void cleanup()
    {
       executor.shutdown();
    }

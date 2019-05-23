@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch;
 
+import org.ojalgo.function.multiary.MultiaryFunction.Convex;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +21,12 @@ public class CliffDetectionTools
    public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw, FootstepPlannerParameters parameters,
                                      double forward, double backward, double left, double right)
    {
-      double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
+      return isNearCliff(planarRegionsList, footInWorld, footYaw, parameters.getCliffHeightToAvoid(), forward, backward, left, right);
+   }
+
+   public static boolean isNearCliff(PlanarRegionsList planarRegionsList, Point3DReadOnly footInWorld, double footYaw, double cliffHeightToAvoid,
+                                     double forward, double backward, double left, double right)
+   {
       if (!Double.isFinite(cliffHeightToAvoid))
          return true;
 
@@ -80,7 +87,7 @@ public class CliffDetectionTools
 
          double heightOfPointFromFoot = closestPointInWorld.getZ() - footInWorld.getZ();
 
-         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()))
+         if (tempPolygon.isPointInside(closestPointInWorld.getX(), closestPointInWorld.getY()) && heightOfPointFromFoot > maxZInSoleFrame)
          {
             maxZInSoleFrame = heightOfPointFromFoot;
             highestNearbyPointToPack.set(closestPointInWorld);
