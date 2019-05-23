@@ -25,6 +25,7 @@ import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -71,16 +72,13 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -310,7 +308,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotSensorInformation getSensorInformation()
+   public HumanoidRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
    }
@@ -426,18 +424,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                         ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         RealtimeRos2Node realtimeRos2Node,
-                                                                         CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node)
    {
       switch (selectedVersion.getHandModel())
       {
       case ROBOTIQ:
-         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, realtimeRos2Node,
+         return new SimulatedRobotiqHandsController(simulatedRobot, this, realtimeRos2Node,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()),
-                                                    closeableAndDisposableRegistry);
+                                                    ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
 
       default:
          return null;

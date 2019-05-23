@@ -131,7 +131,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
    {
-      return false;
+      return true;
    }
 
    @Override

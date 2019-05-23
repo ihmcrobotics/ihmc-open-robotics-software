@@ -6,17 +6,13 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
+import us.ihmc.sensorProcessing.parameters.*;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 
-public class AtlasSensorInformation implements DRCRobotSensorInformation
+public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 {
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";
@@ -43,7 +39,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * Camera Parameters
     */
-   private final DRCRobotCameraParameters[] cameraParameters = new DRCRobotCameraParameters[4];
+   private final AvatarRobotCameraParameters[] cameraParameters = new AvatarRobotCameraParameters[4];
    public static final int MULTISENSE_SL_LEFT_CAMERA_ID = 0;
    public static final int MULTISENSE_SL_RIGHT_CAMERA_ID = 1;
    public static final int BLACKFLY_LEFT_CAMERA_ID = 2;
@@ -77,7 +73,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     */
    private static final double lidar_spindle_velocity = 2.183;
 
-   private final DRCRobotLidarParameters[] lidarParameters = new DRCRobotLidarParameters[1];
+   private final AvatarRobotLidarParameters[] lidarParameters = new AvatarRobotLidarParameters[1];
    public static final int MULTISENSE_LIDAR_ID = 0;
 
    private static final String lidarPoseLink = "hokuyo_link";
@@ -101,7 +97,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * Stereo Parameters
     */
 
-   private final DRCRobotPointCloudParameters[] pointCloudParameters = new DRCRobotPointCloudParameters[1];
+   private final AvatarRobotPointCloudParameters[] pointCloudParameters = new AvatarRobotPointCloudParameters[1];
    public static final int MULTISENSE_STEREO_ID = 0;
    private static final String stereoSensorName = "stereo_camera";
    private static final String stereoColorTopic = multisense_namespace + "/image_points2_color_world";
@@ -130,19 +126,19 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 
       if(target == RobotTarget.REAL_ROBOT)
       {
-         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
-         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
-         lidarParameters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_laser_scan_topic_string,
-               multisense_laser_scan_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         pointCloudParameters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParameters[MULTISENSE_LIDAR_ID] = new AvatarRobotLidarParameters(true, lidarSensorName, multisense_laser_scan_topic_string,
+                                                                               multisense_laser_scan_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParameters[MULTISENSE_STEREO_ID] = new AvatarRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
       else if(target == RobotTarget.HEAD_ON_A_STICK)
       {
-         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
-         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
-         lidarParameters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_filtered_laser_as_point_cloud_topic_string,
-                 multisense_ground_point_cloud_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         pointCloudParameters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParameters[MULTISENSE_LIDAR_ID] = new AvatarRobotLidarParameters(true, lidarSensorName, multisense_filtered_laser_as_point_cloud_topic_string,
+                                                                               multisense_ground_point_cloud_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParameters[MULTISENSE_STEREO_ID] = new AvatarRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
       else if (target == RobotTarget.GAZEBO)
       {
@@ -153,26 +149,26 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
          String lidarEndFrame = "head_hokuyo_frame";
 
 
-         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic,
-               multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
-         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic,
-               multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
-         lidarParameters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
-               lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         pointCloudParameters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame,
-               stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, left_info_camera_topic,
+                                                                                          multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, right_info_camera_topic,
+                                                                                           multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParameters[MULTISENSE_LIDAR_ID] = new AvatarRobotLidarParameters(true, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+                                                                               lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParameters[MULTISENSE_STEREO_ID] = new AvatarRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame,
+                                                                                          stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
       else
       {
-         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, multisenseHandoffFrame, left_info_camera_topic, MULTISENSE_SL_LEFT_CAMERA_ID);
-         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic,  multisenseHandoffFrame, right_info_camera_topic, MULTISENSE_SL_RIGHT_CAMERA_ID);
-         lidarParameters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
-               lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-         pointCloudParameters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, MULTISENSE_STEREO_ID);
+         cameraParameters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_topic, multisenseHandoffFrame, left_info_camera_topic, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParameters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_camera_name, right_camera_topic, multisenseHandoffFrame, right_info_camera_topic, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParameters[MULTISENSE_LIDAR_ID] = new AvatarRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+                                                                               lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParameters[MULTISENSE_STEREO_ID] = new AvatarRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, MULTISENSE_STEREO_ID);
       }
 
-      cameraParameters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
-      cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
+      cameraParameters[BLACKFLY_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
+      cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
       setupROSLocationService = target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
       setupROSParameterSetters = target == RobotTarget.REAL_ROBOT;
@@ -188,13 +184,13 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotLidarParameters[] getLidarParameters()
+   public AvatarRobotLidarParameters[] getLidarParameters()
    {
       return lidarParameters;
    }
 
    @Override
-   public DRCRobotLidarParameters getLidarParameters(int sensorId)
+   public AvatarRobotLidarParameters getLidarParameters(int sensorId)
    {
       return lidarParameters[sensorId];
    }
@@ -236,13 +232,13 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParameters[] getCameraParameters()
+   public AvatarRobotCameraParameters[] getCameraParameters()
    {
       return cameraParameters;
    }
 
    @Override
-   public DRCRobotCameraParameters getCameraParameters(int sensorId)
+   public AvatarRobotCameraParameters getCameraParameters(int sensorId)
    {
       return cameraParameters[sensorId];
    }
@@ -258,18 +254,18 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParameters[] getPointCloudParameters()
+   public AvatarRobotPointCloudParameters[] getPointCloudParameters()
    {
       return pointCloudParameters;
    }
 
    @Override
-   public DRCRobotPointCloudParameters getPointCloudParameters(int sensorId)
+   public AvatarRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
       return pointCloudParameters[sensorId];
    }
 
-   private void sensorFramesToTrack(DRCRobotSensorParameters[] sensorParams, ArrayList<String> holder)
+   private void sensorFramesToTrack(AvatarRobotSensorParameters[] sensorParams, ArrayList<String> holder)
    {
       for(int i = 0; i < sensorParams.length; i++)
       {
@@ -308,12 +304,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public boolean isMultisenseHead()
    {
       return isMultisenseHead;
-   }
-
-   @Override
-   public ReferenceFrame getHeadIMUFrameWhenLevel()
-   {
-      return null;
    }
 
    @Override
