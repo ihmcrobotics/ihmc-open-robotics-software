@@ -18,7 +18,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
@@ -26,7 +26,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 {
    private static final boolean DEBUG = false;
 
-   public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
+   public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
                                 RobotConfigurationDataBuffer robotConfigurationDataBuffer, Ros2Node ros2Node,
                                 PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
    {

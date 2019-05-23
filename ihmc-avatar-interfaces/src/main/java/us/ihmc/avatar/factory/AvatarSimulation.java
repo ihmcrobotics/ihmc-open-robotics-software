@@ -1,32 +1,28 @@
 package us.ihmc.avatar.factory;
 
-import us.ihmc.avatar.DRCEstimatorThread;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public class AvatarSimulation
 {
    private SimulationConstructionSet simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
-   private AbstractThreadedRobotController threadedRobotController;
-   private DRCEstimatorThread stateEstimationThread;
-   private DRCControllerThread controllerThread;
-   private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
+   private DisposableRobotController robotController;
+   private AvatarEstimatorThread stateEstimationThread;
+   private AvatarControllerThread controllerThread;
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
-   private ThreadDataSynchronizerInterface threadDataSynchronizer;
+   private FullHumanoidRobotModel controllerFullRobotModel;
 
    public void start()
    {
@@ -45,18 +41,8 @@ public class AvatarSimulation
 
    public void dispose()
    {
-      threadedRobotController.stop();
-
-      stateEstimationThread.dispose();
-      stateEstimationThread = null;
-
-      controllerThread.dispose();
-      controllerThread = null;
-
-      threadedRobotController = null;
-
-      closeableAndDisposableRegistry.closeAndDispose();
-      closeableAndDisposableRegistry = null;
+      robotController.dispose();
+      robotController = null;
    }
 
    public void updateEnvironment(CommonAvatarEnvironmentInterface commonAvatarEnvironment)
@@ -71,10 +57,10 @@ public class AvatarSimulation
          simulationConstructionSet.addStaticLinkGraphics(commonAvatarEnvironment.getTerrainObject3D().getLinkGraphics());
       }
    }
-   
+
    public FullHumanoidRobotModel getControllerFullRobotModel()
    {
-      return threadDataSynchronizer.getControllerFullRobotModel();
+      return controllerFullRobotModel;
    }
 
    /**
@@ -105,11 +91,6 @@ public class AvatarSimulation
       return humanoidFloatingRootJointRobot;
    }
 
-   public ThreadDataSynchronizerInterface getThreadDataSynchronizer()
-   {
-      return threadDataSynchronizer;
-   }
-
    public SimulatedDRCRobotTimeProvider getSimulatedRobotTimeProvider()
    {
       return simulatedRobotTimeProvider;
@@ -130,24 +111,19 @@ public class AvatarSimulation
       this.yoVariableServer = yoVariableServer;
    }
 
-   public void setThreadedRobotController(AbstractThreadedRobotController threadedRobotController)
+   public void setRobotController(DisposableRobotController robotController)
    {
-      this.threadedRobotController = threadedRobotController;
+      this.robotController = robotController;
    }
 
-   public void setStateEstimationThread(DRCEstimatorThread stateEstimationThread)
+   public void setStateEstimationThread(AvatarEstimatorThread stateEstimationThread)
    {
       this.stateEstimationThread = stateEstimationThread;
    }
 
-   public void setControllerThread(DRCControllerThread controllerThread)
+   public void setControllerThread(AvatarControllerThread controllerThread)
    {
       this.controllerThread = controllerThread;
-   }
-
-   public void setCloseableAndDisposableRegistry(CloseableAndDisposableRegistry closeableAndDisposableRegistry)
-   {
-      this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
    }
 
    public void setHumanoidFloatingRootJointRobot(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
@@ -160,9 +136,9 @@ public class AvatarSimulation
       this.simulatedRobotTimeProvider = simulatedRobotTimeProvider;
    }
 
-   public void setThreadDataSynchronizer(ThreadDataSynchronizerInterface threadDataSynchronizer)
+   public void setFullHumanoidRobotModel(FullHumanoidRobotModel controllerFullRobotModel)
    {
-      this.threadDataSynchronizer = threadDataSynchronizer;
+      this.controllerFullRobotModel = controllerFullRobotModel;
    }
 
    public void addRobotControllerOnEstimatorThread(RobotController controller)

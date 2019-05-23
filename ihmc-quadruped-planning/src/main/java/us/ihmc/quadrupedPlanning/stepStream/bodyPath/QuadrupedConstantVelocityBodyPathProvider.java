@@ -297,8 +297,13 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
          }
       }
 
+      if(sortedMessageList.isEmpty())
+      {
+         return null;
+      }
+
       sortedMessageList.sort((message1, message2) -> Double.compare(message2.getDesiredStepInterval().getEndTime(), message1.getDesiredStepInterval().getEndTime()));
-      return sortedMessageList.get(Math.min(sortedMessageList.size() - 1, depth));
+      return sortedMessageList.get(Math.min(sortedMessageList.size(), depth) - 1);
    }
 
    public void setShiftPlanBasedOnStepAdjustment(boolean shiftPlanBasedOnStepAdjustment)
