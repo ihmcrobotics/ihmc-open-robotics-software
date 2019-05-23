@@ -35,7 +35,7 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
    private double getExpansionResolution(FootstepNode node)
    {
       if (!snapper.hasPlanarRegions())
-         return 2 * FootstepNode.gridSizeXY;
+         return  2 * FootstepNode.gridSizeXY;
 
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       int xIndex = node.getXIndex(movingQuadrant);

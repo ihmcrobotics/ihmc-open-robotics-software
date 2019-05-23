@@ -7,7 +7,7 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
@@ -17,13 +17,13 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
    private final RosImagePublisher[] cameraPublisher;
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final DRCRobotCameraParameters[] cameraParameters;
+   private final AvatarRobotCameraParameters[] cameraParameters;
    private final RosCameraInfoPublisher[] cameraInfoPublishers;
 
    private final int nSensors;
 
    public RosSCSCameraPublisher(ObjectCommunicator localObjectCommunicator, RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         DRCRobotCameraParameters[] cameraParameters)
+         AvatarRobotCameraParameters[] cameraParameters)
    {
       nSensors = cameraParameters.length;
       this.rosMainNode = rosMainNode;

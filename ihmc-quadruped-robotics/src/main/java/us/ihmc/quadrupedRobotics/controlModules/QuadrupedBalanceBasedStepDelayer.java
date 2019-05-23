@@ -59,8 +59,9 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider delayAllSubsequentSteps = new BooleanParameter("delayAllSubsequentSteps", registry, true);
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
 
-   private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 5.0);
-   private final DoubleParameter timeToDelayLiftOff = new DoubleParameter("timeToDelayLiftOff", registry, 0.01);
+   private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 0.2);
+   private final DoubleProvider minimumTimeForStep = new DoubleParameter("minimumDurationForDelayedStep", registry, 0.4);
+   private final DoubleParameter timeToDelayLiftOff = new DoubleParameter("timeToDelayLiftOff", registry, 0.005);
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
 
@@ -226,12 +227,20 @@ public class QuadrupedBalanceBasedStepDelayer
             TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
             double currentStartTime = timeInterval.getStartTime();
             if (delayAllSubsequentSteps.getValue())
+            {
                stepStarting.getTimeInterval().shiftInterval(delayAmount);
-            else
+               delayDuration.add(delayAmount);
+               areFeetDelayed.get(quadrantStarting).set(true);
+               stepWasDelayed = true;
+            }
+            else if (stepStarting.getTimeInterval().getDuration() - delayAmount > minimumTimeForStep.getValue())
+            {
                stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
-            delayDuration.add(delayAmount);
-            areFeetDelayed.get(quadrantStarting).set(true);
-            stepWasDelayed = true;
+               delayDuration.add(delayAmount);
+               areFeetDelayed.get(quadrantStarting).set(true);
+               stepWasDelayed = true;
+            }
+
          }
          else
          {

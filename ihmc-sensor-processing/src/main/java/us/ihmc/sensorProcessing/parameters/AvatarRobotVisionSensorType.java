@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.parameters;
 
-public enum DRCRobotSensorType
+public enum AvatarRobotVisionSensorType
 {
    LIDAR, CAMERA, POINTCLOUD
 }

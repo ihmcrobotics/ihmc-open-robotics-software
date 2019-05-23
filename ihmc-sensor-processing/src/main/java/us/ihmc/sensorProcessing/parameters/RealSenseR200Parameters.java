@@ -4,8 +4,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RealSenseR200Parameters implements RGBDCameraParameters
 {
-   private final DRCRobotCameraParameters realSenseCameraParameters;
-   private final DRCRobotPointCloudParameters realSensePointCloudParameters;
+   private final AvatarRobotCameraParameters realSenseCameraParameters;
+   private final AvatarRobotPointCloudParameters realSensePointCloudParameters;
 
    public RealSenseR200Parameters(String namespace)
    {
@@ -27,21 +27,21 @@ public class RealSenseR200Parameters implements RGBDCameraParameters
       String pointCloudSensorName = cameraName + "_pointcloud_sensor";
       String sdfLinkNameForPointCloudPose = "";
 
-      realSenseCameraParameters = new DRCRobotCameraParameters(RobotSide.RIGHT, cameraNameInSDF, rosTopic, rosCameraInfoTopic, cameraFrameNameInSDF,
-            cameraBaseFrame, rgbCameraEndFrame, 0);
+      realSenseCameraParameters = new AvatarRobotCameraParameters(RobotSide.RIGHT, cameraNameInSDF, rosTopic, rosCameraInfoTopic, cameraFrameNameInSDF,
+                                                                  cameraBaseFrame, rgbCameraEndFrame, 0);
 
-      realSensePointCloudParameters = new DRCRobotPointCloudParameters(pointCloudSensorName, pointCloudTopic, sdfLinkNameForPointCloudPose, cameraBaseFrame,
-            irCameraEndFrame, 0);
+      realSensePointCloudParameters = new AvatarRobotPointCloudParameters(pointCloudSensorName, pointCloudTopic, sdfLinkNameForPointCloudPose, cameraBaseFrame,
+                                                                          irCameraEndFrame, 0);
    }
 
    @Override
-   public DRCRobotCameraParameters getCameraParameters()
+   public AvatarRobotCameraParameters getCameraParameters()
    {
       return realSenseCameraParameters;
    }
 
    @Override
-   public DRCRobotPointCloudParameters getPointCloudParameters()
+   public AvatarRobotPointCloudParameters getPointCloudParameters()
    {
       return realSensePointCloudParameters;
    }
