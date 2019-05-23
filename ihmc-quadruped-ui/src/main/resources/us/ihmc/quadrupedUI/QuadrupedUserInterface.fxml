@@ -7,6 +7,9 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <!--<top>-->
+        <!--<fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />-->
+    <!--</top>-->
     <bottom>
         <TabPane prefHeight="300.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
@@ -32,6 +35,12 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
+                    </content>
+                </Tab>
+                <Tab text="Reach Parameters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
                     </content>
                 </Tab>
 

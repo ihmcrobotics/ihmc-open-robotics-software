@@ -16,7 +16,7 @@ public interface JointDesiredOutputWriter
     * 
     * @param jointDesiredOutputList
     */
-   void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList);
+   void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList);
    
    /**
     * Set the holder for the force sensor data holder.

@@ -44,6 +44,8 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -63,6 +65,9 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -71,7 +76,9 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
    {
       cdr.write_type_7(data.getEnable());
 
-      cdr.write_type_6(data.getSupportRegionSize());
+      cdr.write_type_6(data.getInsideSupportRegionSize());
+
+      cdr.write_type_6(data.getOutsideSupportRegionSize());
 
    }
 
@@ -79,7 +86,9 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
    {
       data.setEnable(cdr.read_type_7());
       	
-      data.setSupportRegionSize(cdr.read_type_6());
+      data.setInsideSupportRegionSize(cdr.read_type_6());
+      	
+      data.setOutsideSupportRegionSize(cdr.read_type_6());
       	
 
    }
@@ -88,14 +97,16 @@ public class QuadrupedSupportPlanarRegionParametersMessagePubSubType implements 
    public final void serialize(controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("enable", data.getEnable());
-      ser.write_type_6("support_region_size", data.getSupportRegionSize());
+      ser.write_type_6("inside_support_region_size", data.getInsideSupportRegionSize());
+      ser.write_type_6("outside_support_region_size", data.getOutsideSupportRegionSize());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage data)
    {
       data.setEnable(ser.read_type_7("enable"));
-      data.setSupportRegionSize(ser.read_type_6("support_region_size"));
+      data.setInsideSupportRegionSize(ser.read_type_6("inside_support_region_size"));
+      data.setOutsideSupportRegionSize(ser.read_type_6("outside_support_region_size"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage src, controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage dest)

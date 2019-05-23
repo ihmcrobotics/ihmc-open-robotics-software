@@ -1,29 +1,23 @@
 package us.ihmc.exampleSimulations.springflamingo;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.ArrayList;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.*;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
+
+import java.util.ArrayList;
+
+import static us.ihmc.robotics.Assert.fail;
 
 @Tag("gui-slow")
 public class SpringFlamingoSimulationTest
 {
-   private SimulationGUITestFixture testFixture;
+//   private SimulationGUITestFixture testFixture;
    private SimulationConstructionSet scs;
 
    @BeforeEach
@@ -33,46 +27,47 @@ public class SpringFlamingoSimulationTest
       scs = springFlamingoSimulation.getSimulationConstructionSet();
 
 //      ThreadTools.sleep(1000L);
-      testFixture = new SimulationGUITestFixture(scs);
+//      testFixture = new SimulationGUITestFixture(scs);
    }
 
    @AfterEach
    public void tearDown()
    {
-      testFixture.closeAndDispose();
+//      testFixture.closeAndDispose();
       scs.closeAndDispose();
       scs = null;
-      testFixture = null;
+//      testFixture = null;
    }
 
+   @Disabled
 	@Test
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
-      testFixture.showWindow();
-//      testFixture.clickFileMenu();
+//      testFixture.showWindow();
+////      testFixture.clickFileMenu();
+////
+////      testFixture.selectNameSpaceTab();
+////      ThreadTools.sleep(1000);
 //
-//      testFixture.selectNameSpaceTab();
-//      ThreadTools.sleep(1000);
-
-//      testFixture.selectNewGraphWindowMenu();
-
-      testFixture.selectSearchTab();
-
-      testFixture.deleteSearchText();
-      testFixture.enterSearchText("q_");
-
-      testFixture.selectVariableAndSetValueInSearchTab("q_pitch", 1.0);
-//      ThreadTools.sleep(500);
-      testFixture.selectVariableInSearchTab("q_x");
-//      ThreadTools.sleep(500);
-
-      testFixture.clickRemoveEmptyGraphButton();
-      testFixture.clickNewGraphButton();
-      testFixture.middleClickInEmptyGraph();
-
-      testFixture.selectVariableInSearchTab("q_z");
-      testFixture.middleClickInNthGraph(1);
-      testFixture.removeVariableFromNthGraph("q_z", 1);
+////      testFixture.selectNewGraphWindowMenu();
+//
+//      testFixture.selectSearchTab();
+//
+//      testFixture.deleteSearchText();
+//      testFixture.enterSearchText("q_");
+//
+//      testFixture.selectVariableAndSetValueInSearchTab("q_pitch", 1.0);
+////      ThreadTools.sleep(500);
+//      testFixture.selectVariableInSearchTab("q_x");
+////      ThreadTools.sleep(500);
+//
+//      testFixture.clickRemoveEmptyGraphButton();
+//      testFixture.clickNewGraphButton();
+//      testFixture.middleClickInEmptyGraph();
+//
+//      testFixture.selectVariableInSearchTab("q_z");
+//      testFixture.middleClickInNthGraph(1);
+//      testFixture.removeVariableFromNthGraph("q_z", 1);
 
 //      testFixture.selectNewGraphWindowMenu();
 

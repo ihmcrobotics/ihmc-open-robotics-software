@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public abstract class RosCameraReceiver
@@ -11,8 +11,8 @@ public abstract class RosCameraReceiver
    static final boolean DEBUG = false;
    private final RigidBodyTransform staticTransform = new RigidBodyTransform();
 
-   public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RosMainNode rosMainNode, final CameraLogger logger,
-         final CameraDataReceiver cameraDataReceiver)
+   public RosCameraReceiver(final AvatarRobotCameraParameters cameraParameters, final RosMainNode rosMainNode, final CameraLogger logger,
+                            final CameraDataReceiver cameraDataReceiver)
    {
       if (cameraParameters.useRosForTransformFromPoseToSensor())
       {
@@ -50,6 +50,6 @@ public abstract class RosCameraReceiver
    }
 
    protected abstract void createImageSubscriber(RobotSide robotSide, CameraLogger logger, CameraDataReceiver cameraDataReceiver, RosCameraInfoSubscriber imageInfoSubscriber,
-         RosMainNode rosMainNode, DRCRobotCameraParameters cameraParameters);
+         RosMainNode rosMainNode, AvatarRobotCameraParameters cameraParameters);
 
 }
