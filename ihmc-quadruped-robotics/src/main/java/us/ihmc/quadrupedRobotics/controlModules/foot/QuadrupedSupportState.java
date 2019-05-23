@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -22,6 +23,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -52,7 +54,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
-
    private final SelectionMatrix6D accelerationSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D feedbackSelectionMatrix = new SelectionMatrix6D();
 
@@ -65,6 +66,11 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final YoBoolean isFootSlipping;
    private final YoDouble footPlanarVelocity;
+
+   private final YoDouble rhoMaxSetpoint;
+
+   private final ContactStateRhoRamping<RobotQuadrant> rhoRamping;
+   private final QuadrupedFootControlModuleParameters footControlModuleParameters;
 
 
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
@@ -90,9 +96,16 @@ public class QuadrupedSupportState extends QuadrupedFootState
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
+
+
+      footControlModuleParameters = controllerToolbox.getFootControlModuleParameters();
+      double rhoWeight = controllerToolbox.getRuntimeEnvironment().getControllerCoreOptimizationSettings().getRhoWeight();
+      rhoRamping = new ContactStateRhoRamping<>(robotQuadrant, contactState, rhoWeight, registry);
+
       ReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotQuadrant);
 
       String prefix = robotQuadrant.getShortName();
+      rhoMaxSetpoint = new YoDouble(prefix + "RhoMaxSetpoint", registry);
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
       rootBody = controllerToolbox.getFullRobotModel().getElevator();
@@ -132,6 +145,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
+      rhoRamping.initialize(footControlModuleParameters.getTouchdownDuration());
 
       if (waypointCallback != null)
          waypointCallback.isDoneMoving(robotQuadrant, true);
@@ -155,6 +169,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
       updateHoldPositionSetpoints();
 
+      if (timeInState > footControlModuleParameters.getTouchdownDuration())
+         rhoRamping.resetContactState();
+      else
+         rhoRamping.update(timeInState);
 
       // assemble acceleration command
       ReferenceFrame bodyFixedFrame = contactState.getRigidBody().getBodyFixedFrame();
@@ -162,7 +180,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footAcceleration.setBodyFrame(bodyFixedFrame);
       spatialAccelerationCommand.setSpatialAcceleration(soleFrame, footAcceleration);
       spatialAccelerationCommand.setLinearWeights(parameters.getSupportFootWeights());
-      
+
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(soleFrame);
@@ -275,6 +293,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footBarelyLoaded.set(false);
       isFootSlipping.set(false);
       footPlanarVelocity.setToNaN();
+      rhoRamping.resetContactState();
    }
 
    @Override
