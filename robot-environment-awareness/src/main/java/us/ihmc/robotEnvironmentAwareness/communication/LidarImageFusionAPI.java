@@ -71,7 +71,7 @@ public class LidarImageFusionAPI
    public static final Topic<Boolean> ClearViz = UICategory.child(REA).child(Viz).topic(Request);
    public static final Topic<Boolean> VisualizeAll = UICategory.child(REA).child(All).topic(Request);
    public static final Topic<Boolean> Propagate = UICategory.child(REA).child(Pro).topic(Request);
-   public static final Topic<Boolean> PlanarRegion = UICategory.child(REA).child(Pla).topic(Request);
+   public static final Topic<Boolean> RandomPropagate = UICategory.child(REA).child(Pla).topic(Request);
    public static final Topic<Boolean> EndToEnd = UICategory.child(REA).child(End).topic(Request);
    public static final Topic<Integer> Seed = UICategory.child(REA).topic(Label);
    

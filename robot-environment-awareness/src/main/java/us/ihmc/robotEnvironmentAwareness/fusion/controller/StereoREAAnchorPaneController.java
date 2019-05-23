@@ -57,10 +57,10 @@ public class StereoREAAnchorPaneController
       messager.submitMessage(LidarImageFusionAPI.Propagate, true);
    }
 
-   public void planar()
+   public void randomPropagate()
    {
       messager.submitMessage(LidarImageFusionAPI.Seed, Integer.parseInt(tfSeedLabel.getText()));
-      messager.submitMessage(LidarImageFusionAPI.PlanarRegion, true);
+      messager.submitMessage(LidarImageFusionAPI.RandomPropagate, true);
    }
 
    public void endToEnd()

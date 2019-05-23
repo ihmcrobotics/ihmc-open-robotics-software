@@ -20,7 +20,7 @@
                <children>
                   <TextField fx:id="tfSeedLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="87.0" text="403" />
                   <Button fx:id="btnPropagate" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#propagate" prefHeight="25.0" prefWidth="170.0" text="Propagate" />
-                  <Button fx:id="btnPlanarRegion" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#planar" prefHeight="25.0" prefWidth="170.0" text="Planar" />
+                  <Button fx:id="btnPlanarRegion" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#randomPropagate" prefHeight="25.0" prefWidth="170.0" text="Random Propagate" />
                   <Button fx:id="btnEndToEnd" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#endToEnd" text="End to End" />
                </children>
             </VBox>
