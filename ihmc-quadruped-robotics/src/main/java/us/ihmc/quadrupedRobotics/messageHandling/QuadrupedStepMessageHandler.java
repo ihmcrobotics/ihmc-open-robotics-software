@@ -21,7 +21,10 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,6 +40,7 @@ public class QuadrupedStepMessageHandler
    private final QuadrantDependentList<RecyclingArrayDeque<SoleTrajectoryCommand>> upcomingFootTrajectoryCommandList = new QuadrantDependentList<>();
 
    private final YoInteger numberOfStepsToRecover = new YoInteger("numberOfStepsToRecover", registry);
+   private final BooleanProvider shiftTimesBasedOnLateTouchdown = new BooleanParameter("shiftTimesBasedOnLateTouchdown", registry, true);
    private final YoDouble initialTransferDurationForShifting = new YoDouble("initialTransferDurationForShifting", registry);
 
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
@@ -203,10 +207,27 @@ public class QuadrupedStepMessageHandler
       touchdownTrigger.get(robotQuadrant).setTrue();
    }
 
+   public void shiftPlanTimeBasedOnTouchdown(RobotQuadrant robotQuadrant, double currentTime)
+   {
+      int index = getIndexOfFirstStep(robotQuadrant, timeEpsilonForStepSelection);
+      if (index == -1 || !shiftTimesBasedOnLateTouchdown.getValue())
+         return;
+
+      QuadrupedTimedStep completedStep = receivedStepSequence.remove(index);
+      double stepDelay = currentTime - completedStep.getTimeInterval().getEndTime();
+      if (stepDelay > 0.0)
+      {
+         for (int i = 0; i < receivedStepSequence.size(); i++)
+         {
+            receivedStepSequence.get(i).getTimeInterval().shiftInterval(stepDelay);
+         }
+      }
+   }
+
    private final FramePoint3D tempStep = new FramePoint3D();
 
    // Fixme this isn't working properly anymore
-   public void shiftPlanBasedOnStepAdjustment(FrameVector3DReadOnly stepAdjustment)
+   public void shiftPlanPositionBasedOnStepAdjustment(FrameVector3DReadOnly stepAdjustment)
    {
       int numberOfStepsToAdjust = Math.min(numberOfStepsToRecover.getIntegerValue(), receivedStepSequence.size());
       for (int i = 0; i < numberOfStepsToAdjust; i++)
