@@ -4,13 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import com.badlogic.gdx.Input;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -27,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 
@@ -40,6 +36,7 @@ public class LinkHollowCylinder extends Link
    private static final long serialVersionUID = 6789282991137530985L;
    
    public static final double aluminumDensityKgPerCubicM = 2800.0;
+   public static final double aluminumShearModulusNperSqM = 25.5e9;
    private static final double wallThicknessPercentOfRadius = 0.2; // [0.1]
 
    
@@ -62,6 +59,12 @@ public class LinkHollowCylinder extends Link
 	   this(name, cylinderZAxisInWorld, computeMassOfHollowCylinder(length, radius), length, radius, parentJointOffsetFromCoM, color);
    }
    
+   public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double length, double radius, Vector3D parentJointOffsetFromCoM,
+		   AppearanceDefinition color, boolean showJointGraphics)
+   {
+	   this(name, cylinderZAxisInWorld, computeMassOfHollowCylinder(length, radius), length, radius, parentJointOffsetFromCoM, color, showJointGraphics);
+   }
+   
    public static double computeMassOfHollowCylinder(double length, double radius)
    {
       double innerRadius = radius - wallThicknessPercentOfRadius * radius;
@@ -75,6 +78,15 @@ public class LinkHollowCylinder extends Link
 	   double ret = Math.sqrt(materialVolume / (Math.PI * length * ( 2 * wallThicknessPercentOfRadius - wallThicknessPercentOfRadius*wallThicknessPercentOfRadius)));
 	   return ret;
    }  
+   
+   public static double computeTheoreticalTorsionalStiffness(double length_m, double radius_m, double wallThickness)
+   {
+	   double J = 2.0 * Math.PI * radius_m * Math.pow(wallThickness, 3) / 3.0;
+	   
+	   double ret = aluminumShearModulusNperSqM * J / length_m;
+	   
+	   return ret;
+   }
    
    public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
    {
@@ -146,11 +158,13 @@ public class LinkHollowCylinder extends Link
          inertia.changeFrame(ReferenceFrame.getWorldFrame());
 
          this.setMass(mass);
+         PrintTools.info(this, "Setting Moment of Inertia.  Mass = " + String.format("%.1f", 1000.0 * mass) + " g");
          setMomentOfInertia(inertia.getMassMomentOfInertiaPartCopy());
          setComOffset(comOffset);
       }
 
       this.addCoordinateSystemToCOM(length / 10.0);
+      PrintTools.info(this, "Adding graphics ellipsoid from mass properties.  Mass = "  + String.format("%.1f", 1000.0 * mass) + " g");
       this.addEllipsoidFromMassProperties(color);
    }
 
@@ -170,7 +184,12 @@ public class LinkHollowCylinder extends Link
    
    private void addGraphics3DJointSphere(Graphics3DObject graphicsToAddTo, double radius)
    {
-	   graphicsToAddTo.addSphere(1.5*radius, YoAppearance.BlackMetalMaterial());
+	   addGraphics3DJointSphere(graphicsToAddTo, radius, YoAppearance.BlackMetalMaterial());
+   }
+   
+   private void addGraphics3DJointSphere(Graphics3DObject graphicsToAddTo, double radius, AppearanceDefinition color)
+   {
+	   graphicsToAddTo.addSphere(1.5*radius, color);
    }
    
    private void addGraphics3DCylinder(Graphics3DObject graphicsToAddTo, double length, double radius, AppearanceDefinition color, Vector3D cylinderZAxisInWorld, Vector3D cylinderCenterInWorld)
@@ -191,7 +210,10 @@ public class LinkHollowCylinder extends Link
 
       if (showJointGraphics)
       {
-    	  addGraphics3DJointSphere(ret, 1.5 * radius);
+    	  AppearanceDefinition jointColor = YoAppearance.BlackMetalMaterial();
+    	  jointColor.setTransparency(color.getTransparency());
+    	  
+    	  addGraphics3DJointSphere(ret, 0.7 * radius, jointColor);
       }
       
       ret.translate(parentJointOffsetFromCoM);

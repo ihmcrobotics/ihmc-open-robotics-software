@@ -629,7 +629,12 @@ public class Link implements java.io.Serializable
       InertiaTools.computePrincipalMomentsOfInertia(Inertia, principalAxesRotation, principalMomentsOfInertia);
       if ((principalMomentsOfInertia.getX() < minimumValidInertia) || (principalMomentsOfInertia.getY() < minimumValidInertia) || (principalMomentsOfInertia.getZ() < minimumValidInertia))
       {
-         System.err.println("Warning: Inertia may be too small for Link " + getName() + " for stable simulation. principalMomentsOfInertia = " + principalMomentsOfInertia);
+    	  String parentJointName = "  No parent joint.";
+    	  if (parentJoint != null)
+    	  {
+    		  parentJointName = "  Link parent: " + parentJoint.getName() + " .";
+    	  }
+    	  System.err.println("Warning: Inertia may be too small for Link " + getName() + " for stable simulation. principalMomentsOfInertia = " + principalMomentsOfInertia + parentJointName);
       }
    }
 
