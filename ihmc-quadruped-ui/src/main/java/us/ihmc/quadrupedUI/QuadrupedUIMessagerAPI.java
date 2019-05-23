@@ -143,6 +143,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<QuadrupedTimedStepListMessage> ManualStepsListMessageTopic = Root.child(Command).child(StepTeleop).topic(StepsListMessage);
    public static final Topic<SoleTrajectoryMessage> SoleTrajectoryMessageTopic = Root.child(Command).child(StepTeleop).topic(SoleTrajectoryMessage);
    public static final Topic<Boolean> PauseWalkingTopic = Root.child(Command).child(StepTeleop).topic(Pause);
+   public static final Topic<Boolean> AbortWalkingTopic = Root.child(Command).child(StepTeleop).topic(Stop);
 
    public static final Topic<QuadrupedTeleopDesiredVelocity> DesiredTeleopVelocity = Root.child(Command).child(StepTeleop).topic(DesiredTeleopVelocityMessage);
    public static final Topic<QuadrupedTeleopDesiredPose> DesiredTeleopBodyPoseTopic = Root.child(Command).child(BodyTeleop).topic(DesiredTeleopBodyPoseMessage);
