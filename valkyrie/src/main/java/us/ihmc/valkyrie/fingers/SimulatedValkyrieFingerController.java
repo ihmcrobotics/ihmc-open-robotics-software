@@ -8,11 +8,12 @@ import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
@@ -21,28 +22,15 @@ import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 
-public class SimulatedValkyrieFingerController implements MultiThreadedRobotControlElement, RobotController
+public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
 {
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
-
-   private final YoLong lastEstimatorStartTime = new YoLong("nextExecutionTime", registry);
-
-   private final long controlDTInNS;
-   private final long estimatorDTInNS;
-
-   private final ThreadDataSynchronizerInterface threadDataSynchronizer;
-   private final YoDouble handControllerTime = new YoDouble("handControllerTime", registry);
+   private final YoDouble handControllerTime;
    private final SimulatedValkyrieFingerJointAngleProducer jointAngleProducer;
 
    private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTimeForSim;
@@ -63,20 +51,23 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDegreeOfFreedomJoint>> allHandJointsNameToJointsMap = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> currentHandJointAngles = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
-   public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                            RealtimeRos2Node realtimeRos2Node, CloseableAndDisposableRegistry closeableAndDisposableRegistry,
-                                            DRCRobotModel robotModel, MessageTopicNameGenerator pubTopicNameGenerator,
-                                            MessageTopicNameGenerator subTopicNameGenerator)
+   private long timestamp;
+
+   private final MirroredYoVariableRegistry registry;
+
+   public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
+                                            MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
    {
-      this.threadDataSynchronizer = threadDataSynchronizer;
-      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
+      super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      handControllerTime = new YoDouble("handControllerTime", registry);
 
       if (realtimeRos2Node != null)
       {
          IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
                                                                                                          pubTopicNameGenerator);
-         jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot, closeableAndDisposableRegistry);
+         jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
          jointAngleProducer = null;
@@ -150,10 +141,12 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
                                                  valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }
+
+      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
    @Override
-   public void initialize()
+   public boolean initialize()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -163,21 +156,12 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
             currentHandJointAngles.get(robotSide).get(valkyrieHandJointName).set(oneDegreeOfFreedomJoint.getQ());
          }
       }
+      return true;
    }
 
-   @Override
-   public void read(long currentClockTime)
+   public void read()
    {
-      long timestamp;
-      if (threadDataSynchronizer != null)
-      {
-         timestamp = threadDataSynchronizer.getTimestamp();
-         handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
-      }
-      else
-      {
-         handControllerTime.add(Conversions.nanosecondsToSeconds(controlDTInNS));
-      }
+      handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
       if (jointAngleProducer != null)
       {
@@ -186,7 +170,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    }
 
    @Override
-   public void run()
+   public void execute()
    {
       checkForNewHandDesiredConfigurationRequested();
       checkForNewValkyrieHandFingerTrajectoryRequested();
@@ -198,8 +182,7 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
       }
    }
 
-   @Override
-   public void write(long timestamp)
+   public void write()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -229,48 +212,9 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoVariableRegistry getRegistry()
    {
       return registry;
-   }
-
-   @Override
-   public String getName()
-   {
-      return name;
-   }
-
-   @Override
-   public YoGraphicsListRegistry getYoGraphicsListRegistry()
-   {
-      return null;
-   }
-
-   @Override
-   public long nextWakeupTime()
-   {
-      if (lastEstimatorStartTime.getLongValue() == Long.MIN_VALUE)
-      {
-         return Long.MIN_VALUE;
-      }
-      else
-      {
-         return lastEstimatorStartTime.getLongValue() + controlDTInNS + estimatorDTInNS;
-      }
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return registry.getName();
-   }
-
-   @Override
-   public void doControl()
-   {
-      read(0L);
-      run();
-      write(0L);
    }
 
    private void checkForNewHandDesiredConfigurationRequested()
@@ -441,5 +385,28 @@ public class SimulatedValkyrieFingerController implements MultiThreadedRobotCont
          handJointFingerSetControllers.get(robotSide).appendStopPoint(handJointName,
                                                                       sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
       }
+   }
+
+   @Override
+   protected void cleanup()
+   {
+      if (jointAngleProducer != null)
+      {
+         jointAngleProducer.cleanup();
+      }
+   }
+
+   @Override
+   protected void updateMasterContext(HumanoidRobotContextData context)
+   {
+      write();
+      registry.updateMirror();
+   }
+
+   @Override
+   protected void updateLocalContext(HumanoidRobotContextData context)
+   {
+      timestamp = context.getTimestamp();
+      read();
    }
 }
