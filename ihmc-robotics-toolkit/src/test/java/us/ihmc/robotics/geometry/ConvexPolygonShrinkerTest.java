@@ -14,11 +14,13 @@ import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class ConvexPolygonShrinkerTest
 {
@@ -48,6 +50,35 @@ public class ConvexPolygonShrinkerTest
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.1), shrunkenPolygon.getVertexCCW(0), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.9, 0.1), shrunkenPolygon.getVertexCCW(1), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.9, 0.9), shrunkenPolygon.getVertexCCW(2), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.9), shrunkenPolygon.getVertexCCW(3), 1e-7);
+
+
+      polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertices));
+
+      shrinker.scaleConvexPolygon(polygon, 1.1, shrunkenPolygon);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 0.5), shrunkenPolygon.getVertexCCW(0), 1e-7);
+      assertEquals(1, shrunkenPolygon.getNumberOfVertices());
+   }
+
+   @Test
+   public void testSimpleSquareConvexPolygonShrinkingWithIndexToIgnore()
+   {
+      ArrayList<Point2D> vertices = new ArrayList<Point2D>();
+
+      vertices.add(new Point2D(0.0, 0.0));
+      vertices.add(new Point2D(1.0, 0.0));
+      vertices.add(new Point2D(1.0, 1.0));
+      vertices.add(new Point2D(0.0, 1.0));
+
+      ConvexPolygon2D polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertices));
+      ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
+      ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
+
+      shrinker.scaleConvexPolygon(polygon, 0.1, shrunkenPolygon, 1);
+
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.1), shrunkenPolygon.getVertexCCW(0), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(1.0, 0.1), shrunkenPolygon.getVertexCCW(1), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(1.0, 0.9), shrunkenPolygon.getVertexCCW(2), 1e-7);
       EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.1, 0.9), shrunkenPolygon.getVertexCCW(3), 1e-7);
 
 

@@ -60,9 +60,9 @@ public class StartGoalPositionViewer extends AnimationTimer
    private AtomicReference<Point3D> goalPositionReference = null;
    private AtomicReference<Quaternion> goalOrientationReference = null;
    private AtomicReference<Point3D> lowLevelGoalPositionReference = null;
+   private AtomicReference<PlanarRegionsList> planarRegionsList = null;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
-   private final AtomicReference<PlanarRegionsList> planarRegionsList;
 
 
    private final Messager messager;
@@ -71,7 +71,7 @@ public class StartGoalPositionViewer extends AnimationTimer
    {
       this.messager = messager;
 
-      planarRegionsList = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionDataTopic);
+
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -96,13 +96,14 @@ public class StartGoalPositionViewer extends AnimationTimer
    public StartGoalPositionViewer(Messager messager, Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic,
                                   Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
                                   Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic,
-                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic)
+                                  Topic<QuadrupedXGaitSettingsReadOnly> xGaitSettingsTopic, Topic<PlanarRegionsList> planarRegionDataTopic)
    {
       this(messager);
 
       setEditStartGoalTopics(startEditModeEnabledTopic, goalEditModeEnabledTopic);
       setPositionStartGoalTopics(startPositionTopic, startOrientationTopic, lowLevelGoalPositionTopic, goalPositionTopic, goalOrientationTopic);
       setXGaitSettingsTopic(xGaitSettingsTopic);
+      setPlanarRegionDataTopic(planarRegionDataTopic);
    }
 
    public void setPositionStartGoalTopics(Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
@@ -137,6 +138,11 @@ public class StartGoalPositionViewer extends AnimationTimer
    private void handleXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       xGaitSettingsReference.set(xGaitSettings);
+   }
+
+   public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)
+   {
+      planarRegionsList = messager.createInput(planarRegionDataTopic);
    }
 
    @Override

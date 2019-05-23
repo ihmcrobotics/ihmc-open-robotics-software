@@ -30,6 +30,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 
@@ -79,7 +80,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoDouble timeInStateWithSwingSpeedUp;
    private final YoDouble timeRemainingInState;
    private final YoDouble timeRemainingInStateWithSwingSpeedUp;
-   private final YoDouble timestamp;
+   private final DoubleProvider timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean hasMinimumTimePassed;
 
@@ -177,7 +178,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
 
-      graphicsListRegistry.registerYoGraphic("SwingState", new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red()));
+      YoGraphicPosition finalGraphic = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
+      YoGraphicPosition desiredGraphic = new YoGraphicPosition(namePrefix + "DesiredPosition", desiredSolePosition, 0.015, YoAppearance.Green());
+      graphicsListRegistry.registerYoGraphic("SwingState", finalGraphic);
+      graphicsListRegistry.registerYoGraphic("SwingState", desiredGraphic);
+      graphicsListRegistry.registerArtifact("SwingState", finalGraphic.createArtifact());
    }
 
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
@@ -217,7 +222,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
-      setFootstepDurationInternal(currentStepCommand.getTimeInterval().getDuration());
+      double swingDuration = Math.max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
+      setFootstepDurationInternal(swingDuration);
 
       activeTrajectoryType.set(TrajectoryType.DEFAULT);
 
@@ -231,8 +237,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (debug)
       {
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
-               .getTimeInterval());
+         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " +
+                                currentStepCommand.getGroundClearance() + ", " + currentStepCommand.getTimeInterval());
       }
    }
 
@@ -271,8 +277,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
 
       PositionTrajectoryGenerator activeTrajectory;
-      if (timeInState > swingDuration.getDoubleValue())
-         activeTrajectory = touchdownTrajectory;
+      if (!timeRemainingInStateWithSwingSpeedUp.isNaN() && timeRemainingInStateWithSwingSpeedUp.getValue() < 0.0)
+            activeTrajectory = touchdownTrajectory;
+      else if (timeRemainingInState.getValue() < 0.0)
+            activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
 
@@ -323,7 +331,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          touchdownTrigger.update(footSwitch.hasFootHitGround());
       }
 
-      double currentTime = timestamp.getDoubleValue();
+      double currentTime = timestamp.getValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
       double startTime = currentStepCommand.getTimeInterval().getStartTime();
       double percentDone = (currentTime - startTime) / (touchDownTime - startTime);

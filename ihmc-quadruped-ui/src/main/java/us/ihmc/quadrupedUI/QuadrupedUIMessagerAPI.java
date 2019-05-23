@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -11,15 +9,13 @@ import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
@@ -70,6 +66,9 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<VisibilityGraphsParameters> VisibilityGraphsParameters = apiFactory.createTypedTopicTheme("VisibilityGraphsParameters");
    private static final TypedTopicTheme<QuadrupedFootstepStatusMessage> FootstepStatusMessage = apiFactory.createTypedTopicTheme("FootstepStatusMessage");
    private static final TypedTopicTheme<QuadrupedTimedStepListMessage> StepsListMessage = apiFactory.createTypedTopicTheme("StepsListMessage");
+   private static final TypedTopicTheme<SoleTrajectoryMessage> SoleTrajectoryMessage = apiFactory.createTypedTopicTheme("SoleTrajectoryMessage");
+   private static final TypedTopicTheme<QuadrupedTeleopDesiredPose> DesiredTeleopBodyPoseMessage = apiFactory.createTypedTopicTheme("TeleopDesiredPose");
+   private static final TypedTopicTheme<QuadrupedTeleopDesiredVelocity> DesiredTeleopVelocityMessage = apiFactory.createTypedTopicTheme("DesiredTeleopVelocityMessage");
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Integer> Id = apiFactory.createTypedTopicTheme("Id");
@@ -79,6 +78,8 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<FootstepPlannerStatus> PlannerStatus = apiFactory.createTypedTopicTheme("PlannerStatus");
    private static final TypedTopicTheme<Number> Fraction = apiFactory.createTypedTopicTheme("Fraction");
    private static final TypedTopicTheme<Point3D> Point = apiFactory.createTypedTopicTheme("Point");
+   private static final TypedTopicTheme<QuadrantDependentList<Point3D>> QuadrantPoint = apiFactory.createTypedTopicTheme("QuadrantPoint");
+   private static final TypedTopicTheme<FootstepPlannerTargetType> FootstepPlannerTargetType = apiFactory.createTypedTopicTheme("FootstepPlannerTargetType");
    private static final TypedTopicTheme<Quaternion> Quaternion = apiFactory.createTypedTopicTheme("Quaternion");
    private static final TypedTopicTheme<RobotQuadrant> RobotQuadrant = apiFactory.createTypedTopicTheme("RobotQuadrant");
    private static final TypedTopicTheme<FootstepPlan> FootstepPlan = apiFactory.createTypedTopicTheme("FootstepPlan");
@@ -118,8 +119,10 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> EnableHeightTeleopTopic = Root.child(Command).child(HeightTeleop).topic(Enable);
    public static final Topic<Boolean> EnableJoystickTopic = Root.child(Command).child(Joystick).topic(Enable);
    public static final Topic<QuadrupedTimedStepListMessage> ManualStepsListMessageTopic = Root.child(Command).child(StepTeleop).topic(StepsListMessage);
+   public static final Topic<SoleTrajectoryMessage> SoleTrajectoryMessageTopic = Root.child(Command).child(StepTeleop).topic(SoleTrajectoryMessage);
 
-
+   public static final Topic<QuadrupedTeleopDesiredVelocity> DesiredTeleopVelocity = Root.child(Command).child(StepTeleop).topic(DesiredTeleopVelocityMessage);
+   public static final Topic<QuadrupedTeleopDesiredPose> DesiredTeleopBodyPoseTopic = Root.child(Command).child(BodyTeleop).topic(DesiredTeleopBodyPoseMessage);
 
    /* Footstep Planning */
    public static final Topic<FootstepPlannerType> PlannerTypeTopic = Root.child(FootstepPlanning).child(Command).topic(Type);
@@ -135,6 +138,8 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> ShowFootstepPreviewTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Show);
    public static final Topic<Number> PlannerPlaybackFractionTopic = Root.child(FootstepPlanning).child(Result).child(Review).topic(Fraction);
    public static final Topic<Point3D> StartPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(Point);
+   public static final Topic<FootstepPlannerTargetType> StartTargetTypeTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(FootstepPlannerTargetType);
+   public static final Topic<QuadrantDependentList<Point3D>> StartFeetPositionTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Position).topic(QuadrantPoint);
    public static final Topic<Quaternion> StartOrientationTopic = Root.child(FootstepPlanning).child(Command).child(Start).child(Orientation).topic(Quaternion);
    public static final Topic<Point3D> LowLevelGoalPositionTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Position).topic(Point);
    public static final Topic<Quaternion> LowLevelGoalOrientationTopic = Root.child(FootstepPlanning).child(Command).child(LowLevelGoal).child(Orientation).topic(Quaternion);

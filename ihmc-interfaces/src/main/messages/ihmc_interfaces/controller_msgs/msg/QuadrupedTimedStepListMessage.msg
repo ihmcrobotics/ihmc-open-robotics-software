@@ -7,3 +7,5 @@ QuadrupedTimedStepMessage[] quadruped_step_list
 bool is_expressed_in_absolute_time true
 # Properties for queueing footstep lists.
 QueueableMessage queueing_properties
+# Defines if the step list is adjustable
+bool are_steps_adjustable true

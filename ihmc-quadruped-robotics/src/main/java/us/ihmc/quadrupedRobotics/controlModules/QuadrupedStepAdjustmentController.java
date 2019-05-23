@@ -6,12 +6,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStepPlanarRegionProjection;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.DeadbandTools;
@@ -47,10 +49,16 @@ public class QuadrupedStepAdjustmentController
    private final DoubleParameter dcmErrorThresholdForStepAdjustment = new DoubleParameter("dcmErrorThresholdForStepAdjustment", registry, 0.0);
    private final DoubleParameter dcmErrorDeadbandForStepAdjustment = new DoubleParameter("dcmErrorDeadbandForStepAdjustment", registry, 0.0);
    private final BooleanParameter useTimeBasedStepAdjustment = new BooleanParameter("useTimeBasedStepAdjustment", registry, true);
-   private final BooleanParameter useStepAdjustment = new BooleanParameter("useStepAdjustment", registry, true);
+   private final BooleanParameter projectAdjustmentIntoPlanarRegions = new BooleanParameter("projectAdjustmentIntoPlanarRegions", registry, false);
+
+   private final BooleanParameter allowStepAdjustment = new BooleanParameter("allowStepAdjustment", registry, true);
+
+   private final YoBoolean useStepAdjustment = new YoBoolean("useStepAdjustment", registry);
 
    private final QuadrupedControllerToolbox controllerToolbox;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
+   private final QuadrupedStepPlanarRegionProjection planarRegionProjection;
+   private final QuadrupedAdjustmentReachabilityProjection reachabilityProjection;
    private final LinearInvertedPendulumModel lipModel;
 
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
@@ -98,6 +106,9 @@ public class QuadrupedStepAdjustmentController
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), referenceFrames.getSoleFrames(), registry);
 
+      reachabilityProjection = new QuadrupedAdjustmentReachabilityProjection(controllerToolbox, registry);
+      planarRegionProjection = new QuadrupedStepPlanarRegionProjection(registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -107,12 +118,18 @@ public class QuadrupedStepAdjustmentController
       limitedInstantaneousStepAdjustments.get(robotQuadrant).setToZero();
       dcmStepAdjustmentMultipliers.get(robotQuadrant).setToNaN();
       recursionMultipliers.get(robotQuadrant).setToNaN();
+      planarRegionProjection.completedStep(robotQuadrant);
+      reachabilityProjection.completedStep(robotQuadrant);
    }
 
-   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition)
+   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, FramePoint3DReadOnly desiredDCMPosition,
+                                                                  boolean stepPlanIsAdjustable)
    {
+      reachabilityProjection.update();
+
       adjustedActiveSteps.clear();
 
+      useStepAdjustment.set(stepPlanIsAdjustable && allowStepAdjustment.getValue());
       // compute step adjustment for ongoing steps (proportional to dcm tracking error)
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPositionEstimate.changeFrame(worldFrame);
@@ -200,14 +217,23 @@ public class QuadrupedStepAdjustmentController
          tempPoint.setIncludingFrame(activeStep.getReferenceFrame(), activeStep.getGoalPosition());
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(limitedInstantaneousStepAdjustment);
+
+         reachabilityProjection.project(tempPoint, robotQuadrant);
          crossoverProjection.project(tempPoint, robotQuadrant);
-         //         groundPlaneEstimator.projectZ(tempPoint);
+         if (projectAdjustmentIntoPlanarRegions.getValue())
+            planarRegionProjection.project(tempPoint, robotQuadrant);
+
          adjustedStep.setGoalPosition(tempPoint);
       }
 
       this.stepHasBeenAdjusted.set(stepHasBeenAdjusted);
 
       return adjustedActiveSteps;
+   }
+
+   public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
+   {
+      planarRegionProjection.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
    public FrameVector3DReadOnly getStepAdjustment(RobotQuadrant robotQuadrant)

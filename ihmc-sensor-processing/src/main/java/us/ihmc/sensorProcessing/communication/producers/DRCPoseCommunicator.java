@@ -21,7 +21,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -61,7 +61,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                               AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, MessageTopicNameGenerator publisherTopicNameGenerator,
                               RealtimeRos2Node realtimeRos2Node, SensorTimestampHolder sensorTimestampHolder,
                               SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController,
-                              DRCRobotSensorInformation sensorInformation)
+                              HumanoidRobotSensorInformation sensorInformation)
    {
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorTimestampHolder = sensorTimestampHolder;

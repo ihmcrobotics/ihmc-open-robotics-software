@@ -3,6 +3,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.footstepPlanningPort;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
 
 public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
 {
@@ -75,6 +77,10 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT),
+                                           s -> processSupportRegionParameters(s.takeNextData()));
+
       // inputs to this module
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processFootstepPlanningRequest(s.takeNextData()));
@@ -84,8 +90,6 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processVisibilityGraphParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
-                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
    private void processRobotTimestamp(long timestamp)
@@ -124,6 +128,12 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
          footstepPlanningController.processGroundPlaneMessage(message);
    }
 
+   private void processSupportRegionParameters(QuadrupedSupportPlanarRegionParametersMessage message)
+   {
+      if (footstepPlanningController != null)
+         footstepPlanningController.processSupportRegionParameters(message);
+   }
+
    private void processFootstepPlanningRequest(QuadrupedFootstepPlanningRequestPacket packet)
    {
       if (footstepPlanningController != null)
@@ -134,12 +144,6 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
    {
       if (footstepPlanningController != null)
          footstepPlanningController.processXGaitSettingsPacket(packet);
-   }
-
-   private void processPlanarRegionsListMessage(PlanarRegionsListMessage message)
-   {
-      if (footstepPlanningController != null)
-         footstepPlanningController.processPlanarRegionsListMessage(message);
    }
 
    @Override

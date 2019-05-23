@@ -590,6 +590,34 @@ public static RobotQuadrant generateRandomRobotQuadrant(Random random)
          }
       }
    }
+
+   public String getTitleCaseName()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return "Front Left";
+         }
+         case FRONT_RIGHT:
+         {
+            return "Front Right";
+         }
+         case HIND_RIGHT:
+         {
+            return "Hind Right";
+         }
+         case HIND_LEFT:
+         {
+            return "Hind Left";
+         }
+
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
    
    public String getCamelCaseName()
    {

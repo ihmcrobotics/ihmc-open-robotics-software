@@ -11,7 +11,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
 
 public class IntermediateEstimatorStateHolder
 {
@@ -37,8 +36,9 @@ public class IntermediateEstimatorStateHolder
    private final CenterOfMassDataHolder intermediateCenterOfMassDataHolder;
    private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
 
-   private final RawJointSensorDataHolderMapCopier rawDataEstimatorToIntermadiateCopier;
-   private final RawJointSensorDataHolderMapCopier rawDataIntermediateToControllerCopier;
+   private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
+   private final RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap;
+   private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
    public IntermediateEstimatorStateHolder(FullHumanoidRobotModelFactory fullRobotModelFactory, RigidBodyBasics estimatorRootBody, RigidBodyBasics controllerRootBody,
          ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder,
@@ -62,9 +62,9 @@ public class IntermediateEstimatorStateHolder
       this.intermediateCenterOfMassDataHolder = new CenterOfMassDataHolder();
       this.controllerCenterOfMassDataHolder = controllerCenterOfMassDataHolder;
 
-      RawJointSensorDataHolderMap intermediateRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(intermediateModel);
-      rawDataEstimatorToIntermadiateCopier = new RawJointSensorDataHolderMapCopier(estimatorRawJointSensorDataHolderMap, intermediateRawJointSensorDataHolderMap);
-      rawDataIntermediateToControllerCopier = new RawJointSensorDataHolderMapCopier(intermediateRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
+      this.estimatorRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
+      this.intermediateRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap();
+      this.controllerRawJointSensorDataHolderMap = controllerRawJointSensorDataHolderMap;
    }
 
    public void setFromEstimatorModel(long timestamp, long estimatorTick, long estimatorClockStartTime)
@@ -75,17 +75,17 @@ public class IntermediateEstimatorStateHolder
 
       checksum = calculateEstimatorChecksum();
       estimatorToIntermediateCopier.copy();
-      rawDataEstimatorToIntermadiateCopier.copy();
-      intermediateForceSensorDataHolder.set(estimatorForceSensorDataHolder);
+      intermediateForceSensorDataHolder.setDataOnly(estimatorForceSensorDataHolder);
       intermediateCenterOfMassDataHolder.set(estimatorCenterOfMassDataHolder);
+      intermediateRawJointSensorDataHolderMap.set(estimatorRawJointSensorDataHolderMap);
    }
 
    public void getIntoControllerModel()
    {
       intermediateToControllerCopier.copy();
-      rawDataIntermediateToControllerCopier.copy();
-      controllerForceSensorDataHolder.set(intermediateForceSensorDataHolder);
+      controllerForceSensorDataHolder.setDataOnly(intermediateForceSensorDataHolder);
       controllerCenterOfMassDataHolder.set(intermediateCenterOfMassDataHolder);
+      controllerRawJointSensorDataHolderMap.set(intermediateRawJointSensorDataHolderMap);
    }
 
    public long getTimestamp()
