@@ -41,8 +41,8 @@ import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -150,7 +150,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
 //      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-//      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+//      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 //      DRCRobotJointMap jointMap = robotModel.getJointMap();
 //
 //      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
@@ -190,7 +190,7 @@ public class ThePeoplesGloriousNetworkProcessor
    }
 
    @SuppressWarnings("unused")
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
          RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
@@ -198,12 +198,12 @@ public class ThePeoplesGloriousNetworkProcessor
          new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
       }
 
-      DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
+      AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
       if (lidarParameters.length > 0)
       {
          new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel, lidarParameters);
 
-         DRCRobotLidarParameters primaryLidar = lidarParameters[0];
+         AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
          robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
       }
    }
