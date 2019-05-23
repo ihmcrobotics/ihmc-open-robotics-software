@@ -240,7 +240,8 @@ public class QuadrupedSupportState extends QuadrupedFootState
       else
       {
          rhoRamping.update(timeInState);
-         rhoMaxSetpoint.set(InterpolationTools.linearInterpolate(0.0, footControlModuleParameters.getLoadingMaxMagnitude(), timeInState / touchdownDuration));
+         rhoMaxSetpoint.set(InterpolationTools.linearInterpolate(footControlModuleParameters.getLoadingMinMagnitude(),
+                                                                 footControlModuleParameters.getLoadingMaxMagnitude(), timeInState / touchdownDuration));
 
          for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
          {
