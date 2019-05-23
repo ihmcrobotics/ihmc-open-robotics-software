@@ -274,8 +274,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          protected void setBehaviorInput()
          {
             lookDown();
-            doorOpenDetectorBehaviorService.reset();
-            doorOpenDetectorBehaviorService.run(true);
             if (DEBUG)
             {
                publishTextToSpeech("open door action");
