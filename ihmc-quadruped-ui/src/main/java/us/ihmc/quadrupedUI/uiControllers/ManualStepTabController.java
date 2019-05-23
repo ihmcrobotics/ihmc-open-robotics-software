@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
@@ -70,6 +71,7 @@ public class ManualStepTabController extends Group
 
    @FXML private ComboBox<String> flamingoFoot;
    @FXML private Spinner<Double> flamingoTrajectoryTime;
+   @FXML private Button requestLoadFoot;
    private PositionGraphic flamingoFootGraphic;
    private volatile boolean flamingoKeyIsHeld = false;
    private Vector3D flamingoVectorToAdd = new Vector3D();
@@ -141,6 +143,14 @@ public class ManualStepTabController extends Group
       useTrot.setSelected(false);
       firstFoot.getSelectionModel().select(RobotQuadrant.FRONT_RIGHT);
       flamingoFoot.getSelectionModel().select(NO_FLAMINGO_QUADRANT_SELECTED);
+      requestLoadFoot.setOnAction(event ->
+                                        {
+                                           if (!flamingoFoot.getValue().equals(NO_FLAMINGO_QUADRANT_SELECTED))
+                                           {
+                                              RobotQuadrant quadrant = RobotQuadrant.guessQuadrantFromName(flamingoFoot.getValue());
+                                              messager.submitMessage(QuadrupedUIMessagerAPI.LoadBearingRequestTopic, quadrant);
+                                           }
+                                        });
    }
 
    public void initScene(SubScene subScene)
