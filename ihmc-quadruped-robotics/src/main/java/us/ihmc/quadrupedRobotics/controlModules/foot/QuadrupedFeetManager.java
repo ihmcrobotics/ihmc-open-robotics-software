@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
@@ -162,6 +163,11 @@ public class QuadrupedFeetManager
    public void requestContact(RobotQuadrant robotQuadrant)
    {
       footControlModules.get(robotQuadrant).requestSupport();
+   }
+
+   public QuadrupedFootStates getCurrentState(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getCurrentState();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

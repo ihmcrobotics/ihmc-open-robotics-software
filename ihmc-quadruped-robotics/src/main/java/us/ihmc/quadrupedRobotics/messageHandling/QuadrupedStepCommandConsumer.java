@@ -7,7 +7,9 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootStates;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.List;
 
@@ -67,7 +69,11 @@ public class QuadrupedStepCommandConsumer
          List<QuadrupedFootLoadBearingCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(QuadrupedFootLoadBearingCommand.class);
          for (int i = 0; i < commands.size(); i++)
          {
-            feetManager.requestContact(commands.get(i).getRobotQuadrant());
+            RobotQuadrant robotQuadrant = commands.get(i).getRobotQuadrant();
+            if(feetManager.getCurrentState(robotQuadrant) == QuadrupedFootStates.MOVE_VIA_WAYPOINTS)
+            {
+               feetManager.requestContact(robotQuadrant);
+            }
          }
       }
    }
