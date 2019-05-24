@@ -81,7 +81,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private SleepBehavior sleepBehavior;
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   private IHMCROS2Publisher<DoorLocationPacket> publisher;
+   private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
+   private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
+
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final HumanoidReferenceFrames referenceFrames;
@@ -120,7 +122,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
+      doorToBehaviorPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
+      doorToUIPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      
 
       //setup publisher for sending door location to UI
       setupStateMachine();
@@ -131,7 +135,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       //should constantly be searching for door and updating its location here
-      publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
@@ -176,7 +179,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          pose.get(location, orientation);
          publishUIPositionCheckerPacket(location, orientation);
 
-         publisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
+         doorToBehaviorPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
+         doorToUIPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
       }
       super.doControl();
 
