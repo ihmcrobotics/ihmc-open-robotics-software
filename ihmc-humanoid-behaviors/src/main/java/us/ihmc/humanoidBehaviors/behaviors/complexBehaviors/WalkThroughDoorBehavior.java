@@ -131,7 +131,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       //should constantly be searching for door and updating its location here
-      publisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      publisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
