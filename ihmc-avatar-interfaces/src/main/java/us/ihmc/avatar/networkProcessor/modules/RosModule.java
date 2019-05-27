@@ -1,12 +1,22 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Set;
+
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
+
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.ros.*;
+import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.avatar.ros.RosRobotConfigurationDataPublisher;
+import us.ihmc.avatar.ros.RosSCSCameraPublisher;
+import us.ihmc.avatar.ros.RosSCSLidarPublisher;
+import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
@@ -30,10 +40,6 @@ import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Set;
-
 public class RosModule
 {
    private static final boolean DEBUG = false;
@@ -51,29 +57,29 @@ public class RosModule
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       this(robotModel, robotModel.getPPSTimestampOffsetProvider(), robotModel.getSensorInformation(), robotModel.getSensorInformation(),
-           robotModel.getJointMap(), rosCoreURI, simulatedSensorCommunicator);
+           robotModel.getJointMap(), rosCoreURI, simulatedSensorCommunicator,
+           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).generateTopicName(RobotConfigurationData.class));
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
                     AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap jointMap,
-                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
+                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, String robotConfigurationDataTopicName)
    {
       String simpleRobotName = robotModelFactory.getRobotDescription().getName();
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       robotName = simpleRobotName.toLowerCase();
       String rosTopicPrefix = "/ihmc_ros/" + robotName;
-      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(simpleRobotName).generateTopicName(RobotConfigurationData.class);
 
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ControllerAPIDefinition.getPublisherTopicNameGenerator(simpleRobotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                            s -> this.ppsTimestampOffsetProvider.receivedPacket(s.takeNextData()));
 
       this.sensorInformation = sensorInformation;
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModelFactory, ros2Node, rcdTopicName,
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModelFactory, ros2Node, robotConfigurationDataTopicName,
                                                                                                               rosMainNode, ppsTimestampOffsetProvider,
                                                                                                               this.sensorInformation, forceSensorInformation,
                                                                                                               jointMap, rosTopicPrefix, tfPublisher);
