@@ -1,10 +1,15 @@
 package us.ihmc.quadrupedRobotics.messageHandling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.commons.MathTools;
+
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
@@ -21,9 +26,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class QuadrupedStepMessageHandler
 {
@@ -48,6 +50,9 @@ public class QuadrupedStepMessageHandler
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
 
    private final YoBoolean stepPlanIsAdjustable = new YoBoolean("stepPlanIsAdjustable", registry);
+
+   private final YoBoolean offsettingHeightPlanWithStepError = new YoBoolean("offsettingHeightPlanWithStepError", registry);
+   private final DoubleParameter offsetHeightCorrectionScale = new DoubleParameter("stepHeightCorrectionErrorScaleFactor", registry, 0.25);
 
    private final double controlDt;
 
@@ -93,6 +98,7 @@ public class QuadrupedStepMessageHandler
       RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
 
       stepPlanIsAdjustable.set(command.isStepPlanAdjustable());
+      offsettingHeightPlanWithStepError.set(command.getOffsetStepsHeightWithExecutionError());
 
       receivedStepSequence.clear();
       for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
@@ -209,6 +215,31 @@ public class QuadrupedStepMessageHandler
          tempStep.setIncludingFrame(receivedStepSequence.get(i).getReferenceFrame(), receivedStepSequence.get(i).getGoalPosition());
          tempStep.scaleAdd(multiplier, stepAdjustment, tempStep);
          receivedStepSequence.get(i).setGoalPosition(tempStep);
+      }
+   }
+
+   private final FrameVector3D stepOffsetVector = new FrameVector3D();
+
+   public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
+   {
+      if (!offsettingHeightPlanWithStepError.getValue())
+      {
+         return;
+      }
+
+      stepOffsetVector.setIncludingFrame(offset);
+      stepOffsetVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+      stepOffsetVector.setX(0.0);
+      stepOffsetVector.setY(0.0);
+      stepOffsetVector.scale(offsetHeightCorrectionScale.getValue());
+
+      for (int i = 0; i < receivedStepSequence.size(); i++)
+      {
+         YoQuadrupedTimedStep step = receivedStepSequence.get(i);
+         tempStep.setIncludingFrame(step.getReferenceFrame(), step.getGoalPosition());
+         tempStep.add(stepOffsetVector);
+         step.setGoalPosition(tempStep);
       }
    }
 
