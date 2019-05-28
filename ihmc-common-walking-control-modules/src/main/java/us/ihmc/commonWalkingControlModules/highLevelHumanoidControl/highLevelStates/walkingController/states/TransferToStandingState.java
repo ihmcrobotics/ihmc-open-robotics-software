@@ -76,8 +76,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
 
-      feetManager.initializeContactStatesForDoubleSupport(null);
-
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
       RobotSide previousSupportSide = null;
       if (previousStateEnum != null)
