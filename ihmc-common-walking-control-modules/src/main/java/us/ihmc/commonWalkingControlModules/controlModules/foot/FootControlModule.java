@@ -16,10 +16,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,7 +46,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN;
+      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS;
 
       public boolean isLoadBearing()
       {
@@ -76,7 +74,6 @@ public class FootControlModule
 
    private final SwingState swingState;
    private final MoveViaWaypointsState moveViaWaypointsState;
-   private final TouchDownState touchdownState;
    private final OnToesState onToesState;
    private final SupportState supportState;
 
@@ -86,10 +83,6 @@ public class FootControlModule
 
    private final YoBoolean requestExploration;
    private final YoBoolean resetFootPolygon;
-   
-   private final FramePose3D desiredPose = new FramePose3D();
-   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
-   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final UnloadedAnkleControlModule ankleControlModule;
@@ -144,7 +137,6 @@ public class FootControlModule
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       swingState = new SwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
-      touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
@@ -208,7 +200,6 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.FULL, trues);
 //      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
       contactStatesMap.put(ConstraintType.TOES, trues);
-      contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
    private StateMachine<ConstraintType, AbstractFootControlState> setupStateMachine(String namePrefix)
@@ -218,7 +209,6 @@ public class FootControlModule
       factory.addState(ConstraintType.TOES, onToesState);
       factory.addState(ConstraintType.FULL, supportState);
       factory.addState(ConstraintType.SWING, swingState);
-      factory.addState(ConstraintType.TOUCHDOWN, touchdownState);
       factory.addState(ConstraintType.MOVE_VIA_WAYPOINTS, moveViaWaypointsState);
       
       for (ConstraintType from : ConstraintType.values())
@@ -235,7 +225,6 @@ public class FootControlModule
    {
       swingState.setWeights(footAngularWeight, footLinearWeight);
       moveViaWaypointsState.setWeights(footAngularWeight, footLinearWeight);
-      touchdownState.setWeights(footAngularWeight, footLinearWeight);
       onToesState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
       supportState.setWeights(loadedFootAngularWeight, loadedFootLinearWeight);
    }
@@ -249,16 +238,6 @@ public class FootControlModule
    {
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery(stateMachine.getTimeInCurrentState());
-   }
-   
-   public void requestTouchdown()
-   {
-    if(stateMachine.getCurrentStateKey() == ConstraintType.SWING)
-    {
-       setContactState(ConstraintType.TOUCHDOWN);
-       swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
-       touchdownState.initialize(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
-    }
    }
 
    public void requestStopTrajectoryIfPossible()
@@ -353,22 +332,6 @@ public class FootControlModule
       onToesState.setUsePointContact(usePointContact);
    }
 
-   private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector3D direction = new FrameVector3D(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
-
-      int[] indexOfPointsInContact = DesiredFootstepCalculatorTools.findMaximumPointIndexesInDirection(contactableBody.getContactPointsCopy(), direction, 2);
-
-      boolean[] contactPointStates = new boolean[contactableBody.getTotalNumberOfContactPoints()];
-
-      for (int i = 0; i < indexOfPointsInContact.length; i++)
-      {
-         contactPointStates[indexOfPointsInContact[i]] = true;
-      }
-
-      return contactPointStates;
-   }
-
    public void updateLegSingularityModule()
    {
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
@@ -407,10 +370,9 @@ public class FootControlModule
       }
    }
 
-   public void setFootstep(Footstep footstep, double swingTime, double touchdownTime)
+   public void setFootstep(Footstep footstep, double swingTime)
    {
       swingState.setFootstep(footstep, swingTime);
-      touchdownState.setTouchdownDuration(touchdownTime);
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -477,11 +439,6 @@ public class FootControlModule
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
-   }
-   
-   public boolean isInTouchdown()
-   {
-      return getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
    }
 
    public void initializeFootExploration()

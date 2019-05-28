@@ -90,7 +90,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          if (i == 0)
          {
             adjustTiming(timing);
-            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTouchdownDuration(), timing.getTransferTime());
+            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
          balanceManager.addFootstepToPlan(footstep, timing);
@@ -105,9 +105,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
-         double currentTouchdownDuration = balanceManager.getCurrentTouchdownDuration();
-
-         firstTiming.setTimings(currentSwingDuration, currentTouchdownDuration, currentTransferDuration);
+         firstTiming.setTimings(currentSwingDuration, currentTransferDuration);
       }
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
@@ -120,7 +118,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
-      if (!doManualLiftOff() && !isInTouchdown())
+      if (!doManualLiftOff())
          switchToToeOffIfPossible();
 
       super.doAction(timeInState);
@@ -171,7 +169,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       double originalSwingTime = stepTiming.getSwingTime();
       double originalTransferTime = stepTiming.getTransferTime();
-      double originalTouchdownDuration = stepTiming.getTouchdownDuration();
       this.originalTransferTime.set(originalTransferTime);
 
       double currentTime = controllerToolbox.getYoTime().getDoubleValue();
@@ -181,10 +178,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // make sure transfer does not get too short
       adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getValue());
 
-      // as the touchdown in part of transfer scale it according to the transfer adjustment
-      double adjustmentFactor = adjustedTransferTime / originalTransferTime;
-      double adjustedTouchdownDuration = originalTouchdownDuration * adjustmentFactor;
-
       // GW TODO - possible improvement:
       // If the adjustment is capped by the minimum transfer time adjust also the upcoming transfer times here. That
       // would make the ICP plan for the upcoming steps more accurate. However, if the given original transfer times
@@ -192,6 +185,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // to debug. If we have big adjustments a lot we should revisit this.
 
       // keep swing times and only adjust transfers for now
-      stepTiming.setTimings(originalSwingTime, adjustedTouchdownDuration, adjustedTransferTime);
+      stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
    }
 }
