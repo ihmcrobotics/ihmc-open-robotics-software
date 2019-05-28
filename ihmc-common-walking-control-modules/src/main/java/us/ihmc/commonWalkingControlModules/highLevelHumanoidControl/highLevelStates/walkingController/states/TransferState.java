@@ -100,11 +100,6 @@ public abstract class TransferState extends WalkingState
    @Override
    public void doAction(double timeInState)
    {
-      if (!isInTouchdown.getBooleanValue())
-      {
-         switchToToeOffIfPossible();
-      }
-
       boolean touchdownTimeElapsed = timeInState > touchdownDuration.getDoubleValue();
       boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
 

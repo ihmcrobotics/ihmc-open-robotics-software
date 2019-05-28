@@ -27,6 +27,13 @@ public class TransferToFlamingoStanceState extends TransferState
    }
 
    @Override
+   public void doAction(double timeInState)
+   {
+      switchToToeOffIfPossible();
+      super.doAction(timeInState);
+   }
+
+   @Override
    public void onEntry()
    {
       super.onEntry();

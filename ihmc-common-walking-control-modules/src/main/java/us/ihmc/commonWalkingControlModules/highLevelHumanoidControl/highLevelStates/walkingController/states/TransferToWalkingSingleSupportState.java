@@ -120,6 +120,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      if (!doManualLiftOff() && !isInTouchdown())
+         switchToToeOffIfPossible();
+
       super.doAction(timeInState);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
@@ -130,18 +133,22 @@ public class TransferToWalkingSingleSupportState extends TransferState
          legConfigurationManager.collapseLegDuringTransfer(transferToSide);
       }
 
+      // TODO: hard coded for now.
       double toeOffDuration = transferDuration * 0.5;
-      Footstep upcomingFootstep = footsteps[0];
-      if (upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && transferDuration - timeInState < toeOffDuration)
+      if (doManualLiftOff() && transferDuration - timeInState < toeOffDuration)
       {
+         Footstep upcomingFootstep = footsteps[0];
          FrameSE3TrajectoryPoint firstWaypoint = upcomingFootstep.getSwingTrajectory().get(0);
-         if (Precision.equals(firstWaypoint.getTime(), 0.0))
-         {
-            tempOrientation.setIncludingFrame(firstWaypoint.getOrientation());
-            tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide()));
-            feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), toeOffDuration);
-         }
+         tempOrientation.setIncludingFrame(firstWaypoint.getOrientation());
+         tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide()));
+         feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), toeOffDuration);
       }
+   }
+
+   private boolean doManualLiftOff()
+   {
+      Footstep upcomingFootstep = footsteps[0];
+      return upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(upcomingFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
    @Override
