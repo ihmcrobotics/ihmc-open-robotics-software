@@ -849,6 +849,8 @@ public class WalkingMessageHandler
       }
 
       timingToSet.setTimings(swingDuration, transferDuration);
+      timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());
+      timingToSet.setLiftoffDuration(footstep.getLiftoffDuration());
 
       switch (executionTiming)
       {

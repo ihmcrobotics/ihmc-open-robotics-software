@@ -20,6 +20,16 @@ public class FootstepTiming
    /** The controller time at which the footstep data list starts executing if absolute timings are requested */
    private double executionStartTime = Double.NaN;
 
+   /**
+    * Optional: time spent in heel or toe support after a step. Used to pitch down the foot if it does not land flat.
+    */
+   private double touchdownDuration = Double.NaN;
+
+   /**
+    * Optional: time spent in heel or toe support before a step. Used to pitch up the foot if this is desired.
+    */
+   private double liftoffDuration = Double.NaN;
+
    public FootstepTiming()
    {
    }
@@ -136,6 +146,28 @@ public class FootstepTiming
       hasAbsoluteTime = other.hasAbsoluteTime;
       swingStartTime = other.swingStartTime;
       executionStartTime = other.executionStartTime;
+      touchdownDuration = other.touchdownDuration;
+      liftoffDuration = other.liftoffDuration;
+   }
+
+   public void setTouchdownDuration(double touchdownDuration)
+   {
+      this.touchdownDuration = touchdownDuration;
+   }
+
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration;
+   }
+
+   public void setLiftoffDuration(double liftoffDuration)
+   {
+      this.liftoffDuration = liftoffDuration;
+   }
+
+   public double getLiftoffDuration()
+   {
+      return liftoffDuration;
    }
 
    public static FootstepTiming[] createTimings(int numberOfTimings)
