@@ -148,12 +148,11 @@ public class FusionSensorMeshViewer
       double randomB = random.nextDouble();
       double randomG = random.nextDouble();
       double randomR = random.nextDouble();
-      LogTools.info(" " + randomR + " " + randomG + " " + randomB);
       Color color = new Color(randomR, randomG, randomB, 1.0);
 
       long startTime = System.nanoTime();
       updater.addSegmentNodeData(seedLabel.get(), manualPropagateIndex);
-      LogTools.info("propagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+      LogTools.info("propagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime)+" "+ seedLabel.get() +" "+ manualPropagateIndex);
 
       JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
       List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(manualPropagateIndex).getPointsInSegment();

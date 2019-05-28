@@ -116,7 +116,7 @@ public class LidarImageFusionDataFeatureUpdater
       TIntArrayList allLablesInNewSegment = newSegment.getLabels();
       for (int labelNumber : allLablesInNewSegment.toArray())
       {
-         LogTools.info("" + labelNumber);
+         //LogTools.info("" + labelNumber);
       }
 
       int[] adjacentLabels = data.getAdjacentLabels(newSegment.getLabels());
