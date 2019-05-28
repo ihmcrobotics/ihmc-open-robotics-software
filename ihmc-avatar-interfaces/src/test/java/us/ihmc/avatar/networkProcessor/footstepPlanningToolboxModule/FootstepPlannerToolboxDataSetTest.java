@@ -96,13 +96,9 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 public abstract class FootstepPlannerToolboxDataSetTest
 {
@@ -773,15 +769,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       @Override
       public DRCSensorSuiteManager getSensorSuiteManager()
-      {
-         return null;
-      }
-
-      @Override
-      public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                            ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                            RealtimeRos2Node realtimeRos2Node,
-                                                                            CloseableAndDisposableRegistry closeableAndDisposableRegistry)
       {
          return null;
       }

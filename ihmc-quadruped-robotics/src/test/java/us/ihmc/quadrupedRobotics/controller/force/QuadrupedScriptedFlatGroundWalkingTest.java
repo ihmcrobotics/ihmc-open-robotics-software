@@ -5,9 +5,8 @@ import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedCommunication.QuadrupedMessageTools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.*;
@@ -73,6 +72,60 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       // check robot is still upright and walked forward
       Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+
+      conductor.simulate();
+
+      conductor.concludeTesting();
+   }
+
+   public void testScriptedFlatGroundWalkingWithHeightOffset(double stepHeightOffset) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.requestWalkingState();
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      Point3D initialPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().addZ(stepHeightOffset));
+
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      // check robot is still upright and walked forward
+      Point3D expectedFinalPlanarPosition = getFinalPlanarPosition();
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, message.getQuadrupedStepList().getLast().getTimeInterval().getEndTime() + 2.0));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
+
+      conductor.simulate();
+
+      // Re-execute the same footsteps but shifted to the new robot location
+      Point3D currentPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+      Vector3D offset = new Vector3D();
+      offset.sub(currentPosition, initialPosition);
+      offset.setZ(0.0);
+      steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().add(offset));
+      message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      message.setOffsetStepsHeightWithExecutionError(true);
+      stepTeleopManager.publishTimedStepListToController(message);
+
+      // check robot is still upright and walked forward
+      expectedFinalPlanarPosition.add(offset);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyX(), expectedFinalPlanarPosition.getX(), 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyY(), expectedFinalPlanarPosition.getY(), 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), expectedFinalPlanarPosition.getZ(), 0.1));
