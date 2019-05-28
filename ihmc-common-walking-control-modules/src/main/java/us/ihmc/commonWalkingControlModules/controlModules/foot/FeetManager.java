@@ -156,10 +156,10 @@ public class FeetManager
       return false;
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, double touchdownTime)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
    {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime, touchdownTime);
+      footControlModule.setFootstep(footstep, swingTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 
@@ -219,11 +219,6 @@ public class FeetManager
       {
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
-   }
-
-   public void initializeContactStatesForTouchdown(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).requestTouchdown();
    }
 
    public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
@@ -528,11 +523,6 @@ public class FeetManager
    public boolean isFootToeingOffSlipping(RobotSide robotSideToCheck)
    {
       return footControlModules.get(robotSideToCheck).isFootToeingOffSlipping();
-   }
-
-   public boolean isInTouchdown(RobotSide swingFoot)
-   {
-      return footControlModules.get(swingFoot).isInTouchdown();
    }
 
    public void unload(RobotSide sideToUnload, double percentInUnloading, double rhoMin)

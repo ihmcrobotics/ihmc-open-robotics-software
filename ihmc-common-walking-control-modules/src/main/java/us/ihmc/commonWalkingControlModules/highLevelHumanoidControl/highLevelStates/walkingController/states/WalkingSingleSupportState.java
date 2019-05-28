@@ -207,13 +207,12 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
-      double defaultTouchdownTime = walkingMessageHandler.getDefaultTouchdownTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          swingTime = defaultSwingTime;
-         footstepTiming.setTimings(swingTime, defaultTouchdownTime, defaultTransferTime);
+         footstepTiming.setTimings(swingTime, defaultTransferTime);
          balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
@@ -252,10 +251,9 @@ public class WalkingSingleSupportState extends SingleSupportState
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
          double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
-         double currentTouchdownDuration = balanceManager.getCurrentTouchdownDuration();
 
          swingTime = currentSwingDuration;
-         footstepTiming.setTimings(currentSwingDuration, currentTouchdownDuration, currentTransferDuration);
+         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
 
          if (isLastStep)
          {
@@ -264,8 +262,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          else
          {
             double nextSwingTime = footstepTimings[0].getSwingTime();
-            footstepTimings[0].setTimings(nextSwingTime, currentTouchdownDuration, nextTransferDuration);
-            walkingMessageHandler.adjustTiming(nextSwingTime, currentTouchdownDuration, nextTransferDuration);
+            footstepTimings[0].setTimings(nextSwingTime, nextTransferDuration);
+            walkingMessageHandler.adjustTiming(nextSwingTime, nextTransferDuration);
          }
       }
 
@@ -275,8 +273,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-      double touchdownTime = footstepTiming.getTouchdownDuration();
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime);
 
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
