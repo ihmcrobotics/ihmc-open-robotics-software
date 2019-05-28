@@ -549,4 +549,17 @@ public class FeetManager
    {
       return footControlModules.get(robotSide).pollStatusToReport();
    }
+
+   public void liftOff(RobotSide side, double pitch, double duration)
+   {
+      footControlModules.get(side).liftOff(pitch, duration);
+   }
+
+   public void touchDown(RobotSide side, double pitch, double duration)
+   {
+      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
+      footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
+      footControlModules.get(side).touchDown(pitch, duration);
+      reset();
+   }
 }

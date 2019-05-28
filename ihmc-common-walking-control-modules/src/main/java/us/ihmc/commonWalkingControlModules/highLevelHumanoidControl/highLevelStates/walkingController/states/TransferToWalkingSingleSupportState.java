@@ -1,13 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -25,6 +30,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
+
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -121,6 +128,19 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
       {
          legConfigurationManager.collapseLegDuringTransfer(transferToSide);
+      }
+
+      double toeOffDuration = transferDuration * 0.5;
+      Footstep upcomingFootstep = footsteps[0];
+      if (upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && transferDuration - timeInState < toeOffDuration)
+      {
+         FrameSE3TrajectoryPoint firstWaypoint = upcomingFootstep.getSwingTrajectory().get(0);
+         if (Precision.equals(firstWaypoint.getTime(), 0.0))
+         {
+            tempOrientation.setIncludingFrame(firstWaypoint.getOrientation());
+            tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide()));
+            feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), toeOffDuration);
+         }
       }
    }
 

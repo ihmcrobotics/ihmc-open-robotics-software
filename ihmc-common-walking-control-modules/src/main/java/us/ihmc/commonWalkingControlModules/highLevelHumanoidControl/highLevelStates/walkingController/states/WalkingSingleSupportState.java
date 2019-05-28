@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -61,6 +62,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoBoolean minimizeAngularMomentumRateZDuringSwing = new YoBoolean("minimizeAngularMomentumRateZDuringSwing", registry);
 
    private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
+
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public WalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -319,6 +322,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
+
+      double touchDownDuration = 0.2;
+      tempOrientation.setIncludingFrame(nextFootstep.getFootstepPose().getOrientation());
+      tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide()));
+      feetManager.touchDown(nextFootstep.getRobotSide(), tempOrientation.getPitch(), touchDownDuration);
 
       setYoVariablesToNaN();
    }

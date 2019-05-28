@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.GEQ_INEQUALITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType.LEQ_INEQUALITY;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -566,5 +567,15 @@ public class FootControlModule
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public void liftOff(double pitch, double duration)
+   {
+      supportState.liftOff(pitch, duration);
+   }
+
+   public void touchDown(double pitch, double duration)
+   {
+      supportState.touchDown(pitch, duration);
    }
 }

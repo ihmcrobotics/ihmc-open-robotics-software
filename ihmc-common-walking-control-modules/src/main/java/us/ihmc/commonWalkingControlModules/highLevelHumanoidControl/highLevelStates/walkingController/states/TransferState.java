@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -208,12 +207,10 @@ public abstract class TransferState extends WalkingState
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
       if (supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
       {
-         feetManager.initializeContactStatesForTouchdown(transferToSide);
          isInTouchdown.set(true);
       }
       else
       {
-         feetManager.initializeContactStatesForDoubleSupport(transferToSide);
          isInTouchdown.set(false);
          updateICPPlan();
       }
