@@ -323,6 +323,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
+      // TODO: hard coded for now.
       double touchDownDuration = 0.2;
       tempOrientation.setIncludingFrame(nextFootstep.getFootstepPose().getOrientation());
       tempOrientation.changeFrame(controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide()));

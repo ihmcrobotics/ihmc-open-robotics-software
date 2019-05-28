@@ -571,6 +571,10 @@ public class FootControlModule
 
    public void liftOff(double pitch, double duration)
    {
+      // Should not do this in the toe off state.
+      if (getCurrentConstraintType() != ConstraintType.FULL)
+         return;
+
       supportState.liftOff(pitch, duration);
    }
 

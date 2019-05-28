@@ -516,7 +516,7 @@ public class SupportState extends AbstractFootControlState
 
    public void liftOff(double finalPitchInSoleZUp, double duration)
    {
-      if (liftOff.getValue() || touchDown.getValue())
+      if (isInLiftOffOrTouchDown())
          return;
 
       double currentTime = controllerToolbox.getYoTime().getValue();
@@ -551,7 +551,7 @@ public class SupportState extends AbstractFootControlState
 
    public void touchDown(double finalPitchInSoleZUp, double duration)
    {
-      if (liftOff.getValue() || touchDown.getValue())
+      if (isInLiftOffOrTouchDown())
       {
          return;
       }
@@ -636,6 +636,11 @@ public class SupportState extends AbstractFootControlState
       touchDownPitch.set(Double.NaN);
 
       desiredAngularVelocity.setToZero(worldFrame);
+   }
+
+   private boolean isInLiftOffOrTouchDown()
+   {
+      return liftOff.getValue() || touchDown.getValue();
    }
 
    public void requestFootholdExploration()
