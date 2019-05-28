@@ -50,7 +50,9 @@ public class QuadrupedUserInterface
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
+   private final Joystick joystick;
    private final AnimationTimer joystickModule;
+   private final JavaFXROS2VideoView videoView;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -186,12 +188,13 @@ public class QuadrupedUserInterface
 
       if (Joystick.isAJoystickConnectedToSystem())
       {
-         Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+         joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
          joystickModule = new QuadrupedJoystickModule(messager, xGaitSettings, nominalBodyHeight, joystick);
          joystickModule.start();
       }
       else
       {
+         joystick = null;
          joystickModule = null;
          LogTools.warn("No joystick detected, running without xbox module");
       }
@@ -236,6 +239,8 @@ public class QuadrupedUserInterface
       pawPathViewer.stop();
       bodyPathMeshViewer.stop();
       cameraTracking.stop();
+      videoView.stop();
+      manualStepTabController.stop();
 
       if(joystickModule != null)
          joystickModule.stop();

@@ -284,4 +284,9 @@ public class ManualStepTabController extends Group
          messager.submitMessage(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, soleTrajectoryMessage);
       }
    }
+
+   public void stop()
+   {
+      flamingoPoseKeyHeldMover.shutdown();
+   }
 }
