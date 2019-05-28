@@ -34,9 +34,6 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAModuleLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.ThreadTools;
@@ -102,14 +99,14 @@ public abstract class DRCSimulationTools
 
       if (startREAModule || startREAUI)
       {
-         Class<?> reaClassToSpawn;
-         if (startREAModule && startREAUI)
-            reaClassToSpawn = LidarBasedREAStandaloneLauncher.class;
-         else if (startREAModule)
-            reaClassToSpawn = RemoteLidarBasedREAModuleLauncher.class;
-         else
-            reaClassToSpawn = RemoteLidarBasedREAUILauncher.class;
-         new JavaProcessSpawner(true, true).spawn(reaClassToSpawn);
+//         Class<?> reaClassToSpawn;
+//         if (startREAModule && startREAUI)
+//            reaClassToSpawn = LidarBasedREAStandaloneLauncher.class;
+//         else if (startREAModule)
+//            reaClassToSpawn = RemoteLidarBasedREAModuleLauncher.class;
+//         else
+//            reaClassToSpawn = RemoteLidarBasedREAUILauncher.class;
+//         new JavaProcessSpawner(true, true).spawn(reaClassToSpawn);
       }
    }
 
