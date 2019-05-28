@@ -47,16 +47,17 @@ public class LidarImageFusionDataTest
       rawData.initializeSegments();
       LidarImageFusionDataFeatureUpdater updater = new LidarImageFusionDataFeatureUpdater(rawData);
 
-//      long startTime = System.nanoTime();
-//      updater.iterateSegmenataionPropagation(0);
-//      LogTools.info("propagating time is " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
-//      
-//      updater.createSegmentNodeData(403, 1);
-//      
-//      updater.createSegmentNodeData(253, 2);
-//      
-//      updater.createSegmentNodeData(130, 3);
-      updater.createSegmentNodeData(407, 1);
+      long startTime = System.nanoTime();
+      updater.iterateSegmenataionPropagation(0);
+      LogTools.info("propagating time is " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+      
+      updater.createSegmentNodeData(403, 1);
+      
+      updater.createSegmentNodeData(253, 2);
+      
+      updater.createSegmentNodeData(130, 3);
+      
+      
    }
 
    @Test
