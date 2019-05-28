@@ -5,6 +5,8 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
@@ -31,13 +33,14 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
+import us.ihmc.quadrupedUI.video.JavaFXROS2VideoView;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 
 public class QuadrupedUserInterface
 {
    private final Stage primaryStage;
-   private final BorderPane mainPane;
+   private final SplitPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionViewer startGoalPositionViewer;
@@ -53,6 +56,11 @@ public class QuadrupedUserInterface
    private final Joystick joystick;
    private final AnimationTimer joystickModule;
    private final JavaFXROS2VideoView videoView;
+
+   @FXML
+   private SplitPane mainViewSplitPane;
+   @FXML
+   private AnchorPane firstPersonViewPane;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -199,6 +207,14 @@ public class QuadrupedUserInterface
          LogTools.warn("No joystick detected, running without xbox module");
       }
 
+      int width = 1024;
+      int height = 544;
+      videoView = new JavaFXROS2VideoView(width, height, false, true);
+      firstPersonViewPane.getChildren().add(videoView);
+//      AnchorPane.setLeftAnchor(videoView, 0.0);
+//      AnchorPane.setTopAnchor(videoView, 0.0);
+
+      videoView.start(messager, QuadrupedUIMessagerAPI.LeftCameraVideo);
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
@@ -210,7 +226,7 @@ public class QuadrupedUserInterface
       robotVisualizer.start();
       cameraTracking.start();
 
-      mainPane.setCenter(subScene);
+      mainViewSplitPane.getItems().set(1, subScene);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
@@ -242,6 +258,8 @@ public class QuadrupedUserInterface
       videoView.stop();
       manualStepTabController.stop();
 
+      if (joystick != null)
+         joystick.shutdown();
       if(joystickModule != null)
          joystickModule.stop();
 

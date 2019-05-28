@@ -1,63 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
-    <!--<top>-->
-        <!--<fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />-->
-    <!--</top>-->
-    <bottom>
-        <TabPane prefHeight="300.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
-            <tabs>
-                <Tab text="Planner">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                        <fx:include fx:id="plannerTab" source="Planner.fxml"/>
-                    </content>
-                </Tab>
-                <Tab text="RobotControl">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                        <fx:include fx:id="robotControlTab" source="RobotControlTab.fxml"/>
-                    </content>
-                </Tab>
-                <Tab text="XGaitSettings">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                        <fx:include source="XGaitSettingsTab.fxml" fx:id="xGaitSettings"/>
-                    </content>
-                </Tab>
-                <Tab text="Footstep Parameters">
-                    <content>
+<SplitPane dividerPositions="0.5" orientation="VERTICAL" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <items>
+      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+         <children>
+            <SplitPane fx:id="mainViewSplitPane" dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <items>
+                <AnchorPane fx:id="firstPersonViewPane" minHeight="0.0" minWidth="0.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" />
+              </items>
+            </SplitPane>
+         </children></AnchorPane>
+      <AnchorPane minHeight="0.0" minWidth="0.0">
+         <children>
+            <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <tabs>
+                  <Tab text="Planner">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" />
+                        <fx:include fx:id="plannerTab" source="Planner.fxml" />
+                     </content>
+                  </Tab>
+                  <Tab text="RobotControl">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="robotControlTab" source="RobotControlTab.fxml" />
+                     </content>
+                  </Tab>
+                  <Tab text="XGaitSettings">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include source="XGaitSettingsTab.fxml" fx:id="xGaitSettings" />
+                     </content>
+                  </Tab>
+                  <Tab text="Footstep Parameters">
+                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
-                    </content>
-                </Tab>
-                <Tab text="Reach Parameters">
-                    <content>
+                     </content>
+                  </Tab>
+                  <Tab text="Reach Parameters">
+                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
-                    </content>
-                </Tab>
-
-                <Tab text="Visibility Graph Parameters">
-                    <content>
+                     </content>
+                  </Tab>
+                  <Tab text="Visibility Graph Parameters">
+                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
-                    </content>
-                </Tab>
-                <Tab text="ManualSteps">
-                    <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
-                        <fx:include fx:id="manualStepTab" source="ManualStepTab.fxml"/>
-                    </content>
-                </Tab>
-
-            </tabs>
-        </TabPane>
-    </bottom>
-</BorderPane>
+                     </content>
+                  </Tab>
+                  <Tab text="ManualSteps">
+                     <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                        <fx:include fx:id="manualStepTab" source="ManualStepTab.fxml" />
+                     </content>
+                  </Tab>
+               </tabs>
+            </TabPane>
+         </children>
+      </AnchorPane>
+   </items>
+</SplitPane>
