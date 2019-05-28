@@ -518,6 +518,8 @@ public class SupportState extends AbstractFootControlState
    {
       if (isInLiftOffOrTouchDown())
          return;
+      if (Double.isNaN(duration) || duration <= 0.0)
+         return;
 
       double currentTime = controllerToolbox.getYoTime().getValue();
 
@@ -552,9 +554,9 @@ public class SupportState extends AbstractFootControlState
    public void touchDown(double finalPitchInSoleZUp, double duration)
    {
       if (isInLiftOffOrTouchDown())
-      {
          return;
-      }
+      if (Double.isNaN(duration) || duration <= 0.0)
+         return;
 
       double currentTime = controllerToolbox.getYoTime().getValue();
 

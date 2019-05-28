@@ -131,8 +131,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          legConfigurationManager.collapseLegDuringTransfer(transferToSide);
       }
 
-      // TODO: hard coded for now.
-      double toeOffDuration = transferDuration * 0.5;
+      double toeOffDuration = footstepTimings[0].getLiftoffDuration();
       if (doManualLiftOff() && transferDuration - timeInState < toeOffDuration)
       {
          Footstep upcomingFootstep = footsteps[0];
