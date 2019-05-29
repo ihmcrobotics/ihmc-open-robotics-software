@@ -273,11 +273,11 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       double firstSequenceDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
       double secondSequenceDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double firstSplineDurationOnEntryCMP = splineSegmentDuration.getValue();
+      double firstSplineDurationOnEntryCMP = (1.0 - splineSplitFraction) * splineSegmentDuration.getValue();
       double secondSplineDurationOnEntryCMP = splineSplitFraction * splineSegmentDuration.getValue();
       double secondSplineDurationSpentOnExitCMP = Math.min((1.0 - splineSplitFraction) * splineSegmentDuration.getValue(), secondSequenceDuration);
 
-      if (firstSequenceDuration < (1.0 + splineSplitFraction) * minimumSplineDuration.getValue())
+      if (firstSequenceDuration < minimumSplineDuration.getValue())
       { // the first duration isn't big enough to have the minimum spline durations on it, so wrap the first spline around it.
          firstSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineDurationSpentOnExitCMP);
          secondSplineStartTime.set(Double.NaN);
