@@ -45,25 +45,22 @@ public class EstimatorTask extends HumanoidRobotControlTask
          return;
 
       timer.start();
+      estimatorThread.read();
       estimatorThread.run();
+      estimatorThread.write();
+      robotVisualizer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(), estimatorThread.getYoVariableRegistry());
       timer.stop();
    }
 
    @Override
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
-      estimatorThread.write();
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
-
-      // Abuse the fact that this is running on the scheduler thread to safely update the robot visualizer.
-      robotVisualizer.update(masterContext.getTimestamp(), estimatorThread.getYoVariableRegistry());
 
       // Abuse the fact that this is running on the robot synchronized thread to update the sensor data and the time.
       long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
       masterContext.setTimestamp(newTimestamp);
       sensorsRead = true;
-
-      estimatorThread.read();
    }
 
    @Override
