@@ -20,37 +20,37 @@
             </Tab>
             <Tab text="RobotControl">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include fx:id="robotControlTab" source="RobotControlTab.fxml" />
                </content>
             </Tab>
             <Tab text="XGaitSettings">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include source="XGaitSettingsTab.fxml" fx:id="xGaitSettings" />
                </content>
             </Tab>
             <Tab text="Footstep Parameters">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml" />
                </content>
             </Tab>
             <Tab text="Reach Parameters">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include fx:id="plannerReachParametersUI" source="PlannerReachParametersUI.fxml" />
                </content>
             </Tab>
             <Tab text="Visibility Graph Parameters">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
                </content>
             </Tab>
             <Tab text="ManualSteps">
                <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <AnchorPane minHeight="0.0" minWidth="0.0" />
                   <fx:include fx:id="manualStepTab" source="ManualStepTab.fxml" />
                </content>
             </Tab>
@@ -60,7 +60,7 @@
    <center>
       <AnchorPane fx:id="sceneAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" BorderPane.alignment="CENTER">
          <children>
-            <AnchorPane prefHeight="200.0" prefWidth="200.0" />
+            <AnchorPane prefHeight="69.0" prefWidth="114.0" />
             <StackPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="92.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
             <ImageView fitHeight="150.0" fitWidth="90.0" layoutX="1091.0" layoutY="-21.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
                <image>
