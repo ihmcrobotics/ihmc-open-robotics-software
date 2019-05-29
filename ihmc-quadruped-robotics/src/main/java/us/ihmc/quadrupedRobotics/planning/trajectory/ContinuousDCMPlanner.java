@@ -29,7 +29,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 50;
@@ -40,9 +40,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    private final YoFrameTrajectory3D dcmSecondSpline;
 
    private final DoubleParameter initialTransitionDuration = new DoubleParameter("initialTransitionDuration", registry, 0.25);
-   private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.05);
-   private final DoubleParameter maximumSplineSegmentDuration = new DoubleParameter("maximumSplineSegmentDuration", registry, 0.2);
-   private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.5);
+   private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.01);
+   private final DoubleParameter maximumSplineSegmentDuration = new DoubleParameter("maximumSplineSegmentDuration", registry, 0.1);
+   private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.2);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
@@ -134,13 +134,23 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       piecewiseConstantCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
       dcmTrajectory.setupVisualizers(yoGraphicsListRegistry, POINT_SIZE);
 
-      YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", desiredECMPPosition, 0.002, YoAppearance.BlueViolet());
+      double graphicSize = 0.007;
+      YoGraphicPosition perfectCMPPositionViz = new YoGraphicPosition("Perfect CMP Position", desiredECMPPosition, graphicSize, YoAppearance.BlueViolet());
+      YoGraphicPosition dcmStartOfFirstSpline = new YoGraphicPosition("Start of First DCM Spline", dcmPositionAtStartOfFirstSpline, graphicSize, YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition dcmEndOfFirstSpline = new YoGraphicPosition("End of First DCM Spline", dcmPositionAtEndOfFirstSpline, graphicSize, YoAppearance.Green(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition dcmStartOfSecondSpline = new YoGraphicPosition("Start of Second DCM Spline", dcmPositionAtStartOfSecondSpline, graphicSize, YoAppearance.Red(), YoGraphicPosition.GraphicType.SOLID_BALL);
+      YoGraphicPosition dcmEndOfSecondSpline = new YoGraphicPosition("End of Second DCM Spline", dcmPositionAtEndOfSecondSpline, graphicSize, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL);
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
 
-      yoGraphicsListRegistry.registerYoGraphic("dcmPlanner", perfectCMPPositionViz);
-      yoGraphicsListRegistry.registerArtifact("dcmPlanner", perfectCMPPositionViz.createArtifact());
+      String name = "dcmPlanner";
+      yoGraphicsListRegistry.registerYoGraphic(name, perfectCMPPositionViz);
+      yoGraphicsListRegistry.registerArtifact(name, perfectCMPPositionViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact(name, dcmStartOfFirstSpline.createArtifact());
+      yoGraphicsListRegistry.registerArtifact(name, dcmEndOfFirstSpline.createArtifact());
+      yoGraphicsListRegistry.registerArtifact(name, dcmStartOfSecondSpline.createArtifact());
+      yoGraphicsListRegistry.registerArtifact(name, dcmEndOfSecondSpline.createArtifact());
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -212,8 +222,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    {
       // compute piecewise constant center of pressure plan
       double currentTime = controllerTime.getDoubleValue();
-      timedContactSequence.update(stepSequence, soleFrames, currentContactStates, currentTime);
-      piecewiseConstantCopTrajectory.initializeTrajectory(currentTime, timedContactSequence, stepSequence);
+      timedContactSequence.update(stepSequence, soleFrames, currentContactStates, timeAtStartOfState.getDoubleValue());
+      piecewiseConstantCopTrajectory.initializeTrajectory(timeAtStartOfState.getDoubleValue(), timedContactSequence, stepSequence);
 
       // compute dcm trajectory with final boundary constraint
       int numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();
@@ -256,6 +266,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          updateSplines();
          return;
       }
+
 
       if (secondSplineTimeSpentOnExitCMP < minimumSplineDuration.getValue())
       {
@@ -300,8 +311,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          {// we know that this segment is too short, so let's have the current spline go onto the next segment
             double timeOnExit = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(1));
             firstSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + timeOnExit);
-            secondSplineStartTime.set(Double.POSITIVE_INFINITY);
-            secondSplineEndTime.set(Double.POSITIVE_INFINITY);
+            secondSplineStartTime.set(Double.NaN);
+            secondSplineEndTime.set(Double.NaN);
 
             updateSplines();
             return;
@@ -419,6 +430,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
       desiredDCMPositionToPack.setMatchingFrame(desiredDCMPosition);
       desiredDCMVelocityToPack.setMatchingFrame(desiredDCMVelocity);
+
+      if (desiredDCMPositionToPack.containsNaN())
+         throw new RuntimeException("Invalid setpoint.");
    }
 
 
