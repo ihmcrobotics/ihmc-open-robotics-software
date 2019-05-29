@@ -5,7 +5,7 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -23,24 +23,28 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
+import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
-import us.ihmc.quadrupedUI.video.JavaFXROS2VideoView;
+import us.ihmc.quadrupedUI.video.QuadrupedVideoViewOverlay;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 
 public class QuadrupedUserInterface
 {
    private final Stage primaryStage;
-   private final SplitPane mainPane;
+   private final BorderPane mainPane;
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionViewer startGoalPositionViewer;
@@ -55,12 +59,10 @@ public class QuadrupedUserInterface
    private final AnimationTimer cameraTracking;
    private final Joystick joystick;
    private final AnimationTimer joystickModule;
-   private final JavaFXROS2VideoView videoView;
+   private final QuadrupedVideoViewOverlay videoViewOverlay;
 
    @FXML
-   private SplitPane mainViewSplitPane;
-   @FXML
-   private AnchorPane firstPersonViewPane;
+   private AnchorPane sceneAnchorPane;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -209,12 +211,13 @@ public class QuadrupedUserInterface
 
       int width = 1024;
       int height = 544;
-      videoView = new JavaFXROS2VideoView(width, height, false, true);
-      firstPersonViewPane.getChildren().add(videoView);
-//      AnchorPane.setLeftAnchor(videoView, 0.0);
-//      AnchorPane.setTopAnchor(videoView, 0.0);
+      videoViewOverlay = new QuadrupedVideoViewOverlay(width, height, false, true);
+      sceneAnchorPane.getChildren().set(1, videoViewOverlay.getNode());
+      AnchorPane.setTopAnchor(videoViewOverlay.getNode(), 0.0);
+      AnchorPane.setLeftAnchor(videoViewOverlay.getNode(), 0.0);
+      videoViewOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> videoViewOverlay.toggleMode());
 
-      videoView.start(messager, QuadrupedUIMessagerAPI.LeftCameraVideo);
+      videoViewOverlay.start(messager, QuadrupedUIMessagerAPI.LeftCameraVideo);
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
@@ -226,7 +229,11 @@ public class QuadrupedUserInterface
       robotVisualizer.start();
       cameraTracking.start();
 
-      mainViewSplitPane.getItems().set(1, subScene);
+      sceneAnchorPane.getChildren().set(0, subScene);
+      AnchorPane.setTopAnchor(subScene, 0.0);
+      AnchorPane.setBottomAnchor(subScene, 0.0);
+      AnchorPane.setLeftAnchor(subScene, 0.0);
+      AnchorPane.setRightAnchor(subScene, 0.0);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
@@ -255,7 +262,7 @@ public class QuadrupedUserInterface
       pawPathViewer.stop();
       bodyPathMeshViewer.stop();
       cameraTracking.stop();
-      videoView.stop();
+      videoViewOverlay.stop();
       manualStepTabController.stop();
 
       if (joystick != null)
