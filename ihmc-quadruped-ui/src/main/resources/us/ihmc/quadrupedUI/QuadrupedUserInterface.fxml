@@ -2,10 +2,11 @@
 
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
-
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <bottom>
@@ -61,6 +62,11 @@
          <children>
             <AnchorPane prefHeight="200.0" prefWidth="200.0" />
             <StackPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="92.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <ImageView fitHeight="150.0" fitWidth="90.0" layoutX="1091.0" layoutY="-21.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+               <image>
+                  <Image url="@icons/ihmc-logo-black.png" />
+               </image>
+            </ImageView>
          </children>
       </AnchorPane>
    </center>
