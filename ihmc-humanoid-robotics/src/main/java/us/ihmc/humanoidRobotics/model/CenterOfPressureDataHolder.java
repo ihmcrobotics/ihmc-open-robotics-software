@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -26,7 +26,7 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
     * This is used for lookups only and is populated from the {@link #centerOfPressures}. It should not be modified
     * directly and does not represent the state of the class.
     */
-   private final transient Map<RigidBodyBasics, FramePoint2D> centerOfPressureMap = new LinkedHashMap<>();
+   private final transient TLongObjectMap<FramePoint2D> centerOfPressureMap = new TLongObjectHashMap<>();
 
    public CenterOfPressureDataHolder()
    {
@@ -60,7 +60,7 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       FramePoint2D cop = centerOfPressures.add();
       cop.setToNaN(ReferenceFrame.getWorldFrame());
       bodiesWithCenterOfPressures.add(rigidBody);
-      centerOfPressureMap.put(rigidBody, cop);
+      centerOfPressureMap.put(rigidBody.hashCode(), cop);
    }
 
    public void registerRigidBody(RigidBodyBasics rigidBody, FramePoint2DReadOnly centerOfPressure)
@@ -71,7 +71,7 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
       FramePoint2D cop = centerOfPressures.add();
       cop.setIncludingFrame(centerOfPressure);
       bodiesWithCenterOfPressures.add(rigidBody);
-      centerOfPressureMap.put(rigidBody, cop);
+      centerOfPressureMap.put(rigidBody.hashCode(), cop);
    }
 
    public int getNumberOfBodiesWithCenterOfPressure()
@@ -86,12 +86,12 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
 
    public void setCenterOfPressure(FramePoint2DReadOnly centerOfPressure, RigidBodyBasics foot)
    {
-      centerOfPressureMap.get(foot).setIncludingFrame(centerOfPressure);
+      centerOfPressureMap.get(foot.hashCode()).setIncludingFrame(centerOfPressure);
    }
 
    public void setCenterOfPressure(ReferenceFrame referenceFrame, Point2DReadOnly centerOfPressure, RigidBodyBasics foot)
    {
-      centerOfPressureMap.get(foot).setIncludingFrame(referenceFrame, centerOfPressure);
+      centerOfPressureMap.get(foot.hashCode()).setIncludingFrame(referenceFrame, centerOfPressure);
    }
 
    public void setCenterOfPressure(ReferenceFrame referenceFrame, Point2DReadOnly centerOfPressure, int bodyIndex)
@@ -101,12 +101,12 @@ public class CenterOfPressureDataHolder implements Settable<CenterOfPressureData
 
    public void getCenterOfPressure(FramePoint2DBasics centerOfPressureToPack, RigidBodyBasics foot)
    {
-      centerOfPressureToPack.setIncludingFrame(centerOfPressureMap.get(foot));
+      centerOfPressureToPack.setIncludingFrame(centerOfPressureMap.get(foot.hashCode()));
    }
 
    public FramePoint2D getCenterOfPressure(RigidBodyBasics foot)
    {
-      return centerOfPressureMap.get(foot);
+      return centerOfPressureMap.get(foot.hashCode());
    }
 
    public FramePoint2D getCenterOfPressure(int bodyIndex)
