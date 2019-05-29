@@ -41,7 +41,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final DoubleParameter initialTransitionDuration = new DoubleParameter("initialTransitionDuration", registry, 0.25);
    private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.01);
-   private final DoubleParameter maximumSplineSegmentDuration = new DoubleParameter("maximumSplineSegmentDuration", registry, 0.1);
+   private final DoubleParameter splineSegmentDuration = new DoubleParameter("splineSegmentDuration", registry, 0.1);
    private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.2);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
@@ -237,98 +237,64 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private void computeInitialTransitionTrajectory()
    {
-      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.001, 0.5);
+      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.0, 1.0);
 
-      double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
-      double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
+      double firstSequenceDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
+      double secondSequenceDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double firstSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      firstSplineTimeSpentOnEntryCMP = Math.max(firstSplineTimeSpentOnEntryCMP, initialTransitionDuration.getValue());
+      double firstSplineDurationOnEntryCMP = initialTransitionDuration.getValue();
+      double secondSplineDurationOnEntryCMP = splineSplitFraction * splineSegmentDuration.getValue();
+      double secondSplineDurationSpentOnExitCMP = Math.min((1.0 - splineSplitFraction) * splineSegmentDuration.getValue(), secondSequenceDuration);
 
-      double secondSplineTimeSpentOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
-
-      secondSplineTimeSpentOnEntryCMP = Math.max(secondSplineTimeSpentOnEntryCMP, minimumSplineDuration.getValue());
-      secondSplineTimeSpentOnExitCMP = Math.max(secondSplineTimeSpentOnExitCMP, minimumSplineDuration.getValue());
-
-      setFirstSplineStartFromCurrentState();
-
-      boolean initialPhaseIsLongEnough = currentIntervalDuration > firstSplineTimeSpentOnEntryCMP + secondSplineTimeSpentOnEntryCMP;
-
-      if (!initialPhaseIsLongEnough)
-      {
-         double timeOnExit = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(1));
-
-         firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + timeOnExit);
-         secondSplineStartTime.set(Double.POSITIVE_INFINITY);
-         secondSplineEndTime.set(Double.POSITIVE_INFINITY);
+      if (firstSequenceDuration < firstSplineDurationOnEntryCMP + splineSplitFraction * minimumSplineDuration.getValue())
+      {// the first sequence isn't big enough to fit the initial durations on it, so wrap the first spline around it.
+         firstSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineDurationSpentOnExitCMP);
+         secondSplineStartTime.set(Double.NaN);
+         secondSplineEndTime.set(Double.NaN);
 
          updateSplines();
          return;
       }
-
-
-      if (secondSplineTimeSpentOnExitCMP < minimumSplineDuration.getValue())
-      {
-         if (0.5 * nextIntervalDuration < minimumSplineDuration.getValue())
-         {
-            firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
-            secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
-
-            double timeOnFinal = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(2));
-            secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(2) + timeOnFinal);
-
-            updateSplines();
-            return;
-         }
-
-         secondSplineTimeSpentOnExitCMP = minimumSplineDuration.getValue();
+      else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
+      { // we know the first duration can fit both, and we have to maintain the initial transfer duration, so don't modify it any
+         secondSplineDurationOnEntryCMP = firstSequenceDuration - firstSplineDurationOnEntryCMP;
       }
 
-      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineTimeSpentOnEntryCMP);
-
-      secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineTimeSpentOnEntryCMP);
-      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
-
+      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineDurationOnEntryCMP);
+      secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineDurationOnEntryCMP);
+      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineDurationSpentOnExitCMP);
       updateSplines();
    }
 
    private void computeTransitionTrajectory()
    {
-      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.001, 0.5);
+      double splineSplitFraction = MathTools.clamp(this.splineSplitFraction.getValue(), 0.0, 1.0);
 
-      double currentIntervalDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
-      double nextIntervalDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
+      double firstSequenceDuration = piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - timeAtStartOfState.getValue();
+      double secondSequenceDuration = piecewiseConstantCopTrajectory.getIntervalDuration(1);
 
-      double splineDurationOnEntryCMP = Math.min(splineSplitFraction * currentIntervalDuration, maximumSplineSegmentDuration.getValue());
-      double secondSplineTimeSpentOnExitCMP = Math.min(splineSplitFraction * nextIntervalDuration, maximumSplineSegmentDuration.getValue());
+      double firstSplineDurationOnEntryCMP = splineSegmentDuration.getValue();
+      double secondSplineDurationOnEntryCMP = splineSplitFraction * splineSegmentDuration.getValue();
+      double secondSplineDurationSpentOnExitCMP = Math.min((1.0 - splineSplitFraction) * splineSegmentDuration.getValue(), secondSequenceDuration);
 
-      double halfCurrentIntervalDuration = 0.5 * currentIntervalDuration;
+      if (firstSequenceDuration < (1.0 + splineSplitFraction) * minimumSplineDuration.getValue())
+      { // the first duration isn't big enough to have the minimum spline durations on it, so wrap the first spline around it.
+         firstSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineDurationSpentOnExitCMP);
+         secondSplineStartTime.set(Double.NaN);
+         secondSplineEndTime.set(Double.NaN);
 
-      if (splineDurationOnEntryCMP < minimumSplineDuration.getValue())
-      {
-         if (halfCurrentIntervalDuration < minimumSplineDuration.getValue())
-         {// we know that this segment is too short, so let's have the current spline go onto the next segment
-            double timeOnExit = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(1));
-            firstSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + timeOnExit);
-            secondSplineStartTime.set(Double.NaN);
-            secondSplineEndTime.set(Double.NaN);
-
-            updateSplines();
-            return;
-         }
-
-         splineDurationOnEntryCMP = minimumSplineDuration.getValue();
+         updateSplines();
+         return;
+      }
+      else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
+      { // we know the first duration is big enough to have the minimum spline durations, but still too short for the desired values
+         firstSplineDurationOnEntryCMP = Math.max(firstSequenceDuration - secondSplineDurationOnEntryCMP, minimumSplineDuration.getValue());
+         secondSplineDurationOnEntryCMP = Math.max(firstSequenceDuration - firstSplineDurationOnEntryCMP, splineSplitFraction * minimumSplineDuration.getValue());
       }
 
-      if (secondSplineTimeSpentOnExitCMP < minimumSplineDuration.getValue())
-      {
-         secondSplineTimeSpentOnExitCMP = Math.min(minimumSplineDuration.getValue(), piecewiseConstantCopTrajectory.getIntervalDuration(1));
-      }
-
-      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + splineDurationOnEntryCMP);
-      secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - splineDurationOnEntryCMP);
-      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineTimeSpentOnExitCMP);
+      firstSplineEndTime.set(timeAtStartOfState.getDoubleValue() + firstSplineDurationOnEntryCMP);
+      secondSplineStartTime.set(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0) - secondSplineDurationOnEntryCMP);
+      secondSplineEndTime.set(piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(1) + secondSplineDurationSpentOnExitCMP);
 
       updateSplines();
    }
