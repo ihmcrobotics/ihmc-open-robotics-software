@@ -5,6 +5,7 @@ import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -34,6 +35,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedUI.skybox.QuadrupedSkybox3D;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
@@ -125,9 +127,13 @@ public class QuadrupedUserInterface
       plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addDefaultLighting();
+      FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(0.05, 1000000.0, true);
+      SubScene subScene = view3dFactory.getSubScene();
       view3dFactory.addWorldCoordinateSystem(0.3);
-      Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
+      view3dFactory.addNodeToView(new QuadrupedSkybox3D(subScene).getSkybox());
+
+      Pane subScenePane = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
@@ -142,13 +148,13 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic,
                                                                        QuadrupedUIMessagerAPI.LowLevelGoalOrientationTopic,
                                                                        QuadrupedUIMessagerAPI.GoalPositionTopic, QuadrupedUIMessagerAPI.GoalOrientationTopic);
-      this.startGoalPositionEditor = new StartGoalPositionEditor(messager, subScene, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
+      this.startGoalPositionEditor = new StartGoalPositionEditor(messager, subScenePane, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
                                                                  QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.SelectedRegionTopic,
                                                                  QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic);
-      this.startGoalOrientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene(), QuadrupedUIMessagerAPI.EditModeEnabledTopic,
+      this.startGoalOrientationEditor = new StartGoalOrientationEditor(messager, subScene, QuadrupedUIMessagerAPI.EditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
@@ -161,7 +167,7 @@ public class QuadrupedUserInterface
 
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
-      manualStepTabController.initScene(view3dFactory.getSubScene());
+      manualStepTabController.initScene(subScene);
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
@@ -179,7 +185,6 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(manualStepTabController);
 
-      FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();
       cameraController.prependTransform(rootJointOffset);
 
@@ -229,11 +234,11 @@ public class QuadrupedUserInterface
       robotVisualizer.start();
       cameraTracking.start();
 
-      sceneAnchorPane.getChildren().set(0, subScene);
-      AnchorPane.setTopAnchor(subScene, 0.0);
-      AnchorPane.setBottomAnchor(subScene, 0.0);
-      AnchorPane.setLeftAnchor(subScene, 0.0);
-      AnchorPane.setRightAnchor(subScene, 0.0);
+      sceneAnchorPane.getChildren().set(0, subScenePane);
+      AnchorPane.setTopAnchor(subScenePane, 0.0);
+      AnchorPane.setBottomAnchor(subScenePane, 0.0);
+      AnchorPane.setLeftAnchor(subScenePane, 0.0);
+      AnchorPane.setRightAnchor(subScenePane, 0.0);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
