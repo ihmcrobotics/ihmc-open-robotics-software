@@ -8,6 +8,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -15,17 +16,17 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 public class QuadrupedVideoViewOverlay
 {
    private final JavaFXROS2VideoView videoView;
-   private Mode currentMode = Mode.MINIMIZED;
+   private SizeMode currentMode = SizeMode.MIN;
 
    private final DoubleProperty animationDurationProperty = new SimpleDoubleProperty(this, "animationDuration", 0.15);
 
-   private enum Mode
+   private enum SizeMode
    {
-      MINIMIZED(200.0), MAXIMIZED(800.0);
+      MIN(200.0), MED(800.0), MAX(1600.0);
 
       private final double width;
 
-      private Mode(double width)
+      private SizeMode(double width)
       {
          this.width = width;
       }
@@ -42,20 +43,38 @@ public class QuadrupedVideoViewOverlay
       videoView.setPreserveRatio(true);
       videoView.setFitWidth(currentMode.getWidth());
       videoView.setStyle("-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.6), 5, 0, 0, 0);");
+      videoView.setOpacity(0.5);
       videoView.setBlendMode(BlendMode.OVERLAY);
+
+      videoView.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> transitionBlending(1.0, null));
+      videoView.addEventHandler(MouseEvent.MOUSE_EXITED, e -> transitionBlending(0.5, BlendMode.OVERLAY));
+   }
+
+   private void transitionBlending(double endOpacity, BlendMode endBlendMode)
+   {
+      Timeline timeline = new Timeline();
+      timeline.setAutoReverse(false);
+      timeline.setCycleCount(1);
+      timeline.getKeyFrames().add(new KeyFrame(Duration.ZERO, new KeyValue(videoView.opacityProperty(), videoView.getOpacity())));
+      timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(animationDurationProperty.get()), new KeyValue(videoView.opacityProperty(), endOpacity)));
+      timeline.setOnFinished(e2 -> videoView.setBlendMode(endBlendMode));
+      timeline.play();
    }
 
    public void toggleMode()
    {
-      Mode endMode;
+      SizeMode endMode;
 
       switch (currentMode)
       {
-      case MINIMIZED:
-         endMode = Mode.MAXIMIZED;
+      case MIN:
+         endMode = SizeMode.MED;
          break;
-      case MAXIMIZED:
-         endMode = Mode.MINIMIZED;
+      case MED:
+         endMode = SizeMode.MAX;
+         break;
+      case MAX:
+         endMode = SizeMode.MIN;
          break;
       default:
          throw new RuntimeException("Unhandle mode: " + currentMode);
