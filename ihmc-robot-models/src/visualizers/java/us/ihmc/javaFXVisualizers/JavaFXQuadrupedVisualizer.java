@@ -1,13 +1,14 @@
 package us.ihmc.javaFXVisualizers;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.CRC32;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
@@ -19,9 +20,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
-
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.CRC32;
 
 public class JavaFXQuadrupedVisualizer
 {
@@ -137,7 +135,7 @@ public class JavaFXQuadrupedVisualizer
 
    private void addNodesRecursively(Graphics3DNode graphics3dNode, JavaFXGraphics3DNode parentNode)
    {
-      JavaFXGraphics3DNode node = new JavaFXGraphics3DNode(graphics3dNode, YoAppearance.Green());
+      JavaFXGraphics3DNode node = new JavaFXGraphics3DNode(graphics3dNode);
       parentNode.addChild(node);
       graphics3dNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
