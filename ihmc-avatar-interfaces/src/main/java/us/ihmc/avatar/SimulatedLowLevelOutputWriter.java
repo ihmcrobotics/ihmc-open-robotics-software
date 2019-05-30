@@ -44,12 +44,6 @@ public class SimulatedLowLevelOutputWriter implements JointDesiredOutputWriter
 
    }
 
-   @Override
-   public void initialize()
-   {
-
-   }
-
    protected void write()
    {
       for (int i = 0; i < revoluteJoints.size(); i++)

@@ -18,16 +18,6 @@ public interface JointDesiredOutputWriter
    void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList);
 
    /**
-    * Called the first time the outputwriter runs.
-    * 
-    * This function is called in a realtime context.
-    * The data from the controller is valid and this function gets called before writeBefore() ever gets called.
-    * 
-    */
-   void initialize();
-   
-   
-   /**
     * Write function that gets called before the estimator has ran.
     * 
     * All joint data is from the previous estimator tick. 

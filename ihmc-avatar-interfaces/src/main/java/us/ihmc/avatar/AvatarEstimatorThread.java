@@ -83,7 +83,6 @@ public class AvatarEstimatorThread
    private final SensorReader sensorReader;
 
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
-   private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
@@ -217,7 +216,6 @@ public class AvatarEstimatorThread
       }
 
       firstTick.set(true);
-      outputWriterInitialized.set(false);
       controllerDataValid.set(false);
 
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
@@ -314,12 +312,6 @@ public class AvatarEstimatorThread
 
          if (outputWriter != null && controllerDataValid.getValue())
          {
-            if (!outputWriterInitialized.getBooleanValue())
-            {
-               outputWriter.initialize();
-               outputWriterInitialized.set(true);
-            }
-
             // TODO: should this be the last estimator timestamp?
             long nanoTime = System.nanoTime();
             outputWriter.writeBefore(nanoTime);

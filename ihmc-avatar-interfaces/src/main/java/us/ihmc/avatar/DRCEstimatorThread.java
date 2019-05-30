@@ -101,7 +101,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
    private final YoLong estimatorTick = new YoLong("estimatorTick", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
-   private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
    private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
@@ -269,7 +268,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
 
       firstTick.set(true);
-      outputWriterInitialized.set(false);
       controllerDataValid.set(false);
 
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
@@ -409,12 +407,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          {
             if (controllerDataValid.getBooleanValue())
             {
-               if (!outputWriterInitialized.getBooleanValue())
-               {
-                  outputWriter.initialize();
-                  outputWriterInitialized.set(true);
-               }
-
                outputWriter.writeBefore(currentClockTime);
             }
          }
