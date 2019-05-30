@@ -1,9 +1,11 @@
 package us.ihmc.avatar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
-import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 
@@ -14,22 +16,20 @@ public class ControllerTask extends HumanoidRobotControlTask
 
    private final AvatarControllerThread controllerThread;
 
-   private final RobotVisualizer robotVisualizer;
-
    private final ThreadTimer timer;
 
-   public ControllerTask(AvatarControllerThread controllerThread, long divisor, FullHumanoidRobotModel masterFullRobotModel, RobotVisualizer robotVisualizer)
+   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
+
+   public ControllerTask(AvatarControllerThread controllerThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.controllerThread = controllerThread;
-      this.robotVisualizer = robotVisualizer;
 
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       timer = new ThreadTimer("Controller", controllerThread.getYoVariableRegistry());
-
-      robotVisualizer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
    }
 
    @Override
@@ -38,13 +38,14 @@ public class ControllerTask extends HumanoidRobotControlTask
       timer.start();
       controllerThread.run();
       controllerThread.write();
-      robotVisualizer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(), controllerThread.getYoVariableRegistry());
+      runAll(taskThreadRunnables);
       timer.stop();
    }
 
    @Override
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
+      runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataController(controllerThread.getHumanoidRobotContextData(), masterContext);
    }
 
@@ -53,6 +54,18 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, controllerThread.getHumanoidRobotContextData());
       controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, controllerThread.getHumanoidRobotContextData());
+   }
+
+   @Override
+   public void addRunnableOnTaskThread(Runnable runnable)
+   {
+      taskThreadRunnables.add(runnable);
+   }
+
+   @Override
+   public void addRunnableOnSchedulerThread(Runnable runnable)
+   {
+      schedulerThreadRunnables.add(runnable);
    }
 
 }

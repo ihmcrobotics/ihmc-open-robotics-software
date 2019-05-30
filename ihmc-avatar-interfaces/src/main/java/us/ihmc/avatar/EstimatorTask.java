@@ -1,9 +1,11 @@
 package us.ihmc.avatar;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
-import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -16,26 +18,23 @@ public class EstimatorTask extends HumanoidRobotControlTask
    private final AvatarEstimatorThread estimatorThread;
    private final SensorReader sensorReader;
 
-   private final RobotVisualizer robotVisualizer;
-
    private final ThreadTimer timer;
+
+   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    private boolean sensorsRead = false;
 
-   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel, RobotVisualizer robotVisualizer)
+   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
       this.estimatorThread = estimatorThread;
       this.sensorReader = estimatorThread.getSensorReader();
-      this.robotVisualizer = robotVisualizer;
 
       estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
       timer = new ThreadTimer("Estimator", estimatorThread.getYoVariableRegistry());
-
-      robotVisualizer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
-                                      estimatorThread.getYoGraphicsListRegistry());
    }
 
    @Override
@@ -48,13 +47,14 @@ public class EstimatorTask extends HumanoidRobotControlTask
       estimatorThread.read();
       estimatorThread.run();
       estimatorThread.write();
-      robotVisualizer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(), estimatorThread.getYoVariableRegistry());
+      runAll(taskThreadRunnables);
       timer.stop();
    }
 
    @Override
    protected void updateMasterContext(HumanoidRobotContextData masterContext)
    {
+      runAll(schedulerThreadRunnables);
       masterResolver.resolveHumanoidRobotContextDataEstimator(estimatorThread.getHumanoidRobotContextData(), masterContext);
 
       // Abuse the fact that this is running on the robot synchronized thread to update the sensor data and the time.
@@ -68,6 +68,18 @@ public class EstimatorTask extends HumanoidRobotControlTask
    {
       estimatorResolver.resolveHumanoidRobotContextDataScheduler(masterContext, estimatorThread.getHumanoidRobotContextData());
       estimatorResolver.resolveHumanoidRobotContextDataController(masterContext, estimatorThread.getHumanoidRobotContextData());
+   }
+
+   @Override
+   public void addRunnableOnTaskThread(Runnable runnable)
+   {
+      taskThreadRunnables.add(runnable);
+   }
+
+   @Override
+   public void addRunnableOnSchedulerThread(Runnable runnable)
+   {
+      schedulerThreadRunnables.add(runnable);
    }
 
 }
