@@ -32,8 +32,6 @@
                           <RowConstraints vgrow="SOMETIMES" />
                           <RowConstraints />
                           <RowConstraints />
-                          <RowConstraints />
-                          <RowConstraints />
                       </rowConstraints>
                       <children>
 
