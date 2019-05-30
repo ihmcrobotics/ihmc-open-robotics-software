@@ -37,7 +37,6 @@ public class ControllerTask extends HumanoidRobotControlTask
    {
       timer.start();
       controllerThread.run();
-      controllerThread.write();
       runAll(taskThreadRunnables);
       timer.stop();
    }

@@ -83,15 +83,12 @@ public class AvatarEstimatorThread
    private final SensorReader sensorReader;
 
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
-   private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
    private final DRCPoseCommunicator poseCommunicator;
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
-
-   private final JointDesiredOutputWriter outputWriter;
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
@@ -216,19 +213,16 @@ public class AvatarEstimatorThread
       }
 
       firstTick.set(true);
-      controllerDataValid.set(false);
 
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
 
-      this.outputWriter = outputWriter;
-      if (this.outputWriter != null)
+      if (outputWriter != null)
       {
-         this.outputWriter.setJointDesiredOutputList(desiredJointDataHolder);
-         if (this.outputWriter.getYoVariableRegistry() != null)
+         outputWriter.setJointDesiredOutputList(desiredJointDataHolder);
+         if (outputWriter.getYoVariableRegistry() != null)
          {
-            estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());
+            estimatorRegistry.addChild(outputWriter.getYoVariableRegistry());
          }
-
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
@@ -304,29 +298,6 @@ public class AvatarEstimatorThread
       return estimatorRegistry;
    }
 
-   public void read()
-   {
-      try
-      {
-         controllerDataValid.set(humanoidRobotContextData.getControllerRan());
-
-         if (outputWriter != null && controllerDataValid.getValue())
-         {
-            // TODO: should this be the last estimator timestamp?
-            long nanoTime = System.nanoTime();
-            outputWriter.writeBefore(nanoTime);
-         }
-      }
-      catch (Throwable e)
-      {
-         if (controllerCrashPublisher != null)
-         {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_READ, e.getMessage()));
-         }
-         throw new RuntimeException(e);
-      }
-   }
-
    public void run()
    {
       try
@@ -363,28 +334,6 @@ public class AvatarEstimatorThread
          if (controllerCrashPublisher != null)
          {
             controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage()));
-         }
-         throw new RuntimeException(e);
-      }
-   }
-
-   public void write()
-   {
-      try
-      {
-         if (outputWriter != null)
-         {
-            if (controllerDataValid.getBooleanValue())
-            {
-               outputWriter.writeAfter();
-            }
-         }
-      }
-      catch (Throwable e)
-      {
-         if (controllerCrashPublisher != null)
-         {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_WRITE, e.getMessage()));
          }
          throw new RuntimeException(e);
       }

@@ -46,6 +46,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -219,9 +220,8 @@ public class AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       estimatorThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                        robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
-                                                        contextDataFactory, realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter,
-                                                        gravity.get());
+                                                  robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, contextDataFactory,
+                                                  realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter, gravity.get());
    }
 
    private void setupControllerThread()
@@ -250,6 +250,47 @@ public class AvatarSimulationFactory
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, masterFullRobotModel);
       SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeRos2Node.get());
+
+      // Previously done in estimator thread write
+      if (simulationOutputWriter != null)
+      {
+         estimatorTask.addRunnableOnSchedulerThread(() -> {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeAfter();
+         });
+      }
+      // Previously done in estimator thread read
+      SensorReader sensorReader = estimatorThread.getSensorReader();
+      estimatorTask.addRunnableOnSchedulerThread(() -> {
+         long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+         masterContext.setTimestamp(newTimestamp);
+      });
+      if (simulationOutputWriter != null)
+      {
+         estimatorTask.addRunnableOnSchedulerThread(() -> {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+         });
+      }
+      // Previously done in controller thread write
+      if (simulationOutputProcessor != null)
+      {
+         controllerTask.addRunnableOnSchedulerThread(new Runnable()
+         {
+            boolean initialized = false;
+
+            @Override
+            public void run()
+            {
+               if (!controllerThread.getHumanoidRobotContextData().getControllerRan())
+                  return;
+               if (!initialized)
+                  simulationOutputProcessor.initialize();
+               initialized = true;
+               simulationOutputProcessor.processAfterController(controllerThread.getHumanoidRobotContextData().getTimestamp());
+            }
+         });
+      }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
       tasks.add(estimatorTask);

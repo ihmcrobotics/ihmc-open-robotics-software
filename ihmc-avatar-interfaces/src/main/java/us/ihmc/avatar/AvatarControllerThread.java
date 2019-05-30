@@ -75,8 +75,6 @@ public class AvatarControllerThread
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final DRCOutputProcessor outputProcessor;
-
    private final ModularRobotController robotController;
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
@@ -87,7 +85,6 @@ public class AvatarControllerThread
                                  HighLevelHumanoidControllerFactory controllerFactory, HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, double gravity, double estimatorDT)
    {
-      this.outputProcessor = outputProcessor;
       this.controllerFullRobotModel = robotModel.createFullRobotModel();
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
@@ -275,10 +272,6 @@ public class AvatarControllerThread
          if (firstTick.getValue())
          {
             robotController.initialize();
-            if (outputProcessor != null)
-            {
-               outputProcessor.initialize();
-            }
             firstTick.set(false);
          }
 
@@ -290,28 +283,6 @@ public class AvatarControllerThread
          crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e.getMessage()));
 
          throw new RuntimeException(e);
-      }
-   }
-
-   public void write()
-   {
-      if (!runController.getValue())
-      {
-         return;
-      }
-
-      try
-      {
-         if (outputProcessor != null)
-         {
-            outputProcessor.processAfterController(timestamp.getValue());
-         }
-      }
-      catch (Exception e)
-      {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_WRITE, e.getMessage()));
-         throw new RuntimeException(e);
-
       }
    }
 
