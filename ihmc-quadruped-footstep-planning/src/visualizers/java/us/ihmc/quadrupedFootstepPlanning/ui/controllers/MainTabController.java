@@ -1,15 +1,26 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,7 +40,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
@@ -38,15 +53,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.robotics.time.TimeIntervalTools;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MainTabController
 {
@@ -123,7 +130,7 @@ public class MainTabController
    public void computePath()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked compute path...");
+         LogTools.info("Clicked compute path...");
 
       if (quadrupedReferenceFrames != null)
          setStartFromRobot();
@@ -137,7 +144,7 @@ public class MainTabController
    public void abortPlanning()
    {
       if (verbose)
-         PrintTools.info(this, "Clicked abort planning...");
+         LogTools.info("Clicked abort planning...");
 
       messager.submitMessage(abortPlanningTopic, true);
    }
@@ -167,7 +174,7 @@ public class MainTabController
       stepMessages.setOffsetStepsHeightWithExecutionError(correctStepHeightError.isSelected());
 
       if (verbose)
-         PrintTools.info(this, "Sending step list...");
+         LogTools.info("Sending step list...");
       messager.submitMessage(stepListMessageTopic, stepMessages);
    }
 
