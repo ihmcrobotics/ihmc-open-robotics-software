@@ -62,7 +62,7 @@
          <children>
             <AnchorPane prefHeight="69.0" prefWidth="114.0" />
             <StackPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="92.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-            <ImageView fitHeight="150.0" fitWidth="90.0" layoutX="1091.0" layoutY="-21.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+            <ImageView fitWidth="120.0" layoutX="1091.0" layoutY="-21.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
                <image>
                   <Image url="@icons/ihmc-logo-black.png" />
                </image>
