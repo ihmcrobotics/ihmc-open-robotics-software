@@ -603,42 +603,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       while (!endNode.geometricallyEquals(goalNode))
       {
-         if (!endNode.quadrantGeometricallyEquals(movingQuadrant, goalNode))
-         {
-            int xFrontLeft = endNode.getXIndex(RobotQuadrant.FRONT_LEFT);
-            int yFrontLeft = endNode.getYIndex(RobotQuadrant.FRONT_LEFT);
-            int xFrontRight = endNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
-            int yFrontRight = endNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
-            int xHindLeft = endNode.getXIndex(RobotQuadrant.HIND_LEFT);
-            int yHindLeft = endNode.getYIndex(RobotQuadrant.HIND_LEFT);
-            int xHindRight = endNode.getXIndex(RobotQuadrant.HIND_RIGHT);
-            int yHindRight = endNode.getYIndex(RobotQuadrant.HIND_RIGHT);
+         FootstepNode nodeAtGoal = FootstepNode.constructNodeFromOtherNode(movingQuadrant, goalNode.getXIndex(movingQuadrant), goalNode.getYIndex(movingQuadrant), endNode);
 
-            switch (movingQuadrant)
-            {
-            case FRONT_LEFT:
-               xFrontLeft = goalNode.getXIndex(RobotQuadrant.FRONT_LEFT);
-               yFrontLeft = goalNode.getYIndex(RobotQuadrant.FRONT_LEFT);
-               break;
-            case FRONT_RIGHT:
-               xFrontRight = goalNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
-               yFrontRight = goalNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
-               break;
-            case HIND_LEFT:
-               xHindLeft = goalNode.getXIndex(RobotQuadrant.HIND_LEFT);
-               yHindLeft = goalNode.getYIndex(RobotQuadrant.HIND_LEFT);
-               break;
-            case HIND_RIGHT:
-               xHindRight = goalNode.getXIndex(RobotQuadrant.HIND_RIGHT);
-               yHindRight = goalNode.getYIndex(RobotQuadrant.HIND_RIGHT);
-               break;
-            }
-            FootstepNode nodeAtGoal = new FootstepNode(movingQuadrant, xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight,
-                                                       yHindRight, endNode.getNominalStanceLength(), endNode.getNominalStanceWidth());
-
-            nodePathToPack.add(nodeAtGoal);
-            endNode = nodeAtGoal;
-         }
+         nodePathToPack.add(nodeAtGoal);
+         endNode = nodeAtGoal;
 
          movingQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
       }
