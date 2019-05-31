@@ -830,5 +830,9 @@ public class MainTabController
       }
    }
 
-
+   public void stop()
+   {
+      footstepPlanPreviewPlaybackManager.stop();
+      executorService.shutdown();
+   }
 }

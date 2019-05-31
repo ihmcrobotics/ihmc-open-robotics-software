@@ -99,4 +99,10 @@ public class ManualStepPlanGraphic extends Group
          meshView.setMaterial(material);
       }
    }
+
+   public void stop()
+   {
+      executorService.shutdown();
+      animationTimer.stop();
+   }
 }

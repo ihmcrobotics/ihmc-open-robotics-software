@@ -259,6 +259,7 @@ public class QuadrupedUserInterface
 
    public void stop()
    {
+      plannerTabController.stop();
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
       startGoalOrientationViewer.stop();

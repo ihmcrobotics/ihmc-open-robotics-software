@@ -288,5 +288,6 @@ public class ManualStepTabController extends Group
    public void stop()
    {
       flamingoPoseKeyHeldMover.shutdown();
+      manualStepPlanGraphic.stop();
    }
 }
