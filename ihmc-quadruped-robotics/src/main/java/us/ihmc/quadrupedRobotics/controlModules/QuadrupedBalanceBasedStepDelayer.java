@@ -121,11 +121,6 @@ public class QuadrupedBalanceBasedStepDelayer
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          delayedFootLocations.get(robotQuadrant).setToNaN();
 
-      if (!allowDelayingSteps.getValue())
-      {
-         return activeSteps;
-      }
-
       stepsStarting.clear();
       inactiveSteps.clear();
       stepsAlreadyActive.clear();
@@ -192,7 +187,7 @@ public class QuadrupedBalanceBasedStepDelayer
       double delayAmount = timeToDelayLiftOff.getValue();
       boolean stepWasDelayed = false;
 
-      boolean forceDelay = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
+      boolean forceDelayToPreventReallyBadContact = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
 
       for (int i = 0; i < stepsStarting.size(); i++)
       {
@@ -209,7 +204,7 @@ public class QuadrupedBalanceBasedStepDelayer
             scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
 
          timeScaledEllipticalError.get(quadrantStarting).set(scaledNormalizedDCMEllipticalError);
-         if (!forceDelay && scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
+         if (!forceDelayToPreventReallyBadContact && scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
          {
             updatedActiveSteps.add(stepStarting);
             continue;
@@ -218,10 +213,10 @@ public class QuadrupedBalanceBasedStepDelayer
          icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
          YoDouble delayDuration = delayDurations.get(quadrantStarting);
-         boolean delayStep = isFootPushingAgainstError(quadrantStarting) || forceDelay;
+         boolean delayStep = isFootPushingAgainstError(quadrantStarting) || forceDelayToPreventReallyBadContact;
          delayStep &= delayDuration.getDoubleValue() + delayAmount < (maximumDelayFraction.getValue() * stepStarting.getTimeInterval().getDuration());
 
-         if (delayStep)
+         if ((delayStep && allowDelayingSteps.getValue()) || forceDelayToPreventReallyBadContact)
          {
             TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
             double currentStartTime = timeInterval.getStartTime();
