@@ -1,10 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -13,7 +9,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
-import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -73,19 +68,19 @@ public class QuadrupedBalanceBasedStepDelayer
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D supportPolygonInWorldAfterChange = new FrameConvexPolygon2D();
 
+   private final List<QuadrupedTimedStep> inactiveSteps = new ArrayList<>();
+
    private final double controlDt;
 
    public QuadrupedBalanceBasedStepDelayer(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox.getReferenceFrames().getSoleFrames(),
-           controllerToolbox.getSupportPolygons().getMidFeetZUpFrame(), controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency(),
-           controllerToolbox.getFootContactStates(), controllerToolbox.getRuntimeEnvironment().getControlDT(), parentRegistry,
-           controllerToolbox.getRuntimeEnvironment().getGraphicsListRegistry());
+      this(controllerToolbox.getReferenceFrames().getSoleFrames(), controllerToolbox.getSupportPolygons().getMidFeetZUpFrame(),
+           controllerToolbox.getLinearInvertedPendulumModel().getYoNaturalFrequency(), controllerToolbox.getFootContactStates(),
+           controllerToolbox.getRuntimeEnvironment().getControlDT(), parentRegistry, controllerToolbox.getRuntimeEnvironment().getGraphicsListRegistry());
    }
 
-   public QuadrupedBalanceBasedStepDelayer(QuadrantDependentList<MovingReferenceFrame> soleFrames,
-                                           ReferenceFrame midZUpFrame, DoubleProvider omega, QuadrantDependentList<? extends PlaneContactState> contactStates,
-                                           double controlDt,
+   public QuadrupedBalanceBasedStepDelayer(QuadrantDependentList<MovingReferenceFrame> soleFrames, ReferenceFrame midZUpFrame, DoubleProvider omega,
+                                           QuadrantDependentList<? extends PlaneContactState> contactStates, double controlDt,
                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleFrames = soleFrames;
@@ -114,7 +109,10 @@ public class QuadrupedBalanceBasedStepDelayer
       parentRegistry.addChild(registry);
    }
 
-   private final List<QuadrupedTimedStep> inactiveSteps = new ArrayList<>();
+   public boolean getStepWasDelayed(RobotQuadrant robotQuadrant)
+   {
+      return areFeetDelayed.get(robotQuadrant).getBooleanValue();
+   }
 
    public List<? extends QuadrupedTimedStep> delayStepsIfNecessary(List<? extends QuadrupedTimedStep> activeSteps,
                                                                    List<? extends QuadrupedTimedStep> allOtherSteps, FramePoint3DReadOnly desiredDcmPosition,
@@ -193,8 +191,6 @@ public class QuadrupedBalanceBasedStepDelayer
 
       double delayAmount = timeToDelayLiftOff.getValue();
       boolean stepWasDelayed = false;
-
-
 
       boolean forceDelay = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
 
@@ -290,16 +286,25 @@ public class QuadrupedBalanceBasedStepDelayer
    private boolean isFootPushingAgainstError(RobotQuadrant robotQuadrant)
    {
       updateSupportPolygon(supportPolygonInWorld, contactStates, null);
+      updateSupportPolygon(supportPolygonInWorldAfterChange, contactStates, robotQuadrant);
 
-      boolean currentICPOutsideOfSupport = !supportPolygonInWorld.isPointInside(currentICP);
-      boolean statesAreCapturable = !currentICPOutsideOfSupport || supportPolygonInWorld.isPointInside(desiredICP);
-      if (statesAreCapturable)
-         return isFootPushingAgainstErrorWhenTheDesiredsAreCapturable(robotQuadrant, currentICPOutsideOfSupport);
+      boolean currentICPInsideSupport = supportPolygonInWorld.isPointInside(currentICP);
+
+      if (currentICPInsideSupport || supportPolygonInWorld.isPointInside(desiredICP))
+      {
+         if (willPickingTheFootUpMakeTrackingImpossible())
+            return true;
+
+         return isFootPushingAgainstError(robotQuadrant, currentICPInsideSupport);
+      }
       else
-         return isFootPushingAgainstErrorWhenTheDesiredsAreNotCapturable(robotQuadrant, icpError, midZUpFrame);
+      {
+         // FIXME is this right?
+         return isFootInDirectionOfError(robotQuadrant, icpError, midZUpFrame);
+      }
    }
 
-   private boolean isFootPushingAgainstErrorWhenTheDesiredsAreCapturable(RobotQuadrant quadrantToBePickedUp, boolean currentICPOutsideOfSupport)
+   private boolean isFootPushingAgainstError(RobotQuadrant quadrantToBePickedUp, boolean currentICPInsideSupport)
    {
       RobotQuadrant otherSideToCheck = RobotQuadrant.getQuadrant(quadrantToBePickedUp.getEnd(), quadrantToBePickedUp.getOppositeSide());
       RobotQuadrant otherEndToCheck = RobotQuadrant.getQuadrant(quadrantToBePickedUp.getOppositeEnd(), quadrantToBePickedUp.getOppositeSide());
@@ -308,17 +313,16 @@ public class QuadrupedBalanceBasedStepDelayer
       tempFootPoint3D.changeFrame(worldFrame);
       tempFootPoint2D.setIncludingFrame(tempFootPoint3D);
 
-
       if (contactStates.get(otherEndToCheck).inContact())
       {
          tempOtherFootPoint.setToZero(soleFrames.get(otherEndToCheck));
          tempOtherFootPoint.changeFrame(worldFrame);
          tempOtherFootPoint2D.setIncludingFrame(tempOtherFootPoint);
 
-         if (currentICPOutsideOfSupport && EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         if (!currentICPInsideSupport && EuclidGeometryTools
+               .intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
             return true;
-         if (EuclidGeometryTools
-               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         if (EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
             return true;
       }
 
@@ -328,22 +332,22 @@ public class QuadrupedBalanceBasedStepDelayer
          tempOtherFootPoint.changeFrame(worldFrame);
          tempOtherFootPoint2D.setIncludingFrame(tempOtherFootPoint);
 
-         if (currentICPOutsideOfSupport && EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         if (!currentICPInsideSupport && EuclidGeometryTools
+               .intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
             return true;
-         if (EuclidGeometryTools
-               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
-            return true;
+         return EuclidGeometryTools
+               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway);
       }
-
-      updateSupportPolygon(supportPolygonInWorldAfterChange, contactStates, quadrantToBePickedUp);
-
-      if (supportPolygonInWorldAfterChange.isPointInside(desiredICP) && !supportPolygonInWorldAfterChange.isPointInside(currentICP))
-         return true;
 
       return false;
    }
 
-   private static boolean isFootPushingAgainstErrorWhenTheDesiredsAreNotCapturable(RobotQuadrant robotQuadrant, FrameVector2D icpError, ReferenceFrame frameForError)
+   private boolean willPickingTheFootUpMakeTrackingImpossible()
+   {
+      return supportPolygonInWorldAfterChange.isPointInside(desiredICP) && !supportPolygonInWorldAfterChange.isPointInside(currentICP);
+   }
+
+   private static boolean isFootInDirectionOfError(RobotQuadrant robotQuadrant, FrameVector2D icpError, ReferenceFrame frameForError)
    {
       icpError.changeFrameAndProjectToXYPlane(frameForError);
 
@@ -353,10 +357,7 @@ public class QuadrupedBalanceBasedStepDelayer
          return true;
       if (icpError.getX() > 0.0 && robotQuadrant.isQuadrantInFront())
          return true;
-      if (icpError.getX() < 0.0 && robotQuadrant.isQuadrantInHind())
-         return true;
-
-      return false;
+      return icpError.getX() < 0.0 && robotQuadrant.isQuadrantInHind();
    }
 
    private void updateSupportPolygon(FrameConvexPolygon2DBasics polygonToPack, QuadrantDependentList<? extends PlaneContactState> contactStates,
