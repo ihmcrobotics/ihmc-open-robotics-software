@@ -51,6 +51,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider allowDelayingSteps = new BooleanParameter("allowingDelayingSteps", registry, true);
    private final BooleanProvider delayAllSubsequentSteps = new BooleanParameter("delayAllSubsequentSteps", registry, true);
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
+   private final BooleanProvider requireFootOnEachEnd = new BooleanParameter("requireFootOnEachEnd", registry, true);
 
    private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 0.2);
    private final DoubleProvider minimumTimeForStep = new DoubleParameter("minimumDurationForDelayedStep", registry, 0.4);
@@ -135,6 +136,8 @@ public class QuadrupedBalanceBasedStepDelayer
 
       int numberOfLeftSideFeetInContact = 0;
       int numberOfRightSideFeetInContact = 0;
+      int numberOfFrontFeetInContact = 0;
+      int numberOfHindFeetInContact = 0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (!contactStates.get(robotQuadrant).inContact())
@@ -144,6 +147,11 @@ public class QuadrupedBalanceBasedStepDelayer
             numberOfLeftSideFeetInContact++;
          else
             numberOfRightSideFeetInContact++;
+
+         if (robotQuadrant.isQuadrantInFront())
+            numberOfFrontFeetInContact++;
+         else
+            numberOfHindFeetInContact++;
       }
 
       for (int i = 0; i < allOtherSteps.size(); i++)
@@ -187,24 +195,19 @@ public class QuadrupedBalanceBasedStepDelayer
       double delayAmount = timeToDelayLiftOff.getValue();
       boolean stepWasDelayed = false;
 
-      boolean forceDelayToPreventReallyBadContact = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
+      boolean willCauseLessThanTwoFeetTotal = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
 
       for (int i = 0; i < stepsStarting.size(); i++)
       {
          QuadrupedTimedStep stepStarting = stepsStarting.get(i);
          RobotQuadrant quadrantStarting = stepStarting.getRobotQuadrant();
 
-         double scaledNormalizedDCMEllipticalError = Math.exp(omega.getValue() * stepStarting.getTimeInterval().getDuration()) * normalizedDcmEllipticalError;
+         boolean willCauseNoFootOnEnd = quadrantStarting.isQuadrantInFront() ? numberOfFrontFeetInContact < 2 : numberOfHindFeetInContact < 2;
 
-         icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
+         timeScaledEllipticalError.get(quadrantStarting).set(computeScaledNormalizedDCMEllipticalError(stepStarting, normalizedDcmEllipticalError));
 
-         if (icpError.getY() > 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnLeftSide() && aboutToHaveNoLeftFoot.getBooleanValue())
-            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
-         else if (icpError.getY() < 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnRightSide() && aboutToHaveNoRightFoot.getBooleanValue())
-            scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
-
-         timeScaledEllipticalError.get(quadrantStarting).set(scaledNormalizedDCMEllipticalError);
-         if (!forceDelayToPreventReallyBadContact && scaledNormalizedDCMEllipticalError < timeScaledEllipticalErrorThreshold.getValue())
+         if (!willCauseLessThanTwoFeetTotal && !willCauseNoFootOnEnd &&
+               timeScaledEllipticalError.get(quadrantStarting).getDoubleValue() < timeScaledEllipticalErrorThreshold.getValue())
          {
             updatedActiveSteps.add(stepStarting);
             continue;
@@ -212,29 +215,29 @@ public class QuadrupedBalanceBasedStepDelayer
 
          icpError.changeFrameAndProjectToXYPlane(worldFrame);
 
+         TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
          YoDouble delayDuration = delayDurations.get(quadrantStarting);
-         boolean delayStep = isFootPushingAgainstError(quadrantStarting) || forceDelayToPreventReallyBadContact;
-         delayStep &= delayDuration.getDoubleValue() + delayAmount < (maximumDelayFraction.getValue() * stepStarting.getTimeInterval().getDuration());
+         boolean totalDelayLessThanMax = delayDuration.getDoubleValue() + delayAmount < (maximumDelayFraction.getValue() * stepStarting.getTimeInterval().getDuration());
+         boolean delayedStepIsLongEnough = timeInterval.getDuration() - delayAmount > minimumTimeForStep.getValue();
+         boolean delayStepFromConfiguration = isFootPushingAgainstError(quadrantStarting) && totalDelayLessThanMax;
 
-         if ((delayStep && allowDelayingSteps.getValue()) || forceDelayToPreventReallyBadContact)
+         boolean delayStep =
+               (delayStepFromConfiguration && allowDelayingSteps.getValue()) || (willCauseLessThanTwoFeetTotal && requireTwoFeetInContact.getValue())
+               || (willCauseNoFootOnEnd && requireFootOnEachEnd.getValue());
+
+         if (delayStep && (delayAllSubsequentSteps.getValue() || delayedStepIsLongEnough))
          {
-            TimeIntervalBasics timeInterval = stepStarting.getTimeInterval();
-            double currentStartTime = timeInterval.getStartTime();
             if (delayAllSubsequentSteps.getValue())
             {
-               stepStarting.getTimeInterval().shiftInterval(delayAmount);
-               delayDuration.add(delayAmount);
-               areFeetDelayed.get(quadrantStarting).set(true);
-               stepWasDelayed = true;
+               timeInterval.shiftInterval(delayAmount);
             }
             else if (stepStarting.getTimeInterval().getDuration() - delayAmount > minimumTimeForStep.getValue())
             {
-               stepStarting.getTimeInterval().setStartTime(currentStartTime + delayAmount);
-               delayDuration.add(delayAmount);
-               areFeetDelayed.get(quadrantStarting).set(true);
-               stepWasDelayed = true;
+               stepStarting.getTimeInterval().setStartTime(timeInterval.getStartTime() + delayAmount);
             }
-
+            delayDuration.add(delayAmount);
+            areFeetDelayed.get(quadrantStarting).set(true);
+            stepWasDelayed = true;
          }
          else
          {
@@ -255,6 +258,23 @@ public class QuadrupedBalanceBasedStepDelayer
 
       return updatedActiveSteps;
    }
+
+   private double computeScaledNormalizedDCMEllipticalError(QuadrupedTimedStep stepStarting, double normalizedDcmEllipticalError)
+   {
+      double scaledNormalizedDCMEllipticalError = Math.exp(omega.getValue() * stepStarting.getTimeInterval().getDuration()) * normalizedDcmEllipticalError;
+
+      icpError.changeFrameAndProjectToXYPlane(midZUpFrame);
+
+      if (icpError.getY() > 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnLeftSide() && aboutToHaveNoLeftFoot.getBooleanValue())
+         scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+      else if (icpError.getY() < 0.0 && stepStarting.getRobotQuadrant().isQuadrantOnRightSide() && aboutToHaveNoRightFoot.getBooleanValue())
+         scaledNormalizedDCMEllipticalError *= thresholdScalerForNoFeetOnSide.getValue();
+
+      icpError.changeFrameAndProjectToXYPlane(worldFrame);
+
+      return scaledNormalizedDCMEllipticalError;
+   }
+
 
    private void updateGraphics()
    {
