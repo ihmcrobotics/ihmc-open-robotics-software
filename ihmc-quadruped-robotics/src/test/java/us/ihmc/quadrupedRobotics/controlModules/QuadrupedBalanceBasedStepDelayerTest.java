@@ -10,18 +10,22 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -201,6 +205,66 @@ public class QuadrupedBalanceBasedStepDelayerTest
             continue;
          assertFalse(robotQuadrant.getShortName() + " was delayed.", stepDelayer.getStepWasDelayed(robotQuadrant));
       }
+   }
+
+   @Test
+   public void testFootIsHelpingToPush() throws Exception
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactStates.get(robotQuadrant).setInContact(true);
+
+
+      DoubleParameter distance = (DoubleParameter) getParameter("minimumICPDistanceFromEdgeForNotNeeded");
+      setValueOfDoubleParameter(distance, 0.0);
+
+      List<QuadrupedTimedStep> activeSteps = new ArrayList<>();
+      List<QuadrupedTimedStep> otherSteps = new ArrayList<>();
+      QuadrupedTimedStep frontLeftStep = new QuadrupedTimedStep();
+      frontLeftStep.getTimeInterval().setInterval(0.5, 1.0);
+      frontLeftStep.setRobotQuadrant(RobotQuadrant.HIND_LEFT);
+      frontLeftStep.setGoalPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5 * stanceLength, 0.5 * stanceWidth, 0.0));
+
+      activeSteps.add(frontLeftStep);
+
+      FramePoint3D currentICP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -0.05);
+      FramePoint3D desiredICP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -0.06);
+
+      List<? extends QuadrupedTimedStep> updatedActiveSteps = stepDelayer.delayStepsIfNecessary(activeSteps, otherSteps, desiredICP, currentICP, 10.0);
+
+      assertEquals(0, updatedActiveSteps.size());
+      assertTrue(stepDelayer.getStepWasDelayed(RobotQuadrant.HIND_LEFT));
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (robotQuadrant == RobotQuadrant.HIND_LEFT)
+            continue;
+         assertFalse(robotQuadrant.getShortName() + " was delayed.", stepDelayer.getStepWasDelayed(robotQuadrant));
+      }
+   }
+
+   private YoParameter<?> getParameter(String name)
+   {
+      for (YoParameter<?> parameter : registry.getAllParameters())
+      {
+         if (parameter.getName().equals(name))
+            return parameter;
+      }
+
+      throw new RuntimeException("Variable doesn't exist.");
+   }
+
+   private void setValueOfDoubleParameter(DoubleParameter parameter, double value) throws Exception
+   {
+      Method method = parameter.getClass().getDeclaredMethod("getVariable", null);
+      method.setAccessible(true);
+      ((YoDouble) method.invoke(parameter)).set(value);
+   }
+
+   private void setValueOfBooleanParameter(BooleanParameter parameter, boolean value) throws Exception
+   {
+      Method method = parameter.getClass().getDeclaredMethod("getVariable", null);
+      method.setAccessible(true);
+      ((YoBoolean) method.invoke(parameter)).set(value);
    }
 
    public class DummyContactState implements PlaneContactState
