@@ -467,6 +467,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          tasks.add(controllerTask);
 
          robotController = new BarrierScheduledRobotController<>(robotName, tasks, masterContext, TaskOverrunBehavior.SKIP_TICK);
+         controllerThread.getYoVariableRegistry().addChild(robotController.getYoVariableRegistry());
          if (valkyrieAffinity.setAffinity())
          {
             estimatorRealtimeThread.setAffinity(valkyrieAffinity.getEstimatorThreadProcessor());
