@@ -111,6 +111,11 @@ public class JavaFXQuadrupedVisualizer
       return (int) crc.getValue();
    }
 
+   public boolean isRobotLoaded()
+   {
+      return isRobotLoaded;
+   }
+
    private void loadRobotModelAndGraphics(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
