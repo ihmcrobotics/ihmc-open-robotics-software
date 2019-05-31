@@ -53,11 +53,15 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
    private final BooleanProvider requireFootOnEachEnd = new BooleanParameter("requireFootOnEachEnd", registry, true);
 
+   private final BooleanProvider delayFootIfItsHelpingButNotNeeded = new BooleanParameter("delayFootIfItsHelpingButNotNeeded", registry, true);
+   private final DoubleProvider minimumICPDistanceFromEdgeForNotNeeded = new DoubleParameter("minimumICPDistanceFromEdgeForNotNeeded", registry, 0.0);
+
    private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 0.2);
    private final DoubleProvider minimumTimeForStep = new DoubleParameter("minimumDurationForDelayedStep", registry, 0.4);
    private final DoubleParameter timeToDelayLiftOff = new DoubleParameter("timeToDelayLiftOff", registry, 0.005);
    private final YoBoolean aboutToHaveNoLeftFoot = new YoBoolean("aboutToHaveNoLeftFoot", registry);
    private final YoBoolean aboutToHaveNoRightFoot = new YoBoolean("aboutToHaveNoRightFoot", registry);
+
 
    private final DoubleProvider timeScaledEllipticalErrorThreshold = new DoubleParameter("timeScaledEllipticalErrorThreshold", registry, 5.0);
    private final DoubleProvider thresholdScalerForNoFeetOnSide = new DoubleParameter("thresholdScalerForNoFeetOnSide", registry, 4.0);
@@ -328,6 +332,7 @@ public class QuadrupedBalanceBasedStepDelayer
       tempFootPoint3D.changeFrame(worldFrame);
       tempFootPoint2D.setIncludingFrame(tempFootPoint3D);
 
+      boolean footIsHelpingToPush = false;
       if (contactStates.get(otherEndToCheck).inContact())
       {
          tempOtherFootPoint.setToZero(soleFrames.get(otherEndToCheck));
@@ -336,12 +341,17 @@ public class QuadrupedBalanceBasedStepDelayer
 
          if (!currentICPInsideSupport && EuclidGeometryTools
                .intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
-            return true;
-         if (EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
-            return true;
+         {
+            footIsHelpingToPush = true;
+         }
+         if (!footIsHelpingToPush && EuclidGeometryTools
+               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         {
+            footIsHelpingToPush = true;
+         }
       }
 
-      if (contactStates.get(otherSideToCheck).inContact())
+      if (!footIsHelpingToPush && contactStates.get(otherSideToCheck).inContact())
       {
          tempOtherFootPoint.setToZero(soleFrames.get(otherSideToCheck));
          tempOtherFootPoint.changeFrame(worldFrame);
@@ -349,10 +359,18 @@ public class QuadrupedBalanceBasedStepDelayer
 
          if (!currentICPInsideSupport && EuclidGeometryTools
                .intersectionBetweenTwoLineSegment2Ds(currentICP, desiredICP, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
-            return true;
-         return EuclidGeometryTools
-               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway);
+         {
+            footIsHelpingToPush = true;
+         }
+         if (!footIsHelpingToPush && EuclidGeometryTools
+               .intersectionBetweenRay2DAndLineSegment2D(currentICP, icpError, tempFootPoint2D, tempOtherFootPoint2D, intersectionToThrowAway))
+         {
+            footIsHelpingToPush = true;
+         }
       }
+
+      if (footIsHelpingToPush)
+         return -supportPolygonInWorldAfterChange.signedDistance(currentICP) < minimumICPDistanceFromEdgeForNotNeeded.getValue();
 
       return false;
    }
