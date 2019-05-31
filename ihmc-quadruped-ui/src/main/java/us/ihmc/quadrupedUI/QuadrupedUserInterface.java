@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedUI;
 
+import java.util.function.Consumer;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -10,10 +12,12 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -40,11 +44,14 @@ import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
 import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
 import us.ihmc.quadrupedUI.video.QuadrupedVideoViewOverlay;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 
 public class QuadrupedUserInterface
 {
+   public static final QuadrantDependentList<Color> feetColors = new QuadrantDependentList<>(Color.web("#DA5526"), Color.web("#F68930"), Color.web("#0C695D"), Color.web("#37AFA9"));
+
    private final Stage primaryStage;
    private final BorderPane mainPane;
 
@@ -85,7 +92,7 @@ public class QuadrupedUserInterface
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
                                  FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
-                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
+                                 QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -162,6 +169,9 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.SelectedRegionTopic);
       this.pawPathViewer = new FootstepPathMeshViewer(messager, QuadrupedUIMessagerAPI.FootstepPlanTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                       QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
+      pawPathViewer.setFootstepRadius(0.025);
+      pawPathViewer.setFootstepColors(feetColors);
+
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                        QuadrupedUIMessagerAPI.BodyPathDataTopic);
 
@@ -169,7 +179,8 @@ public class QuadrupedUserInterface
 
       manualStepTabController.initScene(subScene);
 
-      robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
+      robotVisualizer = new JavaFXQuadrupedVisualizer(modelFactory, graphicsMutator);
+      robotVisualizer.attachMessager(messager, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
 
       plannerTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
@@ -318,9 +329,9 @@ public class QuadrupedUserInterface
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                                             FootstepPlannerParameters footstepPlannerParameters,
                                                             VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
-                                                            QuadrupedXGaitSettingsReadOnly xGaitSettings) throws Exception
+                                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {
       return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, footstepPlannerParameters, visibilityGraphsParameters,
-                                        xGaitSettings);
+                                        xGaitSettings, graphicsMutator);
    }
 }
