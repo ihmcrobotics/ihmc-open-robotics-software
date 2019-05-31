@@ -22,6 +22,7 @@ public class QuadrupedSkybox3D
       PerspectiveCamera camera = (PerspectiveCamera) subScene.getCamera();
       skybox = loadCloudyCrown(size, camera);
       skybox.getTransforms().add(new Rotate(-90.0, Rotate.X_AXIS));
+      skybox.setMouseTransparent(true);
    }
 
    public static Skybox loadCloudyCrown(double size, PerspectiveCamera camera)
