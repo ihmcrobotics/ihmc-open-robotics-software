@@ -361,7 +361,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
 
 
    @Test
-   public void testReallyDynamicWalk() throws Exception
+   public void testReallyDynamicWalkButNotTheRightStep() throws Exception
    {
       RobotQuadrant quadrantToStepWith = RobotQuadrant.HIND_LEFT;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -404,12 +404,65 @@ public class QuadrupedBalanceBasedStepDelayerTest
 
       List<? extends QuadrupedTimedStep> updatedActiveSteps = stepDelayer.delayStepsIfNecessary(activeSteps, otherSteps, desiredICP, currentICP, 10.0);
 
-
-
       assertEquals(1, updatedActiveSteps.size());
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
+         assertFalse(robotQuadrant.getShortName() + " was delayed.", stepDelayer.getStepWasDelayed(robotQuadrant));
+      }
+   }
+
+   @Test
+   public void testReallyDynamicWalkWithTheRightStep() throws Exception
+   {
+      RobotQuadrant quadrantToStepWith = RobotQuadrant.HIND_RIGHT;
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactStates.get(robotQuadrant).setInContact(true);
+      contactStates.get(RobotQuadrant.FRONT_RIGHT).setInContact(false);
+
+      FrameConvexPolygon2D polygonAfterStep = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D scaledPolygonAfterStep = new FrameConvexPolygon2D();
+
+
+      double distanceInsideToNotDelay = 0.05;
+      DoubleParameter distance = (DoubleParameter) getParameter("minimumICPDistanceFromEdgeForNotNeeded");
+      BooleanParameter delayFootIfItsHelpingButNotNeeded = (BooleanParameter) getParameter("delayFootIfItsHelpingButNotNeeded");
+      setValueOfDoubleParameter(distance, distanceInsideToNotDelay);
+      setValueOfBooleanParameter(delayFootIfItsHelpingButNotNeeded, true);
+
+      List<QuadrupedTimedStep> activeSteps = new ArrayList<>();
+      List<QuadrupedTimedStep> otherSteps = new ArrayList<>();
+      QuadrupedTimedStep step = new QuadrupedTimedStep();
+      step.getTimeInterval().setInterval(0.5, 1.0);
+      step.setRobotQuadrant(quadrantToStepWith);
+      step.setGoalPosition(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5 * stanceLength, 0.5 * stanceWidth, 0.0));
+
+      activeSteps.add(step);
+
+      FramePoint3D currentICP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.05, -0.04, 0.0);
+      FramePoint3D desiredICP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, -0.06, 0.0);
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (!contactStates.get(robotQuadrant).inContact() || quadrantToStepWith == robotQuadrant)
+            continue;
+         FramePoint3D footPoint = new FramePoint3D(soleFrames.get(robotQuadrant));
+         polygonAfterStep.addVertexMatchingFrame(footPoint);
+      }
+      polygonAfterStep.update();
+      ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
+      polygonScaler.scaleConvexPolygon(polygonAfterStep, distanceInsideToNotDelay, scaledPolygonAfterStep);
+
+
+      List<? extends QuadrupedTimedStep> updatedActiveSteps = stepDelayer.delayStepsIfNecessary(activeSteps, otherSteps, desiredICP, currentICP, 10.0);
+
+      assertEquals(0, updatedActiveSteps.size());
+      assertTrue(quadrantToStepWith.getShortName() + " was not delayed.", stepDelayer.getStepWasDelayed(quadrantToStepWith));
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (quadrantToStepWith == robotQuadrant)
+            continue;
          assertFalse(robotQuadrant.getShortName() + " was delayed.", stepDelayer.getStepWasDelayed(robotQuadrant));
       }
    }
