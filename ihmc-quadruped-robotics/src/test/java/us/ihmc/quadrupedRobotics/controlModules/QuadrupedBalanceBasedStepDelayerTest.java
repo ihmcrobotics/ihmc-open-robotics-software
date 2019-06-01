@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -79,8 +80,18 @@ public class QuadrupedBalanceBasedStepDelayerTest
    }
 
    @Test
-   public void testNoDelay()
+   public void testNoDelay() throws Exception
    {
+      BooleanParameter allowDelayingSteps = (BooleanParameter) getParameter("allowingDelayingSteps");
+      BooleanParameter delayAllSubsequentSteps = (BooleanParameter) getParameter("delayAllSubsequentSteps");
+      BooleanParameter requireTwoFeetInContact = (BooleanParameter) getParameter("requireTwoFeetInContact");
+      BooleanParameter requireFootOnEachEnd = (BooleanParameter) getParameter("requireFootOnEachEnd");
+
+      setValueOfBooleanParameter(allowDelayingSteps, true);
+      setValueOfBooleanParameter(delayAllSubsequentSteps, true);
+      setValueOfBooleanParameter(requireTwoFeetInContact, true);
+      setValueOfBooleanParameter(requireFootOnEachEnd, true);
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          contactStates.get(robotQuadrant).setInContact(true);
 
@@ -107,9 +118,17 @@ public class QuadrupedBalanceBasedStepDelayerTest
    }
 
    @Test
-   public void testDelayBecauseICPOutside()
+   public void testDelayBecauseICPOutside() throws Exception
    {
       RobotQuadrant quadrantToStepWith = RobotQuadrant.FRONT_LEFT;
+
+      BooleanParameter allowDelayingSteps = (BooleanParameter) getParameter("allowingDelayingSteps");
+      BooleanParameter requireTwoFeetInContact = (BooleanParameter) getParameter("requireTwoFeetInContact");
+      BooleanParameter requireFootOnEachEnd = (BooleanParameter) getParameter("requireFootOnEachEnd");
+
+      setValueOfBooleanParameter(allowDelayingSteps, true);
+      setValueOfBooleanParameter(requireTwoFeetInContact, false);
+      setValueOfBooleanParameter(requireFootOnEachEnd, false);
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          contactStates.get(robotQuadrant).setInContact(true);
@@ -142,8 +161,16 @@ public class QuadrupedBalanceBasedStepDelayerTest
    }
 
    @Test
-   public void testPreventingLessThanTwoFeet()
+   public void testPreventingLessThanTwoFeet() throws Exception
    {
+      BooleanParameter allowDelayingSteps = (BooleanParameter) getParameter("allowingDelayingSteps");
+      BooleanParameter requireTwoFeetInContact = (BooleanParameter) getParameter("requireTwoFeetInContact");
+      BooleanParameter requireFootOnEachEnd = (BooleanParameter) getParameter("requireFootOnEachEnd");
+
+      setValueOfBooleanParameter(allowDelayingSteps, false);
+      setValueOfBooleanParameter(requireTwoFeetInContact, true);
+      setValueOfBooleanParameter(requireFootOnEachEnd, false);
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          contactStates.get(robotQuadrant).setInContact(true);
 
@@ -177,8 +204,16 @@ public class QuadrupedBalanceBasedStepDelayerTest
    }
 
    @Test
-   public void testRequireFootOnEachEnd()
+   public void testRequireFootOnEachEnd() throws Exception
    {
+      BooleanParameter allowDelayingSteps = (BooleanParameter) getParameter("allowingDelayingSteps");
+      BooleanParameter requireTwoFeetInContact = (BooleanParameter) getParameter("requireTwoFeetInContact");
+      BooleanParameter requireFootOnEachEnd = (BooleanParameter) getParameter("requireFootOnEachEnd");
+
+      setValueOfBooleanParameter(allowDelayingSteps, false);
+      setValueOfBooleanParameter(requireTwoFeetInContact, false);
+      setValueOfBooleanParameter(requireFootOnEachEnd, true);
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          contactStates.get(robotQuadrant).setInContact(true);
 
