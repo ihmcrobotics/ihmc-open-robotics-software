@@ -223,7 +223,7 @@ public class QuadrupedBalanceBasedStepDelayer
          YoDouble delayDuration = delayDurations.get(quadrantStarting);
          boolean totalDelayLessThanMax = delayDuration.getDoubleValue() + delayAmount < (maximumDelayFraction.getValue() * stepStarting.getTimeInterval().getDuration());
          boolean delayedStepIsLongEnough = timeInterval.getDuration() - delayAmount > minimumTimeForStep.getValue();
-         boolean delayStepFromConfiguration = isFootCriticalForErrorRejection(quadrantStarting) && totalDelayLessThanMax;
+         boolean delayStepFromConfiguration = isFootHelpingWithErrorRejection(quadrantStarting) && totalDelayLessThanMax;
 
          boolean delayStep =
                (delayStepFromConfiguration && allowDelayingSteps.getValue()) || (willCauseLessThanTwoFeetTotal && requireTwoFeetInContact.getValue())
@@ -302,7 +302,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final FramePoint2D tempOtherFootPoint2D = new FramePoint2D();
    private final FramePoint2D intersectionToThrowAway = new FramePoint2D();
 
-   private boolean isFootCriticalForErrorRejection(RobotQuadrant robotQuadrant)
+   private boolean isFootHelpingWithErrorRejection(RobotQuadrant robotQuadrant)
    {
       updateSupportPolygon(supportPolygonInWorld, contactStates, null);
       updateSupportPolygon(supportPolygonInWorldAfterChange, contactStates, robotQuadrant);
@@ -316,7 +316,7 @@ public class QuadrupedBalanceBasedStepDelayer
       if (currentICPInsideSupport || supportPolygonInWorld.isPointInside(desiredICP))
       {
          if (delayFootIfItsHelpingButNotNeeded.getValue())
-            return isFootCriticalForErrorRejection(robotQuadrant, currentICPInsideSupport);
+            return isFootHelpingWithErrorRejection(robotQuadrant, currentICPInsideSupport);
          else
             return false;
       }
@@ -327,7 +327,7 @@ public class QuadrupedBalanceBasedStepDelayer
       }
    }
 
-   private boolean isFootCriticalForErrorRejection(RobotQuadrant quadrantToBePickedUp, boolean currentICPInsideSupport)
+   private boolean isFootHelpingWithErrorRejection(RobotQuadrant quadrantToBePickedUp, boolean currentICPInsideSupport)
    {
       RobotQuadrant otherSideToCheck = RobotQuadrant.getQuadrant(quadrantToBePickedUp.getEnd(), quadrantToBePickedUp.getOppositeSide());
       RobotQuadrant otherEndToCheck = RobotQuadrant.getQuadrant(quadrantToBePickedUp.getOppositeEnd(), quadrantToBePickedUp.getOppositeSide());
