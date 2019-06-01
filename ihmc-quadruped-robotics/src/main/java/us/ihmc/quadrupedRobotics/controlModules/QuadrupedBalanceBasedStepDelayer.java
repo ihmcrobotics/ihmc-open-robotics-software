@@ -199,18 +199,18 @@ public class QuadrupedBalanceBasedStepDelayer
       double delayAmount = timeToDelayLiftOff.getValue();
       boolean stepWasDelayed = false;
 
-      boolean willCauseLessThanTwoFeetTotal = (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2) && requireTwoFeetInContact.getValue();
+      boolean delayBecauseThereWillBeLessThanTwoFeetTotal = requireTwoFeetInContact.getValue() && (numberOfLeftSideFeetInContact + numberOfRightSideFeetInContact - stepsStarting.size() < 2);
 
       for (int i = 0; i < stepsStarting.size(); i++)
       {
          QuadrupedTimedStep stepStarting = stepsStarting.get(i);
          RobotQuadrant quadrantStarting = stepStarting.getRobotQuadrant();
 
-         boolean willCauseNoFootOnEnd = quadrantStarting.isQuadrantInFront() ? numberOfFrontFeetInContact < 2 : numberOfHindFeetInContact < 2;
+         boolean delayBecauseOneEndWillHaveNoFeet = requireFootOnEachEnd.getValue() && (quadrantStarting.isQuadrantInFront() ? numberOfFrontFeetInContact < 2 : numberOfHindFeetInContact < 2);
 
          timeScaledEllipticalError.get(quadrantStarting).set(computeScaledNormalizedDCMEllipticalError(stepStarting, normalizedDcmEllipticalError));
 
-         if (!willCauseLessThanTwoFeetTotal && !willCauseNoFootOnEnd &&
+         if (!delayBecauseThereWillBeLessThanTwoFeetTotal && !delayBecauseOneEndWillHaveNoFeet &&
                timeScaledEllipticalError.get(quadrantStarting).getDoubleValue() < timeScaledEllipticalErrorThreshold.getValue())
          {
             updatedActiveSteps.add(stepStarting);
@@ -226,8 +226,7 @@ public class QuadrupedBalanceBasedStepDelayer
          boolean delayStepFromConfiguration = isFootHelpingWithErrorRejection(quadrantStarting) && totalDelayLessThanMax;
 
          boolean delayStep =
-               (delayStepFromConfiguration && allowDelayingSteps.getValue()) || (willCauseLessThanTwoFeetTotal && requireTwoFeetInContact.getValue())
-               || (willCauseNoFootOnEnd && requireFootOnEachEnd.getValue());
+               (delayStepFromConfiguration && allowDelayingSteps.getValue()) || delayBecauseThereWillBeLessThanTwoFeetTotal || delayBecauseOneEndWillHaveNoFeet;
 
          if (delayStep && (delayAllSubsequentSteps.getValue() || delayedStepIsLongEnough))
          {
