@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -321,8 +322,9 @@ public class QuadrupedBalanceBasedStepDelayer
       }
       else
       {
-         // FIXME is this right?
-         return isFootInDirectionOfError(robotQuadrant, icpError, midZUpFrame);
+         // both the desired and the current values are outside the support polygon
+         return checkIfStartingFootIsOneOfTheClosestOnes(robotQuadrant);
+//         return isFootInDirectionOfError(robotQuadrant, icpError, midZUpFrame);
       }
    }
 
@@ -383,18 +385,22 @@ public class QuadrupedBalanceBasedStepDelayer
       return supportPolygonInWorldAfterChange.isPointInside(desiredICP) && !supportPolygonInWorldAfterChange.isPointInside(currentICP);
    }
 
-   private static boolean isFootInDirectionOfError(RobotQuadrant robotQuadrant, FrameVector2D icpError, ReferenceFrame frameForError)
+   private boolean checkIfStartingFootIsOneOfTheClosestOnes(RobotQuadrant startedStepQuadrant)
    {
-      icpError.changeFrameAndProjectToXYPlane(frameForError);
+      int lineOfSightStartIndex = Math.max(supportPolygonInWorld.lineOfSightStartIndex(currentICP), supportPolygonInWorld.lineOfSightStartIndex(desiredICP));
+      int lineOfSightEndIndex = Math.min(supportPolygonInWorld.lineOfSightEndIndex(currentICP), supportPolygonInWorld.lineOfSightEndIndex(desiredICP));
 
-      if (icpError.getY() > 0.0 && robotQuadrant.isQuadrantOnLeftSide())
-         return true;
-      if (icpError.getY() < 0.0 && robotQuadrant.isQuadrantOnRightSide())
-         return true;
-      if (icpError.getX() > 0.0 && robotQuadrant.isQuadrantInFront())
-         return true;
-      return icpError.getX() < 0.0 && robotQuadrant.isQuadrantInHind();
+      for (int vertexIndex = lineOfSightStartIndex; vertexIndex <= lineOfSightEndIndex; vertexIndex++)
+      {
+         tempFootPoint2D.setToZero(soleFrames.get(startedStepQuadrant));
+         tempFootPoint2D.changeFrameAndProjectToXYPlane(worldFrame);
+         if (supportPolygonInWorld.getVertex(vertexIndex).epsilonEquals(tempFootPoint2D, 1e-5))
+            return true;
+      }
+
+      return false;
    }
+
 
    private void updateSupportPolygon(FrameConvexPolygon2DBasics polygonToPack, QuadrantDependentList<? extends PlaneContactState> contactStates,
                                      RobotQuadrant quadrantToIgnore)
