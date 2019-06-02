@@ -572,14 +572,16 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return finalSteps;
    }
 
-   private static String checkStepOrder(String dataseName, FootstepPlan plannedSteps)
+   private static String checkStepOrder(String datasetName, FootstepPlan plannedSteps)
    {
       String errorMessage = "";
-      RobotQuadrant movingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      RobotQuadrant previousMovingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
       for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
       {
-         if (movingQuadrant.getNextRegularGaitSwingQuadrant() != plannedSteps.getFootstep(i).getRobotQuadrant())
-            errorMessage += dataseName + " step " + i + " in the plan is out of order.\n";
+         RobotQuadrant movingQuadrant = plannedSteps.getFootstep(i).getRobotQuadrant();
+         if (previousMovingQuadrant.getNextRegularGaitSwingQuadrant() != movingQuadrant)
+            errorMessage += datasetName + " step " + i + " in the plan is out of order.\n";
+         previousMovingQuadrant = movingQuadrant;
       }
 
       return errorMessage;
