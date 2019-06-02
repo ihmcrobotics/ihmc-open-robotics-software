@@ -114,6 +114,12 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
+         public long getControllerTimestamp()
+         {
+            return 0;
+         }
+
+         @Override
          public long getSensorHeadPPSTimestamp()
          {
             return 0;
@@ -179,6 +185,12 @@ public class KinematicToolboxDiagnosticEnvironment
 
          @Override
          public long getTimestamp()
+         {
+            return timestamp;
+         }
+
+         @Override
+         public long getControllerTimestamp()
          {
             return timestamp;
          }

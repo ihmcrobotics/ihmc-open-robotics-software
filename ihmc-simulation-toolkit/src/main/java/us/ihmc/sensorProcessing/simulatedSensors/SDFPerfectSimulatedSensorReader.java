@@ -208,6 +208,12 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
+   public long getControllerTimestamp()
+   {
+      return timestamp.getLongValue();
+   }
+
+   @Override
    public long getVisionSensorTimestamp()
    {
       return visionSensorTimestamp.getLongValue();

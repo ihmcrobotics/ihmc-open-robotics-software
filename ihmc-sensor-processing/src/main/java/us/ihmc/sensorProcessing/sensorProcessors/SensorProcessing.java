@@ -171,6 +171,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoLong timestamp = new YoLong("timestamp", registry);
+   private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
    private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
@@ -356,12 +357,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    public void initialize()
    {
-      startComputation(0, 0, -1);
+      startComputation(0, 0, 0, -1);
    }
 
-   public void startComputation(long timestamp, long visionSensorTimestamp, long sensorHeadPPSTimestamp)
+   public void startComputation(long timestamp, long controllerTimestamp, long visionSensorTimestamp, long sensorHeadPPSTimestamp)
    {
       this.timestamp.set(timestamp);
+      this.controllerTimestamp.set(controllerTimestamp);
       this.visionSensorTimestamp.set(visionSensorTimestamp);
       this.sensorHeadPPSTimetamp.set(sensorHeadPPSTimestamp);
 
@@ -1821,6 +1823,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    public long getTimestamp()
    {
       return timestamp.getLongValue();
+   }
+
+   @Override
+   public long getControllerTimestamp()
+   {
+      return controllerTimestamp.getLongValue();
    }
 
    @Override

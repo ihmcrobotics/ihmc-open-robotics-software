@@ -19,7 +19,14 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Absolute timestamp (UTC). This is usually used with ROS and is different from the controller up-time and machine up-time.
+            */
    public long timestamp_;
+   /**
+            * Timestamp representing the controller up-time.
+            */
+   public long controller_timestamp_;
    public long sensor_head_pps_timestamp_;
    public int joint_name_hash_;
    public us.ihmc.idl.IDLSequence.Float  joint_angles_;
@@ -67,6 +74,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       timestamp_ = other.timestamp_;
 
+      controller_timestamp_ = other.controller_timestamp_;
+
       sensor_head_pps_timestamp_ = other.sensor_head_pps_timestamp_;
 
       joint_name_hash_ = other.joint_name_hash_;
@@ -106,13 +115,34 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       return sequence_id_;
    }
 
+   /**
+            * Absolute timestamp (UTC). This is usually used with ROS and is different from the controller up-time and machine up-time.
+            */
    public void setTimestamp(long timestamp)
    {
       timestamp_ = timestamp;
    }
+   /**
+            * Absolute timestamp (UTC). This is usually used with ROS and is different from the controller up-time and machine up-time.
+            */
    public long getTimestamp()
    {
       return timestamp_;
+   }
+
+   /**
+            * Timestamp representing the controller up-time.
+            */
+   public void setControllerTimestamp(long controller_timestamp)
+   {
+      controller_timestamp_ = controller_timestamp;
+   }
+   /**
+            * Timestamp representing the controller up-time.
+            */
+   public long getControllerTimestamp()
+   {
+      return controller_timestamp_;
    }
 
    public void setSensorHeadPpsTimestamp(long sensor_head_pps_timestamp)
@@ -251,6 +281,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.controller_timestamp_, other.controller_timestamp_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sensor_head_pps_timestamp_, other.sensor_head_pps_timestamp_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_name_hash_, other.joint_name_hash_, epsilon)) return false;
@@ -305,6 +337,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
+      if(this.controller_timestamp_ != otherMyClass.controller_timestamp_) return false;
+
       if(this.sensor_head_pps_timestamp_ != otherMyClass.sensor_head_pps_timestamp_) return false;
 
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
@@ -341,6 +375,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);      builder.append(", ");
+      builder.append("controller_timestamp=");
+      builder.append(this.controller_timestamp_);      builder.append(", ");
       builder.append("sensor_head_pps_timestamp=");
       builder.append(this.sensor_head_pps_timestamp_);      builder.append(", ");
       builder.append("joint_name_hash=");

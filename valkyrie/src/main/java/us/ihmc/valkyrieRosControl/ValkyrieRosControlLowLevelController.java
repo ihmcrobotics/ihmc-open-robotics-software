@@ -189,4 +189,9 @@ public class ValkyrieRosControlLowLevelController
       }
       return false;
    }
+
+   public double getControllerTime()
+   {
+      return yoTime.getValue();
+   }
 }

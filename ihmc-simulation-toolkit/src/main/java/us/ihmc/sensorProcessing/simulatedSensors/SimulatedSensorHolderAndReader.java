@@ -143,7 +143,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       }
 
       long timestamp = Conversions.secondsToNanoseconds(yoTime.getDoubleValue());
-      sensorProcessing.startComputation(timestamp, timestamp, -1);
+      sensorProcessing.startComputation(timestamp, timestamp, timestamp, -1);
 
       step.increment();
    }

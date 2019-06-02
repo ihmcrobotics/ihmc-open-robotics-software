@@ -27,6 +27,7 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
 public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfectSensorOutputMapReadOnly
 {
    private long timestamp;
+   private long controllerTimestamp;
    private long visionSensorTimestamp;
    private long sensorHeadPPSTimestamp;
    private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
@@ -80,6 +81,17 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    public void setTimestamp(long timestamp)
    {
       this.timestamp = timestamp;
+   }
+
+   public void setControllerTimestamp(long controllerTimestamp)
+   {
+      this.controllerTimestamp = controllerTimestamp;
+   }
+
+   @Override
+   public long getControllerTimestamp()
+   {
+      return controllerTimestamp;
    }
 
    @Override

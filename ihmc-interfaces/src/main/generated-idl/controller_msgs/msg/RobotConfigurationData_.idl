@@ -32,7 +32,14 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Absolute timestamp (UTC). This is usually used with ROS and is different from the controller up-time and machine up-time.
+         */
         long long timestamp;
+        /**
+         * Timestamp representing the controller up-time.
+         */
+        long long controller_timestamp;
         long long sensor_head_pps_timestamp;
         long joint_name_hash;
         sequence<float, 50> joint_angles;
