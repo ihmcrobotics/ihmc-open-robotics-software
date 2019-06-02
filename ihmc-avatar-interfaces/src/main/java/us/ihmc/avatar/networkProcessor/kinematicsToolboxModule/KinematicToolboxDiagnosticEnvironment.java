@@ -100,13 +100,6 @@ public class KinematicToolboxDiagnosticEnvironment
    {
       return new SensorRawOutputMapReadOnly()
       {
-
-         @Override
-         public long getVisionSensorTimestamp()
-         {
-            return 0;
-         }
-
          @Override
          public long getTimestamp()
          {
@@ -175,17 +168,10 @@ public class KinematicToolboxDiagnosticEnvironment
    {
       return new SensorOutputMapReadOnly()
       {
-
-         @Override
-         public long getVisionSensorTimestamp()
-         {
-            timestamp += Conversions.millisecondsToNanoseconds(1L);
-            return timestamp;
-         }
-
          @Override
          public long getTimestamp()
          {
+            timestamp += Conversions.millisecondsToNanoseconds(1L);
             return timestamp;
          }
 

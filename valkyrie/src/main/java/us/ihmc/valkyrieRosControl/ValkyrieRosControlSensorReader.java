@@ -166,7 +166,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       long controllerTimestamp = Conversions.secondsToNanoseconds(lowlLevelController.getControllerTime());
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
          fingerStateEstimator.update();
-      sensorProcessing.startComputation(timestamp, controllerTimestamp, timestamp, -1);
+      sensorProcessing.startComputation(timestamp, controllerTimestamp, -1);
    }
 
    @Override

@@ -28,7 +28,6 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
 {
    private long timestamp;
    private long controllerTimestamp;
-   private long visionSensorTimestamp;
    private long sensorHeadPPSTimestamp;
    private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
    private final TObjectDoubleMap<OneDoFJointBasics> jointVelocity = new TObjectDoubleHashMap<>();
@@ -92,17 +91,6 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    public long getControllerTimestamp()
    {
       return controllerTimestamp;
-   }
-
-   @Override
-   public long getVisionSensorTimestamp()
-   {
-      return visionSensorTimestamp;
-   }
-
-   public void setVisionSensorTimestamp(long visionSensorTimestamp)
-   {
-      this.visionSensorTimestamp = visionSensorTimestamp;
    }
 
    @Override

@@ -172,7 +172,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    private final YoLong timestamp = new YoLong("timestamp", registry);
    private final YoLong controllerTimestamp = new YoLong("controllerTimestamp", registry);
-   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointPositions = new LinkedHashMap<>();
@@ -357,14 +356,23 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    public void initialize()
    {
-      startComputation(0, 0, 0, -1);
+      startComputation(0, 0, -1);
    }
 
-   public void startComputation(long timestamp, long controllerTimestamp, long visionSensorTimestamp, long sensorHeadPPSTimestamp)
+   /**
+    * Triggers a control tick for this sensor processing.
+    * <p>
+    * During a control tick, every sensor processor is updated once and the timestamps are updated.
+    * </p>
+    * 
+    * @param timestamp machine timestamp in nanoseconds.
+    * @param controllerTimestamp timestamp in nanoseconds representing the controller up-time.
+    * @param sensorHeadPPSTimestamp TODO define me.
+    */
+   public void startComputation(long timestamp, long controllerTimestamp, long sensorHeadPPSTimestamp)
    {
       this.timestamp.set(timestamp);
       this.controllerTimestamp.set(controllerTimestamp);
-      this.visionSensorTimestamp.set(visionSensorTimestamp);
       this.sensorHeadPPSTimetamp.set(sensorHeadPPSTimestamp);
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -1831,12 +1839,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return controllerTimestamp.getLongValue();
    }
 
-   @Override
-   public long getVisionSensorTimestamp()
-   {
-      return visionSensorTimestamp.getLongValue();
-   }
-   
    @Override
    public long getSensorHeadPPSTimestamp()
    {

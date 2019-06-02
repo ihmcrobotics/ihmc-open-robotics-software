@@ -154,7 +154,6 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
       long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       sensorOutputMap.setTimestamp(timestamp);
       sensorOutputMap.setControllerTimestamp(timestamp);
-      sensorOutputMap.setVisionSensorTimestamp(timestamp);
       sensorOutputMap.setSensorHeadPPSTimetamp(timestamp);
       
       if (forceSensorDataHolderToUpdate != null)
