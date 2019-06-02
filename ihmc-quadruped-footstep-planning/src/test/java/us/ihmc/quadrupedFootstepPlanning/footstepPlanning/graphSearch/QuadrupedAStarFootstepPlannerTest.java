@@ -72,6 +72,21 @@ public class QuadrupedAStarFootstepPlannerTest
    }
 
    @Test
+   public void testSimpleWalkBackward()
+   {
+      PlanarRegionsList planarRegionsList = null;
+
+      double timeout = 10.0;
+      double stanceLength = 1.0;
+      double stanceWidth = 0.5;
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setPosition(-2.0, 0.0, 0.0);
+
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
+   }
+
+   @Test
    public void testWalkAndTurn()
    {
       double timeout = 10.0;
