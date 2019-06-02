@@ -12,6 +12,7 @@ public class FootstepCostBuilder
    private final RequiredFactoryField<FootstepPlannerParameters> footstepPlannerParameters = new RequiredFactoryField<>("footstepPlannerParameters");
    private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
    private final RequiredFactoryField<FootstepNodeSnapper> snapper = new RequiredFactoryField<>("snapper");
+   private final RequiredFactoryField<NominalVelocityProvider> velocityProvider = new RequiredFactoryField<>("velocityProvider");
 
    private final OptionalFactoryField<Boolean> includeHeightCost = new OptionalFactoryField<>("includeHeightCost");
 
@@ -35,6 +36,11 @@ public class FootstepCostBuilder
       this.includeHeightCost.set(includeHeightCost);
    }
 
+   public void setVelocityProvider(NominalVelocityProvider velocityProvider)
+   {
+      this.velocityProvider.set(velocityProvider);
+   }
+
    public FootstepCost buildCost()
    {
       includeHeightCost.setDefaultValue(false);
@@ -45,7 +51,7 @@ public class FootstepCostBuilder
          compositeFootstepCost.addFootstepCost(new HeightCost(footstepPlannerParameters.get(), snapper.get()));
 
       compositeFootstepCost.addFootstepCost(new DistanceAndYawBasedCost(footstepPlannerParameters.get(), xGaitSettings.get()));
-      compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get(), snapper.get()));
+      compositeFootstepCost.addFootstepCost(new XGaitCost(footstepPlannerParameters.get(), xGaitSettings.get(), snapper.get(), velocityProvider.get()));
       compositeFootstepCost.addFootstepCost(new PerStepCost(footstepPlannerParameters.get()));
 
       FactoryTools.disposeFactory(this);
