@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.ejml.data.DenseMatrix64F;
 
 import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -162,9 +163,10 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       }
 
       long timestamp = timestampProvider.getTimestamp();
+      long controllerTimestamp = Conversions.secondsToNanoseconds(lowlLevelController.getControllerTime());
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
          fingerStateEstimator.update();
-      sensorProcessing.startComputation(timestamp, timestamp, -1);
+      sensorProcessing.startComputation(timestamp, controllerTimestamp, timestamp, -1);
    }
 
    @Override

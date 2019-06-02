@@ -8,7 +8,10 @@ byte ROBOT_MOTION_STATUS_IN_MOTION=2
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Absolute timestamp (UTC). This is usually used with ROS and is different from the controller up-time and machine up-time.
 int64 timestamp
+# Timestamp representing the controller up-time.
+int64 controller_timestamp
 int64 sensor_head_pps_timestamp
 int32 joint_name_hash
 float32[<=50] joint_angles
