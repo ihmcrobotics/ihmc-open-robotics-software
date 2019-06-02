@@ -44,6 +44,9 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
    private static final CategoryTheme Position = apiFactory.createCategoryTheme("Position");
    private static final CategoryTheme Orientation = apiFactory.createCategoryTheme("Orientation");
+   private static final CategoryTheme Left = apiFactory.createCategoryTheme("Left");
+   private static final CategoryTheme Right = apiFactory.createCategoryTheme("Right");
+   private static final CategoryTheme Camera = apiFactory.createCategoryTheme("Camera");
 
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
    private static final CategoryTheme LowLevelGoal = apiFactory.createCategoryTheme("LowLevelGoal");
@@ -86,6 +89,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<List<? extends Point3DReadOnly>> BodyPathPlan = apiFactory.createTypedTopicTheme("BodyPathPlan");
    private static final TypedTopicTheme<Double> Time = apiFactory.createTypedTopicTheme("Time");
    private static final TypedTopicTheme<Double> Length = apiFactory.createTypedTopicTheme("Length");
+   private static final TypedTopicTheme<VideoPacket> Video = apiFactory.createTypedTopicTheme("Video");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("QuadrupedUI"));
 
@@ -104,7 +108,8 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(Environment).child(PlanarRegions).child(FlatGround).topic(Enable);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Show);
-
+   public static final Topic<VideoPacket> LeftCameraVideo = Root.child(Camera).child(Left).topic(Video);
+   public static final Topic<VideoPacket> RightCameraVideo = Root.child(Camera).child(Right).topic(Video);
 
    /* Status */
    public static final Topic<QuadrupedFootstepStatusMessage> FootstepStatusMessageTopic = Root.child(Controller).child(Status).topic(FootstepStatusMessage);
