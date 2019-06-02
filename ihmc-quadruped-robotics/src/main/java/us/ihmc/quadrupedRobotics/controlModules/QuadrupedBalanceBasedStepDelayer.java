@@ -54,7 +54,7 @@ public class QuadrupedBalanceBasedStepDelayer
    private final BooleanProvider requireTwoFeetInContact = new BooleanParameter("requireTwoFeetInContact", registry, true);
    private final BooleanProvider requireFootOnEachEnd = new BooleanParameter("requireFootOnEachEnd", registry, true);
 
-   private final BooleanProvider delayFootIfItsHelpingButNotNeeded = new BooleanParameter("delayFootIfItsHelpingButNotNeeded", registry, true);
+   private final BooleanProvider delayFootIfItsHelpingButNotNeeded = new BooleanParameter("delayFootIfItsHelpingButNotNeeded", registry, false);
    private final DoubleProvider minimumICPDistanceFromEdgeForNotNeeded = new DoubleParameter("minimumICPDistanceFromEdgeForNotNeeded", registry, 0.0);
 
    private final DoubleProvider maximumDelayFraction = new DoubleParameter("maximumDelayFraction", registry, 0.2);
