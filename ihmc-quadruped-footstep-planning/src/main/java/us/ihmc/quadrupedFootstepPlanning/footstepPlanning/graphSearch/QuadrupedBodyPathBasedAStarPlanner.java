@@ -16,8 +16,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecki
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.BodyPathBasedVelocityProvider;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.NominalVelocityProvider;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,6 +48,7 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
 
 
       heuristics = new BodyPathHeuristics(parameters, this.bodyPathPlanner);
+      NominalVelocityProvider velocityProvider = new BodyPathBasedVelocityProvider(this.bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
@@ -59,13 +62,14 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(false);
+      costBuilder.setVelocityProvider(velocityProvider);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
-      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, expansion, footstepCost, snapper,
+      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, velocityProvider, expansion, footstepCost, snapper,
                                                           postProcessingSnapper, null, registry);
 
       parentRegistry.addChild(registry);

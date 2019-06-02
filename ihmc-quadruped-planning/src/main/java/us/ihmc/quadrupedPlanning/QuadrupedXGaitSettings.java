@@ -6,8 +6,8 @@ public class QuadrupedXGaitSettings implements QuadrupedXGaitSettingsBasics
    private double stanceWidth;
    private double stepGroundClearance;
    private double endPhaseShift;
-   private double maxHorizontalSpeedFraction;
-   private double maxYawSpeedFraction;
+   private double maxHorizontalSpeedFraction = 0.5;
+   private double maxYawSpeedFraction = 0.75;
    private QuadrupedSpeed quadrupedSpeed;
 
    private final QuadrupedGaitTimingsBasics paceSlowTimings = new QuadrupedGaitTimings();
