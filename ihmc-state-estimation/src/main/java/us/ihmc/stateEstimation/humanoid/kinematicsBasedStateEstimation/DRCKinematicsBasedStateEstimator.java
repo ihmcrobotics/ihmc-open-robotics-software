@@ -274,7 +274,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
-         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getVisionSensorTimestamp());
+         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getTimestamp());
       }
 
       updateVisualizers();

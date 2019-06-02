@@ -9,12 +9,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
 {
-   public long getTimestamp();
-
-   public long getVisionSensorTimestamp();
-
-   public long getSensorHeadPPSTimestamp();
-   
    public double getJointPositionRawOutput(OneDoFJointBasics oneDoFJoint);
 
    public double getJointVelocityRawOutput(OneDoFJointBasics oneDoFJoint);

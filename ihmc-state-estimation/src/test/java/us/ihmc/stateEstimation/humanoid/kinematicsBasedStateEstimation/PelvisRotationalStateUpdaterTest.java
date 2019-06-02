@@ -167,7 +167,7 @@ public class PelvisRotationalStateUpdaterTest
          rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
          
          // Need to run the sensor data source manually
-         jointAndIMUSensorDataSource.startComputation(0, 0, 0, -1);
+         jointAndIMUSensorDataSource.startComputation(0, 0, -1);
          pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
 
          rotationEstimated.set(rootJoint.getJointPose().getOrientation());

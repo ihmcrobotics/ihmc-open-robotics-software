@@ -26,12 +26,6 @@ public class GenericQuadrupedTimestampProvider implements SensorTimestampHolder
    }
 
    @Override
-   public long getVisionSensorTimestamp()
-   {
-      return getTimestamp();
-   }
-
-   @Override
    public long getSensorHeadPPSTimestamp()
    {
       return -1;
