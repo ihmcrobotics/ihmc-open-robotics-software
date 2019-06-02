@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpan
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CliffDetectionTools;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -14,9 +15,9 @@ import java.util.HashSet;
 
 public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
 {
-   private final FootstepNodeSnapperReadOnly snapper;
+   private final FootstepNodeSnapper snapper;
 
-   public VariableResolutionNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapperReadOnly snapper)
+   public VariableResolutionNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapper snapper)
    {
       super(parameters, xGaitSettings);
       this.snapper = snapper;
@@ -41,7 +42,7 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
       int xIndex = node.getXIndex(movingQuadrant);
       int yIndex = node.getYIndex(movingQuadrant);
       RigidBodyTransform footTransformToWorld = new RigidBodyTransform();
-      FootstepNodeTools.getSnappedNodeTransformToWorld(xIndex, yIndex, snapper.getSnapData(xIndex, yIndex).getSnapTransform(), footTransformToWorld);
+      FootstepNodeTools.getSnappedNodeTransformToWorld(xIndex, yIndex, snapper.snapFootstepNode(xIndex, yIndex).getSnapTransform(), footTransformToWorld);
 
       Point3D footInWorld = new Point3D();
       footTransformToWorld.transform(footInWorld);
