@@ -1,5 +1,7 @@
 package us.ihmc.ihmcPerception.camera;
 
+import java.util.Objects;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,6 +18,7 @@ public abstract class RosCameraReceiver
    {
       if (cameraParameters.useRosForTransformFromPoseToSensor())
       {
+         Objects.requireNonNull(cameraDataReceiver.getHeadFrame());
          // Start request for transform
          ROSHeadTransformFrame cameraFrame = new ROSHeadTransformFrame(cameraDataReceiver.getHeadFrame(), rosMainNode, cameraParameters);
          cameraDataReceiver.setCameraFrame(cameraFrame);
@@ -24,12 +27,14 @@ public abstract class RosCameraReceiver
       }
       else if(cameraParameters.useStaticTransformFromHeadFrameToSensor())
       {
+         Objects.requireNonNull(cameraDataReceiver.getHeadFrame());
          staticTransform.set(cameraParameters.getStaticTransformFromHeadFrameToCameraFrame());
          ReferenceFrame headFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("headToCamera", cameraDataReceiver.getHeadFrame(), staticTransform);
          cameraDataReceiver.setCameraFrame(headFrame);
       }
       else
       {
+         Objects.requireNonNull(cameraDataReceiver.getHeadFrame());
          cameraDataReceiver.setCameraFrame(cameraDataReceiver.getHeadFrame());
       }
 

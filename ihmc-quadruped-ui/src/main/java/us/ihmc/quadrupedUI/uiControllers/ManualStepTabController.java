@@ -1,12 +1,22 @@
 package us.ihmc.quadrupedUI.uiControllers;
 
-import com.sun.javafx.collections.ImmutableObservableList;
-import controller_msgs.msg.dds.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.SubScene;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -27,10 +37,6 @@ import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
-
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ManualStepTabController extends Group
 {
@@ -116,7 +122,7 @@ public class ManualStepTabController extends Group
       stepDuration.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.05, 3.0, defaultStepDuration, 0.05));
       dwellTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.0, defaultDwellTime, 0.05));
       numberOfSteps.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 60, 1));
-      firstFoot.setItems(new ImmutableObservableList<>(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT));
+      firstFoot.setItems(FXCollections.observableArrayList(RobotQuadrant.FRONT_LEFT, RobotQuadrant.FRONT_RIGHT, RobotQuadrant.HIND_LEFT, RobotQuadrant.HIND_RIGHT));
       swingHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
       stepHeight.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
       stepLength.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
@@ -126,11 +132,11 @@ public class ManualStepTabController extends Group
       numberOfSteps.getValueFactory().valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
       firstFoot.valueProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
       useTrot.selectedProperty().addListener((ChangeListener) -> visualizeManualStepPlan());
-      flamingoFoot.setItems(new ImmutableObservableList<>(NO_FLAMINGO_QUADRANT_SELECTED,
-                                                          RobotQuadrant.FRONT_LEFT.getTitleCaseName(),
-                                                          RobotQuadrant.FRONT_RIGHT.getTitleCaseName(),
-                                                          RobotQuadrant.HIND_LEFT.getTitleCaseName(),
-                                                          RobotQuadrant.HIND_RIGHT.getTitleCaseName()));
+      flamingoFoot.setItems(FXCollections.observableArrayList(NO_FLAMINGO_QUADRANT_SELECTED,
+                                                              RobotQuadrant.FRONT_LEFT.getTitleCaseName(),
+                                                              RobotQuadrant.FRONT_RIGHT.getTitleCaseName(),
+                                                              RobotQuadrant.HIND_LEFT.getTitleCaseName(),
+                                                              RobotQuadrant.HIND_RIGHT.getTitleCaseName()));
       flamingoTrajectoryTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 500.0, 2.0, 0.1));
       useTrot.setSelected(false);
       firstFoot.getSelectionModel().select(RobotQuadrant.FRONT_RIGHT);
@@ -283,5 +289,11 @@ public class ManualStepTabController extends Group
 
          messager.submitMessage(QuadrupedUIMessagerAPI.SoleTrajectoryMessageTopic, soleTrajectoryMessage);
       }
+   }
+
+   public void stop()
+   {
+      flamingoPoseKeyHeldMover.shutdown();
+      manualStepPlanGraphic.stop();
    }
 }
