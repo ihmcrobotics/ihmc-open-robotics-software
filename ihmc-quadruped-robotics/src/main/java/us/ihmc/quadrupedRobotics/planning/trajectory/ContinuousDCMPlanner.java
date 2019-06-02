@@ -41,8 +41,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final DoubleParameter initialTransitionDuration = new DoubleParameter("initialTransitionDuration", registry, 0.25);
    private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.05);
-   private final DoubleParameter splineSegmentDuration = new DoubleParameter("splineSegmentDuration", registry, 0.2);
-   private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.2);
+   private final DoubleParameter splineSegmentDuration = new DoubleParameter("splineSegmentDuration", registry, 0.1);
+   private final DoubleParameter splineSplitFraction = new DoubleParameter("splineSplitFraction", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
