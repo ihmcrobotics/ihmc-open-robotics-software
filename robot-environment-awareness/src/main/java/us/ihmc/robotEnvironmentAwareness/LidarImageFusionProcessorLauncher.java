@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionProcessorCommunicationModule;
 import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionProcessorUI;
