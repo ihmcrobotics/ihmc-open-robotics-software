@@ -68,8 +68,6 @@ public class QuadrupedStepController implements EventState
       bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
       bodyOrientationManager.initialize();
 
-      stepMessageHandler.process();
-
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -79,7 +77,6 @@ public class QuadrupedStepController implements EventState
    @Override
    public void doAction(double timeInState)
    {
-      stepMessageHandler.process();
       stepMessageHandler.updateActiveSteps();
 
       List<? extends QuadrupedTimedStep> activeSteps = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(),
@@ -151,12 +148,6 @@ public class QuadrupedStepController implements EventState
    @Override
    public void onExit()
    {
-      stepMessageHandler.reset();
-   }
-
-   public void halt()
-   {
-      stepMessageHandler.halt();
    }
 
    public YoVariableRegistry getYoVariableRegistry()

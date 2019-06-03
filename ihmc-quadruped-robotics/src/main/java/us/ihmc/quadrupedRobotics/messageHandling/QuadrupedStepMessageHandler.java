@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
@@ -42,16 +43,14 @@ public class QuadrupedStepMessageHandler
    private final YoInteger numberOfStepsToRecover = new YoInteger("numberOfStepsToRecover", registry);
    private final BooleanProvider shiftTimesBasedOnLateTouchdown = new BooleanParameter("shiftTimesBasedOnLateTouchdown", registry, true);
    private final YoDouble initialTransferDurationForShifting = new YoDouble("initialTransferDurationForShifting", registry);
+   private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
+   private final YoDouble pauseTime = new YoDouble("pauseTime", registry);
 
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
-   private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
    private final QuadrantDependentList<MutableBoolean> touchdownTrigger = new QuadrantDependentList<>(MutableBoolean::new);
    private final YoPreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
    private final QuadrantDependentList<YoQuadrupedTimedStep> mostRecentCompletedStep = new QuadrantDependentList<>();
-
-   private final YoDouble haltTime = new YoDouble("haltTime", registry);
-   private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
 
    private final YoBoolean stepPlanIsAdjustable = new YoBoolean("stepPlanIsAdjustable", registry);
 
@@ -72,7 +71,6 @@ public class QuadrupedStepMessageHandler
       {
          upcomingFootTrajectoryCommandList.put(robotQuadrant, new RecyclingArrayDeque<>(SoleTrajectoryCommand.class, SoleTrajectoryCommand::set));
          this.mostRecentCompletedStep.put(robotQuadrant, new YoQuadrupedTimedStep(robotQuadrant.getShortName() + "_LastCompletedStep", registry));
-
       }
 
       // the look-ahead step adjustment was doing integer division which was 1.0 for step 0 and 0.0 after, so effectively having a one step recovery
@@ -84,19 +82,20 @@ public class QuadrupedStepMessageHandler
 
    public boolean isStepPlanAvailable()
    {
-      return receivedStepSequence.size() > 0;
-   }
-
-   public void process()
-   {
-      if (haltFlag.getBooleanValue())
-         pruneHaltedSteps();
+      return !isPaused.getBooleanValue() && !receivedStepSequence.isEmpty();
    }
 
    private final TimeInterval tempTimeInterval = new TimeInterval();
 
    public void handleQuadrupedTimedStepListCommand(QuadrupedTimedStepListCommand command)
    {
+      // if paused, resume when new steps are received
+      if (isPaused.getBooleanValue())
+      {
+         isPaused.set(false);
+         pauseTime.set(Double.NaN);
+      }
+
       double currentTime = robotTimestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
       RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
@@ -165,6 +164,42 @@ public class QuadrupedStepMessageHandler
       return false;
    }
 
+   public void handlePauseWalkingCommand(PauseWalkingCommand pauseWalkingCommand)
+   {
+      if(isPaused.getBooleanValue() == pauseWalkingCommand.isPauseRequested())
+      {
+         return;
+      }
+
+      this.isPaused.set(pauseWalkingCommand.isPauseRequested());
+
+      if (pauseWalkingCommand.isPauseRequested())
+      {
+         pauseTime.set(robotTimestamp.getDoubleValue());
+      }
+      else
+      {
+         double earliestStartTime = Double.POSITIVE_INFINITY;
+         for (int i = 0; i < receivedStepSequence.size(); i++)
+         {
+            double startTime = receivedStepSequence.get(i).getTimeInterval().getStartTime();
+            if (startTime < earliestStartTime)
+               earliestStartTime = startTime;
+         }
+
+         double timeShift = robotTimestamp.getDoubleValue() + initialTransferDurationForShifting.getDoubleValue() - earliestStartTime;
+         for (int i = 0; i < receivedStepSequence.size(); i++)
+         {
+            receivedStepSequence.get(i).getTimeInterval().shiftInterval(timeShift);
+         }
+      }
+   }
+
+   public void clearUpcomingSteps()
+   {
+      TimeIntervalTools.removeStartTimesGreaterThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
+   }
+
    public void clearFootTrajectory(RobotQuadrant robotQuadrant)
    {
       upcomingFootTrajectoryCommandList.get(robotQuadrant).clear();
@@ -176,25 +211,22 @@ public class QuadrupedStepMessageHandler
          clearFootTrajectory(robotQuadrant);
    }
 
-   private void pruneHaltedSteps()
-   {
-      TimeIntervalTools.removeStartTimesGreaterThan(haltTime.getDoubleValue(), receivedStepSequence);
-      for (int i = receivedStepSequence.size() - 1; i >= 0; i--)
-      {
-         if (receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
-            receivedStepSequence.remove(i);
-      }
-   }
-
    public void initialize()
    {
-      haltFlag.set(false);
+      isPaused.set(false);
+      pauseTime.set(Double.NaN);
    }
 
    public boolean isDoneWithStepSequence()
    {
-      return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp
-            .getDoubleValue();
+      // if paused, wait for current steps to finish
+      if (isPaused.getBooleanValue() && activeSteps.isEmpty())
+      {
+         return true;
+      }
+
+      // otherwise only done when step queue is empty
+      return receivedStepSequence.isEmpty();
    }
 
    public boolean isStepPlanAdjustable()
@@ -264,15 +296,6 @@ public class QuadrupedStepMessageHandler
       }
    }
 
-   public void halt()
-   {
-      if (!haltFlag.getBooleanValue())
-      {
-         haltFlag.set(true);
-         haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.getValue());
-      }
-   }
-
    public YoPreallocatedList<YoQuadrupedTimedStep> getStepSequence()
    {
       return receivedStepSequence;
@@ -301,17 +324,18 @@ public class QuadrupedStepMessageHandler
          }
       }
 
-
       activeSteps.clear();
+
+      double currentTime = robotTimestamp.getDoubleValue();
+      double activeStepTimeThreshold = isPaused.getBooleanValue() ? pauseTime.getDoubleValue() : currentTime;
 
       for (int i = 0; i < receivedStepSequence.size(); i++)
       {
-         double currentTime = robotTimestamp.getDoubleValue();
          double startTime = receivedStepSequence.get(i).getTimeInterval().getStartTime();
          double endTime = receivedStepSequence.get(i).getTimeInterval().getEndTime();
 
          // add all steps by start time
-         if (currentTime >= startTime)
+         if (activeStepTimeThreshold >= startTime)
             activeSteps.add(receivedStepSequence.get(i));
 
          // extend timing of steps with expired end time
@@ -338,7 +362,6 @@ public class QuadrupedStepMessageHandler
 
    public void reset()
    {
-      haltFlag.set(false);
       receivedStepSequence.clear();
    }
 
