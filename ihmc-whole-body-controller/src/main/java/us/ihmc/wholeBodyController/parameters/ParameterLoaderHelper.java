@@ -79,6 +79,9 @@ public class ParameterLoaderHelper
                "Parameters using their default value: " + defaultParameters.size() + "\n" +
                "Parameters in XML with no match: " + unmatchedParameters.size();
          Skully.say(message, additionalInfo);
+
+         LogTools.info("\n---> Unmatched in XML <---");
+         unmatchedParameters.forEach(parameter -> LogTools.info(parameter));
       }
 
       if (debugLoading)
