@@ -9,15 +9,8 @@ import us.ihmc.log.LogTools;
 
 public class LidarImageFusionDataFeatureUpdater
 {
-   private static final double sparseThreshold = 0.01;
-
-   private static final double proximityThreshold = 0.05;
-   private static final double planarityThresholdAngle = 30.0;
-   private static final double planarityThreshold = Math.cos(Math.PI / 180 * planarityThresholdAngle);
-
-   private static final boolean updateNodeDataWithExtendedData = false;
-   private static final double extendingPlaneDistanceThreshold = 0.01;
-   private static final double extendingDistanceThreshold = 0.03;
+   private ImageSegmentationParameters imageSegmentationParameters = new ImageSegmentationParameters();
+   private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
 
    private static final int maximumNumberOfTrialsToFindUnIdLabel = 100;
 
@@ -37,7 +30,7 @@ public class LidarImageFusionDataFeatureUpdater
    {
       return segments.size();
    }
-   
+
    public SegmentationNodeData getSegmentationNodeData(int index)
    {
       return segments.get(index);
@@ -89,7 +82,7 @@ public class LidarImageFusionDataFeatureUpdater
             //LogTools.info("   candidate label is " + adjacentLabels[i]);
             FusionDataSegment candidate = data.getFusionDataSegment(adjacentLabel);
 
-            if (candidate.isSparse(sparseThreshold))
+            if (candidate.isSparse(planarRegionPropagationParameters.getSparseThreshold()))
             {
                //LogTools.info("is too sparce "+candidate.getImageSegmentLabel());
                continue;
@@ -97,9 +90,9 @@ public class LidarImageFusionDataFeatureUpdater
 
             boolean isParallel = false;
             boolean isCoplanar = false;
-            if (newSegment.isParallel(candidate, planarityThreshold))
+            if (newSegment.isParallel(candidate, planarRegionPropagationParameters.getPlanarityThreshold()))
                isParallel = true;
-            if (newSegment.isCoplanar(candidate, proximityThreshold))
+            if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
                isCoplanar = true;
 
             //LogTools.info("connectivity test result is ## " + (isParallel && isCoplanar) + " ## isParallel " + isParallel + " isCoplanar " + isCoplanar);
@@ -124,7 +117,8 @@ public class LidarImageFusionDataFeatureUpdater
       for (int adjacentLabel : adjacentLabels)
       {
          FusionDataSegment adjacentData = data.getFusionDataSegment(adjacentLabel);
-         newSegment.extend(adjacentData, extendingPlaneDistanceThreshold, updateNodeDataWithExtendedData, extendingDistanceThreshold);
+         newSegment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
+                           planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
       }
       return newSegment;
    }
