@@ -38,8 +38,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 public class QuadrupedAStarFootstepPlannerTest
 {
@@ -247,7 +247,7 @@ public class QuadrupedAStarFootstepPlannerTest
          visualizer.showAndSleep(true);
       }
 
-      assertTrue(result.validForExecution());
+      assertTrue("Result was : " + result, result.validForExecution());
       FootstepPlan steps = planner.getPlan();
 
       if (visualize && !activelyVisualize)
@@ -273,8 +273,8 @@ public class QuadrupedAStarFootstepPlannerTest
 
       centerPoint.scale(0.25);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(goalPosition, centerPoint, FootstepNode.gridSizeXY);
-      assertEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Goal Position", goalPosition, centerPoint, FootstepNode.gridSizeXY);
+      assertEquals("Tried to acheive yaw " + goalYaw + ", actually achieved " + nominalYaw, goalYaw, nominalYaw, FootstepNode.gridSizeYaw);
    }
 
    private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)

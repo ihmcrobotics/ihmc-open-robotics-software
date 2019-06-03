@@ -90,7 +90,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      String errorMessage = test.runAssertions(DataSetName._20171114_135559_PartialShallowMaze);
+//      String errorMessage = test.runAssertions(DataSetName._20171114_135559_PartialShallowMaze);
+      String errorMessage = test.runAssertions(DataSetName._20171215_220208_SimpleStairs);
       assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);
