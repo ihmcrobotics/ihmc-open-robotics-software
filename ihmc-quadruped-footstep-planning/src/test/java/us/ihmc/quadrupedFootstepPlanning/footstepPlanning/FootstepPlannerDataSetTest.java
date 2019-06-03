@@ -357,11 +357,14 @@ public abstract class FootstepPlannerDataSetTest
    private static String checkStepOrder(String dataseName, FootstepPlan plannedSteps)
    {
       String errorMessage = "";
-      RobotQuadrant movingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      RobotQuadrant previousMovingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
       for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
       {
-         if (movingQuadrant.getNextRegularGaitSwingQuadrant() != plannedSteps.getFootstep(i).getRobotQuadrant())
+         RobotQuadrant movingQuadrant = plannedSteps.getFootstep(i).getRobotQuadrant();
+         if (previousMovingQuadrant.getNextRegularGaitSwingQuadrant() != movingQuadrant)
             errorMessage += dataseName + " step " + i + " in the plan is out of order.\n";
+
+         previousMovingQuadrant = movingQuadrant;
       }
 
       return errorMessage;
