@@ -353,7 +353,7 @@ public class AvatarEstimatorThread
 
          // TODO: move this to the actual estimator thread and make it thread safe.
          sensorReader.read();
-         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+         estimatorTime.set(sensorOutputMapReadOnly.getWallTime());
       }
       catch (Throwable e)
       {

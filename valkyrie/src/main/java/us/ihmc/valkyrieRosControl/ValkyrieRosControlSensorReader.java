@@ -162,11 +162,11 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          sensorProcessing.setForceSensorValue(yoForceTorqueSensorHandle.getForceSensorDefinition(), torqueForce);
       }
 
-      long timestamp = timestampProvider.getTimestamp();
-      long controllerTimestamp = Conversions.secondsToNanoseconds(lowlLevelController.getControllerTime());
+      long wallTime = timestampProvider.getTimestamp();
+      long monotonicTime = Conversions.secondsToNanoseconds(lowlLevelController.getControllerTime());
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
          fingerStateEstimator.update();
-      sensorProcessing.startComputation(timestamp, controllerTimestamp, -1);
+      sensorProcessing.startComputation(wallTime, monotonicTime, -1);
    }
 
    @Override

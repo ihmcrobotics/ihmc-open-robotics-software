@@ -72,7 +72,7 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
       return timestamp;
    }
@@ -88,13 +88,13 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    }
 
    @Override
-   public long getControllerTimestamp()
+   public long getMonotonicTime()
    {
       return controllerTimestamp;
    }
 
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getSyncTimestamp()
    {
       return sensorHeadPPSTimestamp;
    }

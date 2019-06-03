@@ -95,6 +95,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void doControl()
    {
+      // FIXME: The timestamp provider provides wall-time, we should switch to get monotonic time by some other mean.
       long timestamp = timestampProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())

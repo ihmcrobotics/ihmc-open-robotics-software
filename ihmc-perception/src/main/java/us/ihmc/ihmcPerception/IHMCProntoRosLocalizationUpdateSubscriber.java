@@ -1,12 +1,13 @@
 package us.ihmc.ihmcPerception;
 
+import java.util.function.LongUnaryOperator;
+
 import org.ros.node.NodeConfiguration;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
@@ -19,7 +20,7 @@ public class IHMCProntoRosLocalizationUpdateSubscriber
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
    
    public IHMCProntoRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
-         final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
+         LongUnaryOperator robotMonotonicTimeCalculator)
    {
 	   
       RosNavMsgsOdometrySubscriber rosOdometrySubscriber = new RosNavMsgsOdometrySubscriber()
@@ -28,8 +29,7 @@ public class IHMCProntoRosLocalizationUpdateSubscriber
 		   protected void newPose(String frameID,
 				   TimeStampedTransform3D timeStampedTransform)
 		   {
-			   long timestamp = timeStampedTransform.getTimeStamp();
-			   timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
+			   long timestamp = robotMonotonicTimeCalculator.applyAsLong(timeStampedTransform.getTimeStamp());
 			   timeStampedTransform.setTimeStamp(timestamp);
 			   
 			   StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);
