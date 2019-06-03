@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.Messager;
+import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -55,6 +56,7 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
    private final AtomicReference<Boolean> bodyPoseTeleopEnabled;
 
    private final AtomicBoolean resetBodyPose = new AtomicBoolean(false);
+   private final AtomicReference<QuadrupedSteppingStateEnum> currentSteppingState;
 
    public QuadrupedJoystickModule(Messager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight, Joystick joystick)
    {
@@ -86,6 +88,8 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
             messager.submitMessage(QuadrupedUIMessagerAPI.EnableJoystickTopic, false);
          }
       });
+
+      currentSteppingState = messager.createInput(QuadrupedUIMessagerAPI.CurrentSteppingStateNameTopic, null);
    }
 
    private static void configureJoystickFilters(Joystick device)
@@ -220,6 +224,11 @@ public class QuadrupedJoystickModule extends AnimationTimer implements JoystickE
       else if (mapping == XBoxOneMapping.SELECT)
       {
          resetBodyPose.set(true);
+      }
+      else if (mapping == XBoxOneMapping.XBOX_BUTTON)
+      {
+         boolean walking = currentSteppingState.get() != null && currentSteppingState.get() == QuadrupedSteppingStateEnum.STEP;
+         messager.submitMessage(QuadrupedUIMessagerAPI.PauseWalkingTopic, walking);
       }
 
       else if (mapping == XBoxOneMapping.A)

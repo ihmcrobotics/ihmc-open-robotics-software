@@ -89,6 +89,11 @@
                   <Spinner fx:id="flamingoTrajectoryTime" editable="true" maxWidth="1.7976931348623157E308" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                   <Label text="Time" GridPane.rowIndex="2" />
                   <Label text="Flamingo stance" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" />
+                   <Button fx:id="requestLoadFoot" text="Load foot" GridPane.rowIndex="3">
+                       <GridPane.margin>
+                           <Insets top="5.0"/>
+                       </GridPane.margin>
+                   </Button>
                </children>
             </GridPane>
          </children>
