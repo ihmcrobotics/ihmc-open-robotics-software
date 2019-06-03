@@ -25,6 +25,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
+   compile group: 'org.bytedeco', name: 'javacv-platform', version: '1.5'
 }
 
 applicationDependencies {
