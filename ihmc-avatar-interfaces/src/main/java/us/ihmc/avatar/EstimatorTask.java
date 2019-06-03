@@ -21,7 +21,7 @@ public class EstimatorTask extends HumanoidRobotControlTask
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   // This is needed for the single threaded mode as the master context will be updated aftter the firt execute call.
+   // This is needed for the single threaded mode as the master context will be updated after the first execute call.
    private boolean masterContextUpdated = false;
 
    public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
