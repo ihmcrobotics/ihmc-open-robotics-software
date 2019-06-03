@@ -27,6 +27,28 @@ public class PlanarRegionPropagationParameters
       set(other);
    }
 
+   public void setDefaultParameters()
+   {
+      sparseThreshold = DEFAULT_SPARSE_THRESHOLD;
+      proximityThreshold = DEFAULT_PROXIMITY_THRESHOLD;
+      planarityThreshold = DEFAULT_PLANARITY_THRESHOLD;
+
+      updateExtendedData = DEFAULT_UPDATE_EXTENDED_DATA;
+      extendingDistanceThreshold = DEFAULT_EXTENDING_DISTANCE_THRESHOLD;
+      extendingRadiusThreshold = DEFAULT_EXTENDING_RADIUS_THRESHOLD;
+   }
+
+   public void set(PlanarRegionPropagationParameters other)
+   {
+      sparseThreshold = other.sparseThreshold;
+      proximityThreshold = other.proximityThreshold;
+      planarityThreshold = other.planarityThreshold;
+
+      updateExtendedData = other.updateExtendedData;
+      extendingDistanceThreshold = other.extendingDistanceThreshold;
+      extendingRadiusThreshold = other.extendingRadiusThreshold;
+   }
+
    public double getSparseThreshold()
    {
       return sparseThreshold;
@@ -90,27 +112,5 @@ public class PlanarRegionPropagationParameters
    public void setExtendingRadiusThreshold(double extendingRadiusThreshold)
    {
       this.extendingRadiusThreshold = extendingRadiusThreshold;
-   }
-
-   public void setDefaultParameters()
-   {
-      sparseThreshold = DEFAULT_SPARSE_THRESHOLD;
-      proximityThreshold = DEFAULT_PROXIMITY_THRESHOLD;
-      planarityThreshold = DEFAULT_PLANARITY_THRESHOLD;
-
-      updateExtendedData = DEFAULT_UPDATE_EXTENDED_DATA;
-      extendingDistanceThreshold = DEFAULT_EXTENDING_DISTANCE_THRESHOLD;
-      extendingRadiusThreshold = DEFAULT_EXTENDING_RADIUS_THRESHOLD;
-   }
-
-   public void set(PlanarRegionPropagationParameters other)
-   {
-      sparseThreshold = other.sparseThreshold;
-      proximityThreshold = other.proximityThreshold;
-      planarityThreshold = other.planarityThreshold;
-
-      updateExtendedData = other.updateExtendedData;
-      extendingDistanceThreshold = other.extendingDistanceThreshold;
-      extendingRadiusThreshold = other.extendingRadiusThreshold;
    }
 }

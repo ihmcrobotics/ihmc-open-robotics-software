@@ -54,7 +54,7 @@ public class FusionSensorMeshViewer
    private final IntrinsicParameters intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
    private final LidarImageFusionRawDataLoader dataLoader = new LidarImageFusionRawDataLoader();
    private LidarImageFusionRawData rawData;
-   private final AtomicReference<Integer> seedLabel;
+//   private final AtomicReference<Integer> seedLabel;
    private final Random random = new Random(0612L);
 
    public FusionSensorMeshViewer(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager) throws Exception
@@ -72,14 +72,14 @@ public class FusionSensorMeshViewer
 
       root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, detectedObjectRootNode);
 
-      messager.registerTopicListener(LidarImageFusionAPI.ClearObjects, (content) -> detectedObjectViewer.clear());
-      messager.registerTopicListener(LidarImageFusionAPI.LoadData, (content) -> loadData());
-      messager.registerTopicListener(LidarImageFusionAPI.ClearViz, (content) -> clearViz());
-      messager.registerTopicListener(LidarImageFusionAPI.VisualizeAll, (content) -> visualizeAll());
-      messager.registerTopicListener(LidarImageFusionAPI.Propagate, (content) -> propagate());
-      messager.registerTopicListener(LidarImageFusionAPI.RandomPropagate, (content) -> randomPropagate());
-      messager.registerTopicListener(LidarImageFusionAPI.EndToEnd, (content) -> endToEnd());
-      seedLabel = messager.createInput(LidarImageFusionAPI.Seed);
+//      messager.registerTopicListener(LidarImageFusionAPI.ClearObjects, (content) -> detectedObjectViewer.clear());
+//      messager.registerTopicListener(LidarImageFusionAPI.LoadData, (content) -> loadData());
+//      messager.registerTopicListener(LidarImageFusionAPI.ClearViz, (content) -> clearViz());
+//      messager.registerTopicListener(LidarImageFusionAPI.VisualizeAll, (content) -> visualizeAll());
+//      messager.registerTopicListener(LidarImageFusionAPI.Propagate, (content) -> propagate());
+//      messager.registerTopicListener(LidarImageFusionAPI.RandomPropagate, (content) -> randomPropagate());
+//      messager.registerTopicListener(LidarImageFusionAPI.EndToEnd, (content) -> endToEnd());
+//      seedLabel = messager.createInput(LidarImageFusionAPI.Seed);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -96,159 +96,159 @@ public class FusionSensorMeshViewer
 
    private LidarImageFusionDataFeatureUpdater updater;
 
-   private void loadData()
-   {
-      dataLoader.loadLidarImageFusionRawData("dataOne", pointCloudDataFileName, labeledImageDataFileName, imageWidth, imageHeight, intrinsicParameters);
-      rawData = dataLoader.getRawData("dataOne");
-      rawData.initializeSegments();
-
-      updater = new LidarImageFusionDataFeatureUpdater(rawData);
-   }
-
-   private void clearViz()
-   {
-      root.getChildren().clear();
-      rawData.clear();
-      updater.initialize();
-   }
-
-   private void visualizeAll()
-   {
-      int numberOfLabels = rawData.getNumberOfLabels();
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
-      for (int i = 0; i < numberOfLabels; i++)
-      {
-         FusionDataSegment fusionDataSegment = rawData.getFusionDataSegment(i);
-         Point3D labelCenter = fusionDataSegment.getCenter();
-         Vector3D labelNormal = fusionDataSegment.getNormal();
-         Point3D labelNormalEnd = new Point3D(labelNormal);
-         labelNormalEnd.scaleAdd(0.05, labelCenter);
-
-         Color sparseSegmentColor = new Color(1.0, 0.0, 0.0, 1.0);
-         Color segmentColor = new Color(0.0, 1.0, 0.0, 1.0);
-         if (fusionDataSegment.isSparse(0.01))
-         {
-            meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, sparseSegmentColor);
-            for(Point3D point : fusionDataSegment.getPoints())
-               meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, sparseSegmentColor);
-         }
-         else
-         {
-            meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, segmentColor);
-         }
-      }
-      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
-      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
-      root.getChildren().add(newScanMeshView);
-   }
-
-   private void propagate()
-   {
-      int manualPropagateIndex = updater.getNumberOfSegments();
-      double randomB = random.nextDouble();
-      double randomG = random.nextDouble();
-      double randomR = random.nextDouble();
-      Color color = new Color(randomR, randomG, randomB, 1.0);
-
-      long startTime = System.nanoTime();
-      updater.addSegmentNodeData(seedLabel.get(), manualPropagateIndex);
-      LogTools.info("propagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime)+" "+ seedLabel.get() +" "+ manualPropagateIndex);
-
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
-      List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(manualPropagateIndex).getPointsInSegment();
-      for (Point3D point : pointsOnSegment)
-      {
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
-      }
-
-      Point3D labelCenter = updater.getSegmentationNodeData(manualPropagateIndex).getCenter();
-      Vector3D labelNormal = updater.getSegmentationNodeData(manualPropagateIndex).getNormal();
-      Point3D labelNormalEnd = new Point3D(labelNormal);
-      labelNormalEnd.scaleAdd(0.05, labelCenter);
-
-      meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
-      meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
-
-      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
-      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
-
-      root.getChildren().add(newScanMeshView);
-      manualPropagateIndex++;
-   }
-
-   private void randomPropagate()
-   {
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
-      long startTime = System.nanoTime();
-      int segmentId = updater.getNumberOfSegments();
-      if (!updater.iterateSegmenataionPropagation(segmentId))
-      {
-         LogTools.info("iterative is terminated " + segmentId);
-         return;
-      }
-
-      double randomB = random.nextDouble();
-      double randomG = random.nextDouble();
-      double randomR = random.nextDouble();
-      Color color = new Color(randomR, randomG, randomB, 1.0);
-      List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(segmentId).getPointsInSegment();
-      for (Point3D point : pointsOnSegment)
-      {
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
-      }
-      Point3D labelCenter = updater.getSegmentationNodeData(segmentId).getCenter();
-      Vector3D labelNormal = updater.getSegmentationNodeData(segmentId).getNormal();
-      Point3D labelNormalEnd = new Point3D(labelNormal);
-      labelNormalEnd.scaleAdd(0.05, labelCenter);
-
-      meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
-      meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
-      LogTools.info("randomPropagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " sec, " + segmentId);
-
-      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
-      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
-
-      root.getChildren().add(newScanMeshView);
-   }
-
-   private void endToEnd()
-   {
-      updater.initialize();
-      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
-      long startTime = System.nanoTime();
-      int numberOfIterate = 600;
-      for (int i = 0; i < numberOfIterate; i++)
-      {
-         if (!updater.iterateSegmenataionPropagation(i))
-         {
-            LogTools.info("iterative is terminated " + i);
-            break;
-         }
-
-         double randomB = random.nextDouble();
-         double randomG = random.nextDouble();
-         double randomR = random.nextDouble();
-         Color color = new Color(randomR, randomG, randomB, 1.0);
-         List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(i).getPointsInSegment();
-         for (Point3D point : pointsOnSegment)
-         {
-            meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
-         }
-         Point3D labelCenter = updater.getSegmentationNodeData(i).getCenter();
-         Vector3D labelNormal = updater.getSegmentationNodeData(i).getNormal();
-         Point3D labelNormalEnd = new Point3D(labelNormal);
-         labelNormalEnd.scaleAdd(0.05, labelCenter);
-
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
-         meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
-      }
-      LogTools.info("endToEnd " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " sec, " + updater.getNumberOfSegments());
-
-      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
-      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
-
-      root.getChildren().add(newScanMeshView);
-   }
+//   private void loadData()
+//   {
+//      dataLoader.loadLidarImageFusionRawData("dataOne", pointCloudDataFileName, labeledImageDataFileName, imageWidth, imageHeight, intrinsicParameters);
+//      rawData = dataLoader.getRawData("dataOne");
+//      rawData.initializeSegments();
+//
+//      updater = new LidarImageFusionDataFeatureUpdater(rawData);
+//   }
+//
+//   private void clearViz()
+//   {
+//      root.getChildren().clear();
+//      rawData.clear();
+//      updater.initialize();
+//   }
+//
+//   private void visualizeAll()
+//   {
+//      int numberOfLabels = rawData.getNumberOfLabels();
+//      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
+//      for (int i = 0; i < numberOfLabels; i++)
+//      {
+//         FusionDataSegment fusionDataSegment = rawData.getFusionDataSegment(i);
+//         Point3D labelCenter = fusionDataSegment.getCenter();
+//         Vector3D labelNormal = fusionDataSegment.getNormal();
+//         Point3D labelNormalEnd = new Point3D(labelNormal);
+//         labelNormalEnd.scaleAdd(0.05, labelCenter);
+//
+//         Color sparseSegmentColor = new Color(1.0, 0.0, 0.0, 1.0);
+//         Color segmentColor = new Color(0.0, 1.0, 0.0, 1.0);
+//         if (fusionDataSegment.isSparse(0.01))
+//         {
+//            meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, sparseSegmentColor);
+//            for(Point3D point : fusionDataSegment.getPoints())
+//               meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, sparseSegmentColor);
+//         }
+//         else
+//         {
+//            meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, segmentColor);
+//         }
+//      }
+//      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
+//      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+//      root.getChildren().add(newScanMeshView);
+//   }
+//
+//   private void propagate()
+//   {
+//      int manualPropagateIndex = updater.getNumberOfSegments();
+//      double randomB = random.nextDouble();
+//      double randomG = random.nextDouble();
+//      double randomR = random.nextDouble();
+//      Color color = new Color(randomR, randomG, randomB, 1.0);
+//
+//      long startTime = System.nanoTime();
+//      updater.addSegmentNodeData(seedLabel.get(), manualPropagateIndex);
+//      LogTools.info("propagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime)+" "+ seedLabel.get() +" "+ manualPropagateIndex);
+//
+//      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
+//      List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(manualPropagateIndex).getPointsInSegment();
+//      for (Point3D point : pointsOnSegment)
+//      {
+//         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
+//      }
+//
+//      Point3D labelCenter = updater.getSegmentationNodeData(manualPropagateIndex).getCenter();
+//      Vector3D labelNormal = updater.getSegmentationNodeData(manualPropagateIndex).getNormal();
+//      Point3D labelNormalEnd = new Point3D(labelNormal);
+//      labelNormalEnd.scaleAdd(0.05, labelCenter);
+//
+//      meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
+//      meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
+//
+//      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
+//      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+//
+//      root.getChildren().add(newScanMeshView);
+//      manualPropagateIndex++;
+//   }
+//
+//   private void randomPropagate()
+//   {
+//      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
+//      long startTime = System.nanoTime();
+//      int segmentId = updater.getNumberOfSegments();
+//      if (!updater.iterateSegmenataionPropagation(segmentId))
+//      {
+//         LogTools.info("iterative is terminated " + segmentId);
+//         return;
+//      }
+//
+//      double randomB = random.nextDouble();
+//      double randomG = random.nextDouble();
+//      double randomR = random.nextDouble();
+//      Color color = new Color(randomR, randomG, randomB, 1.0);
+//      List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(segmentId).getPointsInSegment();
+//      for (Point3D point : pointsOnSegment)
+//      {
+//         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
+//      }
+//      Point3D labelCenter = updater.getSegmentationNodeData(segmentId).getCenter();
+//      Vector3D labelNormal = updater.getSegmentationNodeData(segmentId).getNormal();
+//      Point3D labelNormalEnd = new Point3D(labelNormal);
+//      labelNormalEnd.scaleAdd(0.05, labelCenter);
+//
+//      meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
+//      meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
+//      LogTools.info("randomPropagate " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " sec, " + segmentId);
+//
+//      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
+//      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+//
+//      root.getChildren().add(newScanMeshView);
+//   }
+//
+//   private void endToEnd()
+//   {
+//      updater.initialize();
+//      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
+//      long startTime = System.nanoTime();
+//      int numberOfIterate = 600;
+//      for (int i = 0; i < numberOfIterate; i++)
+//      {
+//         if (!updater.iterateSegmenataionPropagation(i))
+//         {
+//            LogTools.info("iterative is terminated " + i);
+//            break;
+//         }
+//
+//         double randomB = random.nextDouble();
+//         double randomG = random.nextDouble();
+//         double randomR = random.nextDouble();
+//         Color color = new Color(randomR, randomG, randomB, 1.0);
+//         List<Point3D> pointsOnSegment = updater.getSegmentationNodeData(i).getPointsInSegment();
+//         for (Point3D point : pointsOnSegment)
+//         {
+//            meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), point, color);
+//         }
+//         Point3D labelCenter = updater.getSegmentationNodeData(i).getCenter();
+//         Vector3D labelNormal = updater.getSegmentationNodeData(i).getNormal();
+//         Point3D labelNormalEnd = new Point3D(labelNormal);
+//         labelNormalEnd.scaleAdd(0.05, labelCenter);
+//
+//         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(0.01), labelCenter, color);
+//         meshBuilder.addLine(labelCenter, labelNormalEnd, 0.01, color);
+//      }
+//      LogTools.info("endToEnd " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " sec, " + updater.getNumberOfSegments());
+//
+//      MeshView newScanMeshView = new MeshView(meshBuilder.generateMesh());
+//      newScanMeshView.setMaterial(meshBuilder.generateMaterial());
+//
+//      root.getChildren().add(newScanMeshView);
+//   }
 
    public void start()
    {
