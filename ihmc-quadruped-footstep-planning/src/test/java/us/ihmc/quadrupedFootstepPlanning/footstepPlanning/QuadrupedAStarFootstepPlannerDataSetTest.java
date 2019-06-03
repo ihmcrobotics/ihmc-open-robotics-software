@@ -33,7 +33,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
-      settings.getAmbleMediumTimings().setMaxSpeed(1.0);
+      settings.getAmbleMediumTimings().setMaxSpeed(0.4);
       return settings;
    }
 
@@ -90,7 +90,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
+      String errorMessage = test.runAssertions(DataSetName._20171114_135559_PartialShallowMaze);
       assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);

@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -35,4 +36,11 @@ public class BodyPathBasedVelocityProvider implements NominalVelocityProvider
       return heading;
    }
 
+   public double computeNominalYaw(Point2DReadOnly node)
+   {
+      Pose2D closestPointOnPath = new Pose2D();
+
+      bodyPath.getClosestPoint(node, closestPointOnPath);
+      return closestPointOnPath.getYaw();
+   }
 }
