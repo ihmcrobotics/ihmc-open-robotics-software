@@ -85,6 +85,7 @@ public class QuadrupedStepController implements EventState
       List<? extends QuadrupedTimedStep> activeSteps = stepDelayer.delayStepsIfNecessary(stepMessageHandler.getActiveSteps(),
                                                                                          stepMessageHandler.getStepSequence(),
                                                                                          balanceManager.getDesiredDcmPosition(),
+                                                                                         controllerToolbox.getDCMPositionEstimate(),
                                                                                          balanceManager.computeNormalizedEllipticDcmErrorForDelayedLiftOff());
       // trigger step events
       feetManager.triggerSteps(activeSteps);
