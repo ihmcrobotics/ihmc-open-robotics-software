@@ -14,19 +14,19 @@ public class GenericQuadrupedTimestampProvider implements SensorTimestampHolder
    }
    
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
       return Conversions.secondsToNanoseconds(sdfRobot.getYoTime().getDoubleValue());
    }
 
    @Override
-   public long getControllerTimestamp()
+   public long getMonotonicTime()
    {
-      return getTimestamp();
+      return getWallTime();
    }
 
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getSyncTimestamp()
    {
       return -1;
    }

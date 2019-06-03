@@ -149,7 +149,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private MultiThreadedRobotControlElementCoordinator robotController;
 
-   private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
+   private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
 
    private boolean firstTick = true;
 
@@ -336,7 +336,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, stateEstimatorParameters,
                                                                                                             effortJointHandles, positionJointHandles,
                                                                                                             jointStateHandles, imuHandles,
                                                                                                             forceTorqueSensorHandles, jointMap,
@@ -410,7 +410,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       if (isGazebo)
       {
          LogTools.info("Running with blocking synchronous execution between estimator and controller");
-         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
+         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, wallTimeProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
          robotController = coordinator;
@@ -453,7 +453,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    }
 
    @Override
-   protected void doControl(long time, long duration)
+   protected void doControl(long rosTime, long duration)
    {
       if (firstTick)
       {
@@ -465,7 +465,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          firstTick = false;
       }
 
-      timestampProvider.setTimestamp(time);
+      wallTimeProvider.setTimestamp(rosTime);
       robotController.read();
    }
 }

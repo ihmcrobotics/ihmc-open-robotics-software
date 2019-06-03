@@ -1,16 +1,21 @@
 package us.ihmc.avatar.ros;
 
-import controller_msgs.msg.dds.IMUPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
+
+import controller_msgs.msg.dds.IMUPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -25,12 +30,13 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
 import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.publisher.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
+import us.ihmc.utilities.ros.publisher.RosImuPublisher;
+import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
+import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
+import us.ihmc.utilities.ros.publisher.RosLastReceivedMessagePublisher;
+import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
+import us.ihmc.utilities.ros.publisher.RosStringPublisher;
+import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
@@ -52,7 +58,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
    private final JointNameMap jointMap;
    private final int jointNameHash;
@@ -68,16 +74,15 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTransforms;
 
    public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
-                                             final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+                                             final RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
                                              AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation,
-                                             JointNameMap jointMap, String rosNameSpace,
-                                             RosTfPublisher tfPublisher)
+                                             JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       this.imuDefinitions = fullRobotModel.getIMUDefinitions();
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
       this.tfPublisher = tfPublisher;
       this.jointMap = jointMap;
       this.staticTransforms = sensorInformation.getStaticTransformsForRos();
@@ -208,7 +213,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
             float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
-            long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
+            long timeStamp = rosClockCalculator.computeROSTime(robotConfigurationData.getWallTime(), robotConfigurationData.getMonotonicTime());
             Time t = Time.fromNano(timeStamp);
 
             if (robotConfigurationData.getJointNameHash() != jointNameHash)
@@ -290,7 +295,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                   if (messageType != null)
                   {
                      lastReceivedMessagePublisher.publish(messageType, robotConfigurationData.getLastReceivedPacketUniqueId(),
-                                                          robotConfigurationData.getTimestamp(), robotConfigurationData.getLastReceivedPacketRobotTimestamp());
+                                                          timeStamp, robotConfigurationData.getLastReceivedPacketRobotTimestamp());
                   }
                }
             }

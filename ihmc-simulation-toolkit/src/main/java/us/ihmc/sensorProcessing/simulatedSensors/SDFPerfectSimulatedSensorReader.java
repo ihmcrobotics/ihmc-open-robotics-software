@@ -202,19 +202,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
       return timestamp.getLongValue();
    }
 
    @Override
-   public long getControllerTimestamp()
+   public long getMonotonicTime()
    {
       return controllerTimestamp.getLongValue();
    }
 
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getSyncTimestamp()
    {
       return sensorHeadPPSTimetamp.getLongValue();
    }
