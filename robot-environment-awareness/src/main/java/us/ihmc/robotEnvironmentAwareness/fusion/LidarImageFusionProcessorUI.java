@@ -63,7 +63,7 @@ public class LidarImageFusionProcessorUI
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
-      //view3dFactory.addWorldCoordinateSystem(0.05);
+      view3dFactory.addWorldCoordinateSystem(0.05);
 
       VBox imageViewPane = new VBox();
       mainPane.setRight(imageViewPane);

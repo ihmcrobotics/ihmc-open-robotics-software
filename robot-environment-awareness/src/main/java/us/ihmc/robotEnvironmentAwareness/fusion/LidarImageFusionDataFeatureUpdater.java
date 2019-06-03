@@ -129,7 +129,7 @@ public class LidarImageFusionDataFeatureUpdater
       for (int i = 0; i < maximumNumberOfTrialsToFindUnIdLabel; i++)
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
-         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1 && !data.getFusionDataSegment(randomSeedLabel).isSparse(sparseThreshold))
+         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1 && !data.getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseThreshold()))
             return randomSeedLabel;
       }
       return -1;
