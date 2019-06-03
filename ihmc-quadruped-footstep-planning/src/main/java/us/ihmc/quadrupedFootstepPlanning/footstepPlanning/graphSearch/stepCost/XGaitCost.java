@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -91,15 +92,20 @@ public class XGaitCost implements FootstepCost
 
       endXGaitPose.setPosition(endXGaitPosition);
       endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
-      endXGaitPoseFrame.update();
+      endXGaitPoseFrame.setPoseAndUpdate(endXGaitPose);
 
       FramePoint2D nominalEndFootPosition = new FramePoint2D(endXGaitPoseFrame);
       nominalEndFootPosition.setX(0.5 * movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()));
       nominalEndFootPosition.setY(0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
       nominalEndFootPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
+      if (nominalEndFootPosition.distanceXY(endXGaitPose.getPosition()) > 0.8)
+         PrintTools.info("huh");
+
       Point2D endFootPosition = new Point2D(endNode.getX(movingQuadrant), endNode.getY(movingQuadrant));
 
-      return plannerParameters.getXGaitWeight() * endFootPosition.distance(nominalEndFootPosition);
+      if (plannerParameters.getXGaitWeight() * endFootPosition.distanceSquared(nominalEndFootPosition) > 1.0)
+         return 0.0;
+      return plannerParameters.getXGaitWeight() * endFootPosition.distanceSquared(nominalEndFootPosition);
    }
 }
