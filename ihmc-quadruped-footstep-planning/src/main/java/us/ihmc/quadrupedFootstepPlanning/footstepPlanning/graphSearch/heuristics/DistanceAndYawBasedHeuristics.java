@@ -29,7 +29,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double referenceYaw = computeReferenceYaw(node, goalNode);
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
-
+      double distanceHeuristicCost = parameters.getDistanceHeuristicWeight() * bodyDistance;
 
       double heightCost = 0.0;
 
@@ -66,7 +66,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
          }
       }
 
-      return yawHeuristicCost + heightCost + parameters.getDistanceHeuristicWeight() * bodyDistance;
+      return yawHeuristicCost + heightCost + distanceHeuristicCost;
    }
 
    private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode)

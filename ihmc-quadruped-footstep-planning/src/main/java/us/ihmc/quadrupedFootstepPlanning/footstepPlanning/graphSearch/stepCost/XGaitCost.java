@@ -2,6 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
@@ -40,7 +41,9 @@ public class XGaitCost implements FootstepCost
 
 
    private final FramePose3D startXGaitPose = new FramePose3D();
+   private final FramePose3D endXGaitPose = new FramePose3D();
    private final PoseReferenceFrame startXGaitPoseFrame = new PoseReferenceFrame("startXGaitPose", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame endXGaitPoseFrame = new PoseReferenceFrame("endXGaitPose", ReferenceFrame.getWorldFrame());
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
@@ -66,6 +69,7 @@ public class XGaitCost implements FootstepCost
       startXGaitPose.setOrientationYawPitchRoll(startNode.getNominalYaw(), nominalPitch, 0.0);
       startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
 
+
       FrameVector2D nominalVelocityHeading = new FrameVector2D(worldFrame, velocityProvider.computeNominalVelocityHeadingInWorld(startNode));
       nominalVelocityHeading.changeFrameAndProjectToXYPlane(startXGaitPoseFrame);
       nominalVelocityHeading.normalize();
@@ -79,13 +83,23 @@ public class XGaitCost implements FootstepCost
       desiredVelocity.setX(nominalVelocityHeading.getX() * desiredMaxForwardSpeed);
       desiredVelocity.setY(nominalVelocityHeading.getY() * desiredMaxHorizontalSpeed);
 
-      FramePoint2D edgeVelocity = new FramePoint2D(worldFrame, endNode.getX(movingQuadrant), endNode.getY(movingQuadrant));
+      FramePoint2D endXGaitPosition = new FramePoint2D(worldFrame, desiredVelocity);
+      endXGaitPosition.scale(durationBetweenSteps);
+      endXGaitPosition.add(startNode.getOrComputeXGaitCenterPoint());
 
-      edgeVelocity.changeFrameAndProjectToXYPlane(startXGaitPoseFrame);
-      edgeVelocity.addX(0.5 * movingQuadrant.getEnd().negateIfFrontEnd(xGaitSettings.getStanceLength()));
-      edgeVelocity.addY(0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-      edgeVelocity.scale(1.0 / durationBetweenSteps);
+      double nominalYawOfEnd = velocityProvider.computeNominalYaw(endXGaitPosition);
 
-      return plannerParameters.getXGaitWeight() * EuclidCoreTools.norm(desiredVelocity.getX() - edgeVelocity.getX(), desiredVelocity.getY() - edgeVelocity.getY());
+      endXGaitPose.setPosition(endXGaitPosition);
+      endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
+      endXGaitPoseFrame.update();
+
+      FramePoint2D nominalEndFootPosition = new FramePoint2D(endXGaitPoseFrame);
+      nominalEndFootPosition.setX(0.5 * movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()));
+      nominalEndFootPosition.setY(0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      nominalEndFootPosition.changeFrameAndProjectToXYPlane(worldFrame);
+
+      Point2D endFootPosition = new Point2D(endNode.getX(movingQuadrant), endNode.getY(movingQuadrant));
+
+      return plannerParameters.getXGaitWeight() * endFootPosition.distance(nominalEndFootPosition);
    }
 }
