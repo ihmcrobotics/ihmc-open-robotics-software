@@ -186,12 +186,19 @@ public class CrossRobotCommandResolver
       resolveHumanoidRobotContextDataEstimator(in, out);
    }
 
+   /**
+    * Resolves only the part of the context data that is updated by the scheduler thread.
+    */
    public void resolveHumanoidRobotContextDataScheduler(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveSensorDataContext(in.getSensorDataContext(), out.getSensorDataContext());
       out.setTimestamp(in.getTimestamp());
+      out.setSchedulerTick(in.getSchedulerTick());
    }
 
+   /**
+    * Resolves only the part of the context data that is updated by the controller thread.
+    */
    public void resolveHumanoidRobotContextDataController(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureDataHolder(), out.getCenterOfPressureDataHolder());
@@ -200,16 +207,26 @@ public class CrossRobotCommandResolver
       out.setControllerRan(in.getControllerRan());
    }
 
+   /**
+    * Resolves only the part of the context data that is updated by the estimator thread.
+    */
    public void resolveHumanoidRobotContextDataEstimator(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
       out.setEstimatorRan(in.getEstimatorRan());
+
+      // TODO: remove this hack.
+      // Was the easiest way to get Atlas working since it needs additional context information.
+      if (in instanceof AtlasHumanoidRobotContextData && out instanceof AtlasHumanoidRobotContextData)
+      {
+         resolveRawJointSensorDataHolderMap(((AtlasHumanoidRobotContextData) in).getRawJointSensorDataHolderMap(),
+                                            ((AtlasHumanoidRobotContextData) out).getRawJointSensorDataHolderMap());
+      }
    }
 
    public void resolveAtlasHumanoidRobotContextData(AtlasHumanoidRobotContextData in, AtlasHumanoidRobotContextData out)
    {
-      resolveRawJointSensorDataHolderMap(in.getRawJointSensorDataHolderMap(), out.getRawJointSensorDataHolderMap());
       resolveHumanoidRobotContextData(in, out);
    }
 

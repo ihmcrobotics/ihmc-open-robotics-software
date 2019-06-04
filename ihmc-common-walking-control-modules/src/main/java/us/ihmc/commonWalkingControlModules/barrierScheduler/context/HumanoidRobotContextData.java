@@ -24,6 +24,12 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    private long timestamp = Long.MIN_VALUE;
 
    /**
+    * Serves to keep track of skipped ticks.
+    * Set by the scheduler thread.
+    */
+   private long schedulerTick = Long.MIN_VALUE;
+
+   /**
     * The robot measurements.
     * Set by the scheduler thread.
     */
@@ -143,6 +149,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    public void copyFrom(HumanoidRobotContextData src)
    {
       this.timestamp = src.timestamp;
+      this.schedulerTick = src.schedulerTick;
       this.controllerRan = src.controllerRan;
       this.estimatorRan = src.estimatorRan;
       this.processedJointData.set(src.processedJointData);
@@ -161,6 +168,16 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    public void setTimestamp(long timestamp)
    {
       this.timestamp = timestamp;
+   }
+
+   public long getSchedulerTick()
+   {
+      return schedulerTick;
+   }
+
+   public void setSchedulerTick(long schedulerTick)
+   {
+      this.schedulerTick = schedulerTick;
    }
 
    public void setControllerRan(boolean controllerRan)
@@ -194,6 +211,8 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       {
          HumanoidRobotContextData other = (HumanoidRobotContextData) obj;
          if (timestamp != other.timestamp)
+            return false;
+         if (schedulerTick != other.schedulerTick)
             return false;
          if (controllerRan ^ other.controllerRan)
             return false;
