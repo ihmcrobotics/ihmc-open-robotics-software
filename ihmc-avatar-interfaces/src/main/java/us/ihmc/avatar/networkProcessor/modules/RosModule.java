@@ -30,12 +30,15 @@ import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotVisionSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosModule
 {
@@ -48,35 +51,42 @@ public class RosModule
 
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final HumanoidRobotSensorInformation sensorInformation;
+   private final AvatarRobotRosVisionSensorInformation sensorInformation;
    private final String robotName;
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
+      this(robotModel, robotModel.getPPSTimestampOffsetProvider(), robotModel.getSensorInformation(), robotModel.getSensorInformation(),
+           robotModel.getJointMap(), rosCoreURI, simulatedSensorCommunicator,
+           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).generateTopicName(RobotConfigurationData.class));
+   }
+
+   public RosModule(FullRobotModelFactory robotModelFactory, DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+                    AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap jointMap,
+                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, String robotConfigurationDataTopicName)
+   {
+      String simpleRobotName = robotModelFactory.getRobotDescription().getName();
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
-      robotName = robotModel.getSimpleRobotName().toLowerCase();
+      robotName = simpleRobotName.toLowerCase();
       String rosTopicPrefix = "/ihmc_ros/" + robotName;
-      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName())
-                                                   .generateTopicName(RobotConfigurationData.class);
 
-      ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
-      ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
-                                           s -> ppsTimestampOffsetProvider.receivedPacket(s.takeNextData()));
+      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+                                           s -> this.ppsTimestampOffsetProvider.receivedPacket(s.takeNextData()));
 
-      sensorInformation = robotModel.getSensorInformation();
+      this.sensorInformation = sensorInformation;
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, ros2Node, rcdTopicName, rosMainNode,
-                                                                                                              ppsTimestampOffsetProvider, sensorInformation,
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModelFactory, ros2Node, robotConfigurationDataTopicName,
+                                                                                                              rosMainNode, ppsTimestampOffsetProvider,
+                                                                                                              this.sensorInformation, forceSensorInformation,
                                                                                                               jointMap, rosTopicPrefix, tfPublisher);
 
       if (simulatedSensorCommunicator != null)
       {
-         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
+         publishSimulatedCameraAndLidar(robotModelFactory.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
 
          AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
          if (lidarParameters.length > 0)
@@ -103,7 +113,7 @@ public class RosModule
          PrintTools.debug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, AvatarRobotVisionSensorInformation sensorInformation,
                                                ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
