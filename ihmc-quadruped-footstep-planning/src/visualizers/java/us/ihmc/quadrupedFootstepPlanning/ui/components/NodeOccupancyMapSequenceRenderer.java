@@ -1,12 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.components;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.Sphere;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -17,7 +24,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
@@ -30,14 +36,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
 {
@@ -167,7 +165,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
       {
          for (FootstepNode node : nodesBeingExpanded)
          {
-            parentNodeColor = FootstepPathMeshViewer.solutionFootstepColors.get(node.getMovingQuadrant());
+            parentNodeColor = FootstepPathMeshViewer.defaultSolutionFootstepColors.get(node.getMovingQuadrant());
             break;
          }
       }

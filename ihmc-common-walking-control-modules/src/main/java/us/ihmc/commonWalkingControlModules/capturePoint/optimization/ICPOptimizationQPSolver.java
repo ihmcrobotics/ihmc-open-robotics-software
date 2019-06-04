@@ -1,25 +1,31 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPConstraintCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInputCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class that sets up the actual optimization framework and handles the inputs to generate an optimized solution
@@ -1094,7 +1100,18 @@ public class ICPOptimizationQPSolver
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
 
-      numberOfIterations = solver.solve(solutionToPack);
+      try
+      {
+         numberOfIterations = solver.solve(solutionToPack);
+      }
+      catch (Exception e)
+      {
+         // GW: observed this sometimes when the robot was close to falling (see related issue FB-155).
+         // This seems to happen only after the solver failed to find a solution for a few ticks anyway and the
+         // robot will probably fall. That is just a suspicion though.
+         LogTools.warn("ICP optimization crashed with exception.");
+         return false;
+      }
 
       return !MatrixTools.containsNaN(solutionToPack);
    }
