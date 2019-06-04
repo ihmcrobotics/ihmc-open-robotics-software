@@ -1243,7 +1243,7 @@ public class PlanarRegion
       buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
 
       int maxNumberOfPolygonsToPrint = 5;
-      for (int i = 0; i < maxNumberOfPolygonsToPrint; i++)
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
       {
          buffer.append(convexPolygons.get(i) + "\n");
       }
