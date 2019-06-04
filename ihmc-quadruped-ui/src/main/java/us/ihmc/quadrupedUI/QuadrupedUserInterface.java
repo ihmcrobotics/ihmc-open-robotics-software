@@ -182,7 +182,7 @@ public class QuadrupedUserInterface
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
       manualStepTabController.initScene(subScene);
-      subScene.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
+      primaryStage.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
 
       robotVisualizer = new JavaFXQuadrupedVisualizer(modelFactory, graphicsMutator);
       robotVisualizer.attachMessager(messager, QuadrupedUIMessagerAPI.RobotModelTopic);
@@ -269,6 +269,7 @@ public class QuadrupedUserInterface
       // pressed and released only use code field
       if (keyEvent.getEventType() == KeyEvent.KEY_PRESSED && keyEvent.getCode() == KeyCode.ESCAPE)
       {
+         messager.submitMessage(QuadrupedUIMessagerAPI.EnableStepTeleopTopic, false);
          messager.submitMessage(QuadrupedUIMessagerAPI.AbortWalkingTopic, true);
       }
    }
@@ -340,6 +341,8 @@ public class QuadrupedUserInterface
       plannerTabController.setShowFootstepPreviewTopic(QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
       plannerTabController.setStepListMessageTopic(QuadrupedUIMessagerAPI.FootstepPlannerTimedStepsTopic);
       plannerTabController.setDesiredSteppingStateNameTopic(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic);
+      plannerTabController.setAbortWalkingTopic(QuadrupedUIMessagerAPI.AbortWalkingTopic);
+      plannerTabController.setEnableStepTeleopTopic(QuadrupedUIMessagerAPI.EnableStepTeleopTopic);
    }
 
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,

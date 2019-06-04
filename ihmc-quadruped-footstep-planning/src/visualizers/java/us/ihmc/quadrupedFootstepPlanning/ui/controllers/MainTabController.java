@@ -181,14 +181,15 @@ public class MainTabController
    @FXML
    public void requestStopWalking()
    {
-      messager.submitMessage(stepListMessageTopic, new QuadrupedTimedStepListMessage());
-      requestStanding();
-   }
+      if (abortWalkingTopic != null)
+      {
+         messager.submitMessage(abortWalkingTopic, true);
+      }
 
-   private void requestStanding()
-   {
-      if (desiredSteppingStateNameTopic != null)
-         messager.submitMessage(desiredSteppingStateNameTopic, QuadrupedSteppingStateEnum.STAND);
+      if (enableStepTeleopTopic != null)
+      {
+         messager.submitMessage(enableStepTeleopTopic, false);
+      }
    }
 
    @FXML
@@ -275,6 +276,8 @@ public class MainTabController
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
    private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
+   private Topic<Boolean> abortWalkingTopic;
+   private Topic<Boolean> enableStepTeleopTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -305,6 +308,16 @@ public class MainTabController
    public void setPlanarRegionDataClearTopic(Topic<Boolean> planarRegionDataClearTopic)
    {
       this.planarRegionDataClearTopic = planarRegionDataClearTopic;
+   }
+   
+   public void setAbortWalkingTopic(Topic<Boolean> abortWalkingTopic)
+   {
+      this.abortWalkingTopic = abortWalkingTopic;
+   }
+
+   public void setEnableStepTeleopTopic(Topic<Boolean> enableStepTeleopTopic)
+   {
+      this.enableStepTeleopTopic = enableStepTeleopTopic;
    }
 
    public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)
