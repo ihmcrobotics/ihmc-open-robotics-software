@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -16,15 +19,12 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StartGoalPositionViewer extends AnimationTimer
 {
@@ -63,15 +63,14 @@ public class StartGoalPositionViewer extends AnimationTimer
    private AtomicReference<PlanarRegionsList> planarRegionsList = null;
    private final AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference = new AtomicReference<>(new QuadrupedXGaitSettings());
 
-
+   private Topic<Boolean> startEditModeEnabledTopic;
+   private Topic<Boolean> goalEditModeEnabledTopic;
 
    private final Messager messager;
 
    public StartGoalPositionViewer(Messager messager)
    {
       this.messager = messager;
-
-
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -84,9 +83,18 @@ public class StartGoalPositionViewer extends AnimationTimer
          goalFeetSpheres.put(robotQuadrant, goalFootSphere);
       }
 
-      startSphere.setMouseTransparent(true);
-      goalSphere.setMouseTransparent(true);
       lowLevelGoalSphere.setMouseTransparent(true);
+
+      startSphere.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (startEditModeEnabled != null && !startEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(startEditModeEnabledTopic, true);
+      });
+      goalSphere.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (goalEditModeEnabled != null && !goalEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(goalEditModeEnabledTopic, true);
+      });
 
       showStart(true);
       showGoal(true);
@@ -119,6 +127,8 @@ public class StartGoalPositionViewer extends AnimationTimer
    // TODO
    public void setEditStartGoalTopics(Topic<Boolean> startEditModeEnabledTopic, Topic<Boolean> goalEditModeEnabledTopic)
    {
+      this.startEditModeEnabledTopic = startEditModeEnabledTopic;
+      this.goalEditModeEnabledTopic = goalEditModeEnabledTopic;
       startEditModeEnabled = messager.createInput(startEditModeEnabledTopic, false);
       goalEditModeEnabled = messager.createInput(goalEditModeEnabledTopic, false);
    }
