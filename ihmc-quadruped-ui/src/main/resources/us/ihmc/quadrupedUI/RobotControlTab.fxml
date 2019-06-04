@@ -38,8 +38,8 @@
       
                       <Button fx:id="sitDownButton" onAction="#requestSitDown" text="Sit Down" GridPane.columnIndex="0" />
                       <Button fx:id="standUpButton" onAction="#requestStandUp" text="Stand Up" GridPane.columnIndex="1" />
-                      <Button fx:id="standButton" minWidth="-Infinity" onAction="#requestStopWalking" text="Stop Walking" GridPane.columnIndex="2" />
-      
+                      <Button fx:id="stopWalkingButton" onAction="#requestStopWalking" text="Stop Walking" GridPane.columnIndex="2" />
+
                       <CheckBox fx:id="enablePoseTeleopControl" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Enable Body Teleop" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                       <CheckBox fx:id="enableStepTeleopControl" maxWidth="1.7976931348623157E308" minWidth="-Infinity" text="Enable Step Teleop" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       
