@@ -31,6 +31,8 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.Footstep
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -44,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public abstract class FootstepPlannerDataSetTest
 {
    protected static final double bambooTimeScaling = 4.0;
@@ -53,7 +57,7 @@ public abstract class FootstepPlannerDataSetTest
                                                                                                                    YoAppearance.DarkGreen());
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = false;
+   protected static boolean VISUALIZE = true;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = false;
@@ -61,10 +65,10 @@ public abstract class FootstepPlannerDataSetTest
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
 
-   private QuadrupedXGaitSettingsReadOnly xGaitSettings = null;
+   protected QuadrupedXGaitSettings xGaitSettings = null;
    private QuadrupedBodyPathAndFootstepPlanner planner = null;
 
-   protected abstract QuadrupedXGaitSettingsReadOnly getXGaitSettings();
+   protected abstract QuadrupedXGaitSettings getXGaitSettings();
 
    protected abstract QuadrupedBodyPathAndFootstepPlanner createPlanner();
 
@@ -170,6 +174,56 @@ public abstract class FootstepPlannerDataSetTest
       runAssertionsOnAllDatasets(dataSets);
    }
 
+   @Test
+   public void testSimpleForwardPoint()
+   {
+
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setPosition(1.5, 0.5, 0.0);
+      goalPose.setOrientationYawPitchRoll(-Math.PI / 4.0, 0.0, 0.0);
+
+
+      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
+      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
+      start.setStartPose(startPose);
+      goal.setGoalPose(goalPose);
+
+      planner.setPlanarRegionsList(null);
+      planner.setStart(start);
+      planner.setGoal(goal);
+      planner.setTimeout(20.0);
+
+      xGaitSettings.setEndPhaseShift(180.0);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.getTrotMediumTimings().setMaxSpeed(0.6);
+      xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(0.15);
+      xGaitSettings.getTrotMediumTimings().setStepDuration(0.3);
+      xGaitSettings.setStanceLength(1.1);
+      xGaitSettings.setStanceWidth(0.2);
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, null);
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      //      planner.setHorizonLengthTopic(Double.MAX_VALUE);
+
+      FootstepPlanningResult pathResult = planner.planPath();
+      assertTrue("Path plan is invalid. Got path result " + pathResult, pathResult.validForExecution());
+
+      FootstepPlanningResult planResult = planner.plan();
+      assertTrue("Footstep plan is invalid. Got path result " + pathResult, planResult.validForExecution());
+
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
+
+      String errorMessage = assertPlanIsValid("", planner.getPlan(), goalPose.getPosition(), goalPose.getYaw());
+      assertTrue(errorMessage, errorMessage.isEmpty());
+
+      if (VISUALIZE)
+         ThreadTools.sleepForever();
+   }
 
 
 
