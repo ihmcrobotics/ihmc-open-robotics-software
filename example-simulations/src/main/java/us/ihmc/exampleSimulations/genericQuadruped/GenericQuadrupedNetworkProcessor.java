@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedFootstepPlannerParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPointFootSnapperParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.pubsub.DomainFactory;
@@ -20,9 +21,13 @@ public class GenericQuadrupedNetworkProcessor extends QuadrupedNetworkProcessor
 {
    public GenericQuadrupedNetworkProcessor(DomainFactory.PubSubImplementation pubSubImplementation, QuadrupedNetworkModuleParameters networkModuleParameters)
    {
-      this(new GenericQuadrupedModelFactory(), new GenericQuadrupedPhysicalProperties().getNominalBodyHeight(),
-           new GenericQuadrupedPhysicalProperties().getFeetGroundContactPoints(), new GenericQuadrupedFootstepPlannerParameters(),
-           new GenericQuadrupedXGaitSettings(), new GenericQuadrupedPointFootSnapperParameters(), pubSubImplementation, networkModuleParameters);
+      this(new GenericQuadrupedModelFactory(),
+           new GenericQuadrupedPhysicalProperties().getFeetGroundContactPoints(),
+           new GenericQuadrupedFootstepPlannerParameters(),
+           new GenericQuadrupedXGaitSettings(),
+           new GenericQuadrupedPointFootSnapperParameters(),
+           pubSubImplementation,
+           networkModuleParameters);
    }
 
    public GenericQuadrupedNetworkProcessor(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
