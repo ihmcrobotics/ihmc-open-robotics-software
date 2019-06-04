@@ -48,6 +48,9 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
 
       ConvexPolygon2D planeToWiggleInto = troublesomeRegion.getConvexHull();
 
+      double deltaInside = 0.06;
+      double maxXY = 0.1;
+
       for (int vertexIndex = 0; vertexIndex < planeToWiggleInto.getNumberOfVertices(); vertexIndex++)
       {
          for (double alpha = 0; alpha <= 1.0; alpha += 0.05)
@@ -63,17 +66,18 @@ class FootstepNodePlanarRegionSnapAndWigglerTest
             polygonToWiggle.addVertex(pointOnEdge);
             polygonToWiggle.update();
             WiggleParameters parameters = new WiggleParameters();
-            parameters.deltaInside = 0.06;
-            parameters.maxX = 0.05;
-            parameters.maxY = 0.05;
-            parameters.minX = -0.05;
-            parameters.minY = -0.05;
+            parameters.deltaInside = deltaInside;
+            parameters.maxX = maxXY;
+            parameters.maxY = maxXY;
+            parameters.minX = -maxXY;
+            parameters.minY = -maxXY;
             parameters.maxYaw = 0.0;
             parameters.minYaw = -0.0;
             
             ConvexPolygon2D wigglePolygon = PolygonWiggler.wigglePolygon(polygonToWiggle, planeToWiggleInto, parameters);
-            
-            assertTrue(planeToWiggleInto.signedDistance(wigglePolygon.getCentroid()) < -0.025);
+
+            double distanceInside = planeToWiggleInto.signedDistance(wigglePolygon.getCentroid());
+            assertTrue("desired = " + -0.025 + " actual = " + distanceInside, distanceInside < -0.025);
 //            assertEquals(-parameters.deltaInside, planeToWiggleInto.signedDistance(wigglePolygon.getCentroid()), 1.0e-3);
          }
       }
