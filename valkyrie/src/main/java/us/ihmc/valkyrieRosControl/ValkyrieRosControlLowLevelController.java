@@ -31,7 +31,7 @@ public class ValkyrieRosControlLowLevelController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final TimestampProvider timestampProvider;
+   private final TimestampProvider monotonicTimeProvider;
 
    private final List<ValkyrieRosControlEffortJointControlCommandCalculator> effortControlCommandCalculators = new ArrayList<>();
    private final LinkedHashMap<String, ValkyrieRosControlEffortJointControlCommandCalculator> effortJointToControlCommandCalculatorMap = new LinkedHashMap<>();
@@ -47,13 +47,13 @@ public class ValkyrieRosControlLowLevelController
 
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
-   public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
+   public ValkyrieRosControlLowLevelController(TimestampProvider monotonicTimeProvider, final double updateDT,
                                                ValkyrieRosControlFingerStateEstimator fingerStateEstimator,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap,
                                                YoVariableRegistry parentRegistry)
    {
-      this.timestampProvider = timestampProvider;
+      this.monotonicTimeProvider = monotonicTimeProvider;
 
       wakeUpTime.set(Double.NaN);
 
@@ -95,8 +95,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void doControl()
    {
-      // FIXME: The timestamp provider provides wall-time, we should switch to get monotonic time by some other mean.
-      long timestamp = timestampProvider.getTimestamp();
+      long timestamp = monotonicTimeProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())
          wakeUpTime.set(Conversions.nanosecondsToSeconds(timestamp));
@@ -189,10 +188,5 @@ public class ValkyrieRosControlLowLevelController
          }
       }
       return false;
-   }
-
-   public double getControllerTime()
-   {
-      return yoTime.getValue();
    }
 }
