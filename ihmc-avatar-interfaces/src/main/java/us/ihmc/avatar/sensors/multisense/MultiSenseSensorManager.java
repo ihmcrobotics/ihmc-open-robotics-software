@@ -5,7 +5,7 @@ import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
 import us.ihmc.ihmcPerception.camera.VideoPacketHandler;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -20,7 +20,7 @@ public class MultiSenseSensorManager
 
    private CameraDataReceiver cameraReceiver;
 
-   private final FullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final FullRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -29,7 +29,7 @@ public class MultiSenseSensorManager
 
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
-   public MultiSenseSensorManager(FullHumanoidRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+   public MultiSenseSensorManager(FullRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
                                   RosMainNode rosMainNode, Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
                                   AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
                                   AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
