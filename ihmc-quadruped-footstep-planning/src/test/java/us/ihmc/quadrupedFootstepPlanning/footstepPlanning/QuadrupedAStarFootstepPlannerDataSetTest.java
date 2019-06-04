@@ -24,7 +24,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       return FootstepPlannerType.A_STAR;
    }
 
-   public QuadrupedXGaitSettingsReadOnly getXGaitSettings()
+   public QuadrupedXGaitSettings getXGaitSettings()
    {
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
       settings.setStanceLength(1.0);
@@ -41,7 +41,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
    public QuadrupedBodyPathAndFootstepPlanner createPlanner()
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      QuadrupedXGaitSettingsReadOnly xGaitSettings = getXGaitSettings();
+      xGaitSettings = getXGaitSettings();
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
