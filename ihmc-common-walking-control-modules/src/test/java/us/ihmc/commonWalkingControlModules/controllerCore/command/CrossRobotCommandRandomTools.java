@@ -1423,6 +1423,7 @@ public class CrossRobotCommandRandomTools
       HumanoidRobotContextData next = new HumanoidRobotContextData(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder,
                                                                    robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext);
       next.setTimestamp(random.nextLong());
+      next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
       return next;
@@ -1448,6 +1449,7 @@ public class CrossRobotCommandRandomTools
                                                                              robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext,
                                                                              rawJointSensorDataHolderMap);
       next.setTimestamp(random.nextLong());
+      next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
       return next;

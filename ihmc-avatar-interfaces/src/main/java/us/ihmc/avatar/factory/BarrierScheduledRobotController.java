@@ -2,26 +2,29 @@ package us.ihmc.avatar.factory;
 
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
-import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class BarrierScheduledRobotController<C> implements DisposableRobotController
+public class BarrierScheduledRobotController implements DisposableRobotController
 {
    private final YoVariableRegistry registry;
-   private final BarrierScheduler<C> barrierScheduler;
+   private final BarrierScheduler<HumanoidRobotContextData> barrierScheduler;
+   private final HumanoidRobotContextData masterContext;
 
    private final ThreadTimer timer;
 
-   public BarrierScheduledRobotController(String name, List<? extends Task<C>> tasks, C masterContext, TaskOverrunBehavior overrunBehavior)
+   public BarrierScheduledRobotController(String name, List<HumanoidRobotControlTask> tasks, HumanoidRobotContextData masterContext,
+                                          TaskOverrunBehavior overrunBehavior, double schedulerDt)
    {
-      // TODO: add some YoVariables back that measure missed ticks.
+      this.masterContext = masterContext;
+
       barrierScheduler = new BarrierScheduler<>(tasks, masterContext, overrunBehavior);
       registry = new YoVariableRegistry(name);
 
-      timer = new ThreadTimer("Scheduler", registry);
+      timer = new ThreadTimer("Scheduler", schedulerDt, registry);
    }
 
    @Override
@@ -39,6 +42,7 @@ public class BarrierScheduledRobotController<C> implements DisposableRobotContro
    public void doControl()
    {
       timer.start();
+      masterContext.setSchedulerTick(timer.getTickCount());
       barrierScheduler.run();
       timer.stop();
    }

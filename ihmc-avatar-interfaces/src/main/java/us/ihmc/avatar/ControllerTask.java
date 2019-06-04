@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class ControllerTask extends HumanoidRobotControlTask
 {
@@ -16,26 +17,33 @@ public class ControllerTask extends HumanoidRobotControlTask
 
    private final AvatarControllerThread controllerThread;
 
+   private final long divisor;
    private final ThreadTimer timer;
+   private final YoLong ticksBehindScheduled;
 
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-   public ControllerTask(AvatarControllerThread controllerThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
+   public ControllerTask(AvatarControllerThread controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
+      this.divisor = divisor;
       this.controllerThread = controllerThread;
 
       controllerResolver = new CrossRobotCommandResolver(controllerThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-      timer = new ThreadTimer("Controller", controllerThread.getYoVariableRegistry());
+      String prefix = "Controller";
+      timer = new ThreadTimer(prefix, schedulerDt * divisor, controllerThread.getYoVariableRegistry());
+      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", controllerThread.getYoVariableRegistry());
    }
 
    @Override
    protected void execute()
    {
       timer.start();
+      long schedulerTick = controllerThread.getHumanoidRobotContextData().getSchedulerTick();
+      ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
       controllerThread.run();
       runAll(taskThreadRunnables);
       timer.stop();
