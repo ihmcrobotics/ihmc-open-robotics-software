@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.Property;
-import us.ihmc.robotEnvironmentAwareness.fusion.ImageSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
 
 public class ImageSegmentationParametersProperty extends ParametersProperty<ImageSegmentationParameters>
 {

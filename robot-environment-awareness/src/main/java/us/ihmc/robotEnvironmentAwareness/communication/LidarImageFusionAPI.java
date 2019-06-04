@@ -12,9 +12,9 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
-import us.ihmc.robotEnvironmentAwareness.fusion.ImageSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.fusion.PlanarRegionPropagationParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 
 public class LidarImageFusionAPI
 {
@@ -34,7 +34,7 @@ public class LidarImageFusionAPI
    private static final CategoryTheme Object = apiFactory.createCategoryTheme("Object");
    private static final CategoryTheme Socket = apiFactory.createCategoryTheme("Socket");
    private static final CategoryTheme ImageSegmentation = apiFactory.createCategoryTheme("ImageSegmentation");
-   private static final CategoryTheme REA = apiFactory.createCategoryTheme("REA");
+   private static final CategoryTheme StereoREA = apiFactory.createCategoryTheme("StereoREA");
    private static final CategoryTheme Result = apiFactory.createCategoryTheme("Result");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
 
@@ -65,16 +65,17 @@ public class LidarImageFusionAPI
    public static final Topic<List<ObjectType>> SelectedObjecTypes = ObjectDetectionCategory.topic(ObjecTypes);
    public static final Topic<List<RegionOfInterest>> ReceivedROIs = ObjectDetectionCategory.topic(ROIs);
 
-   public static final Topic<Boolean> EnableREA = UICategory.child(REA).topic(Enable);
-   public static final Topic<Boolean> ClearREA = UICategory.child(REA).topic(Clear);
-   public static final Topic<String> ComputationTime = UICategory.child(REA).topic(Time);
+   public static final Topic<Boolean> EnableREA = UICategory.child(StereoREA).topic(Enable);
+   public static final Topic<Boolean> ClearREA = UICategory.child(StereoREA).topic(Clear);
+   public static final Topic<String> ComputationTime = UICategory.child(StereoREA).topic(Time);
 
-   public static final Topic<Integer> StereoBufferSize = UICategory.child(REA).child(Buffer).topic(Size);
-   public static final Topic<Boolean> ShowStereoBuffer = UICategory.child(REA).child(Buffer).topic(Request);
-   public static final Topic<Boolean> ShowStereoBufferProjection = UICategory.child(REA).child(Buffer).topic(SnapShot);
+   public static final Topic<Integer> StereoBufferSize = UICategory.child(StereoREA).child(Buffer).topic(Size);
+   public static final Topic<Boolean> ShowStereoBuffer = UICategory.child(StereoREA).child(Buffer).topic(Request);
+   public static final Topic<Boolean> ShowStereoBufferProjection = UICategory.child(StereoREA).child(Buffer).topic(SnapShot);
+   public static final Topic<Boolean> RunStereoREA = UICategory.child(StereoREA).topic(Request);
 
    public static final Topic<ImageSegmentationParameters> ImageSegmentationParameters = UICategory.child(ImageSegmentation).topic(Parameters);
-   public static final Topic<PlanarRegionPropagationParameters> PlanarRegionPropagationParameters = UICategory.child(REA).topic(Parameters);
+   public static final Topic<PlanarRegionPropagationParameters> PlanarRegionPropagationParameters = UICategory.child(StereoREA).topic(Parameters);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

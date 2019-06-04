@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.parameters;
 
 public class PlanarRegionPropagationParameters
 {

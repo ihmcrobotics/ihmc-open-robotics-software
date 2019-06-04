@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.Random;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 
 public class LidarImageFusionDataFeatureUpdater
 {
-   private ImageSegmentationParameters imageSegmentationParameters = new ImageSegmentationParameters();
    private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
 
    private static final int maximumNumberOfTrialsToFindUnIdLabel = 100;
@@ -65,7 +65,7 @@ public class LidarImageFusionDataFeatureUpdater
    public SegmentationNodeData createSegmentNodeData(int seedLabel, int segmentId)
    {
       //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
-      FusionDataSegment seedImageSegment = data.getFusionDataSegment(seedLabel);
+      SegmentationRawData seedImageSegment = data.getFusionDataSegment(seedLabel);
       seedImageSegment.setID(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
 
@@ -80,7 +80,7 @@ public class LidarImageFusionDataFeatureUpdater
          for (int adjacentLabel : adjacentLabels)
          {
             //LogTools.info("   candidate label is " + adjacentLabels[i]);
-            FusionDataSegment candidate = data.getFusionDataSegment(adjacentLabel);
+            SegmentationRawData candidate = data.getFusionDataSegment(adjacentLabel);
 
             if (candidate.isSparse(planarRegionPropagationParameters.getSparseThreshold()))
             {
@@ -116,7 +116,7 @@ public class LidarImageFusionDataFeatureUpdater
       //LogTools.info("extending for " + adjacentLabels.length + " segments");
       for (int adjacentLabel : adjacentLabels)
       {
-         FusionDataSegment adjacentData = data.getFusionDataSegment(adjacentLabel);
+         SegmentationRawData adjacentData = data.getFusionDataSegment(adjacentLabel);
          newSegment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
                            planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
       }
@@ -129,7 +129,8 @@ public class LidarImageFusionDataFeatureUpdater
       for (int i = 0; i < maximumNumberOfTrialsToFindUnIdLabel; i++)
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
-         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1 && !data.getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseThreshold()))
+         if (data.getFusionDataSegment(randomSeedLabel).getId() == -1
+               && !data.getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseThreshold()))
             return randomSeedLabel;
       }
       return -1;

@@ -16,6 +16,7 @@
                         <ToggleButton fx:id="enableREA" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="176.0" text="Enable" />
                         <Button fx:id="clearREA" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearREA" text="Clear" />
                         <Label fx:id="computationTime" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" />
+                        <Button fx:id="runSREA" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#runSREA" text="Run SREA" />
                      </children>
                   </VBox>
                </children>

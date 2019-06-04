@@ -1,11 +1,11 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.parameters;
 
 public class ImageSegmentationParameters
 {
    private static final int DEFAULT_PIXEL_SIZE = 30;
    private static final double DEFAULT_PIXEL_RULER = 80.0;
    private static final int DEFAULT_ITERATE = 6;
-   private static final int DEFAULT_MIN_ELEMENT_SIZE = 80;
+   private static final int DEFAULT_MIN_ELEMENT_SIZE = 30;
 
    private int pixelSize;
    private double pixelRuler;

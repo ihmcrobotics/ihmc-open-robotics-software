@@ -68,6 +68,9 @@ public class StereoREAAnchorPaneController
    private final PlanarRegionPropagationParametersProperty planarRegionPropagationParametersProperty = new PlanarRegionPropagationParametersProperty(this,
                                                                                                                                                      "planarRegionPropagationParametersProperty");
 
+   @FXML
+   private Button runSREA;
+   
    public void initialize(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -119,5 +122,10 @@ public class StereoREAAnchorPaneController
    public void showProjection()
    {
       messager.submitMessage(LidarImageFusionAPI.ShowStereoBufferProjection, true);
+   }
+   
+   public void runSREA()
+   {
+      messager.submitMessage(LidarImageFusionAPI.RunStereoREA, true);
    }
 }

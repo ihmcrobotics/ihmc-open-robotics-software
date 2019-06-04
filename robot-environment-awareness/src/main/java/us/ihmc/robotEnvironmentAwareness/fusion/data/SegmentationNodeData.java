@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class SegmentationNodeData
 
    private final List<Point3D> pointsInSegment = new ArrayList<>();
 
-   public SegmentationNodeData(FusionDataSegment seedImageSegment)
+   public SegmentationNodeData(SegmentationRawData seedImageSegment)
    {
       labels.add(seedImageSegment.getImageSegmentLabel());
 
@@ -29,7 +29,7 @@ public class SegmentationNodeData
       pointsInSegment.addAll(seedImageSegment.getPoints());
    }
 
-   void merge(FusionDataSegment fusionDataSegment)
+   public void merge(SegmentationRawData fusionDataSegment)
    {
       labels.add(fusionDataSegment.getImageSegmentLabel());
 
@@ -47,7 +47,7 @@ public class SegmentationNodeData
       pointsInSegment.addAll(fusionDataSegment.getPoints());
    }
 
-   void extend(FusionDataSegment fusionDataSegment, double threshold, boolean updateNodeData, double extendingThreshold)
+   public void extend(SegmentationRawData fusionDataSegment, double threshold, boolean updateNodeData, double extendingThreshold)
    {
       for (Point3D point : fusionDataSegment.getPoints())
       {
@@ -101,7 +101,7 @@ public class SegmentationNodeData
       return pointsInSegment;
    }
 
-   boolean isCoplanar(FusionDataSegment fusionDataSegment, double threshold)
+   public boolean isCoplanar(SegmentationRawData fusionDataSegment, double threshold)
    {
       double distanceFromSegment = distancePlaneToPoint(fusionDataSegment.getNormal(), fusionDataSegment.getCenter(), center);
       double distanceToSegment = distancePlaneToPoint(normal, center, fusionDataSegment.getCenter());
@@ -112,7 +112,7 @@ public class SegmentationNodeData
          return false;
    }
 
-   boolean isParallel(FusionDataSegment fusionDataSegment, double threshold)
+   public boolean isParallel(SegmentationRawData fusionDataSegment, double threshold)
    {
       if (Math.abs(fusionDataSegment.getNormal().dot(normal)) > threshold)
          return true;

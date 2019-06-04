@@ -20,17 +20,11 @@ import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 import org.junit.jupiter.api.Test;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionDataFeatureUpdater;
-import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionRawData;
-import us.ihmc.robotEnvironmentAwareness.fusion.LidarImageFusionRawDataLoader;
+import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataFeatureUpdater;
+import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionRawData;
+import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionRawDataLoader;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 
 public class LidarImageFusionDataTest
@@ -118,7 +112,7 @@ public class LidarImageFusionDataTest
       System.out.println("ConvertingTime2 " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConvertTime2));
 
       long startSuperpixelSLICTime2 = System.nanoTime();
-      SuperpixelSLIC slic2 = opencv_ximgproc.createSuperpixelSLIC(convertedMat, opencv_ximgproc.SLIC, 30, 80);
+      SuperpixelSLIC slic2 = opencv_ximgproc.createSuperpixelSLIC(convertedMat2, opencv_ximgproc.SLIC, 30, 80);
       slic2.iterate(6);
       slic2.enforceLabelConnectivity(30);
       System.out.println("SuperpixelSLIC " + Conversions.nanosecondsToSeconds(System.nanoTime() - startSuperpixelSLICTime2));
@@ -127,28 +121,53 @@ public class LidarImageFusionDataTest
    @Test
    public void segmentationEndToEndTest()
    {
-
-   }
-
-   class ImageViewer extends Application
-   {
-      Image image;
-
-      ImageViewer(Image image)
+      File imageFile = new File(imageDataFileName);
+      BufferedImage image = null;
+      try
       {
-         this.image = image;
+         image = ImageIO.read(imageFile);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      
+      Mat imageMat = Java2DFrameUtils.toMat(image);
+      
+      long startConvertTime2 = System.nanoTime();
+      Mat convertedMat2 = new Mat();
+      opencv_imgproc.cvtColor(imageMat, convertedMat2, opencv_imgproc.COLOR_RGB2HSV);
+      System.out.println("ConvertingTime2 " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConvertTime2));
+
+      long startSuperpixelSLICTime2 = System.nanoTime();
+      SuperpixelSLIC slic2 = opencv_ximgproc.createSuperpixelSLIC(convertedMat2, opencv_ximgproc.SLIC, 30, 80);
+      slic2.iterate(6);
+      slic2.enforceLabelConnectivity(30);
+      System.out.println("SuperpixelSLIC " + Conversions.nanosecondsToSeconds(System.nanoTime() - startSuperpixelSLICTime2));
+   }
+   
+   @Test
+   public void testMatBufferedImageConverters()
+   {
+      File imageFile = new File(imageDataFileName);
+      BufferedImage image = null;
+      try
+      {
+         image = ImageIO.read(imageFile);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
 
-      @Override
-      public void start(Stage stage) throws Exception
+      Mat imageMat = Java2DFrameUtils.toMat(image);
+      show(imageMat, image.getWidth(), image.getHeight());
+      show(Java2DFrameUtils.toBufferedImage(imageMat));
+      
+      System.out.println("done");
+      while(true)
       {
-         ImageView imageView = new ImageView(image);
-
-         HBox hbox = new HBox(imageView);
-
-         Scene scene = new Scene(hbox, 200, 100);
-         stage.setScene(scene);
-         stage.show();
+         
       }
    }
 
@@ -174,6 +193,18 @@ public class LidarImageFusionDataTest
       frame.add(label);
       frame.setVisible(true);
       frame.setSize(width, height);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   }
+   
+   public static void show(BufferedImage image)
+   {
+      JFrame frame = new JFrame();
+      ImageIcon icon = new ImageIcon(image);
+      JLabel label = new JLabel(icon);
+
+      frame.add(label);
+      frame.setVisible(true);
+      frame.setSize(image.getWidth(), image.getHeight());
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
 }

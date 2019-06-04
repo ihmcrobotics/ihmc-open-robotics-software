@@ -2,7 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.ui.properties;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import us.ihmc.robotEnvironmentAwareness.fusion.PlanarRegionPropagationParameters;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 
 public class PlanarRegionPropagationParametersProperty extends ParametersProperty<PlanarRegionPropagationParameters>
 {
