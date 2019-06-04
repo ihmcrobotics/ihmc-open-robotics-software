@@ -26,9 +26,9 @@ import us.ihmc.sensorProcessing.imu.IMUSensor;
  */
 public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfectSensorOutputMapReadOnly
 {
-   private long timestamp;
-   private long controllerTimestamp;
-   private long sensorHeadPPSTimestamp;
+   private long wallTime;
+   private long monotonicTime;
+   private long syncTimestamp;
    private final TObjectDoubleMap<OneDoFJointBasics> jointPosition = new TObjectDoubleHashMap<>();
    private final TObjectDoubleMap<OneDoFJointBasics> jointVelocity = new TObjectDoubleHashMap<>();
    private final TObjectDoubleMap<OneDoFJointBasics> jointAcceleration = new TObjectDoubleHashMap<>();
@@ -74,34 +74,34 @@ public class SensorOutputMap implements SensorOutputMapReadOnly, RootJointPerfec
    @Override
    public long getWallTime()
    {
-      return timestamp;
+      return wallTime;
    }
 
-   public void setTimestamp(long timestamp)
+   public void setWallTime(long wallTime)
    {
-      this.timestamp = timestamp;
+      this.wallTime = wallTime;
    }
 
-   public void setControllerTimestamp(long controllerTimestamp)
+   public void setMonotonicTime(long monotonicTime)
    {
-      this.controllerTimestamp = controllerTimestamp;
+      this.monotonicTime = monotonicTime;
    }
 
    @Override
    public long getMonotonicTime()
    {
-      return controllerTimestamp;
+      return monotonicTime;
    }
 
    @Override
    public long getSyncTimestamp()
    {
-      return sensorHeadPPSTimestamp;
+      return syncTimestamp;
    }
 
-   public void setSensorHeadPPSTimetamp(long sensorHeadPPSTimestamp)
+   public void setSyncTimestamp(long syncTimestamp)
    {
-      this.sensorHeadPPSTimestamp = sensorHeadPPSTimestamp;
+      this.syncTimestamp = syncTimestamp;
    }
 
    @Override
