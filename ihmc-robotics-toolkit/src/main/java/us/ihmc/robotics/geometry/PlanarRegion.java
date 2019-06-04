@@ -909,6 +909,16 @@ public class PlanarRegion
    }
 
    /**
+    * Get the transform from world coordinates to local coordinates.
+    *
+    * @param transformToPack used to store the transform.
+    */
+   public void getTransformToLocal(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(fromWorldToLocalTransform);
+   }
+
+   /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
     * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
