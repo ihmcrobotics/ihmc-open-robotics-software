@@ -74,13 +74,18 @@ public abstract class QuadrupedAStarFootstepSimulationPlanToWaypointTest impleme
    {
       setUpSimulation(null);
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
       stepTeleopManager.setEndPhaseShift(180);
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepPlanningToolboxOutputStatus.class,
                                            ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                            ROS2TopicQualifier.OUTPUT),
-                                           s -> stepTeleopManager.publishTimedStepListToController(s.takeNextData().getFootstepDataList()));
+                                           s -> {
+         QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
+         stepMessage.setAreStepsAdjustable(true);
+         stepTeleopManager.publishTimedStepListToController(stepMessage);
+                                           });
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
                                            ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX,
                                                                            ROS2TopicQualifier.OUTPUT),

@@ -84,7 +84,7 @@ public class XGaitCost implements FootstepCost
       FrameVector2D desiredVelocity = new FrameVector2D(nominalVelocityHeading);
       desiredVelocity.setX(desiredVelocity.getX() * desiredMaxForwardSpeed);
       desiredVelocity.setY(desiredVelocity.getY() * desiredMaxHorizontalSpeed);
-      desiredVelocity.changeFrame(worldFrame);
+      desiredVelocity.changeFrameAndProjectToXYPlane(worldFrame);
 
       FramePoint2D endXGaitPosition = new FramePoint2D(desiredVelocity);
       endXGaitPosition.scale(durationBetweenSteps);
