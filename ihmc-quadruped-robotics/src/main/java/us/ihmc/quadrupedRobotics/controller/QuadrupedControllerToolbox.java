@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonQuadrupedRefere
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
@@ -250,6 +251,11 @@ public class QuadrupedControllerToolbox
    public void getDCMPositionEstimate(FramePoint3D dcmPositionEstimateToPack)
    {
       dcmPositionEstimator.getDCMPositionEstimate(dcmPositionEstimateToPack);
+   }
+
+   public FramePoint3DReadOnly getDCMPositionEstimate()
+   {
+      return dcmPositionEstimator.getDCMPositionEstimate();
    }
 
    public YoPlaneContactState getFootContactState(RobotQuadrant robotQuadrant)

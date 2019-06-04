@@ -331,6 +331,8 @@ public abstract class FootstepPlannerDataSetTest
             errorMessage = datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
+      errorMessage += checkStepOrder(datasetName, plannedSteps);
+
       if ((VISUALIZE || DEBUG) && !errorMessage.isEmpty())
          LogTools.error(errorMessage);
 
@@ -350,6 +352,19 @@ public abstract class FootstepPlannerDataSetTest
       }
 
       return finalSteps;
+   }
+
+   private static String checkStepOrder(String dataseName, FootstepPlan plannedSteps)
+   {
+      String errorMessage = "";
+      RobotQuadrant movingQuadrant = plannedSteps.getFootstep(0).getRobotQuadrant();
+      for (int i = 1; i < plannedSteps.getNumberOfSteps(); i++)
+      {
+         if (movingQuadrant.getNextRegularGaitSwingQuadrant() != plannedSteps.getFootstep(i).getRobotQuadrant())
+            errorMessage += dataseName + " step " + i + " in the plan is out of order.\n";
+      }
+
+      return errorMessage;
    }
 
    private void visualizePlan(FootstepPlan plan, PlanarRegionsList planarRegionsList, Point3DReadOnly start, Point3DReadOnly goal)
