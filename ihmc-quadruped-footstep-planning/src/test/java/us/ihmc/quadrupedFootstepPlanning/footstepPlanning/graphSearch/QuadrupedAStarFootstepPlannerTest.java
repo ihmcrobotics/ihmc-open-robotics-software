@@ -45,7 +45,7 @@ public class QuadrupedAStarFootstepPlannerTest
 {
    private static final double epsilon = 1e-3;
    private static boolean visualize = true;
-   private static boolean activelyVisualize = false;
+   private static boolean activelyVisualize = true;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 
@@ -273,7 +273,7 @@ public class QuadrupedAStarFootstepPlannerTest
 
       centerPoint.scale(0.25);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Goal Position", goalPosition, centerPoint, FootstepNode.gridSizeXY);
+      assertTrue("Goal Position expected:\n" + goalPosition +"\n but was:\n" + centerPoint + "\nDifference of: " + goalPosition.distanceXY(centerPoint), goalPosition.distanceXY(centerPoint) < FootstepNode.gridSizeXY);
       assertEquals("Tried to acheive yaw " + goalYaw + ", actually achieved " + nominalYaw, goalYaw, nominalYaw, FootstepNode.gridSizeYaw);
    }
 
