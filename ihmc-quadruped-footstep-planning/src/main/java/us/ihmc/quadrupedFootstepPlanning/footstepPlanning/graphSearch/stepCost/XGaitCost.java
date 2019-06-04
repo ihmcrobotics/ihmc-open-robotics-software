@@ -13,6 +13,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -80,11 +81,12 @@ public class XGaitCost implements FootstepCost
       double desiredMaxForwardSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredMaxHorizontalSpeed = xGaitSettings.getMaxHorizontalSpeedFraction() * desiredMaxForwardSpeed;
 
-      Vector2D desiredVelocity = new Vector2D();
-      desiredVelocity.setX(nominalVelocityHeading.getX() * desiredMaxForwardSpeed);
-      desiredVelocity.setY(nominalVelocityHeading.getY() * desiredMaxHorizontalSpeed);
+      FrameVector2D desiredVelocity = new FrameVector2D(nominalVelocityHeading);
+      desiredVelocity.setX(desiredVelocity.getX() * desiredMaxForwardSpeed);
+      desiredVelocity.setY(desiredVelocity.getY() * desiredMaxHorizontalSpeed);
+      desiredVelocity.changeFrame(worldFrame);
 
-      FramePoint2D endXGaitPosition = new FramePoint2D(worldFrame, desiredVelocity);
+      FramePoint2D endXGaitPosition = new FramePoint2D(desiredVelocity);
       endXGaitPosition.scale(durationBetweenSteps);
       endXGaitPosition.add(startNode.getOrComputeXGaitCenterPoint());
 
@@ -92,7 +94,13 @@ public class XGaitCost implements FootstepCost
       if (Double.isNaN(nominalYawOfEnd))
          nominalYawOfEnd = startNode.getNominalYaw();
 
-      endXGaitPose.setPosition(endXGaitPosition);
+      if (AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getNominalYaw(), nominalYawOfEnd) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
+      {
+         nominalYawOfEnd = AngleTools.trimAngleMinusPiToPi(nominalYawOfEnd + Math.PI);
+      }
+
+
+         endXGaitPose.setPosition(endXGaitPosition);
       endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
       endXGaitPoseFrame.setPoseAndUpdate(endXGaitPose);
 
