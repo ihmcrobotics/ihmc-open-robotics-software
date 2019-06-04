@@ -121,6 +121,7 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<FullQuadrupedRobotModel> RobotModelTopic = Root.child(Robot).topic(RobotModel);
 
    /* Environment */
+   public static final Topic<Boolean> PlanarRegionDataClearTopic = Root.child(Environment).child(PlanarRegions).topic(Reset);
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(Environment).child(PlanarRegions).topic(PlanarRegionsList);
    public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(Environment).child(PlanarRegions).child(FlatGround).topic(Enable);
