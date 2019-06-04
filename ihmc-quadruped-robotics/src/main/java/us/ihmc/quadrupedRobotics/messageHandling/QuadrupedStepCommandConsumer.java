@@ -6,7 +6,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootStates;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.List;
 
 public class QuadrupedStepCommandConsumer
 {
@@ -16,6 +21,7 @@ public class QuadrupedStepCommandConsumer
 
    private final QuadrupedBalanceManager balanceManager;
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
+   private final QuadrupedFeetManager feetManager;
 
    public QuadrupedStepCommandConsumer(CommandInputManager commandInputManager, QuadrupedStepMessageHandler stepMessageHandler,
                                        QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
@@ -26,6 +32,7 @@ public class QuadrupedStepCommandConsumer
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = managerFactory.getOrCreateBodyOrientationManager();
+      feetManager = managerFactory.getOrCreateFeetManager();
    }
 
    public void update()
@@ -47,6 +54,27 @@ public class QuadrupedStepCommandConsumer
       {
          balanceManager.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
          commandConsumerWithDelayBuffers.clearCommands(PlanarRegionsListCommand.class);
+      }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+      {
+         stepMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
+      }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AbortWalkingCommand.class))
+      {
+         commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class);
+         stepMessageHandler.clearUpcomingSteps();
+      }
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(QuadrupedFootLoadBearingCommand.class))
+      {
+         List<QuadrupedFootLoadBearingCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(QuadrupedFootLoadBearingCommand.class);
+         for (int i = 0; i < commands.size(); i++)
+         {
+            RobotQuadrant robotQuadrant = commands.get(i).getRobotQuadrant();
+            if(feetManager.getCurrentState(robotQuadrant) == QuadrupedFootStates.MOVE_VIA_WAYPOINTS)
+            {
+               feetManager.requestContact(robotQuadrant);
+            }
+         }
       }
    }
 
