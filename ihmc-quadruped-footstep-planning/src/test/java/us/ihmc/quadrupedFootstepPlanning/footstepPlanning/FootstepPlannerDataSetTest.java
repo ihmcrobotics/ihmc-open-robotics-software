@@ -29,6 +29,8 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.ApplicationRunner;
 import us.ihmc.quadrupedFootstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
@@ -214,7 +216,7 @@ public abstract class FootstepPlannerDataSetTest
       assertTrue("Path plan is invalid. Got path result " + pathResult, pathResult.validForExecution());
 
       FootstepPlanningResult planResult = planner.plan();
-      assertTrue("Footstep plan is invalid. Got path result " + pathResult, planResult.validForExecution());
+      assertTrue("Footstep plan is invalid. Got path result " + planResult, planResult.validForExecution());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanTopic, planner.getPlan());
 
@@ -376,7 +378,7 @@ public abstract class FootstepPlannerDataSetTest
       centerPoint.scale(0.25);
 
       String errorMessage = "";
-      if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
+      if (goalPosition.distanceXY(centerPoint) > 3.0 * FootstepNode.gridSizeXY)
          errorMessage = datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
       if (!Double.isNaN(goalYaw))
       {
