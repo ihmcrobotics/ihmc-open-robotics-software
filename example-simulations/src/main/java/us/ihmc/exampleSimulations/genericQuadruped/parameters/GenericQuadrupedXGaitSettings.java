@@ -48,7 +48,7 @@ public class GenericQuadrupedXGaitSettings implements QuadrupedXGaitSettingsRead
 
       trotMediumTimings.setStepDuration(0.3);
       trotMediumTimings.setEndDoubleSupportDuration(0.15);
-      trotMediumTimings.setMaxSpeed(1.25);
+      trotMediumTimings.setMaxSpeed(0.6);
 
       trotFastTimings.setStepDuration(0.25);
       trotFastTimings.setEndDoubleSupportDuration(0.05);
