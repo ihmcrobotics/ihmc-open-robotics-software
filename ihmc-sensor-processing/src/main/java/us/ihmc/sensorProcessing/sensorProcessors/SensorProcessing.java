@@ -81,23 +81,13 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private static final String FINITE_DIFFERENCE = "fd";
    private static final String ELASTICITY_COMPENSATOR = "stiff";
 
-   private static final ProcessingYoVariable EMPTY_PROCESSOR = () ->
-   {
-   };
+   private static final ProcessingYoVariable EMPTY_PROCESSOR = () -> {};
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public enum SensorType
    {
-      JOINT_POSITION,
-      JOINT_VELOCITY,
-      JOINT_ACCELERATION,
-      JOINT_TAU,
-      TORQUE_SENSOR,
-      FORCE_SENSOR,
-      IMU_ORIENTATION,
-      IMU_ANGULAR_VELOCITY,
-      IMU_LINEAR_ACCELERATION;
+      JOINT_POSITION, JOINT_VELOCITY, JOINT_ACCELERATION, JOINT_TAU, TORQUE_SENSOR, FORCE_SENSOR, IMU_ORIENTATION, IMU_ANGULAR_VELOCITY, IMU_LINEAR_ACCELERATION;
 
       public boolean isJointSensor()
       {
@@ -247,9 +237,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final Wrench tempWrench = new Wrench();
 
    private AtlasAuxiliaryRobotData auxiliaryRobotData;
+   
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
-                           YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       this.updateDT = sensorProcessingConfiguration.getEstimatorDT();
 
@@ -329,7 +320,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          inputLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
-
+         
          inputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
          outputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
       }
@@ -400,7 +391,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          updateProcessors(processedJointAccelerations.get(oneDoFJoint));
          updateProcessors(processedJointTaus.get(oneDoFJoint));
       }
-
+      
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
@@ -414,7 +405,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          updateProcessors(processedOrientations.get(imuDefinition));
          updateProcessors(processedAngularVelocities.get(imuDefinition));
          updateProcessors(processedLinearAccelerations.get(imuDefinition));
-
+         
          IMUSensor outputIMU = outputIMUs.get(i);
          tempOrientation.set(intermediateOrientations.get(imuDefinition));
          outputIMU.setOrientationMeasurement(tempOrientation);
@@ -427,11 +418,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
 
          inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
-         tempForce.setIncludingFrame(tempWrench.getLinearPart());
-         tempTorque.setIncludingFrame(tempWrench.getAngularPart());
+         tempForce.setIncludingFrame(tempWrench.getLinearPart()); 
+         tempTorque.setIncludingFrame(tempWrench.getAngularPart()); 
          inputForces.get(forceSensorDefinition).set(tempForce);
          inputTorques.get(forceSensorDefinition).set(tempTorque);
-
+         
          updateProcessors(processedForces.get(forceSensorDefinition));
          updateProcessors(processedTorques.get(forceSensorDefinition));
 
@@ -454,12 +445,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
-    * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public Map<String, Integer> addSensorAlphaFilter(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType)
    {
@@ -467,31 +456,25 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
-    * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be processed.
     */
-   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
-                                                                           String... sensorsToBeProcessed)
+   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToBeProcessed)
    {
       return addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
    }
 
    /**
-    * Add a low-pass filter stage for the given sensor signal. This is cumulative, by calling this
-    * method twice for instance, you will obtain a two pole low-pass filter.
-    * 
+    * Add a low-pass filter stage for the given sensor signal.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
-                                                                       String... sensorsToIgnore)
+   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType, String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDMap;
       List<String> sensorToIgnoreList = new ArrayList<>();
@@ -515,8 +498,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return Collections.unmodifiableMap(processorIDMap);
    }
 
-   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
-                                                                List<String> sensorsToIgnore)
+   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
@@ -537,13 +519,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorsIDs.put(imuName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(imuName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix,
-                                                                                                         suffix,
-                                                                                                         registry,
-                                                                                                         alphaFilter,
-                                                                                                         intermediateSignal);
+         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
-
+         
          if (!forVizOnly)
             intermediateIMUVectorTypeSignals.put(imuDefinition, filter);
       }
@@ -551,8 +529,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return processorsIDs;
    }
 
-   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
-                                                                             List<String> sensorsToIgnore)
+   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
@@ -573,11 +550,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorsIDs.put(sensorName, newProcessorID);
          String suffix = sensorType.getProcessorNameSuffix(sensorName, newProcessorID);
-         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix,
-                                                                                                         suffix,
-                                                                                                         registry,
-                                                                                                         alphaFilter,
-                                                                                                         intermediateSignal);
+         AlphaFilteredYoFrameVector filter = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, suffix, registry, alphaFilter, intermediateSignal);
          processors.add(filter);
 
          if (!forVizOnly)
@@ -587,8 +560,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return processorsIDs;
    }
 
-   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
-                                                                      List<String> jointsToIgnore)
+   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType, List<String> jointsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
 
@@ -611,7 +583,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          String suffix = sensorType.getProcessorNameSuffix(jointName, newProcessorID);
          AlphaFilteredYoVariable filter = new AlphaFilteredYoVariable(prefix + suffix, registry, alphaFilter, intermediateJointSignal);
          processedJointSignals.get(oneDoFJoint).add(filter);
-
+         
          if (!forVizOnly)
             outputJointSignals.put(oneDoFJoint, filter);
       }
@@ -620,15 +592,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a constant position and velocity override on the joints. This can be useful when dealing
-    * with a broken robot with sensors going crazy.
-    * 
-    * @param constantPosition the position value that will be used as the output of the sensor
-    *           processing.
-    * @param constantVelocity the velocity value that will be used as the output of the sensor
-    *           processing.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void addJointSensorsOverride(double constantPosition, double constantVelocity, boolean forVizOnly)
    {
@@ -636,36 +603,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a constant position and velocity override on the joints. This can be useful when dealing
-    * with a broken robot with sensors going crazy.
-    * 
-    * @param constantPosition the position value that will be used as the output of the sensor
-    *           processing.
-    * @param constantVelocity the velocity value that will be used as the output of the sensor
-    *           processing.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
-   public void addJointSensorsOverrideOnlyForSpecifiedJoints(double constantPosition, double constantVelocity, boolean forVizOnly,
-                                                             String... jointsToBeProcessed)
+   public void addJointSensorsOverrideOnlyForSpecifiedJoints(double constantPosition, double constantVelocity, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      addJointSensorsOverrideWithJointsToIgnore(constantPosition,
-                                                constantVelocity,
-                                                forVizOnly,
-                                                invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+      addJointSensorsOverrideWithJointsToIgnore(constantPosition, constantVelocity, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
-    * Apply a constant position and velocity override on the joints. This can be useful when dealing
-    * with a broken robot with sensors going crazy.
-    * 
-    * @param constantPosition the position value that will be used as the output of the sensor
-    *           processing.
-    * @param constantVelocity the velocity value that will be used as the output of the sensor
-    *           processing.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void addJointSensorsOverrideWithJointsToIgnore(double constantPosition, double constantVelocity, boolean forVizOnly, String... jointsToIgnore)
@@ -713,15 +666,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * <code> q_filt = scale * q_in + bias </code>
     * </p>
     * <p>
-    * Useful when the sensor measurement does not directly reflect the joint position, i.e.
-    * separated with a constant gear ratio plus an offset. Implemented as a cumulative processor but
-    * should probably be called only once.
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
     * </p>
-    * 
     * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
     * @param bias the offset to add to the joint position measurement. Can be {@code null}.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
     */
    public void addJointPositionAffineTransform(DoubleProvider scale, DoubleProvider bias, boolean forVizOnly)
@@ -735,20 +685,16 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * <code> q_filt = scale * q_in + bias </code>
     * </p>
     * <p>
-    * Useful when the sensor measurement does not directly reflect the joint position, i.e.
-    * separated with a constant gear ratio plus an offset. Implemented as a cumulative processor but
-    * should probably be called only once.
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
     * </p>
-    * 
     * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
     * @param bias the offset to add to the joint position measurement. Can be {@code null}.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
     */
-   public void addJointPositionAffineTransformOnlyForSpecifiedJoints(DoubleProvider scale, DoubleProvider bias, boolean forVizOnly,
-                                                                     String... jointsToBeProcessed)
+   public void addJointPositionAffineTransformOnlyForSpecifiedJoints(DoubleProvider scale, DoubleProvider bias, boolean forVizOnly, String... jointsToBeProcessed)
    {
       addJointPositionAffineTransformWithJointsToIgnore(scale, bias, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
@@ -759,15 +705,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * <code> q_filt = scale * q_in + bias </code>
     * </p>
     * <p>
-    * Useful when the sensor measurement does not directly reflect the joint position, i.e.
-    * separated with a constant gear ratio plus an offset. Implemented as a cumulative processor but
-    * should probably be called only once.
+    * Useful when the sensor measurement does not directly reflect the joint position, i.e. separated with a constant gear ratio plus an offset.
+    * Implemented as a cumulative processor but should probably be called only once.
     * </p>
-    * 
     * @param scale the scale factor to apply to the joint position measurement. Can be {@code null}.
     * @param bias the offset to add to the joint position measurement. Can be {@code null}.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
     */
@@ -808,13 +751,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint
-    * position. Useful when the joint encoders are off and the error can be approximated by a
-    * polynomial. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
     * @param polynomialToApply the polynomial to apply on the joint position signals.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void addJointPositionPolynomialProcessor(PolynomialReadOnly polynomialToApply, boolean forVizOnly)
    {
@@ -822,29 +763,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint
-    * position. Useful when the joint encoders are off and the error can be approximated by a
-    * polynomial. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
     * @param polynomialToApply the polynomial to apply on the joint position signals.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
-   public void addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(PolynomialReadOnly polynomialToApply, boolean forVizOnly,
-                                                                         String... jointsToBeProcessed)
+   public void addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(PolynomialReadOnly polynomialToApply, boolean forVizOnly, String... jointsToBeProcessed)
    {
       addJointPositionPolynomialProcessorWithJointsToIgnore(polynomialToApply, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
-    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint
-    * position. Useful when the joint encoders are off and the error can be approximated by a
-    * polynomial. Implemented as a cumulative processor but should probably be called only once.
-    * 
+    * Apply a polynomial function to (see {@link PolynomialProcessorYoVariable}) to the joint position.
+    * Useful when the joint encoders are off and the error can be approximated by a polynomial.
+    * Implemented as a cumulative processor but should probably be called only once.
     * @param polynomialToApply the polynomial to apply on the joint position signals.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void addJointPositionPolynomialProcessorWithJointsToIgnore(PolynomialReadOnly polynomialToApply, boolean forVizOnly, String... jointsToIgnore)
@@ -865,10 +801,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(POLYNOMIAL);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
-         PolynomialProcessorYoVariable filteredJointPosition = new PolynomialProcessorYoVariable(prefix + suffix,
-                                                                                                 intermediateJointPosition,
-                                                                                                 polynomialToApply,
-                                                                                                 registry);
+         PolynomialProcessorYoVariable filteredJointPosition = new PolynomialProcessorYoVariable(prefix + suffix, intermediateJointPosition, polynomialToApply, registry);
          processors.add(filteredJointPosition);
 
          if (!forVizOnly)
@@ -876,37 +809,30 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
-   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
 
    /**
-    * Apply an elasticity compensator to correct the joint positions according their torque and a
-    * given stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
+    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
+    * Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
     * @param stiffnesses estimated stiffness for each joint.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs,
-                                                                     boolean forVizOnly, String... jointsToIgnore)
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -934,10 +860,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointPositions.get(oneDoFJoint);
          String prefix = JOINT_POSITION.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, processors.size());
-         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointPosition, intermediateJointTau, registry);
+         ElasticityCompensatorYoVariable filteredJointPosition = new ElasticityCompensatorYoVariable(prefix + suffix, stiffness, maximumDeflection, intermediateJointPosition, intermediateJointTau, registry);
          processors.add(filteredJointPosition);
-
+         
          if (!forVizOnly)
             outputJointPositions.put(oneDoFJoint, filteredJointPosition);
       }
@@ -947,22 +872,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Computes the position of a slave joint from a master joint as follows:
     * <p>
     * <code> q_slave = couplingRatio * q_master + couplingBias </code>
-    * </p>
+    * </p> 
     * 
-    * @param nameOfJointMaster the name of the joint from which the position of the slave is to be
-    *           computed.
+    * @param nameOfJointMaster the name of the joint from which the position of the slave is to be computed.
     * @param nameOfJointSlave the name of the joint to compute the position of.
-    * @param couplingRatio the ratio between the master position and the slave position. Can be
-    *           {@code null}.
+    * @param couplingRatio the ratio between the master position and the slave position. Can be {@code null}.
     * @param couplingBias the position offset between the master and the slave. Can be {@code null}.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @return a provider to get the output of the new processor.
-    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are
-    *            {@code null}.
+    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
     */
-   public DoubleProvider computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, DoubleProvider couplingRatio,
-                                                           DoubleProvider couplingBias, boolean forVizOnly)
+   public DoubleProvider computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, DoubleProvider couplingRatio, DoubleProvider couplingBias, boolean forVizOnly)
    {
       OneDoFJointBasics jointMaster = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointMaster)).findFirst().get();
       return computeJointPositionUsingCoupling(jointMaster::getQ, nameOfJointSlave, couplingRatio, couplingBias, forVizOnly);
@@ -972,22 +892,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Computes the position of a slave joint from a master joint as follows:
     * <p>
     * <code> q_slave = couplingRatio * q_master + couplingBias </code>
-    * </p>
+    * </p> 
     * 
-    * @param jointMasterPositionProvider the provider of the master joint position that is to be
-    *           used to compute the slave position.
+    * @param jointMasterPositionProvider the provider of the master joint position that is to be used to compute the slave position.
     * @param nameOfJointSlave the name of the joint to compute the position of.
-    * @param couplingRatio the ratio between the master position and the slave position. Can be
-    *           {@code null}.
+    * @param couplingRatio the ratio between the master position and the slave position. Can be {@code null}.
     * @param couplingBias the position offset between the master and the slave. Can be {@code null}.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @return a provider to get the output of the new processor.
-    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are
-    *            {@code null}.
+    * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
     */
-   public DoubleProvider computeJointPositionUsingCoupling(DoubleProvider jointMasterPositionProvider, String nameOfJointSlave, DoubleProvider couplingRatio,
-                                                           DoubleProvider couplingBias, boolean forVizOnly)
+   public DoubleProvider computeJointPositionUsingCoupling(DoubleProvider jointMasterPositionProvider, String nameOfJointSlave, DoubleProvider couplingRatio, DoubleProvider couplingBias, boolean forVizOnly)
    {
       if (couplingRatio == null && couplingBias == null)
          throw new RuntimeException("Cannot create joint position coupling without giving either a couplingRatio or couplingBias.");
@@ -1038,8 +953,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       int newProcessorID = jointProcessors.size();
       String suffix = JOINT_POSITION.getProcessorNameSuffix(jointName, newProcessorID);
       YoDouble filteredJointPosition = new YoDouble(prefix + suffix, registry);
-      ProcessingYoVariable jointProcessor = () -> filteredJointPosition.set(backupProcessorTrigger.test(defaultInput) ? backupInput.getValue()
-            : defaultInput.getValue());
+      ProcessingYoVariable jointProcessor = () -> filteredJointPosition.set(backupProcessorTrigger.test(defaultInput) ? backupInput.getValue() : defaultInput.getValue());
 
       jointProcessors.add(jointProcessor);
 
@@ -1047,37 +961,30 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          outputJointPositions.put(joint, filteredJointPosition);
    }
 
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   boolean forVizOnly)
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
-   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
 
    /**
-    * Apply an elasticity compensator to correct the joint positions according their torque and a
-    * given stiffness. Useful when the robot has a non negligible elasticity in the links or joints.
+    * Apply an elasticity compensator to correct the joint positions according their torque and a given stiffness.
+    * Useful when the robot has a non negligible elasticity in the links or joints.
     * Implemented as a cumulative processor but should probably be called only once.
-    * 
     * @param stiffnesses estimated stiffness for each joint.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
-   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs,
-                                                                     boolean forVizOnly, String... jointsToIgnore)
+   public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1105,23 +1012,20 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(ELASTICITY_COMPENSATOR);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix
-               + suffix, stiffness, maximumDeflection, intermediateJointVelocity, intermediateJointTau, updateDT, registry);
+         VelocityElasticityCompensatorYoVariable filteredJointVelocity = new VelocityElasticityCompensatorYoVariable(prefix + suffix, stiffness,
+               maximumDeflection, intermediateJointVelocity, intermediateJointTau, updateDT, registry);
          processors.add(filteredJointVelocity);
-
+         
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, filteredJointVelocity);
       }
    }
 
    /**
-    * Compute the joint velocities by calculating finite-difference on joint positions using
-    * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered. This is not
-    * cumulative and has the effect of ignoring the velocity signal provided by the robot.
-    * 
+    * Compute the joint velocities by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void computeJointVelocityFromFiniteDifference(DoubleProvider alphaFilter, boolean forVizOnly)
    {
@@ -1129,14 +1033,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating
-    * finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then
-    * automatically low-pass filtered. This is not cumulative and has the effect of ignoring the
-    * velocity signal provided by the robot.
-    * 
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be processed.
     */
    public void computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(DoubleProvider alphaFilter, boolean forVizOnly, String... jointsToBeProcessed)
@@ -1145,14 +1045,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating
-    * finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then
-    * automatically low-pass filtered. This is not cumulative and has the effect of ignoring the
-    * velocity signal provided by the robot.
-    * 
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, String... jointsToIgnore)
@@ -1173,24 +1069,20 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
+         FilteredVelocityYoVariable jointVelocity = new FilteredVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointPosition, updateDT, registry);
          processors.add(jointVelocity);
-
+         
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
    }
 
+   
    /**
-    * Compute the joint velocities by calculating finite-difference on joint positions and applying
-    * a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then
-    * automatically low-pass filtered. This is not cumulative and has the effect of ignoring the
-    * velocity signal provided by the robot.
-    * 
+    * Compute the joint velocities by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void computeJointVelocityWithBacklashCompensator(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly)
    {
@@ -1198,40 +1090,25 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating
-    * finite-difference on joint positions and applying a backlash compensator (see
-    * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
-    * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided
-    * by the robot.
-    * 
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be processed.
     */
-   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly,
-                                                                                 String... jointsToBeProcessed)
+   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly, String... jointsToBeProcessed)
    {
-      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter,
-                                                                    slopTime,
-                                                                    forVizOnly,
-                                                                    invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+      computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter, slopTime, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating
-    * finite-difference on joint positions and applying a backlash compensator (see
-    * {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass
-    * filtered. This is not cumulative and has the effect of ignoring the velocity signal provided
-    * by the robot.
-    * 
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions and applying a backlash compensator (see {@link RevisedBacklashCompensatingVelocityYoVariable}). It is then automatically low-pass filtered.
+    * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly,
-                                                                             String... jointsToIgnore)
+   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1250,26 +1127,21 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
+         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
-
+      
    }
 
    /**
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
-    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
-    * robot is at rest. Implemented as a cumulative processor but should probably be called only
-    * once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void addJointVelocityBacklashFilter(DoubleProvider slopTime, boolean forVizOnly)
    {
@@ -1278,14 +1150,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    /**
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
-    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
-    * robot is at rest. Implemented as a cumulative processor but should probably be called only
-    * once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
    public void addJointVelocityBacklashFilterOnlyForSpecifiedJoints(DoubleProvider slopTime, boolean forVizOnly, String... jointsToBeProcessed)
@@ -1295,14 +1163,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    /**
     * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to the joint velocity.
-    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the
-    * robot is at rest. Implemented as a cumulative processor but should probably be called only
-    * once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void addJointVelocityBacklashFilterWithJointsToIgnore(DoubleProvider slopTime, boolean forVizOnly, String... jointsToIgnore)
@@ -1323,8 +1187,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String prefix = JOINT_VELOCITY.getProcessorNamePrefix(BACKLASH);
          String suffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, processors.size());
-         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix
-               + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
+         BacklashProcessingYoVariable filteredJointVelocity = new BacklashProcessingYoVariable(prefix + suffix, "", intermediateJointVelocity, updateDT, slopTime, registry);
          processors.add(filteredJointVelocity);
 
          if (!forVizOnly)
@@ -1333,12 +1196,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint accelerations by calculating finite-difference on joint velocities using
-    * {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
-    * 
+    * Compute the joint accelerations by calculating finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public void computeJointAccelerationFromFiniteDifference(DoubleProvider alphaFilter, boolean forVizOnly)
    {
@@ -1346,13 +1206,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Compute the joint accelerations (for a specific subset of joints) by calculating
-    * finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then
-    * automatically low-pass filtered.
-    * 
+    * Compute the joint accelerations (for a specific subset of joints) by calculating finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
    public void computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, String... jointsToIgnore)
@@ -1373,8 +1229,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
          String prefix = JOINT_ACCELERATION.getProcessorNamePrefix(FINITE_DIFFERENCE);
          String suffix = JOINT_ACCELERATION.getProcessorNameSuffix(jointName, processors.size());
-         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix
-               + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
+         FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable(prefix + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
          processors.add(jointAcceleration);
 
          if (!forVizOnly)
@@ -1383,13 +1238,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Add a low-pass filter stage on the orientations provided by the IMU sensors. This is
-    * cumulative, by calling this method twice for instance, you will obtain a two pole low-pass
-    * filter.
-    * 
+    * Add a low-pass filter stage on the orientations provided by the IMU sensors.
+    * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
     * @param alphaFilter low-pass filter parameter.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
    private Map<String, Integer> addIMUOrientationAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, List<String> sensorsToIgnore)
@@ -1410,13 +1262,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorIDs.put(imuName, newProcessorID);
          String suffix = IMU_ORIENTATION.getProcessorNameSuffix(imuName, newProcessorID);
-         AlphaFilteredYoFrameQuaternion filteredOrientation = new AlphaFilteredYoFrameQuaternion(prefix,
-                                                                                                 suffix,
-                                                                                                 intermediateOrientation,
-                                                                                                 alphaFilter,
-                                                                                                 registry);
+         AlphaFilteredYoFrameQuaternion filteredOrientation = new AlphaFilteredYoFrameQuaternion(prefix, suffix, intermediateOrientation, alphaFilter, registry);
          processors.add(filteredOrientation);
-
+         
          if (!forVizOnly)
             intermediateOrientations.put(imuDefinition, filteredOrientation);
       }
@@ -1471,10 +1319,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean useStateEstimatorData,
                                                                          boolean forVizOnly, String... sensorsToBeProcessed)
    {
-      return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain,
-                                                   integralGain,
-                                                   useStateEstimatorData,
-                                                   forVizOnly,
+      return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain, integralGain, useStateEstimatorData, forVizOnly,
                                                    invertSensorSelection(IMU_ORIENTATION, sensorsToBeProcessed));
    }
 
@@ -1530,12 +1375,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoFrameQuaternion processedOrientation = new YoFrameQuaternion(orientationPrefix, orientationSuffix, sensorFrame, registry);
          YoFrameVector3D processedAngularVelocity = new YoFrameVector3D(angularVelocityPrefix, angularVelocitySuffix, sensorFrame, registry);
 
-         YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName,
-                                                          orientationSuffix,
-                                                          updateDT,
-                                                          sensorFrame,
-                                                          processedOrientation,
-                                                          processedAngularVelocity,
+         YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName, orientationSuffix, updateDT, sensorFrame, processedOrientation, processedAngularVelocity,
                                                           registry);
          filter.setGains(proportionalGain, integralGain);
 
@@ -1590,15 +1430,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of
-    * the IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm
-    * down small shakies when the robot is at rest. Implemented as a cumulative processor but should
-    * probably be called only once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
    public Map<String, Integer> addIMUAngularVelocityBacklashFilter(DoubleProvider slopTime, boolean forVizOnly)
    {
@@ -1606,33 +1442,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of
-    * the IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm
-    * down small shakies when the robot is at rest. Implemented as a cumulative processor but should
-    * probably be called only once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleProvider slopTime, boolean forVizOnly,
-                                                                                          String... sensorsToBeProcessed)
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleProvider slopTime, boolean forVizOnly, String... sensorsToBeProcessed)
    {
       return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly, invertSensorSelection(IMU_ANGULAR_VELOCITY, sensorsToBeProcessed));
    }
 
    /**
-    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of
-    * the IMU angular velocity. Useful when the robot has backlash in its joints or simply to calm
-    * down small shakies when the robot is at rest. Implemented as a cumulative processor but should
-    * probably be called only once.
-    * 
-    * @param slopTime every time the velocity changes sign, a slop is engaged during which a
-    *           confidence factor is ramped up from 0 to 1.
-    * @param forVizOnly if set to true, the result will not be used as the input of the next
-    *           processing stage, nor as the output of the sensor processing.
+    * Apply a backlash compensator (see {@link BacklashProcessingYoVariable}) to each component of the IMU angular velocity.
+    * Useful when the robot has backlash in its joints or simply to calm down small shakies when the robot is at rest.
+    * Implemented as a cumulative processor but should probably be called only once.
+    * @param slopTime every time the velocity changes sign, a slop is engaged during which a confidence factor is ramped up from 0 to 1.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
    public Map<String, Integer> addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(DoubleProvider slopTime, boolean forVizOnly, String... sensorsToIgnore)
@@ -1657,14 +1484,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          int newProcessorID = processors.size();
          processorIDs.put(imuName, newProcessorID);
          String suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, newProcessorID);
-         BacklashProcessingYoFrameVector filteredAngularVelocity = BacklashProcessingYoFrameVector.createBacklashProcessingYoFrameVector(prefix,
-                                                                                                                                         suffix,
-                                                                                                                                         updateDT,
-                                                                                                                                         slopTime,
-                                                                                                                                         registry,
-                                                                                                                                         intermediateAngularVelocity);
+         BacklashProcessingYoFrameVector filteredAngularVelocity = BacklashProcessingYoFrameVector.createBacklashProcessingYoFrameVector(prefix, suffix, updateDT, slopTime, registry, intermediateAngularVelocity);
          processors.add(filteredAngularVelocity);
-
+         
          if (!forVizOnly)
             intermediateAngularVelocities.put(imuDefinition, filteredAngularVelocity);
       }
@@ -1673,15 +1495,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Call this method to setup validity checkers on all the joint sensors. Each validity checker
-    * will check if the sensor measurement signal is NaN, infinite, dead, etc. Use only for
-    * diagnostics.
-    * 
+    * Call this method to setup validity checkers on all the joint sensors.
+    * Each validity checker will check if the sensor measurement signal is NaN, infinite, dead, etc.
+    * Use only for diagnostics.
     * @return The map with all the validity checkers.
     */
-   public Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging,
-                                                                                                  JointDesiredOutputListReadOnly outputDataHolder,
-                                                                                                  List<String> jointsToIgnore)
+   public Map<OneDoFJointBasics, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, JointDesiredOutputListReadOnly outputDataHolder, List<String> jointsToIgnore)
    {
       LinkedHashMap<OneDoFJointBasics, OneDoFJointSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
@@ -1695,12 +1514,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoDouble position = outputJointPositions.get(jointToCheck);
          YoDouble velocity = outputJointVelocities.get(jointToCheck);
          YoDouble tau = outputJointTaus.get(jointToCheck);
-         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck,
-                                                                                                 outputDataHolder.getJointDesiredOutput(jointToCheck),
-                                                                                                 position,
-                                                                                                 velocity,
-                                                                                                 tau,
-                                                                                                 registry);
+         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), position, velocity, tau, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
          validityCheckerMap.put(jointToCheck, validityChecker);
@@ -1764,13 +1578,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoDouble rawVelocity = inputJointVelocities.get(jointToCheck);
          YoDouble processedPosition = outputJointPositions.get(jointToCheck);
          YoDouble processedVelocity = outputJointVelocities.get(jointToCheck);
-         PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(),
-                                                                                                            rawPosition,
-                                                                                                            rawVelocity,
-                                                                                                            processedPosition,
-                                                                                                            processedVelocity,
-                                                                                                            updateDT,
-                                                                                                            registry);
+         PositionVelocity1DConsistencyChecker consistencyChecker = new PositionVelocity1DConsistencyChecker(jointToCheck.getName(), rawPosition, rawVelocity, processedPosition, processedVelocity, updateDT, registry);
          consistencyCheckerMap.put(jointToCheck, consistencyChecker);
          diagnosticModules.add(consistencyChecker);
       }
@@ -1789,12 +1597,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          ReferenceFrame referenceFrame = imuToCheck.getRigidBody().getBodyFixedFrame();
          YoFrameQuaternion orientation = intermediateOrientations.get(imuToCheck);
          YoFrameVector3D angularVelocity = intermediateAngularVelocities.get(imuToCheck);
-         OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(),
-                                                                                                                            orientation,
-                                                                                                                            angularVelocity,
-                                                                                                                            referenceFrame,
-                                                                                                                            updateDT,
-                                                                                                                            registry);
+         OrientationAngularVelocityConsistencyChecker consistencyChecker = new OrientationAngularVelocityConsistencyChecker(imuToCheck.getName(), orientation, angularVelocity, referenceFrame, updateDT, registry);
          consistencyCheckerMap.put(imuToCheck.getName(), consistencyChecker);
          diagnosticModules.add(consistencyChecker);
       }
@@ -1802,8 +1605,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
-   public Map<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore,
-                                                                                                              JointDesiredOutputListReadOnly outputDataHolder)
+   public Map<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJointBasics, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
 
@@ -1814,10 +1616,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck,
-                                                                                                            outputDataHolder.getJointDesiredOutput(jointToCheck),
-                                                                                                            updateDT,
-                                                                                                            registry);
+         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), updateDT, registry);
          delayEstimatorMap.put(jointToCheck, delayEstimator);
          diagnosticModules.add(delayEstimator);
       }
@@ -1825,8 +1624,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return delayEstimatorMap;
    }
 
-   public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore,
-                                                                                     JointDesiredOutputListReadOnly outputDataHolder)
+   public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
 
@@ -1837,11 +1635,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck,
-                                                                                          outputDataHolder.getJointDesiredOutput(jointToCheck),
-                                                                                          estimationWindow,
-                                                                                          updateDT,
-                                                                                          registry);
+         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), estimationWindow, updateDT, registry);
          jointFourierAnalysisMap.put(jointToCheck, jointFourierAnalysis);
          diagnosticModules.add(jointFourierAnalysis);
       }
@@ -1850,14 +1644,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered
-    * in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
-    * 
+    * Create an alpha filter given a name and a break frequency (in Hertz) that will be registered in the {@code SensorProcessing}'s {@code YoVariableRegistry}.
     * @param name name of the variable.
     * @param breakFrequency break frequency in Hertz
-    * @return a {@code YoDouble} to be used when adding a low-pass filter stage using the methods in
-    *         this class such as
-    *         {@link SensorProcessing#addJointVelocityAlphaFilter(YoDouble, boolean)}.
+    * @return a {@code YoDouble} to be used when adding a low-pass filter stage using the methods in this class such as {@link SensorProcessing#addJointVelocityAlphaFilter(YoDouble, boolean)}.
     */
    public DoubleProvider createAlphaFilter(String name, double breakFrequency)
    {
@@ -1866,25 +1656,18 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    /**
-    * Helper to create easily a {@code Map<OneDoFJoint, YoDouble>} referring to the stiffness for
-    * each joint.
-    * 
+    * Helper to create easily a {@code Map<OneDoFJoint, YoDouble>} referring to the stiffness for each joint.
     * @param nameSuffix suffix to be used in the variables' name.
-    * @param defaultStiffness default value of stiffness to use when not referred in the
-    *           jointSpecificStiffness.
-    * @param jointSpecificStiffness {@code Map<String, Double>} referring the specific stiffness
-    *           value to be used for each joint. Does not need to be exhaustive, can also be empty
-    *           or null in which the defaultStiffness is used for every joint.
-    * @return {@code Map<OneDoFJoint, YoDouble>} to be used when calling
-    *         {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
+    * @param defaultStiffness default value of stiffness to use when not referred in the jointSpecificStiffness.
+    * @param jointSpecificStiffness {@code Map<String, Double>} referring the specific stiffness value to be used for each joint. Does not need to be exhaustive, can also be empty or null in which the defaultStiffness is used for every joint.
+    * @return {@code Map<OneDoFJoint, YoDouble>} to be used when calling {@link SensorProcessing#addJointPositionElasticyCompensator(Map, boolean)}.
     */
    public Map<OneDoFJointBasics, DoubleProvider> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
    {
       return createStiffnessWithJointsToIgnore(nameSuffix, defaultStiffness, jointSpecificStiffness);
    }
 
-   public Map<OneDoFJointBasics, DoubleProvider> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness,
-                                                                                   Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
+   public Map<OneDoFJointBasics, DoubleProvider> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1895,7 +1678,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       {
          OneDoFJointBasics oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
-
+         
          if (jointToIgnoreList.contains(jointName))
             continue;
 
@@ -1904,17 +1687,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             stiffness = new DoubleParameter(jointName + nameSuffix, registry, jointSpecificStiffness.get(jointName));
          else
             stiffness = new DoubleParameter(jointName + nameSuffix, registry, defaultStiffness);
-
+         
          stiffesses.put(oneDoFJoint, stiffness);
       }
-
+      
       return stiffesses;
    }
 
    /**
-    * Helper to convert easily a map from joint name to @{@code YoDouble}
-    * ({@code Map<String, YoDouble>}) to a {@code Map<OneDoFJoint, YoDouble>}.
-    * 
+    * Helper to convert easily a map from joint name to @{@code YoDouble} ({@code Map<String, YoDouble>}) to a {@code Map<OneDoFJoint, YoDouble>}.
     * @param mapToConvert {@code Map<String, YoDouble>} the map to be converted, not modified.
     * @return {@code Map<OneDoFJoint, YoDouble>} the converted map.
     */
@@ -1930,7 +1711,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (yoDouble != null)
             newMap.put(oneDoFJoint, yoDouble);
       }
-
+      
       return newMap;
    }
 
@@ -2064,7 +1845,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       return monotonicTime.getLongValue();
    }
-
+   
    @Override
    public long getSyncTimestamp()
    {
@@ -2085,7 +1866,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       inputJointVelocities.get(oneDoFJoint).set(value);
    }
-
+   
    public void setJointAccelerationSensorValue(OneDoFJointBasics oneDoFJoint, double value)
    {
       inputJointAccelerations.get(oneDoFJoint).set(value);
@@ -2135,7 +1916,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    {
       return outputJointVelocities.get(oneDoFJoint).getDoubleValue();
    }
-
+   
    @Override
    public double getJointAccelerationProcessedOutput(OneDoFJointBasics oneDoFJoint)
    {
