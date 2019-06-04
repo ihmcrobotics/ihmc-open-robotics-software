@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.time.ThreadTimer;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class EstimatorTask extends HumanoidRobotControlTask
 {
@@ -16,7 +17,9 @@ public class EstimatorTask extends HumanoidRobotControlTask
 
    private final AvatarEstimatorThread estimatorThread;
 
+   private final long divisor;
    private final ThreadTimer timer;
+   private final YoLong ticksBehindScheduled;
 
    private final List<Runnable> taskThreadRunnables = new ArrayList<>();
    private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
@@ -24,15 +27,18 @@ public class EstimatorTask extends HumanoidRobotControlTask
    // This is needed for the single threaded mode as the master context will be updated after the first execute call.
    private boolean masterContextUpdated = false;
 
-   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, FullHumanoidRobotModel masterFullRobotModel)
+   public EstimatorTask(AvatarEstimatorThread estimatorThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
       super(divisor);
+      this.divisor = divisor;
       this.estimatorThread = estimatorThread;
 
       estimatorResolver = new CrossRobotCommandResolver(estimatorThread.getFullRobotModel());
       masterResolver = new CrossRobotCommandResolver(masterFullRobotModel);
 
-      timer = new ThreadTimer("Estimator", estimatorThread.getYoVariableRegistry());
+      String prefix = "Estimator";
+      timer = new ThreadTimer(prefix, schedulerDt * divisor, estimatorThread.getYoVariableRegistry());
+      ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", estimatorThread.getYoVariableRegistry());
    }
 
    @Override
@@ -41,6 +47,8 @@ public class EstimatorTask extends HumanoidRobotControlTask
       timer.start();
       if (masterContextUpdated)
       {
+         long schedulerTick = estimatorThread.getHumanoidRobotContextData().getSchedulerTick();
+         ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
          estimatorThread.run();
          runAll(taskThreadRunnables);
       }

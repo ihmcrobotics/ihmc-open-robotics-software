@@ -193,6 +193,7 @@ public class CrossRobotCommandResolver
    {
       resolveSensorDataContext(in.getSensorDataContext(), out.getSensorDataContext());
       out.setTimestamp(in.getTimestamp());
+      out.setSchedulerTick(in.getSchedulerTick());
    }
 
    /**
