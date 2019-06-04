@@ -128,7 +128,7 @@ public class XGaitCostTest
       FramePoint2D frontLeft = new FramePoint2D(yawedFrame, 0.5, 0.25);
       FramePoint2D frontRight = new FramePoint2D(yawedFrame, 0.5, -0.25);
 
-      FramePoint2D nextFrontLeft = new FramePoint2D(yawedFrame, 0.668, -0.25);
+      FramePoint2D nextFrontLeft = new FramePoint2D(yawedFrame, 0.668, 0.25);
 
       hindLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       hindRight.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
@@ -179,7 +179,7 @@ public class XGaitCostTest
       FramePoint2D frontLeftGoal = new FramePoint2D(yawedFrame, -2.5, 0.25);
       FramePoint2D frontRightGoal = new FramePoint2D(yawedFrame, -2.5, -0.25);
 
-      FramePoint2D nextFrontLeft = new FramePoint2D(yawedFrame, 0.5 - 0.168, -0.25);
+      FramePoint2D nextFrontLeft = new FramePoint2D(yawedFrame, 0.5 - 0.168, 0.25);
 
       hindLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       hindRight.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
