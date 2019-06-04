@@ -98,7 +98,7 @@ public class QuadrupedSimulationController implements RobotController
 
       if (robotVisualizer != null)
       {
-         long timestamp = sensorReader.getSensorRawOutputMapReadOnly().getTimestamp();
+         long timestamp = sensorReader.getSensorRawOutputMapReadOnly().getWallTime();
          robotVisualizer.update(timestamp);
       }
 
