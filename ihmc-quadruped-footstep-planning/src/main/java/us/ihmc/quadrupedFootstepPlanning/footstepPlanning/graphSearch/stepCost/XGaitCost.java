@@ -89,6 +89,8 @@ public class XGaitCost implements FootstepCost
       endXGaitPosition.add(startNode.getOrComputeXGaitCenterPoint());
 
       double nominalYawOfEnd = velocityProvider.computeNominalYaw(endXGaitPosition);
+      if (Double.isNaN(nominalYawOfEnd))
+         nominalYawOfEnd = startNode.getNominalYaw();
 
       endXGaitPose.setPosition(endXGaitPosition);
       endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
@@ -99,13 +101,8 @@ public class XGaitCost implements FootstepCost
       nominalEndFootPosition.setY(0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
       nominalEndFootPosition.changeFrameAndProjectToXYPlane(worldFrame);
 
-      if (nominalEndFootPosition.distanceXY(endXGaitPose.getPosition()) > 0.8)
-         PrintTools.info("huh");
-
       Point2D endFootPosition = new Point2D(endNode.getX(movingQuadrant), endNode.getY(movingQuadrant));
 
-      if (plannerParameters.getXGaitWeight() * endFootPosition.distanceSquared(nominalEndFootPosition) > 1.0)
-         return 0.0;
       return plannerParameters.getXGaitWeight() * endFootPosition.distanceSquared(nominalEndFootPosition);
    }
 }
