@@ -420,7 +420,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          sensorReader.read();
 
-         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+         estimatorTime.set(sensorOutputMapReadOnly.getWallTime());
       }
       catch (Throwable e)
       {

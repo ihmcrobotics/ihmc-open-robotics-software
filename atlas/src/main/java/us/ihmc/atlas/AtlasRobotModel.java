@@ -31,6 +31,8 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -386,28 +388,33 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
+   public RobotROSClockCalculator getROSClockCalculator()
    {
+      DRCROSPPSTimestampOffsetProvider timestampOffsetProvider = null;
+
       if (target == RobotTarget.REAL_ROBOT)
       {
-         return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
+         timestampOffsetProvider = AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
       if (AtlasSensorInformation.SEND_ROBOT_DATA_TO_ROS)
       {
          if (target == RobotTarget.SCS)
          {
-            return new SimulationRosClockPPSTimestampOffsetProvider();
+            timestampOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
          }
       }
 
-      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
+      if (timestampOffsetProvider == null)
+         timestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
+
+      return new RobotROSClockCalculatorFromPPSOffset(timestampOffsetProvider);
    }
 
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation,
+      return new AtlasSensorSuiteManager(getSimpleRobotName(), this, getCollisionBoxProvider(), getROSClockCalculator(), sensorInformation,
                                          getJointMap(), getPhysicalProperties(), target);
    }
 

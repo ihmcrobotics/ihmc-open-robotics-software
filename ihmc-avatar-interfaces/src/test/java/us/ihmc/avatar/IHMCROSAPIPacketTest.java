@@ -23,6 +23,8 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -171,10 +173,10 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       try
       {
-         SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+         RobotROSClockCalculator rosClockCalculator = new RobotROSClockCalculatorFromPPSOffset(new SimulationRosClockPPSTimestampOffsetProvider());
          String nameSpace = "/ihmc_ros/atlas";
          String tfPrefix = null;
-         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
+         new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator_server, null, rosClockCalculator, robotModel, nameSpace, tfPrefix,
                                                 Collections.<Class> emptySet());
       }
       catch (IOException e)
