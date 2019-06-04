@@ -33,6 +33,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
@@ -48,6 +49,7 @@ import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -150,6 +152,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private MultiThreadedRobotControlElementCoordinator robotController;
 
    private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
+   private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
 
    private boolean firstTick = true;
 
@@ -336,7 +339,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, stateEstimatorParameters,
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, monotonicTimeProvider, stateEstimatorParameters,
                                                                                                             effortJointHandles, positionJointHandles,
                                                                                                             jointStateHandles, imuHandles,
                                                                                                             forceTorqueSensorHandles, jointMap,

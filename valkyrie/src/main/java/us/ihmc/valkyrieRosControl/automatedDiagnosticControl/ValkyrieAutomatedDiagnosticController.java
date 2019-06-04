@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -55,6 +56,7 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -84,7 +86,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
+   private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
+   private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
    private final YoDouble diagnosticControllerTime = new YoDouble("diagnosticControllerTime", registry);
    private final ExecutionTimer diagnosticControllerTimer = new ExecutionTimer("diagnosticControllerTimer", 10.0, registry);
    private final YoLong startTime = new YoLong("startTime", registry);
@@ -161,7 +164,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, monotonicTimeProvider,
                                                                                                             diagnosticSensorProcessingConfiguration,
                                                                                                             jointHandles, emptyPositionJointHandles,
                                                                                                             emptyJointStateHandles, imuHandles,
@@ -205,15 +208,15 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private boolean firstDiagnosticControlTick = true;
 
    @Override
-   protected void doControl(long time, long duration)
+   protected void doControl(long rosTime, long duration)
    {
       diagnosticControllerTimer.startMeasurement();
-      timestampProvider.setTimestamp(time);
+      wallTimeProvider.setTimestamp(rosTime);
       sensorReader.readSensors();
 
       if (firstEstimatorTick)
       {
-         startTime.set(time);
+         startTime.set(rosTime);
          stateEstimator.initialize();
          forceSensorStateUpdater.initialize();
          firstEstimatorTick = false;
@@ -237,9 +240,9 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       diagnosticController.doControl();
       sensorReader.writeCommandsToRobot();
 
-      diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));
+      diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(rosTime - startTime.getLongValue()));
 
-      yoVariableServer.update(time);
+      yoVariableServer.update(rosTime);
 
       diagnosticControllerTimer.stopMeasurement();
    }
