@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class LidarImageFusionRawData
 
    private final IntrinsicParameters intrinsicParameters;
 
-   private final ArrayList<FusionDataSegment> fusionDataSegments = new ArrayList<FusionDataSegment>();
+   private final ArrayList<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
 
    public LidarImageFusionRawData(Point3D[] pointCloud, BufferedImage bufferedImage, int[] labels, IntrinsicParameters intrinsic)
    {
@@ -41,7 +41,7 @@ public class LidarImageFusionRawData
 
       LogTools.info("numberOfLabels " + numberOfLabels + ", numberOfPoints " + pointCloud.length);
       for (int i = 0; i < numberOfLabels; i++)
-         fusionDataSegments.add(new FusionDataSegment(i));
+         fusionDataSegments.add(new SegmentationRawData(i));
 
       for (int i = 0; i < pointCloud.length; i++)
       {
@@ -61,7 +61,7 @@ public class LidarImageFusionRawData
    
    public void clear()
    {
-      for(FusionDataSegment fusionDataSegment:fusionDataSegments)
+      for(SegmentationRawData fusionDataSegment:fusionDataSegments)
          fusionDataSegment.setID(-1);
    }
 
@@ -89,7 +89,7 @@ public class LidarImageFusionRawData
          }
       }
 
-      for (FusionDataSegment fusionDataSegment : fusionDataSegments)
+      for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
          fusionDataSegment.update();
       }
@@ -100,7 +100,7 @@ public class LidarImageFusionRawData
       return fusionDataSegments.size();
    }
 
-   public FusionDataSegment getFusionDataSegment(int label)
+   public SegmentationRawData getFusionDataSegment(int label)
    {
       return fusionDataSegments.get(label);
    }
@@ -128,7 +128,7 @@ public class LidarImageFusionRawData
 
    public boolean allIdentified()
    {
-      for (FusionDataSegment fusionDataSegment : fusionDataSegments)
+      for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
          if (fusionDataSegment.getId() == -1)
             return false;

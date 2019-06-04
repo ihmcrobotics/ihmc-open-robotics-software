@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
-public class FusionDataSegment
+/**
+ * This data set includes points which are in a superpixel.
+ * The data has its own id and basic planar region information such as center and normal.
+ * The adjacent score is to determine which segments are adjacent sufficiently.
+ */
+public class SegmentationRawData
 {
    private int id = -1;
 
@@ -27,7 +32,7 @@ public class FusionDataSegment
    private static final int numberOfAdjacentPixels = 20;
    private final TIntArrayList adjacentScore = new TIntArrayList();
 
-   public FusionDataSegment(int labelID)
+   public SegmentationRawData(int labelID)
    {
       imageSegmentLabel = labelID;
    }

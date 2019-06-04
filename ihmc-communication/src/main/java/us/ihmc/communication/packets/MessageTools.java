@@ -901,4 +901,18 @@ public class MessageTools
       scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
       scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
    }
+   
+   public static Point3D[] unpackScanPoint3ds(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
+   {
+      int numberOfScanPoints = stereoVisionPointCloudMessage.point_cloud_.size() / 3;
+      Point3D[] scanPoints = new Point3D[numberOfScanPoints];
+      for (int index = 0; index < numberOfScanPoints; index++)
+      {
+         Point3D scanPoint1 = new Point3D();
+         MessageTools.unpackScanPoint(stereoVisionPointCloudMessage, index, scanPoint1);
+         Point3D scanPoint = scanPoint1;
+         scanPoints[index] = scanPoint;
+      }
+      return scanPoints;
+   }
 }
