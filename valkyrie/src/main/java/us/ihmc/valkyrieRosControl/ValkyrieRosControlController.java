@@ -384,7 +384,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                         stateEstimatorParameters, sensorReaderFactory, estimatorContextFactory,
                                                                         estimatorRealtimeRos2Node, externalPelvisPoseSubscriber, outputWriter, gravity);
       int estimatorDivisor = 1;
-      EstimatorTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, masterFullRobotModel);
+      EstimatorTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getEstimatorDT(), masterFullRobotModel);
       yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
                                        estimatorThread.getYoGraphicsListRegistry());
       estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
@@ -409,7 +409,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
       if (!Precision.equals(robotModel.getControllerDT() / robotModel.getEstimatorDT(), controllerDivisor))
          throw new RuntimeException("Controller DT must be multiple of estimator DT.");
-      ControllerTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, masterFullRobotModel);
+      ControllerTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getEstimatorDT(), masterFullRobotModel);
       controllerTask.addRunnableOnTaskThread(new Runnable()
       {
          boolean initialized = false;
@@ -466,7 +466,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          RealtimeThread controllerRealtimeThread = new RealtimeThread(controllerPriority, controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
          tasks.add(controllerTask);
 
-         robotController = new BarrierScheduledRobotController<>(robotName, tasks, masterContext, TaskOverrunBehavior.SKIP_TICK);
+         robotController = new BarrierScheduledRobotController(robotName, tasks, masterContext, TaskOverrunBehavior.SKIP_TICK, robotModel.getEstimatorDT());
          controllerThread.getYoVariableRegistry().addChild(robotController.getYoVariableRegistry());
          if (valkyrieAffinity.setAffinity())
          {
