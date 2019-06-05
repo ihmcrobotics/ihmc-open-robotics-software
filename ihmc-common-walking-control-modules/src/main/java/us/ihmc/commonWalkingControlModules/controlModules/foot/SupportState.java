@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.apache.commons.math3.util.Precision;
-
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,6 +30,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -129,18 +129,10 @@ public class SupportState extends AbstractFootControlState
    private final FootRotationDetector footRotationDetector;
 
    private final YoBoolean liftOff;
-   private final YoDouble liftOffStartTime;
-   private final YoDouble liftOffStartPitch;
-   private final YoDouble liftOffFinalTime;
-   private final YoDouble liftOffFinalPitch;
-   private final YoDouble liftOffPitch;
-
    private final YoBoolean touchDown;
-   private final YoDouble touchDownStartTime;
-   private final YoDouble touchDownStartPitch;
-   private final YoDouble touchDownFinalTime;
-   private final YoDouble touchDownFinalPitch;
-   private final YoDouble touchDownPitch;
+   private final YoPolynomial pitchTrajectory;
+   private final YoDouble pitchTrajectoryEndTime;
+   private final YoDouble desiredPitch;
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -227,18 +219,10 @@ public class SupportState extends AbstractFootControlState
       footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
 
       liftOff = new YoBoolean(prefix + "LiftOff", registry);
-      liftOffStartTime = new YoDouble(prefix + "LiftOffStartTime", registry);
-      liftOffStartPitch = new YoDouble(prefix + "LiftOffStartPitch", registry);
-      liftOffFinalTime = new YoDouble(prefix + "LiftOffFinalTime", registry);
-      liftOffFinalPitch = new YoDouble(prefix + "LiftOffFinalPitch", registry);
-      liftOffPitch = new YoDouble(prefix + "LiftOffPitch", registry);
-
       touchDown = new YoBoolean(prefix + "TouchDown", registry);
-      touchDownStartTime = new YoDouble(prefix + "TouchDownStartTime", registry);
-      touchDownStartPitch = new YoDouble(prefix + "TouchDownStartPitch", registry);
-      touchDownFinalTime = new YoDouble(prefix + "TouchDownFinalTime", registry);
-      touchDownFinalPitch = new YoDouble(prefix + "TouchDownFinalPitch", registry);
-      touchDownPitch = new YoDouble(prefix + "TouchDownPitch", registry);
+      pitchTrajectory = new YoPolynomial(prefix + "PitchTrajectory", 3, registry);
+      pitchTrajectoryEndTime = new YoDouble(prefix + "PitchTrajectoryEndTime", registry);
+      desiredPitch = new YoDouble(prefix + "DesiredPitch", registry);
    }
 
    @Override
@@ -269,19 +253,7 @@ public class SupportState extends AbstractFootControlState
       footRotationDetector.reset();
 
       liftOff.set(false);
-      liftOffStartPitch.set(Double.NaN);
-      liftOffFinalPitch.set(Double.NaN);
-      liftOffStartTime.set(Double.NaN);
-      liftOffFinalTime.set(Double.NaN);
-      liftOffPitch.set(Double.NaN);
-
       touchDown.set(false);
-      touchDownStartPitch.set(Double.NaN);
-      touchDownFinalPitch.set(Double.NaN);
-      touchDownStartTime.set(Double.NaN);
-      touchDownFinalTime.set(Double.NaN);
-      touchDownPitch.set(Double.NaN);
-
       desiredAngularVelocity.setToZero(worldFrame);
    }
 
@@ -485,164 +457,120 @@ public class SupportState extends AbstractFootControlState
       if (holdFootOrientationFlat.getValue())
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
 
-      if (liftOff.getValue())
+      // If we are tracking a lift off trajectory set the pitch of the desired orientation and the angular velocity accordingly.
+      double currentTime = controllerToolbox.getYoTime().getValue();
+      if (liftOff.getValue() && currentTime < pitchTrajectoryEndTime.getValue())
       {
-         double currentTime = controllerToolbox.getYoTime().getValue();
-         double percent = (currentTime - liftOffStartTime.getValue()) / (liftOffFinalTime.getValue() - liftOffStartTime.getValue());
-         percent = MathTools.clamp(percent, 0.0, 1.0);
-         liftOffPitch.set(liftOffStartPitch.getValue() + (liftOffFinalPitch.getValue() - liftOffStartPitch.getValue()) * percent);
-         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), liftOffPitch.getValue(), desiredOrientation.getRoll());
-         desiredAngularVelocity.set(0.0, (liftOffFinalPitch.getValue() - liftOffStartPitch.getValue()) / (liftOffFinalTime.getValue() - liftOffStartTime.getValue()), 0.0);
+         pitchTrajectory.compute(currentTime);
+         desiredPitch.set(pitchTrajectory.getPosition());
+         desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+         desiredAngularVelocity.set(0.0, pitchTrajectory.getVelocity(), 0.0);
       }
+
+      // If we are tracking a touch down trajectory set the pitch of the desired orientation and the angular velocity accordingly.
       if (touchDown.getValue())
       {
-         double currentTime = controllerToolbox.getYoTime().getValue();
-         double percent = (currentTime - touchDownStartTime.getValue()) / (touchDownFinalTime.getValue() - touchDownStartTime.getValue());
-         if (percent > 1.0)
+         if (currentTime >= pitchTrajectoryEndTime.getValue())
          {
-            finishTouchDown();
+            // Since the end of the touch down does not mean we exit this state it must be finished manually here.
+            PlaneContactState.enableAllContacts(controllerToolbox.getFootContactState(robotSide));
+            desiredAngularVelocity.setToZero(worldFrame);
+            touchDown.set(false);
          }
          else
          {
-            percent = MathTools.clamp(percent, 0.0, 1.0);
-            touchDownPitch.set(touchDownStartPitch.getValue() + (touchDownFinalPitch.getValue() - touchDownStartPitch.getValue()) * percent);
-            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), touchDownPitch.getValue(), desiredOrientation.getRoll());
-            desiredAngularVelocity.set(0.0, (touchDownFinalPitch.getValue() - touchDownStartPitch.getValue()) / (touchDownFinalTime.getValue() - touchDownStartTime.getValue()), 0.0);
+            pitchTrajectory.compute(currentTime);
+            desiredPitch.set(pitchTrajectory.getPosition());
+            desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
+            desiredAngularVelocity.set(0.0, pitchTrajectory.getVelocity(), 0.0);
          }
       }
 
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
 
+   /**
+    * Will cause the support state to perform a foot lift off. This should be called before a step is taken and the desired
+    * foot pitch at the start of swing is provided. This method will enable toe or heel contact points depending on the direction
+    * of the pitch motion.
+    *
+    * @param finalPitchInSoleZUp is the final desired foot pitch at lift off.
+    * @param duration the time until expected foot lift off.
+    */
    public void liftOff(double finalPitchInSoleZUp, double duration)
    {
-      if (isInLiftOffOrTouchDown())
-         return;
-      if (Double.isNaN(duration) || duration <= 0.0)
-         return;
-
-      double currentTime = controllerToolbox.getYoTime().getValue();
-
-      footOrientation.setToZero(contactableFoot.getSoleFrame());
-      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
-      footOrientation.changeFrame(soleZUpFrame);
-      double currentPitch = footOrientation.getPitch();
-
-      if (MathTools.epsilonEquals(finalPitchInSoleZUp, currentPitch, Math.toRadians(5.0)))
+      double currentPitch = computeCurrentFootPitchInSoleZUp();
+      if (!initializePitchTrajectory(currentPitch, finalPitchInSoleZUp, duration))
       {
          return;
       }
-
-      liftOffStartPitch.set(currentPitch);
-      liftOffFinalPitch.set(finalPitchInSoleZUp);
-      liftOffStartTime.set(currentTime);
-      liftOffFinalTime.set(currentTime + duration);
-      liftOffPitch.set(currentPitch);
 
       if (finalPitchInSoleZUp > currentPitch)
       {
-         enableToeContacts(controllerToolbox.getFootContactState(robotSide));
+         PlaneContactState.enableToeContacts(controllerToolbox.getFootContactState(robotSide));
       }
       else
       {
-         enableHeelContacts(controllerToolbox.getFootContactState(robotSide));
+         PlaneContactState.enableHeelContacts(controllerToolbox.getFootContactState(robotSide));
       }
 
       liftOff.set(true);
    }
 
+   /**
+    * Will cause the support state to perform a foot touch down. This should be called right after a step is finished (if the foot did
+    * not land flat on the ground) and the final flat foot pitch provided. This method will enable toe or heel contact points depending
+    * on the direction of the pitch motion.
+    *
+    * @param finalPitchInSoleZUp is the final desired foot pitch for full support.
+    * @param duration the time until the foot should enter full support.
+    */
    public void touchDown(double finalPitchInSoleZUp, double duration)
    {
-      if (isInLiftOffOrTouchDown())
-         return;
-      if (Double.isNaN(duration) || duration <= 0.0)
-         return;
-
-      double currentTime = controllerToolbox.getYoTime().getValue();
-
-      footOrientation.setToZero(contactableFoot.getSoleFrame());
-      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
-      footOrientation.changeFrame(soleZUpFrame);
-      double currentPitch = footOrientation.getPitch();
-
-      if (MathTools.epsilonEquals(finalPitchInSoleZUp, currentPitch, Math.toRadians(5.0)))
+      double currentPitch = computeCurrentFootPitchInSoleZUp();
+      if (!initializePitchTrajectory(currentPitch, finalPitchInSoleZUp, duration))
       {
-         finishTouchDown();
          return;
       }
-
-      touchDownStartPitch.set(currentPitch);
-      touchDownFinalPitch.set(finalPitchInSoleZUp);
-      touchDownStartTime.set(currentTime);
-      touchDownFinalTime.set(currentTime + duration);
-      touchDownPitch.set(currentPitch);
 
       if (finalPitchInSoleZUp < currentPitch)
       {
-         enableToeContacts(controllerToolbox.getFootContactState(robotSide));
+         PlaneContactState.enableToeContacts(controllerToolbox.getFootContactState(robotSide));
       }
       else
       {
-         enableHeelContacts(controllerToolbox.getFootContactState(robotSide));
+         PlaneContactState.enableHeelContacts(controllerToolbox.getFootContactState(robotSide));
       }
 
       touchDown.set(true);
    }
 
-   private static void enableToeContacts(YoPlaneContactState contactState)
-   {
-      double maxX = Double.NEGATIVE_INFINITY;
-      for (int i = 0; i < contactState.getContactPoints().size(); i++)
-      {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
-         maxX = Math.max(maxX, x);
-      }
-      for (int i = 0; i < contactState.getContactPoints().size(); i++)
-      {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
-         contactState.getContactPoints().get(i).setInContact(Precision.equals(x, maxX));
-      }
-      contactState.notifyContactStateHasChanged();
-   }
-
-   private static void enableHeelContacts(YoPlaneContactState contactState)
-   {
-      double minX = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < contactState.getContactPoints().size(); i++)
-      {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
-         minX = Math.min(minX, x);
-      }
-      for (int i = 0; i < contactState.getContactPoints().size(); i++)
-      {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
-         contactState.getContactPoints().get(i).setInContact(Precision.equals(x, minX));
-      }
-      contactState.notifyContactStateHasChanged();
-   }
-
-   private void finishTouchDown()
-   {
-      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
-      for (int i = 0; i < contactState.getContactPoints().size(); i++)
-      {
-         contactState.getContactPoints().get(i).setInContact(true);
-      }
-      contactState.notifyContactStateHasChanged();
-
-      touchDown.set(false);
-      touchDownStartPitch.set(Double.NaN);
-      touchDownFinalPitch.set(Double.NaN);
-      touchDownStartTime.set(Double.NaN);
-      touchDownFinalTime.set(Double.NaN);
-      touchDownPitch.set(Double.NaN);
-
-      desiredAngularVelocity.setToZero(worldFrame);
-   }
-
    private boolean isInLiftOffOrTouchDown()
    {
       return liftOff.getValue() || touchDown.getValue();
+   }
+
+   private boolean initializePitchTrajectory(double currentPitchInSoleZUp, double finalPitchInSoleZUp, double duration)
+   {
+      if (isInLiftOffOrTouchDown())
+         return false;
+      if (Double.isNaN(duration) || duration <= 0.0)
+         return false;
+      if (MathTools.epsilonEquals(finalPitchInSoleZUp, currentPitchInSoleZUp, Math.toRadians(5.0)))
+         return false;
+
+      double currentTime = controllerToolbox.getYoTime().getValue();
+      pitchTrajectoryEndTime.set(currentTime + duration);
+      pitchTrajectory.setLinear(currentTime, pitchTrajectoryEndTime.getValue(), currentPitchInSoleZUp, finalPitchInSoleZUp);
+      return true;
+   }
+
+   private double computeCurrentFootPitchInSoleZUp()
+   {
+      footOrientation.setToZero(contactableFoot.getSoleFrame());
+      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
+      footOrientation.changeFrame(soleZUpFrame);
+      return footOrientation.getPitch();
    }
 
    public void requestFootholdExploration()
