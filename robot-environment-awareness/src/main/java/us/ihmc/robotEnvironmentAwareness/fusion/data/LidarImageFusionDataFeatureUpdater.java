@@ -54,11 +54,6 @@ public class LidarImageFusionDataFeatureUpdater
       return true;
    }
 
-   public void addSegmentNodeData(int seedLabel, int segmentId)
-   {
-      segments.add(createSegmentNodeData(seedLabel, segmentId));
-   }
-
    /**
     * iterate computation until there is no more candidate to try merge.
     */
@@ -66,7 +61,7 @@ public class LidarImageFusionDataFeatureUpdater
    {
       //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
       SegmentationRawData seedImageSegment = data.getFusionDataSegment(seedLabel);
-      seedImageSegment.setID(segmentId);
+      seedImageSegment.setId(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
 
       boolean isPropagating = true;
@@ -98,7 +93,7 @@ public class LidarImageFusionDataFeatureUpdater
             //LogTools.info("connectivity test result is ## " + (isParallel && isCoplanar) + " ## isParallel " + isParallel + " isCoplanar " + isCoplanar);
             if (isParallel && isCoplanar)
             {
-               candidate.setID(segmentId);
+               candidate.setId(segmentId);
                newSegment.merge(candidate);
                isPropagating = true;
             }

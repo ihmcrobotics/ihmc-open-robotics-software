@@ -101,7 +101,7 @@ public class SegmentationRawData
       pca.getStandardDeviation(standardDeviation);
    }
 
-   public void setID(int id)
+   public void setId(int id)
    {
       this.id = id;
    }

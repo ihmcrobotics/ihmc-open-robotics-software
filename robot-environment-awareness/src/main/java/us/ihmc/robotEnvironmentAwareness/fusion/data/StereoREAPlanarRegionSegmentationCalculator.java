@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.fusion;
+package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,75 +7,88 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationNodeData;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 
-public class StereoREAPlanarRegionFeatureUpdater
+public class StereoREAPlanarRegionSegmentationCalculator
 {
    private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
 
-   private static final int maximumNumberOfTrialsToFindUnIdLabel = 100;
+   private static final int maximumNumberOfTrialsToFindUnIdLabel = 500;
 
    private final AtomicReference<LidarImageFusionData> data = new AtomicReference<LidarImageFusionData>(null);
    private int numberOfLabels = 0;
    private final List<SegmentationNodeData> segments = new ArrayList<SegmentationNodeData>();
+   private List<PlanarRegionSegmentationRawData> regionsNodeData = new ArrayList<>();
 
    private final Random random = new Random(0612L);
 
-   public StereoREAPlanarRegionFeatureUpdater()
-   {
-      
-   }
-   
-   public void update(LidarImageFusionData lidarImageFusionData)
+   public void updateFusionData(LidarImageFusionData lidarImageFusionData)
    {
       data.set(lidarImageFusionData);
       numberOfLabels = lidarImageFusionData.getNumberOfLabels();
    }
 
-   public int getNumberOfSegments()
-   {
-      return segments.size();
-   }
-
-   public SegmentationNodeData getSegmentationNodeData(int index)
-   {
-      return segments.get(index);
-   }
-
    public void initialize()
    {
       segments.clear();
+      regionsNodeData.clear();
    }
 
-   public boolean iterateSegmenataionPropagation(int segmentId)
+   public boolean calculate()
+   {
+      int numberOfIterate = 600;
+      for (int i = 0; i < numberOfIterate; i++)
+      {
+         if (!iterateSegmenataionPropagation(i))
+         {
+            LogTools.info("iterative is terminated " + i);
+            return false;
+         }
+      }
+      convertNodeDataToPlanarRegionSegmentationRawData();
+      return true;
+   }
+
+   public List<PlanarRegionSegmentationRawData> getSegmentationRawData()
+   {
+      return regionsNodeData;
+   }
+
+   private void convertNodeDataToPlanarRegionSegmentationRawData()
+   {
+      for (SegmentationNodeData segmentationNodeData : segments)
+      {
+         PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(segmentationNodeData.getId(),
+                                                                                                               segmentationNodeData.getNormal(),
+                                                                                                               segmentationNodeData.getCenter(),
+                                                                                                               segmentationNodeData.getPointsInSegment());
+         regionsNodeData.add(planarRegionSegmentationRawData);
+      }
+   }
+
+   private boolean iterateSegmenataionPropagation(int segmentId)
    {
       int nonIDLabel = selectRandomNonIdentifiedLabel();
-      LogTools.info("" + segmentId + " randomSeedLabel " + nonIDLabel);
+      //LogTools.info("" + segmentId + " randomSeedLabel " + nonIDLabel);
 
       if (nonIDLabel == -1)
-         return false;
+         // TODO: return false;
+         return true;
       else
          segments.add(createSegmentNodeData(nonIDLabel, segmentId));
 
       return true;
    }
 
-   public void addSegmentNodeData(int seedLabel, int segmentId)
-   {
-      segments.add(createSegmentNodeData(seedLabel, segmentId));
-   }
-
    /**
     * iterate computation until there is no more candidate to try merge.
     */
-   public SegmentationNodeData createSegmentNodeData(int seedLabel, int segmentId)
+   private SegmentationNodeData createSegmentNodeData(int seedLabel, int segmentId)
    {
       //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
       SegmentationRawData seedImageSegment = data.get().getFusionDataSegment(seedLabel);
-      seedImageSegment.setID(segmentId);
+      seedImageSegment.setId(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
 
       boolean isPropagating = true;
@@ -107,14 +120,14 @@ public class StereoREAPlanarRegionFeatureUpdater
             //LogTools.info("connectivity test result is ## " + (isParallel && isCoplanar) + " ## isParallel " + isParallel + " isCoplanar " + isCoplanar);
             if (isParallel && isCoplanar)
             {
-               candidate.setID(segmentId);
+               candidate.setId(segmentId);
                newSegment.merge(candidate);
                isPropagating = true;
             }
          }
       }
 
-      LogTools.info("allLablesInNewSegment");
+      //LogTools.info("allLablesInNewSegment");
       TIntArrayList allLablesInNewSegment = newSegment.getLabels();
       for (int labelNumber : allLablesInNewSegment.toArray())
       {
@@ -144,5 +157,4 @@ public class StereoREAPlanarRegionFeatureUpdater
       }
       return -1;
    }
-   
 }

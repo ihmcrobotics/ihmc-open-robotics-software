@@ -6,10 +6,12 @@ import java.util.List;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class SegmentationNodeData
 {
+   private int id = PlanarRegion.NO_REGION_ID;
    private final TIntArrayList labels = new TIntArrayList();
 
    private final Vector3D normal = new Vector3D();
@@ -21,6 +23,7 @@ public class SegmentationNodeData
 
    public SegmentationNodeData(SegmentationRawData seedImageSegment)
    {
+      id = seedImageSegment.getId();
       labels.add(seedImageSegment.getImageSegmentLabel());
 
       normal.set(seedImageSegment.getNormal());
@@ -79,6 +82,11 @@ public class SegmentationNodeData
          if (normal.getZ() < 0.0)
             normal.negate();
       }
+   }
+   
+   public int getId()
+   {
+      return id;
    }
 
    public TIntArrayList getLabels()
