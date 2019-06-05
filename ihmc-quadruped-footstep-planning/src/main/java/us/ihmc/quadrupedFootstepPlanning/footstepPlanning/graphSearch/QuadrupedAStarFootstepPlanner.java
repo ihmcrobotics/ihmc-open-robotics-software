@@ -662,8 +662,10 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    {
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
+//      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
+//                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
+      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
+                                                                                                         parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
       FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
 
