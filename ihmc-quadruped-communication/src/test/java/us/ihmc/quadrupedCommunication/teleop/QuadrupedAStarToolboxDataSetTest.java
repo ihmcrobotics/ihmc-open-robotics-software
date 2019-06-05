@@ -48,7 +48,7 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       VISUALIZE = true;
       test.setup();
 
-      test.runAssertions(DataSetName._20171215_214801_StairsUpDown);
+      test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
       ThreadTools.sleepForever();
       test.tearDown();
    }
