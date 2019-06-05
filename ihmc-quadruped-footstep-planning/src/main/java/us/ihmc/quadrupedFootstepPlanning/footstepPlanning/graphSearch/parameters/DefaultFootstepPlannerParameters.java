@@ -118,7 +118,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getProjectInsideDistanceForPostProcessing()
    {
-      return 0.04;
+      return 0.07;
    }
 
    /** {@inheritDoc} */
@@ -132,7 +132,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public boolean getProjectInsideUsingConvexHullDuringPostProcessing()
    {
-      return true;
+      return false;
    }
 
    @Override
