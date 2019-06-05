@@ -62,7 +62,7 @@ public class LidarImageFusionRawData
    public void clear()
    {
       for(SegmentationRawData fusionDataSegment:fusionDataSegments)
-         fusionDataSegment.setID(-1);
+         fusionDataSegment.setId(-1);
    }
 
    public void initializeSegments()

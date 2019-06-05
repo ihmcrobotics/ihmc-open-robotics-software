@@ -35,7 +35,7 @@ public class LidarImageFusionDataBuffer
       return newBuffer.getAndSet(null);
    }
 
-   public void update()
+   public void updateNewBuffer()
    {
       long updateStartTime = System.nanoTime();
 
@@ -51,17 +51,15 @@ public class LidarImageFusionDataBuffer
       newBuffer.set(data);
 
       double updatingTime = Conversions.nanosecondsToSeconds(System.nanoTime() - updateStartTime);
-
-      String computationTime = Double.toString(updatingTime);
-      messager.submitMessage(LidarImageFusionAPI.ComputationTime, computationTime);
+      System.out.println("LidarImageFusionDataBuffer updatingTime " + updatingTime);
    }
 
-   public void handleStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
    {
       latestStereoVisionPointCloudMessage.set(message);
    }
 
-   public void handleBufferedImage(BufferedImage bufferedImage)
+   public void updateLatestBufferedImage(BufferedImage bufferedImage)
    {
       latestBufferedImage.set(bufferedImage);
    }

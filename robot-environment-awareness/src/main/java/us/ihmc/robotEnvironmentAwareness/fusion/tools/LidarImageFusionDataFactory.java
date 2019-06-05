@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
-import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_ximgproc;
@@ -13,8 +12,6 @@ import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.messager.Messager;
-import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 

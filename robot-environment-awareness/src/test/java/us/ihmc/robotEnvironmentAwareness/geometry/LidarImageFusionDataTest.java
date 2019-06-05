@@ -67,6 +67,12 @@ public class LidarImageFusionDataTest
       updater.createSegmentNodeData(253, 2);
       updater.createSegmentNodeData(130, 3);
    }
+   
+   @Test
+   public void newSegmentationPropagationTest()
+   {
+      
+   }
 
    @Test
    public void dataConstructionFromJavaCV()
