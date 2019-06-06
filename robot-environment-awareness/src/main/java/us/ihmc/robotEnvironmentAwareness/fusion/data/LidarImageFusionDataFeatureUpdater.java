@@ -59,7 +59,6 @@ public class LidarImageFusionDataFeatureUpdater
     */
    public SegmentationNodeData createSegmentNodeData(int seedLabel, int segmentId)
    {
-      //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
       SegmentationRawData seedImageSegment = data.getFusionDataSegment(seedLabel);
       seedImageSegment.setId(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
@@ -71,15 +70,12 @@ public class LidarImageFusionDataFeatureUpdater
          isPropagating = false;
 
          int[] adjacentLabels = data.getAdjacentLabels(newSegment.getLabels());
-         //LogTools.info("propagating " + adjacentLabels.length);
          for (int adjacentLabel : adjacentLabels)
          {
-            //LogTools.info("   candidate label is " + adjacentLabels[i]);
             SegmentationRawData candidate = data.getFusionDataSegment(adjacentLabel);
 
             if (candidate.isSparse(planarRegionPropagationParameters.getSparseThreshold()))
             {
-               //LogTools.info("is too sparce "+candidate.getImageSegmentLabel());
                continue;
             }
 
@@ -90,7 +86,6 @@ public class LidarImageFusionDataFeatureUpdater
             if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
                isCoplanar = true;
 
-            //LogTools.info("connectivity test result is ## " + (isParallel && isCoplanar) + " ## isParallel " + isParallel + " isCoplanar " + isCoplanar);
             if (isParallel && isCoplanar)
             {
                candidate.setId(segmentId);
@@ -100,7 +95,6 @@ public class LidarImageFusionDataFeatureUpdater
          }
       }
 
-      LogTools.info("allLablesInNewSegment");
       TIntArrayList allLablesInNewSegment = newSegment.getLabels();
       for (int labelNumber : allLablesInNewSegment.toArray())
       {
@@ -108,7 +102,6 @@ public class LidarImageFusionDataFeatureUpdater
       }
 
       int[] adjacentLabels = data.getAdjacentLabels(newSegment.getLabels());
-      //LogTools.info("extending for " + adjacentLabels.length + " segments");
       for (int adjacentLabel : adjacentLabels)
       {
          SegmentationRawData adjacentData = data.getFusionDataSegment(adjacentLabel);

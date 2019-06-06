@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -7,38 +8,38 @@
 
 <AnchorPane prefHeight="251.0" prefWidth="1628.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.fusion.controller.StereoREAAnchorPaneController">
    <children>
-      <HBox layoutY="10.0" prefHeight="180.0" prefWidth="1000.0" spacing="20.0">
+      <HBox layoutY="10.0" prefHeight="200.0" prefWidth="1300.0" spacing="20.0">
          <children>
             <HBox prefHeight="213.0" prefWidth="90.0">
                <children>
                   <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="5.0">
                      <children>
+                        <Label fx:id="computationTime" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" />
                         <ToggleButton fx:id="enableREA" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="25.0" prefWidth="176.0" text="Enable" />
                         <Button fx:id="clearREA" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearREA" text="Clear" />
-                        <Label fx:id="computationTime" alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="25.0" />
-                        <Button fx:id="runSREA" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#runSREA" text="Run SREA" />
+                        <Button fx:id="runSREA" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#runSREA" text="run REA" />
                      </children>
                   </VBox>
                </children>
             </HBox>
-            <VBox prefHeight="213.0" prefWidth="200.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Stereo Buffer" textAlignment="CENTER" />
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
                      <children>
-                        <Slider fx:id="stereoBuffer" blockIncrement="1000.0" majorTickUnit="10000.0" max="100000.0" minorTickCount="1000" prefHeight="48.0" prefWidth="182.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="2000.0" />
+                        <Slider fx:id="stereoBuffer" blockIncrement="1000.0" majorTickUnit="10000.0" max="200000.0" minorTickCount="1000" prefHeight="48.0" prefWidth="182.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" />
                         <Button fx:id="showBuffer" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showBuffer" text="Show Buffer" />
                         <Button fx:id="showProjection" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showProjection" text="Show Projection" />
                      </children>
                   </VBox>
                </children>
             </VBox>
-            <VBox prefHeight="213.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Image Processing Parameters" textAlignment="CENTER" />
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Pixel Size" textAlignment="CENTER" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Pixel Size" textAlignment="CENTER" />
                         <Slider fx:id="superpixelSize" max="60.0" maxWidth="1.7976931348623157E308" min="10.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
                      </children>
                   </HBox>
@@ -56,49 +57,90 @@
                   </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Connectivity" textAlignment="CENTER" />
-                        <Slider fx:id="superpixelConnectivity" majorTickUnit="5.0" maxWidth="1.7976931348623157E308" min="10.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
+                        <ToggleButton fx:id="enableConnectivity" mnemonicParsing="false" prefHeight="25.0" prefWidth="110.0" selected="true" text="Element Size">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </ToggleButton>
+                        <Slider fx:id="superpixelMinimumElement" majorTickUnit="5.0" maxWidth="1.7976931348623157E308" min="10.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
                      </children>
                   </HBox>
                </children>
             </VBox>
-            <VBox prefHeight="213.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Propagation Parameters" textAlignment="CENTER" />
-                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                  <HBox prefHeight="60.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Sparse" textAlignment="CENTER" />
-                        <Slider fx:id="sparseThreshold" blockIncrement="0.01" majorTickUnit="0.01" max="0.05" maxWidth="1.7976931348623157E308" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" prefWidth="110.0" text="Sparse Bound" textAlignment="CENTER" />
+                        <VBox prefHeight="200.0">
+                           <children>
+                              <Slider fx:id="sparseLowerThreshold" blockIncrement="0.01" majorTickUnit="0.005" max="0.05" maxWidth="1.7976931348623157E308" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" />
+                              <Slider fx:id="sparseUpperThreshold" blockIncrement="0.01" majorTickUnit="0.005" max="0.05" maxWidth="1.7976931348623157E308" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.03" />
+                           </children>
+                        </VBox>
                      </children>
                   </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Proximity (m)" textAlignment="CENTER" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="110.0" text="Proximity (m)" textAlignment="CENTER" />
                         <Slider fx:id="proximityThreshold" blockIncrement="1.0" majorTickUnit="0.01" max="0.1" maxWidth="1.7976931348623157E308" min="0.01" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" />
                      </children>
                   </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Planarity (rad)" textAlignment="CENTER" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="110.0" text="Planarity (rad)" textAlignment="CENTER" />
                         <Slider fx:id="planarityThreshold" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" maxWidth="1.7976931348623157E308" min="0.3" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.6" />
                      </children>
                   </HBox>
                </children>
             </VBox>
-            <VBox prefHeight="213.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+            <VBox prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Extending Parameters" textAlignment="CENTER" />
-                  <ToggleButton fx:id="updateExtendedData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Update Extended Data" />
+                  <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
+                     <children>
+                        <CheckBox fx:id="enableExtending" mnemonicParsing="false" prefHeight="17.0" prefWidth="100.0" selected="true" text="Extending" />
+                        <CheckBox fx:id="updateExtendedData" mnemonicParsing="false" prefHeight="17.0" prefWidth="100.0" text="Update Plane" />
+                     </children>
+                  </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Distance (m)" textAlignment="CENTER" />
-                        <Slider fx:id="extendingDistanceThreshold" blockIncrement="0.01" majorTickUnit="0.01" max="0.05" maxWidth="1.7976931348623157E308" min="0.01" minorTickCount="0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" />
+                        <Slider fx:id="extendingDistanceThreshold" blockIncrement="0.01" majorTickUnit="0.005" max="0.05" maxWidth="1.7976931348623157E308" min="0.005" minorTickCount="0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.01" />
                      </children>
                   </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Radius (m)" textAlignment="CENTER" />
                         <Slider fx:id="ExtendingRadius" blockIncrement="0.01" majorTickUnit="0.01" max="0.05" maxWidth="1.7976931348623157E308" min="0.01" minorTickCount="0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.03" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="200.0" spacing="5.0" style="-fx-border-color: lightblue; -fx-padding: 3; -fx-border-radius: 5; -fx-border-width: 2;">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Stitching Parameters" textAlignment="CENTER" />
+                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="?" textAlignment="CENTER" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Alpha convex hull" textAlignment="CENTER" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Proximity (m)" textAlignment="CENTER" />
+                        <Slider fx:id="proximityThreshold1" blockIncrement="1.0" majorTickUnit="0.01" max="0.1" maxWidth="1.7976931348623157E308" min="0.01" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.05" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="42.0" prefWidth="110.0" text="Planarity (rad)" textAlignment="CENTER" />
+                        <Slider fx:id="planarityThreshold1" blockIncrement="0.1" majorTickUnit="0.1" max="1.0" maxWidth="1.7976931348623157E308" min="0.3" minorTickCount="1" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="0.6" />
                      </children>
                   </HBox>
                </children>

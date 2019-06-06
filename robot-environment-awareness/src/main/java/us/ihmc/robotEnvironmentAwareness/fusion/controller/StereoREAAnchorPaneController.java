@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.fusion.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
@@ -43,10 +44,16 @@ public class StereoREAAnchorPaneController
    private Slider superpixelIterate;
 
    @FXML
-   private Slider superpixelConnectivity;
+   private ToggleButton enableConnectivity;
 
    @FXML
-   private Slider sparseThreshold;
+   private Slider superpixelMinimumElement;
+
+   @FXML
+   private Slider sparseLowerThreshold;
+
+   @FXML
+   private Slider sparseUpperThreshold;
 
    @FXML
    private Slider proximityThreshold;
@@ -55,7 +62,10 @@ public class StereoREAAnchorPaneController
    private Slider planarityThreshold;
 
    @FXML
-   private ToggleButton updateExtendedData;
+   private CheckBox enableExtending;
+
+   @FXML
+   private CheckBox updateExtendedData;
 
    @FXML
    private Slider extendingDistanceThreshold;
@@ -70,7 +80,7 @@ public class StereoREAAnchorPaneController
 
    @FXML
    private Button runSREA;
-   
+
    public void initialize(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -82,12 +92,14 @@ public class StereoREAAnchorPaneController
       imageSegmentationParametersProperty.bindBidirectionalPixelSize(superpixelSize.valueProperty());
       imageSegmentationParametersProperty.bindBidirectionalPixelRuler(superpixelRuler.valueProperty());
       imageSegmentationParametersProperty.bindBidirectionalIterate(superpixelIterate.valueProperty());
-      imageSegmentationParametersProperty.bindBidirectionalMinElementSize(superpixelConnectivity.valueProperty());
+      imageSegmentationParametersProperty.bindBidirectionalEnableConnectivity(enableConnectivity.selectedProperty());
+      imageSegmentationParametersProperty.bindBidirectionalMinElementSize(superpixelMinimumElement.valueProperty());
       messager.bindBidirectional(LidarImageFusionAPI.ImageSegmentationParameters, imageSegmentationParametersProperty, true);
 
-      planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseThreshold.valueProperty());
+      planarRegionPropagationParametersProperty.bindBidirectionalSparseThreshold(sparseLowerThreshold.valueProperty(), sparseUpperThreshold.valueProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalProximityThreshold(proximityThreshold.valueProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalPlanarityThreshold(planarityThreshold.valueProperty());
+      planarRegionPropagationParametersProperty.bindBidirectionalEnableExtending(enableExtending.selectedProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalUpdateExtendedData(updateExtendedData.selectedProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalExtendingDistanceThreshold(extendingDistanceThreshold.valueProperty());
       planarRegionPropagationParametersProperty.bindBidirectionalExtendingRadiusThreshold(ExtendingRadius.valueProperty());
@@ -123,7 +135,7 @@ public class StereoREAAnchorPaneController
    {
       messager.submitMessage(LidarImageFusionAPI.ShowStereoBufferProjection, true);
    }
-   
+
    public void runSREA()
    {
       messager.submitMessage(LidarImageFusionAPI.RunStereoREA, true);
