@@ -146,28 +146,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                                                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
-      Point2D frontLeft = new Point2D(previousNode.getX(FRONT_LEFT), previousNode.getY(FRONT_LEFT));
-      Point2D frontRight = new Point2D(previousNode.getX(FRONT_RIGHT), previousNode.getY(FRONT_RIGHT));
-      Point2D hindLeft = new Point2D(previousNode.getX(HIND_LEFT), previousNode.getY(HIND_LEFT));
-      Point2D hindRight = new Point2D(previousNode.getX(HIND_RIGHT), previousNode.getY(HIND_RIGHT));
-
-      switch (nextQuadrant)
-      {
-      case FRONT_LEFT:
-         frontLeft.set(newNodePosition);
-         break;
-      case FRONT_RIGHT:
-         frontRight.set(newNodePosition);
-         break;
-      case HIND_LEFT:
-         hindLeft.set(newNodePosition);
-         break;
-      default:
-         hindRight.set(newNodePosition);
-         break;
-      }
-
-      return new FootstepNode(nextQuadrant, frontLeft, frontRight, hindLeft, hindRight, xGaitSettings.getStanceLength(),
-                              xGaitSettings.getStanceWidth());
+      return FootstepNode.constructNodeFromOtherNode(nextQuadrant, newNodePosition, previousNode, xGaitSettings.getStanceLength(),
+                                                     xGaitSettings.getStanceWidth());
    }
 }

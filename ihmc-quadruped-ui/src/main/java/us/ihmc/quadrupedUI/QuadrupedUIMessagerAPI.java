@@ -1,15 +1,32 @@
 package us.ihmc.quadrupedUI;
 
-import controller_msgs.msg.dds.*;
+import java.util.List;
+
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredPose;
+import controller_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SoleTrajectoryMessage;
+import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.messager.MessagerAPIFactory.*;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
+import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerStatus;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerTargetType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlannerType;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -17,8 +34,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.List;
 
 public class QuadrupedUIMessagerAPI
 {
@@ -44,6 +59,9 @@ public class QuadrupedUIMessagerAPI
    private static final CategoryTheme FlatGround = apiFactory.createCategoryTheme("FlatGround");
    private static final CategoryTheme Position = apiFactory.createCategoryTheme("Position");
    private static final CategoryTheme Orientation = apiFactory.createCategoryTheme("Orientation");
+   private static final CategoryTheme Left = apiFactory.createCategoryTheme("Left");
+   private static final CategoryTheme Right = apiFactory.createCategoryTheme("Right");
+   private static final CategoryTheme Camera = apiFactory.createCategoryTheme("Camera");
 
    private static final CategoryTheme Start = apiFactory.createCategoryTheme("Start");
    private static final CategoryTheme LowLevelGoal = apiFactory.createCategoryTheme("LowLevelGoal");
@@ -60,6 +78,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Begin = apiFactory.createTypedTopicTheme("Start");
    private static final TypedTopicTheme<Boolean> Stop = apiFactory.createTypedTopicTheme("Stop");
+   private static final TypedTopicTheme<Boolean> Pause = apiFactory.createTypedTopicTheme("Pause");
    private static final TypedTopicTheme<Double> DesiredBodyHeight = apiFactory.createTypedTopicTheme("BodyHeight");
    private static final TypedTopicTheme<QuadrupedXGaitSettingsReadOnly> XGaitSettings = apiFactory.createTypedTopicTheme("XGaitSettings");
    private static final TypedTopicTheme<FootstepPlannerParameters> FootstepPlannerParameters = apiFactory.createTypedTopicTheme("FootstepPlannerParameters");
@@ -69,6 +88,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<SoleTrajectoryMessage> SoleTrajectoryMessage = apiFactory.createTypedTopicTheme("SoleTrajectoryMessage");
    private static final TypedTopicTheme<QuadrupedTeleopDesiredPose> DesiredTeleopBodyPoseMessage = apiFactory.createTypedTopicTheme("TeleopDesiredPose");
    private static final TypedTopicTheme<QuadrupedTeleopDesiredVelocity> DesiredTeleopVelocityMessage = apiFactory.createTypedTopicTheme("DesiredTeleopVelocityMessage");
+   private static final TypedTopicTheme<RobotQuadrant> LoadBearingRequest = apiFactory.createTypedTopicTheme("LoadBearingRequest");
 
    private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Integer> Id = apiFactory.createTypedTopicTheme("Id");
@@ -86,6 +106,7 @@ public class QuadrupedUIMessagerAPI
    private static final TypedTopicTheme<List<? extends Point3DReadOnly>> BodyPathPlan = apiFactory.createTypedTopicTheme("BodyPathPlan");
    private static final TypedTopicTheme<Double> Time = apiFactory.createTypedTopicTheme("Time");
    private static final TypedTopicTheme<Double> Length = apiFactory.createTypedTopicTheme("Length");
+   private static final TypedTopicTheme<VideoPacket> Video = apiFactory.createTypedTopicTheme("Video");
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("QuadrupedUI"));
 
@@ -100,16 +121,19 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<FullQuadrupedRobotModel> RobotModelTopic = Root.child(Robot).topic(RobotModel);
 
    /* Environment */
+   public static final Topic<Boolean> PlanarRegionDataClearTopic = Root.child(Environment).child(PlanarRegions).topic(Reset);
    public static final Topic<PlanarRegionsList> PlanarRegionDataTopic = Root.child(Environment).child(PlanarRegions).topic(PlanarRegionsList);
    public static final Topic<Boolean> AcceptNewPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Enable);
    public static final Topic<Boolean> AssumeFlatGroundTopic = Root.child(Environment).child(PlanarRegions).child(FlatGround).topic(Enable);
    public static final Topic<Boolean> ShowPlanarRegionsTopic = Root.child(Environment).child(PlanarRegions).topic(Show);
-
+   public static final Topic<VideoPacket> LeftCameraVideo = Root.child(Camera).child(Left).topic(Video);
+   public static final Topic<VideoPacket> RightCameraVideo = Root.child(Camera).child(Right).topic(Video);
 
    /* Status */
    public static final Topic<QuadrupedFootstepStatusMessage> FootstepStatusMessageTopic = Root.child(Controller).child(Status).topic(FootstepStatusMessage);
    public static final Topic<HighLevelControllerName> CurrentControllerNameTopic = Root.child(Controller).child(Status).topic(ControllerState);
    public static final Topic<HighLevelControllerName> DesiredControllerNameTopic = Root.child(Controller).child(Command).topic(ControllerState);
+   public static final Topic<QuadrupedSteppingStateEnum> CurrentSteppingStateNameTopic = Root.child(Controller).child(Status).topic(SteppingState);
    public static final Topic<QuadrupedSteppingStateEnum> DesiredSteppingStateNameTopic = Root.child(Controller).child(Command).topic(SteppingState);
 
    /* Teleop */
@@ -120,6 +144,9 @@ public class QuadrupedUIMessagerAPI
    public static final Topic<Boolean> EnableJoystickTopic = Root.child(Command).child(Joystick).topic(Enable);
    public static final Topic<QuadrupedTimedStepListMessage> ManualStepsListMessageTopic = Root.child(Command).child(StepTeleop).topic(StepsListMessage);
    public static final Topic<SoleTrajectoryMessage> SoleTrajectoryMessageTopic = Root.child(Command).child(StepTeleop).topic(SoleTrajectoryMessage);
+   public static final Topic<Boolean> PauseWalkingTopic = Root.child(Command).child(StepTeleop).topic(Pause);
+   public static final Topic<Boolean> AbortWalkingTopic = Root.child(Command).child(StepTeleop).topic(Stop);
+   public static final Topic<RobotQuadrant> LoadBearingRequestTopic = Root.child(Command).child(StepTeleop).topic(LoadBearingRequest);
 
    public static final Topic<QuadrupedTeleopDesiredVelocity> DesiredTeleopVelocity = Root.child(Command).child(StepTeleop).topic(DesiredTeleopVelocityMessage);
    public static final Topic<QuadrupedTeleopDesiredPose> DesiredTeleopBodyPoseTopic = Root.child(Command).child(BodyTeleop).topic(DesiredTeleopBodyPoseMessage);

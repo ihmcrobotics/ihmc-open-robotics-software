@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.LidarScanPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher.StereoVisionWorldTransformCalculator;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -39,7 +39,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_valkyrie_sensor_suite_node");
 
-   private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final HumanoidRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
@@ -49,11 +49,11 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final String robotName;
 
    public ValkyrieSensorSuiteManager(String robotName, FullHumanoidRobotModelFactory fullRobotModelFactory, CollisionBoxProvider collisionBoxProvider,
-                                     DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, HumanoidRobotSensorInformation sensorInformation,
+                                     RobotROSClockCalculator rosClockCalculator, HumanoidRobotSensorInformation sensorInformation,
                                      ValkyrieJointMap jointMap, RobotTarget target)
    {
       this.robotName = robotName;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
 
@@ -61,13 +61,13 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
       String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
       lidarScanPublisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
-      lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
+      lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
 
       if (ENABLE_STEREO_PUBLISHER)
       {
          stereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
-         stereoVisionPointCloudPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
+         stereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
          stereoVisionPointCloudPublisher.setCustomStereoVisionTransformer(createCustomStereoTransformCalculator());
       }
       else
@@ -85,7 +85,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(multisenseLeftEyeCameraParameters.getRobotSide(), fullRobotModelFactory,
                                                                         multisenseLeftEyeCameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer,
-                                                                        scsSensorsCommunicator, ros2Node, ppsTimestampOffsetProvider);
+                                                                        scsSensorsCommunicator, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
       cameraDataReceiver.start();
 
       lidarScanPublisher.receiveLidarFromSCS(scsSensorsCommunicator);
@@ -111,7 +111,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       boolean shouldUseRosParameterSetters = sensorInformation.setupROSParameterSetters();
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(fullRobotModelFactory, robotConfigurationDataBuffer, rosMainNode, ros2Node,
-                                                                                    ppsTimestampOffsetProvider, multisenseLeftEyeCameraParameters,
+                                                                                    rosClockCalculator, multisenseLeftEyeCameraParameters,
                                                                                     multisenseLidarParameters, multisenseStereoParameters,
                                                                                     shouldUseRosParameterSetters);
 
@@ -126,7 +126,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       }
 
       multiSenseSensorManager.initializeParameterListeners();
-      ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+      rosClockCalculator.setROSMainNode(rosMainNode);
       rosMainNode.execute();
    }
 

@@ -1,6 +1,7 @@
 package us.ihmc.ihmcPerception;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongUnaryOperator;
 
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.LocalizationPointMapPacket;
@@ -16,7 +17,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -33,7 +33,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
    private final IHMCROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
 
-   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
+   public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, Ros2Node ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, LocalizationPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ROS2Tools.createPublisher(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
@@ -44,8 +44,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
          @Override
          protected void newPose(String frameID, TimeStampedTransform3D timeStampedTransform)
          {
-            long timestamp = timeStampedTransform.getTimeStamp();
-            timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
+            long timestamp = robotMonotonicTimeCalculator.applyAsLong(timeStampedTransform.getTimeStamp());
             timeStampedTransform.setTimeStamp(timestamp);
 
             StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);

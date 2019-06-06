@@ -1,11 +1,21 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.viewers;
 
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.RADIUS;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startOpaqueMaterial;
+import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.startTransparentMaterial;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import javafx.scene.transform.Affine;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -13,10 +23,6 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.*;
 
 public class StartGoalOrientationViewer extends AnimationTimer
 {
@@ -26,6 +32,10 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final ArrowGraphic startArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.GREEN);
    private final ArrowGraphic lowLevelGoalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.DARKRED);
    private final ArrowGraphic goalArrow = new ArrowGraphic(0.2 * RADIUS, cylinderLength, Color.RED);
+
+   private final Affine startArrowAffine = new Affine();
+   private final Affine goalArrowAffine = new Affine();
+   private final Affine lowLevelGoalArrowAffine = new Affine();
 
    private final AtomicReference<Boolean> startRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
@@ -42,9 +52,11 @@ public class StartGoalOrientationViewer extends AnimationTimer
                                      Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
                                      Topic<Quaternion> lowLevelGoalOrientationTopic, Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
    {
-      startArrow.setMouseTransparent(true);
       lowLevelGoalArrow.setMouseTransparent(true);
-      goalArrow.setMouseTransparent(true);
+
+      startArrow.getTransforms().add(startArrowAffine);
+      goalArrow.getTransforms().add(goalArrowAffine);
+      lowLevelGoalArrow.getTransforms().add(lowLevelGoalArrowAffine);
 
       root.getChildren().add(startArrow);
       root.getChildren().add(lowLevelGoalArrow);
@@ -60,6 +72,17 @@ public class StartGoalOrientationViewer extends AnimationTimer
       startQuaternionReference = messager.createInput(startOrientationTopic, new Quaternion());
       lowLevelGoalQuaternionReference = messager.createInput(lowLevelGoalOrientationTopic, new Quaternion());
       goalQuaternionReference = messager.createInput(goalOrientationTopic, new Quaternion());
+
+      startArrow.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (!startRotationEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(startOrientationEditModeEnabledTopic, true);
+      });
+      goalArrow.addEventHandler(MouseEvent.MOUSE_CLICKED, e ->
+      {
+         if (!goalRotationEditModeEnabled.get() && !e.isShiftDown())
+            messager.submitMessage(goalOrientationEditModeEnabledTopic, true);
+      });
    }
 
    @Override
@@ -73,7 +96,7 @@ public class StartGoalOrientationViewer extends AnimationTimer
       Point3D startPosition = startPositionReference.get();
       if (startPosition != null)
       {
-         setArrowPose(startArrow, startPosition, startQuaternionReference.get().getYaw());
+         setArrowPose(startArrowAffine, startPosition, startQuaternionReference.get().getYaw());
       }
 
       if (goalRotationEditModeEnabled.get())
@@ -84,22 +107,21 @@ public class StartGoalOrientationViewer extends AnimationTimer
       Point3D goalPosition = goalPositionReference.get();
       if (goalPosition != null)
       {
-         setArrowPose(goalArrow, goalPosition, goalQuaternionReference.get().getYaw());
+         setArrowPose(goalArrowAffine, goalPosition, goalQuaternionReference.get().getYaw());
       }
 
       Point3D lowLevelGoalPosition = lowLevelGoalPositionReference.get();
       if (goalPosition != null)
       {
-         setArrowPose(lowLevelGoalArrow, lowLevelGoalPosition, lowLevelGoalQuaternionReference.get().getYaw());
+         setArrowPose(lowLevelGoalArrowAffine, lowLevelGoalPosition, lowLevelGoalQuaternionReference.get().getYaw());
       }
    }
 
-   private static void setArrowPose(ArrowGraphic arrow, Point3D position, double orientationRadians)
+   private static void setArrowPose(Affine arrowAffine, Point3D position, double orientationRadians)
    {
-      arrow.setTranslateX(position.getX() + 0.5 * cylinderLength * (Math.cos(orientationRadians) - 1.0));
-      arrow.setTranslateY(position.getY() + 0.5 * cylinderLength * Math.sin(orientationRadians));
-      arrow.setTranslateZ(position.getZ());
-      arrow.setRotate(Math.toDegrees(orientationRadians));
+      arrowAffine.setToIdentity();
+      arrowAffine.appendTranslation(position.getX(), position.getY(), position.getZ());
+      arrowAffine.appendRotation(Math.toDegrees(orientationRadians));
    }
 
    private class ArrowGraphic extends Group
