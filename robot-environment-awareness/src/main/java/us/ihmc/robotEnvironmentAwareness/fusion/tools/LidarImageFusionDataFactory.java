@@ -1,10 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.tools;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import org.bytedeco.javacpp.indexer.UByteRawIndexer;
+import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_ximgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -17,6 +26,8 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 
 public class LidarImageFusionDataFactory
 {
+   private static final boolean displaySegmentedContour = false;
+
    public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
                                                                  int pixelSize, double ruler, int elementSize, int iterate)
    {
@@ -128,21 +139,69 @@ public class LidarImageFusionDataFactory
       {
          labels[i] = labelMat.getIntBuffer().get(i);
       }
-      
-//      if(displaySegmentedContour)
-//      {
-//         Mat contourMat = new Mat();
-//         slic.getLabelContourMask(contourMat);
-//
-//         BufferedImage result = Java2DFrameUtils.toBufferedImage(contourMat);
-//         messager.submitMessage(LidarImageFusionAPI.ImageResultState, result);
-//      }
-      
+
+      if (displaySegmentedContour)
+      {
+         Mat contourMat = new Mat();
+         slic.getLabelContourMask(contourMat);
+
+         BufferedImage contourImage = Java2DFrameUtils.toBufferedImage(contourMat);
+         BufferedImage copyOriginal = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
+         for (int i = 0; i < contourImage.getWidth(); i++)
+         {
+            for (int j = 0; j < contourImage.getHeight(); j++)
+            {
+               if (contourImage.getRGB(i, j) == -1)
+                  copyOriginal.setRGB(i, j, 0xFF0000);
+               else
+                  copyOriginal.setRGB(i, j, bufferedImage.getRGB(i, j));
+            }
+         }
+         show(copyOriginal);
+      }
+
       return labels;
    }
 
    private static int getArrayIndex(int u, int v, int width)
    {
       return u + v * width;
+   }
+
+   public static void show(Mat mat, int width, int height)
+   {
+      byte[] byteArray = new byte[width * height * 3];
+      opencv_imgcodecs.imencode(".jpg", mat, byteArray);
+      BufferedImage img = null;
+      try
+      {
+         InputStream in = new ByteArrayInputStream(byteArray);
+         img = ImageIO.read(in);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+
+      JFrame frame = new JFrame();
+      ImageIcon icon = new ImageIcon(img);
+      JLabel label = new JLabel(icon);
+
+      frame.add(label);
+      frame.setVisible(true);
+      frame.setSize(width, height);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   }
+
+   public static void show(BufferedImage image)
+   {
+      JFrame frame = new JFrame();
+      ImageIcon icon = new ImageIcon(image);
+      JLabel label = new JLabel(icon);
+
+      frame.add(label);
+      frame.setVisible(true);
+      frame.setSize(image.getWidth(), image.getHeight());
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    }
 }

@@ -59,7 +59,10 @@ public class StereoREAPlanarRegionSegmentationCalculator
    {
       for (SegmentationNodeData segmentationNodeData : segments)
       {
-         PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(segmentationNodeData.getId(),
+         // TODO: id of PlanarRegionSegmentationRawData is color.
+         // id of SegmentationNodeData is started from 0.
+         // PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(segmentationNodeData.getId(),
+         PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(random.nextInt(),
                                                                                                                segmentationNodeData.getNormal(),
                                                                                                                segmentationNodeData.getCenter(),
                                                                                                                segmentationNodeData.getPointsInSegment());

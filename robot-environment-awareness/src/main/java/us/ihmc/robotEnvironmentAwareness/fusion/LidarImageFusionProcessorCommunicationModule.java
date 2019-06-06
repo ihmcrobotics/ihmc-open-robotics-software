@@ -44,7 +44,7 @@ public class LidarImageFusionProcessorCommunicationModule
    private final AtomicReference<String> socketHostIPAddress;
    private final AtomicReference<BufferedImage> latestBufferedImage = new AtomicReference<>(null);
    private final AtomicReference<List<ObjectType>> selectedObjecTypes;
-   private final Messager reaMessager;
+   
    private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.reaMessager = reaMessager;
@@ -82,6 +82,7 @@ public class LidarImageFusionProcessorCommunicationModule
    }
 
    // TODO: Temp method.
+   private final Messager reaMessager;
    private void runSREA()
    {
       reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true);
