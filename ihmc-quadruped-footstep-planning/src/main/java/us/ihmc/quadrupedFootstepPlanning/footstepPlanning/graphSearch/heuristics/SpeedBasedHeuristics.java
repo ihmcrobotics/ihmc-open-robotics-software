@@ -20,8 +20,8 @@ public class SpeedBasedHeuristics extends CostToGoHeuristics
    {
       double bodyDistance = node.euclideanDistance(goalNode);
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
-      double minSteps = bodyDistance / desiredSpeed;
+      double minSteps = 4.0 * bodyDistance / desiredSpeed;
 
-      return 4.0 * parameters.getCostPerStep() * minSteps;
+      return parameters.getCostPerStep() * minSteps;
    }
 }

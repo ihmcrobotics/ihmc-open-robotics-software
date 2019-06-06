@@ -15,6 +15,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecki
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.VariableResolutionNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.BodyPathBasedVelocityProvider;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -47,13 +48,13 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
 
-      heuristics = new BodyPathHeuristics(parameters, this.bodyPathPlanner);
       NominalVelocityProvider velocityProvider = new BodyPathBasedVelocityProvider(this.bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
+      heuristics = new BodyPathHeuristics(parameters, this.bodyPathPlanner, xGaitSettings, snapper);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
+      FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
       FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
                                                                                              parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
@@ -61,7 +62,7 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       costBuilder.setFootstepPlannerParameters(parameters);
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
-      costBuilder.setIncludeHeightCost(false);
+      costBuilder.setIncludeHeightCost(true);
       costBuilder.setVelocityProvider(velocityProvider);
 
       FootstepCost footstepCost = costBuilder.buildCost();
