@@ -16,7 +16,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
-   private static final double pathViolationWeight = 30.0;
+   private static final double pathViolationWeight = 10.0;
+   private static final double yawViolationWeight = 1.0;
    private final BodyPathPlanner bodyPath;
    private final FootstepNodeSnapper snapper;
 
@@ -48,7 +49,9 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double pathLength = bodyPath.computePathLength(alpha) - bodyPath.computePathLength(goalAlpha);
       double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
 
-      double yaw = pathViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), closestPointOnPath.getYaw());
+      double referenceYaw = computeReferenceYaw(node, goalNode, closestPointOnPath);
+
+      double yaw = yawViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), referenceYaw);
 
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = 4.0 * remainingDistance / desiredSpeed;
@@ -98,5 +101,28 @@ public class BodyPathHeuristics extends CostToGoHeuristics
    public void setGoalAlpha(double alpha)
    {
       goalAlpha = alpha;
+   }
+
+   private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode, Pose2D closestPoseOnPath)
+   {
+      double distanceToGoal = node.euclideanDistance(goalNode);
+      double finalTurnProximity = 1.0;
+
+      double minimumBlendDistance = 0.75 * finalTurnProximity;
+      double maximumBlendDistance = 1.25 * finalTurnProximity;
+
+      double pathHeading = AngleTools.trimAngleMinusPiToPi(closestPoseOnPath.getYaw());
+
+      double yawMultiplier;
+      if (distanceToGoal < minimumBlendDistance)
+         yawMultiplier = 0.0;
+      else if(distanceToGoal > maximumBlendDistance)
+         yawMultiplier = 1.0;
+      else
+         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
+
+      double referenceHeading = yawMultiplier * pathHeading;
+      referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
+      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 }
