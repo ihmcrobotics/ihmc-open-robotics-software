@@ -74,7 +74,23 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
       return super.epsilonEquals(other, epsilon) && getTimeInterval().epsilonEquals(other.getTimeInterval(), epsilon);
+   }
 
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      QuadrupedTimedStep other = (QuadrupedTimedStep) obj;
+
+      if (!getTimeInterval().epsilonEquals(other.getTimeInterval(), 0.0))
+         return false;
+
+      return super.equals(other);
    }
 
    @Override

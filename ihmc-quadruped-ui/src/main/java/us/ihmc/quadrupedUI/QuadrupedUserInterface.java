@@ -1,16 +1,25 @@
 package us.ihmc.quadrupedUI;
 
+import java.util.function.Consumer;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -21,23 +30,33 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.StartGoalOrientationEditor;
-import us.ihmc.quadrupedFootstepPlanning.ui.controllers.*;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.PlannerReachParametersUIController;
+import us.ihmc.quadrupedFootstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.BodyPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.FootstepPathMeshViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalOrientationViewer;
 import us.ihmc.quadrupedFootstepPlanning.ui.viewers.StartGoalPositionViewer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
-import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
+import us.ihmc.quadrupedUI.skybox.QuadrupedSkybox3D;
 import us.ihmc.quadrupedUI.uiControllers.ManualStepTabController;
+import us.ihmc.quadrupedUI.uiControllers.RobotControlTabController;
 import us.ihmc.quadrupedUI.uiControllers.XGaitSettingsController;
+import us.ihmc.quadrupedUI.video.QuadrupedVideoViewOverlay;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 
 public class QuadrupedUserInterface
 {
+   public static final QuadrantDependentList<Color> feetColors = new QuadrantDependentList<>(Color.web("#DA5526"), Color.web("#F68930"), Color.web("#0C695D"), Color.web("#37AFA9"));
+
    private final Stage primaryStage;
    private final BorderPane mainPane;
+   private final JavaFXMessager messager;
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionViewer startGoalPositionViewer;
@@ -50,7 +69,12 @@ public class QuadrupedUserInterface
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
+   private final Joystick joystick;
    private final AnimationTimer joystickModule;
+   private final QuadrupedVideoViewOverlay videoViewOverlay;
+
+   @FXML
+   private AnchorPane sceneAnchorPane;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -71,10 +95,11 @@ public class QuadrupedUserInterface
 
    public QuadrupedUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory, double nominalBodyHeight,
                                  FootstepPlannerParameters footstepPlannerParameters, VisibilityGraphsParameters visibilityGraphsParameters,
-                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
+                                 QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator)
          throws Exception
    {
       this.primaryStage = primaryStage;
+      this.messager = messager;
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -113,9 +138,13 @@ public class QuadrupedUserInterface
       plannerReachParametersUIController.loadFromFile();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      view3dFactory.addDefaultLighting();
+      FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(0.05, 1000000.0, true);
+      SubScene subScene = view3dFactory.getSubScene();
       view3dFactory.addWorldCoordinateSystem(0.3);
-      Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
+      view3dFactory.addNodeToView(new QuadrupedSkybox3D(subScene).getSkybox());
+
+      Pane subScenePane = view3dFactory.getSubSceneWrappedInsidePane();
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
@@ -130,13 +159,13 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.LowLevelGoalPositionTopic,
                                                                        QuadrupedUIMessagerAPI.LowLevelGoalOrientationTopic,
                                                                        QuadrupedUIMessagerAPI.GoalPositionTopic, QuadrupedUIMessagerAPI.GoalOrientationTopic);
-      this.startGoalPositionEditor = new StartGoalPositionEditor(messager, subScene, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
+      this.startGoalPositionEditor = new StartGoalPositionEditor(messager, subScenePane, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.GoalPositionEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.GoalPositionTopic,
                                                                  QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.SelectedRegionTopic,
                                                                  QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
                                                                  QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic);
-      this.startGoalOrientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene(), QuadrupedUIMessagerAPI.EditModeEnabledTopic,
+      this.startGoalOrientationEditor = new StartGoalOrientationEditor(messager, subScene, QuadrupedUIMessagerAPI.EditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.StartOrientationEditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.GoalOrientationEditModeEnabledTopic,
                                                                        QuadrupedUIMessagerAPI.StartPositionTopic, QuadrupedUIMessagerAPI.StartOrientationTopic,
@@ -144,14 +173,19 @@ public class QuadrupedUserInterface
                                                                        QuadrupedUIMessagerAPI.SelectedRegionTopic);
       this.pawPathViewer = new FootstepPathMeshViewer(messager, QuadrupedUIMessagerAPI.FootstepPlanTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                       QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
+      pawPathViewer.setFootstepRadius(0.025);
+      pawPathViewer.setFootstepColors(feetColors);
+
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager, QuadrupedUIMessagerAPI.ShowBodyPathTopic, QuadrupedUIMessagerAPI.ComputePathTopic,
                                                        QuadrupedUIMessagerAPI.BodyPathDataTopic);
 
       plannerTabController.setPreviewFootstepPositions(pawPathViewer.getPreviewFootstepPositions());
 
-      manualStepTabController.initScene(view3dFactory.getSubScene());
+      manualStepTabController.initScene(subScene);
+      subScene.addEventHandler(KeyEvent.ANY, this::onKeyEvent);
 
-      robotVisualizer = new JavaFXQuadrupedVisualizer(messager, modelFactory, QuadrupedUIMessagerAPI.RobotModelTopic);
+      robotVisualizer = new JavaFXQuadrupedVisualizer(modelFactory, graphicsMutator);
+      robotVisualizer.attachMessager(messager, QuadrupedUIMessagerAPI.RobotModelTopic);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::submitNewConfiguration);
 
       plannerTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
@@ -167,7 +201,6 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(manualStepTabController);
 
-      FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       Translate rootJointOffset = new Translate();
       cameraController.prependTransform(rootJointOffset);
 
@@ -186,16 +219,26 @@ public class QuadrupedUserInterface
 
       if (Joystick.isAJoystickConnectedToSystem())
       {
-         Joystick joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+         joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
          joystickModule = new QuadrupedJoystickModule(messager, xGaitSettings, nominalBodyHeight, joystick);
          joystickModule.start();
       }
       else
       {
+         joystick = null;
          joystickModule = null;
          LogTools.warn("No joystick detected, running without xbox module");
       }
 
+      int width = 1024;
+      int height = 544;
+      videoViewOverlay = new QuadrupedVideoViewOverlay(width, height, false, true);
+      sceneAnchorPane.getChildren().set(1, videoViewOverlay.getNode());
+      AnchorPane.setTopAnchor(videoViewOverlay.getNode(), 0.0);
+      AnchorPane.setLeftAnchor(videoViewOverlay.getNode(), 0.0);
+      videoViewOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> videoViewOverlay.toggleMode());
+
+      videoViewOverlay.start(messager, QuadrupedUIMessagerAPI.LeftCameraVideo);
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
@@ -207,13 +250,27 @@ public class QuadrupedUserInterface
       robotVisualizer.start();
       cameraTracking.start();
 
-      mainPane.setCenter(subScene);
+      sceneAnchorPane.getChildren().set(0, subScenePane);
+      AnchorPane.setTopAnchor(subScenePane, 0.0);
+      AnchorPane.setBottomAnchor(subScenePane, 0.0);
+      AnchorPane.setLeftAnchor(subScenePane, 0.0);
+      AnchorPane.setRightAnchor(subScenePane, 0.0);
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
+   }
+
+
+   private void onKeyEvent(KeyEvent keyEvent)
+   {
+      // pressed and released only use code field
+      if (keyEvent.getEventType() == KeyEvent.KEY_PRESSED && keyEvent.getCode() == KeyCode.ESCAPE)
+      {
+         messager.submitMessage(QuadrupedUIMessagerAPI.AbortWalkingTopic, true);
+      }
    }
 
    private void submitNewConfiguration(RobotConfigurationData configuration)
@@ -228,6 +285,7 @@ public class QuadrupedUserInterface
 
    public void stop()
    {
+      plannerTabController.stop();
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
       startGoalOrientationViewer.stop();
@@ -236,7 +294,11 @@ public class QuadrupedUserInterface
       pawPathViewer.stop();
       bodyPathMeshViewer.stop();
       cameraTracking.stop();
+      videoViewOverlay.stop();
+      manualStepTabController.stop();
 
+      if (joystick != null)
+         joystick.shutdown();
       if(joystickModule != null)
          joystickModule.stop();
 
@@ -256,6 +318,7 @@ public class QuadrupedUserInterface
       plannerTabController.setPlannerRequestIdTopic(QuadrupedUIMessagerAPI.PlannerRequestIdTopic);
       plannerTabController.setReceivedPlanIdTopic(QuadrupedUIMessagerAPI.ReceivedPlanIdTopic);
       plannerTabController.setFootstepPlanTopic(QuadrupedUIMessagerAPI.ShowFootstepPlanTopic, QuadrupedUIMessagerAPI.FootstepPlanTopic);
+      plannerTabController.setPlanarRegionDataClearTopic(QuadrupedUIMessagerAPI.PlanarRegionDataClearTopic);
       plannerTabController.setPlanarRegionDataTopic(QuadrupedUIMessagerAPI.PlanarRegionDataTopic);
       plannerTabController.setPlannerTimeTakenTopic(QuadrupedUIMessagerAPI.PlannerTimeTakenTopic);
       plannerTabController.setPlannerTimeoutTopic(QuadrupedUIMessagerAPI.PlannerTimeoutTopic);
@@ -282,9 +345,9 @@ public class QuadrupedUserInterface
    public static QuadrupedUserInterface createUserInterface(Stage primaryStage, JavaFXMessager messager, QuadrupedModelFactory modelFactory,
                                                             FootstepPlannerParameters footstepPlannerParameters,
                                                             VisibilityGraphsParameters visibilityGraphsParameters, double nominalBodyHeight,
-                                                            QuadrupedXGaitSettingsReadOnly xGaitSettings) throws Exception
+                                                            QuadrupedXGaitSettingsReadOnly xGaitSettings, Consumer<Graphics3DNode> graphicsMutator) throws Exception
    {
       return new QuadrupedUserInterface(primaryStage, messager, modelFactory, nominalBodyHeight, footstepPlannerParameters, visibilityGraphsParameters,
-                                        xGaitSettings);
+                                        xGaitSettings, graphicsMutator);
    }
 }
