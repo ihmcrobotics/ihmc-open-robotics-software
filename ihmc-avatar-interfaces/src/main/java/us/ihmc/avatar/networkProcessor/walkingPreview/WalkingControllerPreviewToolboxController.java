@@ -54,12 +54,12 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -93,7 +93,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                                    ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager walkingOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final StateExecutor taskExecutor = new StateExecutor();
 
    private final YoBoolean isInitialized = new YoBoolean("isInitialized", registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
