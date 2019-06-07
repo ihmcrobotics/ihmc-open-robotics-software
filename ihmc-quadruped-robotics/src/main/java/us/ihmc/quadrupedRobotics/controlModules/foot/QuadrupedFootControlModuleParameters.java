@@ -67,8 +67,9 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider coefficientOfFrictionWhenSlipping = new DoubleParameter("coefficientOfFrictionWhenSlipping", finalRegistry, 0.6);
    private final DoubleProvider coefficientOfFrictionWhenNotSlipping = new DoubleParameter("coefficientOfFrictionWhenNotSlipping", finalRegistry, 0.9);
 
-   private final DoubleProvider touchdownDuration = new DoubleParameter("touchdownDuration", finalRegistry, 0.05);
-   private final DoubleProvider loadingMinMagnitude = new DoubleParameter("loadingMinMagnitude", finalRegistry, 100.0);
+   private final DoubleProvider touchdownDuration = new DoubleParameter("touchdownDuration", finalRegistry, 0.15);
+   private final DoubleProvider rhoClampingDuration = new DoubleParameter("rhoClampingDuration", finalRegistry, 0.05);
+   private final DoubleProvider loadingMinMagnitude = new DoubleParameter("loadingMinMagnitude", finalRegistry, 10.0);
    private final DoubleProvider loadingMaxMagnitude = new DoubleParameter("loadingMaxMagnitude", finalRegistry, 500.0);
 
 
@@ -251,6 +252,11 @@ public class QuadrupedFootControlModuleParameters
    public double getTouchdownDuration()
    {
       return touchdownDuration.getValue();
+   }
+
+   public double getRhoClampingDuration()
+   {
+      return rhoClampingDuration.getValue();
    }
 
    public double getLoadingMinMagnitude()
