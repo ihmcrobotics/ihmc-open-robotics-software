@@ -20,6 +20,8 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -132,7 +134,7 @@ public class OpenHumanoidsSimulator
 		  }
 
 		  LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
-		  SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+	      RobotROSClockCalculator rosClockCalculator = new RobotROSClockCalculatorFromPPSOffset(new SimulationRosClockPPSTimestampOffsetProvider());
 
 		  java.util.List<java.util.Map.Entry<String,RosTopicSubscriberInterface<? extends Message>>> subscribers = new java.util.ArrayList<>();
 
@@ -140,7 +142,7 @@ public class OpenHumanoidsSimulator
 		  java.util.Map.Entry<String,RosTopicSubscriberInterface<? extends Message>> pair=new java.util.AbstractMap.SimpleEntry<String,RosTopicSubscriberInterface<? extends Message>>(nameSpace+"/api_command", sub);
 		  subscribers.add(pair);
 
-		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
+		  new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, rosClockCalculator, robotModel, nameSpace, tfPrefix, additionalPacketTypes, subscribers, null);
 
 		  avatarSimulation = simulationStarter.getAvatarSimulation();
    }

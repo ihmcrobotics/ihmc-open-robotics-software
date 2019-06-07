@@ -80,7 +80,7 @@ public class JointConfigurationGatherer
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void packEstimatorJoints(long timestamp, long sensorHeadPPSTimestamp, RobotConfigurationData jointConfigurationData)
+   public void packEstimatorJoints(long wallTime, long monotonicTime, long syncTimestamp, RobotConfigurationData jointConfigurationData)
    {
       if (jointConfigurationData == null)
       {
@@ -99,8 +99,9 @@ public class JointConfigurationGatherer
       jointConfigurationData.getRootTranslation().set(rootTranslation);
       jointConfigurationData.getRootOrientation().set(rootOrientation);
       RobotConfigurationDataFactory.packJointState(jointConfigurationData, joints);
-      jointConfigurationData.setTimestamp(timestamp);
-      jointConfigurationData.setSensorHeadPpsTimestamp(sensorHeadPPSTimestamp);
+      jointConfigurationData.setWallTime(wallTime);
+      jointConfigurationData.setMonotonicTime(monotonicTime);
+      jointConfigurationData.setSyncTimestamp(syncTimestamp);
 
       RecyclingArrayList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.getForceSensorData();
       momentAndForceDataAllForceSensors.clear();

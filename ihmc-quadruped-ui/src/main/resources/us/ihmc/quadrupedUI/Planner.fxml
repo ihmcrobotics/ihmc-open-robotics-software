@@ -33,6 +33,7 @@
                             <ColumnConstraints hgrow="SOMETIMES" />
                               <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" />
                               <ColumnConstraints maxWidth="-Infinity" />
+                              <ColumnConstraints maxWidth="-Infinity" minWidth="10.0" />
                           </columnConstraints>
                           <rowConstraints>
                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -43,10 +44,10 @@
                            <children>
                               <Button fx:id="computePath" maxWidth="1.7976931348623157E308" minWidth="-Infinity" mnemonicParsing="false" onAction="#computePath" text="Compute Path" GridPane.halignment="CENTER" />
                               <Button fx:id="abortPlanning" maxWidth="1.7976931348623157E308" minWidth="-Infinity" mnemonicParsing="false" onAction="#abortPlanning" text="Cancel Planning" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                              <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                              <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" text="Accept New Planar Regions" GridPane.columnIndex="4" />
                                <CheckBox fx:id="isPlanAdjustable" minWidth="-Infinity" text="Is plan adjustable" GridPane.columnIndex="3" />
-                               <CheckBox fx:id="assumeFlatGround" minWidth="-Infinity" text="Flat ground" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                               <Button maxWidth="1.7976931348623157E308" onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="3" GridPane.columnSpan="1" GridPane.rowIndex="3" />
+                               <CheckBox fx:id="assumeFlatGround" minWidth="-Infinity" text="Flat ground" GridPane.columnIndex="4" GridPane.rowIndex="2" />
+                               <Button maxWidth="1.7976931348623157E308" onAction="#clearFlat" text="Clear Flat" GridPane.columnIndex="4" GridPane.columnSpan="1" GridPane.rowIndex="3" />
                               <ComboBox fx:id="plannerType" prefHeight="26.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                               <Label text="Planner Type" GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.rowIndex="1" />
                               <Label minWidth="-Infinity" text="Timeout" GridPane.columnIndex="2" GridPane.rowIndex="2" />
@@ -54,6 +55,7 @@
                               <Spinner fx:id="timeout" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                               <Spinner fx:id="horizonLength" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                               <CheckBox fx:id="correctStepHeightError" minWidth="-Infinity" selected="true" text="Correct step height" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestClearREA" text="Clear Planar Regions" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                      </children>
@@ -144,12 +146,12 @@
                   <Spinner fx:id="goalYPosition" layoutX="578.0" layoutY="89.0" prefWidth="100.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
                   <Spinner fx:id="goalYaw" layoutX="243.0" layoutY="89.0" prefWidth="100.0" GridPane.columnIndex="8" GridPane.rowIndex="1" />
                   <Label maxWidth="-Infinity" minWidth="-Infinity" text="initialSupport" textAlignment="RIGHT" GridPane.columnIndex="9" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
-                  <ComboBox fx:id="initialSupportQuadrant" prefHeight="26.0" prefWidth="100.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                  <ComboBox fx:id="initialSupportQuadrant" prefWidth="130.0" GridPane.columnIndex="10" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                </children>
             </GridPane>
                      </children>
                   </VBox>
-                  <VBox alignment="CENTER" prefWidth="390.0" spacing="5.0" style="-fx-border-color: darkgray; -fx-padding: 2; -fx-border-radius: 3;">
+                  <VBox alignment="CENTER" prefWidth="566.0" spacing="5.0" style="-fx-border-color: darkgray; -fx-padding: 2; -fx-border-radius: 3;">
                      <children>
                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Walking Preview" textAlignment="CENTER" wrappingWidth="214.7294921875" />
                               <!--<Button mnemonicParsing="false" onAction="#requestWalkingPreview" prefWidth="130.0" text="Preview Steps" GridPane.halignment="CENTER" />-->

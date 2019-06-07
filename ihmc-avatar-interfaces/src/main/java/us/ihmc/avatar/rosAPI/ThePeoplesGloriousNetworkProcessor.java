@@ -19,10 +19,10 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
 import us.ihmc.avatar.ros.IHMCROSTranslationRuntimeTools;
 import us.ihmc.avatar.ros.PeriodicRosHighLevelStatePublisher;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RosCapturabilityBasedStatusPublisher;
 import us.ihmc.avatar.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.avatar.ros.RosSCSCameraPublisher;
@@ -53,7 +53,7 @@ public class ThePeoplesGloriousNetworkProcessor
 {
    private static final String nodeName = "/controller";
 
-   private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final RosMainNode rosMainNode;
    private final PacketCommunicator controllerCommunicationBridge;
    private final ObjectCommunicator scsSensorCommunicationBridge;
@@ -67,36 +67,46 @@ public class ThePeoplesGloriousNetworkProcessor
 
    @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix, String... additionalMessagePackages) throws IOException
+                                             String tfPrefix, String... additionalMessagePackages)
+         throws IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet(), additionalMessagePackages);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getROSClockCalculator(), robotModel, namespace, tfPrefix, Collections.<Class> emptySet(),
+           additionalMessagePackages);
    }
 
    @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
-         String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
+                                             String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages)
+         throws IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, additionalMessagePackages);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getROSClockCalculator(), robotModel, namespace, tfPrefix, additionalPacketTypes,
+           additionalMessagePackages);
    }
 
    @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
+                                             RobotROSClockCalculator ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix,
+                                             Collection<Class> additionalPacketTypes, String... additionalMessagePackages)
+         throws IOException
    {
-      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null, additionalMessagePackages);
+      this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getROSClockCalculator(), robotModel, namespace, tfPrefix, additionalPacketTypes, null,
+           null, additionalMessagePackages);
    }
 
    @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
-         DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes,
-         List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
-         List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers, String... additionalMessagePackages) throws IOException
+                                             RobotROSClockCalculator rosClockCalculator, DRCRobotModel robotModel, String namespace, String tfPrefix,
+                                             Collection<Class> additionalPacketTypes,
+                                             List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
+                                             List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers,
+                                             String... additionalMessagePackages)
+         throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.controllerCommunicationBridge = rosAPI_communicator;
       this.scsSensorCommunicationBridge = sensorCommunicator;
-      this.ppsTimestampOffsetProvider = ppsOffsetProvider;
-      this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+      this.rosClockCalculator = rosClockCalculator;
+      this.rosClockCalculator.setROSMainNode(rosMainNode);
       this.subscribers = new ArrayList<AbstractRosTopicSubscriber<?>>();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
 
@@ -105,7 +115,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.fullRobotModel = robotModel.createFullRobotModel();
       HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       rosAPI_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
-      rosAPI_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
+      rosAPI_communicator.attachListener(RobotConfigurationData.class, rosClockCalculator::receivedRobotConfigurationData);
       rosAPI_communicator.attachListener(HighLevelStateChangeStatusMessage.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
       rosAPI_communicator.attachListener(CapturabilityBasedStatus.class, new RosCapturabilityBasedStatusPublisher(rosMainNode, namespace));
 
@@ -195,13 +205,13 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
-         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
+         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, sensorInformation.getCameraParameters());
       }
 
       AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
       if (lidarParameters.length > 0)
       {
-         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel, lidarParameters);
+         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, fullRobotModel, lidarParameters);
 
          AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
          robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
@@ -240,8 +250,8 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupRosLocalization()
    {
-      new RosLocalizationPoseCorrectionSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
-      new IHMCProntoRosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
+      new RosLocalizationPoseCorrectionSubscriber(rosMainNode, controllerCommunicationBridge, rosClockCalculator::computeRobotMonotonicTime);
+      new IHMCProntoRosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, rosClockCalculator::computeRobotMonotonicTime);
    }
 
    @SuppressWarnings("unused")
