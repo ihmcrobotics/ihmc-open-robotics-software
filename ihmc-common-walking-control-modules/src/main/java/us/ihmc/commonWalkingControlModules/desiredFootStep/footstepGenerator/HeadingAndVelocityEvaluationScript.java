@@ -13,7 +13,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
-import us.ihmc.robotics.taskExecutor.TaskExecutor;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -75,7 +75,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    }
 
    private final StateMachineClock clock;
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final StateExecutor taskExecutor = new StateExecutor();
    private final List<EventTask> eventList;
 
    /**

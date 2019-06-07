@@ -8,43 +8,43 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class ParallelTask<T> implements State
+public class ParallelState<T> implements State
 {
    // TODO convert to ObjectObjectMap<T, TaskExecutor>
-   private final Map<T, TaskExecutor> executorMap = new LinkedHashMap<T, TaskExecutor>();
-   private final ArrayList<TaskExecutor> executors = new ArrayList<>();
+   private final Map<T, StateExecutor> executorMap = new LinkedHashMap<T, StateExecutor>();
+   private final ArrayList<StateExecutor> executors = new ArrayList<>();
    private final StateMachineClock clock;
 
-   public ParallelTask(YoDouble yotime)
+   public ParallelState(YoDouble yotime)
    {
       clock = StateMachineClock.clock(yotime);
    }
    
    //the new constructor with yoTime should be used.
    @Deprecated
-   public ParallelTask()
+   public ParallelState()
    {
       clock = StateMachineClock.dummyClock();
    }
    
-   public void submit(T executorKey, State task)
+   public void submit(T executorKey, State state)
    {
-      TaskExecutor executor = executorMap.get(executorKey);
+      StateExecutor executor = executorMap.get(executorKey);
       if (executor == null)
       {
-         executor = new TaskExecutor(clock);
+         executor = new StateExecutor(clock);
          executorMap.put(executorKey, executor);
          executors.add(executor);
       }
 
-      executor.submit(task);
+      executor.submit(state);
    }
 
    public void clear(T executorKey)
    {
-      TaskExecutor taskExecutor = executorMap.get(executorKey);
-      if (taskExecutor != null)
-         taskExecutor.clear();
+      StateExecutor stateExecutor = executorMap.get(executorKey);
+      if (stateExecutor != null)
+         stateExecutor.clear();
       
    }
 
