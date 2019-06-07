@@ -59,6 +59,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -795,7 +796,9 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot, robotModel.getJointMap());
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
-      drcPerfectSensorReaderFactory.getSensorReader().read();
+      SensorDataContext sensorDataContext = new SensorDataContext();
+      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
+      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
       return initialFullRobotModel;
    }
 }

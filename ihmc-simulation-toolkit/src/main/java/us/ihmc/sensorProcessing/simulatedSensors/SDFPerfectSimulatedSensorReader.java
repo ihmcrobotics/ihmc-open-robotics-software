@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -295,11 +294,5 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
       return forceSensorDataHolderToUpdate;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
-   {
-      return null;
    }
 }

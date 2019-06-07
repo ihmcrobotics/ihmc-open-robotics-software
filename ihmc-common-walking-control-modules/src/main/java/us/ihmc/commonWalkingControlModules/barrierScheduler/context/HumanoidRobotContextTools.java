@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public class HumanoidRobotContextTools
 {
-   public static void updateContext(FullHumanoidRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
+   public static void updateContext(FullRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
    {
       contextData.clear();
       for (int jointIndex = 0; jointIndex < fullRobotModel.getOneDoFJoints().length; jointIndex++)
@@ -18,7 +18,7 @@ public class HumanoidRobotContextTools
       contextData.setRootJointData(rootJoint.getJointPose(), rootJoint.getJointTwist(), rootJoint.getJointAcceleration());
    }
 
-   public static void updateRobot(FullHumanoidRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
+   public static void updateRobot(FullRobotModel fullRobotModel, HumanoidRobotContextJointData contextData)
    {
       for (int jointIndex = 0; jointIndex < fullRobotModel.getOneDoFJoints().length; jointIndex++)
       {
