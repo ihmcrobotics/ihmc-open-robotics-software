@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,6 +14,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -88,10 +88,11 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContext)
    {
       readSensors();
       writeCommandsToRobot();
+      return monotonicTimeProvider.getTimestamp();
    }
 
    public void writeCommandsToRobot()
@@ -177,12 +178,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
    }
 
    @Override
