@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
@@ -98,12 +97,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    }
 
-   @Override
-   public CoactiveElement getCoactiveElement()
-   {
-      return null;//coactiveElement;
-   }
-
+   
    public void setTarget(FramePose2D targetPose2dInWorld)
    {
       setTarget(targetPose2dInWorld, WalkingOrientation.CUSTOM);
@@ -184,26 +178,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
          generateFootsteps();
    }
 
-   @Override
-   public void onBehaviorEntered()
-   {
-      hasTargetBeenProvided.set(false);
-      haveFootstepsBeenGenerated.set(false);
-      hasInputBeenSet.set(false);
-      footstepListBehavior.initialize();
-
-      robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
-      robotPose.changeFrame(worldFrame);
-
-      robotYoPose.set(robotPose);
-
-      robotLocation.set(robotPose.getPosition());
-      robotOrientation.set(robotPose.getOrientation());
-
-      this.targetLocation.set(robotLocation);
-      this.targetOrientation.set(robotOrientation);
-   }
-
+  
    public int getNumberOfFootSteps()
    {
       return footsteps.size();
@@ -326,11 +301,29 @@ public class WalkToLocationBehavior extends AbstractBehavior
    {
       isPaused.set(false);
       isAborted.set(false);
+      footstepListBehavior.onBehaviorExited();
+   }
+   
+   @Override
+   public void onBehaviorEntered()
+   {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
-      footstepListBehavior.onBehaviorExited();
+      footstepListBehavior.initialize();
+
+      robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      robotPose.changeFrame(worldFrame);
+
+      robotYoPose.set(robotPose);
+
+      robotLocation.set(robotPose.getPosition());
+      robotOrientation.set(robotPose.getOrientation());
+
+      this.targetLocation.set(robotLocation);
+      this.targetOrientation.set(robotOrientation);
    }
+
 
    public boolean hasInputBeenSet()
    {

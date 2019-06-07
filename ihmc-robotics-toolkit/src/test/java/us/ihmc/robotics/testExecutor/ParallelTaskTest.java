@@ -1,19 +1,25 @@
-package us.ihmc.tools.taskExecutor;
+package us.ihmc.robotics.testExecutor;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.robotics.stateMachine.core.StateMachineClock;
+import us.ihmc.robotics.taskExecutor.NullState;
+import us.ihmc.robotics.taskExecutor.ParallelState;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 public class ParallelTaskTest
 {
 
    @Test
    public void testOneSerialTask()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
-      ParallelTask<ParallelTaskKey> parallelTask = new ParallelTask<ParallelTaskKey>();
+
+      StateExecutor taskExecutor = new StateExecutor();
+      ParallelState<ParallelTaskKey> parallelTask = new ParallelState<ParallelTaskKey>();
 
       ParallelTaskKey taskKeyA = new ParallelTaskKey();
 
@@ -49,8 +55,8 @@ public class ParallelTaskTest
    @Test
    public void testTwoSerialTasks()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
-      ParallelTask<ParallelTaskKey> parallelTask = new ParallelTask<ParallelTaskKey>();
+      StateExecutor taskExecutor = new StateExecutor();
+      ParallelState<ParallelTaskKey> parallelTask = new ParallelState<ParallelTaskKey>();
 
       ParallelTaskKey taskKeyA = new ParallelTaskKey();
 
@@ -104,8 +110,8 @@ public class ParallelTaskTest
    @Test
    public void testTwoParallelTasks()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
-      ParallelTask<ParallelTaskKey> parallelTask = new ParallelTask<ParallelTaskKey>();
+      StateExecutor taskExecutor = new StateExecutor();
+      ParallelState<ParallelTaskKey> parallelTask = new ParallelState<ParallelTaskKey>();
 
       ParallelTaskKey taskKeyA = new ParallelTaskKey();
       ParallelTaskKey taskKeyB = new ParallelTaskKey();
@@ -153,8 +159,8 @@ public class ParallelTaskTest
    @Test
    public void testABunchOfParallelAndSeriesTasks()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
-      ParallelTask<ParallelTaskKey> parallelTask = new ParallelTask<ParallelTaskKey>();
+      StateExecutor taskExecutor = new StateExecutor();
+      ParallelState<ParallelTaskKey> parallelTask = new ParallelState<ParallelTaskKey>();
 
       ParallelTaskKey taskKeyA = new ParallelTaskKey();
       ParallelTaskKey taskKeyB = new ParallelTaskKey();
@@ -265,7 +271,7 @@ public class ParallelTaskTest
       taskExecutor.doControl();
       assertTrue(taskExecutor.isDone());
       assertFalse(parallelTask == taskExecutor.getCurrentTask());
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
       assertTrue(exampleTaskA0.checkNumberOfCalls(1, 1, 1));
       assertTrue(exampleTaskA1.checkNumberOfCalls(1, 2, 1));
       assertTrue(exampleTaskA2.checkNumberOfCalls(1, 2, 1));
