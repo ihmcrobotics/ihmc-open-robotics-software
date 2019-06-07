@@ -45,6 +45,7 @@ public class QuadrupedFootControlModuleParameters
    private final DoubleProvider minSwingTimeForDisturbanceRecovery = new DoubleParameter("minSwingTimeForDisturbanceRecovery", finalRegistry, 0.2);
    private final DoubleProvider minRequiredSpeedUpFactor = new DoubleParameter("minRequiredSpeedUpFactor", finalRegistry, 1.05);
 
+   private final DoubleProvider flatWaypointProportion = new DoubleParameter("swingFlatWaypointProportion", finalRegistry, 0.5);
    private final DoubleProvider waypointProportion0 = new DoubleParameter("swingWaypointProportion0", finalRegistry, 0.33);
    private final DoubleProvider waypointProportion1 = new DoubleParameter("swingWaypointProportion1", finalRegistry, 0.66);
    private final DoubleProvider obstacleClearanceWaypointProportion0 = new DoubleParameter("swingObstacleClearanceWaypointProportion0", finalRegistry, 0.25);
@@ -147,6 +148,11 @@ public class QuadrupedFootControlModuleParameters
    public double getMinRequiredSpeedUpFactor()
    {
       return minRequiredSpeedUpFactor.getValue();
+   }
+
+   public double getFlatSwingWaypointProportion()
+   {
+      return flatWaypointProportion.getValue();
    }
 
    public double getSwingWaypointProportion0()

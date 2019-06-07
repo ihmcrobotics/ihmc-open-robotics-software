@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -239,7 +238,7 @@ public class PlanarRegion
     * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the
     *           intersections.
     */
-   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DBasics convexPolygon2DBasics,
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2DReadOnly convexPolygon2DBasics,
                                                               ArrayList<ConvexPolygon2D> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
@@ -910,6 +909,16 @@ public class PlanarRegion
    }
 
    /**
+    * Get the transform from world coordinates to local coordinates.
+    *
+    * @param transformToPack used to store the transform.
+    */
+   public void getTransformToLocal(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(fromWorldToLocalTransform);
+   }
+
+   /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
     * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
@@ -1244,7 +1253,7 @@ public class PlanarRegion
       buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
 
       int maxNumberOfPolygonsToPrint = 5;
-      for (int i = 0; i < maxNumberOfPolygonsToPrint; i++)
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
       {
          buffer.append(convexPolygons.get(i) + "\n");
       }

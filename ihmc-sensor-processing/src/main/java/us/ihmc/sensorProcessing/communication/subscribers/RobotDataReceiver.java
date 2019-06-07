@@ -59,7 +59,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    public void receivedPacket(RobotConfigurationData object)
    {
       packet.set(object);
-      simTime.set(object.getTimestamp());
+      simTime.set(object.getMonotonicTime());
    }
 
    public void updateRobotModel()

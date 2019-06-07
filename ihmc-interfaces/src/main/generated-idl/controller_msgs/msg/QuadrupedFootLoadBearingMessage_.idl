@@ -1,0 +1,50 @@
+#ifndef __controller_msgs__msg__QuadrupedFootLoadBearingMessage__idl__
+#define __controller_msgs__msg__QuadrupedFootLoadBearingMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FRONT_LEFT =
+      0;
+
+      const octet FRONT_RIGHT =
+      1;
+
+      const octet HIND_RIGHT =
+      2;
+
+      const octet HIND_LEFT =
+      3;
+
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message commands the controller to start loading a foot.
+       * This message will only load the foot when the robot is in Sole Waypoint mode, which is triggered by a SoleTrajectoryMessage
+       * If the robot is walking, the message is ignored
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedFootLoadBearingMessage_")
+      struct QuadrupedFootLoadBearingMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which quadrant should be loaded.
+         */
+        @defaultValue(value=255)
+        octet robot_quadrant;
+        /**
+         * The time to delay this command on the controller side before being executed.
+         */
+        double execution_delay_time;
+      };
+    };
+  };
+};
+
+#endif
