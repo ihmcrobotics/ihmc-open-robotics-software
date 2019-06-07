@@ -232,7 +232,7 @@ public class QuadrupedUserInterface
 
       int width = 1024;
       int height = 544;
-      videoViewOverlay = new QuadrupedVideoViewOverlay(width, height, false, true);
+      videoViewOverlay = new QuadrupedVideoViewOverlay(width, height, true, true);
       sceneAnchorPane.getChildren().set(1, videoViewOverlay.getNode());
       AnchorPane.setTopAnchor(videoViewOverlay.getNode(), 0.0);
       AnchorPane.setLeftAnchor(videoViewOverlay.getNode(), 0.0);
