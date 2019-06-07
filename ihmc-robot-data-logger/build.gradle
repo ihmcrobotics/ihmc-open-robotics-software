@@ -45,7 +45,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
    compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.6"
-   compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3"
+   compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3.1"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"

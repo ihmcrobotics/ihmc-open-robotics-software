@@ -1,6 +1,6 @@
 package us.ihmc.avatar.sensors.multisense;
 
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
 import us.ihmc.ihmcPerception.camera.CameraLogger;
 import us.ihmc.ihmcPerception.camera.RosCameraCompressedImageReceiver;
@@ -23,14 +23,14 @@ public class MultiSenseSensorManager
    private final FullRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
 
    private final AvatarRobotCameraParameters cameraParameters;
 
    private MultiSenseParamaterSetter multiSenseParameterSetter;
 
    public MultiSenseSensorManager(FullRobotModelFactory sdfFullRobotModelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-                                  RosMainNode rosMainNode, Ros2Node ros2Node, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+                                  RosMainNode rosMainNode, Ros2Node ros2Node, RobotROSClockCalculator rosClockCalculator,
                                   AvatarRobotCameraParameters cameraParameters, AvatarRobotLidarParameters lidarParameters,
                                   AvatarRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
@@ -38,7 +38,7 @@ public class MultiSenseSensorManager
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraParameters = cameraParameters;
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
 
       boolean rosOnline = false;
 
@@ -82,7 +82,7 @@ public class MultiSenseSensorManager
    {
       CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
       cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer,
-                                              new VideoPacketHandler(ros2Node), ppsTimestampOffsetProvider);
+                                              new VideoPacketHandler(ros2Node), rosClockCalculator::computeRobotMonotonicTime);
 
       new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 

@@ -68,7 +68,7 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
       // status messages from the controller
       MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
-                                           s -> processRobotTimestamp(s.takeNextData().getTimestamp()));
+                                           s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
 //      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> footstepPlanningController.setPaused(true));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
