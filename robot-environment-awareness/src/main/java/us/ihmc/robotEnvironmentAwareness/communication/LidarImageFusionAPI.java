@@ -12,6 +12,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
+import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
@@ -35,6 +36,7 @@ public class LidarImageFusionAPI
    private static final CategoryTheme Socket = apiFactory.createCategoryTheme("Socket");
    private static final CategoryTheme ImageSegmentation = apiFactory.createCategoryTheme("ImageSegmentation");
    private static final CategoryTheme StereoREA = apiFactory.createCategoryTheme("StereoREA");
+   private static final CategoryTheme FusionData = apiFactory.createCategoryTheme("RawData");
    private static final CategoryTheme Result = apiFactory.createCategoryTheme("Result");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
 
@@ -58,6 +60,7 @@ public class LidarImageFusionAPI
 
    public static final Topic<ImageMessage> ImageState = ModuleCategory.child(Image).topic(Data);
    public static final Topic<BufferedImage> ImageResultState = ModuleCategory.child(Image).child(Result).topic(Data);
+   public static final Topic<LidarImageFusionData> FusionDataState = ModuleCategory.child(StereoREA).child(FusionData).topic(Data);
 
    public static final Topic<Boolean> RequestSocketConnection = ObjectDetectionCategory.child(Socket).topic(Request);
    public static final Topic<Boolean> RequestObjectDetection = ObjectDetectionCategory.topic(Request);
@@ -70,7 +73,7 @@ public class LidarImageFusionAPI
    public static final Topic<String> ComputationTime = UICategory.child(StereoREA).topic(Time);
 
    public static final Topic<Integer> StereoBufferSize = UICategory.child(StereoREA).child(Buffer).topic(Size);
-   public static final Topic<Boolean> ShowStereoBuffer = UICategory.child(StereoREA).child(Buffer).topic(Request);
+   public static final Topic<Boolean> ShowFusionData = UICategory.child(StereoREA).child(FusionData).topic(Request);
    public static final Topic<Boolean> ShowStereoBufferProjection = UICategory.child(StereoREA).child(Buffer).topic(SnapShot);
    public static final Topic<Boolean> RunStereoREA = UICategory.child(StereoREA).topic(Request);
 

@@ -107,7 +107,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
             //LogTools.info("   candidate label is " + adjacentLabels[i]);
             SegmentationRawData candidate = data.get().getFusionDataSegment(adjacentLabel);
 
-            if (candidate.isSparse(planarRegionPropagationParameters.getSparseThreshold()))
+            if (candidate.isSparse(planarRegionPropagationParameters.getSparseLowerThreshold()))
             {
                //LogTools.info("is too sparce "+candidate.getImageSegmentLabel());
                continue;
@@ -155,7 +155,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
          if (data.get().getFusionDataSegment(randomSeedLabel).getId() == -1
-               && !data.get().getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseThreshold()))
+               && !data.get().getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseLowerThreshold()))
             return randomSeedLabel;
       }
       return -1;
