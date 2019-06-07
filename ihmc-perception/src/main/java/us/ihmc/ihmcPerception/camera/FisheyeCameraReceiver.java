@@ -1,6 +1,7 @@
 package us.ihmc.ihmcPerception.camera;
 
 import java.awt.image.BufferedImage;
+import java.util.function.LongUnaryOperator;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.FisheyePacket;
@@ -13,7 +14,6 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
@@ -28,10 +28,10 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
                                 RobotConfigurationDataBuffer robotConfigurationDataBuffer, Ros2Node ros2Node,
-                                PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
+                                LongUnaryOperator robotMonotonicTimeCalculator, final RosMainNode rosMainNode)
    {
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
-            ppsTimestampOffsetProvider);
+            robotMonotonicTimeCalculator);
 
       if (!cameraParameters.useIntrinsicParametersFromRos())
       {

@@ -65,6 +65,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -161,7 +162,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private RobotController robotController;
 
-   private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
+   private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
+   private final TimestampProvider monotonicTimeProvider = () -> RealtimeThread.getCurrentMonotonicClockTime();
 
    private boolean firstTick = true;
 
@@ -348,7 +350,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       ValkyrieJointMap jointMap = robotModel.getJointMap();
-      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, monotonicTimeProvider, stateEstimatorParameters,
                                                                                                             effortJointHandles, positionJointHandles,
                                                                                                             jointStateHandles, imuHandles,
                                                                                                             forceTorqueSensorHandles, jointMap,
@@ -448,7 +450,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       {
          LogTools.info("Running with blocking synchronous execution between estimator and controller");
          throw new RuntimeException("Re-implement this possibly using the " + SingleThreadedRobotController.class.getSimpleName() + "!");
-//         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
+//         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, wallTimeProvider);
 //         coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 //         robotController = coordinator;
       }
@@ -506,7 +508,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    }
 
    @Override
-   protected void doControl(long time, long duration)
+   protected void doControl(long rosTime, long duration)
    {
       if (firstTick)
       {
@@ -518,7 +520,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          firstTick = false;
       }
 
-      timestampProvider.setTimestamp(time);
+      wallTimeProvider.setTimestamp(rosTime);
       robotController.doControl();
    }
 }

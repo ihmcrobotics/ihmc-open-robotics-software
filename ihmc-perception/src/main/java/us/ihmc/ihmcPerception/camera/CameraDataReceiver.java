@@ -4,18 +4,18 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.LongUnaryOperator;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -33,7 +33,7 @@ public class CameraDataReceiver extends Thread
    private final Point3D cameraPosition = new Point3D();
    private final Quaternion cameraOrientation = new Quaternion();
 
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final LongUnaryOperator robotMonotonicTimeCalculator;
 
    private final LinkedBlockingQueue<CameraData> dataQueue = new LinkedBlockingQueue<>(2);
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
@@ -42,10 +42,10 @@ public class CameraDataReceiver extends Thread
    private boolean useTimestamps = true;
 
    public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         CompressedVideoHandler compressedVideoHandler, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         CompressedVideoHandler compressedVideoHandler, LongUnaryOperator robotMonotonicTimeCalculator)
    {
       this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.robotMonotonicTimeCalculator = robotMonotonicTimeCalculator;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
 
@@ -79,7 +79,7 @@ public class CameraDataReceiver extends Thread
                {
                   System.out.println("Updating full robot model");
                }
-               long robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamp);
+               long robotTimestamp = robotMonotonicTimeCalculator.applyAsLong(data.timestamp);
 
                if(useTimestamps)
                {

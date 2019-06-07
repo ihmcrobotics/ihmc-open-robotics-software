@@ -443,8 +443,9 @@ public final class RandomHumanoidMessages
    {
       RobotConfigurationData next = new RobotConfigurationData();
       int size = random.nextInt(10000);
-      next.setTimestamp(random.nextLong());
-      next.setSensorHeadPpsTimestamp(random.nextLong());
+      next.setWallTime(random.nextLong());
+      next.setMonotonicTime(random.nextLong());
+      next.setSyncTimestamp(random.nextLong());
       next.setJointNameHash(random.nextInt(10000));
       next.getJointAngles().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
       next.getJointVelocities().add(RandomNumbers.nextFloatArray(random, size, 1.0f));

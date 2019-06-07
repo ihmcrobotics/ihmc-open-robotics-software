@@ -1,9 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,16 +18,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D;
 import us.ihmc.robotics.graphics.YoGraphicPolynomial3D.TrajectoryColorType;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d
@@ -85,6 +89,11 @@ public class PositionOptimizedTrajectoryGenerator
    public PositionOptimizedTrajectoryGenerator()
    {
       this("", new YoVariableRegistry(""));
+   }
+
+   public PositionOptimizedTrajectoryGenerator(int maxIterations, int maxWaypoints)
+   {
+      this("", new YoVariableRegistry(""), null, maxIterations, maxWaypoints);
    }
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
