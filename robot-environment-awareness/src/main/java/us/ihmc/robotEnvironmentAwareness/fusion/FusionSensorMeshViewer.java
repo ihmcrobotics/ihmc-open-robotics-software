@@ -2,36 +2,22 @@ package us.ihmc.robotEnvironmentAwareness.fusion;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
-import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataFeatureUpdater;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionRawData;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionRawDataLoader;
+import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataViewer;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.DetectedObjectViewer;
-import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.LidarScanViewer;
@@ -50,6 +36,7 @@ public class FusionSensorMeshViewer
    private final StereoVisionPointCloudViewer stereoVisionPointCloudViewer;
    private final DetectedObjectViewer detectedObjectViewer;
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
+   private final LidarImageFusionDataViewer lidarImageFusionDataViewer;
 
    private final MeshView planarRegionMeshView = new MeshView();
 
@@ -63,6 +50,7 @@ public class FusionSensorMeshViewer
       stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, reaMessager);
       detectedObjectViewer = new DetectedObjectViewer(ros2Node);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(reaMessager);
+      lidarImageFusionDataViewer = new LidarImageFusionDataViewer(messager);
 
       Node lidarScanRootNode = lidarScanViewer.getRoot();
       lidarScanRootNode.setMouseTransparent(true);
@@ -70,8 +58,10 @@ public class FusionSensorMeshViewer
       stereoVisionPointCloudRootNode.setMouseTransparent(true);
       Node detectedObjectRootNode = detectedObjectViewer.getRoot();
       detectedObjectRootNode.setMouseTransparent(true);
+      Node lidarImageFusionDataRootNode = lidarImageFusionDataViewer.getRoot();
+      lidarImageFusionDataRootNode.setMouseTransparent(true);
 
-      root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, detectedObjectRootNode, planarRegionMeshView);
+      root.getChildren().addAll(lidarScanRootNode, stereoVisionPointCloudRootNode, detectedObjectRootNode, planarRegionMeshView, lidarImageFusionDataRootNode);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -81,6 +71,7 @@ public class FusionSensorMeshViewer
             lidarScanViewer.render();
             stereoVisionPointCloudViewer.render();
             detectedObjectViewer.render();
+            lidarImageFusionDataViewer.render();
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());

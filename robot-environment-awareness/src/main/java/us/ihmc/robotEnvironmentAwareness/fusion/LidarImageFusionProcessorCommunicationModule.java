@@ -9,23 +9,18 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.ImageMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataBuffer;
-import us.ihmc.robotEnvironmentAwareness.fusion.data.StereoREAPlanarRegionFeatureUpdater;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObjectDetectionManager;
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
-import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
 import us.ihmc.ros2.Ros2Node;
 
@@ -35,25 +30,21 @@ public class LidarImageFusionProcessorCommunicationModule
 
    private final Ros2Node ros2Node;
    private final REAModuleStateReporter moduleStateReporter;
-
-   private final LidarImageFusionDataBuffer lidarImageFusionDataBuffer;
-   private final StereoREAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
+   private final StereoREAModule stereoREAModule; // TODO: realize online runner with enable button.
 
    private final FusionSensorObjectDetectionManager objectDetectionManager;
 
    private final AtomicReference<String> socketHostIPAddress;
    private final AtomicReference<BufferedImage> latestBufferedImage = new AtomicReference<>(null);
    private final AtomicReference<List<ObjectType>> selectedObjecTypes;
-   
+
    private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
-      this.reaMessager = reaMessager;
       this.messager = messager;
       this.ros2Node = ros2Node;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
-      planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager);
+      stereoREAModule = new StereoREAModule(reaMessager, messager);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan", this::dispatchLidarScanMessage);
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud",
@@ -67,8 +58,9 @@ public class LidarImageFusionProcessorCommunicationModule
       selectedObjecTypes = messager.createInput(LidarImageFusionAPI.SelectedObjecTypes, new ArrayList<ObjectType>());
       socketHostIPAddress = messager.createInput(LidarImageFusionAPI.ObjectDetectionModuleAddress);
 
-      
-      messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> runSREA());
+      //TODO: will be replaced by LidarImageFusionAPI.EnableREA.
+      //messager.registerTopicListener(LidarImageFusionAPI.EnableREA, (content) -> stereoREAModule.enable());
+      messager.registerTopicListener(LidarImageFusionAPI.RunStereoREA, (content) -> stereoREAModule.run());
    }
 
    private void connect()
@@ -79,30 +71,6 @@ public class LidarImageFusionProcessorCommunicationModule
    private void request()
    {
       objectDetectionManager.requestObjectDetection(latestBufferedImage.getAndSet(null), selectedObjecTypes.get());
-   }
-
-   // TODO: Temp method.
-   private final Messager reaMessager;
-   private void runSREA()
-   {
-      reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true);
-      // TODO: visualize.
-      // Reduce and optimize computation time.
-      // Visualize manual test.
-      // Unit tests.
-      // Online system.
-      long updateStartTime = System.nanoTime();
-      lidarImageFusionDataBuffer.updateNewBuffer();
-      planarRegionFeatureUpdater.updateLatestLidarImageFusionData(lidarImageFusionDataBuffer.pollNewBuffer());
-
-      if(planarRegionFeatureUpdater.update())
-      {
-         moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater);
-      }
-      
-      double updatingTime = Conversions.nanosecondsToSeconds(System.nanoTime() - updateStartTime);
-      String computationTime = Double.toString(updatingTime);
-      messager.submitMessage(LidarImageFusionAPI.ComputationTime, computationTime);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -116,7 +84,7 @@ public class LidarImageFusionProcessorCommunicationModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       objectDetectionManager.updateLatestStereoVisionPointCloudMessage(message);
-      lidarImageFusionDataBuffer.updateLatestStereoVisionPointCloudMessage(message);
+      stereoREAModule.updateLatestStereoVisionPointCloudMessage(message);
    }
 
    private void dispatchImageMessage(Subscriber<ImageMessage> subscriber)
@@ -126,7 +94,7 @@ public class LidarImageFusionProcessorCommunicationModule
          messager.submitMessage(LidarImageFusionAPI.ImageState, new ImageMessage(message));
 
       latestBufferedImage.set(ImageVisualizationHelper.convertImageMessageToBufferedImage(message));
-      lidarImageFusionDataBuffer.updateLatestBufferedImage(latestBufferedImage.get());
+      stereoREAModule.updateLatestBufferedImage(latestBufferedImage.get());
    }
 
    public void start() throws IOException

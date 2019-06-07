@@ -29,7 +29,7 @@ public class StereoREAAnchorPaneController
    private Slider stereoBuffer;
 
    @FXML
-   private Button showBuffer;
+   private Button showSegmentationRawData;
 
    @FXML
    private Button showProjection;
@@ -126,9 +126,9 @@ public class StereoREAAnchorPaneController
       messager.submitMessage(LidarImageFusionAPI.ClearREA, true);
    }
 
-   public void showBuffer()
+   public void showFusionData()
    {
-      messager.submitMessage(LidarImageFusionAPI.ShowStereoBuffer, true);
+      messager.submitMessage(LidarImageFusionAPI.ShowFusionData, true);
    }
 
    public void showProjection()

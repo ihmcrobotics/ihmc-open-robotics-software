@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
@@ -14,7 +13,6 @@ import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataFactor
 
 public class LidarImageFusionDataBuffer
 {
-   private final Messager messager;
    private final IntrinsicParameters intrinsicParameters;
 
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
@@ -25,7 +23,6 @@ public class LidarImageFusionDataBuffer
 
    public LidarImageFusionDataBuffer(Messager messager, IntrinsicParameters intrinsic)
    {
-      this.messager = messager;
       intrinsicParameters = intrinsic;
       latestImageSegmentationParaeters = messager.createInput(LidarImageFusionAPI.ImageSegmentationParameters, new ImageSegmentationParameters());
    }
@@ -37,8 +34,6 @@ public class LidarImageFusionDataBuffer
 
    public void updateNewBuffer()
    {
-      long updateStartTime = System.nanoTime();
-
       StereoVisionPointCloudMessage stereoVisionPointCloudMessage = latestStereoVisionPointCloudMessage.get();
       ImageSegmentationParameters imageSegmentationParameters = latestImageSegmentationParaeters.get();
 
@@ -49,9 +44,6 @@ public class LidarImageFusionDataBuffer
                                                                                          imageSegmentationParameters.getMinElementSize(),
                                                                                          imageSegmentationParameters.getIterate());
       newBuffer.set(data);
-
-      double updatingTime = Conversions.nanosecondsToSeconds(System.nanoTime() - updateStartTime);
-      System.out.println("LidarImageFusionDataBuffer updatingTime " + updatingTime);
    }
 
    public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
