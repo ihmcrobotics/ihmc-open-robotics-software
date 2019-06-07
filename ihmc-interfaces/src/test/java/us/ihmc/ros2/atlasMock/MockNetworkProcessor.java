@@ -37,7 +37,7 @@ public class MockNetworkProcessor
             {
                // Access message data
                // long nanosec = robotConfigurationData.getHeader().getStamp().getNanosec();
-               long nanosec = robotConfigurationData.getTimestamp();
+               long nanosec = robotConfigurationData.getMonotonicTime();
             }
          }
          catch (Exception e)

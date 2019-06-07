@@ -94,6 +94,8 @@ public class QuadrupedUIMessageConverter
    private IHMCRealtimeROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
    private IHMCRealtimeROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingRequestPublisher;
 
+   private IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+
    public QuadrupedUIMessageConverter(RealtimeRos2Node ros2Node, Messager messager, String robotName)
    {
       this.messager = messager;
@@ -216,6 +218,8 @@ public class QuadrupedUIMessageConverter
 
       stepListMessagePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
 
+      reaStateRequestPublisher = ROS2Tools.createPublisher(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, this::publishDesiredQuadrupedSteppigState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredBodyHeightTopic, this::publishDesiredBodyHeight);
@@ -247,6 +251,13 @@ public class QuadrupedUIMessageConverter
          QuadrupedFootLoadBearingMessage loadBearingMessage = new QuadrupedFootLoadBearingMessage();
          loadBearingMessage.setRobotQuadrant(quadrant.toByte());
          loadBearingRequestPublisher.publish(loadBearingMessage);
+      });
+
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.PlanarRegionDataClearTopic, m ->
+      {
+         REAStateRequestMessage clearRequest = new REAStateRequestMessage();
+         clearRequest.setRequestClear(true);
+         reaStateRequestPublisher.publish(clearRequest);
       });
    }
 

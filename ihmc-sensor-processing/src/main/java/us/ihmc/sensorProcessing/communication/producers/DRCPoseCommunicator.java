@@ -142,9 +142,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
    @Override
    public void write()
    {
-      long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
-      long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
-      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, robotConfigurationData);
+      long wallTime = sensorTimestampHolder.getWallTime();
+      long monotonicTime = sensorTimestampHolder.getMonotonicTime();
+      long syncTimestamp = sensorTimestampHolder.getSyncTimestamp();
+      jointConfigurationGathererAndProducer.packEstimatorJoints(wallTime, monotonicTime, syncTimestamp, robotConfigurationData);
 
       if (sensorRawOutputMapReadOnly != null)
       {

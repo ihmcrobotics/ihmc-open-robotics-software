@@ -5,7 +5,6 @@ import org.ros.message.Time;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -15,19 +14,16 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
 {
    private final RosLidarPublisher[] lidarPublisher;
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final AvatarRobotLidarParameters[] lidarParameters;
    private final int nSensors;
 
-   public RosSCSLidarPublisher(ObjectCommunicator localObjectCommunicator,
-         RosMainNode rosMainNode,
-         PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         FullRobotModel fullRobotModel,
-         AvatarRobotLidarParameters[] lidarParameters)
+   public RosSCSLidarPublisher(ObjectCommunicator localObjectCommunicator, RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
+                               FullRobotModel fullRobotModel, AvatarRobotLidarParameters[] lidarParameters)
    {
       nSensors = lidarParameters.length;
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
       this.lidarParameters = lidarParameters;
 
       lidarPublisher = new RosLidarPublisher[nSensors];
@@ -44,9 +40,10 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
    @Override
    public void consumeObject(SimulatedLidarScanPacket simLidarScan)
    {
-      if(rosMainNode.isStarted()){
+      if (rosMainNode.isStarted())
+      {
          int sensorId = simLidarScan.getSensorId();
-         long timestamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(simLidarScan.getLidarScanParameters().getTimestamp());
+         long timestamp = rosClockCalculator.computeROSTime(simLidarScan.getLidarScanParameters().getTimestamp(), simLidarScan.getLidarScanParameters().getTimestamp());
          Time time = Time.fromNano(timestamp);
          String frameId = lidarParameters[sensorId].getEndFrameForRosTransform();
          lidarPublisher[sensorId].publish(simLidarScan, frameId, time);

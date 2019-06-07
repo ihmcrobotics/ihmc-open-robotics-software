@@ -84,21 +84,20 @@ public class KinematicToolboxDiagnosticEnvironment
    {
       return new SensorRawOutputMapReadOnly()
       {
-
          @Override
-         public long getVisionSensorTimestamp()
+         public long getWallTime()
          {
             return 0;
          }
 
          @Override
-         public long getTimestamp()
+         public long getMonotonicTime()
          {
             return 0;
          }
 
          @Override
-         public long getSensorHeadPPSTimestamp()
+         public long getSyncTimestamp()
          {
             return 0;
          }
@@ -147,22 +146,21 @@ public class KinematicToolboxDiagnosticEnvironment
    {
       return new SensorOutputMapReadOnly()
       {
-
          @Override
-         public long getVisionSensorTimestamp()
+         public long getWallTime()
          {
             timestamp += Conversions.millisecondsToNanoseconds(1L);
             return timestamp;
          }
 
          @Override
-         public long getTimestamp()
+         public long getMonotonicTime()
          {
             return timestamp;
          }
 
          @Override
-         public long getSensorHeadPPSTimestamp()
+         public long getSyncTimestamp()
          {
             return timestamp;
          }
