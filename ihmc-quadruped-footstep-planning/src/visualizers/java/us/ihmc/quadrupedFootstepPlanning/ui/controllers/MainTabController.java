@@ -199,6 +199,12 @@ public class MainTabController
       messager.submitMessage(planarRegionDataTopic, buildFlatGround());
    }
 
+   @FXML
+   public void requestClearREA()
+   {
+      messager.submitMessage(planarRegionDataClearTopic, true);
+   }
+
    private PlanarRegionsList buildFlatGround()
    {
       quadrupedReferenceFrames.updateFrames();
@@ -242,6 +248,7 @@ public class MainTabController
    private Topic<Integer> receivedPlanIdTopic;
    private Topic<Boolean> showFootstepPlanTopic;
    private Topic<FootstepPlan> footstepPlanTopic;
+   private Topic<Boolean> planarRegionDataClearTopic;
    private Topic<PlanarRegionsList> planarRegionDataTopic;
    private Topic<Double> plannerTimeTakenTopic;
    private Topic<Double> plannerTimeoutTopic;
@@ -293,6 +300,11 @@ public class MainTabController
    {
       this.showFootstepPlanTopic = showFootstepPlanTopic;
       this.footstepPlanTopic = footstepPlanTopic;
+   }
+
+   public void setPlanarRegionDataClearTopic(Topic<Boolean> planarRegionDataClearTopic)
+   {
+      this.planarRegionDataClearTopic = planarRegionDataClearTopic;
    }
 
    public void setPlanarRegionDataTopic(Topic<PlanarRegionsList> planarRegionDataTopic)

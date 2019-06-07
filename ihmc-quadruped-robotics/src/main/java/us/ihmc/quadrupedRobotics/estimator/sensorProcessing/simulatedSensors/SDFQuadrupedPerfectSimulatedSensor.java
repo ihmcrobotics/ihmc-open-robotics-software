@@ -83,7 +83,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
 
       super.read();
-      return getTimestamp();
+      return getMonotonicTime();
    }
 
    @Override

@@ -55,6 +55,6 @@ public class DRCPerfectSensorReader implements SensorReader
       {
          rawSensorReader.read();
       }
-      return sensorOutputMapReadOnly.getTimestamp();
+      return sensorOutputMapReadOnly.getMonotonicTime();
    }
 }

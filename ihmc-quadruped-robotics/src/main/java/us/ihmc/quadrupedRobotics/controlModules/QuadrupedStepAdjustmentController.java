@@ -36,7 +36,7 @@ public class QuadrupedStepAdjustmentController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final QuadrantDependentList<FixedFrameVector3DBasics> instantaneousStepAdjustments = new QuadrantDependentList<>();
-   private final QuadrantDependentList<AccelerationLimitedYoFrameVector3D> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
+   private final QuadrantDependentList<RateLimitedYoFrameVector> limitedInstantaneousStepAdjustments = new QuadrantDependentList<>();
 
    private final DoubleParameter maxStepAdjustmentRate = new DoubleParameter("maxStepAdjustmentRate", registry, 5.0);
    private final DoubleParameter maxStepAdjustmentAcceleration = new DoubleParameter("maxStepAdjustmentAcceleration", registry, 10.0);
@@ -86,8 +86,8 @@ public class QuadrupedStepAdjustmentController
          String prefix = robotQuadrant.getShortName();
 
          YoFrameVector3D instantaneousStepAdjustment = new YoFrameVector3D(prefix + "InstantaneousStepAdjustment", worldFrame, registry);
-         AccelerationLimitedYoFrameVector3D limitedInstantaneousStepAdjustment = new AccelerationLimitedYoFrameVector3D(prefix + "LimitedInstantaneousStepAdjustment", "", registry,
-                                                                                                    maxStepAdjustmentRate, maxStepAdjustmentAcceleration,
+         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = new RateLimitedYoFrameVector(prefix + "LimitedInstantaneousStepAdjustment", "", registry,
+                                                                                                    maxStepAdjustmentRate,// maxStepAdjustmentAcceleration,
                                                                                                     controllerToolbox.getRuntimeEnvironment().getControlDT(),
                                                                                                     instantaneousStepAdjustment);
 
@@ -96,6 +96,8 @@ public class QuadrupedStepAdjustmentController
          limitedInstantaneousStepAdjustment.setToZero();
          dcmStepAdjustmentMultiplier.setToNaN();
          recursionMultiplier.setToNaN();
+
+//         limitedInstantaneousStepAdjustment.setGainsByPolePlacement(2.0 * Math.PI * 12.0, 1.0, 2.0);
 
          instantaneousStepAdjustments.put(robotQuadrant, instantaneousStepAdjustment);
          limitedInstantaneousStepAdjustments.put(robotQuadrant, limitedInstantaneousStepAdjustment);
@@ -169,7 +171,7 @@ public class QuadrupedStepAdjustmentController
          RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
 
          FixedFrameVector3DBasics instantaneousStepAdjustment = instantaneousStepAdjustments.get(robotQuadrant);
-         AccelerationLimitedYoFrameVector3D limitedInstantaneousStepAdjustment = limitedInstantaneousStepAdjustments.get(robotQuadrant);
+         RateLimitedYoFrameVector limitedInstantaneousStepAdjustment = limitedInstantaneousStepAdjustments.get(robotQuadrant);
 
          if (instantaneousStepAdjustment.containsNaN())
          {

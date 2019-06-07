@@ -8,7 +8,8 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSetting
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -46,7 +47,10 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract double getStandPrepAngle(String jointName);
 
-   public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+   public default RobotROSClockCalculator getROSClockCalculator()
+   {
+      return new WallTimeBasedROSClockCalculator();
+   }
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
 

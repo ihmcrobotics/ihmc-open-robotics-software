@@ -1,8 +1,16 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.net.URI;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -11,7 +19,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -20,13 +27,6 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-
-import java.net.URI;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class StereoVisionPointCloudPublisher
 {
@@ -48,7 +48,7 @@ public class StereoVisionPointCloudPublisher
 
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
-   private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
+   private RobotROSClockCalculator rosClockCalculator = null;
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> pointcloudPublisher;
    private final IHMCRealtimeROS2Publisher<StereoVisionPointCloudMessage> pointcloudRealtimePublisher;
@@ -110,9 +110,9 @@ public class StereoVisionPointCloudPublisher
       rosMainNode.attachSubscriber(stereoPointCloudROSTopic, createROSPointCloud2Subscriber());
    }
 
-   public void setPPSTimestampOffsetProvider(PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+   public void setROSClockCalculator(RobotROSClockCalculator rosClockCalculator)
    {
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
    }
 
    public void setCustomStereoVisionTransformer(StereoVisionWorldTransformCalculator transformer)
@@ -174,15 +174,15 @@ public class StereoVisionPointCloudPublisher
 
       long robotTimestamp;
 
-      if (ppsTimestampOffsetProvider == null)
+      if (rosClockCalculator == null)
       {
          robotTimestamp = pointCloudData.getTimestamp();
          robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
       }
       else
       {
-         long timestamp = pointCloudData.getTimestamp();
-         robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timestamp);
+         long rosTimestamp = pointCloudData.getTimestamp();
+         robotTimestamp = rosClockCalculator.computeRobotMonotonicTime(rosTimestamp);
          boolean waitForTimestamp = true;
          boolean success = robotConfigurationDataBuffer.updateFullRobotModel(waitForTimestamp, robotTimestamp, fullRobotModel, null) != -1;
          if (!success)
