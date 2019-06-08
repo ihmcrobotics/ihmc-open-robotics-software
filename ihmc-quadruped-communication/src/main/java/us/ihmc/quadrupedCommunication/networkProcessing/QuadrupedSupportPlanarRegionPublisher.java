@@ -1,10 +1,19 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.ejml.data.DenseMatrix64F;
+
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
-import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -32,31 +41,27 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedSupportPlanarRegionPublisher
 {
    private static final double defaultInsideRegionSize = 0.3;
    private static final double defaultOutsideRegionSize = 0.1;
+   private static final double heightMergeThreshold = 0.02;
 
    private static final int FRONT_LEFT_FOOT_INDEX = 0;
    private static final int FRONT_RIGHT_FOOT_INDEX = 1;
    private static final int HIND_LEFT_FOOT_INDEX = 2;
    private static final int HIND_RIGHT_FOOT_INDEX = 3;
-   private static final int CONVEX_HULL_INDEX = 4;
+   private static final int HIND_CONVEX_HULL_INDEX = 4;
+   private static final int FRONT_CONVEX_HULL_INDEX = 5;
 
-   private static final int numberOfRegions = 5;
+   private static final int numberOfRegions = 6;
 
    private final RealtimeRos2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
@@ -71,11 +76,11 @@ public class QuadrupedSupportPlanarRegionPublisher
    private final OneDoFJointBasics[] oneDoFJoints;
    private final CommonQuadrupedReferenceFrames referenceFrames;
    private final QuadrantDependentList<ContactablePlaneBody> contactableFeet;
-   private final QuadrantDependentList<ZUpFrame> soleZUpFrame;
+   private final QuadrantDependentList<ZUpFrame> soleZUpFrames;
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
-   public QuadrupedSupportPlanarRegionPublisher(FullQuadrupedRobotModelFactory robotModel,
-                                                QuadrantDependentList<ArrayList<Point2D>> groundContactPoints, PubSubImplementation pubSubImplementation)
+   public QuadrupedSupportPlanarRegionPublisher(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
+                                                PubSubImplementation pubSubImplementation)
    {
       fullRobotModel = robotModel.createFullRobotModel();
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
@@ -87,18 +92,26 @@ public class QuadrupedSupportPlanarRegionPublisher
       contactableBodiesFactory.setFootContactPoints(groundContactPoints);
       contactableFeet = new QuadrantDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      soleZUpFrame = new QuadrantDependentList<>();
+      soleZUpFrames = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         soleZUpFrame.put(robotQuadrant, new ZUpFrame(ReferenceFrame.getWorldFrame(), contactableFeet.get(robotQuadrant).getSoleFrame(), robotQuadrant.getShortName() + "ZUpFrame"));
+         soleZUpFrames.put(robotQuadrant,
+                           new ZUpFrame(ReferenceFrame.getWorldFrame(),
+                                        contactableFeet.get(robotQuadrant).getSoleFrame(),
+                                        robotQuadrant.getShortName() + "ZUpFrame"));
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           RobotConfigurationData.class,
+                                           QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class,
+      regionPublisher = ROS2Tools.createPublisher(ros2Node,
+                                                  PlanarRegionsListMessage.class,
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT), s -> latestParametersMessage.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           QuadrupedSupportPlanarRegionParametersMessage.class,
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT),
+                                           s -> latestParametersMessage.set(s.takeNextData()));
 
       QuadrupedSupportPlanarRegionParametersMessage defaultParameters = new QuadrupedSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);
@@ -133,7 +146,8 @@ public class QuadrupedSupportPlanarRegionPublisher
          supportRegions.set(FRONT_RIGHT_FOOT_INDEX, new PlanarRegion());
          supportRegions.set(HIND_LEFT_FOOT_INDEX, new PlanarRegion());
          supportRegions.set(HIND_RIGHT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
+         supportRegions.set(HIND_CONVEX_HULL_INDEX, new PlanarRegion());
+         supportRegions.set(FRONT_CONVEX_HULL_INDEX, new PlanarRegion());
 
          publishRegions();
          return;
@@ -151,47 +165,62 @@ public class QuadrupedSupportPlanarRegionPublisher
       referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         soleZUpFrame.get(robotQuadrant).update();
+         soleZUpFrames.get(robotQuadrant).update();
       }
 
       QuadrantDependentList<Boolean> isInSupport = new QuadrantDependentList<>(true, true, true, true);
-      /*
-      if (feetAreInSamePlane(isInSupport))
-      {
-         ReferenceFrame leftSoleFrame = soleZUpFrame.get(RobotQuadrant.FRONT_LEFT);
 
-         List<FramePoint2D> allContactPoints = new ArrayList<>();
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            allContactPoints.addAll(createConvexPolygonPoints(robotQuadrant, soleZUpFrame.get(robotQuadrant), insideSupportRegionSize, outsideSupportRegionSize));
-         allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
-
-         supportRegions.set(FRONT_LEFT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(FRONT_RIGHT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(HIND_LEFT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(HIND_RIGHT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
-                                                new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
-      }
-      else
+      for (RobotEnd robotEnd : RobotEnd.values)
       {
-      */
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         if (feetAreInSamePlane(robotEnd, isInSupport))
          {
-            if (isInSupport.get(robotQuadrant))
+            ReferenceFrame leftSoleFrame = soleZUpFrames.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT));
+
+            List<FramePoint2D> allContactPoints = new ArrayList<>();
+
+            for (RobotSide robotSide : RobotSide.values)
             {
-               List<FramePoint2D> contactPoints = createConvexPolygonPoints(robotQuadrant, soleZUpFrame.get(robotQuadrant), insideSupportRegionSize, outsideSupportRegionSize);
-               RigidBodyTransform transformToWorld = soleZUpFrame.get(robotQuadrant).getTransformToWorldFrame();
-               supportRegions.set(robotQuadrant.ordinal(),
-                                  new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
+               RobotQuadrant robotQuadrant = RobotQuadrant.getQuadrant(robotEnd, robotSide);
+               allContactPoints.addAll(createConvexPolygonPoints(robotQuadrant,
+                                                                 soleZUpFrames.get(robotQuadrant),
+                                                                 insideSupportRegionSize,
+                                                                 outsideSupportRegionSize));
             }
-            else
+
+            allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
+
+            for (RobotSide robotSide : RobotSide.values)
             {
+               RobotQuadrant robotQuadrant = RobotQuadrant.getQuadrant(robotEnd, robotSide);
                supportRegions.set(robotQuadrant.ordinal(), new PlanarRegion());
             }
-         }
 
-         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
-//      }
+            supportRegions.set(4 + robotEnd.ordinal(),
+                               new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
+                                                new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
+         }
+         else
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               RobotQuadrant robotQuadrant = RobotQuadrant.getQuadrant(robotEnd, robotSide);
+               if (isInSupport.get(robotQuadrant))
+               {
+                  ReferenceFrame soleZUpFrame = soleZUpFrames.get(robotQuadrant);
+                  List<FramePoint2D> contactPoints = createConvexPolygonPoints(robotQuadrant, soleZUpFrame, insideSupportRegionSize, outsideSupportRegionSize);
+                  RigidBodyTransform transformToWorld = soleZUpFrame.getTransformToWorldFrame();
+                  supportRegions.set(robotQuadrant.ordinal(),
+                                     new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
+               }
+               else
+               {
+                  supportRegions.set(robotQuadrant.ordinal(), new PlanarRegion());
+               }
+            }
+
+            supportRegions.set(4 + robotEnd.ordinal(), new PlanarRegion());
+         }
+      }
 
       publishRegions();
    }
@@ -206,30 +235,24 @@ public class QuadrupedSupportPlanarRegionPublisher
       regionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(supportRegions)));
    }
 
-   private boolean feetAreInSamePlane(QuadrantDependentList<Boolean> isInSupport)
+   private boolean feetAreInSamePlane(RobotEnd robotEnd, QuadrantDependentList<Boolean> isInSupport)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         if (!isInSupport.get(robotQuadrant))
-         {
+         if (!isInSupport.get(RobotQuadrant.getQuadrant(robotEnd, robotSide)))
             return false;
-         }
       }
-      ReferenceFrame frontLeftSoleFrame = contactableFeet.get(RobotQuadrant.FRONT_LEFT).getSoleFrame();
-      ReferenceFrame frontRightSoleFrame = contactableFeet.get(RobotQuadrant.FRONT_RIGHT).getSoleFrame();
-      ReferenceFrame hindLeftSoleFrame = contactableFeet.get(RobotQuadrant.HIND_LEFT).getSoleFrame();
-      ReferenceFrame hindRightSoleFrame = contactableFeet.get(RobotQuadrant.HIND_RIGHT).getSoleFrame();
 
-      RigidBodyTransform frontLeftToHindLeft = frontLeftSoleFrame.getTransformToDesiredFrame(hindLeftSoleFrame);
-      RigidBodyTransform frontLeftToHindRight = frontLeftSoleFrame.getTransformToDesiredFrame(hindRightSoleFrame);
-      RigidBodyTransform frontLeftToFrontRight = frontLeftSoleFrame.getTransformToDesiredFrame(frontRightSoleFrame);
+      ReferenceFrame leftSoleFrame = contactableFeet.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT)).getSoleFrame();
+      ReferenceFrame rightSoleFrame = contactableFeet.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT)).getSoleFrame();
 
-      double translationEpsilon = 0.02;
-      return Math.abs(frontLeftToHindLeft.getTranslationZ()) < translationEpsilon && Math.abs(frontLeftToHindRight.getTranslationZ()) < translationEpsilon &&
-            Math.abs(frontLeftToFrontRight.getTranslationZ()) < translationEpsilon;
+      RigidBodyTransform leftToRight = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
+
+      return Math.abs(leftToRight.getTranslationZ()) < heightMergeThreshold;
    }
 
-   private static List<FramePoint2D> createConvexPolygonPoints(RobotQuadrant robotQuadrant, ReferenceFrame referenceFrame, double insideSize, double outsideSize)
+   private static List<FramePoint2D> createConvexPolygonPoints(RobotQuadrant robotQuadrant, ReferenceFrame referenceFrame, double insideSize,
+                                                               double outsideSize)
    {
       List<FramePoint2D> points = new ArrayList<>();
       double forwardBound;
@@ -249,7 +272,7 @@ public class QuadrupedSupportPlanarRegionPublisher
          else
          {
             leftBound = outsideSize;
-            rightBound= -insideSize;
+            rightBound = -insideSize;
          }
       }
       else
@@ -268,8 +291,6 @@ public class QuadrupedSupportPlanarRegionPublisher
             rightBound = -outsideSize;
          }
       }
-
-
 
       points.add(new FramePoint2D(referenceFrame, forwardBound, leftBound));
       points.add(new FramePoint2D(referenceFrame, forwardBound, rightBound));
