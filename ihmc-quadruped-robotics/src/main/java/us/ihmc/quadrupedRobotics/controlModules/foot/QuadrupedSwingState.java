@@ -23,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.OneWaypointSwingGenerator;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -99,7 +100,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final FootSwitchInterface footSwitch;
 
+   private final YoDouble speedUpFactorRateLimit;
    private final YoDouble swingTimeSpeedUpFactor;
+   private final RateLimitedYoVariable limitedSwingTimeSpeedUpFactor;
    private final YoDouble maxSwingTimeSpeedUpFactor;
    private final BooleanProvider isSwingSpeedUpEnabled;
 
@@ -125,7 +128,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration = new YoDouble(namePrefix + "SwingDuration", registry);
       hasMinimumTimePassed = new YoBoolean(namePrefix + "HasMinimumTimePassed", registry);
 
+      speedUpFactorRateLimit = new YoDouble(namePrefix + "SpeedUpFactorRateLimit", registry);
+      speedUpFactorRateLimit.set(10.0);
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
+      limitedSwingTimeSpeedUpFactor = new RateLimitedYoVariable(namePrefix + "LimitedTimeSpeedUpFactor", registry, speedUpFactorRateLimit, swingTimeSpeedUpFactor, controlDT);
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
 
       isSwingPastDone = new YoBoolean(namePrefix + "IsSwingPastDone", registry);
@@ -199,6 +205,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       timeInState.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
+      limitedSwingTimeSpeedUpFactor.set(1.0);
       timeInStateWithSwingSpeedUp.setToNaN();
       timeRemainingInState.setToNaN();
       timeRemainingInStateWithSwingSpeedUp.setToNaN();
@@ -269,6 +276,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       blendForStepAdjustment();
 
+      limitedSwingTimeSpeedUpFactor.update();
+      
       double time;
       if (!isSwingSpeedUpEnabled.getValue() || timeInStateWithSwingSpeedUp.isNaN())
       {
@@ -276,7 +285,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         timeInStateWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         timeInStateWithSwingSpeedUp.add(limitedSwingTimeSpeedUpFactor.getDoubleValue() * controlDT);
          time = timeInStateWithSwingSpeedUp.getDoubleValue();
          timeRemainingInStateWithSwingSpeedUp.set(swingDuration.getDoubleValue() - time);
       }
@@ -301,9 +310,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (isSwingSpeedUpEnabled.getValue() && !timeInStateWithSwingSpeedUp.isNaN())
       {
-         desiredVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredVelocity.scale(limitedSwingTimeSpeedUpFactor.getDoubleValue());
 
-         double speedUpFactorSquared = swingTimeSpeedUpFactor.getDoubleValue() * swingTimeSpeedUpFactor.getDoubleValue();
+         double speedUpFactorSquared = limitedSwingTimeSpeedUpFactor.getDoubleValue() * limitedSwingTimeSpeedUpFactor.getDoubleValue();
          desiredAcceleration.scale(speedUpFactorSquared);
       }
 
@@ -438,7 +447,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
             .getDoubleValue()))
       {
          speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
-
          swingTimeSpeedUpFactor.set(speedUpFactor);
          if (timeInStateWithSwingSpeedUp.isNaN())
             timeInStateWithSwingSpeedUp.set(timeInState.getDoubleValue());
@@ -452,7 +460,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double swingDuration = this.swingDuration.getDoubleValue();
       if (!timeInStateWithSwingSpeedUp.isNaN())
       {
-         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         double swingTimeRemaining = (swingDuration - timeInStateWithSwingSpeedUp.getDoubleValue()) / limitedSwingTimeSpeedUpFactor.getDoubleValue();
          return swingTimeRemaining;
       }
       else
@@ -519,6 +527,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingDuration.setToNaN();
       timeInState.setToNaN();
       swingTimeSpeedUpFactor.setToNaN();
+      limitedSwingTimeSpeedUpFactor.setToNaN();
       timeRemainingInState.setToNaN();
       timeInStateWithSwingSpeedUp.setToNaN();
 
