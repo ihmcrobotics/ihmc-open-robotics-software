@@ -44,8 +44,8 @@ import static us.ihmc.robotics.Assert.assertEquals;
 public class QuadrupedAStarFootstepPlannerTest
 {
    private static final double epsilon = 1e-3;
-   private static boolean visualize = true;
-   private static boolean activelyVisualize = true;
+   private static boolean visualize = false;
+   private static boolean activelyVisualize = false;
 
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Green(), YoAppearance.DarkRed(), YoAppearance.DarkGreen());
 

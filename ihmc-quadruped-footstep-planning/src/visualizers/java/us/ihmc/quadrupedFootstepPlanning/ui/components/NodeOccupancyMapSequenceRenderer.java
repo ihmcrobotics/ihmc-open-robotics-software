@@ -219,7 +219,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
          double centerHeight = getHeightAtPoint(centerPosition2D.getX(), centerPosition2D.getY()) + nodeOffsetZ;
 
          Point3DReadOnly centerPosition = new Point3D(centerPosition2D.getX(), centerPosition2D.getY(), centerHeight);
-         double yaw = parentNode.getNominalYaw();
+         double yaw = parentNode.getStepYaw();
          double cylinderLength = 5.0 * coneRadius;
          ArrowGraphic orientationArrow = new ArrowGraphic(0.2 * coneRadius, cylinderLength, Color.GREEN);
 

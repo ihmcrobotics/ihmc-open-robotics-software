@@ -96,14 +96,16 @@ public class SnapBasedNodeCheckerTest
       hindRight.changeFrame(worldFrame);
 
 
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
       // check stepping on exactly the same spot
-      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, otherHindLeft, hindRight, 1.0, 0.5);
-      FootstepNode node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
+      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, otherHindLeft, hindRight, yaw, 1.0, 0.5);
+      FootstepNode node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
 
       PoseReferenceFrame nodeFrame = new PoseReferenceFrame("nodeFrame", worldFrame);
       nodeFrame.setPoseAndUpdate(new Point3D(previousNode.getOrComputeXGaitCenterPoint().getX(), previousNode.getOrComputeXGaitCenterPoint().getY(), 0.0),
-                                 new AxisAngle(previousNode.getNominalYaw(), 0.0, 0.0));
+                                 new AxisAngle(yaw, 0.0, 0.0));
 
 
       String message = "Stepping from " + previousNode + " to " + node ;
@@ -129,7 +131,7 @@ public class SnapBasedNodeCheckerTest
          Point2D shiftedFrontLeft = new Point2D(frontLeft);
          shiftedFrontLeft.add(offsetVector);
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
          if (newNode.getXIndex(robotQuadrant) == previousNode.getXIndex(robotQuadrant) && newNode.getYIndex(robotQuadrant) == previousNode.getYIndex(robotQuadrant))
             continue;
@@ -153,7 +155,7 @@ public class SnapBasedNodeCheckerTest
          FramePoint2D shiftedFrontLeft = new FramePoint2D(frontLeft);
          shiftedFrontLeft.add(offsetVector);
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
 
          offsetVector.changeFrame(nodeFrame);
@@ -183,7 +185,7 @@ public class SnapBasedNodeCheckerTest
 
 
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
 
          frontLeft.changeFrame(nodeFrame);
@@ -258,12 +260,16 @@ public class SnapBasedNodeCheckerTest
       hindLeft.changeFrame(worldFrame);
       hindRight.changeFrame(worldFrame);
 
-      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
 
 
       PoseReferenceFrame nodeFrame = new PoseReferenceFrame("nodeFrame", worldFrame);
-      nodeFrame.setPoseAndUpdate(new Point3D(previousNode.getOrComputeXGaitCenterPoint()), new AxisAngle(previousNode.getNominalYaw(), 0.0, 0.0));
+      nodeFrame.setPoseAndUpdate(new Point3D(previousNode.getOrComputeXGaitCenterPoint()), new AxisAngle(yaw, 0.0, 0.0));
 
 
       frontLeft.changeFrame(nodeFrame);
@@ -298,7 +304,7 @@ public class SnapBasedNodeCheckerTest
          shiftedFrontLeft.add(offsetVector);
 
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -334,7 +340,7 @@ public class SnapBasedNodeCheckerTest
          FramePoint2D shiftedFrontLeft = new FramePoint2D(frontLeft);
          shiftedFrontLeft.add(offsetVector);
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -371,7 +377,7 @@ public class SnapBasedNodeCheckerTest
          shiftedFrontLeft.add(offsetVector);
 
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, shiftedFrontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -454,12 +460,16 @@ public class SnapBasedNodeCheckerTest
       hindLeft.changeFrame(worldFrame);
       hindRight.changeFrame(worldFrame);
 
-      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      FootstepNode previousNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
 
 
       PoseReferenceFrame nodeFrame = new PoseReferenceFrame("nodeFrame", worldFrame);
-      nodeFrame.setPoseAndUpdate(new Point3D(previousNode.getOrComputeXGaitCenterPoint()), new AxisAngle(previousNode.getNominalYaw(), 0.0, 0.0));
+      nodeFrame.setPoseAndUpdate(new Point3D(previousNode.getOrComputeXGaitCenterPoint()), new AxisAngle(yaw, 0.0, 0.0));
 
 
       frontLeft.changeFrame(nodeFrame);
@@ -494,7 +504,7 @@ public class SnapBasedNodeCheckerTest
          shiftedHindRight.add(offsetVector);
 
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -530,7 +540,7 @@ public class SnapBasedNodeCheckerTest
          FramePoint2D shiftedHindRight = new FramePoint2D(hindRight);
          shiftedHindRight.add(offsetVector);
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -567,7 +577,7 @@ public class SnapBasedNodeCheckerTest
          shiftedHindRight.add(offsetVector);
 
 
-         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, stanceLength, stanceWidth);
+         FootstepNode newNode = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, shiftedHindRight, yaw, stanceLength, stanceWidth);
 
          FrameVector2D actualShift = new FrameVector2D();
          actualShift.set(newNode.getX(robotQuadrant) - previousNode.getX(robotQuadrant), newNode.getY(robotQuadrant) - previousNode.getY(robotQuadrant));
@@ -639,7 +649,11 @@ public class SnapBasedNodeCheckerTest
       FramePoint2D hindLeft = new FramePoint2D(worldFrame, -stanceLength, 0.0);
       FramePoint2D hindRight = new FramePoint2D(worldFrame, -stanceLength, -stanceWidth); // way further out
 
-      FootstepNode node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      FootstepNode node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
       boolean isValid = nodeChecker.isNodeValid(node, null);
 
@@ -664,7 +678,7 @@ public class SnapBasedNodeCheckerTest
       parameters.setDistanceInside(0.08);
       frontLeft.setX(0.9 * 0.5 * cinderWidth);
 
-      node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+      node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
       isValid = nodeChecker.isNodeValid(node, null);
       testListener.assertCorrectRejection("", node, null, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);

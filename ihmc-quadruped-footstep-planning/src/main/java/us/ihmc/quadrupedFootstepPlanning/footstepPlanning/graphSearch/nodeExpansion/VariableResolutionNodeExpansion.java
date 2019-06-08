@@ -55,7 +55,7 @@ public class VariableResolutionNodeExpansion extends ParameterBasedNodeExpansion
       double left = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
       double right = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
 
-      if (CliffDetectionTools.isNearCliff(snapper.getPlanarRegionsList(), footInWorld, node.getNominalYaw(), parameters, forward, backward, left, right))
+      if (CliffDetectionTools.isNearCliff(snapper.getPlanarRegionsList(), footInWorld, node.getStepYaw(), parameters, forward, backward, left, right))
          return FootstepNode.gridSizeXY;
 
       return 2 * FootstepNode.gridSizeXY;

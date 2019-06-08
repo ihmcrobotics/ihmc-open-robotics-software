@@ -27,7 +27,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
       double bodyDistance = node.euclideanDistance(goalNode);
 
       double referenceYaw = computeReferenceYaw(node, goalNode);
-      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), referenceYaw);
+      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
       double distanceHeuristicCost = parameters.getDistanceHeuristicWeight() * bodyDistance;
 
@@ -90,7 +90,7 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
       double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
+      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 }

@@ -51,7 +51,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
 
       double referenceYaw = computeReferenceYaw(node, goalNode, closestPointOnPath);
 
-      double yaw = yawViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), referenceYaw);
+      double yaw = yawViolationWeight * AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
 
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = 4.0 * remainingDistance / desiredSpeed;
@@ -122,7 +122,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
       double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
+      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 }

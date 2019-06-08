@@ -136,7 +136,8 @@ public class XGaitCostTest
 
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
-      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
+      double yaw = Math.toRadians(45.0);
+      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
       ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
 
       FramePoint2D hindLeft = new FramePoint2D(yawedFrame, -0.5, 0.25);
@@ -157,8 +158,8 @@ public class XGaitCostTest
 
       RobotQuadrant steppingQuadrant = RobotQuadrant.FRONT_LEFT;
       FootstepNode startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
-                                                1.0, 0.5);
-      FootstepNode endNode = new FootstepNode(steppingQuadrant, nextFrontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
+                                                yaw, 1.0, 0.5);
+      FootstepNode endNode = new FootstepNode(steppingQuadrant, nextFrontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
 
@@ -167,9 +168,8 @@ public class XGaitCostTest
       nextFrontRight.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       steppingQuadrant = RobotQuadrant.FRONT_RIGHT;
-      startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
-                                            1.0, 0.5);
-      endNode = new FootstepNode(steppingQuadrant, frontLeft, nextFrontRight, hindLeft, hindRight, 1.0, 0.5);
+      startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
+      endNode = new FootstepNode(steppingQuadrant, frontLeft, nextFrontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
    }
@@ -195,8 +195,9 @@ public class XGaitCostTest
 
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
-//      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
-//      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
+      double yaw = Math.toRadians(45.0);
+      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
+      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
 
       double forwardVelocity = maxSpeed * planningSpeedFraction;
       double initialForwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
@@ -212,7 +213,7 @@ public class XGaitCostTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          footPositions.get(robotQuadrant).changeFrameAndProjectToXYPlane(worldFrame);
 
-      FootstepNode startNode =  new FootstepNode(lastQuadrantStepping, footPositions, stanceLength, stanceWidth);
+      FootstepNode startNode =  new FootstepNode(lastQuadrantStepping, footPositions, yaw, stanceLength, stanceWidth);
 
       int stepsToTest = 20;
       for (int stepNumber = 0; stepNumber < stepsToTest; stepNumber++)
@@ -235,7 +236,8 @@ public class XGaitCostTest
 
          endFoot.changeFrameAndProjectToXYPlane(worldFrame);
 
-         FramePoint2D snappedXGait = new FramePoint2D(worldFrame, FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getX()), FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getY()));
+         FramePoint2D snappedXGait = new FramePoint2D(worldFrame, FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getX()),
+                                                      FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getY()));
          snappedXGait.changeFrameAndProjectToXYPlane(yawedFrame);
          snappedXGait.subX(movingQuadrant.getEnd().negateIfHindEnd(0.5 * stanceLength));
          snappedXGait.subY(movingQuadrant.getSide().negateIfRightSide(0.5 * stanceWidth));
@@ -243,7 +245,7 @@ public class XGaitCostTest
 
          footPositions.get(movingQuadrant).set(endFoot);
 
-         FootstepNode endNode = new FootstepNode(movingQuadrant, footPositions, stanceLength, stanceWidth);
+         FootstepNode endNode = new FootstepNode(movingQuadrant, footPositions, yaw, stanceLength, stanceWidth);
 
          double epsilon = 2e-2;
          double cost = xGaitCost.compute(startNode, endNode);
@@ -271,7 +273,7 @@ public class XGaitCostTest
             if (snappedFoot.distance(otherSnappedFoot) < 1e-2)
                continue;
 
-            FootstepNode otherEndNode = new FootstepNode(movingQuadrant, otherFootPositions, stanceLength, stanceWidth);
+            FootstepNode otherEndNode = new FootstepNode(movingQuadrant, otherFootPositions, yaw, stanceLength, stanceWidth);
 
             if (stepNumber == 1 && iteration == 2)
                PrintTools.info(("pause)"));
@@ -321,8 +323,8 @@ public class XGaitCostTest
 
       RobotQuadrant steppingQuadrant = RobotQuadrant.HIND_RIGHT;
       FootstepNode startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
-                                                1.0, 0.5);
-      FootstepNode endNode = new FootstepNode(steppingQuadrant, frontLeft, frontRight, hindLeft, nextHindRight, 1.0, 0.5);
+                                                yaw, 1.0, 0.5);
+      FootstepNode endNode = new FootstepNode(steppingQuadrant, frontLeft, frontRight, hindLeft, nextHindRight, yaw, 1.0, 0.5);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
 
@@ -336,9 +338,8 @@ public class XGaitCostTest
       nextHindLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       steppingQuadrant = RobotQuadrant.HIND_LEFT;
-      startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
-                                                1.0, 0.5);
-      endNode = new FootstepNode(steppingQuadrant, frontLeft, frontRight, nextHindLeft, hindRight, 1.0, 0.5);
+      startNode = new FootstepNode(steppingQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, yaw, 1.0, 0.5);
+      endNode = new FootstepNode(steppingQuadrant, frontLeft, frontRight, nextHindLeft, hindRight, yaw, 1.0, 0.5);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
    }
@@ -363,7 +364,8 @@ public class XGaitCostTest
 
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), velocityProvider);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
-      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
+      double yaw = Math.toRadians(45.0);
+      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
 
       FramePoint2D hindLeft = new FramePoint2D(yawedFrame, -0.5, 0.25);
       FramePoint2D hindRight = new FramePoint2D(yawedFrame, -0.5, -0.25);
@@ -389,13 +391,16 @@ public class XGaitCostTest
       frontRightGoal.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       nextFrontLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
-      FootstepNode startNode = new FootstepNode(RobotQuadrant.FRONT_LEFT.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
-      FootstepNode endNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, nextFrontLeft, frontRight, hindLeft, hindRight, 1.0, 0.5);
-      FootstepNode goalNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftGoal, frontRightGoal, hindLeftGoal, hindRightGoal, 1.0, 0.5);
+      FootstepNode startNode = new FootstepNode(RobotQuadrant.FRONT_LEFT.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
+                                                yaw, 1.0, 0.5);
+      FootstepNode endNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, nextFrontLeft, frontRight, hindLeft, hindRight,
+                                              yaw, 1.0, 0.5);
+      FootstepNode goalNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftGoal, frontRightGoal, hindLeftGoal, hindRightGoal,
+                                               yaw, 1.0, 0.5);
 
       velocityProvider.setGoalNode(goalNode);
 
-      assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
+      assertEquals(0.0, xGaitCost.compute(startNode, endNode), 5e-2);
    }
 
    @Test

@@ -70,7 +70,7 @@ public class XGaitCost implements FootstepCost
 
       double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
       startXGaitPose.setPosition(startXGaitPosition);
-      startXGaitPose.setOrientationYawPitchRoll(startNode.getNominalYaw(), nominalPitch, 0.0);
+      startXGaitPose.setOrientationYawPitchRoll(startNode.getStepYaw(), nominalPitch, 0.0);
       startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
 
 
@@ -92,9 +92,9 @@ public class XGaitCost implements FootstepCost
 
       double nominalYawOfEnd = velocityProvider.computeNominalYaw(endXGaitPosition);
       if (Double.isNaN(nominalYawOfEnd))
-         nominalYawOfEnd = startNode.getNominalYaw();
+         nominalYawOfEnd = startNode.getStepYaw();
 
-      if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getNominalYaw(), nominalYawOfEnd)) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
+      if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getStepYaw(), nominalYawOfEnd)) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
       {
          nominalYawOfEnd = AngleTools.trimAngleMinusPiToPi(nominalYawOfEnd + Math.PI);
       }

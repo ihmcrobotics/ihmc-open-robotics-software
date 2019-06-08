@@ -24,7 +24,8 @@ public class FootstepNode
 
    private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
-   private final double nominalYaw;
+//   private final double nominalYaw;
+   private final double stepYaw;
 
    private final double nominalStanceLength;
    private final double nominalStanceWidth;
@@ -39,32 +40,32 @@ public class FootstepNode
    {
       this(other.getMovingQuadrant(), other.getX(RobotQuadrant.FRONT_LEFT), other.getY(RobotQuadrant.FRONT_LEFT), other.getX(RobotQuadrant.FRONT_RIGHT),
            other.getY(RobotQuadrant.FRONT_RIGHT), other.getX(RobotQuadrant.HIND_LEFT), other.getY(RobotQuadrant.HIND_LEFT), other.getX(RobotQuadrant.HIND_RIGHT),
-           other.getY(RobotQuadrant.HIND_RIGHT), other.nominalStanceLength, other.nominalStanceWidth);
+           other.getY(RobotQuadrant.HIND_RIGHT), other.stepYaw, other.nominalStanceLength, other.nominalStanceWidth);
    }
 
-   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<? extends Point2DReadOnly> locations, double nominalStanceLength,
+   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<? extends Point2DReadOnly> locations, double stepYaw, double nominalStanceLength,
                        double nominalStanceWidth)
    {
       this(movingQuadrant, locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
-           locations.get(RobotQuadrant.HIND_RIGHT), nominalStanceLength, nominalStanceWidth);
+           locations.get(RobotQuadrant.HIND_RIGHT), stepYaw, nominalStanceLength, nominalStanceWidth);
    }
 
    public FootstepNode(RobotQuadrant movingQuadrant, Tuple2DReadOnly frontLeft, Tuple2DReadOnly frontRight, Tuple2DReadOnly hindLeft, Tuple2DReadOnly hindRight,
-                       double nominalStanceLength, double nominalStanceWidth)
+                       double stepYaw, double nominalStanceLength, double nominalStanceWidth)
    {
       this(movingQuadrant, frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(), hindRight.getX(),
-           hindRight.getY(), nominalStanceLength, nominalStanceWidth);
+           hindRight.getY(), stepYaw, nominalStanceLength, nominalStanceWidth);
    }
 
    public FootstepNode(RobotQuadrant movingQuadrant, double frontLeftX, double frontLeftY, double frontRightX, double frontRightY, double hindLeftX,
-                       double hindLeftY, double hindRightX, double hindRightY, double nominalStanceLength, double nominalStanceWidth)
+                       double hindLeftY, double hindRightX, double hindRightY,  double stepYaw, double nominalStanceLength, double nominalStanceWidth)
    {
       this(movingQuadrant, snapToGrid(frontLeftX), snapToGrid(frontLeftY), snapToGrid(frontRightX), snapToGrid(frontRightY), snapToGrid(hindLeftX),
-           snapToGrid(hindLeftY), snapToGrid(hindRightX), snapToGrid(hindRightY), nominalStanceLength, nominalStanceWidth);
+           snapToGrid(hindLeftY), snapToGrid(hindRightX), snapToGrid(hindRightY), snapToYawGrid(stepYaw), nominalStanceLength, nominalStanceWidth);
    }
 
    public FootstepNode(RobotQuadrant movingQuadrant, int xFrontLeftIndex, int yFrontLeftIndex, int xFrontRightIndex, int yFrontRightIndex, int xHindLeftIndex,
-                       int yHindLeftIndex, int xHindRightIndex, int yHindRightIndex, double nominalStanceLength, double nominalStanceWidth)
+                       int yHindLeftIndex, int xHindRightIndex, int yHindRightIndex, int yawIndex, double nominalStanceLength, double nominalStanceWidth)
    {
       this.movingQuadrant = movingQuadrant;
       this.nominalStanceLength = nominalStanceLength;
@@ -81,6 +82,8 @@ public class FootstepNode
 
       xIndices.put(RobotQuadrant.HIND_RIGHT, xHindRightIndex);
       yIndices.put(RobotQuadrant.HIND_RIGHT, yHindRightIndex);
+
+      this.yawIndex = yawIndex;
 
       double xFrontLeft = gridSizeXY * xFrontLeftIndex;
       double yFrontLeft = gridSizeXY * yFrontLeftIndex;
@@ -106,8 +109,8 @@ public class FootstepNode
       xPositions.put(RobotQuadrant.HIND_RIGHT, xHindRight);
       yPositions.put(RobotQuadrant.HIND_RIGHT, yHindRight);
 
-      nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
-      yawIndex = (int) Math.round(nominalYaw / gridSizeYaw);
+//      nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
+      stepYaw = gridSizeYaw * yawIndex;
 
       hashCode = computeHashCode(this);
    }
@@ -127,9 +130,14 @@ public class FootstepNode
       return yPositions.get(robotQuadrant);
    }
 
-   public double getNominalYaw()
+//   public double getNominalYaw()
+//   {
+//      return nominalYaw;
+//   }
+
+   public double getStepYaw()
    {
-      return nominalYaw;
+      return stepYaw;
    }
 
    public double getNominalStanceLength()
@@ -178,13 +186,14 @@ public class FootstepNode
       return xGaitCenterPoint;
    }
 
+   // TODO test me
    private static Point2D computeXGaitCenterPoint(FootstepNode node)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
       Vector2D offset = new Vector2D(movingQuadrant.getEnd().negateIfFrontEnd(node.getNominalStanceLength()),
                                      movingQuadrant.getSide().negateIfLeftSide(node.getNominalStanceWidth()));
       offset.scale(0.5);
-      Orientation3DReadOnly rotation = new AxisAngle(node.getNominalYaw(), 0.0, 0.0);
+      Orientation3DReadOnly rotation = new AxisAngle(node.getStepYaw(), 0.0, 0.0);
       rotation.transform(offset);
 
       Point2D newPoint =  new Point2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
@@ -214,6 +223,11 @@ public class FootstepNode
    public static int snapToGrid(double location)
    {
       return (int) Math.round(location / gridSizeXY);
+   }
+
+   public static int snapToYawGrid(double yaw)
+   {
+      return (int) Math.round(yaw / gridSizeYaw);
    }
 
    public boolean quadrantGeometricallyEquals(FootstepNode other)
@@ -309,37 +323,40 @@ public class FootstepNode
       return Math.atan2(deltaY, deltaX);
    }
 
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode)
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, double newYaw, FootstepNode previousNode)
    {
-      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode);
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), newYaw, previousNode);
    }
 
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode,
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, double newYaw, FootstepNode previousNode,
                                                          double nominalStanceLength, double nominalStanceWidth)
    {
-      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode, nominalStanceLength, nominalStanceWidth);
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), newYaw, previousNode, nominalStanceLength, nominalStanceWidth);
    }
 
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode)
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, double newYaw,
+                                                         FootstepNode previousNode)
    {
-      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
-                                        previousNode.getNominalStanceLength(), previousNode.getNominalStanceWidth());
-   }
-
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode,
-                                                         double nominalStanceLength, double nominalStanceWidth)
-   {
-      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
-                                        nominalStanceLength, nominalStanceWidth);
-   }
-
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode)
-   {
-      return constructNodeFromOtherNode(newMovingQuadrant, newXIndex, newYIndex, previousNode, previousNode.getNominalStanceLength(),
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition),
+                                        FootstepNode.snapToYawGrid(newYaw), previousNode, previousNode.getNominalStanceLength(),
                                         previousNode.getNominalStanceWidth());
    }
 
-   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode,
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, double newYaw,
+                                                         FootstepNode previousNode, double nominalStanceLength, double nominalStanceWidth)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition),
+                                        FootstepNode.snapToYawGrid(newYaw), previousNode, nominalStanceLength, nominalStanceWidth);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, int newYawIndex,
+                                                         FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newXIndex, newYIndex, newYawIndex, previousNode, previousNode.getNominalStanceLength(),
+                                        previousNode.getNominalStanceWidth());
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, int newYawIndex, FootstepNode previousNode,
                                                          double nominalStanceLength, double nominalStanceWidth)
    {
       int xFrontLeft = previousNode.getXIndex(RobotQuadrant.FRONT_LEFT);
@@ -371,6 +388,6 @@ public class FootstepNode
          break;
       }
       return new FootstepNode(newMovingQuadrant, xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight,
-                              nominalStanceLength, nominalStanceWidth);
+                              newYawIndex, nominalStanceLength, nominalStanceWidth);
    }
 }

@@ -15,8 +15,8 @@ public class ForwardVelocityProvider implements NominalVelocityProvider
    {
       Vector2D heading = new Vector2D();
 
-      heading.setX(Math.cos(node.getNominalYaw()));
-      heading.setY(Math.sin(node.getNominalYaw()));
+      heading.setX(Math.cos(node.getStepYaw()));
+      heading.setY(Math.sin(node.getStepYaw()));
 
       return heading;
    }

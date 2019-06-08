@@ -31,7 +31,7 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
       double minSteps = bodyDistance / desiredSpeed;
 
       double referenceYaw = computeReferenceYaw(node, goalNode);
-      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getNominalYaw(), referenceYaw);
+      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
 
       double stepHeuristicCost = 4.0 * parameters.getCostPerStep() * minSteps;
@@ -96,7 +96,7 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
          yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
 
       double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
+      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 }

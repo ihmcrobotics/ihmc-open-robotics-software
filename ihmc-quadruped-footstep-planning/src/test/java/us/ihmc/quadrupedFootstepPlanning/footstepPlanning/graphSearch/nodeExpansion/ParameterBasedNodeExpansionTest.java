@@ -67,8 +67,9 @@ public class ParameterBasedNodeExpansionTest
 
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
 
+      double yaw = 0.0;
       FootstepNode baseNode = new FootstepNode(quadrantToCheck, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
-                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, stanceLength, stanceWidth);
+                                               -0.5 * stanceLength, 0.5 * stanceWidth, -0.5 * stanceLength, -0.5 * stanceWidth, yaw, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
       for (FootstepNode expandedNode : expandedNodes)
@@ -136,7 +137,10 @@ public class ParameterBasedNodeExpansionTest
       hindLeft.changeFrame(ReferenceFrame.getWorldFrame());
       hindRight.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
+
+      FootstepNode baseNode = new FootstepNode(quadrantToCheck, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -210,8 +214,11 @@ public class ParameterBasedNodeExpansionTest
 
       RobotQuadrant expectedNewQuadrant = RobotQuadrant.HIND_LEFT;
 
+      double yaw = FootstepNode.computeNominalYaw(frontLeft.getX(), frontLeft.getY(), frontRight.getX(), frontRight.getY(), hindLeft.getX(), hindLeft.getY(),
+                                                  hindRight.getX(), hindRight.getY());
 
-      FootstepNode baseNode = new FootstepNode(expectedNewQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, stanceLength, stanceWidth);
+      FootstepNode baseNode = new FootstepNode(expectedNewQuadrant.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight, yaw,
+                                               stanceLength, stanceWidth);
 
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
 
@@ -329,7 +336,7 @@ public class ParameterBasedNodeExpansionTest
 
 
       // do x gait regions for each guy
-      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), new AxisAngle(baseNode.getNominalYaw(), 0.0, 0.0));
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), new AxisAngle(baseNode.getStepYaw(), 0.0, 0.0));
 
       ConvexPolygon2D frontReachableRegion = new ConvexPolygon2D();
       frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepWidth());
