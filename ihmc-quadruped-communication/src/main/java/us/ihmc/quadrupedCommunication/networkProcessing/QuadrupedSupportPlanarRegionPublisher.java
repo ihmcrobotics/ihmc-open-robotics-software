@@ -14,7 +14,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -28,6 +27,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -36,17 +36,14 @@ import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 
 public class QuadrupedSupportPlanarRegionPublisher
 {
@@ -74,9 +71,8 @@ public class QuadrupedSupportPlanarRegionPublisher
 
    private final FullQuadrupedRobotModel fullRobotModel;
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final CommonQuadrupedReferenceFrames referenceFrames;
-   private final QuadrantDependentList<ContactablePlaneBody> contactableFeet;
-   private final QuadrantDependentList<ZUpFrame> soleZUpFrames;
+   private final QuadrupedReferenceFrames referenceFrames;
+   private final QuadrantDependentList<MovingReferenceFrame> soleZUpFrames;
    private final List<PlanarRegion> supportRegions = new ArrayList<>();
 
    public QuadrupedSupportPlanarRegionPublisher(FullQuadrupedRobotModelFactory robotModel, QuadrantDependentList<ArrayList<Point2D>> groundContactPoints,
@@ -86,18 +82,8 @@ public class QuadrupedSupportPlanarRegionPublisher
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
       String robotName = robotModel.getRobotDescription().getName();
-      ContactableBodiesFactory<RobotQuadrant> contactableBodiesFactory = new ContactableBodiesFactory<>();
-      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      contactableBodiesFactory.setReferenceFrames(referenceFrames);
-      contactableBodiesFactory.setFootContactPoints(groundContactPoints);
-      contactableFeet = new QuadrantDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      soleZUpFrames = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         soleZUpFrames.put(robotQuadrant,
-                           new ZUpFrame(ReferenceFrame.getWorldFrame(),
-                                        contactableFeet.get(robotQuadrant).getSoleFrame(),
-                                        robotQuadrant.getShortName() + "ZUpFrame"));
+      soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
@@ -243,8 +229,8 @@ public class QuadrupedSupportPlanarRegionPublisher
             return false;
       }
 
-      ReferenceFrame leftSoleFrame = contactableFeet.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT)).getSoleFrame();
-      ReferenceFrame rightSoleFrame = contactableFeet.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT)).getSoleFrame();
+      ReferenceFrame leftSoleFrame = soleZUpFrames.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.LEFT));
+      ReferenceFrame rightSoleFrame = soleZUpFrames.get(RobotQuadrant.getQuadrant(robotEnd, RobotSide.RIGHT));
 
       RigidBodyTransform leftToRight = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
 
