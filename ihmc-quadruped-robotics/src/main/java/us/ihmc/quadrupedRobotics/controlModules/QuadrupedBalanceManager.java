@@ -370,8 +370,6 @@ public class QuadrupedBalanceManager
       return computeNormalizedEllipticDcmError(maxDcmErrorBeforeLiftOffX.getValue(), maxDcmErrorBeforeLiftOffY.getValue(), normalizedDcmErrorForDelayedLiftOff);
    }
 
-   private final FramePoint2D dcmError2d = new FramePoint2D();
-
    private double computeNormalizedEllipticDcmError(double maxXError, double maxYError, YoDouble normalizedError)
    {
       FrameVector3DReadOnly dcmError = momentumRateOfChangeModule.getDcmError();
