@@ -51,11 +51,11 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
 //      double previousYaw = node.getYaw();
-      double previousYaw = node.getNominalYaw();
-      Orientation3DReadOnly nodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
+      double previousYaw = node.getStepYaw();
+      Orientation3DReadOnly previousNodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
 
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
-      nodeOrientation.transform(clearanceVector);
+      previousNodeOrientation.transform(clearanceVector);
 
       boolean isMovingFront = movingQuadrant.isQuadrantInFront();
       boolean isMovingLeft = movingQuadrant.isQuadrantOnLeftSide();
@@ -65,39 +65,44 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       double maxWidth = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
       double minWidth = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
 
+      Vector2D nominalFootOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()), nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      nominalFootOffset.scale(0.5);
+
+      // FIXME revisit this and see if the operations can be reduced.
       for (double movingX = minLength; movingX < maxLength; movingX += resolution)
       {
          for (double movingY = minWidth; movingY < maxWidth; movingY += resolution)
          {
-            if (EuclidCoreTools.norm(movingX, movingY) > maxReach)
-               continue;
-
             Vector2D movingVector = new Vector2D(movingX, movingY);
-            nodeOrientation.transform(movingVector);
+            previousNodeOrientation.transform(movingVector);
 
             Point2D newXGaitPosition = new Point2D(xGaitCenterPoint);
             newXGaitPosition.add(movingVector);
 
-            Vector2D footOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
-                                               nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-            footOffset.scale(0.5);
+            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
+            {
+               double newYaw = previousYaw + yaw;
+               Orientation3DReadOnly newNodeOrientation = new AxisAngle(newYaw, 0.0, 0.0);
 
-            nodeOrientation.transform(footOffset);
+               Vector2D footOffset = new Vector2D(nominalFootOffset);
 
-            Point2D newNodePosition = new Point2D(newXGaitPosition);
-            newNodePosition.add(footOffset);
+               newNodeOrientation.transform(footOffset);
 
-            int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
-            int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
+               Point2D newNodePosition = new Point2D(newXGaitPosition);
+               newNodePosition.add(footOffset);
 
-            if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
-               continue;
-            if (xIndex == oldXIndex && yIndex == oldYIndex)
-               continue;
+               int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
+               int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
 
-            FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, node, xGaitSettings);
+               if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
+                  continue;
+               if (xIndex == oldXIndex && yIndex == oldYIndex)
+                  continue;
 
-            neighboringNodesToPack.add(offsetNode);
+               FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
+
+               neighboringNodesToPack.add(offsetNode);
+            }
          }
       }
    }
@@ -142,11 +147,11 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
          return true;
    }
 
-   private static FootstepNode constructNodeInPreviousNodeFrame(Point2DReadOnly newNodePosition, FootstepNode previousNode,
+   private static FootstepNode constructNodeInPreviousNodeFrame(Point2DReadOnly newNodePosition, double newNodeYaw, FootstepNode previousNode,
                                                                 QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotQuadrant nextQuadrant = previousNode.getMovingQuadrant().getNextRegularGaitSwingQuadrant();
-      return FootstepNode.constructNodeFromOtherNode(nextQuadrant, newNodePosition, previousNode, xGaitSettings.getStanceLength(),
+      return FootstepNode.constructNodeFromOtherNode(nextQuadrant, newNodePosition, newNodeYaw, previousNode, xGaitSettings.getStanceLength(),
                                                      xGaitSettings.getStanceWidth());
    }
 }

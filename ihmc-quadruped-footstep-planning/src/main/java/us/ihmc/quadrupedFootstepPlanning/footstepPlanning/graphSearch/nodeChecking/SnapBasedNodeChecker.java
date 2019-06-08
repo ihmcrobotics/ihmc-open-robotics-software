@@ -87,8 +87,8 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
       }
 
 
-      double previousYaw = previousNode.getNominalYaw();
-      double currentYaw = nodeToCheck.getNominalYaw();
+      double previousYaw = previousNode.getStepYaw();
+      double currentYaw = nodeToCheck.getStepYaw();
 
       Vector2D offsetVector = new Vector2D(nodeToCheck.getX(movingQuadrant), nodeToCheck.getY(movingQuadrant));
       offsetVector.sub(previousNode.getX(movingQuadrant), previousNode.getY(movingQuadrant));

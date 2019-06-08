@@ -57,7 +57,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
       double left = parameters.getMinimumLateralDistanceFromCliffBottoms();
       double right = -parameters.getMinimumLateralDistanceFromCliffBottoms();
 
-      boolean isNearCliff = CliffDetectionTools.isNearCliff(planarRegionsList, footInWorld, node.getNominalYaw(), parameters, forward, backward, left, right);
+      boolean isNearCliff = CliffDetectionTools.isNearCliff(planarRegionsList, footInWorld, node.getStepYaw(), parameters, forward, backward, left, right);
 
       if (isNearCliff)
       {

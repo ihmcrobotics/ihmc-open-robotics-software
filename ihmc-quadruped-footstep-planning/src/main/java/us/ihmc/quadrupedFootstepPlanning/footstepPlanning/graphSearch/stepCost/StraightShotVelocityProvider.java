@@ -41,7 +41,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
 
       double yawMultiplier = computeDistanceToGoalScalar(node.getX(), node.getY(), 1.0);
       double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
+      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 

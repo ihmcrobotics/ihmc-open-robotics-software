@@ -194,8 +194,10 @@ public class NodeCheckerRenderer extends AnimationTimer
          hindRightPosition.add(-toFoot.getX(), -toFoot.getY());
       }
 
+      double yaw = FootstepNode.computeNominalYaw(frontLeftPosition.getX(), frontLeftPosition.getY(), frontRightPosition.getX(), frontRightPosition.getY(),
+                                                  hindLeftPosition.getX(), hindLeftPosition.getY(), hindRightPosition.getX(), hindRightPosition.getY());
       FootstepNode node = new FootstepNode(initialSupportQuadrantReference.get(), frontLeftPosition, frontRightPosition, hindLeftPosition, hindRightPosition,
-                                           xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
+                                           yaw, xGaitSettings.getStanceLength(), xGaitSettings.getStanceWidth());
       snapper.setPlanarRegions(planarRegionsList);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
