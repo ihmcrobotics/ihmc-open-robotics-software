@@ -42,6 +42,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
+   
+   private static final double minSwingHeight = 0.04;
+   private static final double maxSwingHeight = 0.3;
+   private static final double defaultSwingHeight = 0.05;
 
    private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
    private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
@@ -150,13 +154,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
 
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
-
-      //      swingTrajectoryWaypointCalculator = new OneWaypointSwingGenerator(namePrefix, 0.5, 0.04, 0.3, registry, graphicsListRegistry);
-
-      double minSwingHeight = 0.04;
-      double maxSwingHeight = 0.3;
-      double defaultSwingHeight = 0.04;
-
+      
       oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix + "1", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                            graphicsListRegistry);
       twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
@@ -235,12 +233,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double swingDuration = Math
             .max(currentStepCommand.getTimeInterval().getEndTime() - timestamp.getValue(), parameters.getMinSwingTimeForDisturbanceRecovery());
       setFootstepDurationInternal(swingDuration);
-
-      activeTrajectoryType.set(TrajectoryType.DEFAULT);
-
-      if (checkStepUpOrDown(finalPosition))
-         activeTrajectoryType.set(TrajectoryType.OBSTACLE_CLEARANCE);
-
+      
+      activeTrajectoryType.set(getTrajectoryType());
       fillAndInitializeTrajectories(true);
 
       touchdownTrigger.set(false);
@@ -251,6 +245,25 @@ public class QuadrupedSwingState extends QuadrupedFootState
          PrintTools.debug(
                currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance()
                      + ", " + currentStepCommand.getTimeInterval());
+      }
+   }
+
+   private TrajectoryType getTrajectoryType()
+   {
+      if (currentStepCommand.getTrajectoryType() != null)
+      {
+         return currentStepCommand.getTrajectoryType();
+      }
+      else
+      {
+         if (checkStepUpOrDown(finalPosition))
+         {
+            return TrajectoryType.OBSTACLE_CLEARANCE;
+         }
+         else
+         {
+            return TrajectoryType.DEFAULT;
+         }
       }
    }
 
