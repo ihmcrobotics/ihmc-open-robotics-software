@@ -7,6 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -369,14 +370,11 @@ public class QuadrupedBalanceManager
       return computeNormalizedEllipticDcmError(maxDcmErrorBeforeLiftOffX.getValue(), maxDcmErrorBeforeLiftOffY.getValue(), normalizedDcmErrorForDelayedLiftOff);
    }
 
-   private final FramePoint2D dcmError2d = new FramePoint2D();
-
    private double computeNormalizedEllipticDcmError(double maxXError, double maxYError, YoDouble normalizedError)
    {
-      dcmError2d.setIncludingFrame(momentumRateOfChangeModule.getDcmError());
-      ReferenceFrame midZUpFrame = controllerToolbox.getSupportPolygons().getMidFeetZUpFrame();
-      dcmError2d.changeFrame(midZUpFrame);
-      normalizedError.set(MathTools.square(dcmError2d.getX() / maxXError) + MathTools.square(dcmError2d.getY() / maxYError));
+      FrameVector3DReadOnly dcmError = momentumRateOfChangeModule.getDcmError();
+      dcmError.checkReferenceFrameMatch(controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame());
+      normalizedError.set(MathTools.square(dcmError.getX() / maxXError) + MathTools.square(dcmError.getY() / maxYError));
 
       return normalizedError.getDoubleValue();
    }
