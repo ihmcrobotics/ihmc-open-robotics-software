@@ -431,7 +431,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       }
       else
       {
-         speedUpFactor = Double.POSITIVE_INFINITY;
+         speedUpFactor = 1.0;
       }
 
       if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > parameters.getMinRequiredSpeedUpFactor() && speedUpFactor > swingTimeSpeedUpFactor
