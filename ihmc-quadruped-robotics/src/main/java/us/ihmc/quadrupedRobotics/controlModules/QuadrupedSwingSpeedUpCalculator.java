@@ -36,6 +36,7 @@ public class QuadrupedSwingSpeedUpCalculator
    private final DoubleProvider minDistanceInsideForSpeedUp = new DoubleParameter("minDistanceInsideForSpeedUp", registry, 0.0);
 
    private final FramePoint2D tempFootPoint2D = new FramePoint2D();
+   private final FramePoint2D goalPosition = new FramePoint2D();
 
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
    private final QuadrantDependentList<? extends PlaneContactState> contactStates;
@@ -88,8 +89,9 @@ public class QuadrupedSwingSpeedUpCalculator
          for (int i = 0; i < activeSteps.size(); i++)
          {
             QuadrupedTimedStep activeStep = activeSteps.get(i);
+            goalPosition.setIncludingFrame(worldFrame, activeStep.getGoalPosition());
 
-            if (!wouldPuttingTheFootDownHelpWithErrorRejection(activeStep.getRobotQuadrant()))
+            if (!wouldPuttingTheFootDownHelpWithErrorRejection(activeStep.getRobotQuadrant(), goalPosition))
                continue;
 
             TimeIntervalBasics timeInterval = activeStep.getTimeInterval();
@@ -115,10 +117,10 @@ public class QuadrupedSwingSpeedUpCalculator
    }
 
 
-   private boolean wouldPuttingTheFootDownHelpWithErrorRejection(RobotQuadrant robotQuadrant)
+   private boolean wouldPuttingTheFootDownHelpWithErrorRejection(RobotQuadrant robotQuadrant, FramePoint2DReadOnly goalPosition)
    {
-      updateSupportPolygon(supportPolygonInWorld, contactStates, null);
-      updateSupportPolygon(supportPolygonInWorldAfterChange, contactStates, robotQuadrant);
+      updateSupportPolygon(supportPolygonInWorld, contactStates, null, null);
+      updateSupportPolygon(supportPolygonInWorldAfterChange, contactStates, robotQuadrant, goalPosition);
 
       boolean currentICPFarEnoughInsideSupport = supportPolygonInWorld.signedDistance(estimatedICP) < -minDistanceInsideForSpeedUp.getValue();
 
@@ -221,14 +223,19 @@ public class QuadrupedSwingSpeedUpCalculator
 
 
    private void updateSupportPolygon(FrameConvexPolygon2DBasics polygonToPack, QuadrantDependentList<? extends PlaneContactState> contactStates,
-                                     RobotQuadrant quadrantToIgnore)
+                                     RobotQuadrant quadrantToAdd, FramePoint2DReadOnly positionToAdd)
    {
       polygonToPack.clear();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (quadrantToIgnore == robotQuadrant || !contactStates.get(robotQuadrant).inContact())
-            continue;
+         if (!contactStates.get(robotQuadrant).inContact())
+         {
+            if (quadrantToAdd == robotQuadrant)
+               polygonToPack.addVertex(positionToAdd);
+            else
+               continue;
+         }
 
          tempFootPoint2D.setToZero(soleFrames.get(robotQuadrant));
          tempFootPoint2D.changeFrameAndProjectToXYPlane(worldFrame);
