@@ -122,7 +122,7 @@ public class QuadrupedSwingSpeedUpCalculator
 
       boolean currentICPFarEnoughInsideSupport = supportPolygonInWorld.signedDistance(estimatedICP) < -minDistanceInsideForSpeedUp.getValue();
 
-      if (!currentICPFarEnoughInsideSupport && willPuttingTheFootDownMakeTrackingPossible())
+      if (willPuttingTheFootDownMakeTrackingPossibleAgain(currentICPFarEnoughInsideSupport))
          return true;
 
       if (currentICPFarEnoughInsideSupport || supportPolygonInWorld.isPointInside(desiredICP))
@@ -139,9 +139,9 @@ public class QuadrupedSwingSpeedUpCalculator
       }
    }
 
-   private boolean willPuttingTheFootDownMakeTrackingPossible()
+   private boolean willPuttingTheFootDownMakeTrackingPossibleAgain(boolean currentICPFarEnoughInsideSupport)
    {
-      boolean trackingIsCurrentlyImpossible = supportPolygonInWorld.isPointInside(desiredICP) && !supportPolygonInWorld.isPointInside(estimatedICP);
+      boolean trackingIsCurrentlyImpossible = supportPolygonInWorld.isPointInside(desiredICP) && !currentICPFarEnoughInsideSupport;
       boolean trackingWillBePossible = supportPolygonInWorldAfterChange.isPointInside(desiredICP) && supportPolygonInWorldAfterChange.isPointInside(estimatedICP);
 
       return trackingIsCurrentlyImpossible && trackingWillBePossible;
