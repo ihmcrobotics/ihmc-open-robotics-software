@@ -2,6 +2,8 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -176,6 +178,8 @@ public class XGaitCostTest
    @Test
    public void testForwardTrotting()
    {
+      FootstepNode.gridSizeXY = 0.001;
+      FootstepNode.gridSizeYaw = 0.001;
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
       xGaitSettings.setQuadrupedSpeed(MEDIUM);
@@ -191,17 +195,17 @@ public class XGaitCostTest
 
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
-      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
-      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
+//      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
+//      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
 
       double forwardVelocity = maxSpeed * planningSpeedFraction;
-      double nominalForwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
+      double initialForwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
 
       RobotQuadrant lastQuadrantStepping = RobotQuadrant.HIND_RIGHT;
 
       FramePoint2D hindLeft = new FramePoint2D(yawedFrame, -0.5 * stanceLength, 0.5 * stanceWidth);
-      FramePoint2D hindRight = new FramePoint2D(yawedFrame, -0.5 * stanceLength + nominalForwardDisplacement, -0.5 * stanceWidth);
-      FramePoint2D frontLeft = new FramePoint2D(yawedFrame, 0.5 * stanceLength + nominalForwardDisplacement, 0.5 * stanceWidth);
+      FramePoint2D hindRight = new FramePoint2D(yawedFrame, -0.5 * stanceLength + initialForwardDisplacement, -0.5 * stanceWidth);
+      FramePoint2D frontLeft = new FramePoint2D(yawedFrame, 0.5 * stanceLength + initialForwardDisplacement, 0.5 * stanceWidth);
       FramePoint2D frontRight = new FramePoint2D(yawedFrame, 0.5 * stanceLength, -0.5 * stanceWidth);
 
       QuadrantDependentList<FramePoint2D> footPositions = new QuadrantDependentList<>(frontLeft, frontRight, hindLeft, hindRight);
@@ -214,6 +218,12 @@ public class XGaitCostTest
       for (int stepNumber = 0; stepNumber < stepsToTest; stepNumber++)
       {
          RobotQuadrant movingQuadrant = lastQuadrantStepping.getNextRegularGaitSwingQuadrant();
+
+         double nominalForwardDisplacement;
+         if (movingQuadrant.isQuadrantInFront())
+            nominalForwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
+         else
+            nominalForwardDisplacement = 0.0;
 
          FramePoint2D endXGait = new FramePoint2D(worldFrame, startNode.getOrComputeXGaitCenterPoint());
          endXGait.changeFrameAndProjectToXYPlane(yawedFrame);
@@ -235,11 +245,11 @@ public class XGaitCostTest
 
          FootstepNode endNode = new FootstepNode(movingQuadrant, footPositions, stanceLength, stanceWidth);
 
+         double epsilon = 2e-2;
          double cost = xGaitCost.compute(startNode, endNode);
-         assertEquals("step number " + stepNumber + " was wrong cost", 0.0,  cost, 5e-2);
+         assertEquals("step number " + stepNumber + " was wrong cost", 0.0,  cost, epsilon);
 
          endXGait.changeFrameAndProjectToXYPlane(worldFrame);
-         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("step number " + stepNumber + " was wrong x gait", snappedXGait, endNode.getOrComputeXGaitCenterPoint(), 2.0 * FootstepNode.gridSizeXY);
 
          Point2D otherSnappedFoot = new Point2D(FootstepNode.snapToGrid(endFoot.getX()), FootstepNode.snapToGrid(endFoot.getY()));
          otherSnappedFoot.scale(FootstepNode.gridSizeXY);
@@ -263,9 +273,11 @@ public class XGaitCostTest
 
             FootstepNode otherEndNode = new FootstepNode(movingQuadrant, otherFootPositions, stanceLength, stanceWidth);
 
+            if (stepNumber == 1 && iteration == 2)
+               PrintTools.info(("pause)"));
             double otherCost = xGaitCost.compute(startNode, otherEndNode);
             assertTrue("cost of step " + stepNumber + " on iteration " + iteration + " is not the best. Offset was " + offset + ",\noriginal point was " +
-                             endFoot + " and new point was " + otherEndFoot + ". Original cost was " + cost + " while modified cost was " + otherCost, cost < otherCost);
+                             endFoot + " and new point was " + otherEndFoot + ". Original cost was " + cost + " while modified cost was " + otherCost, cost < otherCost + epsilon);
             iteration++;
          }
 
@@ -384,6 +396,27 @@ public class XGaitCostTest
       velocityProvider.setGoalNode(goalNode);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
+   }
+
+   @Test
+   public void computeMagnitudeOnEllipseInDirection()
+   {
+      Random random = new Random(1738L);
+      for (int i = 0; i < 1000; i++)
+      {
+         double maxX = RandomNumbers.nextDouble(random, 0.0, 100.0);
+         double maxY = RandomNumbers.nextDouble(random, 0.0, 100.0);
+
+         double xDirection = RandomNumbers.nextDouble(random, -10.0, 10.0);
+         double yDirection = RandomNumbers.nextDouble(random, -10.0, 10.0);
+
+         double xIntersection = maxX * maxY / Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection)) * xDirection;
+         double yIntersection = maxX * maxY / Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection)) * yDirection;
+
+         double magnitude = EuclidCoreTools.norm(xIntersection, yIntersection);
+
+         assertEquals(magnitude, XGaitCost.computeMagnitudeOnEllipseInDirection(maxX, maxY, xDirection, yDirection), 1e-5);
+      }
    }
 
    private String testTimeDelta(double expectedDuration, RobotQuadrant robotQuadrant, QuadrupedXGaitSettingsReadOnly xGaitSettings)
