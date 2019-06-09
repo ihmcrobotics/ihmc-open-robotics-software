@@ -2,12 +2,12 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
+
 
 public class StraightShotVelocityProvider implements NominalVelocityProvider
 {
@@ -33,13 +33,15 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       return heading;
    }
 
-   public double computeNominalYaw(Point2DReadOnly node)
+
+
+   public double computeNominalYaw(Point2DReadOnly nodeCenterPoint)
    {
-      double pathHeading = Math.atan2(goalNode.getOrComputeXGaitCenterPoint().getY() - node.getY(),
-                                      goalNode.getOrComputeXGaitCenterPoint().getX() - node.getX());
+      double pathHeading = Math.atan2(goalNode.getOrComputeXGaitCenterPoint().getY() - nodeCenterPoint.getY(),
+                                      goalNode.getOrComputeXGaitCenterPoint().getX() - nodeCenterPoint.getX());
       pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
 
-      double yawMultiplier = computeDistanceToGoalScalar(node.getX(), node.getY(), 1.0);
+      double yawMultiplier = computeDistanceToGoalScalar(nodeCenterPoint.getX(), nodeCenterPoint.getY(), 1.0);
       double referenceHeading = yawMultiplier * pathHeading;
       referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
