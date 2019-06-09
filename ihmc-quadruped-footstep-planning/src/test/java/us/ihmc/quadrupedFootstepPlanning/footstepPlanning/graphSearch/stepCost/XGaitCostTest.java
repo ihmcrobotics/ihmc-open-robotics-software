@@ -41,7 +41,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class XGaitCostTest
 {
-   private static final double epsilon = 1e-8;
    private static final double stepDuration = 0.5;
    private static final double doubleSupportDuration = 0.2;
    private static final double maxSpeed = 0.3;
@@ -49,6 +48,8 @@ public class XGaitCostTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
+
+   private static final double epsilon = 1e-5;
 
    @Test
    public void testComputeTimeDeltaBetweenStepsPace()
