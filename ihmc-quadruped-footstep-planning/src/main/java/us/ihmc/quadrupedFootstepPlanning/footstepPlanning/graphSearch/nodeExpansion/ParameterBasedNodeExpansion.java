@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -8,9 +9,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.HashSet;
@@ -21,6 +25,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    protected final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
+
+   private static final double maxDeviationFromXGait = 0.15;
 
    public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
@@ -37,77 +43,81 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       return expansion;
    }
 
-   protected void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> neighboringNodesToPack, double resolution)
+   protected void addDefaultFootsteps(FootstepNode nodeToExpand, HashSet<FootstepNode> neighboringNodesToPack, double resolution)
    {
-      RobotQuadrant movingQuadrant = node.getMovingQuadrant();
+      RobotQuadrant movingQuadrant = nodeToExpand.getMovingQuadrant();
       RobotQuadrant nextQuadrant;
       if (xGaitSettings.getEndPhaseShift() > 180.0)
          nextQuadrant = movingQuadrant.getNextReversedRegularGaitSwingQuadrant();
       else
          nextQuadrant = movingQuadrant.getNextRegularGaitSwingQuadrant();
 
-      int oldXIndex = node.getXIndex(nextQuadrant);
-      int oldYIndex = node.getYIndex(nextQuadrant);
+      double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(movingQuadrant, xGaitSettings);
 
-      Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
-//      double previousYaw = node.getYaw();
-      double previousYaw = node.getStepYaw();
+      Point2DReadOnly previousXGaitCenterPoint = nodeToExpand.getOrComputeXGaitCenterPoint();
+      double previousYaw = nodeToExpand.getStepYaw();
       Orientation3DReadOnly previousNodeOrientation = new AxisAngle(previousYaw, 0.0, 0.0);
 
       Vector2D clearanceVector = new Vector2D(parameters.getMinXClearanceFromFoot(), parameters.getMinYClearanceFromFoot());
       previousNodeOrientation.transform(clearanceVector);
 
       boolean isMovingFront = movingQuadrant.isQuadrantInFront();
-      boolean isMovingLeft = movingQuadrant.isQuadrantOnLeftSide();
       double maxReach = isMovingFront ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
-      double minLength = isMovingFront ? parameters.getMinimumFrontStepLength() : parameters.getMinimumHindStepLength();
-      double maxLength = isMovingFront ? parameters.getMaximumFrontStepLength() : parameters.getMaximumHindStepLength();
-      double maxWidth = isMovingLeft ? parameters.getMaximumStepWidth() : -parameters.getMinimumStepWidth();
-      double minWidth = isMovingLeft ? parameters.getMinimumStepWidth() : -parameters.getMaximumStepWidth();
 
-      Vector2D nominalFootOffset = new Vector2D(nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()), nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-      nominalFootOffset.scale(0.5);
+      double maxForwardSpeed = xGaitSettings.getMaxSpeed() * parameters.getMaxWalkingSpeedMultiplier();
+      double maxForwardDisplacement = durationBetweenSteps * maxForwardSpeed;
+      double maxLateralDisplacement = xGaitSettings.getMaxHorizontalSpeedFraction() * maxForwardDisplacement;
+
+      double maxLength = Math.max(maxForwardDisplacement, maxDeviationFromXGait);
+      double maxWidth = Math.max(maxLateralDisplacement, maxDeviationFromXGait);
+
+      Vector2D nominalFootOffset = new Vector2D(0.5 * nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
+                                                0.5 * nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      Point2D newXGaitPosition = new Point2D();
 
       // FIXME revisit this and see if the operations can be reduced.
-      for (double movingX = minLength; movingX < maxLength; movingX += resolution)
+      for (double movingX = -maxLength; movingX <= maxLength; movingX += resolution)
       {
-         for (double movingY = minWidth; movingY < maxWidth; movingY += resolution)
+         for (double movingY = -maxWidth; movingY <= maxWidth; movingY += resolution)
          {
+            double translation = EuclidCoreTools.normSquared(movingX, movingY);
+
+            if (translation > maxReach)
+               continue;
+
+            double ellipticalVelocity = MathTools.square(movingX / maxLength) + MathTools.square(movingY / maxWidth);
+            if (ellipticalVelocity > 1.0)
+               continue;
+
+            double minYaw = InterpolationTools.hermiteInterpolate(parameters.getMinimumStepYaw(), 0.0, translation / maxReach);
+            double maxYaw = InterpolationTools.hermiteInterpolate(parameters.getMaximumStepYaw(), 0.0, translation / maxReach);
+
             Vector2D movingVector = new Vector2D(movingX, movingY);
             previousNodeOrientation.transform(movingVector);
 
-            Point2D newXGaitPosition = new Point2D(xGaitCenterPoint);
-            newXGaitPosition.add(movingVector);
+            newXGaitPosition.add(previousXGaitCenterPoint, movingVector);
 
-            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
+            for (double yaw = minYaw; yaw <= maxYaw; yaw += FootstepNode.gridSizeYaw)
             {
-               double newYaw = previousYaw + yaw;
-               Orientation3DReadOnly newNodeOrientation = new AxisAngle(newYaw, 0.0, 0.0);
+               double newYaw = AngleTools.trimAngleMinusPiToPi(previousYaw + yaw);
+               Orientation3DReadOnly newNodeOrientation = new Quaternion(newYaw, 0.0, 0.0);
 
                Vector2D footOffset = new Vector2D(nominalFootOffset);
-
                newNodeOrientation.transform(footOffset);
 
                Point2D newNodePosition = new Point2D(newXGaitPosition);
                newNodePosition.add(footOffset);
 
-               int xIndex = FootstepNode.snapToGrid(newNodePosition.getX());
-               int yIndex = FootstepNode.snapToGrid(newNodePosition.getY());
-
-               if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, node))
-                  continue;
-               if (xIndex == oldXIndex && yIndex == oldYIndex)
+               if (!checkNodeIsFarEnoughFromOtherFeet(newNodePosition, clearanceVector, nodeToExpand))
                   continue;
 
-               FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, node, xGaitSettings);
+               FootstepNode offsetNode = constructNodeInPreviousNodeFrame(newNodePosition, newYaw, nodeToExpand, xGaitSettings);
 
                neighboringNodesToPack.add(offsetNode);
             }
          }
       }
    }
-
-
 
    static boolean checkNodeIsFarEnoughFromOtherFeet(Point2DReadOnly nodePositionToCheck, Vector2DReadOnly requiredClearance, FootstepNode previousNode)
    {
