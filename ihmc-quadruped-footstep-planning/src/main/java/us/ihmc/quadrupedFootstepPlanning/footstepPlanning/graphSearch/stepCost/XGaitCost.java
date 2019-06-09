@@ -94,7 +94,7 @@ public class XGaitCost implements FootstepCost
       if (Double.isNaN(nominalYawOfEnd))
          nominalYawOfEnd = startNode.getNominalYaw();
 
-      if (AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getNominalYaw(), nominalYawOfEnd) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
+      if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getNominalYaw(), nominalYawOfEnd)) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
       {
          nominalYawOfEnd = AngleTools.trimAngleMinusPiToPi(nominalYawOfEnd + Math.PI);
       }
