@@ -3,8 +3,17 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -16,9 +25,14 @@ import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
+import java.util.Random;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 import static us.ihmc.quadrupedPlanning.QuadrupedSpeed.MEDIUM;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -30,6 +44,9 @@ public class XGaitCostTest
    private static final double doubleSupportDuration = 0.2;
    private static final double maxSpeed = 0.3;
    private static final double planningSpeedFraction = 0.8;
+
+   private static final double stanceLength = 1.0;
+   private static final double stanceWidth = 0.5;
 
    @Test
    public void testComputeTimeDeltaBetweenStepsPace()
@@ -118,6 +135,7 @@ public class XGaitCostTest
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
       ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
+      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
 
       FramePoint2D hindLeft = new FramePoint2D(yawedFrame, -0.5, 0.25);
       FramePoint2D hindRight = new FramePoint2D(yawedFrame, -0.5, -0.25);
@@ -152,6 +170,109 @@ public class XGaitCostTest
       endNode = new FootstepNode(steppingQuadrant, frontLeft, nextFrontRight, hindLeft, hindRight, 1.0, 0.5);
 
       assertEquals(0.0,  xGaitCost.compute(startNode, endNode), 5e-2);
+   }
+
+
+   @Test
+   public void testForwardTrotting()
+   {
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setEndPhaseShift(QuadrupedGait.TROT.getEndPhaseShift());
+      xGaitSettings.setQuadrupedSpeed(MEDIUM);
+      xGaitSettings.getTrotMediumTimings().setStepDuration(stepDuration);
+      xGaitSettings.getTrotMediumTimings().setEndDoubleSupportDuration(doubleSupportDuration);
+      xGaitSettings.getTrotMediumTimings().setMaxSpeed(maxSpeed);
+      xGaitSettings.setStanceLength(1.0);
+      xGaitSettings.setStanceWidth(0.5);
+
+      Random random = new Random(1738L);
+
+      FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
+
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
+      ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
+      ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(Math.toRadians(45.0), 0.0, 0.0));
+      ((PoseReferenceFrame) yawedFrame).setPositionAndUpdate(new FramePoint3D(worldFrame, 0.74, -2.7, 0.93));
+
+      double forwardVelocity = maxSpeed * planningSpeedFraction;
+      double nominalForwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
+
+      RobotQuadrant lastQuadrantStepping = RobotQuadrant.HIND_RIGHT;
+
+      FramePoint2D hindLeft = new FramePoint2D(yawedFrame, -0.5 * stanceLength, 0.5 * stanceWidth);
+      FramePoint2D hindRight = new FramePoint2D(yawedFrame, -0.5 * stanceLength + nominalForwardDisplacement, -0.5 * stanceWidth);
+      FramePoint2D frontLeft = new FramePoint2D(yawedFrame, 0.5 * stanceLength + nominalForwardDisplacement, 0.5 * stanceWidth);
+      FramePoint2D frontRight = new FramePoint2D(yawedFrame, 0.5 * stanceLength, -0.5 * stanceWidth);
+
+      QuadrantDependentList<FramePoint2D> footPositions = new QuadrantDependentList<>(frontLeft, frontRight, hindLeft, hindRight);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         footPositions.get(robotQuadrant).changeFrameAndProjectToXYPlane(worldFrame);
+
+      FootstepNode startNode =  new FootstepNode(lastQuadrantStepping, footPositions, stanceLength, stanceWidth);
+
+      int stepsToTest = 20;
+      for (int stepNumber = 0; stepNumber < stepsToTest; stepNumber++)
+      {
+         RobotQuadrant movingQuadrant = lastQuadrantStepping.getNextRegularGaitSwingQuadrant();
+
+         FramePoint2D endXGait = new FramePoint2D(worldFrame, startNode.getOrComputeXGaitCenterPoint());
+         endXGait.changeFrameAndProjectToXYPlane(yawedFrame);
+         endXGait.addX(nominalForwardDisplacement);
+
+         FramePoint2D endFoot = new FramePoint2D(endXGait);
+         endFoot.addX(movingQuadrant.getEnd().negateIfHindEnd(0.5 * stanceLength));
+         endFoot.addY(movingQuadrant.getSide().negateIfRightSide(0.5 * stanceWidth));
+
+         endFoot.changeFrameAndProjectToXYPlane(worldFrame);
+
+         FramePoint2D snappedXGait = new FramePoint2D(worldFrame, FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getX()), FootstepNode.gridSizeXY * FootstepNode.snapToGrid(endFoot.getY()));
+         snappedXGait.changeFrameAndProjectToXYPlane(yawedFrame);
+         snappedXGait.subX(movingQuadrant.getEnd().negateIfHindEnd(0.5 * stanceLength));
+         snappedXGait.subY(movingQuadrant.getSide().negateIfRightSide(0.5 * stanceWidth));
+         snappedXGait.changeFrameAndProjectToXYPlane(worldFrame);
+
+         footPositions.get(movingQuadrant).set(endFoot);
+
+         FootstepNode endNode = new FootstepNode(movingQuadrant, footPositions, stanceLength, stanceWidth);
+
+         double cost = xGaitCost.compute(startNode, endNode);
+         assertEquals("step number " + stepNumber + " was wrong cost", 0.0,  cost, 5e-2);
+
+         endXGait.changeFrameAndProjectToXYPlane(worldFrame);
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("step number " + stepNumber + " was wrong x gait", snappedXGait, endNode.getOrComputeXGaitCenterPoint(), 2.0 * FootstepNode.gridSizeXY);
+
+         Point2D otherSnappedFoot = new Point2D(FootstepNode.snapToGrid(endFoot.getX()), FootstepNode.snapToGrid(endFoot.getY()));
+         otherSnappedFoot.scale(FootstepNode.gridSizeXY);
+
+         // check to make sure this is the best state
+         int iteration = 0;
+         while (iteration < 100)
+         {
+            FramePoint2D otherEndFoot = new FramePoint2D(endFoot);
+            Vector2D offset = EuclidCoreRandomTools.nextVector2D(random, -0.2, 0.2);
+            otherEndFoot.add(offset);
+
+            QuadrantDependentList<FramePoint2D> otherFootPositions = new QuadrantDependentList<>(footPositions);
+            otherFootPositions.get(movingQuadrant).set(otherEndFoot);
+
+            Point2D snappedFoot = new Point2D(FootstepNode.snapToGrid(otherEndFoot.getX()), FootstepNode.snapToGrid(otherEndFoot.getY()));
+            snappedFoot.scale(FootstepNode.gridSizeXY);
+
+            if (snappedFoot.distance(otherSnappedFoot) < 1e-2)
+               continue;
+
+            FootstepNode otherEndNode = new FootstepNode(movingQuadrant, otherFootPositions, stanceLength, stanceWidth);
+
+            double otherCost = xGaitCost.compute(startNode, otherEndNode);
+            assertTrue("cost of step " + stepNumber + " on iteration " + iteration + " is not the best. Offset was " + offset + ",\noriginal point was " +
+                             endFoot + " and new point was " + otherEndFoot + ". Original cost was " + cost + " while modified cost was " + otherCost, cost < otherCost);
+            iteration++;
+         }
+
+
+         startNode = endNode;
+         lastQuadrantStepping = movingQuadrant;
+      }
    }
 
    @Test

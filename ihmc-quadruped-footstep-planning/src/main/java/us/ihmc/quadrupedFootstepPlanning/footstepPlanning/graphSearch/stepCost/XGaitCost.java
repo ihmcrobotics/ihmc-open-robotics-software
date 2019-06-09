@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -64,10 +65,10 @@ public class XGaitCost implements FootstepCost
          snapData.getSnapTransform().transform(startFootPositions.get(robotQuadrant));
       }
 
-
+      Point2DReadOnly startXGaitPosition = startNode.getOrComputeXGaitCenterPoint();
 
       double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
-      startXGaitPose.setPosition(startNode.getOrComputeXGaitCenterPoint());
+      startXGaitPose.setPosition(startXGaitPosition);
       startXGaitPose.setOrientationYawPitchRoll(startNode.getNominalYaw(), nominalPitch, 0.0);
       startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
 
@@ -86,7 +87,7 @@ public class XGaitCost implements FootstepCost
 
       FramePoint2D endXGaitPosition = new FramePoint2D(desiredVelocity);
       endXGaitPosition.scale(durationBetweenSteps);
-      endXGaitPosition.add(startNode.getOrComputeXGaitCenterPoint());
+      endXGaitPosition.add(startXGaitPosition);
 
       double nominalYawOfEnd = velocityProvider.computeNominalYaw(endXGaitPosition);
       if (Double.isNaN(nominalYawOfEnd))
