@@ -3,15 +3,12 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.Random;
 
 public class FootstepNode
 {
@@ -24,7 +21,6 @@ public class FootstepNode
 
    private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
-//   private final double nominalYaw;
    private final double stepYaw;
 
    private final double nominalStanceLength;
@@ -109,7 +105,6 @@ public class FootstepNode
       xPositions.put(RobotQuadrant.HIND_RIGHT, xHindRight);
       yPositions.put(RobotQuadrant.HIND_RIGHT, yHindRight);
 
-//      nominalYaw = computeNominalYaw(xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight);
       stepYaw = gridSizeYaw * yawIndex;
 
       hashCode = computeHashCode(this);
@@ -129,11 +124,6 @@ public class FootstepNode
    {
       return yPositions.get(robotQuadrant);
    }
-
-//   public double getNominalYaw()
-//   {
-//      return nominalYaw;
-//   }
 
    public double getStepYaw()
    {
@@ -228,6 +218,13 @@ public class FootstepNode
    public static int snapToYawGrid(double yaw)
    {
       return (int) Math.round(yaw / gridSizeYaw);
+   }
+
+   public static Point2DReadOnly snapPointToGrid(Point2DReadOnly pointToSnap)
+   {
+      Point2D snappedPoint = new Point2D();
+      snappedPoint.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
+      return snappedPoint;
    }
 
    public boolean quadrantGeometricallyEquals(FootstepNode other)
