@@ -149,10 +149,6 @@ public class QuadrupedSupportPlanarRegionPublisher
       setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
 
       referenceFrames.updateFrames();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         soleZUpFrames.get(robotQuadrant).update();
-      }
 
       QuadrantDependentList<Boolean> isInSupport = new QuadrantDependentList<>(true, true, true, true);
 
