@@ -74,8 +74,6 @@ public class XGaitCost implements FootstepCost
 
       FrameVector2D nominalVelocityHeading = new FrameVector2D(worldFrame, velocityProvider.computeNominalVelocityHeadingInWorld(startNode));
       nominalVelocityHeading.changeFrameAndProjectToXYPlane(startXGaitPoseFrame);
-      nominalVelocityHeading.normalize();
-
 
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
       double desiredMaxForwardSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
