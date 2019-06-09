@@ -665,8 +665,8 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
 //      FootstepNodeSnapper postProcessingSnapper = new FootstepNodePlanarRegionSnapAndWiggler(parameters, parameters::getProjectInsideDistanceForPostProcessing,
 //                                                                                             parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
-      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
-                                                                                                         parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
+//      FootstepNodeSnapper postProcessingSnapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
+//                                                                                                         parameters::getProjectInsideUsingConvexHullDuringPostProcessing, false);
 
 //      FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
@@ -697,7 +697,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       FootstepCost footstepCost = costBuilder.buildCost();
 
       QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, velocityProvider, expansion, footstepCost,
-                                                                                snapper, postProcessingSnapper, listener, registry);
+                                                                                snapper, snapper, listener, registry);
 
       return planner;
    }
