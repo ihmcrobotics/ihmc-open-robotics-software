@@ -119,10 +119,10 @@ public class MainTabController
    @FXML
    private Spinner<Double> goalYaw;
 
-
    @FXML
    private Slider previewSlider;
-
+   @FXML
+   private Button sendPlanButton;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -477,6 +477,36 @@ public class MainTabController
       footstepPlanPreviewPlaybackManager = new FootstepPlanPreviewPlaybackManager(messager);
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
+
+      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(!isValidPlan(plan)));
+   }
+
+   private boolean isValidPlan(FootstepPlan plan)
+   {
+      double maximumStepTranslation = 1.0;
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         FramePoint3D startPosition = new FramePoint3D();
+         Point3DReadOnly goalPosition = plan.getFootstep(i).getGoalPosition();
+
+         if(i < 4)
+         {
+            startPosition.setToZero(quadrupedReferenceFrames.getSoleFrame(plan.getFootstep(i).getRobotQuadrant()));
+            startPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+         else
+         {
+            QuadrupedTimedStep previousStep = plan.getFootstep(i - 4);
+            startPosition.set(previousStep.getGoalPosition());
+         }
+
+         if(startPosition.distance(goalPosition) > maximumStepTranslation)
+         {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    private void setupControls()

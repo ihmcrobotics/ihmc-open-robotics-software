@@ -96,7 +96,7 @@
                         <VBox alignment="CENTER" spacing="5.0" VBox.vgrow="SOMETIMES">
                            <children>
                                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#requestStopWalking" text="Stop Walking" />
-                                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendPlan" text="Send Plan" />
+                                  <Button fx:id="sendPlanButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#sendPlan" text="Send Plan" />
                            </children>
                         </VBox>
                      </children>
