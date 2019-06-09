@@ -98,7 +98,7 @@ public class XGaitCost implements FootstepCost
       }
 
 
-         endXGaitPose.setPosition(endXGaitPosition);
+      endXGaitPose.setPosition(endXGaitPosition);
       endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
       endXGaitPoseFrame.setPoseAndUpdate(endXGaitPose);
 
