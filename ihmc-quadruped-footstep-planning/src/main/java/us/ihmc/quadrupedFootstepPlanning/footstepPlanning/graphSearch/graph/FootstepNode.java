@@ -16,7 +16,7 @@ import java.util.Random;
 public class FootstepNode
 {
    public static double gridSizeXY = 0.04;
-   public static final double gridSizeYaw = 0.1;
+   public static double gridSizeYaw = 0.1;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();
    private final QuadrantDependentList<Integer> yIndices = new QuadrantDependentList<>();
@@ -42,7 +42,7 @@ public class FootstepNode
            other.getY(RobotQuadrant.HIND_RIGHT), other.nominalStanceLength, other.nominalStanceWidth);
    }
 
-   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<Point2DReadOnly> locations, double nominalStanceLength,
+   public FootstepNode(RobotQuadrant movingQuadrant, QuadrantDependentList<? extends Point2DReadOnly> locations, double nominalStanceLength,
                        double nominalStanceWidth)
    {
       this(movingQuadrant, locations.get(RobotQuadrant.FRONT_LEFT), locations.get(RobotQuadrant.FRONT_RIGHT), locations.get(RobotQuadrant.HIND_LEFT),
