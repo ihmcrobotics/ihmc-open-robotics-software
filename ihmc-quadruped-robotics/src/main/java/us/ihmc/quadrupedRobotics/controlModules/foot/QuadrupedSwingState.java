@@ -45,8 +45,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
    
    private static final double minSwingHeight = 0.04;
    private static final double maxSwingHeight = 0.3;
-   private static final double defaultSwingHeight = 0.07;
-   private static final double obstacleClearanceSwingHeight = 0.09;
+
+   private static final double defaultSwingHeight = 0.08;
+   private static final double obstacleClearanceSwingHeight = 0.1;
 
    private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
    private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
