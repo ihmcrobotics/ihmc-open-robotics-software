@@ -40,8 +40,8 @@ public class PawDistanceAndYawBasedHeuristics extends PawPlanningCostToGoHeurist
          int nodeXIndex = node.getXIndex(robotQuadrant);
          int nodeYIndex = node.getYIndex(robotQuadrant);
 
-         PawNodeSnapData goalNodeData = snapper.snapPawNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex);
-         PawNodeSnapData nodeData = snapper.snapPawNode(robotQuadrant, nodeXIndex, nodeYIndex);
+         PawNodeSnapData goalNodeData = snapper.snapPawNode(robotQuadrant, goalNodeXIndex, goalNodeYIndex, goalNode.getStepYaw());
+         PawNodeSnapData nodeData = snapper.snapPawNode(robotQuadrant, nodeXIndex, nodeYIndex, node.getStepYaw());
 
          if (nodeData == null || goalNodeData == null)
          {

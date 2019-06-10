@@ -92,11 +92,11 @@ public class PawNodeSnapperTest
                               testSnapper.dirtyBit = true;
                               String string = "i " + i + " j " + j + " k " + k + " l " + l + " m " + m + " n " + n + " o " + o + " p " + p;
 
-                              testSnapper.snapPawNode(robotQuadrant, xIndex, yIndex);
+                              testSnapper.snapPawNode(robotQuadrant, xIndex, yIndex, 0.0);
                               assertTrue(string, testSnapper.dirtyBit);
                               testSnapper.dirtyBit = false;
 
-                              testSnapper.snapPawNode(robotQuadrant, xIndex, yIndex);
+                              testSnapper.snapPawNode(robotQuadrant, xIndex, yIndex, 0.0);
                               assertFalse(string, testSnapper.dirtyBit);
                            }
                         }
@@ -166,7 +166,7 @@ public class PawNodeSnapperTest
                                  break;
                               }
 
-                              PawNodeSnapData snapData = testSnapper.snapPawNode(newQuadrant, xIndex, yIndex);
+                              PawNodeSnapData snapData = testSnapper.snapPawNode(newQuadrant, xIndex, yIndex, 0.0);
                               assertTrue(!testSnapper.dirtyBit);
                               assertTrue(snapData.getSnapTransform().epsilonEquals(new RigidBodyTransform(), epsilon));
                            }
@@ -227,7 +227,7 @@ public class PawNodeSnapperTest
       boolean dirtyBit = false;
 
       @Override
-      protected PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+      protected PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
       {
          dirtyBit = true;
          return PawNodeSnapData.emptyData();

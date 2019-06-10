@@ -54,7 +54,7 @@ public class PawNodePlanarRegionSnapAndWiggler extends PawNodeSnapper
    private final HashMap<PlanarRegion, RigidBodyTransform> regionsChecked = new HashMap<>();
 
    @Override
-   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
    {
       PawNodeTools.getPawPosition(xIndex, yIndex, pawPosition);
       constraintDataParameters.projectionInsideDelta = Math.min(projectionInsideDelta.getValue(), 0.025);
