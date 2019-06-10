@@ -11,12 +11,13 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTo
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
 {
-   private final Point2D pawPosition = new Point2D();
+   protected final Point2D pawPosition = new Point2D();
 
    private final DoubleProvider projectionInsideDelta;
    private final BooleanProvider projectInsideUsingConvexHull;
@@ -44,7 +45,7 @@ public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
    }
 
    @Override
-   public PawNodeSnapData snapInternal(int xIndex, int yIndex)
+   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
    {
       PawNodeTools.getPawPosition(xIndex, yIndex, pawPosition);
       Vector2D projectionTranslation = new Vector2D();

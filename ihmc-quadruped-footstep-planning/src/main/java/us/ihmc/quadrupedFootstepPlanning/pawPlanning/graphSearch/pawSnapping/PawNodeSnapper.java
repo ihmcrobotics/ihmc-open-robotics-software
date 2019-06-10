@@ -3,6 +3,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNode;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.HashMap;
 
@@ -42,10 +43,10 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
 
    public PawNodeSnapData snapPawNode(PawNode node)
    {
-      return snapPawNode(node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
+      return snapPawNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
    }
 
-   public PawNodeSnapData snapPawNode(int xIndex, int yIndex)
+   public PawNodeSnapData snapPawNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
    {
       SnapKey key = new SnapKey(xIndex, yIndex);
       if (snapDataHolder.containsKey(key))
@@ -58,7 +59,7 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
       }
       else
       {
-         PawNodeSnapData snapData = snapInternal(xIndex, yIndex);
+         PawNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex);
          addSnapData(xIndex, yIndex, snapData);
          return snapData;
       }
@@ -79,7 +80,7 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
       return snapDataHolder.get(new SnapKey(xIndex, yIndex));
    }
 
-   protected abstract PawNodeSnapData snapInternal(int xIndex, int yIndex);
+   protected abstract PawNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex);
 
    private class SnapKey
    {

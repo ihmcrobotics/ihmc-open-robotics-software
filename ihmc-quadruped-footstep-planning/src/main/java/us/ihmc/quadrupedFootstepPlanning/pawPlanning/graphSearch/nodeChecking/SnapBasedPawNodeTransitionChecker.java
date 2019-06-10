@@ -189,7 +189,7 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         PawNodeSnapData snapData = snapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         PawNodeSnapData snapData = snapper.snapPawNode(robotQuadrant, node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
          RigidBodyTransform pawSnapTransform = snapData.getSnapTransform();
          if (pawSnapTransform.containsNaN())
             continue;
