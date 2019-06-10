@@ -212,8 +212,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       case OBSTACLE_CLEARANCE:
          for (int i = 0; i < numberWaypoints; i++)
          {
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-            waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
+            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);           
+            waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
+            // waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
+            
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
             {
                waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
