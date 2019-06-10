@@ -28,15 +28,16 @@ public class PawCliffDetectionTools
          return true;
 
       Point3D highestNearbyPoint = new Point3D();
-      double maximumCliffZInSoleFrame = findHighestNearbyPoint2(planarRegionsList, pawInWorld, pawYaw, highestNearbyPoint, forward, backward, left, right);
+      double maximumCliffZInSoleFrame = findHighestNearbyPoint(planarRegionsList, pawInWorld, pawYaw, highestNearbyPoint, forward, backward, left, right);
 
       return maximumCliffZInSoleFrame > cliffHeightToAvoid;
    }
 
-   private static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, Point3DBasics highestNearbyPointToPack,
-                                                double minimumDistanceFromCliffBottoms)
+   public static PlanarRegion findHighestNearbyRegion(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, Point3DBasics highestNearbyPointToPack,
+                                                      double minimumDistanceFromCliffBottoms)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+      PlanarRegion highestRegion = null;
+      highestNearbyPointToPack.setZ( Double.NEGATIVE_INFINITY);
 
       List<PlanarRegion> intersectingRegionsToPack = PlanarRegionTools
             .filterPlanarRegionsWithBoundingCircle(new Point2D(pawInWorld), minimumDistanceFromCliffBottoms, planarRegionsList.getPlanarRegionsAsList());
@@ -48,18 +49,18 @@ public class PawCliffDetectionTools
          double heightOfPointFromPaw = closestPointInWorld.getZ() - pawInWorld.getZ();
          double distanceToPoint = pawInWorld.distanceXY(closestPointInWorld);
 
-         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromPaw > maxZInSoleFrame)
+         if (distanceToPoint < minimumDistanceFromCliffBottoms && heightOfPointFromPaw > highestNearbyPointToPack.getZ())
          {
-            maxZInSoleFrame = heightOfPointFromPaw;
+            highestRegion = intersectingRegion;
             highestNearbyPointToPack.set(closestPointInWorld);
          }
       }
 
-      return maxZInSoleFrame;
+      return highestRegion;
    }
 
-   public static double findHighestNearbyPoint2(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw,
-                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
+   public static double findHighestNearbyPoint(PlanarRegionsList planarRegionsList, Point3DReadOnly pawInWorld, double pawYaw,
+                                               Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
       double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
