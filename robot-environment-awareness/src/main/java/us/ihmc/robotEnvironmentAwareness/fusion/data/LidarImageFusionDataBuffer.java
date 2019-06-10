@@ -18,13 +18,17 @@ public class LidarImageFusionDataBuffer
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionPointCloudMessage = new AtomicReference<>(null);
    private final AtomicReference<BufferedImage> latestBufferedImage = new AtomicReference<>(null);
 
+   private final AtomicReference<Integer> bufferSize;
+
    private final AtomicReference<ImageSegmentationParameters> latestImageSegmentationParaeters;
    private final AtomicReference<LidarImageFusionData> newBuffer = new AtomicReference<>(null);
 
    public LidarImageFusionDataBuffer(Messager messager, IntrinsicParameters intrinsic)
    {
       intrinsicParameters = intrinsic;
+      bufferSize = messager.createInput(LidarImageFusionAPI.StereoBufferSize, 50000);
       latestImageSegmentationParaeters = messager.createInput(LidarImageFusionAPI.ImageSegmentationParameters, new ImageSegmentationParameters());
+
    }
 
    public LidarImageFusionData pollNewBuffer()
@@ -38,9 +42,11 @@ public class LidarImageFusionDataBuffer
       ImageSegmentationParameters imageSegmentationParameters = latestImageSegmentationParaeters.get();
 
       LidarImageFusionData data = LidarImageFusionDataFactory.createLidarImageFusionData(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage),
-                                                                                         latestBufferedImage.get(), intrinsicParameters,
+                                                                                         latestBufferedImage.get(), intrinsicParameters, bufferSize.get(),
                                                                                          imageSegmentationParameters.getPixelSize(),
                                                                                          imageSegmentationParameters.getPixelRuler(),
+                                                                                         //imageSegmentationParameters.getEnableConnectivity(),
+                                                                                         true,
                                                                                          imageSegmentationParameters.getMinElementSize(),
                                                                                          imageSegmentationParameters.getIterate());
       newBuffer.set(data);
