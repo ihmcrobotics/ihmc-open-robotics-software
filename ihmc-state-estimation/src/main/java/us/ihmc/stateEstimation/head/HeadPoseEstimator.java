@@ -69,6 +69,11 @@ public class HeadPoseEstimator
       parentRegistry.addChild(registry);
    }
 
+   public void getHeadTransform(RigidBodyTransform headTransform)
+   {
+      poseState.getTransform(headTransform);
+   }
+
    public void initialize(RigidBodyTransform initialHeadTransform, FrameVector3D magneticFieldDirection)
    {
       poseState.initialize(initialHeadTransform, headTwist);
