@@ -347,7 +347,7 @@ public class QuadrupedUserInterface
       plannerTabController.setXGaitSettingsTopic(QuadrupedUIMessagerAPI.XGaitSettingsTopic);
       plannerTabController.setShowFootstepPreviewTopic(QuadrupedUIMessagerAPI.ShowFootstepPreviewTopic);
       plannerTabController.setStepListMessageTopic(QuadrupedUIMessagerAPI.FootstepPlannerTimedStepsTopic);
-      plannerTabController.setDesiredSteppingStateNameTopic(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic);
+      plannerTabController.setDesiredSteppingStateNameTopic(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, QuadrupedUIMessagerAPI.CurrentSteppingStateNameTopic);
       plannerTabController.setAbortWalkingTopic(QuadrupedUIMessagerAPI.AbortWalkingTopic);
       plannerTabController.setEnableStepTeleopTopic(QuadrupedUIMessagerAPI.EnableStepTeleopTopic);
    }

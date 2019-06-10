@@ -193,6 +193,12 @@ public class MainTabController
    }
 
    @FXML
+   public void clearFootstepPlan()
+   {
+      messager.submitMessage(footstepPlanTopic, null);
+   }
+
+   @FXML
    public void clearFlat()
    {
       acceptNewRegions.setSelected(false);
@@ -276,6 +282,7 @@ public class MainTabController
    private Topic<Boolean> showFootstepPreviewTopic;
    private Topic<QuadrupedTimedStepListMessage> stepListMessageTopic;
    private Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic;
+   private Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic;
    private Topic<Boolean> abortWalkingTopic;
    private Topic<Boolean> enableStepTeleopTopic;
 
@@ -413,9 +420,10 @@ public class MainTabController
       this.stepListMessageTopic = stepListMessageTopic;
    }
 
-   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic)
+   public void setDesiredSteppingStateNameTopic(Topic<QuadrupedSteppingStateEnum> desiredSteppingStateNameTopic, Topic<QuadrupedSteppingStateEnum> currentSteppingStateNameTopic)
    {
       this.desiredSteppingStateNameTopic = desiredSteppingStateNameTopic;
+      this.currentSteppingStateNameTopic = currentSteppingStateNameTopic;
    }
 
    public void bindControls()
@@ -478,7 +486,12 @@ public class MainTabController
       previewSlider.valueProperty()
                    .addListener((observable, oldValue, newValue) -> footstepPlanPreviewPlaybackManager.requestSpecificPercentageInPreview(newValue.doubleValue()));
 
-      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(!isValidPlan(plan)));
+      messager.registerTopicListener(footstepPlanTopic, plan -> sendPlanButton.setDisable(plan == null || !isValidPlan(plan)));
+      messager.registerJavaFXSyncedTopicListener(abortWalkingTopic, m -> clearFootstepPlan());
+      messager.registerJavaFXSyncedTopicListener(currentSteppingStateNameTopic, m -> {
+         if (m != null && m == QuadrupedSteppingStateEnum.STAND)
+            clearFootstepPlan();
+      });
    }
 
    private boolean isValidPlan(FootstepPlan plan)
