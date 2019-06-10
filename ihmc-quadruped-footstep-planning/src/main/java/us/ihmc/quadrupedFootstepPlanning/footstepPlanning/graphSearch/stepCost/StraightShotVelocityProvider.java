@@ -18,7 +18,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       this.goalNode = goalNode;
    }
 
-   public Vector2DReadOnly computeNominalVelocityHeadingInWorld(FootstepNode node)
+   public Vector2DReadOnly computeNominalNormalizedVelocityHeadingInWorld(FootstepNode node)
    {
       Vector2D heading = new Vector2D();
 
@@ -63,5 +63,4 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
 
       return multiplier;
    }
-
 }

@@ -21,7 +21,7 @@ public class BodyPathBasedVelocityProvider implements NominalVelocityProvider
    {
    }
 
-   public Vector2DReadOnly computeNominalVelocityHeadingInWorld(FootstepNode node)
+   public Vector2DReadOnly computeNominalNormalizedVelocityHeadingInWorld(FootstepNode node)
    {
       Point2DReadOnly xGaitCenterPoint = node.getOrComputeXGaitCenterPoint();
       Pose2D closestPointOnPath = new Pose2D();
