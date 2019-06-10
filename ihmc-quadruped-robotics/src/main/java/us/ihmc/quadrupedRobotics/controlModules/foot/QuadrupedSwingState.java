@@ -45,7 +45,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
    
    private static final double minSwingHeight = 0.04;
    private static final double maxSwingHeight = 0.3;
-   private static final double defaultSwingHeight = 0.05;
+   private static final double defaultSwingHeight = 0.07;
+   private static final double obstacleClearanceSwingHeight = 0.09;
 
    private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
    private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
@@ -390,15 +391,22 @@ public class QuadrupedSwingState extends QuadrupedFootState
          waypointCalculator.setFinalConditions(finalPosition, finalLinearVelocity);
          waypointCalculator.setStepTime(swingDuration.getDoubleValue());
          waypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
-         waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
          if (activeTrajectoryType.getEnumValue() == TrajectoryType.DEFAULT)
-            oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());
-
+         {
+            oneWaypointSwingTrajectoryCalculator.setWaypointProportion(parameters.getFlatSwingWaypointProportion());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
          else if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
-            twoWaypointSwingTrajectoryCalculator
-                  .setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());            
+            waypointCalculator.setSwingHeight(obstacleClearanceSwingHeight);
+         }
          else
-            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());
+         {
+            twoWaypointSwingTrajectoryCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());            
+            waypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
+         }
+         
          waypointCalculator.initialize();
       }
 
