@@ -1,11 +1,12 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
@@ -20,10 +21,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class XGaitCost implements FootstepCost
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final FootstepPlannerParameters plannerParameters;
    private final FootstepNodeSnapper snapper;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
@@ -49,6 +51,7 @@ public class XGaitCost implements FootstepCost
    private final PoseReferenceFrame startXGaitPoseFrame = new PoseReferenceFrame("startXGaitPose", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame endXGaitPoseFrame = new PoseReferenceFrame("endXGaitPose", ReferenceFrame.getWorldFrame());
 
+   // FIXME make this more efficient
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
@@ -74,7 +77,7 @@ public class XGaitCost implements FootstepCost
       startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
 
 
-      FrameVector2D nominalVelocityHeading = new FrameVector2D(worldFrame, velocityProvider.computeNominalVelocityHeadingInWorld(startNode));
+      FrameVector2D nominalVelocityHeading = new FrameVector2D(worldFrame, velocityProvider.computeNominalNormalizedVelocityHeadingInWorld(startNode));
       nominalVelocityHeading.changeFrameAndProjectToXYPlane(startXGaitPoseFrame);
 
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
@@ -94,10 +97,9 @@ public class XGaitCost implements FootstepCost
       if (Double.isNaN(nominalYawOfEnd))
          nominalYawOfEnd = startNode.getStepYaw();
 
-      if (Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getStepYaw(), nominalYawOfEnd)) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
-      {
+      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getStepYaw(), nominalYawOfEnd);
+      if (Math.abs(angleDifference) > Math.PI / 2.0) // greater than 90 degrees, so go backwards
          nominalYawOfEnd = AngleTools.trimAngleMinusPiToPi(nominalYawOfEnd + Math.PI);
-      }
 
 
       endXGaitPose.setPosition(endXGaitPosition);

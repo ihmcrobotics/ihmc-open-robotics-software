@@ -377,8 +377,12 @@ public class XGaitCostTest
       FramePoint2D frontLeftGoal = new FramePoint2D(yawedFrame, -2.5, 0.25);
       FramePoint2D frontRightGoal = new FramePoint2D(yawedFrame, -2.5, -0.25);
 
-      double forwardVelocity = maxSpeed * planningSpeedFraction;
-      double forwardDisplacement = forwardVelocity * (stepDuration + doubleSupportDuration);
+      RobotQuadrant startQuadrant = RobotQuadrant.FRONT_LEFT.getNextReversedRegularGaitSwingQuadrant();
+
+      double forwardVelocity = xGaitSettings.getMaxSpeed() * footstepPlannerParameters.getMaxWalkingSpeedMultiplier();
+      double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(startQuadrant, xGaitSettings);
+      double forwardDisplacement = durationBetweenSteps * forwardVelocity;
+
       FramePoint2D nextFrontLeft = new FramePoint2D(yawedFrame, 0.5 - forwardDisplacement, 0.25);
 
       hindLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
@@ -391,7 +395,7 @@ public class XGaitCostTest
       frontRightGoal.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       nextFrontLeft.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
-      FootstepNode startNode = new FootstepNode(RobotQuadrant.FRONT_LEFT.getNextReversedRegularGaitSwingQuadrant(), frontLeft, frontRight, hindLeft, hindRight,
+      FootstepNode startNode = new FootstepNode(startQuadrant, frontLeft, frontRight, hindLeft, hindRight,
                                                 yaw, 1.0, 0.5);
       FootstepNode endNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, nextFrontLeft, frontRight, hindLeft, hindRight,
                                               yaw, 1.0, 0.5);

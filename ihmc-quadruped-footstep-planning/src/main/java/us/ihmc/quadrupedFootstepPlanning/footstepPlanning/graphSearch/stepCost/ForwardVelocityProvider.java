@@ -11,7 +11,7 @@ public class ForwardVelocityProvider implements NominalVelocityProvider
    {
    }
 
-   public Vector2DReadOnly computeNominalVelocityHeadingInWorld(FootstepNode node)
+   public Vector2DReadOnly computeNominalNormalizedVelocityHeadingInWorld(FootstepNode node)
    {
       Vector2D heading = new Vector2D();
 

@@ -8,7 +8,7 @@ public interface NominalVelocityProvider
 {
    void setGoalNode(FootstepNode goalNode);
 
-   Vector2DReadOnly computeNominalVelocityHeadingInWorld(FootstepNode node);
+   Vector2DReadOnly computeNominalNormalizedVelocityHeadingInWorld(FootstepNode node);
 
    double computeNominalYaw(Point2DReadOnly node);
 }
