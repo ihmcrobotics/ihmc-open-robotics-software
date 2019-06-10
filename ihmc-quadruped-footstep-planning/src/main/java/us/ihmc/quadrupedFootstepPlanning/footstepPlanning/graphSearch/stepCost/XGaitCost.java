@@ -68,8 +68,7 @@ public class XGaitCost implements FootstepCost
 
       Point2DReadOnly startXGaitPosition = startNode.getOrComputeXGaitCenterPoint();
 
-//      double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
-      double nominalPitch = 0.0;
+      double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
       startXGaitPose.setPosition(startXGaitPosition);
       startXGaitPose.setOrientationYawPitchRoll(startNode.getNominalYaw(), nominalPitch, 0.0);
       startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
