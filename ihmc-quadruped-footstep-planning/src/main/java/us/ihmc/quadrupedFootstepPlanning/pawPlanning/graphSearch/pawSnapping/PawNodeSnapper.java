@@ -43,10 +43,10 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
 
    public PawNodeSnapData snapPawNode(PawNode node)
    {
-      return snapPawNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()));
+      return snapPawNode(node.getMovingQuadrant(), node.getXIndex(node.getMovingQuadrant()), node.getYIndex(node.getMovingQuadrant()), node.getStepYaw());
    }
 
-   public PawNodeSnapData snapPawNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex)
+   public PawNodeSnapData snapPawNode(RobotQuadrant movingQuadrant, int xIndex, int yIndex, double yaw)
    {
       SnapKey key = new SnapKey(xIndex, yIndex);
       if (snapDataHolder.containsKey(key))
@@ -59,7 +59,7 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
       }
       else
       {
-         PawNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex);
+         PawNodeSnapData snapData = snapInternal(movingQuadrant, xIndex, yIndex, yaw);
          addSnapData(xIndex, yIndex, snapData);
          return snapData;
       }
@@ -80,7 +80,7 @@ public abstract class PawNodeSnapper implements PawNodeSnapperReadOnly
       return snapDataHolder.get(new SnapKey(xIndex, yIndex));
    }
 
-   protected abstract PawNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex);
+   protected abstract PawNodeSnapData snapInternal(RobotQuadrant movingQuadrant, int xIndex, int yIndex, double yaw);
 
    private class SnapKey
    {

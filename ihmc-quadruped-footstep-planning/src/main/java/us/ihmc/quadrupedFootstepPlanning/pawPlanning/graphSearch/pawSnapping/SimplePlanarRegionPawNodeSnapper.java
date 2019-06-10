@@ -45,7 +45,7 @@ public class SimplePlanarRegionPawNodeSnapper extends PawNodeSnapper
    }
 
    @Override
-   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
+   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex, double yaw)
    {
       PawNodeTools.getPawPosition(xIndex, yIndex, pawPosition);
       Vector2D projectionTranslation = new Vector2D();
