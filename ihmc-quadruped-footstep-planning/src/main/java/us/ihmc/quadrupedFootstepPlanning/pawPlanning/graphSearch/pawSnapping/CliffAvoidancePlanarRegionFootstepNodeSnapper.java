@@ -1,24 +1,20 @@
-package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping;
+package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CliffDetectionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.PawCliffDetectionTools;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTools;
+import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarRegionFootstepNodeSnapper
+public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarRegionPawNodeSnapper
 {
    private final double shortCliffHeightToAvoid;
    private final double tallCliffHeightToAvoid;
@@ -27,7 +23,7 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
    private final double distanceToAvoidTallCliffs;
 
 
-   public CliffAvoidancePlanarRegionFootstepNodeSnapper(FootstepPlannerParameters parameters, DoubleProvider projectionInsideDelta,
+   public CliffAvoidancePlanarRegionFootstepNodeSnapper(PawStepPlannerParametersReadOnly parameters, DoubleProvider projectionInsideDelta,
                                                         BooleanProvider projectInsideUsingConvexHull, boolean enforceTranslationLessThanGridCell)
    {
       super(parameters, projectionInsideDelta, projectInsideUsingConvexHull, enforceTranslationLessThanGridCell);
@@ -42,30 +38,30 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
 
 
    @Override
-   public FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
+   public PawNodeSnapData snapInternal(RobotQuadrant robotQuadrant, int xIndex, int yIndex)
    {
-      FootstepNodeTools.getFootPosition(xIndex, yIndex, footPosition);
+      PawNodeTools.getPawPosition(xIndex, yIndex, pawPosition);
       Vector2D projectionTranslation = new Vector2D();
 
 
-      PlanarRegion highestRegion = PlanarRegionSnapTools
-            .findHighestRegionWithProjection(footPosition, projectionTranslation, constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
+      PlanarRegion highestRegion = PlanarRegionPawSnapTools
+            .findHighestRegionWithProjection(pawPosition, projectionTranslation, constraintDataHolder, planarRegionsList.getPlanarRegionsAsList(),
                                              constraintDataParameters);
 
 
       if (highestRegion == null || projectionTranslation.containsNaN() || isTranslationBiggerThanGridCell(projectionTranslation))
       {
-         return FootstepNodeSnapData.emptyData();
+         return PawNodeSnapData.emptyData();
       }
       else
       {
-         RigidBodyTransform snapTransform = getSnapTransformIncludingTranslation(footPosition, projectionTranslation, highestRegion);
-         snapTransform = pushAwayFromCliffs(footPosition, snapTransform, projectionTranslation, highestRegion);
+         RigidBodyTransform snapTransform = getSnapTransformIncludingTranslation(pawPosition, projectionTranslation, highestRegion);
+         snapTransform = pushAwayFromCliffs(pawPosition, snapTransform, projectionTranslation, highestRegion);
 
          if (snapTransform == null)
-            return FootstepNodeSnapData.emptyData();
+            return PawNodeSnapData.emptyData();
 
-         return new FootstepNodeSnapData(snapTransform);
+         return new PawNodeSnapData(snapTransform);
       }
    }
 
@@ -76,7 +72,7 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
       Point3D highestNearbyPoint = new Point3D();
 
       snapTransform.transform(snappedFoot);
-      CliffDetectionTools.findHighestNearbyRegion(planarRegionsList, snappedFoot, highestNearbyPoint, distanceToAvoidTallCliffs);
+      PawCliffDetectionTools.findHighestNearbyRegion(planarRegionsList, snappedFoot, highestNearbyPoint, distanceToAvoidTallCliffs);
 
       double cliffHeight = highestNearbyPoint.getZ() - snappedFoot.getZ();
       if (cliffHeight < shortCliffHeightToAvoid)

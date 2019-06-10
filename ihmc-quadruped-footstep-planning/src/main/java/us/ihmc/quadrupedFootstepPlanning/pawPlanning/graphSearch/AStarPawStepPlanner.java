@@ -345,9 +345,8 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          for (int i = 0; i < path.size(); i++)
          {
             PawNode node = path.get(i);
-            RobotQuadrant robotQuadrant = node.getMovingQuadrant();
 
-            PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+            PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
             RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
             if (snapTransform.containsNaN())
@@ -414,7 +413,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
          newStep.getTimeInterval().setInterval(thisStepStartTime, thisStepEndTime);
 
          Point3D position = new Point3D(node.getX(robotQuadrant), node.getY(robotQuadrant), 0.0);
-         PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node.getXIndex(robotQuadrant), node.getYIndex(robotQuadrant));
+         PawNodeSnapData snapData = postProcessingSnapper.snapPawNode(node);
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
          position.applyTransform(snapTransform);
