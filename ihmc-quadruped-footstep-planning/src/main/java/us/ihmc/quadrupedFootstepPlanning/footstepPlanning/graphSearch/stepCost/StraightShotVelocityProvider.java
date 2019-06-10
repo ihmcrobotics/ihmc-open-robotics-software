@@ -26,7 +26,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       heading.set(goalNode.getOrComputeXGaitCenterPoint());
       heading.sub(nodeCenter);
       heading.normalize();
-      
+
       double proximityMultiplier = InterpolationTools.linearInterpolate(0.1, 1.0, computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), 0.2));
       heading.scale(proximityMultiplier);
 
@@ -44,7 +44,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
-   
+
    private double computeDistanceToGoalScalar(double x, double y, double proximity)
    {
       Point2DReadOnly goalCenter = goalNode.getOrComputeXGaitCenterPoint();
@@ -52,7 +52,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
 
       double minimumBlendDistance = 0.75 * proximity;
       double maximumBlendDistance = 1.25 * proximity;
-      
+
       double multiplier;
       if (distanceToGoal < minimumBlendDistance)
          multiplier = 0.0;
@@ -60,7 +60,7 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
          multiplier = 1.0;
       else
          multiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
-      
+
       return multiplier;
    }
 
