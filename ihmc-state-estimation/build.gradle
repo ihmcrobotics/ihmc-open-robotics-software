@@ -25,7 +25,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
-   compile group: "us.ihmc", name: "ekf", version: "0.2.7"
+   compile group: "us.ihmc", name: "ekf", version: "0.2.8"
 }
 
 testDependencies {
