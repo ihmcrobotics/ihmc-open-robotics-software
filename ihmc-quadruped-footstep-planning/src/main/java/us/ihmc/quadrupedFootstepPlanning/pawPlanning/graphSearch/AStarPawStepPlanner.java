@@ -721,7 +721,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 
       SnapBasedPawNodeTransitionChecker snapBasedNodeTransitionChecker = new SnapBasedPawNodeTransitionChecker(parameters, snapper);
       SnapBasedPawNodeChecker snapBasedNodeChecker = new SnapBasedPawNodeChecker(parameters, snapper);
-      PawPlanarRegionCliffAvoider cliffAvoider = new PawPlanarRegionCliffAvoider(parameters, snapper);
+//      PawPlanarRegionCliffAvoider cliffAvoider = new PawPlanarRegionCliffAvoider(parameters, snapper);
 
       PawPlaningCostToGoHeuristicsBuilder heuristicsBuilder = new PawPlaningCostToGoHeuristicsBuilder();
       heuristicsBuilder.setPawPlannerParameters(parameters);
@@ -732,7 +732,7 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
       PawPlanningCostToGoHeuristics heuristics = heuristicsBuilder.buildHeuristics();
 
       PawNodeTransitionChecker nodeTransitionChecker = new PawNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeTransitionChecker));
-      PawNodeChecker nodeChecker = new PawNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
+      PawNodeChecker nodeChecker = new PawNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));//, cliffAvoider));
       nodeTransitionChecker.addPlannerListener(listener);
       nodeChecker.addPlannerListener(listener);
 
