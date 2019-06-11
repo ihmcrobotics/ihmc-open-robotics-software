@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -68,6 +69,7 @@ public class StereoREAModule implements Runnable
       {
          reaMessager.submitMessage(REAModuleAPI.OcTreeEnable, true); // TODO: replace, or modify.
          reportPlanarRegionState();
+         LogTools.info("reportPlanarRegionState");
       }
       double calculationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - calculationStartTime);
       System.out.println("LidarImageFusionDataBuffer calculationTime " + calculationTime);

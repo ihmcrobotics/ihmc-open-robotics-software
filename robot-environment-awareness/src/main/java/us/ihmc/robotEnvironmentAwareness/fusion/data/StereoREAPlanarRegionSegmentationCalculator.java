@@ -14,6 +14,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
 {
    private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
 
+   private static final int numberOfIterate = 1000;
    private static final int maximumNumberOfTrialsToFindUnIdLabel = 500;
 
    private final AtomicReference<LidarImageFusionData> data = new AtomicReference<LidarImageFusionData>(null);
@@ -37,13 +38,12 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    public boolean calculate()
    {
-      int numberOfIterate = 600;
       for (int i = 0; i < numberOfIterate; i++)
       {
          if (!iterateSegmenataionPropagation(i))
          {
             LogTools.info("iterative is terminated " + i);
-            return false;
+            break;
          }
       }
       convertNodeDataToPlanarRegionSegmentationRawData();
@@ -73,11 +73,9 @@ public class StereoREAPlanarRegionSegmentationCalculator
    private boolean iterateSegmenataionPropagation(int segmentId)
    {
       int nonIDLabel = selectRandomNonIdentifiedLabel();
-      //LogTools.info("" + segmentId + " randomSeedLabel " + nonIDLabel);
 
       if (nonIDLabel == -1)
-         // TODO: return false;
-         return true;
+         return false;
       else
          segments.add(createSegmentNodeData(nonIDLabel, segmentId));
 
