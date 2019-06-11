@@ -11,6 +11,16 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+/**
+ * A simple implementation of a body position sensor for the EKF framework.
+ * <p>
+ * Note, that this sensor assumes that it measures the position of the root joint directly. There is
+ * currently no offset measurement frame or position sensor for other parts of the robot. This should
+ * be added before this is moved to the EKF package.
+ *
+ * @author Georg Wiedebach
+ *
+ */
 public class PositionSensor extends Sensor
 {
    private final String sensorName;
