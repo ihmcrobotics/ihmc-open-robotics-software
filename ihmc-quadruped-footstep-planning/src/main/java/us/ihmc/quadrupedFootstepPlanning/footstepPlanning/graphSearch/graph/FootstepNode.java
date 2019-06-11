@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootstepNode
 {
-   public static double gridSizeXY = 0.04;
+   public static double gridSizeXY = 0.06;
    public static double gridSizeYaw = 0.1;
 
    private final QuadrantDependentList<Integer> xIndices = new QuadrantDependentList<>();

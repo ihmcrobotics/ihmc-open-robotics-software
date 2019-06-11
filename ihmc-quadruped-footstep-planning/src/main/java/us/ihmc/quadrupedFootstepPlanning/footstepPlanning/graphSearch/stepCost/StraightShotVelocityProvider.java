@@ -27,8 +27,8 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       heading.sub(nodeCenter);
       heading.normalize();
 
-      double proximityMultiplier = InterpolationTools.linearInterpolate(0.1, 1.0, computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), 0.2));
-      heading.scale(proximityMultiplier);
+      double scaleFactor = InterpolationTools.linearInterpolate(0.25, 1.0, computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), 0.5));
+      heading.scale(scaleFactor);
 
       return heading;
    }
