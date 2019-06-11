@@ -173,6 +173,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    @Override
    public void initialize()
    {
+      stateMachine.resetToInitialState();
    }
 
    @Override
