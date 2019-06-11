@@ -26,7 +26,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
    public void updateFusionData(LidarImageFusionData lidarImageFusionData)
    {
       data.set(lidarImageFusionData);
-      numberOfLabels = lidarImageFusionData.getNumberOfLabels();
+      numberOfLabels = lidarImageFusionData.getNumberOfImageSegments();
    }
 
    public void initialize()

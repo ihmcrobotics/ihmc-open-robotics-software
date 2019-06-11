@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -21,6 +22,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionData;
@@ -29,32 +31,50 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 public class LidarImageFusionDataFactory
 {
    private static final int MAX_NUMBER_OF_POINTS = 200000;
-   private static final boolean displaySegmentedContour = false;
+   private static final boolean displaySegmentedContour = true;
+
+   public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
+                                                                 int pointCloudBufferSize, int columnSize, int rowSize)
+   {
+      int[] labels = getNewLabelsInGrid(bufferedImage, columnSize, rowSize);
+
+      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
+                                                                                              pointCloudBufferSize));
+      return newData;
+   }
 
    public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
                                                                  int pointCloudBufferSize, int pixelSize, double ruler, boolean enableConnectivity,
                                                                  int elementSize, int iterate)
    {
-      ArrayList<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
+      long startLabel = System.nanoTime();
+      int[] labels = getNewLabelsSLIC(bufferedImage, pixelSize, ruler, iterate, enableConnectivity, elementSize);
+      System.out.println("Labeling time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startLabel));
 
+      LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
+                                                                                              pointCloudBufferSize));
+      return newData;
+   }
+
+   private static List<SegmentationRawData> createListOfSegmentationRawData(int[] labels, Point3D[] pointCloud, BufferedImage bufferedImage,
+                                                                            IntrinsicParameters intrinsicParameters, int pointCloudBufferSize)
+   {
       int imageWidth = bufferedImage.getWidth();
       int imageHeight = bufferedImage.getHeight();
-
-      int[] labels = getNewLabels(bufferedImage, pixelSize, ruler, iterate, enableConnectivity, elementSize);
 
       if (labels.length != imageWidth * imageHeight)
          throw new RuntimeException("newLabels length is different with size of image " + labels.length + ", (w)" + imageWidth + ", (h)" + imageHeight);
 
-      int numberOfLabels = 0;
-      for (int i = 0; i < imageWidth * imageHeight; i++)
-         if (numberOfLabels == labels[i])
-            numberOfLabels++;
+      List<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
 
+      TIntArrayList labelList = new TIntArrayList(labels);
+      int numberOfLabels = labelList.max() + 1;
       for (int i = 0; i < numberOfLabels; i++)
          fusionDataSegments.add(new SegmentationRawData(i));
 
       Point3D[] pointCloudBuffer = randomPruningPointCloudData(pointCloud, pointCloudBufferSize);
 
+      long startConverting = System.nanoTime();
       for (int i = 0; i < pointCloudBuffer.length; i++)
       {
          Point3D point = pointCloudBuffer[i];
@@ -68,7 +88,9 @@ public class LidarImageFusionDataFactory
 
          fusionDataSegments.get(label).addPoint(new Point3D(point));
       }
+      System.out.println("Projection " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConverting));
 
+      long startTime = System.nanoTime();
       for (int u = 1; u < imageWidth - 1; u++)
       {
          for (int v = 1; v < imageHeight - 1; v++)
@@ -90,63 +112,50 @@ public class LidarImageFusionDataFactory
             }
          }
       }
-
-      long startTime = System.nanoTime();
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
          fusionDataSegment.update();
       }
       System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
-      LidarImageFusionData newData = new LidarImageFusionData(fusionDataSegments);
-      return newData;
+      return fusionDataSegments;
    }
 
-   /**
-    * The type of the BufferedImage is TYPE_INT_RGB and the type of the Mat is CV_8UC3.
-    */
-   private static Mat convertBufferedImageToMat(BufferedImage bufferedImage)
+   private static int[] getNewLabelsInGrid(BufferedImage bufferedImage, int columnSize, int rowSize)
    {
-      Mat imageMat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), opencv_core.CV_8UC3);
-      int r, g, b;
-      UByteRawIndexer indexer = imageMat.createIndexer();
-      for (int y = 0; y < bufferedImage.getHeight(); y++)
+      int imageWidth = bufferedImage.getWidth();
+      int imageHeight = bufferedImage.getHeight();
+      int numberOfColumns = imageWidth / columnSize;
+      int numberOfRows = imageHeight / rowSize;
+
+      int[] labels = new int[bufferedImage.getWidth() * bufferedImage.getHeight()];
+      int label = 0;
+      for (int j = 0; j < numberOfRows; j++)
       {
-         for (int x = 0; x < bufferedImage.getWidth(); x++)
+         for (int i = 0; i < numberOfColumns; i++)
          {
-            int rgb = bufferedImage.getRGB(x, y);
-
-            r = (byte) ((rgb >> 0) & 0xFF);
-            g = (byte) ((rgb >> 8) & 0xFF);
-            b = (byte) ((rgb >> 16) & 0xFF);
-
-            indexer.put(y, x, 0, r);
-            indexer.put(y, x, 1, g);
-            indexer.put(y, x, 2, b);
+            int uLowerBoundary = i * columnSize;
+            int uUpperBoundary = i * columnSize + columnSize;
+            int vLowerBoundary = j * rowSize;
+            int vUpperBoundary = j * rowSize + rowSize;
+            for (int u = uLowerBoundary; u < uUpperBoundary; u++)
+            {
+               for (int v = vLowerBoundary; v < vUpperBoundary; v++)
+               {
+                  int arrayIndex = getArrayIndex(u, v, imageWidth);
+                  if (arrayIndex < labels.length)
+                     labels[arrayIndex] = label;
+               }
+            }
+            label++;
          }
       }
-      indexer.release();
 
-      return imageMat;
-   }
-
-   private static Point3D[] randomPruningPointCloudData(Point3D[] buffer, int desiredBufferSize)
-   {
-      int numberOfPoints = desiredBufferSize;
-      if (desiredBufferSize > MAX_NUMBER_OF_POINTS)
-         numberOfPoints = MAX_NUMBER_OF_POINTS;
-
-      Point3D[] newBuffer = new Point3D[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         int randomIndex = new Random().nextInt(buffer.length);
-         newBuffer[i] = buffer[randomIndex];
-      }
-      return newBuffer;
+      return labels;
    }
 
    // TODO: Speed up.
-   private static int[] getNewLabels(BufferedImage bufferedImage, int pixelSize, double ruler, int iterate, boolean enableConnectivity, int elementSize)
+   private static int[] getNewLabelsSLIC(BufferedImage bufferedImage, int pixelSize, double ruler, int iterate, boolean enableConnectivity, int elementSize)
    {
       Mat imageMat = convertBufferedImageToMat(bufferedImage);
       Mat convertedMat = new Mat();
@@ -191,6 +200,49 @@ public class LidarImageFusionDataFactory
    private static int getArrayIndex(int u, int v, int width)
    {
       return u + v * width;
+   }
+
+   /**
+    * The type of the BufferedImage is TYPE_INT_RGB and the type of the Mat is CV_8UC3.
+    */
+   private static Mat convertBufferedImageToMat(BufferedImage bufferedImage)
+   {
+      Mat imageMat = new Mat(bufferedImage.getHeight(), bufferedImage.getWidth(), opencv_core.CV_8UC3);
+      int r, g, b;
+      UByteRawIndexer indexer = imageMat.createIndexer();
+      for (int y = 0; y < bufferedImage.getHeight(); y++)
+      {
+         for (int x = 0; x < bufferedImage.getWidth(); x++)
+         {
+            int rgb = bufferedImage.getRGB(x, y);
+
+            r = (byte) ((rgb >> 0) & 0xFF);
+            g = (byte) ((rgb >> 8) & 0xFF);
+            b = (byte) ((rgb >> 16) & 0xFF);
+
+            indexer.put(y, x, 0, r);
+            indexer.put(y, x, 1, g);
+            indexer.put(y, x, 2, b);
+         }
+      }
+      indexer.release();
+
+      return imageMat;
+   }
+
+   private static Point3D[] randomPruningPointCloudData(Point3D[] buffer, int desiredBufferSize)
+   {
+      int numberOfPoints = desiredBufferSize;
+      if (desiredBufferSize > MAX_NUMBER_OF_POINTS)
+         numberOfPoints = MAX_NUMBER_OF_POINTS;
+
+      Point3D[] newBuffer = new Point3D[numberOfPoints];
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         int randomIndex = new Random().nextInt(buffer.length);
+         newBuffer[i] = buffer[randomIndex];
+      }
+      return newBuffer;
    }
 
    private static void show(Mat mat, int width, int height)

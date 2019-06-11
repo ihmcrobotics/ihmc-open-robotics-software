@@ -49,6 +49,10 @@ public class LidarImageFusionDataBuffer
                                                                                          true,
                                                                                          imageSegmentationParameters.getMinElementSize(),
                                                                                          imageSegmentationParameters.getIterate());
+      
+//      LidarImageFusionData data = LidarImageFusionDataFactory.createLidarImageFusionData(MessageTools.unpackScanPoint3ds(stereoVisionPointCloudMessage),
+//                                                                                         latestBufferedImage.get(), intrinsicParameters, bufferSize.get(),
+//                                                                                         40, 30);
       newBuffer.set(data);
    }
 
