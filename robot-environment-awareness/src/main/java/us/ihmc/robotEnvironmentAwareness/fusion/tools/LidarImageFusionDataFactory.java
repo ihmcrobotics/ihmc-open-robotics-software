@@ -39,7 +39,8 @@ public class LidarImageFusionDataFactory
       int[] labels = getNewLabelsInGrid(bufferedImage, columnSize, rowSize);
 
       LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
-                                                                                              pointCloudBufferSize));
+                                                                                              pointCloudBufferSize),
+                                                              bufferedImage.getWidth(), bufferedImage.getHeight());
       return newData;
    }
 
@@ -52,7 +53,8 @@ public class LidarImageFusionDataFactory
       System.out.println("Labeling time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startLabel));
 
       LidarImageFusionData newData = new LidarImageFusionData(createListOfSegmentationRawData(labels, pointCloud, bufferedImage, intrinsicParameters,
-                                                                                              pointCloudBufferSize));
+                                                                                              pointCloudBufferSize),
+                                                              bufferedImage.getWidth(), bufferedImage.getHeight());
       return newData;
    }
 
@@ -67,13 +69,16 @@ public class LidarImageFusionDataFactory
 
       List<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
 
+      // create.
       TIntArrayList labelList = new TIntArrayList(labels);
       int numberOfLabels = labelList.max() + 1;
       for (int i = 0; i < numberOfLabels; i++)
          fusionDataSegments.add(new SegmentationRawData(i));
 
+      // adjust buffer size.
       Point3D[] pointCloudBuffer = randomPruningPointCloudData(pointCloud, pointCloudBufferSize);
 
+      // projection.
       long startConverting = System.nanoTime();
       for (int i = 0; i < pointCloudBuffer.length; i++)
       {
@@ -90,6 +95,7 @@ public class LidarImageFusionDataFactory
       }
       System.out.println("Projection " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConverting));
 
+      // register adjacent labels.
       long startTime = System.nanoTime();
       for (int u = 1; u < imageWidth - 1; u++)
       {
@@ -112,11 +118,34 @@ public class LidarImageFusionDataFactory
             }
          }
       }
+
+      // update and calculate normal.
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
          fusionDataSegment.update();
       }
       System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+
+      // set segment center in 2D.
+      int[] totalU = new int[numberOfLabels];
+      int[] totalV = new int[numberOfLabels];
+      int[] numberOfPixels = new int[numberOfLabels];
+
+      for (int i = 0; i < imageWidth; i++)
+      {
+         for (int j = 0; j < imageHeight; j++)
+         {
+            int label = labels[getArrayIndex(i, j, imageWidth)];
+            totalU[label] += i;
+            totalV[label] += j;
+            numberOfPixels[label]++;
+         }
+      }
+
+      for (int i = 0; i < numberOfLabels; i++)
+      {
+         fusionDataSegments.get(i).setSegmentCenter(totalU[i] / numberOfPixels[i], totalV[i] / numberOfPixels[i]);
+      }
 
       return fusionDataSegments;
    }
