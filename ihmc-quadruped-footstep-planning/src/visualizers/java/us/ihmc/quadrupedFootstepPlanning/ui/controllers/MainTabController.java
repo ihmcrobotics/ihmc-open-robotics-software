@@ -309,7 +309,7 @@ public class MainTabController
    {
       this.planarRegionDataClearTopic = planarRegionDataClearTopic;
    }
-   
+
    public void setAbortWalkingTopic(Topic<Boolean> abortWalkingTopic)
    {
       this.abortWalkingTopic = abortWalkingTopic;
@@ -483,6 +483,8 @@ public class MainTabController
 
    private boolean isValidPlan(FootstepPlan plan)
    {
+      if (quadrupedReferenceFrames == null)
+         return true;
       double maximumStepTranslation = 1.0;
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
