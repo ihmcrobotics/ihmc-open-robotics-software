@@ -10,11 +10,15 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public class LidarImageFusionData
 {
+   private final int imageWidth;
+   private final int imageHeight;
    private final ArrayList<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
 
-   public LidarImageFusionData(List<SegmentationRawData> fusionDataSegments)
+   public LidarImageFusionData(List<SegmentationRawData> fusionDataSegments, int imageWidth, int imageHeight)
    {
       this.fusionDataSegments.addAll(fusionDataSegments);
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
    }
 
    public int getNumberOfImageSegments()
@@ -56,5 +60,15 @@ public class LidarImageFusionData
             return false;
       }
       return true;
+   }
+   
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+   
+   public int getImageHeight()
+   {
+      return imageHeight;
    }
 }
