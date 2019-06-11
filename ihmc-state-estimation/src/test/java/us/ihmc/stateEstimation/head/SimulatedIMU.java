@@ -47,7 +47,6 @@ public class SimulatedIMU
       linearAcceleration.add(velocityCrossTerm);
       orientation.setToZero(imuFrame);
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
-      linearAcceleration.setToZero();
    }
 
    public FrameQuaternionReadOnly getOrientation()
