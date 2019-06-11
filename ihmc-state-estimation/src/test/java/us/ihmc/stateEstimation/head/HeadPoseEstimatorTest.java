@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -37,14 +38,14 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class HeadPoseEstimatorTest
 {
-   private final static boolean visualize = true;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-   private final Random random = new Random(58369L);
+   private final static boolean VISUALIZE = false;
+   private static final String PARAMETER_FILE = "headPoseEstimatorTest.xml";
+   private static final Random RANDOM = new Random(58369L);
 
    @Test
    public void testSimpleTrajectory() throws IOException
    {
+      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
       FilterTools.proccessNoiseModel = ProccessNoiseModel.PIECEWISE_CONTINUOUS_ACCELERATION;
 
       double duration = 30.0;
@@ -52,7 +53,7 @@ public class HeadPoseEstimatorTest
       double dt = 0.004;
 
       // Create a simple joint structure with the head connected to a floating joint:
-      RigidBodyTransform imuTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      RigidBodyTransform imuTransform = EuclidCoreRandomTools.nextRigidBodyTransform(RANDOM);
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint headJoint = new SixDoFJoint("head_joint", elevator);
       RigidBodyBasics headBody = new RigidBody("imu_body", headJoint, 0.1, 0.1, 0.1, 1.0, new Vector3D());
@@ -73,18 +74,18 @@ public class HeadPoseEstimatorTest
       trajectoryGenerator.initialize();
 
       // Create an EKF based orientation estimator:
-      HeadPoseEstimator poseEstimator = new HeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), registry);
-      XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/headPoseEstimatorTest.xml"));
+      HeadPoseEstimator poseEstimator = new HeadPoseEstimator(dt, imuFrame.getTransformToDesiredFrame(headFrame), true, registry);
+      XmlParameterReader reader = new XmlParameterReader(getClass().getResourceAsStream("/" + PARAMETER_FILE));
       Set<String> defaultParameters = new HashSet<>();
       Set<String> unmatchedParameters = new HashSet<>();
       reader.readParametersInRegistry(registry, defaultParameters, unmatchedParameters);
-      unmatchedParameters.forEach(p -> System.out.println(p));
+      unmatchedParameters.forEach(p -> System.out.println("Did not find parameter " + p));
 
       Vector3DBasics bias = new YoFrameVector3D("AngularVelocityBias", imuFrame, registry);
 
-      // Since we would like to plot some data create an instance of SCS:
+      // If we would like to plot some data create an instance of SCS:
       SimulationConstructionSet scs;
-      if (visualize)
+      if (VISUALIZE)
       {
          Robot robot = new Robot("Head");
          scs = new SimulationConstructionSet(robot);
@@ -94,14 +95,18 @@ public class HeadPoseEstimatorTest
       // Simulate the head moving:
       double t = 0.0;
       boolean initialize = true;
-
       FrameVector3D zAxis = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
-      FrameVector3D north = EuclidFrameRandomTools.nextOrthogonalFrameVector3D(random, zAxis, false);
+      FrameVector3D north = EuclidFrameRandomTools.nextOrthogonalFrameVector3D(RANDOM, zAxis, false);
 
       while (t < duration)
       {
+         // At some point change the angular velocity bias to check if it estimated nicely:
+         boolean biasChanging = false;
          if (t > duration / 4.0 && t < duration / 2.0)
+         {
             bias.setX((t - duration / 4.0) * 0.01);
+            biasChanging = true;
+         }
 
          // Update the simulation:
          updateJoint(headJoint, trajectoryGenerator, t);
@@ -123,7 +128,7 @@ public class HeadPoseEstimatorTest
          FramePoint3D headPosition = new FramePoint3D(headFrame);
          headPosition.changeFrame(ReferenceFrame.getWorldFrame());
          FrameVector3D magneticFieldVector = new FrameVector3D(north);
-         magneticFieldVector .changeFrame(imuFrame);
+         magneticFieldVector.changeFrame(imuFrame);
          FrameVector3D angularVelocityMeasurement = new FrameVector3D(imuAngularVelocityMeasurement);
          angularVelocityMeasurement.add(bias);
 
@@ -131,20 +136,32 @@ public class HeadPoseEstimatorTest
          poseEstimator.setImuLinearAcceleration(imuLinearAccelerationMeasurement);
          poseEstimator.setImuMagneticFieldVector(magneticFieldVector);
          poseEstimator.setEstimatedHeadPosition(headPosition);
-
          poseEstimator.compute();
 
          // Update SCS:
-         if (visualize)
+         if (VISUALIZE)
          {
             scs.setTime(t);
             scs.tickAndUpdate();
          }
+         else
+         {
+            double translationEpsilon = 1.0e-5;
+            double rotationEpsilon = biasChanging ? Math.toRadians(5.0) : Math.toRadians(1.0);
+
+            RigidBodyTransform actual = new RigidBodyTransform();
+            RigidBodyTransform expected = new RigidBodyTransform();
+            poseEstimator.getHeadTransform(actual);
+            headPose.get(expected);
+            EuclidCoreTestTools.assertTuple3DEquals(expected.getTranslationVector(), actual.getTranslationVector(), translationEpsilon);
+            EuclidCoreTestTools.assertRotationMatrixGeometricallyEquals(expected.getRotationMatrix(), actual.getRotationMatrix(), rotationEpsilon);
+         }
+
          t += dt;
       }
 
       // Show SCS:
-      if (visualize)
+      if (VISUALIZE)
       {
          scs.setOutPoint();
          scs.cropBuffer();
@@ -183,11 +200,11 @@ public class HeadPoseEstimatorTest
 
    private void addRandomWaypoint(MultipleWaypointsPoseTrajectoryGenerator trajectoryGenerator, double time)
    {
-      FramePose3D pose = EuclidFrameRandomTools.nextFramePose3D(random, ReferenceFrame.getWorldFrame());
-      FrameVector3D linearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-      FrameVector3D angularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+      FramePose3D pose = EuclidFrameRandomTools.nextFramePose3D(RANDOM, ReferenceFrame.getWorldFrame());
+      FrameVector3D linearVelocity = EuclidFrameRandomTools.nextFrameVector3D(RANDOM, ReferenceFrame.getWorldFrame());
+      FrameVector3D angularVelocity = EuclidFrameRandomTools.nextFrameVector3D(RANDOM, ReferenceFrame.getWorldFrame());
       // Waypoint at time zero should have zero velocity.
-//      if (Precision.equals(time, 0.0))
+      //      if (Precision.equals(time, 0.0))
       {
          angularVelocity.setToZero();
          linearVelocity.setToZero();
