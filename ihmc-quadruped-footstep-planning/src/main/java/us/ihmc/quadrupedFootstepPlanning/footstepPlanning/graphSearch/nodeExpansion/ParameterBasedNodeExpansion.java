@@ -26,7 +26,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    protected final FootstepPlannerParameters parameters;
    private final QuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   private static final double maxDeviationFromXGait = 0.15;
+   private static final double maxDeviationFromXGait = 0.1;
 
    public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
@@ -64,12 +64,13 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       boolean isMovingFront = movingQuadrant.isQuadrantInFront();
       double maxReach = isMovingFront ? parameters.getMaximumFrontStepReach() : parameters.getMaximumHindStepReach();
 
-      double maxForwardSpeed = xGaitSettings.getMaxSpeed() * parameters.getMaxWalkingSpeedMultiplier();
+      double maxForwardSpeed = xGaitSettings.getMaxSpeed();
       double maxForwardDisplacement = durationBetweenSteps * maxForwardSpeed;
       double maxLateralDisplacement = xGaitSettings.getMaxHorizontalSpeedFraction() * maxForwardDisplacement;
+      double maxYawDisplacement = xGaitSettings.getMaxYawSpeedFraction() * maxForwardDisplacement;
 
-      double maxLength = Math.max(maxForwardDisplacement, maxDeviationFromXGait);
-      double maxWidth = Math.max(maxLateralDisplacement, maxDeviationFromXGait);
+      double maxLength = maxForwardDisplacement + maxDeviationFromXGait;
+      double maxWidth = maxLateralDisplacement + maxDeviationFromXGait;
 
       Vector2D nominalFootOffset = new Vector2D(0.5 * nextQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
                                                 0.5 * nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
@@ -89,8 +90,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             if (ellipticalVelocity > 1.0)
                continue;
 
-            double minYaw = InterpolationTools.hermiteInterpolate(parameters.getMinimumStepYaw(), 0.0, translation / maxReach);
-            double maxYaw = InterpolationTools.hermiteInterpolate(parameters.getMaximumStepYaw(), 0.0, translation / maxReach);
+            double absoluteMaxYawDisplacement = InterpolationTools.hermiteInterpolate(maxYawDisplacement, 0.0, translation / maxReach);
+            double minYaw = Math.min(parameters.getMinimumStepYaw(), -absoluteMaxYawDisplacement);
+            double maxYaw = Math.min(parameters.getMaximumStepYaw(), absoluteMaxYawDisplacement);
 
             Vector2D movingVector = new Vector2D(movingX, movingY);
             previousNodeOrientation.transform(movingVector);
