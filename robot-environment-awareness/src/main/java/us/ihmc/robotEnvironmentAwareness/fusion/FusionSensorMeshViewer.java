@@ -14,6 +14,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.fusion.data.LidarImageFusionDataViewer;
@@ -30,6 +31,8 @@ public class FusionSensorMeshViewer
    private static final int MEDIUM_PACE_UPDATE_PERIOD = 100;
    private static final int HIGH_PACE_UPDATE_PERIOD = 10;
 
+   private final REAUIMessager reaMessager;
+   
    private final Group root = new Group();
 
    private final LidarScanViewer lidarScanViewer;
@@ -46,11 +49,14 @@ public class FusionSensorMeshViewer
 
    public FusionSensorMeshViewer(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager, REAUIMessager reaMessager) throws Exception
    {
+      this.reaMessager = reaMessager;
       lidarScanViewer = new LidarScanViewer(REAModuleAPI.LidarScanState, reaMessager);
       stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, reaMessager);
       detectedObjectViewer = new DetectedObjectViewer(ros2Node);
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(reaMessager);
       lidarImageFusionDataViewer = new LidarImageFusionDataViewer(messager);
+      
+      messager.registerTopicListener(LidarImageFusionAPI.ClearREA, (content) -> clear());
 
       Node lidarScanRootNode = lidarScanViewer.getRoot();
       lidarScanRootNode.setMouseTransparent(true);
@@ -78,6 +84,12 @@ public class FusionSensorMeshViewer
          }
       };
       start();
+   }
+   
+   public void clear()
+   {
+      reaMessager.submitMessageInternal(REAModuleAPI.PlanarRegionsPolygonizerClear, true);
+      lidarImageFusionDataViewer.clear();
    }
 
    public void start()

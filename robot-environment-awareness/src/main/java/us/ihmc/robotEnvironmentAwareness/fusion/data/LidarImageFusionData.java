@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
 
@@ -11,12 +12,12 @@ public class LidarImageFusionData
 {
    private final ArrayList<SegmentationRawData> fusionDataSegments = new ArrayList<SegmentationRawData>();
 
-   public LidarImageFusionData(ArrayList<SegmentationRawData> fusionDataSegments)
+   public LidarImageFusionData(List<SegmentationRawData> fusionDataSegments)
    {
       this.fusionDataSegments.addAll(fusionDataSegments);
    }
 
-   public int getNumberOfLabels()
+   public int getNumberOfImageSegments()
    {
       return fusionDataSegments.size();
    }
