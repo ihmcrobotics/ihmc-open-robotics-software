@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
@@ -17,20 +17,23 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
  */
 public class SegmentationRawData
 {
-   private int id = -1;
+   public static final int DEFAULT_SEGMENT_ID = -1;
+   private int id = DEFAULT_SEGMENT_ID;
 
    private final int imageSegmentLabel;
    private final TIntArrayList adjacentSegmentLabels = new TIntArrayList();
    private final List<Point3D> points = new ArrayList<>();
-   
+
    private final Point2D segmentCenterInImage = new Point2D();
 
    private final Point3D center = new Point3D();
    private final Vector3D normal = new Vector3D();
 
-   public final Vector3D standardDeviation = new Vector3D();
+   private final Vector3D standardDeviation = new Vector3D();
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+
+   private boolean isSparse;
 
    private static final boolean useAdjacentScore = true;
    private static final int numberOfAdjacentPixels = 20;
@@ -97,7 +100,10 @@ public class SegmentationRawData
       pca.compute();
 
       pca.getMean(center);
-      pca.getThirdVector(normal);
+      Vector3D x = new Vector3D();
+      Vector3D y = new Vector3D();
+      pca.getPrincipalVectors(x, y, normal);
+      //pca.getThirdVector(normal);
 
       if (normal.getZ() < 0.0)
          normal.negate();
@@ -105,29 +111,29 @@ public class SegmentationRawData
       pca.getStandardDeviation(standardDeviation);
    }
 
+   public void updateSparsity(double threshold)
+   {
+      isSparse = standardDeviation.getZ() > threshold;
+   }
+
    public void setId(int id)
    {
       this.id = id;
    }
-   
+
    public void setSegmentCenter(int u, int v)
    {
       segmentCenterInImage.set(u, v);
    }
-   
-   /**
-    * Scaled threshold is used according to the v value of the segment center.
-    */
-   public boolean isSparse(double minThreshold, double maxThreshold, int imageHeight)
+
+   public Point2DReadOnly getSegmentCenter()
    {
-      double alpha = segmentCenterInImage.getY() / imageHeight;
-      double threshold = alpha * (maxThreshold - minThreshold) + minThreshold;
-      return isSparse(threshold);
+      return segmentCenterInImage;
    }
 
-   public boolean isSparse(double threshold)
+   public boolean isSparse()
    {
-      return standardDeviation.getZ() > threshold;
+      return isSparse;
    }
 
    public int[] getAdjacentSegmentLabels()

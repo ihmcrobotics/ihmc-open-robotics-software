@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionIntersectionCalculator;
@@ -23,22 +26,24 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
    private final StereoREAPlanarRegionSegmentationCalculator planarRegionSegmentationCalculator = new StereoREAPlanarRegionSegmentationCalculator();
    private PlanarRegionsList planarRegionsList = null;
 
+   private final AtomicReference<PlanarRegionPropagationParameters> planarRegionPropagationParameters;
    private final AtomicReference<ConcaveHullFactoryParameters> concaveHullFactoryParameters;
    private final AtomicReference<PolygonizerParameters> polygonizerParameters;
    private final AtomicReference<IntersectionEstimationParameters> intersectionEstimationParameters;
-   
+
    private List<LineSegment3D> planarRegionsIntersections = null;
 
-   public StereoREAPlanarRegionFeatureUpdater(Messager reaMessager)
+   public StereoREAPlanarRegionFeatureUpdater(Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       concaveHullFactoryParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsConcaveHullParameters, new ConcaveHullFactoryParameters());
       polygonizerParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsPolygonizerParameters, new PolygonizerParameters());
       intersectionEstimationParameters = reaMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionParameters, new IntersectionEstimationParameters());
+      planarRegionPropagationParameters = messager.createInput(LidarImageFusionAPI.PlanarRegionPropagationParameters, new PlanarRegionPropagationParameters());
    }
 
    public void updateLatestLidarImageFusionData(LidarImageFusionData lidarImageFusionData)
    {
-      planarRegionSegmentationCalculator.updateFusionData(lidarImageFusionData);
+      planarRegionSegmentationCalculator.updateFusionData(lidarImageFusionData, planarRegionPropagationParameters.get());
       planarRegionSegmentationCalculator.initialize();
    }
 
@@ -76,7 +81,7 @@ public class StereoREAPlanarRegionFeatureUpdater implements RegionFeaturesProvid
 
       planarRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
-   
+
    private void updateIntersections(List<PlanarRegionSegmentationRawData> rawData)
    {
       planarRegionsIntersections = PlanarRegionIntersectionCalculator.computeIntersections(rawData, intersectionEstimationParameters.get());

@@ -17,6 +17,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -37,6 +38,9 @@ public class LidarImageFusionDataViewer
    protected final ObservableList<Node> children = root.getChildren();
    private final AtomicReference<Boolean> clear = new AtomicReference<>(false);
 
+   // TODO: just for debugging.
+   private final AtomicReference<PlanarRegionPropagationParameters> planarRegionPropagationParameters;
+
    public LidarImageFusionDataViewer(SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
@@ -45,6 +49,7 @@ public class LidarImageFusionDataViewer
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
 
       messager.registerTopicListener(LidarImageFusionAPI.ShowFusionData, (content) -> unpackFusionData());
+      planarRegionPropagationParameters = messager.createInput(LidarImageFusionAPI.PlanarRegionPropagationParameters, new PlanarRegionPropagationParameters());
    }
 
    private void unpackFusionData()
@@ -54,21 +59,20 @@ public class LidarImageFusionDataViewer
       meshBuilder.clear();
       LidarImageFusionData lidarImageFusionData = lidarImageFusionDataToRender.get();
 
-      if(lidarImageFusionData == null)
+      if (lidarImageFusionData == null)
          return;
-      
+
       int numberOfSegment = lidarImageFusionData.getNumberOfImageSegments();
-      System.out.println("LidarImageFusionDataViewer numberOfSegment "+ numberOfSegment);
+      System.out.println("LidarImageFusionDataViewer numberOfSegment " + numberOfSegment);
 
       List<PlanarRegionSegmentationRawData> planarRegionSegmentationRawDataList = new ArrayList<>();
-      
+
       for (int i = 0; i < numberOfSegment; i++)
       {
          SegmentationRawData data = lidarImageFusionData.getFusionDataSegment(i);
          SegmentationNodeData segmentationNodeData = new SegmentationNodeData(data);
 
-         PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(i,
-                                                                                                               segmentationNodeData.getNormal(),
+         PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(i, segmentationNodeData.getNormal(),
                                                                                                                segmentationNodeData.getCenter(),
                                                                                                                segmentationNodeData.getPointsInSegment());
 
@@ -81,9 +85,9 @@ public class LidarImageFusionDataViewer
       PlanarRegionsList planarRegionsList = PlanarRegionPolygonizer.createPlanarRegionsList(planarRegionSegmentationRawDataList, concaveHullFactoryParameters,
                                                                                             polygonizerParameters);
 
-      System.out.println("LidarImageFusionDataViewer planarRegionsList "+ planarRegionsList.getNumberOfPlanarRegions());
-      
-      for (int i = 0; i < numberOfSegment; i++)
+      System.out.println("LidarImageFusionDataViewer planarRegionsList " + planarRegionsList.getNumberOfPlanarRegions());
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
          int randomID = new Random().nextInt();
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
@@ -92,19 +96,18 @@ public class LidarImageFusionDataViewer
          planarRegion.getTransformToWorld(transformToWorld);
 
          Color regionColor = getRegionColor(randomID);
-//         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), lineWidth, regionColor, true);
-//         meshBuilder.addTetrahedron(0.02, transformToWorld.getTranslationVector(), regionColor);
+         //         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), lineWidth, regionColor, true);
+         //         meshBuilder.addTetrahedron(0.02, transformToWorld.getTranslationVector(), regionColor);
       }
-      
+
       for (int i = 0; i < numberOfSegment; i++)
       {
          int randomID = new Random().nextInt();
          Color regionColor = getRegionColor(randomID);
          SegmentationRawData data = lidarImageFusionData.getFusionDataSegment(i);
-         for(Point3D point:data.getPoints())
-         {
-            meshBuilder.addTetrahedron(0.02, point, regionColor);
-         }
+         if (!data.isSparse())
+            for (Point3D point : data.getPoints())
+               meshBuilder.addTetrahedron(0.02, point, regionColor);
       }
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());

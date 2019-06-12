@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 
 /**
  * This data set is to hold a list of SegmentationRawData.
@@ -41,12 +42,10 @@ public class LidarImageFusionData
          uncompressedAdjacentLabels.addAll(fusionDataSegments.get(label).getAdjacentSegmentLabels());
       }
 
-      for (int i = 0; i < fusionDataSegments.size(); i++)
+      for(int label : uncompressedAdjacentLabels.toArray())
       {
-         if (uncompressedAdjacentLabels.contains(i) && !labels.contains(i))
-         {
-            adjacentLabels.add(i);
-         }
+         if(!labels.contains(label) && !adjacentLabels.contains(label))
+            adjacentLabels.add(label);
       }
 
       return adjacentLabels.toArray();
@@ -61,12 +60,27 @@ public class LidarImageFusionData
       }
       return true;
    }
-   
+
+   /**
+    * Scaled threshold is used according to the v value of the segment center.
+    */
+   public void updateSparsity(PlanarRegionPropagationParameters propagationParameters)
+   {
+      double sparseUpperThreshold = propagationParameters.getSparseUpperThreshold();
+      double sparseLowerThreshold = propagationParameters.getSparseLowerThreshold();
+      for (SegmentationRawData fusionDataSegment : fusionDataSegments)
+      {
+         double alpha = 1 - fusionDataSegment.getSegmentCenter().getY() / imageHeight;
+         double threshold = alpha * (sparseUpperThreshold - sparseLowerThreshold) + sparseLowerThreshold;
+         fusionDataSegment.updateSparsity(threshold);
+      }
+   }
+
    public int getImageWidth()
    {
       return imageWidth;
    }
-   
+
    public int getImageHeight()
    {
       return imageHeight;

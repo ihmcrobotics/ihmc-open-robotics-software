@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.PlanarRegionPropagationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -14,8 +13,9 @@ public class StereoREAPlanarRegionSegmentationCalculator
 {
    private PlanarRegionPropagationParameters planarRegionPropagationParameters = new PlanarRegionPropagationParameters();
 
-   private static final int numberOfIterate = 1000;
-   private static final int maximumNumberOfTrialsToFindUnIdLabel = 500;
+   private static final int NUMBER_OF_ITERATE = 1000;
+   private static final int MAXIMUM_NUMBER_OF_TRIALS_TO_FIND_UN_ID_LABEL = 500;
+   private static final int MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON = 4;
 
    private final AtomicReference<LidarImageFusionData> data = new AtomicReference<LidarImageFusionData>(null);
    private int numberOfLabels = 0;
@@ -24,10 +24,12 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    private final Random random = new Random(0612L);
 
-   public void updateFusionData(LidarImageFusionData lidarImageFusionData)
+   public void updateFusionData(LidarImageFusionData lidarImageFusionData, PlanarRegionPropagationParameters propagationParameters)
    {
+      lidarImageFusionData.updateSparsity(propagationParameters);
       data.set(lidarImageFusionData);
       numberOfLabels = lidarImageFusionData.getNumberOfImageSegments();
+      planarRegionPropagationParameters.set(propagationParameters);
    }
 
    public void initialize()
@@ -38,7 +40,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    public boolean calculate()
    {
-      for (int i = 0; i < numberOfIterate; i++)
+      for (int i = 0; i < NUMBER_OF_ITERATE; i++)
       {
          if (!iterateSegmenataionPropagation(i))
          {
@@ -59,6 +61,8 @@ public class StereoREAPlanarRegionSegmentationCalculator
    {
       for (SegmentationNodeData segmentationNodeData : segments)
       {
+         if(segmentationNodeData.getLabels().size() < MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON)
+            continue;
          // TODO: id of PlanarRegionSegmentationRawData is color.
          // id of SegmentationNodeData is started from 0.
          // PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(segmentationNodeData.getId(),
@@ -74,7 +78,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
    {
       int nonIDLabel = selectRandomNonIdentifiedLabel();
 
-      if (nonIDLabel == -1)
+      if (nonIDLabel == SegmentationRawData.DEFAULT_SEGMENT_ID)
          return false;
       else
          segments.add(createSegmentNodeData(nonIDLabel, segmentId));
@@ -87,7 +91,6 @@ public class StereoREAPlanarRegionSegmentationCalculator
     */
    private SegmentationNodeData createSegmentNodeData(int seedLabel, int segmentId)
    {
-      //LogTools.info("createSegmentNodeData " + seedLabel + " " + data.getFusionDataSegment(seedLabel).standardDeviation.getZ());
       SegmentationRawData seedImageSegment = data.get().getFusionDataSegment(seedLabel);
       seedImageSegment.setId(segmentId);
       SegmentationNodeData newSegment = new SegmentationNodeData(seedImageSegment);
@@ -99,16 +102,13 @@ public class StereoREAPlanarRegionSegmentationCalculator
          isPropagating = false;
 
          int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
-         //LogTools.info("propagating " + adjacentLabels.length);
+
          for (int adjacentLabel : adjacentLabels)
          {
-            //LogTools.info("   candidate label is " + adjacentLabels[i]);
             SegmentationRawData candidate = data.get().getFusionDataSegment(adjacentLabel);
 
-            if (candidate.isSparse(planarRegionPropagationParameters.getSparseLowerThreshold(), planarRegionPropagationParameters.getSparseUpperThreshold(),
-                                   data.get().getImageHeight()))
+            if (candidate.getId() != SegmentationRawData.DEFAULT_SEGMENT_ID || candidate.isSparse())
             {
-               //LogTools.info("is too sparse "+candidate.getImageSegmentLabel());
                continue;
             }
 
@@ -119,7 +119,6 @@ public class StereoREAPlanarRegionSegmentationCalculator
             if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
                isCoplanar = true;
 
-            //LogTools.info("connectivity test result is ## " + (isParallel && isCoplanar) + " ## isParallel " + isParallel + " isCoplanar " + isCoplanar);
             if (isParallel && isCoplanar)
             {
                candidate.setId(segmentId);
@@ -129,35 +128,28 @@ public class StereoREAPlanarRegionSegmentationCalculator
          }
       }
 
-      //LogTools.info("allLablesInNewSegment");
-      TIntArrayList allLablesInNewSegment = newSegment.getLabels();
-      for (int labelNumber : allLablesInNewSegment.toArray())
+      if (planarRegionPropagationParameters.isEnableExtending())
       {
-         //LogTools.info("" + labelNumber);
+         int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
+         for (int adjacentLabel : adjacentLabels)
+         {
+            SegmentationRawData adjacentData = data.get().getFusionDataSegment(adjacentLabel);
+            newSegment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
+                              planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
+         }
       }
 
-      int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
-      //LogTools.info("extending for " + adjacentLabels.length + " segments");
-      for (int adjacentLabel : adjacentLabels)
-      {
-         SegmentationRawData adjacentData = data.get().getFusionDataSegment(adjacentLabel);
-         newSegment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
-                           planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
-      }
       return newSegment;
    }
 
    private int selectRandomNonIdentifiedLabel()
    {
       int randomSeedLabel = -1;
-      for (int i = 0; i < maximumNumberOfTrialsToFindUnIdLabel; i++)
+      for (int i = 0; i < MAXIMUM_NUMBER_OF_TRIALS_TO_FIND_UN_ID_LABEL; i++)
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
          SegmentationRawData fusionDataSegment = data.get().getFusionDataSegment(randomSeedLabel);
-         if (fusionDataSegment.getId() == -1
-               && !fusionDataSegment.isSparse(planarRegionPropagationParameters.getSparseLowerThreshold(),
-                                                                             planarRegionPropagationParameters.getSparseUpperThreshold(),
-                                                                             data.get().getImageHeight()))
+         if (fusionDataSegment.getId() == SegmentationRawData.DEFAULT_SEGMENT_ID && !fusionDataSegment.isSparse())
             return randomSeedLabel;
       }
       return -1;
