@@ -31,6 +31,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.visualizat
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
 import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -297,8 +298,10 @@ public class QuadrupedAStarFootstepPlannerTest
 
       centerPoint.scale(0.25);
 
-      assertTrue("Goal Position expected:\n" + goalPosition +"\n but was:\n" + centerPoint + "\nDifference of: " + goalPosition.distanceXY(centerPoint), goalPosition.distanceXY(centerPoint) < FootstepNode.gridSizeXY);
-      assertEquals("Tried to acheive yaw " + goalYaw + ", actually achieved " + nominalYaw, goalYaw, nominalYaw, FootstepNode.gridSizeYaw);
+      double centerDistance = goalPosition.distanceXY(centerPoint);
+      double yawDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw));
+      assertTrue("Goal Position expected:\n" + goalPosition +"\n but was:\n" + centerPoint + "\nDifference of: " + centerDistance, centerDistance < FootstepNode.gridSizeXY);
+      assertTrue("Tried to acheive yaw " + goalYaw + ", actually achieved " + nominalYaw, yawDistance < FootstepNode.gridSizeYaw);
    }
 
    private static QuadrantDependentList<Point3DBasics> getFinalStepPositions(FootstepPlan plannedSteps)

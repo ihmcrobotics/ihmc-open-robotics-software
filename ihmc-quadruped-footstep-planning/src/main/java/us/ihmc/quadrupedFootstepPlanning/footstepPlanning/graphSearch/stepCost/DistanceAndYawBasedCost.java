@@ -46,6 +46,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
       double stepDistance = EuclidCoreTools.norm(stepX, stepY);
       double stepYaw = endNode.getStepYaw() - startNode.getStepYaw();
 
+      // don't include yaw, because this is captured in the step distance, too
       return plannerParameters.getDistanceHeuristicWeight() * stepDistance;// + plannerParameters.getYawWeight() * stepYaw;
    }
 }
