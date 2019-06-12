@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -26,7 +27,8 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       heading.sub(nodeCenter);
       heading.normalize();
       
-      heading.scale(computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY()));
+      double proximityMultiplier = InterpolationTools.linearInterpolate(0.1, 1.0, computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), 0.2));
+      heading.scale(proximityMultiplier);
 
       return heading;
    }
@@ -37,20 +39,19 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
                                       goalNode.getOrComputeXGaitCenterPoint().getX() - node.getX());
       pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
 
-      double yawMultiplier = computeDistanceToGoalScalar(node.getX(), node.getY());
+      double yawMultiplier = computeDistanceToGoalScalar(node.getX(), node.getY(), 1.0);
       double referenceHeading = yawMultiplier * pathHeading;
       referenceHeading += (1.0 - yawMultiplier) * goalNode.getNominalYaw();
       return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
    
-   private double computeDistanceToGoalScalar(double x, double y)
+   private double computeDistanceToGoalScalar(double x, double y, double proximity)
    {
       Point2DReadOnly goalCenter = goalNode.getOrComputeXGaitCenterPoint();
       double distanceToGoal = EuclidCoreTools.norm(x - goalCenter.getX(), y - goalCenter.getY());
-      double finalTurnProximity = 1.0;
 
-      double minimumBlendDistance = 0.75 * finalTurnProximity;
-      double maximumBlendDistance = 1.25 * finalTurnProximity;
+      double minimumBlendDistance = 0.75 * proximity;
+      double maximumBlendDistance = 1.25 * proximity;
       
       double multiplier;
       if (distanceToGoal < minimumBlendDistance)
