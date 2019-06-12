@@ -36,7 +36,7 @@ public class BodyPathBasedVelocityProvider implements NominalVelocityProvider
       return heading;
    }
 
-   public double computeNominalYaw(Point2DReadOnly node)
+   public double computeNominalYaw(Point2DReadOnly node, double yaw)
    {
       Pose2D closestPointOnPath = new Pose2D();
 

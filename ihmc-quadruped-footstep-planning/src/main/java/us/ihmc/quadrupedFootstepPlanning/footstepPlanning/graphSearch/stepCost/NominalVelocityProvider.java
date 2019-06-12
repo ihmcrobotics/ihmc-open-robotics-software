@@ -10,5 +10,5 @@ public interface NominalVelocityProvider
 
    Vector2DReadOnly computeNominalNormalizedVelocityHeadingInWorld(FootstepNode node);
 
-   double computeNominalYaw(Point2DReadOnly node);
+   double computeNominalYaw(Point2DReadOnly node, double nodeYaw);
 }

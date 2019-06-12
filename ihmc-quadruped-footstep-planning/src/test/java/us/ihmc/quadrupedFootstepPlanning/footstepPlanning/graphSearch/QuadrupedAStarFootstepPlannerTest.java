@@ -83,6 +83,21 @@ public class QuadrupedAStarFootstepPlannerTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setPosition(-2.0, 0.0, 0.0);
 
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout, RobotQuadrant.HIND_LEFT);
+   }
+
+   @Test
+   public void testTurnInPlace()
+   {
+      PlanarRegionsList planarRegionsList = null;
+
+      double timeout = 10.0;
+      double stanceLength = 1.0;
+      double stanceWidth = 0.5;
+      FramePose3D startPose = new FramePose3D();
+      FramePose3D goalPose = new FramePose3D();
+      goalPose.setPosition(0.0, 0.0, Math.PI);
+
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }
 
@@ -214,6 +229,12 @@ public class QuadrupedAStarFootstepPlannerTest
 
    private void runTest(double stanceLength, double stanceWidth, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList planarRegionsList, double timeout)
    {
+      runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout, null);
+   }
+
+   private void runTest(double stanceLength, double stanceWidth, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList planarRegionsList,
+                        double timeout, RobotQuadrant initialQuadrant)
+   {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
       xGaitSettings.setStanceLength(stanceLength);
@@ -232,6 +253,8 @@ public class QuadrupedAStarFootstepPlannerTest
 
       QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
       QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
+      if (initialQuadrant != null)
+         start.setInitialQuadrant(initialQuadrant);
       start.setStartPose(startPose);
       goal.setGoalPose(goalPose);
 

@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CostTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -30,7 +31,7 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = bodyDistance / desiredSpeed;
 
-      double referenceYaw = computeReferenceYaw(node, goalNode);
+      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, 1.0);
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
 
@@ -73,30 +74,5 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
       }
 
       return yawHeuristicCost + stepHeuristicCost + heightCost + parameters.getDistanceHeuristicWeight() * bodyDistance;
-   }
-
-   private double computeReferenceYaw(FootstepNode node, FootstepNode goalNode)
-   {
-      double distanceToGoal = node.euclideanDistance(goalNode);
-      double finalTurnProximity = 1.0;
-
-      double minimumBlendDistance = 0.75 * finalTurnProximity;
-      double maximumBlendDistance = 1.25 * finalTurnProximity;
-
-      double pathHeading = Math.atan2(goalNode.getOrComputeXGaitCenterPoint().getY() - node.getOrComputeXGaitCenterPoint().getY(),
-                                      goalNode.getOrComputeXGaitCenterPoint().getX() - node.getOrComputeXGaitCenterPoint().getX());
-      pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
-
-      double yawMultiplier;
-      if (distanceToGoal < minimumBlendDistance)
-         yawMultiplier = 0.0;
-      else if(distanceToGoal > maximumBlendDistance)
-         yawMultiplier = 1.0;
-      else
-         yawMultiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
-
-      double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
-      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
    }
 }
