@@ -36,7 +36,7 @@ public class SegmentationRawData
    private boolean isSparse;
 
    private static final boolean useAdjacentScore = true;
-   private static final int numberOfAdjacentPixels = 20;
+   private static final int numberOfAdjacentPixels = 10;
    private final TIntArrayList adjacentScore = new TIntArrayList();
 
    public SegmentationRawData(int labelID)
