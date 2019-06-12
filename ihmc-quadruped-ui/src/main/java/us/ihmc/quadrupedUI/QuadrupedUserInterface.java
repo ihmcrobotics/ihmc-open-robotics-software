@@ -77,7 +77,9 @@ public class QuadrupedUserInterface
    @FXML
    private AnchorPane sceneAnchorPane;
    @FXML
-   private Label timeStatisticsLabel;
+   private Label timeSinceLastUpdateLabel;
+   @FXML
+   private Label lastControllerTimeLabel;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -149,7 +151,10 @@ public class QuadrupedUserInterface
 
       Pane subScenePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-      timeStatisticsManager = new TimeStatisticsManager(timeStatisticsLabel, messager, QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
+      timeStatisticsManager = new TimeStatisticsManager(timeSinceLastUpdateLabel,
+                                                        lastControllerTimeLabel,
+                                                        messager,
+                                                        QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
