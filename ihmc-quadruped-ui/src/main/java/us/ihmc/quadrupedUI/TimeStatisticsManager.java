@@ -12,29 +12,48 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 public class TimeStatisticsManager extends AnimationTimer
 {
-   private final Label label;
-   private final AtomicReference<String> newTimeToDisplay = new AtomicReference<>(null);
-   private final DecimalFormat format = new DecimalFormat("0.000");
-   
+   private final Label timeSinceLastUpdateLabel;
+   private final Label lastControllerTimeLabel;
 
-   public TimeStatisticsManager(Label label, JavaFXMessager messager, Topic<RobotConfigurationData> robotConfigurationDataTopic)
+   private final DecimalFormat format = new DecimalFormat("0.000");
+   private final AtomicReference<RobotConfigurationData> robotConfigurationDataReference;
+   private final AtomicReference<String> newTimeToDisplay = new AtomicReference<>(null);
+
+   public TimeStatisticsManager(Label timeSinceLastUpdateLabel, Label lastControllerTimeLabel, JavaFXMessager messager,
+                                Topic<RobotConfigurationData> robotConfigurationDataTopic)
    {
-      this.label = label;
+      this.timeSinceLastUpdateLabel = timeSinceLastUpdateLabel;
+      this.lastControllerTimeLabel = lastControllerTimeLabel;
+
+      robotConfigurationDataReference = messager.createInput(robotConfigurationDataTopic, null);
+
       messager.registerTopicListener(robotConfigurationDataTopic, m ->
       {
          if (m != null && newTimeToDisplay.get() == null)
          {
-            newTimeToDisplay.set("Controller time: " + format.format(Conversions.nanosecondsToSeconds(m.getMonotonicTime())));
+            newTimeToDisplay.set(format.format(Conversions.nanosecondsToSeconds(m.getMonotonicTime())));
          }
       });
    }
 
+   private long lastUpdateTimestamp = -1L;
+
    @Override
    public void handle(long now)
    {
-      if (newTimeToDisplay.get() != null)
+      RobotConfigurationData robotConfigurationData = robotConfigurationDataReference.getAndSet(null);
+
+      if (robotConfigurationData != null)
       {
-         label.setText(newTimeToDisplay.getAndSet(null));
+         lastUpdateTimestamp = now;
+         String timeFormatted = format.format(Conversions.nanosecondsToSeconds(robotConfigurationData.getMonotonicTime()));
+         lastControllerTimeLabel.setText(timeFormatted);
+      }
+
+      if (lastUpdateTimestamp > 0L)
+      {
+         String timeFormatted = format.format(Conversions.nanosecondsToSeconds(now - lastUpdateTimestamp));
+         timeSinceLastUpdateLabel.setText(timeFormatted);
       }
    }
 }

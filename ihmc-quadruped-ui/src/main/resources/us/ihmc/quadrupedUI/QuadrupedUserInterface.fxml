@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -7,6 +8,9 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
@@ -64,16 +68,49 @@
          <children>
             <AnchorPane prefHeight="69.0" prefWidth="114.0" />
             <StackPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="92.0" prefWidth="220.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-            <ImageView fitWidth="120.0" layoutX="1091.0" layoutY="-21.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+            <ImageView fitWidth="120.0" layoutX="1091.0" layoutY="-21.0" mouseTransparent="true" opacity="0.6" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
                <image>
                   <Image url="@icons/ihmc-logo-black.png" />
                </image>
             </ImageView>
-            <Label fx:id="timeStatisticsLabel" opacity="0.6" text="Time Statistics" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
-               <font>
-                  <Font name="System Bold" size="17.0" />
-               </font>
-            </Label>
+            <GridPane hgap="5.0" layoutY="74.0" mouseTransparent="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints vgrow="SOMETIMES" />
+                  <RowConstraints vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label focusTraversable="false" mouseTransparent="true" opacity="0.6" text="Controller time:">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
+                  <Label focusTraversable="false" mouseTransparent="true" opacity="0.6" text="Time since last update:" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="lastControllerTimeLabel" focusTraversable="false" mouseTransparent="true" opacity="0.6" text="N/D" GridPane.columnIndex="1">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="timeSinceLastUpdateLabel" focusTraversable="false" mouseTransparent="true" opacity="0.6" text="N/D" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="System Bold" size="17.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" />
+               </padding>
+            </GridPane>
          </children>
       </AnchorPane>
    </center>
