@@ -27,7 +27,7 @@
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" prefHeight="20.0" text="Stereo Buffer" textAlignment="CENTER" />
                   <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0">
                      <children>
-                        <Slider fx:id="stereoBuffer" blockIncrement="1000.0" majorTickUnit="10000.0" max="200000.0" minorTickCount="1000" prefHeight="48.0" prefWidth="182.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" />
+                        <Slider fx:id="stereoBuffer" blockIncrement="5000.0" majorTickUnit="10000.0" max="200000.0" minorTickCount="1000" prefHeight="48.0" prefWidth="182.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="50000.0" />
                         <Button fx:id="showFusionData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showFusionData" text="Show Fusion Data" />
                         <Button fx:id="showProjection" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showProjection" text="-" />
                      </children>
@@ -40,7 +40,7 @@
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">
                      <children>
                         <Label alignment="CENTER" contentDisplay="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="110.0" text="Pixel Size" textAlignment="CENTER" />
-                        <Slider fx:id="superpixelSize" max="60.0" maxWidth="1.7976931348623157E308" min="10.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
+                        <Slider fx:id="superpixelSize" blockIncrement="1.0" max="60.0" maxWidth="1.7976931348623157E308" min="10.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="30.0" />
                      </children>
                   </HBox>
                   <HBox prefHeight="30.0" prefWidth="200.0" spacing="5.0">

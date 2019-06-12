@@ -19,6 +19,8 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.global.opencv_ximgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_ximgproc.SuperpixelSLIC;
 
 import boofcv.struct.calib.IntrinsicParameters;
@@ -193,6 +195,7 @@ public class LidarImageFusionDataFactory
       if (enableConnectivity)
          slic.enforceLabelConnectivity(elementSize);
 
+      int numberOfSuperPixels = slic.getNumberOfSuperpixels();
       Mat labelMat = new Mat();
       slic.getLabels(labelMat);
 
@@ -206,6 +209,28 @@ public class LidarImageFusionDataFactory
       {
          Mat contourMat = new Mat();
          slic.getLabelContourMask(contourMat);
+
+         int[] totalU = new int[numberOfSuperPixels];
+         int[] totalV = new int[numberOfSuperPixels];
+         int[] numberOfPixels = new int[numberOfSuperPixels];
+         for (int i = 0; i < bufferedImage.getWidth(); i++)
+         {
+            for (int j = 0; j < bufferedImage.getHeight(); j++)
+            {
+               int label = labels[getArrayIndex(i, j, bufferedImage.getWidth())];
+               totalU[label] += i;
+               totalV[label] += j;
+               numberOfPixels[label]++;
+            }
+         }
+         for (int i = 0; i < numberOfSuperPixels; i++)
+         {
+            int avgU = totalU[i] / numberOfPixels[i];
+            int avgV = totalV[i] / numberOfPixels[i];
+            opencv_imgproc.putText(contourMat, Integer.toString(i), new Point(avgU, avgV), opencv_imgproc.FONT_HERSHEY_COMPLEX_SMALL, 0.5,
+                                   new Scalar(255.0, 255.0, 255.0, 255.0), 1, opencv_imgproc.LINE_4, false);
+         }
+         show(contourMat, bufferedImage.getWidth(), bufferedImage.getHeight());
 
          BufferedImage contourImage = Java2DFrameUtils.toBufferedImage(contourMat);
          BufferedImage copyOriginal = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());

@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
@@ -96,6 +97,7 @@ public class LidarImageFusionDataViewer
          planarRegion.getTransformToWorld(transformToWorld);
 
          Color regionColor = getRegionColor(randomID);
+         
          //         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), lineWidth, regionColor, true);
          //         meshBuilder.addTetrahedron(0.02, transformToWorld.getTranslationVector(), regionColor);
       }
@@ -105,9 +107,16 @@ public class LidarImageFusionDataViewer
          int randomID = new Random().nextInt();
          Color regionColor = getRegionColor(randomID);
          SegmentationRawData data = lidarImageFusionData.getFusionDataSegment(i);
+         Point3D center = data.getCenter();
+         Vector3D normal = data.getNormal();
+         Point3D centerEnd = new Point3D(normal);
+         centerEnd.scaleAdd(0.1, center);
          if (!data.isSparse())
-            for (Point3D point : data.getPoints())
-               meshBuilder.addTetrahedron(0.02, point, regionColor);
+         {
+            meshBuilder.addLine(center, centerEnd, lineWidth, regionColor);
+//            for (Point3D point : data.getPoints())
+//               meshBuilder.addTetrahedron(0.02, point, regionColor);
+         }
       }
 
       MeshView scanMeshView = new MeshView(meshBuilder.generateMesh());

@@ -15,7 +15,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    private static final int NUMBER_OF_ITERATE = 1000;
    private static final int MAXIMUM_NUMBER_OF_TRIALS_TO_FIND_UN_ID_LABEL = 500;
-   private static final int MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON = 4;
+   private static final int MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON = 3;
 
    private final AtomicReference<LidarImageFusionData> data = new AtomicReference<LidarImageFusionData>(null);
    private int numberOfLabels = 0;
@@ -40,6 +40,8 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
    public boolean calculate()
    {
+      //      segments.add(createSegmentNodeData(365, 0));
+      //      segments.add(createSegmentNodeData(451, 1));
       for (int i = 0; i < NUMBER_OF_ITERATE; i++)
       {
          if (!iterateSegmenataionPropagation(i))
@@ -48,8 +50,32 @@ public class StereoREAPlanarRegionSegmentationCalculator
             break;
          }
       }
+
+      if (planarRegionPropagationParameters.isEnableExtending())
+      {
+         extendingSegmentations();
+      }
+
       convertNodeDataToPlanarRegionSegmentationRawData();
       return true;
+   }
+
+   private void extendingSegmentations()
+   {
+      for (SegmentationNodeData segment : segments)
+      {
+         int[] adjacentLabels = data.get().getAdjacentLabels(segment.getLabels());
+         for (int adjacentLabel : adjacentLabels)
+         {
+            SegmentationRawData adjacentData = data.get().getFusionDataSegment(adjacentLabel);
+            if (adjacentData.getId() == SegmentationRawData.DEFAULT_SEGMENT_ID)
+            {
+               segment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
+                              planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
+            }
+
+         }
+      }
    }
 
    public List<PlanarRegionSegmentationRawData> getSegmentationRawData()
@@ -61,10 +87,8 @@ public class StereoREAPlanarRegionSegmentationCalculator
    {
       for (SegmentationNodeData segmentationNodeData : segments)
       {
-         if(segmentationNodeData.getLabels().size() < MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON)
+         if (segmentationNodeData.getLabels().size() < MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON)
             continue;
-         // TODO: id of PlanarRegionSegmentationRawData is color.
-         // id of SegmentationNodeData is started from 0.
          // PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(segmentationNodeData.getId(),
          PlanarRegionSegmentationRawData planarRegionSegmentationRawData = new PlanarRegionSegmentationRawData(random.nextInt(),
                                                                                                                segmentationNodeData.getNormal(),
@@ -99,6 +123,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
 
       while (isPropagating)
       {
+//         LogTools.info("SegmentationNodeData " + segmentId);
          isPropagating = false;
 
          int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
@@ -119,23 +144,14 @@ public class StereoREAPlanarRegionSegmentationCalculator
             if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
                isCoplanar = true;
 
+//            LogTools.info("adjacentLabel ?? " + adjacentLabel + " " + isParallel + " " + isCoplanar);
             if (isParallel && isCoplanar)
             {
                candidate.setId(segmentId);
                newSegment.merge(candidate);
                isPropagating = true;
+//               LogTools.info("adjacentLabel merged " + adjacentLabel);
             }
-         }
-      }
-
-      if (planarRegionPropagationParameters.isEnableExtending())
-      {
-         int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
-         for (int adjacentLabel : adjacentLabels)
-         {
-            SegmentationRawData adjacentData = data.get().getFusionDataSegment(adjacentLabel);
-            newSegment.extend(adjacentData, planarRegionPropagationParameters.getExtendingDistanceThreshold(),
-                              planarRegionPropagationParameters.isUpdateExtendedData(), planarRegionPropagationParameters.getExtendingRadiusThreshold());
          }
       }
 

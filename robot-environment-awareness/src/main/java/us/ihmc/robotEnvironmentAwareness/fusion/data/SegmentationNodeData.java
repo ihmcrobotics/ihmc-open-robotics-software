@@ -36,18 +36,30 @@ public class SegmentationNodeData
    {
       labels.add(fusionDataSegment.getImageSegmentLabel());
 
-      double otherWeight = fusionDataSegment.getWeight();
-      double totalWeight = weight + otherWeight;
-      normal.setX((normal.getX() * weight + fusionDataSegment.getNormal().getX() * otherWeight) / totalWeight);
-      normal.setY((normal.getY() * weight + fusionDataSegment.getNormal().getY() * otherWeight) / totalWeight);
-      normal.setZ((normal.getZ() * weight + fusionDataSegment.getNormal().getZ() * otherWeight) / totalWeight);
-
-      center.setX((center.getX() * weight + fusionDataSegment.getCenter().getX() * otherWeight) / totalWeight);
-      center.setY((center.getY() * weight + fusionDataSegment.getCenter().getY() * otherWeight) / totalWeight);
-      center.setZ((center.getZ() * weight + fusionDataSegment.getCenter().getZ() * otherWeight) / totalWeight);
-
-      weight = totalWeight;
+//      double otherWeight = fusionDataSegment.getWeight();
+//      double totalWeight = weight + otherWeight;
+//      normal.setX((normal.getX() * weight + fusionDataSegment.getNormal().getX() * otherWeight) / totalWeight);
+//      normal.setY((normal.getY() * weight + fusionDataSegment.getNormal().getY() * otherWeight) / totalWeight);
+//      normal.setZ((normal.getZ() * weight + fusionDataSegment.getNormal().getZ() * otherWeight) / totalWeight);
+//
+//      center.setX((center.getX() * weight + fusionDataSegment.getCenter().getX() * otherWeight) / totalWeight);
+//      center.setY((center.getY() * weight + fusionDataSegment.getCenter().getY() * otherWeight) / totalWeight);
+//      center.setZ((center.getZ() * weight + fusionDataSegment.getCenter().getZ() * otherWeight) / totalWeight);
+//
+//      weight = totalWeight;
       pointsInSegment.addAll(fusionDataSegment.getPoints());
+      
+      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+
+      pca.clear();
+      pointsInSegment.stream().forEach(point -> pca.addPoint(point.getX(), point.getY(), point.getZ()));
+      pca.compute();
+
+      pca.getMean(center);
+      pca.getThirdVector(normal);
+      
+      if (normal.getZ() < 0.0)
+         normal.negate();
    }
 
    public void extend(SegmentationRawData fusionDataSegment, double threshold, boolean updateNodeData, double extendingThreshold)
