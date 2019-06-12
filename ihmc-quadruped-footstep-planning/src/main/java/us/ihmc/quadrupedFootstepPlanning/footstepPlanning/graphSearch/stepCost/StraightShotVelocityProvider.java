@@ -5,12 +5,15 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CostTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
 
 
 public class StraightShotVelocityProvider implements NominalVelocityProvider
 {
+   private static final double finalTurnProximity = 1.0;
+   private static final double finalSlowDownProximity = 0.5;
    private FootstepNode goalNode;
 
    public void setGoalNode(FootstepNode goalNode)
@@ -27,7 +30,8 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       heading.sub(nodeCenter);
       heading.normalize();
 
-      double scaleFactor = InterpolationTools.linearInterpolate(0.25, 1.0, computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), 0.5));
+      double scaleFactor = InterpolationTools.linearInterpolate(0.25, 1.0, CostTools.computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), goalNode,
+                                                                                                                 finalSlowDownProximity));
       heading.scale(scaleFactor);
 
       return heading;
@@ -35,34 +39,10 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
 
 
 
-   public double computeNominalYaw(Point2DReadOnly nodeCenterPoint)
+   public double computeNominalYaw(Point2DReadOnly nodeCenterPoint, double nodeYaw)
    {
-      double pathHeading = Math.atan2(goalNode.getOrComputeXGaitCenterPoint().getY() - nodeCenterPoint.getY(),
-                                      goalNode.getOrComputeXGaitCenterPoint().getX() - nodeCenterPoint.getX());
-      pathHeading = AngleTools.trimAngleMinusPiToPi(pathHeading);
-
-      double yawMultiplier = computeDistanceToGoalScalar(nodeCenterPoint.getX(), nodeCenterPoint.getY(), 1.0);
-      double referenceHeading = yawMultiplier * pathHeading;
-      referenceHeading += (1.0 - yawMultiplier) * goalNode.getStepYaw();
-      return AngleTools.trimAngleMinusPiToPi(referenceHeading);
+      return CostTools.computeReferenceYaw(nodeCenterPoint, nodeYaw, goalNode, finalTurnProximity);
    }
 
-   private double computeDistanceToGoalScalar(double x, double y, double proximity)
-   {
-      Point2DReadOnly goalCenter = goalNode.getOrComputeXGaitCenterPoint();
-      double distanceToGoal = EuclidCoreTools.norm(x - goalCenter.getX(), y - goalCenter.getY());
 
-      double minimumBlendDistance = 0.75 * proximity;
-      double maximumBlendDistance = 1.25 * proximity;
-
-      double multiplier;
-      if (distanceToGoal < minimumBlendDistance)
-         multiplier = 0.0;
-      else if(distanceToGoal > maximumBlendDistance)
-         multiplier = 1.0;
-      else
-         multiplier = (distanceToGoal - minimumBlendDistance) / (maximumBlendDistance - minimumBlendDistance);
-
-      return multiplier;
-   }
 }

@@ -91,7 +91,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                continue;
 
             double absoluteMaxYawDisplacement = InterpolationTools.hermiteInterpolate(maxYawDisplacement, 0.0, translation / maxReach);
-            double minYaw = Math.min(parameters.getMinimumStepYaw(), -absoluteMaxYawDisplacement);
+            double minYaw = Math.max(parameters.getMinimumStepYaw(), -absoluteMaxYawDisplacement);
             double maxYaw = Math.min(parameters.getMaximumStepYaw(), absoluteMaxYawDisplacement);
 
             Vector2D movingVector = new Vector2D(movingX, movingY);

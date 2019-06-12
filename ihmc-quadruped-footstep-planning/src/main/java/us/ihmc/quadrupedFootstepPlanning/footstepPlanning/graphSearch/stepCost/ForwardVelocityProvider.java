@@ -21,7 +21,7 @@ public class ForwardVelocityProvider implements NominalVelocityProvider
       return heading;
    }
 
-   public double computeNominalYaw(Point2DReadOnly node)
+   public double computeNominalYaw(Point2DReadOnly node, double yaw)
    {
       return Double.NaN;
    }

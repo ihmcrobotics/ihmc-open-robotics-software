@@ -227,6 +227,11 @@ public class FootstepNode
       return snappedPoint;
    }
 
+   public static void snapPointToGrid(Point2D pointToSnap)
+   {
+      pointToSnap.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
+   }
+
    public boolean quadrantGeometricallyEquals(FootstepNode other)
    {
       return quadrantGeometricallyEquals(movingQuadrant, other);
