@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -65,7 +66,7 @@ public class QuadrupedUserInterface
    private final StartGoalOrientationEditor startGoalOrientationEditor;
    private final FootstepPathMeshViewer pawPathViewer;
    private final BodyPathMeshViewer bodyPathMeshViewer;
-
+   private final TimeStatisticsManager timeStatisticsManager;
 
    private final JavaFXQuadrupedVisualizer robotVisualizer;
    private final AnimationTimer cameraTracking;
@@ -75,6 +76,8 @@ public class QuadrupedUserInterface
 
    @FXML
    private AnchorPane sceneAnchorPane;
+   @FXML
+   private Label timeStatisticsLabel;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
@@ -145,6 +148,8 @@ public class QuadrupedUserInterface
       view3dFactory.addNodeToView(new QuadrupedSkybox3D(subScene).getSkybox());
 
       Pane subScenePane = view3dFactory.getSubSceneWrappedInsidePane();
+
+      timeStatisticsManager = new TimeStatisticsManager(timeStatisticsLabel, messager, QuadrupedUIMessagerAPI.RobotConfigurationDataTopic);
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, QuadrupedUIMessagerAPI.PlanarRegionDataTopic, QuadrupedUIMessagerAPI.ShowPlanarRegionsTopic);
       this.startGoalPositionViewer = new StartGoalPositionViewer(messager, QuadrupedUIMessagerAPI.StartPositionEditModeEnabledTopic,
@@ -239,6 +244,7 @@ public class QuadrupedUserInterface
       videoViewOverlay.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, event -> videoViewOverlay.toggleMode());
 
       videoViewOverlay.start(messager, QuadrupedUIMessagerAPI.LeftCameraVideo);
+      timeStatisticsManager.start();
       planarRegionViewer.start();
       startGoalPositionViewer.start();
       startGoalOrientationViewer.start();
@@ -286,6 +292,7 @@ public class QuadrupedUserInterface
 
    public void stop()
    {
+      timeStatisticsManager.stop();
       plannerTabController.stop();
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
