@@ -90,7 +90,6 @@ public class LidarImageFusionDataFactory
 
          int arrayIndex = getArrayIndex(pixel[0], pixel[1], imageWidth);
          int label = labels[arrayIndex];
-
          fusionDataSegments.get(label).addPoint(new Point3D(point));
       }
       System.out.println("Projection " + Conversions.nanosecondsToSeconds(System.nanoTime() - startConverting));

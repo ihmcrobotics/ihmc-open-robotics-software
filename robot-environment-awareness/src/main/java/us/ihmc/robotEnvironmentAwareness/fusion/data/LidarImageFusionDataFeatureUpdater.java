@@ -74,7 +74,7 @@ public class LidarImageFusionDataFeatureUpdater
          {
             SegmentationRawData candidate = data.getFusionDataSegment(adjacentLabel);
 
-            if (candidate.isSparse(planarRegionPropagationParameters.getSparseLowerThreshold()))
+            if (candidate.isSparse())
             {
                continue;
             }
@@ -118,7 +118,7 @@ public class LidarImageFusionDataFeatureUpdater
       {
          randomSeedLabel = random.nextInt(numberOfLabels - 1);
          if (data.getFusionDataSegment(randomSeedLabel).getId() == -1
-               && !data.getFusionDataSegment(randomSeedLabel).isSparse(planarRegionPropagationParameters.getSparseLowerThreshold()))
+               && !data.getFusionDataSegment(randomSeedLabel).isSparse())
             return randomSeedLabel;
       }
       return -1;

@@ -32,7 +32,7 @@ public class StereoREAModule implements Runnable
       this.messager = messager;
       this.reaMessager = reaMessager;
       lidarImageFusionDataBuffer = new LidarImageFusionDataBuffer(messager, PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters);
-      planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager);
+      planarRegionFeatureUpdater = new StereoREAPlanarRegionFeatureUpdater(reaMessager, messager);
    }
 
    public void updateLatestStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
