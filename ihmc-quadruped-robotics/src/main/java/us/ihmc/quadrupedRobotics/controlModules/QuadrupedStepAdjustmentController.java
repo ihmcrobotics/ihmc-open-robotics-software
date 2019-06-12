@@ -205,12 +205,6 @@ public class QuadrupedStepAdjustmentController
                instantaneousStepAdjustment.set(dcmError);
                instantaneousStepAdjustment.scale(-1.0 / dcmStepAdjustmentMultiplier.getDoubleValue());
                instantaneousStepAdjustment.setZ(0);
-
-               stepHasBeenAdjusted = true;
-            }
-            else
-            {
-               stepHasBeenAdjusted = false;
             }
          }
          else
@@ -228,6 +222,9 @@ public class QuadrupedStepAdjustmentController
          if (projectAdjustmentIntoPlanarRegions.getValue())
             planarRegionProjection.project(tempPoint, robotQuadrant);
 
+         if (!stepHasBeenAdjusted)
+            stepHasBeenAdjusted = tempPoint.distanceXY(activeStep.getGoalPosition()) > 1e-3;
+            
          adjustedStep.setGoalPosition(tempPoint);
       }
 
