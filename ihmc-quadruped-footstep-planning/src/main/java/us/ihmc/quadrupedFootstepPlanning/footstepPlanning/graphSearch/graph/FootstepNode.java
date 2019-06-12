@@ -5,6 +5,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -227,7 +228,7 @@ public class FootstepNode
       return snappedPoint;
    }
 
-   public static void snapPointToGrid(Point2D pointToSnap)
+   public static void snapPointToGrid(Point2DBasics pointToSnap)
    {
       pointToSnap.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
    }
@@ -307,8 +308,11 @@ public class FootstepNode
       string += "\n\t moving quadrant = " + getMovingQuadrant();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         string += "\n\t quadrant= " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);
+         string += "\n\t quadrant = " + robotQuadrant.getCamelCaseName() + ", x= " + getX(robotQuadrant) + ", y= " + getY(robotQuadrant);
       }
+      string += "\n\t yaw = " + getStepYaw();
+      string += "\n\t x gait center = " + getOrComputeXGaitCenterPoint();
+
       return string;
    }
 

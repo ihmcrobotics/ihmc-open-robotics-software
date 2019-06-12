@@ -97,6 +97,7 @@ public class QuadrupedAStarFootstepPlannerTest
       FramePose3D startPose = new FramePose3D();
       FramePose3D goalPose = new FramePose3D();
       goalPose.setPosition(0.0, 0.0, Math.PI);
+      goalPose.setOrientationYawPitchRoll(Math.PI, 0.0, 0.0);
 
       runTest(stanceLength, stanceWidth, startPose, goalPose, planarRegionsList, timeout);
    }

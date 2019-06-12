@@ -120,17 +120,19 @@ public class XGaitCost implements FootstepCost
          throw new RuntimeException("What");
 
 
+
       FootstepNode.snapPointToGrid(nominalEndXGaitPosition);
-      FootstepNode.snapPointToGrid(startXGaitPosition);
+      Point2D snappedStart = new Point2D(startXGaitPosition);
+      FootstepNode.snapPointToGrid(snappedStart);
 
       double distanceFromNominalXGaitCenter;
       if (nominalEndXGaitPosition.distance(startXGaitPosition) < 1e-2)
       {
-         distanceFromNominalXGaitCenter = endXGaitPosition.distance(startXGaitPosition);
+         distanceFromNominalXGaitCenter = endXGaitPosition.distance(snappedStart);
       }
       else
       {
-         LineSegment2D acceptableTranslation = new LineSegment2D(startXGaitPosition, nominalEndXGaitPosition);
+         LineSegment2D acceptableTranslation = new LineSegment2D(snappedStart, nominalEndXGaitPosition);
          distanceFromNominalXGaitCenter = acceptableTranslation.distance(endXGaitPosition);
       }
       double costOfXGait = plannerParameters.getXGaitWeight() * (distanceFromNominalXGaitCenter);// + distanceFromNominalEndFootPosition);
@@ -143,6 +145,9 @@ public class XGaitCost implements FootstepCost
    static double computeMagnitudeOnEllipseInDirection(double maxX, double maxY, double xDirection, double yDirection)
    {
       double magnitude = EuclidCoreTools.norm(xDirection, yDirection);
+      if (magnitude < 1e-3)
+         return 0.0;
+
       magnitude *= maxX * maxY;
       magnitude /= Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection));
       return magnitude;
