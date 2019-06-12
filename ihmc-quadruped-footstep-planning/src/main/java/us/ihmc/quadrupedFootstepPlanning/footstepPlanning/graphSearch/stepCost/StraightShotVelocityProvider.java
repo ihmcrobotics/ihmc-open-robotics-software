@@ -1,13 +1,11 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.CostTools;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.robotics.geometry.AngleTools;
 
 
 public class StraightShotVelocityProvider implements NominalVelocityProvider
@@ -28,11 +26,13 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       Point2DReadOnly nodeCenter = node.getOrComputeXGaitCenterPoint();
       heading.set(goalNode.getOrComputeXGaitCenterPoint());
       heading.sub(nodeCenter);
-      heading.normalize();
+
+      double distance = heading.length();
+//      heading.normalize();
 
       double scaleFactor = InterpolationTools.linearInterpolate(0.25, 1.0, CostTools.computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), goalNode,
                                                                                                                  finalSlowDownProximity));
-      heading.scale(scaleFactor);
+      heading.scale(scaleFactor / distance);
 
       return heading;
    }
