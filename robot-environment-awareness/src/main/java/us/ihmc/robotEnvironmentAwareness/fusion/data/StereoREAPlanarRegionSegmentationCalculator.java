@@ -16,6 +16,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
    private static final int NUMBER_OF_ITERATE = 1000;
    private static final int MAXIMUM_NUMBER_OF_TRIALS_TO_FIND_UN_ID_LABEL = 500;
    private static final int MINIMAM_NUMBER_OF_SEGMENTATION_RAW_DATA_FOR_PLANAR_REGIEON = 3;
+   private static final int MINIMUM_NUMBER_OF_LABELS_FOR_BIG_SEGMENT = 7;
 
    private final AtomicReference<LidarImageFusionData> data = new AtomicReference<LidarImageFusionData>(null);
    private int numberOfLabels = 0;
@@ -125,6 +126,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
       {
 //         LogTools.info("SegmentationNodeData " + segmentId);
          isPropagating = false;
+         boolean isBigSegment = newSegment.getLabels().size() > MINIMUM_NUMBER_OF_LABELS_FOR_BIG_SEGMENT;
 
          int[] adjacentLabels = data.get().getAdjacentLabels(newSegment.getLabels());
 
@@ -141,7 +143,7 @@ public class StereoREAPlanarRegionSegmentationCalculator
             boolean isCoplanar = false;
             if (newSegment.isParallel(candidate, planarRegionPropagationParameters.getPlanarityThreshold()))
                isParallel = true;
-            if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
+            if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold(), isBigSegment))
                isCoplanar = true;
 
 //            LogTools.info("adjacentLabel ?? " + adjacentLabel + " " + isParallel + " " + isCoplanar);

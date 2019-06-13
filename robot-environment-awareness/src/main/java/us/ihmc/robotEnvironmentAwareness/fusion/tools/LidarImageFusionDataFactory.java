@@ -33,7 +33,7 @@ import us.ihmc.robotEnvironmentAwareness.fusion.data.SegmentationRawData;
 public class LidarImageFusionDataFactory
 {
    private static final int MAX_NUMBER_OF_POINTS = 200000;
-   private static final boolean displaySegmentedContour = true;
+   private static final boolean displaySegmentedContour = false;
 
    public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
                                                                  int pointCloudBufferSize, int columnSize, int rowSize)
