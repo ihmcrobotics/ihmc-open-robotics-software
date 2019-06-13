@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.communication.producers;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -26,7 +25,6 @@ import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
-import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -52,16 +50,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
 
    private final RobotConfigurationData robotConfigurationData;
-   private final AtlasAuxiliaryRobotData atlasAuxiliaryRobotData = new AtlasAuxiliaryRobotData();
 
    private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final IHMCRealtimeROS2Publisher<AtlasAuxiliaryRobotData> atlasAuxiliaryRobotDataPublisher;
 
    public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-                              AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, MessageTopicNameGenerator publisherTopicNameGenerator,
-                              RealtimeRos2Node realtimeRos2Node, SensorTimestampHolder sensorTimestampHolder,
-                              SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController,
-                              HumanoidRobotSensorInformation sensorInformation)
+                              MessageTopicNameGenerator publisherTopicNameGenerator, RealtimeRos2Node realtimeRos2Node,
+                              SensorTimestampHolder sensorTimestampHolder, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly,
+                              RobotMotionStatusHolder robotMotionStatusFromController, HumanoidRobotSensorInformation sensorInformation)
    {
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorTimestampHolder = sensorTimestampHolder;
@@ -95,15 +90,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
       OneDoFJointBasics[] joints = jointConfigurationGathererAndProducer.getJoints();
       robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, RobotConfigurationData.class, publisherTopicNameGenerator);
-
-      if (auxiliaryRobotDataProvider == null)
-      {
-         atlasAuxiliaryRobotDataPublisher = null;
-      }
-      else
-      {
-         atlasAuxiliaryRobotDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, AtlasAuxiliaryRobotData.class, publisherTopicNameGenerator);
-      }
    }
 
    private void setupForceSensorMassCompensators(FullRobotModel estimatorModel, SideDependentList<String> wristForceSensorNames)
@@ -156,9 +142,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
    @Override
    public void write()
    {
-      long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
-      long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
-      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, robotConfigurationData);
+      long wallTime = sensorTimestampHolder.getWallTime();
+      long monotonicTime = sensorTimestampHolder.getMonotonicTime();
+      long syncTimestamp = sensorTimestampHolder.getSyncTimestamp();
+      jointConfigurationGathererAndProducer.packEstimatorJoints(wallTime, monotonicTime, syncTimestamp, robotConfigurationData);
 
       if (sensorRawOutputMapReadOnly != null)
       {
@@ -198,15 +185,5 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
-
-      if (atlasAuxiliaryRobotDataPublisher != null && sensorRawOutputMapReadOnly != null)
-      {
-         AtlasAuxiliaryRobotData newData = sensorRawOutputMapReadOnly.getAuxiliaryRobotData();
-         if (newData != null)
-         {
-            atlasAuxiliaryRobotData.set(newData);
-            atlasAuxiliaryRobotDataPublisher.publish(atlasAuxiliaryRobotData);
-         }
-      }
    }
 }

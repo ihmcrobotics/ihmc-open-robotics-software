@@ -2,7 +2,7 @@ package us.ihmc.robotics.taskExecutor;
 
 import us.ihmc.robotics.stateMachine.core.State;
 
-public class NullTask implements State
+public class NullState implements State
 {
    @Override
    public void onEntry()

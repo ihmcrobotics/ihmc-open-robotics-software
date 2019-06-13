@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
@@ -16,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
-import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -33,17 +31,14 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -53,9 +48,9 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
-import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.ekf.HumanoidRobotEKFWithSimpleJoints;
@@ -68,12 +63,9 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoLong;
 
 public class AvatarEstimatorThread
 {
-   private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
-
    /** Set this to true to create and run, but not use the EKF estimator */
    private static final boolean CREATE_EKF_ESTIMATOR = false;
    /** Set this to true to use the EKF estimator */
@@ -90,12 +82,7 @@ public class AvatarEstimatorThread
 
    private final SensorReader sensorReader;
 
-   private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
-   private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
-   private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
-
-   private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
 
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
@@ -103,16 +90,11 @@ public class AvatarEstimatorThread
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
 
-   private final JointDesiredOutputWriter outputWriter;
-
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
    private final ForceSensorStateUpdater forceSensorStateUpdater;
 
-   private final HumanoidRobotContextJointData processedJointData;
    private final HumanoidRobotContextData humanoidRobotContextData;
-
-   private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
 
    @SuppressWarnings("unused")
    public AvatarEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation,
@@ -123,24 +105,31 @@ public class AvatarEstimatorThread
    {
       estimatorFullRobotModel = robotModel.createFullRobotModel();
 
-      processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
-
-      forceSensorDataHolderForEstimator = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
+      HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(estimatorFullRobotModel.getOneDoFJoints().length);
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       CenterOfPressureDataHolder centerOfPressureDataHolderFromController = new CenterOfPressureDataHolder(estimatorFullRobotModel);
+      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(estimatorFullRobotModel.getControllableOneDoFJoints());
+      RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
+      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolder);
+      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderFromController);
+      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusFromController);
+      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+      contextDataFactory.setProcessedJointData(processedJointData);
+      contextDataFactory.setSensorDataContext(new SensorDataContext(estimatorFullRobotModel));
+      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
       IMUDefinition[] imuDefinitions = estimatorFullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = estimatorFullRobotModel.getForceSensorDefinitions();
-      LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(estimatorFullRobotModel.getControllableOneDoFJoints());
 
-      sensorReaderFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+      // This is only used by the perfect sensor reader if we are not using the estimator. It will update the data structure.
+      sensorReaderFactory.setForceSensorDataHolder(forceSensorDataHolder);
+
       FloatingJointBasics rootJoint = estimatorFullRobotModel.getRootJoint();
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, desiredJointDataHolder, estimatorRegistry);
-
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");
 
-      RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
 
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
@@ -153,8 +142,9 @@ public class AvatarEstimatorThread
 
       if (sensorReaderFactory.useStateEstimator())
       {
+         // Updates the force sensor data when running with the estimator.
          forceSensorStateUpdater = new ForceSensorStateUpdater(estimatorFullRobotModel.getRootJoint(), sensorOutputMapReadOnly,
-                                                               forceSensorDataHolderForEstimator, stateEstimatorParameters, gravity,
+                                                               forceSensorDataHolder, stateEstimatorParameters, gravity,
                                                                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
 
          if (realtimeRos2Node != null)
@@ -187,7 +177,7 @@ public class AvatarEstimatorThread
                                                                additionalContactTransforms.get(i));
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
+                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolder)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
          drcStateEstimator = estimatorFactory.createStateEstimator(estimatorRegistry, yoGraphicsListRegistry);
@@ -201,30 +191,18 @@ public class AvatarEstimatorThread
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
       estimatorController.addRobotController(robotJointLimitWatcher);
 
-      if (USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR)
-      {
-         for (ForceSensorDefinition forceSensorDefinition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
-         {
-            String sensorName = forceSensorDefinition.getSensorName();
-            RigidBodyBasics sensorLink = forceSensorDefinition.getRigidBody();
-            ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
-            ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
-            estimatorController.addRobotController(footSensorToJointTorqueProjector);
-         }
-      }
-
       if (realtimeRos2Node != null)
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
          if (sensorReaderFactory.useStateEstimator() && forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled() != null)
             forceSensorDataHolderToSend = forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
          else
-            forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
+            forceSensorDataHolderToSend = forceSensorDataHolder;
 
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
                                                                                                            forceSensorDataHolderToSend);
 
-         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader,
+         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), realtimeRos2Node,
                                                     sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
@@ -235,21 +213,16 @@ public class AvatarEstimatorThread
       }
 
       firstTick.set(true);
-      outputWriterInitialized.set(false);
-      controllerDataValid.set(false);
 
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
 
-      this.outputWriter = outputWriter;
-      if (this.outputWriter != null)
+      if (outputWriter != null)
       {
-         this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
-         this.outputWriter.setJointDesiredOutputList(desiredJointDataHolder);
-         if (this.outputWriter.getYoVariableRegistry() != null)
+         outputWriter.setJointDesiredOutputList(desiredJointDataHolder);
+         if (outputWriter.getYoVariableRegistry() != null)
          {
-            estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());
+            estimatorRegistry.addChild(outputWriter.getYoVariableRegistry());
          }
-
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel, estimatorRegistry);
@@ -303,13 +276,6 @@ public class AvatarEstimatorThread
          reinitializeEKF = null;
          ekfStateEstimator = null;
       }
-
-      contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
-      contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderFromController);
-      contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusFromController);
-      contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
-      contextDataFactory.setProcessedJointData(processedJointData);
-      humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
    }
 
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
@@ -332,39 +298,6 @@ public class AvatarEstimatorThread
       return estimatorRegistry;
    }
 
-   public void read()
-   {
-      try
-      {
-         controllerDataValid.set(humanoidRobotContextData.getControllerRan());
-
-         if (outputWriter != null && controllerDataValid.getValue())
-         {
-            if (!outputWriterInitialized.getBooleanValue())
-            {
-               outputWriter.initialize();
-               outputWriterInitialized.set(true);
-            }
-
-            // TODO: should this be the last estimator timestamp?
-            long nanoTime = System.nanoTime();
-            outputWriter.writeBefore(nanoTime);
-         }
-
-         // TODO: move this to the actual estimator thread and make it thread safe.
-         sensorReader.read();
-         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
-      }
-      catch (Throwable e)
-      {
-         if (controllerCrashPublisher != null)
-         {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_READ, e.getMessage()));
-         }
-         throw new RuntimeException(e);
-      }
-   }
-
    public void run()
    {
       try
@@ -379,52 +312,28 @@ public class AvatarEstimatorThread
             firstTick.set(false);
          }
 
-         estimatorTimer.startMeasurement();
          if (reinitializeEKF != null && reinitializeEKF.getValue())
          {
             reinitializeEKF.set(false);
             estimatorFullRobotModel.getRootJoint().getJointConfiguration(rootToWorldTransform);
             ekfStateEstimator.initializeEstimator(rootToWorldTransform);
          }
+
+         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
          estimatorController.doControl();
          if (forceSensorStateUpdater != null)
          {
             forceSensorStateUpdater.updateForceSensorState();
          }
 
-         HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, processedJointData);
+         HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
-         humanoidRobotContextData.setTimestamp(estimatorTime.getLongValue());
-
-         estimatorTimer.stopMeasurement();
       }
       catch (Throwable e)
       {
          if (controllerCrashPublisher != null)
          {
             controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage()));
-         }
-         throw new RuntimeException(e);
-      }
-   }
-
-   public void write()
-   {
-      try
-      {
-         if (outputWriter != null)
-         {
-            if (controllerDataValid.getBooleanValue())
-            {
-               outputWriter.writeAfter();
-            }
-         }
-      }
-      catch (Throwable e)
-      {
-         if (controllerCrashPublisher != null)
-         {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_WRITE, e.getMessage()));
          }
          throw new RuntimeException(e);
       }
@@ -448,11 +357,6 @@ public class AvatarEstimatorThread
          drcStateEstimator.initializeEstimator(rootJointTransform, jointPositions);
    }
 
-   public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
-   {
-      return sensorOutputMapReadOnly.getIMUProcessedOutputs();
-   }
-
    /**
     * used primarily for unit tests, but could be useful.
     */
@@ -471,8 +375,9 @@ public class AvatarEstimatorThread
       return humanoidRobotContextData;
    }
 
-   public ForceSensorDataHolder getForceSensorDataHolder()
+   @Deprecated // TODO: Split up the sensor reader and move the part needed outside out of this class!
+   public SensorReader getSensorReader()
    {
-      return forceSensorDataHolderForEstimator;
+      return sensorReader;
    }
 }

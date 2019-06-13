@@ -88,7 +88,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.taskExecutor.NullTask;
+import us.ihmc.robotics.taskExecutor.NullState;
 import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -1324,7 +1324,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
       submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(10.0), 0.0);
 
-      pipeLine.submitSingleTaskStage(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullState());
 
       // Do a "Y" stance with the foot outside
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 1.1);
@@ -1337,7 +1337,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitChestHomeCommand(true);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(robotSide.negateIfRightSide(25.0)));
 
-      pipeLine.submitSingleTaskStage(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullState());
 
       // Go back to stand prep but don't put the foot on the ground yet
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);

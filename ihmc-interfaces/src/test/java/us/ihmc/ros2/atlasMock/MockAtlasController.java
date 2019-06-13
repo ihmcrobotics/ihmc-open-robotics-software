@@ -37,7 +37,7 @@ public class MockAtlasController
 
          // Pack message with data
 //         robotConfigurationData.getHeader().getStamp().setNanosec(i);
-         robotConfigurationData.setTimestamp(i);
+         robotConfigurationData.setMonotonicTime(i);
          System.out.println("Publishing timestamp: " + i);
 
          // Publish message, thread safe, copies data into another preallocated holder for sending
