@@ -23,6 +23,7 @@ public class FootstepNode
    private final QuadrantDependentList<Double> xPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<Double> yPositions = new QuadrantDependentList<>();
    private final double stepYaw;
+   private final Orientation3DReadOnly stepOrientation;
 
    private final double nominalStanceLength;
    private final double nominalStanceWidth;
@@ -107,6 +108,7 @@ public class FootstepNode
       yPositions.put(RobotQuadrant.HIND_RIGHT, yHindRight);
 
       stepYaw = gridSizeYaw * yawIndex;
+      stepOrientation = new AxisAngle(stepYaw, 0.0, 0.0);
 
       hashCode = computeHashCode(this);
    }
@@ -129,6 +131,11 @@ public class FootstepNode
    public double getStepYaw()
    {
       return stepYaw;
+   }
+
+   public Orientation3DReadOnly getStepOrientation()
+   {
+      return stepOrientation;
    }
 
    public double getNominalStanceLength()
@@ -181,16 +188,11 @@ public class FootstepNode
    private static Point2D computeXGaitCenterPoint(FootstepNode node)
    {
       RobotQuadrant movingQuadrant = node.getMovingQuadrant();
-      Vector2D offset = new Vector2D(movingQuadrant.getEnd().negateIfFrontEnd(node.getNominalStanceLength()),
-                                     movingQuadrant.getSide().negateIfLeftSide(node.getNominalStanceWidth()));
-      offset.scale(0.5);
-      Orientation3DReadOnly rotation = new AxisAngle(node.getStepYaw(), 0.0, 0.0);
-      rotation.transform(offset);
+      Vector2D offset = new Vector2D(0.5 * movingQuadrant.getEnd().negateIfFrontEnd(node.getNominalStanceLength()),
+                                     0.5 * movingQuadrant.getSide().negateIfLeftSide(node.getNominalStanceWidth()));
+      node.getStepOrientation().transform(offset);
 
-      Point2D newPoint =  new Point2D(node.getX(movingQuadrant), node.getY(movingQuadrant));
-      newPoint.add(offset);
-
-      return newPoint;
+      return new Point2D(node.getX(movingQuadrant) + offset.getX(), node.getY(movingQuadrant) + offset.getY());
    }
 
    @Override

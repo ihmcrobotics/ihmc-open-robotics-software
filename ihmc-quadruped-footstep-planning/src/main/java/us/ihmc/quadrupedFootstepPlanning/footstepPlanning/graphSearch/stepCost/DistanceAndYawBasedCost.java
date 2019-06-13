@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -28,17 +27,13 @@ public class DistanceAndYawBasedCost implements FootstepCost
 
       Point2DReadOnly startXGaitCenter = startNode.getOrComputeXGaitCenterPoint();
 
-      AxisAngle bodyOrientation = new AxisAngle(startNode.getStepYaw(), 0.0, 0.0);
+      Vector2D offsetToFoot = new Vector2D(movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()), movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      offsetToFoot.scale(0.5);
 
-      Vector2D forward = new Vector2D(0.5 * (movingQuadrant.isQuadrantInFront() ? xGaitSettings.getStanceLength() : -xGaitSettings.getStanceLength()), 0.0);
-      Vector2D side = new Vector2D(0.0, 0.5 * (movingQuadrant.isQuadrantOnLeftSide() ? xGaitSettings.getStanceWidth() : -xGaitSettings.getStanceWidth()));
-
-      bodyOrientation.transform(forward);
-      bodyOrientation.transform(side);
+      startNode.getStepOrientation().transform(offsetToFoot);
 
       Point2D nominalStartFoot = new Point2D(startXGaitCenter);
-      nominalStartFoot.add(forward);
-      nominalStartFoot.add(side);
+      nominalStartFoot.add(offsetToFoot);
 
       double stepX = nominalStartFoot.getX() - endNode.getX(movingQuadrant);
       double stepY = nominalStartFoot.getY() - endNode.getY(movingQuadrant);
