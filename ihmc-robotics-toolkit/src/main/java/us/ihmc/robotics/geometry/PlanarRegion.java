@@ -909,6 +909,16 @@ public class PlanarRegion
    }
 
    /**
+    * Get the transform from world coordinates to local coordinates.
+    *
+    * @param transformToPack used to store the transform.
+    */
+   public void getTransformToLocal(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(fromWorldToLocalTransform);
+   }
+
+   /**
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     *
     * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
@@ -1243,7 +1253,7 @@ public class PlanarRegion
       buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
 
       int maxNumberOfPolygonsToPrint = 5;
-      for (int i = 0; i < maxNumberOfPolygonsToPrint; i++)
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
       {
          buffer.append(convexPolygons.get(i) + "\n");
       }

@@ -26,7 +26,8 @@ public class Ros2IntraProcessExample
             RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
             //            robotConfigurationData.getHeader().getStamp().setNanosec(i);
-            robotConfigurationData.setTimestamp(i);
+            robotConfigurationData.setWallTime(i);
+            robotConfigurationData.setMonotonicTime(i);
             System.out.println("Publishing: " + i);
             publisher.publish(robotConfigurationData);
             Thread.sleep(1000);
@@ -47,7 +48,7 @@ public class Ros2IntraProcessExample
          if (subscriber.takeNextData(robotConfigurationData, null))
          {
             //                  System.out.println(robotConfigurationData.getHeader().getStamp().getNanosec());
-            System.out.println(robotConfigurationData.getTimestamp());
+            System.out.println(robotConfigurationData.getMonotonicTime());
          }
       }, (subscriber, info) -> {
          System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopic().getTopicName() + " " + info.getStatus().name());

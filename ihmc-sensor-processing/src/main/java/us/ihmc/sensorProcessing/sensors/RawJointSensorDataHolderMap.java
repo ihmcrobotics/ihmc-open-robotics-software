@@ -30,7 +30,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
       }
    }
 
-   public void registerJoint(OneDoFJointBasics joint)
+   public RawJointSensorDataHolder registerJoint(OneDoFJointBasics joint)
    {
       joints.add(joint);
       RawJointSensorDataHolder rawData = rawJointSensorDataHolders.add();
@@ -38,6 +38,7 @@ public class RawJointSensorDataHolderMap implements Settable<RawJointSensorDataH
       {
          throw new RuntimeException("Already have joint " + joint.getName());
       }
+      return rawData;
    }
 
    public void registerJoint(OneDoFJointBasics joint, RawJointSensorDataHolder rawJointSensorDataHolder)

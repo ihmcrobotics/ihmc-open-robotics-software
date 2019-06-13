@@ -116,7 +116,9 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
       
-      robotConfigurationData.setTimestamp(totalNsecs);
+      robotConfigurationData.setWallTime(totalNsecs);
+      robotConfigurationData.setMonotonicTime(totalNsecs);
+
       if(pelvisPoseInMocapFrame != null)
       {
          Vector3D translation = new Vector3D();

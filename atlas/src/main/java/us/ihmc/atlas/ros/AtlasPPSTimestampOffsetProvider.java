@@ -99,9 +99,9 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
       {
          if (rosMainNode != null)// && rosMainNode.isStarted()
          {
-            long lastPPSTimestampFromRobot = packet.getSensorHeadPpsTimestamp();
+            long lastPPSTimestampFromRobot = packet.getSyncTimestamp();
 
-            long ppsFromRobotAge = packet.getTimestamp() - lastPPSTimestampFromRobot;
+            long ppsFromRobotAge = packet.getMonotonicTime() - lastPPSTimestampFromRobot;
             long ppsFromROSAge = rosMainNode.getCurrentTime().totalNsecs() - multisensePPSTimestamp;
 
             // Check if timestamps are approximately the same age. If not, we discard this measurement and wait for the next one.

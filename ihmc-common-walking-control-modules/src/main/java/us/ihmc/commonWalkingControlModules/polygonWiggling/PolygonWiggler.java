@@ -85,10 +85,25 @@ public class PolygonWiggler
     * @param wiggleParameters
     * @return
     */
-   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2D planeToWiggleInto, WiggleParameters parameters)
+   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters)
+   {
+      return wigglePolygon(polygonToWiggle, planeToWiggleInto, parameters, emptyArray);
+   }
+
+   /**
+    * This method moves a convex polygon into a given convex region. It will return the new polygon without modifying the given one.
+    * The algorithm assumes a small rotation angle (it will linearize sin and cos around 0.0). For that reason it is possible to
+    * specify a maximum and a minimum rotation.
+    *
+    * @param polygonToWiggle
+    * @param planeToWiggleInto
+    * @param wiggleParameters
+    * @return
+    */
+   public static ConvexPolygon2D wigglePolygon(ConvexPolygon2D polygonToWiggle, ConvexPolygon2DReadOnly planeToWiggleInto, WiggleParameters parameters, int[] indicesToExclude)
    {
       ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D(polygonToWiggle);
-      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
+      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, indicesToExclude);
       if (wiggleTransform == null)
          return null;
       wiggledPolygon.applyTransform(wiggleTransform, false);
