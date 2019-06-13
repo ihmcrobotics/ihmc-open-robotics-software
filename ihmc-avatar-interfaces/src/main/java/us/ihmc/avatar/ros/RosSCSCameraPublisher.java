@@ -6,7 +6,6 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
-import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
@@ -16,18 +15,18 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
 {
    private final RosImagePublisher[] cameraPublisher;
    private final RosMainNode rosMainNode;
-   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotROSClockCalculator rosClockCalculator;
    private final AvatarRobotCameraParameters[] cameraParameters;
    private final RosCameraInfoPublisher[] cameraInfoPublishers;
 
    private final int nSensors;
 
-   public RosSCSCameraPublisher(ObjectCommunicator localObjectCommunicator, RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public RosSCSCameraPublisher(ObjectCommunicator localObjectCommunicator, RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
          AvatarRobotCameraParameters[] cameraParameters)
    {
       nSensors = cameraParameters.length;
       this.rosMainNode = rosMainNode;
-      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.rosClockCalculator = rosClockCalculator;
       this.cameraParameters = cameraParameters;
 
       cameraPublisher = new RosImagePublisher[nSensors];
@@ -57,7 +56,7 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
       {
          //XXX: SENSOR ID DOES NOT EXIST! THIS IS SOOOOOO WRONG
          int sensorId = 0;
-         long timestamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getTimeStamp());
+         long timestamp = rosClockCalculator.computeROSTime(object.getTimeStamp(), object.getTimeStamp());
          Time time = Time.fromNano(timestamp);
          String frameId = cameraParameters[sensorId].getPoseFrameForSdf();
          cameraPublisher[sensorId].publish(frameId, object.getImage(), time);

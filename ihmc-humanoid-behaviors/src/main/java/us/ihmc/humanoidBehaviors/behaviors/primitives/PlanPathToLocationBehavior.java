@@ -23,8 +23,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -36,7 +36,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private FootstepPlanningResult planningResult;
 
-   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private PipeLine<BehaviorAction> pipeLine;
    private final YoInteger planId = new YoInteger("planId", registry);
 
    private FramePose3D goalPose = null;
@@ -60,7 +60,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 

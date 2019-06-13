@@ -742,7 +742,10 @@ public class CrossRobotCommandCodeQualityTest
                                                                                   joints.get(0).getSuccessor(),
                                                                                   ReferenceFrame.getWorldFrame());
          Object fieldInstance = field.get(ownerInstance);
-         Object object = ((List<?>) fieldInstance).get(0);
+         List<?> listField = (List<?>) fieldInstance;
+         if (listField.size() < 1)
+            fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in list " + field.getName() + ".");
+         Object object = listField.get(0);
          if (object == null)
             fail("Random generator for " + ownerType.getSimpleName() + " did not instantiate fields in list " + field.getName() + ".");
          return object.getClass();

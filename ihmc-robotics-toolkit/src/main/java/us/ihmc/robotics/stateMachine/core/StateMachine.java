@@ -413,7 +413,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     */
    public boolean isCurrentStateTerminal()
    {
-      return stateTransitions.containsKey(currentStateKey.getEnumValue());
+      return !stateTransitions.containsKey(currentStateKey.getEnumValue());
    }
 
    private static void assertStateNotNull(Object stateKey, State state)
