@@ -81,6 +81,6 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    @Override
    public void receivedPacket(RobotConfigurationData packet)
    {
-      timestampProvider.set(packet.getTimestamp());
+      timestampProvider.set(packet.getMonotonicTime());
    }
 }

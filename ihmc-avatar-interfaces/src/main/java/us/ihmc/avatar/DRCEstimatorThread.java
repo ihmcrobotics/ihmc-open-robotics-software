@@ -54,6 +54,7 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -100,7 +101,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
    private final YoLong estimatorTick = new YoLong("estimatorTick", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
-   private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
    private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
    private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
@@ -122,6 +122,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
 
    private final ForceSensorStateUpdater forceSensorStateUpdater;
+
+   private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public DRCEstimatorThread(String robotName, HumanoidRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
                              DRCRobotModel robotModel, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory,
@@ -212,7 +214,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          CenterOfMassDataHolder centerOfMassDataHolderForEstimator = threadDataSynchronizer.getEstimatorCenterOfMassDataHolder();
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
+                         .setContactableBodiesFactory(contactableBodiesFactory).setEstimatorForceSensorDataHolder(forceSensorDataHolderForEstimator)
                          .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)
                          .setRobotMotionStatusFromController(robotMotionStatusFromController);
@@ -252,7 +254,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel,
                                                     jointConfigurationGathererAndProducer,
-                                                    sensorReader,
                                                     ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                                     realtimeRos2Node,
                                                     sensorOutputMapReadOnly,
@@ -267,7 +268,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
 
       firstTick.set(true);
-      outputWriterInitialized.set(false);
       controllerDataValid.set(false);
 
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
@@ -275,7 +275,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.outputWriter = outputWriter;
       if (this.outputWriter != null)
       {
-         this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
          this.outputWriter.setJointDesiredOutputList(estimatorDesiredJointDataHolder);
          if (this.outputWriter.getYoVariableRegistry() != null)
          {
@@ -408,19 +407,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          {
             if (controllerDataValid.getBooleanValue())
             {
-               if (!outputWriterInitialized.getBooleanValue())
-               {
-                  outputWriter.initialize();
-                  outputWriterInitialized.set(true);
-               }
-
                outputWriter.writeBefore(currentClockTime);
             }
          }
 
-         sensorReader.read();
+         long timestamp = sensorReader.read(sensorDataContext);
+         sensorReader.compute(timestamp, sensorDataContext);
 
-         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+         estimatorTime.set(sensorOutputMapReadOnly.getWallTime());
       }
       catch (Throwable e)
       {

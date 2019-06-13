@@ -5,22 +5,22 @@ import java.util.ArrayDeque;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
 
-public class TaskExecutor
+public class StateExecutor
 {
    private boolean printDebugStatements;
    private State currentTask;
-   private final NullTask nullTask = new NullTask();
+   private final NullState nullTask = new NullState();
    private final ArrayDeque<State> taskQueue = new ArrayDeque<State>();
    private final StateMachineClock clock;
 
-   public TaskExecutor(StateMachineClock clock)
+   public StateExecutor(StateMachineClock clock)
    {
       this.clock = clock;
       clear();
    }
    //a statemachine clock should be passed in slowly removing this constructor
    @Deprecated
-   public TaskExecutor()
+   public StateExecutor()
    {
       clock = StateMachineClock.dummyClock();
       clear();
