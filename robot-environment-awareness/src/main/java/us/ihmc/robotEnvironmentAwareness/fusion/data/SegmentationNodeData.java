@@ -11,8 +11,11 @@ import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 public class SegmentationNodeData
 {
+   private static final boolean USE_PCA_TO_UPDATE = true;
    private int id = PlanarRegion.NO_REGION_ID;
    private final TIntArrayList labels = new TIntArrayList();
+   private final List<Point3D> labelCenters = new ArrayList<>();
+   private final List<Vector3D> labelNormals = new ArrayList<>();
 
    private final Vector3D normal = new Vector3D();
    private final Point3D center = new Point3D();
@@ -20,11 +23,14 @@ public class SegmentationNodeData
    private double weight = 0.0;
 
    private final List<Point3D> pointsInSegment = new ArrayList<>();
-
+   private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
+   
    public SegmentationNodeData(SegmentationRawData seedImageSegment)
    {
       id = seedImageSegment.getId();
       labels.add(seedImageSegment.getImageSegmentLabel());
+      labelCenters.add(seedImageSegment.getCenter());
+      labelNormals.add(seedImageSegment.getNormal());
 
       normal.set(seedImageSegment.getNormal());
       center.set(seedImageSegment.getCenter());
@@ -35,31 +41,36 @@ public class SegmentationNodeData
    public void merge(SegmentationRawData fusionDataSegment)
    {
       labels.add(fusionDataSegment.getImageSegmentLabel());
+      labelCenters.add(fusionDataSegment.getCenter());
+      labelNormals.add(fusionDataSegment.getNormal());
 
-//      double otherWeight = fusionDataSegment.getWeight();
-//      double totalWeight = weight + otherWeight;
-//      normal.setX((normal.getX() * weight + fusionDataSegment.getNormal().getX() * otherWeight) / totalWeight);
-//      normal.setY((normal.getY() * weight + fusionDataSegment.getNormal().getY() * otherWeight) / totalWeight);
-//      normal.setZ((normal.getZ() * weight + fusionDataSegment.getNormal().getZ() * otherWeight) / totalWeight);
-//
-//      center.setX((center.getX() * weight + fusionDataSegment.getCenter().getX() * otherWeight) / totalWeight);
-//      center.setY((center.getY() * weight + fusionDataSegment.getCenter().getY() * otherWeight) / totalWeight);
-//      center.setZ((center.getZ() * weight + fusionDataSegment.getCenter().getZ() * otherWeight) / totalWeight);
-//
-//      weight = totalWeight;
       pointsInSegment.addAll(fusionDataSegment.getPoints());
-      
-      PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
 
-      pca.clear();
-      pointsInSegment.stream().forEach(point -> pca.addPoint(point.getX(), point.getY(), point.getZ()));
-      pca.compute();
+      if(USE_PCA_TO_UPDATE)
+      {
+         fusionDataSegment.getPoints().stream().forEach(point -> pca.addPoint(point.getX(), point.getY(), point.getZ()));
+         pca.compute();
 
-      pca.getMean(center);
-      pca.getThirdVector(normal);
-      
-      if (normal.getZ() < 0.0)
-         normal.negate();
+         pca.getMean(center);
+         pca.getThirdVector(normal);
+
+         if (normal.getZ() < 0.0)
+            normal.negate();
+      }
+      else
+      {
+         double otherWeight = fusionDataSegment.getWeight();
+         double totalWeight = weight + otherWeight;
+         normal.setX((normal.getX() * weight + fusionDataSegment.getNormal().getX() * otherWeight) / totalWeight);
+         normal.setY((normal.getY() * weight + fusionDataSegment.getNormal().getY() * otherWeight) / totalWeight);
+         normal.setZ((normal.getZ() * weight + fusionDataSegment.getNormal().getZ() * otherWeight) / totalWeight);
+
+         center.setX((center.getX() * weight + fusionDataSegment.getCenter().getX() * otherWeight) / totalWeight);
+         center.setY((center.getY() * weight + fusionDataSegment.getCenter().getY() * otherWeight) / totalWeight);
+         center.setZ((center.getZ() * weight + fusionDataSegment.getCenter().getZ() * otherWeight) / totalWeight);
+
+         weight = totalWeight;
+      }
    }
 
    public void extend(SegmentationRawData fusionDataSegment, double threshold, boolean updateNodeData, double extendingThreshold)
@@ -95,7 +106,7 @@ public class SegmentationNodeData
             normal.negate();
       }
    }
-   
+
    public int getId()
    {
       return id;
@@ -121,10 +132,31 @@ public class SegmentationNodeData
       return pointsInSegment;
    }
 
-   public boolean isCoplanar(SegmentationRawData fusionDataSegment, double threshold)
+   public boolean isCoplanar(SegmentationRawData fusionDataSegment, double threshold, boolean isBigSegment)
    {
-      double distanceFromSegment = distancePlaneToPoint(fusionDataSegment.getNormal(), fusionDataSegment.getCenter(), center);
-      double distanceToSegment = distancePlaneToPoint(normal, center, fusionDataSegment.getCenter());
+      Point3D nodeDataCenter = new Point3D(center);
+      Vector3D nodeDataNormal = new Vector3D(normal);
+      if (isBigSegment)
+      {
+         double min = Double.POSITIVE_INFINITY;
+         double cur = 0;
+         int closestLabel = -1;
+         for (int i = 0; i < labelCenters.size(); i++)
+         {
+            Point3D labelCenter = labelCenters.get(i);
+            cur = labelCenter.distance(fusionDataSegment.getCenter());
+            if (cur < min)
+            {
+               min = cur;
+               closestLabel = i;
+            }
+         }
+         nodeDataCenter.set(labelCenters.get(closestLabel));
+         nodeDataNormal.set(labelNormals.get(closestLabel));
+      }
+
+      double distanceFromSegment = distancePlaneToPoint(fusionDataSegment.getNormal(), fusionDataSegment.getCenter(), nodeDataCenter);
+      double distanceToSegment = distancePlaneToPoint(nodeDataNormal, nodeDataCenter, fusionDataSegment.getCenter());
 
       if (Math.abs(distanceFromSegment) < threshold && Math.abs(distanceToSegment) < threshold)
          return true;
@@ -145,6 +177,8 @@ public class SegmentationNodeData
       Vector3D centerVector = new Vector3D(center);
       double constantD = -normalVector.dot(centerVector);
 
+      if (normalVector.lengthSquared() == 0)
+         System.out.println("normalVector.lengthSquared() == 0");
       Vector3D pointVector = new Vector3D(point);
       return Math.abs(normalVector.dot(pointVector) + constantD) / Math.sqrt(normalVector.lengthSquared());
    }

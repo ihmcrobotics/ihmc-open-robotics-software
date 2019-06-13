@@ -83,7 +83,7 @@ public class LidarImageFusionDataFeatureUpdater
             boolean isCoplanar = false;
             if (newSegment.isParallel(candidate, planarRegionPropagationParameters.getPlanarityThreshold()))
                isParallel = true;
-            if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold()))
+            if (newSegment.isCoplanar(candidate, planarRegionPropagationParameters.getProximityThreshold(), false))
                isCoplanar = true;
 
             if (isParallel && isCoplanar)
