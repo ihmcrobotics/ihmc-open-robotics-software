@@ -336,7 +336,7 @@ public class ParameterBasedNodeExpansionTest
 
 
       // do x gait regions for each guy
-      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), new AxisAngle(baseNode.getStepYaw(), 0.0, 0.0));
+      QuadrantDependentList<PoseReferenceFrame> footFrames = getFootFrames(getSnappedStepPositions(baseNode, snapper), baseNode.getStepOrientation());
 
       ConvexPolygon2D frontReachableRegion = new ConvexPolygon2D();
       frontReachableRegion.addVertex(parameters.getMaximumFrontStepLength(), parameters.getMaximumStepWidth());
