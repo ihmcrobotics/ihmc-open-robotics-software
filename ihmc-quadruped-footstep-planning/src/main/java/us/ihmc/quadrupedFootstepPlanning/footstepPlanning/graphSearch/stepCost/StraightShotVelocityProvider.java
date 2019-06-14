@@ -28,7 +28,6 @@ public class StraightShotVelocityProvider implements NominalVelocityProvider
       heading.sub(nodeCenter);
 
       double distance = heading.length();
-//      heading.normalize();
 
       double scaleFactor = InterpolationTools.linearInterpolate(0.25, 1.0, CostTools.computeDistanceToGoalScalar(nodeCenter.getX(), nodeCenter.getY(), goalNode,
                                                                                                                  finalSlowDownProximity));
