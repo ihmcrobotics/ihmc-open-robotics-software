@@ -93,11 +93,13 @@ public interface FootstepPlannerParameters
 
    double getBodyGroundClearance();
 
-   double getDistanceHeuristicWeight();
+   double getDistanceWeight();
 
    double getYawWeight();
 
    double getXGaitWeight();
+
+   double getDesiredVelocityWeight();
 
    double getCostPerStep();
 
@@ -203,6 +205,15 @@ public interface FootstepPlannerParameters
       return 0.1;
    }
 
+   default double getFinalTurnProximity()
+   {
+      return 1.0;
+   }
+
+   default double getFinalSlowDownProximity()
+   {
+      return 0.5;
+   }
 
    default QuadrupedFootstepPlannerParametersPacket getAsPacket()
    {
@@ -230,9 +241,10 @@ public interface FootstepPlannerParameters
       packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
       packet.setBodyGroundClearance(getBodyGroundClearance());
       packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());
-      packet.setDistanceHeuristicWeight(getDistanceHeuristicWeight());
+      packet.setDistanceWeight(getDistanceWeight());
       packet.setYawWeight(getYawWeight());
       packet.setXGaitWeight(getXGaitWeight());
+      packet.setDesiredVelocityWeight(getDesiredVelocityWeight());
       packet.setCostPerStep(getCostPerStep());
       packet.setStepUpWeight(getStepUpWeight());
       packet.setStepDownWeight(getStepDownWeight());
@@ -251,6 +263,8 @@ public interface FootstepPlannerParameters
       packet.setMinimumHindEndForwardDistanceFromCliffBottoms(getMinimumHindEndForwardDistanceFromCliffBottoms());
       packet.setMinimumHindEndBackwardDistanceFromCliffBottoms(getMinimumHindEndBackwardDistanceFromCliffBottoms());
       packet.setMinimumLateralDistanceFromCliffBottoms(getMinimumLateralDistanceFromCliffBottoms());
+      packet.setFinalTurnProximity(getFinalTurnProximity());
+      packet.setFinalSlowDownProximity(getFinalSlowDownProximity());
 
       return packet;
    }

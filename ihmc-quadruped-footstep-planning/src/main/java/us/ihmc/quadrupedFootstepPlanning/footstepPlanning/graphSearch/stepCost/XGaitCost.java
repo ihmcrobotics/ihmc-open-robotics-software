@@ -115,7 +115,7 @@ public class XGaitCost implements FootstepCost
 
       FootstepNode.snapPointToGrid(nominalFootEndPosition);
 
-      double costOfNominalVelocity = desiredVelocityTrackingWeight * EuclidCoreTools
+      double costOfNominalVelocity = plannerParameters.getDesiredVelocityWeight() * EuclidCoreTools
             .norm(endNode.getX(movingQuadrant) - nominalFootEndPosition.getX(), endNode.getY(movingQuadrant) - nominalFootEndPosition.getY());
 
       FootstepNode.snapPointToGrid(nominalXGaitEndPosition);

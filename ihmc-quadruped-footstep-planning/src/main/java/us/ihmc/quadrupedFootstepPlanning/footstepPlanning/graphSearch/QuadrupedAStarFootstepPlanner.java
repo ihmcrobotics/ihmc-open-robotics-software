@@ -697,7 +697,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
       nodeChecker.addPlannerListener(listener);
 
-      NominalVelocityProvider velocityProvider = new StraightShotVelocityProvider();
+      NominalVelocityProvider velocityProvider = new StraightShotVelocityProvider(parameters);
 
       FootstepCostBuilder costBuilder = new FootstepCostBuilder();
       costBuilder.setFootstepPlannerParameters(parameters);

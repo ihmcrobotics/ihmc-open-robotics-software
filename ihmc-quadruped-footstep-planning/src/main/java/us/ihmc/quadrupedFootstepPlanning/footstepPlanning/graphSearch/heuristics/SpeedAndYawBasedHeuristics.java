@@ -31,7 +31,7 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double minSteps = bodyDistance / desiredSpeed;
 
-      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, 1.0);
+      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, parameters.getFinalTurnProximity());
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
 
@@ -73,6 +73,6 @@ public class SpeedAndYawBasedHeuristics extends CostToGoHeuristics
          }
       }
 
-      return yawHeuristicCost + stepHeuristicCost + heightCost + parameters.getDistanceHeuristicWeight() * bodyDistance;
+      return yawHeuristicCost + stepHeuristicCost + heightCost + parameters.getDistanceWeight() * bodyDistance;
    }
 }

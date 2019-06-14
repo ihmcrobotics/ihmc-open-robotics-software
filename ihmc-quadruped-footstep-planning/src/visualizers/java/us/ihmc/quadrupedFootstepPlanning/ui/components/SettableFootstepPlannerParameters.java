@@ -40,6 +40,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double distanceWeight;
    private double heuristicsWeight;
    private double xGaitWeight;
+   private double desiredVelocityWeight;
 
    private double minXClearanceFromFoot;
    private double minYClearanceFromFoot;
@@ -57,6 +58,9 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    private boolean projectInsideUsingConvexHullDuringExpansion;
    private boolean projectInsideUsingConvexHullDuringPostProcessing;
+
+   private double finalTurnProximity;
+   private double finalSlowDownProximity;
 
    public SettableFootstepPlannerParameters(FootstepPlannerParameters footstepPlannerParameters)
    {
@@ -225,7 +229,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public void setDistanceHeuristicWeight(double distanceHeuristicWeight)
+   public void setDistanceWeight(double distanceHeuristicWeight)
    {
       this.distanceWeight = distanceHeuristicWeight;
    }
@@ -242,6 +246,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setXGaitWeight(double xGaitWeight)
    {
       this.xGaitWeight = xGaitWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setDesiredVelocityWeight(double desiredVelocityWeight)
+   {
+      this.desiredVelocityWeight = desiredVelocityWeight;
    }
 
    /** {@inheritDoc} */
@@ -311,7 +322,6 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
       this.minimumFrontEndBackwardDistanceFromCliffBottoms = distance;
    }
 
-
    @Override
    public void setMinimumHindEndForwardDistanceFromCliffBottoms(double distance)
    {
@@ -328,6 +338,18 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public void setMinimumLateralDistanceFromCliffBottoms(double distance)
    {
       this.minimumLateralDistanceFromCliffBottoms = distance;
+   }
+
+   @Override
+   public void setFinalTurnProximity(double proximity)
+   {
+      this.finalTurnProximity = proximity;
+   }
+
+   @Override
+   public void setFinalSlowDownProximity(double proximity)
+   {
+      this.finalSlowDownProximity = proximity;
    }
 
    /** {@inheritDoc} */
@@ -526,7 +548,7 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
       return distanceWeight;
    }
@@ -536,6 +558,13 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    public double getXGaitWeight()
    {
       return xGaitWeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getDesiredVelocityWeight()
+   {
+      return desiredVelocityWeight;
    }
 
    /** {@inheritDoc} */
@@ -663,10 +692,25 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    {
       return minimumHindEndBackwardDistanceFromCliffBottoms;
    }
+
    /** {@inheritDoc} */
    @Override
    public double getMinimumLateralDistanceFromCliffBottoms()
    {
       return minimumLateralDistanceFromCliffBottoms;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFinalTurnProximity()
+   {
+      return finalTurnProximity;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFinalSlowDownProximity()
+   {
+      return finalSlowDownProximity;
    }
 }

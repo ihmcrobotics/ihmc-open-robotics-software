@@ -49,11 +49,13 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setBodyGroundClearance(double bodyGroundClearance);
 
-   void setDistanceHeuristicWeight(double distanceHeuristicWeight);
+   void setDistanceWeight(double distanceHeuristicWeight);
 
    void setYawWeight(double yawWeight);
 
    void setXGaitWeight(double xGaitWeight);
+
+   void setDesiredVelocityWeight(double desiredVelocityWeight);
 
    void setCostPerStep(double costPerStep);
 
@@ -93,6 +95,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
 
    void setMinimumLateralDistanceFromCliffBottoms(double distance);
 
+   void setFinalTurnProximity(double proximity);
+
+   void setFinalSlowDownProximity(double proximity);
+
    default void set(FootstepPlannerParameters other)
    {
       setMaximumFrontStepReach(other.getMaximumFrontStepReach());
@@ -117,9 +123,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMaximumStepYaw(other.getMaximumStepYaw());
       setMaximumStepChangeZ(other.getMaximumStepChangeZ());
       setBodyGroundClearance(other.getBodyGroundClearance());
-      setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
+      setDistanceWeight(other.getDistanceWeight());
       setYawWeight(other.getYawWeight());
       setXGaitWeight(other.getXGaitWeight());
+      setDesiredVelocityWeight(other.getDesiredVelocityWeight());
       setCostPerStep(other.getCostPerStep());
       setStepUpWeight(other.getStepUpWeight());
       setStepDownWeight(other.getStepDownWeight());
@@ -139,6 +146,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       setMinimumHindEndForwardDistanceFromCliffBottoms(other.getMinimumHindEndForwardDistanceFromCliffBottoms());
       setMinimumHindEndBackwardDistanceFromCliffBottoms(other.getMinimumHindEndBackwardDistanceFromCliffBottoms());
       setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
+      setFinalTurnProximity(other.getFinalTurnProximity());
+      setFinalSlowDownProximity(other.getFinalSlowDownProximity());
    }
 
    default void set(QuadrupedFootstepPlannerParametersPacket other)
@@ -189,12 +198,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyGroundClearance(other.getBodyGroundClearance());
       if (other.getMaxWalkingSpeedMultiplier() != other.NO_VALUE_DOUBLE)
          setMaxWalkingSpeedMultiplier(other.getMaxWalkingSpeedMultiplier());
-      if (other.getDistanceHeuristicWeight() != other.NO_VALUE_DOUBLE)
-         setDistanceHeuristicWeight(other.getDistanceHeuristicWeight());
+      if (other.getDistanceWeight() != other.NO_VALUE_DOUBLE)
+         setDistanceWeight(other.getDistanceWeight());
       if (other.getYawWeight() != other.NO_VALUE_DOUBLE)
          setYawWeight(other.getYawWeight());
       if (other.getXGaitWeight() != other.NO_VALUE_DOUBLE)
          setXGaitWeight(other.getXGaitWeight());
+      if (other.getDesiredVelocityWeight() != other.NO_VALUE_DOUBLE)
+         setDesiredVelocityWeight(other.getDesiredVelocityWeight());
       if (other.getCostPerStep() != other.NO_VALUE_DOUBLE)
          setCostPerStep(other.getCostPerStep());
       if (other.getStepUpWeight() != other.NO_VALUE_DOUBLE)
@@ -227,6 +238,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumHindEndBackwardDistanceFromCliffBottoms(other.getMinimumHindEndBackwardDistanceFromCliffBottoms());
       if (other.getMinimumLateralDistanceFromCliffBottoms() != other.NO_VALUE_DOUBLE)
          setMinimumLateralDistanceFromCliffBottoms(other.getMinimumLateralDistanceFromCliffBottoms());
+      if (other.getFinalTurnProximity() != other.NO_VALUE_DOUBLE)
+         setFinalTurnProximity(other.getFinalTurnProximity());
+      if (other.getFinalSlowDownProximity() != other.NO_VALUE_DOUBLE)
+         setFinalSlowDownProximity(other.getFinalSlowDownProximity());
 
       setProjectInsideUsingConvexHullDuringExpansion(other.getProjectInsideUsingConvexHullDuringExpansion());
       setProjectInsideUsingConvexHullDuringPostProcessing(other.getProjectInsideUsingConvexHullDuringPostProcessing());

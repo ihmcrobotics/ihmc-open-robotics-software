@@ -66,11 +66,13 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double body_ground_clearance;
         @defaultValue(value=-11.1)
-        double distance_heuristic_weight;
+        double distance_weight;
         @defaultValue(value=-11.1)
         double yaw_weight;
         @defaultValue(value=-11.1)
         double x_gait_weight;
+        @defaultValue(value=-11.1)
+        double desired_velocity_weight;
         @defaultValue(value=-11.1)
         double cost_per_step;
         @defaultValue(value=-11.1)
@@ -107,6 +109,10 @@ module controller_msgs
         double minimum_hind_end_backward_distance_from_cliff_bottoms;
         @defaultValue(value=-11.1)
         double minimum_lateral_distance_from_cliff_bottoms;
+        @defaultValue(value=-11.1)
+        double final_turn_proximity;
+        @defaultValue(value=-11.1)
+        double final_slow_down_proximity;
       };
     };
   };
