@@ -25,10 +25,11 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class AvatarLiftOffAndTouchDownTest
 {
-   private static final double PITCH_EPSILON = Math.toRadians(2.0);
+   private static final double PITCH_EPSILON = Math.toRadians(3.0);
 
    public static boolean doStep(DRCRobotModel robotModel, DRCSimulationTestHelper testHelper, double stepLength, double startPitch, double finalPitch,
                                 double footLength)
@@ -116,10 +117,16 @@ public class AvatarLiftOffAndTouchDownTest
 
       boolean success = true;
 
-      testHelper.publishToController(message);
+      success &= checkFullContact(testHelper, side, robotModel);
       success &= checkFootPitch(testHelper, 0.0, side);
-      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime());
+
+      testHelper.publishToController(message);
+      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - 0.1);
+      if (!MathTools.epsilonEquals(startPitch, 0.0, Math.toRadians(5.0)))
+         success &= checkPartialContact(testHelper, side, robotModel);
+      testHelper.simulateAndBlockAndCatchExceptions(0.1);
       success &= checkFootPitch(testHelper, startPitch, side);
+
       testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
 
       if (!Precision.equals(adjustmentX, 0.0))
@@ -134,12 +141,53 @@ public class AvatarLiftOffAndTouchDownTest
 
       testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
       success &= checkFootPitch(testHelper, finalPitch, side);
-      testHelper.simulateAndBlockAndCatchExceptions(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(),
-                                                             partialFootholdDuration));
+      testHelper.simulateAndBlockAndCatchExceptions(0.1);
+      if (!MathTools.epsilonEquals(finalPitch, 0.0, Math.toRadians(5.0)))
+         success &= checkPartialContact(testHelper, side, robotModel);
+      testHelper.simulateAndBlockAndCatchExceptions(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration)
+            - 0.1);
+
       success &= checkFootPitch(testHelper, 0.0, side);
+      success &= checkFullContact(testHelper, side, robotModel);
+
       testHelper.simulateAndBlockAndCatchExceptions(0.25);
 
       return success;
+   }
+
+   private static boolean checkPartialContact(DRCSimulationTestHelper testHelper, RobotSide side, DRCRobotModel robotModel)
+   {
+      int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
+      String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
+      int inContact = 0;
+      for (int i = 0; i < contactPoints; i++)
+      {
+         if (((YoBoolean) testHelper.getYoVariable(prefix + "InContact" + i)).getValue())
+            inContact++;
+      }
+      boolean atLeastOneContact = inContact > 0;
+      boolean notFullContact = inContact < contactPoints;
+      if (!atLeastOneContact)
+         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was not in contact at all but expected partial contact.");
+      if (!notFullContact)
+         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was in full contact but expected partial contact.");
+      return atLeastOneContact && notFullContact;
+   }
+
+   private static boolean checkFullContact(DRCSimulationTestHelper testHelper, RobotSide side, DRCRobotModel robotModel)
+   {
+      int contactPoints = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings().getNumberOfContactPointsPerContactableBody();
+      String prefix = testHelper.getReferenceFrames().getSoleFrame(side).getName();
+      int inContact = 0;
+      for (int i = 0; i < contactPoints; i++)
+      {
+         if (((YoBoolean) testHelper.getYoVariable(prefix + "InContact" + i)).getValue())
+            inContact++;
+      }
+      boolean fullContact = inContact == contactPoints;
+      if (!fullContact)
+         System.out.println("At time " + testHelper.getRobot().getTime() + ": Foot was not in full contact.");
+      return fullContact;
    }
 
    private static boolean checkFootPitch(DRCSimulationTestHelper testHelper, double expectedPitch, RobotSide side)
