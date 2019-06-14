@@ -319,7 +319,7 @@ public class SupportState extends AbstractFootControlState
       }
 
       // determine foot state
-      copOnEdge.set(footControlHelper.isCoPOnEdge());
+      copOnEdge.set(footControlHelper.isCoPOnEdge() && !isInLiftOffOrTouchDown());
       footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getDoubleValue());
 
       if (assumeCopOnEdge.getValue())
@@ -375,8 +375,11 @@ public class SupportState extends AbstractFootControlState
       spatialFeedbackControlCommand.setGains(localGains);
 
       // set selection matrices
+      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
       accelerationSelectionMatrix.resetSelection();
+      accelerationSelectionMatrix.setSelectionFrame(soleZUpFrame);
       feedbackSelectionMatrix.resetSelection();
+      feedbackSelectionMatrix.setSelectionFrame(soleZUpFrame);
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
@@ -427,11 +430,11 @@ public class SupportState extends AbstractFootControlState
    {
       footPosition.setToZero(contactableFoot.getSoleFrame());
       footOrientation.setToZero(contactableFoot.getSoleFrame());
-      footPosition.changeFrame(worldFrame);
-      footOrientation.changeFrame(worldFrame);
-
-      desiredPosition.checkReferenceFrameMatch(footPosition);
-      desiredOrientation.checkReferenceFrameMatch(footOrientation);
+      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide);
+      footPosition.changeFrame(soleZUpFrame);
+      footOrientation.changeFrame(soleZUpFrame);
+      desiredPosition.changeFrame(soleZUpFrame);
+      desiredOrientation.changeFrame(soleZUpFrame);
 
       // The z component is always updated as it is never held in place
       if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
@@ -464,7 +467,7 @@ public class SupportState extends AbstractFootControlState
          pitchTrajectory.compute(currentTime);
          desiredPitch.set(pitchTrajectory.getPosition());
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
-         desiredAngularVelocity.set(0.0, pitchTrajectory.getVelocity(), 0.0);
+         desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
       }
 
       // If we are tracking a touch down trajectory set the pitch of the desired orientation and the angular velocity accordingly.
@@ -482,10 +485,13 @@ public class SupportState extends AbstractFootControlState
             pitchTrajectory.compute(currentTime);
             desiredPitch.set(pitchTrajectory.getPosition());
             desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), pitchTrajectory.getPosition(), desiredOrientation.getRoll());
-            desiredAngularVelocity.set(0.0, pitchTrajectory.getVelocity(), 0.0);
+            desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, pitchTrajectory.getVelocity(), 0.0);
          }
       }
 
+      desiredPosition.changeFrame(worldFrame);
+      desiredOrientation.changeFrame(worldFrame);
+      desiredAngularVelocity.changeFrame(worldFrame);
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
    }
 
