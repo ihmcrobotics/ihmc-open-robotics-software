@@ -27,7 +27,7 @@ public class AtlasLiftOffAndTouchDownTest
 
       testHelper.destroySimulation();
 
-      Assert.assertTrue("Foot pitch in test did not match expected at checkpoints.", success);
+      Assert.assertTrue("A check failed. See console output.", success);
    }
 
    @Test
@@ -44,6 +44,6 @@ public class AtlasLiftOffAndTouchDownTest
 
       testHelper.destroySimulation();
 
-      Assert.assertTrue("Foot pitch in test did not match expected at checkpoints.", success);
+      Assert.assertTrue("A check failed. See console output.", success);
    }
 }
