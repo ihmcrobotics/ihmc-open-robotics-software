@@ -223,16 +223,14 @@ public class FootstepNode
       return (int) Math.round(yaw / gridSizeYaw);
    }
 
-   public static Point2DReadOnly snapPointToGrid(Point2DReadOnly pointToSnap)
-   {
-      Point2D snappedPoint = new Point2D();
-      snappedPoint.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
-      return snappedPoint;
-   }
-
    public static void snapPointToGrid(Point2DBasics pointToSnap)
    {
       pointToSnap.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
+   }
+
+   public static void snapPointToGrid(Point2DReadOnly pointToSnap, Point2DBasics snappedPointToPack)
+   {
+      snappedPointToPack.set(FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getX()), FootstepNode.gridSizeXY * snapToGrid(pointToSnap.getY()));
    }
 
    public boolean quadrantGeometricallyEquals(FootstepNode other)
