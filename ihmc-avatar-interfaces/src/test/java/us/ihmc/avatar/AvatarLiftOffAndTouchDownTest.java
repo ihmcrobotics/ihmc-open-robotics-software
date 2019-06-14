@@ -44,8 +44,8 @@ public class AvatarLiftOffAndTouchDownTest
    {
       double swingDuration = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double swingHeight = Math.max(0.05, robotModel.getWalkingControllerParameters().getSteppingParameters().getDefaultSwingHeightFromStanceFoot());
+      double touchdownVelocity = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters().getDesiredTouchdownVelocity();
       RobotSide side = RobotSide.LEFT;
-      double touchdownVelocity = -0.2;
 
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
@@ -116,15 +116,16 @@ public class AvatarLiftOffAndTouchDownTest
       waypoint2.getAngularVelocity().set(waypoint1AngularVelocity);
 
       boolean success = true;
+      double timeOffset = 0.1;
 
       success &= checkFullContact(testHelper, side, robotModel);
       success &= checkFootPitch(testHelper, 0.0, side);
 
       testHelper.publishToController(message);
-      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - 0.1);
+      testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime() - timeOffset);
       if (!MathTools.epsilonEquals(startPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
-      testHelper.simulateAndBlockAndCatchExceptions(0.1);
+      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
       success &= checkFootPitch(testHelper, startPitch, side);
 
       testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() / 3.0);
@@ -141,16 +142,16 @@ public class AvatarLiftOffAndTouchDownTest
 
       testHelper.simulateAndBlockAndCatchExceptions(robotModel.getWalkingControllerParameters().getDefaultSwingTime() * 2.0 / 3.0);
       success &= checkFootPitch(testHelper, finalPitch, side);
-      testHelper.simulateAndBlockAndCatchExceptions(0.1);
+      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
       if (!MathTools.epsilonEquals(finalPitch, 0.0, Math.toRadians(5.0)))
          success &= checkPartialContact(testHelper, side, robotModel);
       testHelper.simulateAndBlockAndCatchExceptions(Math.max(robotModel.getWalkingControllerParameters().getDefaultFinalTransferTime(), partialFootholdDuration)
-            - 0.1);
+            - timeOffset);
 
       success &= checkFootPitch(testHelper, 0.0, side);
+      testHelper.simulateAndBlockAndCatchExceptions(timeOffset);
       success &= checkFullContact(testHelper, side, robotModel);
-
-      testHelper.simulateAndBlockAndCatchExceptions(0.25);
+      testHelper.simulateAndBlockAndCatchExceptions(0.25 - timeOffset);
 
       return success;
    }
