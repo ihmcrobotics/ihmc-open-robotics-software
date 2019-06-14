@@ -3,14 +3,17 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
@@ -22,12 +25,9 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-
 public class XGaitCost implements FootstepCost
 {
-   private static final double desiredVelocityTrackingWeight = 0.0;
-
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double desiredVelocityTrackingWeight = 1.0;
 
    private final FootstepPlannerParameters plannerParameters;
    private final FootstepNodeSnapper snapper;
@@ -36,8 +36,21 @@ public class XGaitCost implements FootstepCost
 
    private final NominalVelocityProvider velocityProvider;
 
+   private final Vector2D nominalVelocityHeading = new Vector2D();
+   private final Vector2D nominalTranslation = new Vector2D();
+   private final Point2D nominalXGaitEndPosition = new Point2D();
+   private final Point2D nominalFootEndPosition = new Point2D();
+   private final Point2D snappedXGaitStartPosition = new Point2D();
 
-   public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapper snapper, NominalVelocityProvider velocityProvider)
+   private final Vector2D footOffsetFromXGait = new Vector2D();
+
+   private final LineSegment2D acceptableTranslationLine = new LineSegment2D();
+   private final Quaternion startOrientation = new Quaternion();
+   private final Quaternion endOrientation = new Quaternion();
+
+
+   public XGaitCost(FootstepPlannerParameters plannerParameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeSnapper snapper,
+                    NominalVelocityProvider velocityProvider)
    {
       this.plannerParameters = plannerParameters;
       this.xGaitSettings = xGaitSettings;
@@ -47,12 +60,6 @@ public class XGaitCost implements FootstepCost
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          startFootPositions.put(robotQuadrant, new Point3D());
    }
-
-
-   private final FramePose3D startXGaitPose = new FramePose3D();
-   private final FramePose3D endXGaitPose = new FramePose3D();
-   private final PoseReferenceFrame startXGaitPoseFrame = new PoseReferenceFrame("startXGaitPose", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame endXGaitPoseFrame = new PoseReferenceFrame("endXGaitPose", ReferenceFrame.getWorldFrame());
 
    // FIXME make this more efficient
    @Override
@@ -76,70 +83,57 @@ public class XGaitCost implements FootstepCost
       Point2DReadOnly endXGaitPosition = endNode.getOrComputeXGaitCenterPoint();
 
       double nominalPitch = QuadrupedSupportPolygon.getNominalPitch(startFootPositions, 4);
-      startXGaitPose.setPosition(startXGaitPosition);
-      startXGaitPose.setOrientationYawPitchRoll(startNode.getStepYaw(), nominalPitch, 0.0);
-      startXGaitPoseFrame.setPoseAndUpdate(startXGaitPose);
+      startOrientation.setYawPitchRoll(startNode.getStepYaw(), nominalPitch, 0.0);
 
-
-      FrameVector2D nominalVelocityHeading = new FrameVector2D(worldFrame, velocityProvider.computeNominalNormalizedVelocityHeadingInWorld(startNode));
-      nominalVelocityHeading.changeFrameAndProjectToXYPlane(startXGaitPoseFrame);
+      nominalVelocityHeading.set(velocityProvider.computeNominalNormalizedVelocityHeadingInWorld(startNode));
+      startOrientation.transform(nominalVelocityHeading, false);
 
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
       double desiredMaxForwardSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredMaxHorizontalSpeed = xGaitSettings.getMaxHorizontalSpeedFraction() * desiredMaxForwardSpeed;
 
-      double desiredVelocityAtHeading = computeMagnitudeOnEllipseInDirection(desiredMaxForwardSpeed, desiredMaxHorizontalSpeed, nominalVelocityHeading.getX(), nominalVelocityHeading.getY());
+      double desiredVelocityAtHeading = computeMagnitudeOnEllipseInDirection(desiredMaxForwardSpeed, desiredMaxHorizontalSpeed, nominalVelocityHeading.getX(),
+                                                                             nominalVelocityHeading.getY());
 
-      FrameVector2D desiredTranslation = new FrameVector2D(nominalVelocityHeading);
-      desiredTranslation.scale(desiredVelocityAtHeading * durationBetweenSteps);
-      desiredTranslation.changeFrameAndProjectToXYPlane(worldFrame);
+      nominalTranslation.set(nominalVelocityHeading);
+      nominalTranslation.scale(desiredVelocityAtHeading * durationBetweenSteps);
+      startOrientation.inverseTransform(nominalTranslation, false);
 
-      FramePoint2D nominalEndXGaitPosition = new FramePoint2D();
-      nominalEndXGaitPosition.add(startXGaitPosition, desiredTranslation);
+      nominalXGaitEndPosition.add(startXGaitPosition, nominalTranslation);
 
-      double nominalYawOfEnd = velocityProvider.computeNominalYaw(nominalEndXGaitPosition, startNode.getStepYaw());
+      double nominalYawOfEnd = velocityProvider.computeNominalYaw(nominalXGaitEndPosition, startNode.getStepYaw());
       if (Double.isNaN(nominalYawOfEnd))
          nominalYawOfEnd = startNode.getStepYaw();
 
-      endXGaitPose.setPosition(nominalEndXGaitPosition);
-      endXGaitPose.setOrientationYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
-      endXGaitPoseFrame.setPoseAndUpdate(endXGaitPose);
+      endOrientation.setYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
 
-      FramePoint2D nominalEndFootPosition = new FramePoint2D(endXGaitPoseFrame);
-      nominalEndFootPosition.setX(0.5 * movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()));
-      nominalEndFootPosition.setY(0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-      nominalEndFootPosition.changeFrameAndProjectToXYPlane(worldFrame);
-      FootstepNode.snapPointToGrid(nominalEndFootPosition);
+      footOffsetFromXGait.set(0.5 * movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
+                              0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
+      endOrientation.transform(footOffsetFromXGait, false);
 
-      Point2D endFootPosition = new Point2D(endNode.getX(movingQuadrant), endNode.getY(movingQuadrant));
+      nominalFootEndPosition.add(nominalXGaitEndPosition, footOffsetFromXGait);
 
-      double costOfNominalVelocity = desiredVelocityTrackingWeight * (EuclidCoreTools.norm(endNode.getX(movingQuadrant) - endFootPosition.getX(),
-                                                                                           endNode.getY(movingQuadrant) - endFootPosition.getY()));// + distanceFromNominalEndFootPosition);
+      FootstepNode.snapPointToGrid(nominalFootEndPosition);
 
-      if (costOfNominalVelocity < 0.0)
-         throw new RuntimeException("What");
+      double costOfNominalVelocity = desiredVelocityTrackingWeight * EuclidCoreTools
+            .norm(endNode.getX(movingQuadrant) - nominalFootEndPosition.getX(), endNode.getY(movingQuadrant) - nominalFootEndPosition.getY());
 
-
-
-      FootstepNode.snapPointToGrid(nominalEndXGaitPosition);
-      Point2D snappedStart = new Point2D(startXGaitPosition);
-      FootstepNode.snapPointToGrid(snappedStart);
+      FootstepNode.snapPointToGrid(nominalXGaitEndPosition);
+      FootstepNode.snapPointToGrid(startXGaitPosition, snappedXGaitStartPosition);
 
       double distanceFromNominalXGaitCenter;
-      if (nominalEndXGaitPosition.distance(startXGaitPosition) < 1e-2)
+      if (nominalXGaitEndPosition.distance(startXGaitPosition) < 1e-2)
       {
-         distanceFromNominalXGaitCenter = endXGaitPosition.distance(snappedStart);
+         distanceFromNominalXGaitCenter = endXGaitPosition.distance(snappedXGaitStartPosition);
       }
       else
       {
-         LineSegment2D acceptableTranslation = new LineSegment2D(snappedStart, nominalEndXGaitPosition);
-         distanceFromNominalXGaitCenter = acceptableTranslation.distance(endXGaitPosition);
+         acceptableTranslationLine.set(snappedXGaitStartPosition, nominalXGaitEndPosition);
+         distanceFromNominalXGaitCenter = acceptableTranslationLine.distance(endXGaitPosition);
       }
-      double costOfXGait = plannerParameters.getXGaitWeight() * (distanceFromNominalXGaitCenter);// + distanceFromNominalEndFootPosition);
+      double costOfXGait = plannerParameters.getXGaitWeight() * (distanceFromNominalXGaitCenter);
 
       return costOfNominalVelocity + costOfXGait;
-
-//      return plannerParameters.getXGaitWeight() * distanceFromNominalEndFootPosition;
    }
 
    static double computeMagnitudeOnEllipseInDirection(double maxX, double maxY, double xDirection, double yDirection)
