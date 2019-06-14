@@ -38,9 +38,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double maximum_step_yaw_ = -11.1;
    public double maximum_step_change_z_ = -11.1;
    public double body_ground_clearance_ = -11.1;
-   public double distance_heuristic_weight_ = -11.1;
+   public double distance_weight_ = -11.1;
    public double yaw_weight_ = -11.1;
    public double x_gait_weight_ = -11.1;
+   public double desired_velocity_weight_ = -11.1;
    public double cost_per_step_ = -11.1;
    public double step_up_weight_ = -11.1;
    public double step_down_weight_ = -11.1;
@@ -60,6 +61,8 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double minimum_hind_end_forward_distance_from_cliff_bottoms_ = -11.1;
    public double minimum_hind_end_backward_distance_from_cliff_bottoms_ = -11.1;
    public double minimum_lateral_distance_from_cliff_bottoms_ = -11.1;
+   public double final_turn_proximity_ = -11.1;
+   public double final_slow_down_proximity_ = -11.1;
 
    public QuadrupedFootstepPlannerParametersPacket()
    {
@@ -119,11 +122,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       body_ground_clearance_ = other.body_ground_clearance_;
 
-      distance_heuristic_weight_ = other.distance_heuristic_weight_;
+      distance_weight_ = other.distance_weight_;
 
       yaw_weight_ = other.yaw_weight_;
 
       x_gait_weight_ = other.x_gait_weight_;
+
+      desired_velocity_weight_ = other.desired_velocity_weight_;
 
       cost_per_step_ = other.cost_per_step_;
 
@@ -162,6 +167,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       minimum_hind_end_backward_distance_from_cliff_bottoms_ = other.minimum_hind_end_backward_distance_from_cliff_bottoms_;
 
       minimum_lateral_distance_from_cliff_bottoms_ = other.minimum_lateral_distance_from_cliff_bottoms_;
+
+      final_turn_proximity_ = other.final_turn_proximity_;
+
+      final_slow_down_proximity_ = other.final_slow_down_proximity_;
 
    }
 
@@ -378,13 +387,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return body_ground_clearance_;
    }
 
-   public void setDistanceHeuristicWeight(double distance_heuristic_weight)
+   public void setDistanceWeight(double distance_weight)
    {
-      distance_heuristic_weight_ = distance_heuristic_weight;
+      distance_weight_ = distance_weight;
    }
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
-      return distance_heuristic_weight_;
+      return distance_weight_;
    }
 
    public void setYawWeight(double yaw_weight)
@@ -403,6 +412,15 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
    public double getXGaitWeight()
    {
       return x_gait_weight_;
+   }
+
+   public void setDesiredVelocityWeight(double desired_velocity_weight)
+   {
+      desired_velocity_weight_ = desired_velocity_weight;
+   }
+   public double getDesiredVelocityWeight()
+   {
+      return desired_velocity_weight_;
    }
 
    public void setCostPerStep(double cost_per_step)
@@ -576,6 +594,24 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       return minimum_lateral_distance_from_cliff_bottoms_;
    }
 
+   public void setFinalTurnProximity(double final_turn_proximity)
+   {
+      final_turn_proximity_ = final_turn_proximity;
+   }
+   public double getFinalTurnProximity()
+   {
+      return final_turn_proximity_;
+   }
+
+   public void setFinalSlowDownProximity(double final_slow_down_proximity)
+   {
+      final_slow_down_proximity_ = final_slow_down_proximity;
+   }
+   public double getFinalSlowDownProximity()
+   {
+      return final_slow_down_proximity_;
+   }
+
 
    public static Supplier<QuadrupedFootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -640,11 +676,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_ground_clearance_, other.body_ground_clearance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_heuristic_weight_, other.distance_heuristic_weight_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_weight_, other.distance_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_gait_weight_, other.x_gait_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_velocity_weight_, other.desired_velocity_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
@@ -683,6 +721,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hind_end_backward_distance_from_cliff_bottoms_, other.minimum_hind_end_backward_distance_from_cliff_bottoms_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_lateral_distance_from_cliff_bottoms_, other.minimum_lateral_distance_from_cliff_bottoms_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_, other.final_turn_proximity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_slow_down_proximity_, other.final_slow_down_proximity_, epsilon)) return false;
 
 
       return true;
@@ -743,11 +785,13 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
 
       if(this.body_ground_clearance_ != otherMyClass.body_ground_clearance_) return false;
 
-      if(this.distance_heuristic_weight_ != otherMyClass.distance_heuristic_weight_) return false;
+      if(this.distance_weight_ != otherMyClass.distance_weight_) return false;
 
       if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
 
       if(this.x_gait_weight_ != otherMyClass.x_gait_weight_) return false;
+
+      if(this.desired_velocity_weight_ != otherMyClass.desired_velocity_weight_) return false;
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
@@ -786,6 +830,10 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       if(this.minimum_hind_end_backward_distance_from_cliff_bottoms_ != otherMyClass.minimum_hind_end_backward_distance_from_cliff_bottoms_) return false;
 
       if(this.minimum_lateral_distance_from_cliff_bottoms_ != otherMyClass.minimum_lateral_distance_from_cliff_bottoms_) return false;
+
+      if(this.final_turn_proximity_ != otherMyClass.final_turn_proximity_) return false;
+
+      if(this.final_slow_down_proximity_ != otherMyClass.final_slow_down_proximity_) return false;
 
 
       return true;
@@ -843,12 +891,14 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append(this.maximum_step_change_z_);      builder.append(", ");
       builder.append("body_ground_clearance=");
       builder.append(this.body_ground_clearance_);      builder.append(", ");
-      builder.append("distance_heuristic_weight=");
-      builder.append(this.distance_heuristic_weight_);      builder.append(", ");
+      builder.append("distance_weight=");
+      builder.append(this.distance_weight_);      builder.append(", ");
       builder.append("yaw_weight=");
       builder.append(this.yaw_weight_);      builder.append(", ");
       builder.append("x_gait_weight=");
       builder.append(this.x_gait_weight_);      builder.append(", ");
+      builder.append("desired_velocity_weight=");
+      builder.append(this.desired_velocity_weight_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
       builder.append("step_up_weight=");
@@ -886,7 +936,11 @@ public class QuadrupedFootstepPlannerParametersPacket extends Packet<QuadrupedFo
       builder.append("minimum_hind_end_backward_distance_from_cliff_bottoms=");
       builder.append(this.minimum_hind_end_backward_distance_from_cliff_bottoms_);      builder.append(", ");
       builder.append("minimum_lateral_distance_from_cliff_bottoms=");
-      builder.append(this.minimum_lateral_distance_from_cliff_bottoms_);
+      builder.append(this.minimum_lateral_distance_from_cliff_bottoms_);      builder.append(", ");
+      builder.append("final_turn_proximity=");
+      builder.append(this.final_turn_proximity_);      builder.append(", ");
+      builder.append("final_slow_down_proximity=");
+      builder.append(this.final_slow_down_proximity_);
       builder.append("}");
       return builder.toString();
    }

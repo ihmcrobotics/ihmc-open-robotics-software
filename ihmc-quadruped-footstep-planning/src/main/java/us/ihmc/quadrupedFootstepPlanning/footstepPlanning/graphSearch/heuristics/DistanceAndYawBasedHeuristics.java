@@ -28,10 +28,10 @@ public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
    {
       double bodyDistance = node.euclideanDistance(goalNode);
 
-      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, 1.0);
+      double referenceYaw = CostTools.computeReferenceYaw(node.getOrComputeXGaitCenterPoint(), node.getStepYaw(), goalNode, parameters.getFinalTurnProximity());
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), referenceYaw);
       double yawHeuristicCost = parameters.getYawWeight() * Math.abs(angleDifference);
-      double distanceHeuristicCost = parameters.getDistanceHeuristicWeight() * bodyDistance;
+      double distanceHeuristicCost = parameters.getDistanceWeight() * bodyDistance;
 
       double heightCost = 0.0;
 

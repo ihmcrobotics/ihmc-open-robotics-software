@@ -106,9 +106,15 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -242,10 +248,19 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -330,11 +345,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
 
       cdr.write_type_6(data.getBodyGroundClearance());
 
-      cdr.write_type_6(data.getDistanceHeuristicWeight());
+      cdr.write_type_6(data.getDistanceWeight());
 
       cdr.write_type_6(data.getYawWeight());
 
       cdr.write_type_6(data.getXGaitWeight());
+
+      cdr.write_type_6(data.getDesiredVelocityWeight());
 
       cdr.write_type_6(data.getCostPerStep());
 
@@ -373,6 +390,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       cdr.write_type_6(data.getMinimumHindEndBackwardDistanceFromCliffBottoms());
 
       cdr.write_type_6(data.getMinimumLateralDistanceFromCliffBottoms());
+
+      cdr.write_type_6(data.getFinalTurnProximity());
+
+      cdr.write_type_6(data.getFinalSlowDownProximity());
 
    }
 
@@ -424,11 +445,13 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setBodyGroundClearance(cdr.read_type_6());
       	
-      data.setDistanceHeuristicWeight(cdr.read_type_6());
+      data.setDistanceWeight(cdr.read_type_6());
       	
       data.setYawWeight(cdr.read_type_6());
       	
       data.setXGaitWeight(cdr.read_type_6());
+      	
+      data.setDesiredVelocityWeight(cdr.read_type_6());
       	
       data.setCostPerStep(cdr.read_type_6());
       	
@@ -468,6 +491,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       	
       data.setMinimumLateralDistanceFromCliffBottoms(cdr.read_type_6());
       	
+      data.setFinalTurnProximity(cdr.read_type_6());
+      	
+      data.setFinalSlowDownProximity(cdr.read_type_6());
+      	
 
    }
 
@@ -497,9 +524,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("maximum_step_yaw", data.getMaximumStepYaw());
       ser.write_type_6("maximum_step_change_z", data.getMaximumStepChangeZ());
       ser.write_type_6("body_ground_clearance", data.getBodyGroundClearance());
-      ser.write_type_6("distance_heuristic_weight", data.getDistanceHeuristicWeight());
+      ser.write_type_6("distance_weight", data.getDistanceWeight());
       ser.write_type_6("yaw_weight", data.getYawWeight());
       ser.write_type_6("x_gait_weight", data.getXGaitWeight());
+      ser.write_type_6("desired_velocity_weight", data.getDesiredVelocityWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_6("step_up_weight", data.getStepUpWeight());
       ser.write_type_6("step_down_weight", data.getStepDownWeight());
@@ -519,6 +547,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       ser.write_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms", data.getMinimumHindEndForwardDistanceFromCliffBottoms());
       ser.write_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms", data.getMinimumHindEndBackwardDistanceFromCliffBottoms());
       ser.write_type_6("minimum_lateral_distance_from_cliff_bottoms", data.getMinimumLateralDistanceFromCliffBottoms());
+      ser.write_type_6("final_turn_proximity", data.getFinalTurnProximity());
+      ser.write_type_6("final_slow_down_proximity", data.getFinalSlowDownProximity());
    }
 
    @Override
@@ -547,9 +577,10 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMaximumStepYaw(ser.read_type_6("maximum_step_yaw"));
       data.setMaximumStepChangeZ(ser.read_type_6("maximum_step_change_z"));
       data.setBodyGroundClearance(ser.read_type_6("body_ground_clearance"));
-      data.setDistanceHeuristicWeight(ser.read_type_6("distance_heuristic_weight"));
+      data.setDistanceWeight(ser.read_type_6("distance_weight"));
       data.setYawWeight(ser.read_type_6("yaw_weight"));
       data.setXGaitWeight(ser.read_type_6("x_gait_weight"));
+      data.setDesiredVelocityWeight(ser.read_type_6("desired_velocity_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setStepUpWeight(ser.read_type_6("step_up_weight"));
       data.setStepDownWeight(ser.read_type_6("step_down_weight"));
@@ -569,6 +600,8 @@ public class QuadrupedFootstepPlannerParametersPacketPubSubType implements us.ih
       data.setMinimumHindEndForwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_forward_distance_from_cliff_bottoms"));
       data.setMinimumHindEndBackwardDistanceFromCliffBottoms(ser.read_type_6("minimum_hind_end_backward_distance_from_cliff_bottoms"));
       data.setMinimumLateralDistanceFromCliffBottoms(ser.read_type_6("minimum_lateral_distance_from_cliff_bottoms"));
+      data.setFinalTurnProximity(ser.read_type_6("final_turn_proximity"));
+      data.setFinalSlowDownProximity(ser.read_type_6("final_slow_down_proximity"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket src, controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket dest)

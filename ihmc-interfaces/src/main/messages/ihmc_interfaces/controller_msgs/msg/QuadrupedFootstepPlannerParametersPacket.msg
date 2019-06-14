@@ -27,9 +27,10 @@ float64 minimum_step_yaw -11.1
 float64 maximum_step_yaw -11.1
 float64 maximum_step_change_z -11.1
 float64 body_ground_clearance -11.1
-float64 distance_heuristic_weight -11.1
+float64 distance_weight -11.1
 float64 yaw_weight -11.1
 float64 x_gait_weight -11.1
+float64 desired_velocity_weight -11.1
 float64 cost_per_step -11.1
 float64 step_up_weight -11.1
 float64 step_down_weight -11.1
@@ -49,3 +50,5 @@ float64 minimum_front_end_backward_distance_from_cliff_bottoms -11.1
 float64 minimum_hind_end_forward_distance_from_cliff_bottoms -11.1
 float64 minimum_hind_end_backward_distance_from_cliff_bottoms -11.1
 float64 minimum_lateral_distance_from_cliff_bottoms -11.1
+float64 final_turn_proximity -11.1
+float64 final_slow_down_proximity -11.1

@@ -42,6 +42,6 @@ public class DistanceAndYawBasedCost implements FootstepCost
       double stepYaw = endNode.getStepYaw() - startNode.getStepYaw();
 
       // don't include yaw, because this is captured in the step distance, too
-      return plannerParameters.getDistanceHeuristicWeight() * stepDistance;// + plannerParameters.getYawWeight() * stepYaw;
+      return plannerParameters.getDistanceWeight() * stepDistance;// + plannerParameters.getYawWeight() * stepYaw;
    }
 }

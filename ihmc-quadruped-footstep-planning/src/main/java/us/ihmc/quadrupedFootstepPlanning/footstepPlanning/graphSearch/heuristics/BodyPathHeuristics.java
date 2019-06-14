@@ -91,7 +91,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
          }
       }
 
-      double distanceCost = parameters.getDistanceHeuristicWeight() * remainingDistance;
+      double distanceCost = parameters.getDistanceWeight() * remainingDistance;
       double yawCost = parameters.getYawWeight() * Math.abs(yaw);
       double stepCost = parameters.getCostPerStep() * minSteps;
 

@@ -30,9 +30,10 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble maximumStepYaw = new YoDouble("maximumStepYaw", registry);
    private final YoDouble maximumStepChangeZ = new YoDouble("maximumStepChangeZ", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
-   private final YoDouble distanceHeuristicWeight = new YoDouble("distanceHeuristicWeight", registry);
+   private final YoDouble distanceWeight = new YoDouble("distanceWeight", registry);
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble xGaitWeight = new YoDouble("xGaitWeight", registry);
+   private final YoDouble desiredVelocityWeight = new YoDouble("desiredVelocityWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble stepUpWeight = new YoDouble("stepUpWeight", registry);
    private final YoDouble stepDownWeight = new YoDouble("stepDownWeight", registry);
@@ -52,6 +53,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    private final YoDouble minimumLateralDistanceFromCliffBottoms = new YoDouble("minimumLateralCliffHeightFromBottoms", registry);
    private final YoBoolean projectInsideUsingConvexHullDuringExpansion = new YoBoolean("projectInsideUsingConvexHullDuringExpansion", registry);
    private final YoBoolean projectInsideUsingConvexHullDuringPostProcessing = new YoBoolean("projectInsideUsingConvexHullDuringPostProcessing", registry);
+   private final YoDouble finalTurnProximity = new YoDouble("finalTurnProximity", registry);
+   private final YoDouble finalSlowDownProximity = new YoDouble("finalSlowDownProximity", registry);
 
    public YoFootstepPlannerParameters(FootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -199,9 +202,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    }
 
    @Override
-   public void setDistanceHeuristicWeight(double distanceHeuristicWeight)
+   public void setDistanceWeight(double distanceWeight)
    {
-      this.distanceHeuristicWeight.set(distanceHeuristicWeight);
+      this.distanceWeight.set(distanceWeight);
    }
 
    @Override
@@ -214,6 +217,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setXGaitWeight(double xGaitWeight)
    {
       this.xGaitWeight.set(xGaitWeight);
+   }
+
+   @Override
+   public void setDesiredVelocityWeight(double desiredVelocityWeight)
+   {
+      this.desiredVelocityWeight.set(desiredVelocityWeight);
    }
 
    @Override
@@ -322,6 +331,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public void setMinimumLateralDistanceFromCliffBottoms(double distance)
    {
       minimumLateralDistanceFromCliffBottoms.set(distance);
+   }
+
+   @Override
+   public void setFinalTurnProximity(double proximity)
+   {
+      this.finalTurnProximity.set(proximity);
+   }
+
+   @Override
+   public void setFinalSlowDownProximity(double proximity)
+   {
+      this.finalSlowDownProximity.set(proximity);
    }
 
    /** {@inheritDoc} */
@@ -479,9 +500,9 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
 
    /** {@inheritDoc} */
    @Override
-   public double getDistanceHeuristicWeight()
+   public double getDistanceWeight()
    {
-      return distanceHeuristicWeight.getDoubleValue();
+      return distanceWeight.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -496,6 +517,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getXGaitWeight()
    {
       return xGaitWeight.getDoubleValue();
+   }
+
+   @Override
+   public double getDesiredVelocityWeight()
+   {
+      return desiredVelocityWeight.getDoubleValue();
    }
 
    /** {@inheritDoc} */
@@ -621,6 +648,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParametersBas
    public double getMinimumLateralDistanceFromCliffBottoms()
    {
       return minimumLateralDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   @Override
+   public double getFinalTurnProximity()
+   {
+      return finalTurnProximity.getDoubleValue();
+   }
+
+   @Override
+   public double getFinalSlowDownProximity()
+   {
+      return finalSlowDownProximity.getDoubleValue();
    }
 
 }

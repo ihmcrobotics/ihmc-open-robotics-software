@@ -361,7 +361,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
 
-      StraightShotVelocityProvider velocityProvider = new StraightShotVelocityProvider();
+      StraightShotVelocityProvider velocityProvider = new StraightShotVelocityProvider(footstepPlannerParameters);
 
       XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), velocityProvider);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
