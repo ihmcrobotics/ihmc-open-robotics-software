@@ -77,6 +77,12 @@ public class TransferToStandingState extends WalkingState
       balanceManager.resetPushRecovery();
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+
+      // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
+      // restore the full foot contact.
+      if (previousStateEnum != null && previousStateEnum.isDoubleSupport())
+         feetManager.initializeContactStatesForDoubleSupport(null);
+
       RobotSide previousSupportSide = null;
       if (previousStateEnum != null)
       {
