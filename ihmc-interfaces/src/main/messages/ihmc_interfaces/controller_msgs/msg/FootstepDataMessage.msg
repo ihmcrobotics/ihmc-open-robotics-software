@@ -62,9 +62,15 @@ float64 swing_duration -1.0
 # The transferDuration is the time spent with the feet in ground contact before a step.
 # If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
 float64 transfer_duration -1.0
-# (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-# If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-# If the default is set to zero, the touchdown state will be disabled.
-float64 touchdown_duration -1.0
 # The time to delay this command on the controller side before being executed.
 float64 execution_delay_time 0.0
+
+# Time spent after touchdown to transition from heel or toe support to full foot support. Note, that this only has an
+# effect if the foot touches down non-flat. More specific: the foot pitch (in sole z-up frame) at touchdown must be
+# different from the pitch of the foothold pose provided in this message.
+float64 touchdown_duration -1.0
+# Time spent in toe or heel support before the step. This duration is part of the transfer duration and must therefore
+# be shorter then the transfer. Note, that this only has an effect if the swing trajectory is provided, the swing trajectory
+# has its first waypoint at time 0.0, and the pitch of the first swing waypoint (in sole z-up frame) is different from the
+# foot pitch.
+float64 liftoff_duration -1.0
