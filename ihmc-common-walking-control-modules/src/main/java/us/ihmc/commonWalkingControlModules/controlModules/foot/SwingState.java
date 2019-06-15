@@ -742,8 +742,6 @@ public class SwingState extends AbstractFootControlState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
-
          // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
          // any touchdown trajectory when doing step adjustment.
          if (activeTrajectoryType.getValue() == TrajectoryType.WAYPOINTS && Precision.equals(swingWaypoints.getLast().getTime(), swingDuration))
@@ -755,11 +753,13 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
             adjustedWaypoint.changeFrame(worldFrame);
             blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, adjustedWaypoint.getPosition(), finalLinearVelocity, touchdownAcceleration);
             touchdownTrajectory.setOrientation(adjustedWaypoint.getOrientation());
          }
          else
          {
             blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+            touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
             touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
          }
       }
