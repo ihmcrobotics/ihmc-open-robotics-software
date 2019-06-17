@@ -48,7 +48,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getMinimumStepYaw()
    {
-      return -getMaximumStepYaw();
+      return -0.2;
    }
 
    /** {@inheritDoc} */
@@ -74,19 +74,19 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getXGaitWeight()
    {
-      return 7.5;
+      return 0.0;//7.5;
    }
 
    @Override
    public double getDesiredVelocityWeight()
    {
-      return 1.0;
+      return 0.0;//1.0;
    }
 
    @Override
    public double getYawWeight()
    {
-      return 5.0;
+      return 2.5;
    }
 
    @Override
@@ -110,7 +110,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getHeuristicsInflationWeight()
    {
-      return 2.0;
+      return 1.75;
    }
 
    /** {@inheritDoc} */
