@@ -279,7 +279,7 @@ public class SnapBasedNodeChecker extends FootstepNodeChecker
 
       newStepPosition.changeFrame(previousXGaitFrame);
 
-      if ((newStepPosition.distance(nominalPreviousStepFromXGait) > maxReach))
+      if ((newStepPosition.distanceXY(nominalPreviousStepFromXGait) > maxReach))
       {
          if (DEBUG)
             PrintTools.debug("The node " + nodeToCheck + " is stepping too far.");
