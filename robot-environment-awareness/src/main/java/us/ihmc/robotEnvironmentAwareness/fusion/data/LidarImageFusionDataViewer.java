@@ -114,8 +114,8 @@ public class LidarImageFusionDataViewer
          if (!data.isSparse())
          {
             meshBuilder.addLine(center, centerEnd, lineWidth, regionColor);
-//            for (Point3D point : data.getPoints())
-//               meshBuilder.addTetrahedron(0.02, point, regionColor);
+            for (Point3D point : data.getPoints())
+               meshBuilder.addTetrahedron(0.02, point, regionColor);
          }
       }
 
