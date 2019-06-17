@@ -20,9 +20,9 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSn
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeTransitionCheckerOfCheckers;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -44,7 +44,7 @@ public class NodeCheckerRenderer extends AnimationTimer
    private final QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
 
-   private final FootstepNodeChecker nodeChecker;
+   private final FootstepNodeTransitionChecker nodeChecker;
 
    private final MeshView meshView = new MeshView();
    private final JavaFXMultiColorMeshBuilder meshBuilder;
@@ -67,8 +67,8 @@ public class NodeCheckerRenderer extends AnimationTimer
       snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForPostProcessing,
                                                           parameters::getProjectInsideUsingConvexHullDuringPostProcessing, true);
 
-      SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
-      nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
+      SnapBasedNodeTransitionChecker snapBasedNodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
+      nodeChecker = new FootstepNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParametersTopic, parameters::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings::set);

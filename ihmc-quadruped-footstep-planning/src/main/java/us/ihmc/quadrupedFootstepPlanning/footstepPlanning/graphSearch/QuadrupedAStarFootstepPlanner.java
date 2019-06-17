@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.QuadrupedGroundPlaneMessage;
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
@@ -27,16 +26,11 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.CostToGoHeuristicsBuilder;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.NodeComparator;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.heuristics.SpeedAndYawBasedHeuristics;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.StartAndGoalListener;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeCheckerOfCheckers;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.PlanarRegionCliffAvoider;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.VariableResolutionNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
@@ -86,6 +80,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
    private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
+   private final FootstepNodeTransitionChecker nodeTransitionChecker;
    private final QuadrupedFootstepPlannerListener listener;
    private final CostToGoHeuristics heuristics;
    private final NominalVelocityProvider velocityProvider;
@@ -111,13 +106,15 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    private final YoBoolean centerReachedGoal = new YoBoolean("centerReachedGoal", registry);
 
    public QuadrupedAStarFootstepPlanner(FootstepPlannerParameters parameters, QuadrupedXGaitSettingsReadOnly xGaitSettings, FootstepNodeChecker nodeChecker,
-                                        CostToGoHeuristics heuristics, NominalVelocityProvider velocityProvider, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
+                                        FootstepNodeTransitionChecker nodeTransitionChecker, CostToGoHeuristics heuristics,
+                                        NominalVelocityProvider velocityProvider, FootstepNodeExpansion nodeExpansion, FootstepCost stepCostCalculator,
                                         FootstepNodeSnapper snapper, FootstepNodeSnapper postProcessingSnapper, QuadrupedFootstepPlannerListener listener,
                                         YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.xGaitSettings = xGaitSettings;
       this.nodeChecker = nodeChecker;
+      this.nodeTransitionChecker = nodeTransitionChecker;
       this.heuristics = heuristics;
       this.velocityProvider = velocityProvider;
       this.nodeExpansion = nodeExpansion;
@@ -219,7 +216,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             startNodeSnapTransforms.put(robotQuadrant, snapTransform);
          }
       }
-      nodeChecker.addStartNode(startNode, startNodeSnapTransforms);
+      nodeTransitionChecker.addStartNode(startNode, startNodeSnapTransforms);
 
       FramePose2DReadOnly startPose = new FramePose2D(worldFrame, startNode.getOrComputeXGaitCenterPoint(), startNode.getStepYaw());
       startAndGoalListeners.parallelStream().forEach(listener -> listener.setInitialPose(startPose));
@@ -309,7 +306,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
    {
       highLevelPlanarRegionConstraintDataParameters.projectionInsideDelta = parameters.getProjectInsideDistanceForExpansion();
       highLevelPlanarRegionConstraintDataParameters.projectInsideUsingConvexHull = parameters.getProjectInsideUsingConvexHullDuringExpansion();
-      nodeChecker.setPlanarRegions(planarRegionsList);
+      nodeTransitionChecker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
       postProcessingSnapper.setPlanarRegions(planarRegionsList);
       this.planarRegionsList = planarRegionsList;
@@ -451,7 +448,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
       NodeComparator nodeComparator = new NodeComparator(graph, goalNode, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      validGoalNode.set(nodeChecker.isNodeValid(goalNode, null));
+      validGoalNode.set(nodeTransitionChecker.isNodeValid(goalNode, null));
       if (!validGoalNode.getBooleanValue())// && !parameters.getReturnBestEffortPlan())
       {
          if (debug)
@@ -562,15 +559,14 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
                listener.addNode(neighbor, nodeToExpand);
 
             // Checks if the footstep (center of the foot) is on a planar region
-            if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
+            if (!nodeTransitionChecker.isNodeValid(neighbor, nodeToExpand))
             {
                rejectedNodesCount++;
                continue;
             }
 
-            double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
-            graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
-
+            double transitionCost = stepCostCalculator.compute(nodeToExpand, neighbor);
+            graph.checkAndSetEdge(nodeToExpand, neighbor, transitionCost);
 
             if (/*!parameters.getReturnBestEffortPlan() || */endNode == null || stack.comparator().compare(neighbor, endNode) < 0)
                stack.add(neighbor);
@@ -683,6 +679,7 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 //      FootstepNodeExpansion expansion = new VariableResolutionNodeExpansion(parameters, xGaitSettings, snapper);
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
+      SnapBasedNodeTransitionChecker snapBasedNodeTransitionChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
       SnapBasedNodeChecker snapBasedNodeChecker = new SnapBasedNodeChecker(parameters, snapper);
       PlanarRegionCliffAvoider cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper);
 
@@ -694,7 +691,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       CostToGoHeuristics heuristics = heuristicsBuilder.buildHeuristics();
 
+      FootstepNodeTransitionChecker nodeTransitionChecker = new FootstepNodeTransitionCheckerOfCheckers(Arrays.asList(snapBasedNodeTransitionChecker));
       FootstepNodeChecker nodeChecker = new FootstepNodeCheckerOfCheckers(Arrays.asList(snapBasedNodeChecker, cliffAvoider));
+      nodeTransitionChecker.addPlannerListener(listener);
       nodeChecker.addPlannerListener(listener);
 
       NominalVelocityProvider velocityProvider = new StraightShotVelocityProvider(parameters);
@@ -708,8 +707,9 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
-      QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, heuristics, velocityProvider, expansion, footstepCost,
-                                                                                snapper, snapper, listener, registry);
+      QuadrupedAStarFootstepPlanner planner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics,
+                                                                                velocityProvider, expansion, footstepCost, snapper, snapper, listener,
+                                                                                registry);
 
       return planner;
    }
