@@ -34,6 +34,8 @@ public class LidarImageFusionDataFactory
 {
    private static final int MAX_NUMBER_OF_POINTS = 200000;
    private static final boolean displaySegmentedContour = false;
+   private static final double FLYING_POINT_THRESHOLD = 0.03;
+   private static final int FLYING_POINT_NEIGHTBORS = 5;
 
    public static LidarImageFusionData createLidarImageFusionData(Point3D[] pointCloud, BufferedImage bufferedImage, IntrinsicParameters intrinsicParameters,
                                                                  int pointCloudBufferSize, int columnSize, int rowSize)
@@ -119,12 +121,14 @@ public class LidarImageFusionDataFactory
             }
          }
       }
-
+      long filteringUpdatingStartTime = System.nanoTime();
       // update and calculate normal.
       for (SegmentationRawData fusionDataSegment : fusionDataSegments)
       {
+         fusionDataSegment.filtering(FLYING_POINT_THRESHOLD, FLYING_POINT_NEIGHTBORS);
          fusionDataSegment.update();
       }
+      System.out.println("SegmentationRawData filteringUpdatingStartTime time " + Conversions.nanosecondsToSeconds(System.nanoTime() - filteringUpdatingStartTime));
       System.out.println("SegmentationRawData updating time " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
 
       // set segment center in 2D.

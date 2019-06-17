@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 
 /**
@@ -75,6 +76,34 @@ public class SegmentationRawData
       points.add(point);
    }
 
+   public void filtering(double threshold, int neighborsThreshold)
+   {
+      List<Point3D> filteredPoints = new ArrayList<>();
+      for (Point3D point : points)
+      {
+         double closestDistance = Double.POSITIVE_INFINITY;
+         int numberOfNeighbors = 0;
+         for (Point3D otherPoint : points)
+         {
+            double distance = point.distance(otherPoint);
+
+            if (distance < closestDistance)
+            {
+               if (point != otherPoint)
+                  closestDistance = distance;
+            }
+            if (distance < threshold)
+            {
+               numberOfNeighbors++;
+            }
+         }
+         if (closestDistance < threshold && numberOfNeighbors > neighborsThreshold)
+            filteredPoints.add(point);
+      }
+      points.clear();
+      points.addAll(filteredPoints);
+   }
+
    public void update()
    {
       if (useAdjacentScore)
@@ -114,6 +143,24 @@ public class SegmentationRawData
    public void updateSparsity(double threshold)
    {
       isSparse = standardDeviation.getZ() > threshold;
+
+      if (!isSparse)
+      {
+         double centerRadius = 0.05;
+         double ratio = 0.4;
+         int numberOfInliers = 0;
+         for (Point3D point : points)
+         {
+            double distance = center.distance(point);
+            if (distance < centerRadius)
+               numberOfInliers++;
+         }
+
+         if (numberOfInliers < ratio * getWeight())
+         {
+            isSparse = true;
+         }
+      }
    }
 
    public void setId(int id)
