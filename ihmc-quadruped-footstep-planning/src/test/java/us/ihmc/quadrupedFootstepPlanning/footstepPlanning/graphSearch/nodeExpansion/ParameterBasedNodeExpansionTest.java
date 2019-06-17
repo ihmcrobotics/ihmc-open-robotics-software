@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
@@ -17,17 +16,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.FootstepPlanningRandomTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionsListPointSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -316,7 +309,7 @@ public class ParameterBasedNodeExpansionTest
       SimulationConstructionSet scs = new SimulationConstructionSet();
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      SnapBasedNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       scs.setGroundVisible(false);

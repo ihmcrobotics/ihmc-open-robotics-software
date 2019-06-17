@@ -31,7 +31,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValidInternal(FootstepNode node)
    {
       if (startNode != null && startNode.equals(node))
          return true;
@@ -61,7 +61,7 @@ public class PlanarRegionCliffAvoider extends FootstepNodeChecker
 
       if (isNearCliff)
       {
-         rejectNode(node, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
+         rejectNode(node, QuadrupedFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
          return false;
       }
 

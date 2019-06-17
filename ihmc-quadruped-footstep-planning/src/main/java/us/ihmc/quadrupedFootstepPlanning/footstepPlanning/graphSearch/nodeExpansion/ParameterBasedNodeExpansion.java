@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -76,6 +77,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                                                 0.5 * nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
       Point2D newXGaitPosition = new Point2D();
 
+      double maxNegativeYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMinimumStepYaw() : -parameters.getMaximumStepYaw();
+      double maxPositiveYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMaximumStepYaw() : -parameters.getMinimumStepYaw();
+
       // FIXME revisit this and see if the operations can be reduced.
       for (double movingX = -maxLength; movingX <= maxLength; movingX += resolution)
       {
@@ -90,9 +94,10 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             if (ellipticalVelocity > 1.0)
                continue;
 
-            double absoluteMaxYawDisplacement = InterpolationTools.hermiteInterpolate(maxYawDisplacement, 0.0, translation / maxReach);
-            double minYaw = Math.max(parameters.getMinimumStepYaw(), -absoluteMaxYawDisplacement);
-            double maxYaw = Math.min(parameters.getMaximumStepYaw(), absoluteMaxYawDisplacement);
+//            double absoluteMaxYawDisplacement = maxYawDisplacement;
+            double absoluteMaxYawDisplacement = InterpolationTools.hermiteInterpolate(maxYawDisplacement, 0.25 * maxYawDisplacement, translation / maxReach);
+            double minYaw = FootstepNode.snapToYawGrid(Math.max(maxNegativeYaw, -absoluteMaxYawDisplacement)) * FootstepNode.gridSizeYaw;
+            double maxYaw = FootstepNode.snapToYawGrid(Math.min(maxPositiveYaw, absoluteMaxYawDisplacement)) * FootstepNode.gridSizeYaw;
 
             Vector2D movingVector = new Vector2D(movingX, movingY);
             previousNodeOrientation.transform(movingVector);

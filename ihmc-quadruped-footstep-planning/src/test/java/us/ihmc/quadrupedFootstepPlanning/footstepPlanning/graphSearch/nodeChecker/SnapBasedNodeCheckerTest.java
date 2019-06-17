@@ -26,8 +26,8 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedF
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.FootstepNodeTransitionChecker;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -58,7 +58,7 @@ public class SnapBasedNodeCheckerTest
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                                                 parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
       nodeChecker.addPlannerListener(testListener);
@@ -224,7 +224,7 @@ public class SnapBasedNodeCheckerTest
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                                                 parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
       nodeChecker.addPlannerListener(testListener);
@@ -424,7 +424,7 @@ public class SnapBasedNodeCheckerTest
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                                                 parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
       nodeChecker.addPlannerListener(testListener);
@@ -613,7 +613,7 @@ public class SnapBasedNodeCheckerTest
       parameters.setDistanceInside(0.5 * cinderWidth);
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                                                 parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
-      FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
+      FootstepNodeTransitionChecker nodeChecker = new SnapBasedNodeTransitionChecker(parameters, snapper);
 
       TestListener testListener = new TestListener();
       nodeChecker.addPlannerListener(testListener);
@@ -710,6 +710,13 @@ public class SnapBasedNodeCheckerTest
       {
          rejectedNode.set(node);
          rejectedParentNode.set(parentNode);
+         reason.set(rejectionReason);
+      }
+
+      @Override
+      public void rejectNode(FootstepNode node, QuadrupedFootstepPlannerNodeRejectionReason rejectionReason)
+      {
+         rejectedNode.set(node);
          reason.set(rejectionReason);
       }
 

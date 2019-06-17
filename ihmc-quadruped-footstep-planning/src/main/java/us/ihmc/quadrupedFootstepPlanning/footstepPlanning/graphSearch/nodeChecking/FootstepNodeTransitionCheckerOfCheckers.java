@@ -1,20 +1,18 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedFootstepPlannerNodeRejectionReason;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.listeners.QuadrupedFootstepPlannerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
-import java.util.HashSet;
 import java.util.List;
 
-public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
+public class FootstepNodeTransitionCheckerOfCheckers extends FootstepNodeTransitionChecker
 {
-   private final List<FootstepNodeChecker> nodeCheckers;
+   private final List<FootstepNodeTransitionChecker> nodeCheckers;
 
-   public FootstepNodeCheckerOfCheckers(List<FootstepNodeChecker> nodeCheckers)
+   public FootstepNodeTransitionCheckerOfCheckers(List<FootstepNodeTransitionChecker> nodeCheckers)
    {
       this.nodeCheckers = nodeCheckers;
    }
@@ -26,11 +24,11 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    }
 
    @Override
-   public boolean isNodeValidInternal(FootstepNode node)
+   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
    {
-      for (FootstepNodeChecker checker : nodeCheckers)
+      for(FootstepNodeTransitionChecker checker : nodeCheckers)
       {
-         if (!checker.isNodeValid(node))
+         if(!checker.isNodeValid(node, previousNode))
             return false;
       }
       return true;
@@ -45,7 +43,7 @@ public class FootstepNodeCheckerOfCheckers extends FootstepNodeChecker
    @Override
    public void addPlannerListener(QuadrupedFootstepPlannerListener listener)
    {
-      for (FootstepNodeChecker nodeChecker : nodeCheckers)
+      for (FootstepNodeTransitionChecker nodeChecker : nodeCheckers)
          nodeChecker.addPlannerListener(listener);
    }
 
