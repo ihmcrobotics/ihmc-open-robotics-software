@@ -53,38 +53,15 @@ public class SnapBasedNodeTransitionChecker extends FootstepNodeTransitionChecke
    @Override
    public boolean isNodeValidInternal(FootstepNode nodeToCheck, FootstepNode previousNode)
    {
-      RobotQuadrant movingQuadrant = nodeToCheck.getMovingQuadrant();
-
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
-      RigidBodyTransform snapTransform = snapData.getSnapTransform();
-      /*
-      if (snapTransform.containsNaN())
-      {
-         if (DEBUG)
-         {
-            PrintTools.debug("Was not able to snap node:\n" + nodeToCheck);
-         }
-         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return false;
-      }
-
-      if (snapTransform.getM22() < Math.cos(parameters.getMinimumSurfaceInclineRadians()))
-      {
-         if (DEBUG)
-         {
-            PrintTools.debug("Surface incline was too steep at radians = " + Math.acos(snapTransform.getM22()) + "\n" + nodeToCheck);
-         }
-         rejectNode(nodeToCheck, previousNode, QuadrupedFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-
-         return false;
-      }
-            */
-
-
       if (previousNode == null)
       {
          return true;
       }
+
+      RobotQuadrant movingQuadrant = nodeToCheck.getMovingQuadrant();
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(nodeToCheck);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       double previousYaw = previousNode.getStepYaw();
       double currentYaw = nodeToCheck.getStepYaw();

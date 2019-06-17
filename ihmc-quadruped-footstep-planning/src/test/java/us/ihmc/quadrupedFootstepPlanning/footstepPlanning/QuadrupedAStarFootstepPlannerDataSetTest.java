@@ -34,6 +34,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
       settings.getAmbleMediumTimings().setMaxSpeed(0.4);
+      settings.setMaxYawSpeedFraction(5.0);
       return settings;
    }
 
@@ -44,36 +45,40 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       xGaitSettings = getXGaitSettings();
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
-         @Override
-         public double getMaximumFrontStepReach()
-         {
-            return 0.7;
-         }
-
-         public double getMaximumFrontStepLength()
-         {
-            return 0.6;
-         }
-
-         @Override
-         public double getMinimumFrontStepLength()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMinimumStepWidth()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMaximumStepWidth()
-         {
-            return 0.35;
-         }
+//         @Override
+//         public double getMaximumFrontStepReach()
+//         {
+//            return 0.7;
+//         }
+//
+//         public double getMaximumFrontStepLength()
+//         {
+//            return 0.6;
+//         }
+//
+//         @Override
+//         public double getMinimumFrontStepLength()
+//         {
+//            return -0.3;
+//         }
+//
+//         @Override
+//         public double getMinimumStepWidth()
+//         {
+//            return -0.3;
+//         }
+//
+//         @Override
+//         public double getMaximumStepWidth()
+//         {
+//            return 0.35;
+//         }
       };
-      AStarMessagerListener listener = new AStarMessagerListener(messager);
+      AStarMessagerListener listener;
+      if (VISUALIZE)
+         listener = new AStarMessagerListener(messager);
+      else
+         listener = null;
 
       return QuadrupedAStarFootstepPlanner.createPlanner(parameters, xGaitSettings, listener, registry);
    }
@@ -90,8 +95,8 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       QuadrupedAStarFootstepPlannerDataSetTest test = new QuadrupedAStarFootstepPlannerDataSetTest();
       VISUALIZE = true;
       test.setup();
-//      String errorMessage = test.runAssertions(DataSetName._20171114_135559_PartialShallowMaze);
-      String errorMessage = test.runAssertions(DataSetName._20171215_220208_SimpleStairs);
+      String errorMessage = test.runAssertions(DataSetName._20171115_171243_SimplePlaneAndWall);
+//      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
       assertTrue(errorMessage, errorMessage.isEmpty());
 //      if (activelyVisualize)
 //         test.visualizer.showAndSleep(true);

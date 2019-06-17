@@ -558,7 +558,14 @@ public class QuadrupedAStarFootstepPlanner implements QuadrupedBodyPathAndFootst
             if (listener != null)
                listener.addNode(neighbor, nodeToExpand);
 
-            // Checks if the footstep (center of the foot) is on a planar region
+            // Checks if the footstep is valid
+            if (!nodeChecker.isNodeValid(neighbor))
+            {
+               rejectedNodesCount++;
+               continue;
+            }
+
+            // Checks if the footstep transition is valid
             if (!nodeTransitionChecker.isNodeValid(neighbor, nodeToExpand))
             {
                rejectedNodesCount++;

@@ -23,10 +23,11 @@ public class SpeedBasedHeuristics extends CostToGoHeuristics
       double yawDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(node.getStepYaw(), goalNode.getStepYaw()));
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredYawSpeed = xGaitSettings.getMaxYawSpeedFraction() * desiredSpeed;
-      double maxYaw = Math.min(desiredYawSpeed * (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration()), parameters.getMaximumStepYaw());
+      double maxYaw = Math.min(desiredYawSpeed * (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration()),
+                               0.5 * (parameters.getMaximumStepYaw() - parameters.getMinimumStepYaw()));
       double minDistanceSteps = 4.0 * bodyDistance / desiredSpeed;
       double minYawSteps = 2.0 * yawDistance / maxYaw;
 
-      return parameters.getCostPerStep() * (minDistanceSteps + minYawSteps);
+      return parameters.getCostPerStep() * Math.max(minDistanceSteps, minYawSteps);
    }
 }
