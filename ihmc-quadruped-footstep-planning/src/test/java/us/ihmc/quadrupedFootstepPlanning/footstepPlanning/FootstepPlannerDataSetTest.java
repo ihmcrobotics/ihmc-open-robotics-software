@@ -59,7 +59,7 @@ public abstract class FootstepPlannerDataSetTest
                                                                                                                    YoAppearance.DarkGreen());
 
    // Whether to start the UI or not.
-   protected static boolean VISUALIZE = true;
+   protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
    protected static boolean VERBOSE = false;
