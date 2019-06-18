@@ -1,13 +1,11 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
+import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI.API;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIGraphic;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -17,24 +15,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PlanarRegionsGraphic extends FXUIGraphic
+public class PlanarRegionsGraphic extends Group
 {
    private static final PlanarRegionColorPicker colorPicker = new PlanarRegionColorPicker();
 
-   private final PlanarRegionsList planarRegionsList;
+   private volatile List<MeshView> regionMeshViews;
 
    public PlanarRegionsGraphic()
    {
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();  // start with a flat ground region
       convexPolygon.addVertex(10.0, 10.0);
       convexPolygon.addVertex(-10.0, 10.0);
       convexPolygon.addVertex(-10.0, -10.0);
       convexPolygon.addVertex(10.0, -10.0);
       convexPolygon.update();
       PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), convexPolygon);
-      planarRegionsList = new PlanarRegionsList(groundPlane);
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(groundPlane);
 
-      List<MeshView> regionMeshViews = new ArrayList<>();
+      generateMeshes(planarRegionsList);
+   }
+
+   public void generateMeshes(PlanarRegionsList planarRegionsList)
+   {
+      List<MeshView> updateRegionMeshViews = new ArrayList<>();
 
       for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
@@ -55,10 +58,17 @@ public class PlanarRegionsGraphic extends FXUIGraphic
 
          MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
          regionMeshView.setMaterial(new PhongMaterial(getRegionColor(regionId)));
-         regionMeshViews.add(regionMeshView);
+         updateRegionMeshViews.add(regionMeshView);
       }
 
-      rootChildren.addAll(regionMeshViews);
+      regionMeshViews = updateRegionMeshViews; // volatile set
+   }
+
+   public void update()
+   {
+      List<MeshView> meshViews = regionMeshViews;  // volatile get
+      getChildren().clear();
+      getChildren().addAll(meshViews);
    }
 
    public static Color getRegionColor(int regionId)
