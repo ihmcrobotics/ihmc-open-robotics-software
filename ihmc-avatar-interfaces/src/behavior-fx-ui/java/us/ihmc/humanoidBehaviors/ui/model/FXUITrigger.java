@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.model;
 
-public enum FXUIStateTransitionTrigger
+public enum FXUITrigger
 {
    START,
    POSITION_LEFT_CLICK,
