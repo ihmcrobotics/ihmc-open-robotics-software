@@ -15,7 +15,7 @@ public class AtlasHumanoidRobotContextDataFactory extends HumanoidRobotContextDa
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       return new AtlasHumanoidRobotContextData(processedJointData.get(), forceSensorDataHolder.get(), centerOfPressureDataHolder.get(),
-                                               robotMotionStatusHolder.get(), jointDesiredOutputList.get(), rawJointData.get());
+                                               robotMotionStatusHolder.get(), jointDesiredOutputList.get(), sensorDataContext.get(), rawJointData.get());
    }
 
    public void setRawJointData(RawJointSensorDataHolderMap value)

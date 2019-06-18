@@ -158,6 +158,8 @@ public class FlamingoStanceState extends SingleSupportState
    {
       super.onExit();
 
+      feetManager.initializeContactStatesForDoubleSupport(swingSide);
+
       balanceManager.disablePelvisXYControl();
    }
 

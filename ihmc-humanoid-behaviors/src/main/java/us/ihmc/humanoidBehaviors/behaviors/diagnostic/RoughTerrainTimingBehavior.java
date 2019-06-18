@@ -38,9 +38,9 @@ public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrai
       BehaviorAction planning = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Planning State");
 
          }
@@ -73,9 +73,9 @@ public class RoughTerrainTimingBehavior extends StateMachineBehavior<RoughTerrai
       BehaviorAction walking = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Walking State");
 
          }

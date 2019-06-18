@@ -2,7 +2,7 @@ package us.ihmc.avatar;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.robotics.math.filters.DelayedYoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -92,7 +92,7 @@ public class DRCSimulationOutputWriterForControllerThread implements DRCOutputPr
    }
 
    @Override
-   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, JointDesiredOutputListBasics lowLevelControllerOutput)
+   public void setLowLevelControllerCoreOutput(HumanoidRobotContextJointData estimatedState, JointDesiredOutputListBasics lowLevelControllerOutput)
    {
 
       for (int i = 0; i < lowLevelControllerOutput.getNumberOfJointsWithDesiredOutput(); i++)

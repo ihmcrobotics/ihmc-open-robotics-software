@@ -21,11 +21,6 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
       return true;
    }
 
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
-
    @Override
    public void onBehaviorEntered()
    {

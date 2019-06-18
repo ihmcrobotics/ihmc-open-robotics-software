@@ -1,38 +1,43 @@
-package us.ihmc.tools.taskExecutor;
+package us.ihmc.robotics.testExecutor;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.taskExecutor.NullState;
+import us.ihmc.robotics.taskExecutor.StateExecutor;
+
 public class TaskExecutorTest
 {
 
    @Test
    public void testEmptyExecutor()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       assertTrue(taskExecutor.isDone());
-      Task currentTask = taskExecutor.getCurrentTask();
+      State currentTask = taskExecutor.getCurrentTask();
 
-      assertTrue(currentTask.isDone());
+      assertTrue(currentTask.isDone(Double.NaN));
 
-      Task nextTask = taskExecutor.getNextTask();
+      State nextTask = taskExecutor.getNextTask();
       assertNull(nextTask);
 
-      Task lastTask = taskExecutor.getLastTask();
+      State lastTask = taskExecutor.getLastTask();
       assertNull(lastTask);
    }
 
    @Test
    public void testWithOneNullTask()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
       assertTrue(taskExecutor.isDone());
 
-      NullTask nullTask0 = new NullTask();
+      NullState nullTask0 = new NullState();
       taskExecutor.submit(nullTask0);
 
       assertFalse(taskExecutor.isDone());
@@ -46,7 +51,7 @@ public class TaskExecutorTest
       assertFalse(taskExecutor.isDone());
 
       taskExecutor.doControl();
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
       assertNull(taskExecutor.getNextTask());
       assertNull(taskExecutor.getLastTask());
       assertTrue(taskExecutor.isDone());
@@ -55,13 +60,13 @@ public class TaskExecutorTest
    @Test
    public void testWithSeveralNullTasks()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
-      NullTask nullTask0 = new NullTask();
-      NullTask nullTask1 = new NullTask();
-      NullTask nullTask2 = new NullTask();
-      NullTask nullTask3 = new NullTask();
-      NullTask nullTask4 = new NullTask();
+      NullState nullTask0 = new NullState();
+      NullState nullTask1 = new NullState();
+      NullState nullTask2 = new NullState();
+      NullState nullTask3 = new NullState();
+      NullState nullTask4 = new NullState();
       taskExecutor.submit(nullTask0);
       taskExecutor.submit(nullTask1);
       taskExecutor.submit(nullTask2);
@@ -69,7 +74,7 @@ public class TaskExecutorTest
       taskExecutor.submit(nullTask4);
 
       assertFalse(taskExecutor.isDone());
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
       assertTrue(nullTask0 == taskExecutor.getNextTask());
       assertTrue(nullTask4 == taskExecutor.getLastTask());
 
@@ -109,24 +114,24 @@ public class TaskExecutorTest
       assertNull(taskExecutor.getNextTask());
       assertNull(taskExecutor.getLastTask());
 
-      assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
+      assertTrue(taskExecutor.getCurrentTask() instanceof NullState);
    }
 
    @Test
    public void testSomeTasks()
    {
-      int[] doActionsPerTask = new int[] { 1 };
+      int[] doActionsPerTask = new int[] {1};
       runATest(doActionsPerTask);
 
-      doActionsPerTask = new int[] { 1, 2 };
-
-      runATest(doActionsPerTask);
-
-      doActionsPerTask = new int[] { 2, 3, 7, 10, 1, 3 };
+      doActionsPerTask = new int[] {1, 2};
 
       runATest(doActionsPerTask);
 
-      doActionsPerTask = new int[] { 2, 3, 7, 10, 1, 1 };
+      doActionsPerTask = new int[] {2, 3, 7, 10, 1, 3};
+
+      runATest(doActionsPerTask);
+
+      doActionsPerTask = new int[] {2, 3, 7, 10, 1, 1};
 
       runATest(doActionsPerTask);
 
@@ -135,7 +140,7 @@ public class TaskExecutorTest
    @Test
    public void testAddingTasksOnTheFly()
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       CountActionsTask exampleTask0 = new CountActionsTask(2);
 
@@ -204,7 +209,7 @@ public class TaskExecutorTest
 
    private void runATest(int[] doActionsPerTask)
    {
-      TaskExecutor taskExecutor = new TaskExecutor();
+      StateExecutor taskExecutor = new StateExecutor();
 
       CountActionsTask[] exampleTasks = new CountActionsTask[doActionsPerTask.length];
 
@@ -242,7 +247,7 @@ public class TaskExecutorTest
             assertEquals(exampleTasks[currentTaskIndex + 1], taskExecutor.getNextTask());
          }
 
-         Task lastTask = taskExecutor.getLastTask();
+         State lastTask = taskExecutor.getLastTask();
          if (lastTask != null)
             assertEquals(exampleTasks[exampleTasks.length - 1], lastTask);
 
@@ -250,12 +255,12 @@ public class TaskExecutorTest
          {
             if (i < currentTaskIndex)
             {
-               assertTrue(exampleTasks[i].isDone());
+               assertTrue(exampleTasks[i].isDone(Double.NaN));
                assertTrue(exampleTasks[i].checkNumberOfCalls(1, doActionsPerTask[i], 1));
 
             }
             else if (currentTaskDoActionCount < doActionsPerTask[currentTaskIndex])
-               assertFalse(exampleTasks[i].isDone());
+               assertFalse(exampleTasks[i].isDone(Double.NaN));
          }
 
          if (currentTaskIndex < doActionsPerTask.length)
@@ -263,12 +268,12 @@ public class TaskExecutorTest
             if ((currentTaskDoActionCount >= doActionsPerTask[currentTaskIndex]))
             {
                exampleTasks[currentTaskIndex].checkNumberOfCalls(1, currentTaskDoActionCount, 1);
-               assertTrue(exampleTasks[currentTaskIndex].isDone());
+               assertTrue(exampleTasks[currentTaskIndex].isDone(Double.NaN));
             }
             else
             {
                exampleTasks[currentTaskIndex].checkNumberOfCalls(1, currentTaskDoActionCount, 0);
-               assertFalse(exampleTasks[currentTaskIndex].isDone());
+               assertFalse(exampleTasks[currentTaskIndex].isDone(Double.NaN));
             }
          }
       }

@@ -12,8 +12,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,13 +25,14 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
 
    private FramePose3D targetOrientationInWorldFrame;
-   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private PipeLine<BehaviorAction> pipeLine;
    private final  WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
 
    public TurnInPlaceBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
                               HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime )
    {
       super(robotName, ros2Node);
+      pipeLine = new PipeLine<>(yoTime);
       walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
       this.referenceFrames = referenceFrames;
       setupPipeline();

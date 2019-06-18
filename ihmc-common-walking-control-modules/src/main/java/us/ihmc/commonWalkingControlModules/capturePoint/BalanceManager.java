@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
@@ -295,11 +298,6 @@ public class BalanceManager
    public double getNextTransferDurationAdjustedForReachability()
    {
       return icpPlanner.getTransferDuration(1);
-   }
-
-   public double getCurrentTouchdownDuration()
-   {
-      return icpPlanner.getTouchdownDuration(0);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
