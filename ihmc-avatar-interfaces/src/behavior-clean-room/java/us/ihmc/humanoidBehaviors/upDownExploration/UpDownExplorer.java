@@ -163,7 +163,7 @@ public class UpDownExplorer
    {
       newWaypoint.getPose().set(midFeetZUpPose);
 
-      double randomTurn = Math.PI / 3.0 + random.nextDouble() * (Math.PI / 3.0);
+      double randomTurn = 0.25 * Math.PI + random.nextDouble() * 0.25 * Math.PI;
 
       Vector3D robotToCenter = new Vector3D(upDownCenter.get());
       robotToCenter.sub(midFeetZUpPose.getPosition());
