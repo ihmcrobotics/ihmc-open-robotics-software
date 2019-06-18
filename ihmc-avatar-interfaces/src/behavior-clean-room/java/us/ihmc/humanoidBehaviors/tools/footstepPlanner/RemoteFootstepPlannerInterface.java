@@ -33,7 +33,7 @@ public class RemoteFootstepPlannerInterface
    public static final double STEP_DOWN_DISTANCE_QUALIFIER = 0.05;
 
    public static final double DEFAULT_TIMEOUT = 12.0;
-   public static final double DEFAULT_PERCEIVE_TIME_REQUIRED = 22.0;
+   public static final double DEFAULT_PERCEIVE_TIME_REQUIRED = 26.0;
    public static final double DEFAULT_TRANSFER_TIME_FLAT_UP = 0.8;
    public static final double DEFAULT_TRANSFER_TIME_DOWN    = 2.0;
    public static final double DEFAULT_SWING_TIME_FLAT_UP    = 1.2;
