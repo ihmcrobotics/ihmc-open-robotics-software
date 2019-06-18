@@ -8,8 +8,10 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSetting
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
+import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
@@ -45,7 +47,10 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract double getStandPrepAngle(String jointName);
 
-   public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+   public default RobotROSClockCalculator getROSClockCalculator()
+   {
+      return new WallTimeBasedROSClockCalculator();
+   }
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
 
@@ -94,7 +99,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     *
     * @return the custom output writer.
     */
-   public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
+                                                                           HumanoidRobotContextData contextData)
    {
       return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
    }

@@ -73,6 +73,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -136,6 +138,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -174,9 +179,11 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.write_type_6(data.getTransferDuration());
 
+      cdr.write_type_6(data.getExecutionDelayTime());
+
       cdr.write_type_6(data.getTouchdownDuration());
 
-      cdr.write_type_6(data.getExecutionDelayTime());
+      cdr.write_type_6(data.getLiftoffDuration());
 
    }
 
@@ -202,9 +209,11 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       	
       data.setTransferDuration(cdr.read_type_6());
       	
+      data.setExecutionDelayTime(cdr.read_type_6());
+      	
       data.setTouchdownDuration(cdr.read_type_6());
       	
-      data.setExecutionDelayTime(cdr.read_type_6());
+      data.setLiftoffDuration(cdr.read_type_6());
       	
 
    }
@@ -227,8 +236,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("swing_trajectory_blend_duration", data.getSwingTrajectoryBlendDuration());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
-      ser.write_type_6("touchdown_duration", data.getTouchdownDuration());
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
+      ser.write_type_6("touchdown_duration", data.getTouchdownDuration());
+      ser.write_type_6("liftoff_duration", data.getLiftoffDuration());
    }
 
    @Override
@@ -249,8 +259,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setSwingTrajectoryBlendDuration(ser.read_type_6("swing_trajectory_blend_duration"));
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
-      data.setTouchdownDuration(ser.read_type_6("touchdown_duration"));
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
+      data.setTouchdownDuration(ser.read_type_6("touchdown_duration"));
+      data.setLiftoffDuration(ser.read_type_6("liftoff_duration"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepDataMessage src, controller_msgs.msg.dds.FootstepDataMessage dest)

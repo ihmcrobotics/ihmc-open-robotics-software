@@ -82,17 +82,17 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
 
    private final YoBoolean startFingerCalibration;
    private final YoBoolean isCalibratingFingers;
-   private final TimestampProvider timestampProvider;
+   private final TimestampProvider monotonicTimeProvider;
    private final YoDouble fingerCalibrationStartTime;
    private final YoDouble fingerCalibrationDuration;
 
    public ValkyrieRosControlFingerStateEstimator(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
                                                  List<YoPositionJointHandleHolder> yoPositionJointHandleHolders,
-                                                 List<YoJointStateHandleHolder> yoJointStateHandleHolders, TimestampProvider timestampProvider,
+                                                 List<YoJointStateHandleHolder> yoJointStateHandleHolders, TimestampProvider monotonicTimeProvider,
                                                  StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
                                                  SensorProcessingConfiguration sensorProcessingConfiguration, YoVariableRegistry registry)
    {
-      this.timestampProvider = timestampProvider;
+      this.monotonicTimeProvider = monotonicTimeProvider;
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       List<OneDoFJointBasics> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
 
@@ -334,7 +334,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
 
    private void performCalibrationUsingFingerJointEncoders()
    {
-      double currentTime = Conversions.nanosecondsToSeconds(timestampProvider.getTimestamp());
+      double currentTime = Conversions.nanosecondsToSeconds(monotonicTimeProvider.getTimestamp());
 
       if (startFingerCalibration.getValue())
       {

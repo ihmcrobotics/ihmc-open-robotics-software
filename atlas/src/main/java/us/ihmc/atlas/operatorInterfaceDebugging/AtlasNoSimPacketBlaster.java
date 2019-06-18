@@ -111,7 +111,8 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
 
-      robotConfigurationData.setTimestamp(random.nextInt(1800) * Conversions.millisecondsToNanoseconds(100));
+      robotConfigurationData.setWallTime(random.nextInt(1800) * Conversions.millisecondsToNanoseconds(100));
+      robotConfigurationData.setMonotonicTime(random.nextInt(1800) * Conversions.millisecondsToNanoseconds(100));
 
       for (int i = 0; i < numberOfJoints; i++)
       {

@@ -308,4 +308,69 @@ public class FootstepNode
 
       return Math.atan2(deltaY, deltaX);
    }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, Point2DReadOnly newPosition, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newPosition.getX(), newPosition.getY(), previousNode, nominalStanceLength, nominalStanceWidth);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
+                                        previousNode.getNominalStanceLength(), previousNode.getNominalStanceWidth());
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, double newXPosition, double newYPosition, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, FootstepNode.snapToGrid(newXPosition), FootstepNode.snapToGrid(newYPosition), previousNode,
+                                        nominalStanceLength, nominalStanceWidth);
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode)
+   {
+      return constructNodeFromOtherNode(newMovingQuadrant, newXIndex, newYIndex, previousNode, previousNode.getNominalStanceLength(),
+                                        previousNode.getNominalStanceWidth());
+   }
+
+   public static FootstepNode constructNodeFromOtherNode(RobotQuadrant newMovingQuadrant, int newXIndex, int newYIndex, FootstepNode previousNode,
+                                                         double nominalStanceLength, double nominalStanceWidth)
+   {
+      int xFrontLeft = previousNode.getXIndex(RobotQuadrant.FRONT_LEFT);
+      int yFrontLeft = previousNode.getYIndex(RobotQuadrant.FRONT_LEFT);
+      int xFrontRight = previousNode.getXIndex(RobotQuadrant.FRONT_RIGHT);
+      int yFrontRight = previousNode.getYIndex(RobotQuadrant.FRONT_RIGHT);
+      int xHindLeft = previousNode.getXIndex(RobotQuadrant.HIND_LEFT);
+      int yHindLeft = previousNode.getYIndex(RobotQuadrant.HIND_LEFT);
+      int xHindRight = previousNode.getXIndex(RobotQuadrant.HIND_RIGHT);
+      int yHindRight = previousNode.getYIndex(RobotQuadrant.HIND_RIGHT);
+
+      switch (newMovingQuadrant)
+      {
+      case FRONT_LEFT:
+         xFrontLeft = newXIndex;
+         yFrontLeft = newYIndex;
+         break;
+      case FRONT_RIGHT:
+         xFrontRight = newXIndex;
+         yFrontRight = newYIndex;
+         break;
+      case HIND_LEFT:
+         xHindLeft = newXIndex;
+         yHindLeft = newYIndex;
+         break;
+      case HIND_RIGHT:
+         xHindRight = newXIndex;
+         yHindRight = newYIndex;
+         break;
+      }
+      return new FootstepNode(newMovingQuadrant, xFrontLeft, yFrontLeft, xFrontRight, yFrontRight, xHindLeft, yHindLeft, xHindRight, yHindRight,
+                              nominalStanceLength, nominalStanceWidth);
+   }
 }
