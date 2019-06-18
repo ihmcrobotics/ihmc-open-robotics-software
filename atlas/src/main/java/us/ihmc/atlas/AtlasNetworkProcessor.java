@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -17,27 +16,26 @@ import us.ihmc.communication.configuration.NetworkParameters;
 
 public class AtlasNetworkProcessor
 {
-
-   public static void main(String[] args) throws URISyntaxException, JSAPException
+   public static void main(String[] args) throws JSAPException
    {
       JSAP jsap = new JSAP();
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model")
-                                                                   .setShortFlag('m')
-                                                                   .setRequired(true)
-                                                                   .setStringParser(JSAP.STRING_PARSER);
+                                                                .setShortFlag('m')
+                                                                .setRequired(true)
+                                                                .setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
 
       FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand")
-                                                                       .setShortFlag('l')
-                                                                       .setRequired(false)
-                                                                       .setStringParser(JSAP.STRING_PARSER);
+                                                                    .setShortFlag('l')
+                                                                    .setRequired(false)
+                                                                    .setStringParser(JSAP.STRING_PARSER);
       FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand")
-                                                                         .setShortFlag('r')
-                                                                         .setRequired(false)
-                                                                         .setStringParser(JSAP.STRING_PARSER);
+                                                                      .setShortFlag('r')
+                                                                      .setRequired(false)
+                                                                      .setStringParser(JSAP.STRING_PARSER);
 
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
