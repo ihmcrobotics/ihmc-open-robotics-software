@@ -107,7 +107,7 @@ public class AtlasBehaviorSimulation
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = createForManualTest(new AtlasRobotModel(AtlasBehaviorModule.ATLAS_VERSION, RobotTarget.SCS, false),
-                                                                    new FlatGroundEnvironment());
+                                                          new FlatGroundEnvironment());
       scs.simulate();
    }
 }
