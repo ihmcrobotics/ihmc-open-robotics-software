@@ -405,10 +405,6 @@ public interface ICPPlannerInterface
    double getTransferDuration(int stepNumber);
 
    double getSwingDuration(int stepNumber);
-   
-   void setTouchdownDuration(int stepNumber, double duration);
-   
-   double getTouchdownDuration(int stepNumber);
 
    /**
     * Changes the duration for the last transfer when going to standing state.

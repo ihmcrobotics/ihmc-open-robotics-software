@@ -96,7 +96,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
       else
       {
-         return newestConfigurationData.getTimestamp();
+         return newestConfigurationData.getMonotonicTime();
       }
    }
 
@@ -113,7 +113,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
             break;
          }
 
-         if (data.getTimestamp() <= key)
+         if (data.getMonotonicTime() <= key)
          {
             return data;
          }
@@ -145,7 +145,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          return -1;
       }
       updateFullRobotModel(robotConfigurationData, model, forceSensorDataHolder);
-      return robotConfigurationData.getTimestamp();
+      return robotConfigurationData.getMonotonicTime();
    }
 
    public boolean updateFullRobotModelWithNewestData(FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder)

@@ -12,8 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -292,12 +290,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public double getEstimatorDT()
    {
       return 0.002;
-   }
-
-   @Override
-   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
-   {
-      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
 
    @Override

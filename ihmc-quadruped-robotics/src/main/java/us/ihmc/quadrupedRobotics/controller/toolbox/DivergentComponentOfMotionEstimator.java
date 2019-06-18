@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.toolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -96,5 +97,10 @@ public class DivergentComponentOfMotionEstimator
    public void getDCMPositionEstimate(FramePoint3D dcmPositionEstimateToPack)
    {
       dcmPositionEstimateToPack.setIncludingFrame(yoDcmPositionEstimate);
+   }
+
+   public FramePoint3DReadOnly getDCMPositionEstimate()
+   {
+      return yoDcmPositionEstimate;
    }
 }

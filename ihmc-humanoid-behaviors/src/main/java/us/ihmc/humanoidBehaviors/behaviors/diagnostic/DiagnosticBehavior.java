@@ -36,6 +36,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -86,9 +87,9 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.taskExecutor.NullState;
+import us.ihmc.robotics.taskExecutor.PipeLine;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.taskExecutor.NullTask;
-import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -106,8 +107,9 @@ public class DiagnosticBehavior extends AbstractBehavior
    private static final boolean FAST_MOTION = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
+   private boolean initialized = false;
 
-   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine;
 
    /**
     * FIXME Should have a packet from the controller to let know when it is ready to execute
@@ -252,11 +254,11 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node,
-                             WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
+                             YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
-
+      pipeLine = new PipeLine<>(yoTime);
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;
@@ -492,7 +494,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          armZeroJointAngleConfigurationOffsets.put(robotSide, armZeroJointAngleConfigurationOffset);
 
          upperArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(chest, upperArmBody), OneDoFJointBasics.class));
-         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(upperArmJoints.get(robotSide)), OneDoFJointBasics.class));
+         upperArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(upperArmJoints.get(robotSide)),
+                                                                              OneDoFJointBasics.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide),
                                                                     upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
@@ -504,7 +507,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
          lowerArmJoints.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(lowerArmBody, hand), OneDoFJointBasics.class));
-         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(lowerArmJoints.get(robotSide)), OneDoFJointBasics.class));
+         lowerArmJointsClone.put(robotSide, MultiBodySystemTools.filterJoints(MultiBodySystemFactories.cloneKinematicChain(lowerArmJoints.get(robotSide)),
+                                                                              OneDoFJointBasics.class));
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide),
                                                                     lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length
                                                                           - 1].getSuccessor().getBodyFixedFrame());
@@ -1319,7 +1323,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
       submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(10.0), 0.0);
 
-      pipeLine.submitSingleTaskStage(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullState());
 
       // Do a "Y" stance with the foot outside
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 1.1);
@@ -1332,7 +1336,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitChestHomeCommand(true);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(robotSide.negateIfRightSide(25.0)));
 
-      pipeLine.submitSingleTaskStage(new NullTask());
+      pipeLine.submitSingleTaskStage(new NullState());
 
       // Go back to stand prep but don't put the foot on the ground yet
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
@@ -2396,6 +2400,8 @@ public class DiagnosticBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      initialized = false;
+
    }
 
    private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
@@ -2609,6 +2615,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          default:
             break;
          }
+         //JJC simply here to get junit test working. they unit test  
+         initialized = true;
          requestedDiagnostic.set(null);
       }
    }
@@ -2834,7 +2842,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return pipeLine.isDone();
+      return initialized && pipeLine.isDone();
    }
 
    @Override

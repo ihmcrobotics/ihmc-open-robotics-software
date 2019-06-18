@@ -33,7 +33,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.MultiStageFootstepPlanningModule;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -759,12 +758,6 @@ public abstract class FootstepPlannerToolboxDataSetTest
       public double getStandPrepAngle(String jointName)
       {
          return 0;
-      }
-
-      @Override
-      public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
-      {
-         return null;
       }
 
       @Override
