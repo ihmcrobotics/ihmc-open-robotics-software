@@ -120,11 +120,14 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.LowLevelState;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 
 public class CrossRobotCommandRandomTools
 {
@@ -158,6 +161,8 @@ public class CrossRobotCommandRandomTools
       set.add(LowLevelOneDoFJointDesiredDataHolder.class);
       set.add(RawJointSensorDataHolderMap.class);
       set.add(ForceSensorDataHolder.class);
+      set.add(SensorDataContext.class);
+      set.add(ImuData.class);
       set.add(HumanoidRobotContextData.class);
       set.add(AtlasHumanoidRobotContextData.class);
       return set;
@@ -349,6 +354,11 @@ public class CrossRobotCommandRandomTools
    {
       return MecanoRandomTools.nextSpatialAcceleration(random, nextElementIn(random, possibleFrames), nextElementIn(random, possibleFrames),
                                                        nextElementIn(random, possibleFrames));
+   }
+
+   public static DenseMatrix64F nextDenseMatrix64F(Random random)
+   {
+      return RandomMatrices.createRandom(random.nextInt(10), random.nextInt(10), random);
    }
 
    public static DenseMatrix64F nextDenseMatrix64F(Random random, int numRow, int numCol)
@@ -1409,9 +1419,11 @@ public class CrossRobotCommandRandomTools
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody,
                                                                                                              possibleFrames);
+      SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
       HumanoidRobotContextData next = new HumanoidRobotContextData(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder,
-                                                                   robotMotionStatusHolder, jointDesiredOutputList);
+                                                                   robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext);
       next.setTimestamp(random.nextLong());
+      next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
       return next;
@@ -1431,12 +1443,76 @@ public class CrossRobotCommandRandomTools
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody,
                                                                                                              possibleFrames);
+      SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = nextRawJointSensorDataHolderMap(random, ensureNonEmptyCommand, rootBody);
       AtlasHumanoidRobotContextData next = new AtlasHumanoidRobotContextData(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder,
-                                                                             robotMotionStatusHolder, jointDesiredOutputList, rawJointSensorDataHolderMap);
+                                                                             robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext,
+                                                                             rawJointSensorDataHolderMap);
       next.setTimestamp(random.nextLong());
+      next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      return next;
+   }
+
+   public static SensorDataContext nextSensorDataContext(Random random, RigidBodyBasics rootBody)
+   {
+      return nextSensorDataContext(random, false, rootBody);
+   }
+
+   public static SensorDataContext nextSensorDataContext(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody)
+   {
+      SensorDataContext next = new SensorDataContext();
+
+      List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
+      int numberOfJoints = random.nextInt(allJoints.size());
+      if (ensureNonEmptyCommand)
+         numberOfJoints = Math.max(numberOfJoints, 1);
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
+         next.registerJoint(joint.getName()).set(nextLowLevelState(random));
+      }
+
+      int numberOfImus = random.nextInt(10);
+      if (ensureNonEmptyCommand)
+         numberOfImus = Math.max(numberOfImus, 1);
+      for (int imuIndex = 0; imuIndex < numberOfImus; imuIndex++)
+      {
+         next.registerImu("imu" + imuIndex).set(nextImuData(random));
+      }
+
+      int numberOfForceSensors = random.nextInt(10);
+      if (ensureNonEmptyCommand)
+         numberOfForceSensors = Math.max(numberOfForceSensors, 1);
+      for (int forceSensorIndex = 0; forceSensorIndex < numberOfForceSensors; forceSensorIndex++)
+      {
+         next.registerForceSensor("ForceSensor" + forceSensorIndex).set(nextDenseMatrix64F(random, 6, 1));
+      }
+
+      return next;
+   }
+
+   public static ImuData nextImuData(Random random)
+   {
+      ImuData next = new ImuData();
+      next.setAngularVelocity(nextVector3D(random));
+      next.setLinearAcceleration(nextVector3D(random));
+      next.setOrientation(nextQuaternion(random));
+      return next;
+   }
+
+   public static LowLevelState nextLowLevelState(Random random)
+   {
+      LowLevelState next = new LowLevelState();
+      next.setPosition(random.nextDouble());
+      next.setVelocity(random.nextDouble());
+      next.setAcceleration(random.nextDouble());
+      next.setEffort(random.nextDouble());
+      next.setPositionValid(random.nextBoolean());
+      next.setVelocityValid(random.nextBoolean());
+      next.setAccelerationValid(random.nextBoolean());
+      next.setEffortValid(random.nextBoolean());
       return next;
    }
 
@@ -1817,7 +1893,7 @@ public class CrossRobotCommandRandomTools
          }
          else
          {
-            throw new RuntimeException("Unexpected type: " + parameterType.getSimpleName());
+            throw new RuntimeException("Unexpected type: " + parameterType.getSimpleName() + " for " + generator.getName());
          }
       }
 

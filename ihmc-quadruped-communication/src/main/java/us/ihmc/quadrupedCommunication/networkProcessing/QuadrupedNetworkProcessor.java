@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
-import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -8,6 +7,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -15,8 +15,8 @@ import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.bodyTeleop.QuadrupedBodyTeleopModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.footstepPlanning.QuadrupedFootstepPlanningModule;
 import us.ihmc.quadrupedCommunication.networkProcessing.heightTeleop.QuadrupedBodyHeightTeleopModule;
+import us.ihmc.quadrupedCommunication.networkProcessing.reaUpdater.QuadrupedREAStateUpdater;
 import us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop.QuadrupedStepTeleopModule;
-import us.ihmc.quadrupedCommunication.networkProcessing.xBox.QuadrupedXBoxModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -31,7 +31,6 @@ public class QuadrupedNetworkProcessor
    private final boolean DEBUG = false;
    private QuadrupedStepTeleopModule stepTeleopModule;
 
-   public static final int xBoxPort = 8005;
    public static final int bodyHeightPort = 8006;
    public static final int footstepPlanningPort = 8007;
    public static final int bodyTeleopPort = 8009;
@@ -66,8 +65,9 @@ public class QuadrupedNetworkProcessor
       tryToStartModule(() -> setupStepTeleopModule(robotModel, xGaitSettings, pointFootSnapperParameters, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyHeightTeleopModule(robotModel, nominalHeight, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupBodyTeleopModule(robotModel, logModelProvider, params, pubSubImplementation));
-      tryToStartModule(() -> setupXBoxModule(robotModel, xGaitSettings, nominalHeight, logModelProvider, params, pubSubImplementation));
       tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params, pubSubImplementation));
+      tryToStartModule(() -> setupREAStateUpdater(robotModel.getRobotDescription().getName(), params));
+
       setupQuadrupedSupportPlanarRegionPublisherModule(robotModel, groundContactPoints, params, pubSubImplementation);
    }
 
@@ -148,15 +148,6 @@ public class QuadrupedNetworkProcessor
                                                 params.logBodyTeleopModuleEnabled(), pubSubImplementation));
    }
 
-   private void setupXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,
-                                LogModelProvider logModelProvider, QuadrupedNetworkModuleParameters params,
-                                DomainFactory.PubSubImplementation pubSubImplementation) throws IOException
-   {
-      if (!params.isXBoxModuleEnabled())
-         return;
-      modules.add(new QuadrupedXBoxModule(modelFactory, defaultXGaitSettings, nominalBodyHeight, logModelProvider, params.visualizeXBoxModule(), pubSubImplementation));
-   }
-
    private void setupRobotEnvironmentAwarenessModule(QuadrupedNetworkModuleParameters params, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       if (params.isRobotEnvironmentAwarenessModuleEnabled())
@@ -176,6 +167,11 @@ public class QuadrupedNetworkProcessor
          }
       }
    }
+   private void setupREAStateUpdater(String robotName, QuadrupedNetworkModuleParameters params)
+   {
+      if (params.isAutoREAStateUpdaterEnabled())
+         new QuadrupedREAStateUpdater(robotName, PubSubImplementation.FAST_RTPS);
+   }  
 
    protected void connect(PacketCommunicator communicator)
    {

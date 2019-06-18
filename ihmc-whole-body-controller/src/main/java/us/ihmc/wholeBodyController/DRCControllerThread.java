@@ -3,6 +3,8 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -31,8 +33,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
@@ -109,7 +111,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
-   public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, DRCRobotSensorInformation sensorInformation,
+   private final HumanoidRobotContextJointData proccessedJointData = new HumanoidRobotContextJointData();
+
+   public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, HumanoidRobotSensorInformation sensorInformation,
                               HighLevelHumanoidControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
                               DRCOutputProcessor outputProcessor, RealtimeRos2Node realtimeRos2Node, RobotVisualizer robotVisualizer, double gravity,
                               double estimatorDT)
@@ -153,7 +157,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       registry.addChild(robotController.getYoVariableRegistry());
       if (outputProcessor != null)
       {
-         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder());
+         outputProcessor.setLowLevelControllerCoreOutput(proccessedJointData, threadDataSynchronizer.getControllerDesiredJointDataHolder());
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
@@ -176,11 +180,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
                                                                    WholeBodyControllerParameters<RobotSide> robotModel,
-                                                                   DRCRobotSensorInformation sensorInformation)
+                                                                   HumanoidRobotSensorInformation sensorInformation)
    {
       ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
 
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
+      AvatarRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       if (lidarParameters != null)
       {
          listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
@@ -222,7 +226,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                                                             YoDouble yoTime, double controlDT, double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                            DRCRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            HumanoidRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
@@ -365,6 +369,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                robotController.initialize();
                if (outputProcessor != null)
                {
+                  HumanoidRobotContextTools.updateContext(controllerFullRobotModel, proccessedJointData);
                   outputProcessor.initialize();
                }
                firstTick.set(false);
@@ -391,6 +396,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             if (outputProcessor != null)
             {
+               HumanoidRobotContextTools.updateContext(controllerFullRobotModel, proccessedJointData);
                outputProcessor.processAfterController(controllerTimestamp.getLongValue());
             }
             totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());

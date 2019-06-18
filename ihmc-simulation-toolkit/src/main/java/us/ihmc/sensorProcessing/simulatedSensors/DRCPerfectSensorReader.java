@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -50,17 +49,12 @@ public class DRCPerfectSensorReader implements SensorReader
    }
 
    @Override
-   public void read()
+   public long read(SensorDataContext sensorDataContext)
    {
-      if(rawSensorReader != null)
+      if (rawSensorReader != null)
       {
          rawSensorReader.read();
       }
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
-   {
-      return null;
+      return sensorOutputMapReadOnly.getMonotonicTime();
    }
 }

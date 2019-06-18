@@ -15,4 +15,6 @@ public enum QuadrupedGait
    {
       return endPhaseShift;
    }
+
+   public static QuadrupedGait[] values = values();
 }

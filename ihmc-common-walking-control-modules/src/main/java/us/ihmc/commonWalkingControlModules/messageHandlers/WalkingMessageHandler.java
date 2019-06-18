@@ -92,7 +92,6 @@ public class WalkingMessageHandler
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
-   private final YoDouble defaultTouchdownTime = new YoDouble("defaultTouchdownTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
@@ -126,10 +125,9 @@ public class WalkingMessageHandler
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
-                                double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                YoVariableRegistry parentRegistry)
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
+                                SideDependentList<? extends ContactablePlaneBody> contactableFeet, StatusMessageOutputManager statusOutputManager,
+                                YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
 
@@ -138,7 +136,6 @@ public class WalkingMessageHandler
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.defaultSwingTime.set(defaultSwingTime);
-      this.defaultTouchdownTime.set(defaultTouchdownTime);
       this.defaultInitialTransferTime.set(defaultInitialTransferTime);
       this.defaultFinalTransferTime.set(defaultFinalTransferTime);
       this.finalTransferTime.set(defaultFinalTransferTime);
@@ -227,7 +224,7 @@ public class WalkingMessageHandler
       lastCommandID.set(command.getCommandId());
 
       if (isWalkingPaused.getValue())
-      { 
+      {
          /*
           * The walking was paused, when paused isWalking remains true. We're
           * receiving a new series of footsteps, let's reset isWalking so the
@@ -431,13 +428,13 @@ public class WalkingMessageHandler
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTiming(double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
+   public void adjustTiming(double newSwingDuration, double newTransferDuration)
    {
       if (upcomingFootstepTimings.isEmpty())
       {
          throw new RuntimeException("Can not adjust timing of upciming step - have no steps.");
       }
-      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
+      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -729,18 +726,6 @@ public class WalkingMessageHandler
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
 
-   public double getDefaultTouchdownTime()
-   {
-      return defaultTouchdownTime.getDoubleValue();
-   }
-
-   public double getNextTouchdownDuration()
-   {
-      if (upcomingFootstepTimings.isEmpty())
-         return getDefaultTouchdownTime();
-      return upcomingFootstepTimings.get(0).getTouchdownDuration();
-   }
-
    public double getInitialTransferTime()
    {
       return defaultInitialTransferTime.getDoubleValue();
@@ -863,13 +848,9 @@ public class WalkingMessageHandler
             transferDuration = defaultTransferTime.getDoubleValue();
       }
 
-      double touchdownDuration = footstep.getTouchdownDuration();
-      if (Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
-      {
-         touchdownDuration = defaultTouchdownTime.getDoubleValue();
-      }
-
-      timingToSet.setTimings(swingDuration, touchdownDuration, transferDuration);
+      timingToSet.setTimings(swingDuration, transferDuration);
+      timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());
+      timingToSet.setLiftoffDuration(footstep.getLiftoffDuration());
 
       switch (executionTiming)
       {

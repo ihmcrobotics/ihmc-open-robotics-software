@@ -234,7 +234,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp()));
+      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getWallTime()));
 
 
       if (fusedIMUSensor != null)
@@ -274,7 +274,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
-         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getVisionSensorTimestamp());
+         pelvisPoseHistoryCorrection.doControl(sensorOutputMapReadOnly.getWallTime());
       }
 
       updateVisualizers();

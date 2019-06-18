@@ -20,12 +20,14 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 public class SnapAndWiggleSingleStep
 {
    private final WiggleParameters wiggleParameters = new WiggleParameters();
-   private PlanarRegionsList planarRegionsList;
    private final SnapAndWiggleSingleStepParameters parameters;
+   private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
@@ -37,18 +39,21 @@ public class SnapAndWiggleSingleStep
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
+      PlanarRegionsList steppableRegions = new PlanarRegionsList(planarRegionsList.getPlanarRegionsAsList()
+                                                                                  .stream()
+                                                                                  .filter(region -> region.getConvexHull().getArea() >= parameters.getMinPlanarRegionArea())
+                                                                                  .filter(region -> region.getNormal().getZ() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
+                                                                                  .collect(Collectors.toList()));
+      this.planarRegionsList.set(steppableRegions);
    }
 
    public ConvexPolygon2D snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygon, boolean walkingForward) throws SnappingFailedException
    {
-      if (planarRegionsList == null)
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
+      if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
          return null;
       }
-
-      planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getConvexHull().getArea() < parameters.getMinPlanarRegionArea());
-      planarRegionsList.getPlanarRegionsAsList().removeIf(region -> region.getNormal().getZ() < Math.cos(parameters.getMaxPlanarRegionAngle()));
 
       FramePose3D solePoseBeforeSnapping = new FramePose3D(solePose);
       PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
@@ -82,6 +87,7 @@ public class SnapAndWiggleSingleStep
          throws SnappingFailedException
    {
       PlanarRegion regionToMoveTo = new PlanarRegion();
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, regionToMoveTo);
       if (snapTransform == null)
       {
@@ -211,6 +217,8 @@ public class SnapAndWiggleSingleStep
       Point3D highestPointInSoleFrame = new Point3D();
       LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
       Point3D closestPointOnCliff = new Point3D();
+
+      PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
       double highestPointZ = PlanarRegionBaseOfCliffAvoider
             .findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame,
                                      closestPointOnCliff);
