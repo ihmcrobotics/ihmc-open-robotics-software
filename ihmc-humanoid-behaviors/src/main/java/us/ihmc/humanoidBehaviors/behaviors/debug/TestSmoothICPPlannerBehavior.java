@@ -155,7 +155,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Finished Walking Forward");
+            publishTextToSpeech("Finished Walking Forward");
          }
       };
 

@@ -1,8 +1,8 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -15,6 +15,7 @@ ihmc {
 mainDependencies {
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-models-visualizers", version: "source"
+   compile group: "us.ihmc", name: "ihmc-quadruped-footstep-planning-visualizers", version: "source"
 }
 
 testDependencies {

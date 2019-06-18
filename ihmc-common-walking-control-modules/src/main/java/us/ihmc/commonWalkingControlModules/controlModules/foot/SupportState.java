@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -22,13 +23,18 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -112,6 +118,11 @@ public class SupportState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
+   private final BooleanProvider avoidFootRotations;
+   private final BooleanProvider dampFootRotations;
+   private final DoubleProvider footDamping;
+   private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
+
    private final FootRotationDetector footRotationDetector;
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
@@ -191,6 +202,12 @@ public class SupportState extends AbstractFootControlState
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
       footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
+
+      String feetManagerName = FeetManager.class.getSimpleName();
+      String paramRegistryName = getClass().getSimpleName() + "Parameters";
+      avoidFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "avoidFootRotations", registry, false);
+      dampFootRotations = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "dampFootRotations", registry, false);
+      footDamping = ParameterProvider.getOrCreateParameter(feetManagerName, paramRegistryName, "footDamping", registry, 0.0);
    }
 
    @Override
@@ -296,6 +313,21 @@ public class SupportState extends AbstractFootControlState
 
       updateHoldPositionSetpoints();
 
+      localGains.set(gains);
+      boolean dampingRotations = false;
+
+      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      {
+         if (dampFootRotations.getValue())
+         {
+            PID3DGainsReadOnly orientationGains = gains.getOrientationGains();
+            PID3DGains localOrientationGains = localGains.getOrientationGains();
+            localOrientationGains.setProportionalGains(0.0, 0.0, orientationGains.getProportionalGains()[2]);
+            localOrientationGains.setDerivativeGains(footDamping.getValue(), footDamping.getValue(), orientationGains.getDerivativeGains()[2]);
+            dampingRotations = true;
+         }
+      }
+
       // update the control frame
       footSwitch.computeAndPackCoP(cop2d);
       if (cop2d.containsNaN())
@@ -315,14 +347,12 @@ public class SupportState extends AbstractFootControlState
       bodyFixedControlledPose.setToZero(controlFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       desiredCopPosition.setIncludingFrame(cop2d, 0.0);
-      desiredCopPosition.setIncludingFrame(desiredSoleFrame, desiredCopPosition);
+      desiredCopPosition.setReferenceFrame(desiredSoleFrame);
       desiredCopPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
-      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredCopPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
-      spatialFeedbackControlCommand.setGains(gains);
+      spatialFeedbackControlCommand.setGains(localGains);
 
       // set selection matrices
       accelerationSelectionMatrix.resetSelection();
@@ -337,7 +367,7 @@ public class SupportState extends AbstractFootControlState
          isDirectionFeedbackControlled[4] = true; // control y position
          isDirectionFeedbackControlled[2] = true; // control z orientation
       }
-      if (copOnEdge.getBooleanValue())
+      if (copOnEdge.getBooleanValue() || dampingRotations)
       {
          isDirectionFeedbackControlled[0] = true; // control x orientation
          isDirectionFeedbackControlled[1] = true; // control y orientation
@@ -357,8 +387,6 @@ public class SupportState extends AbstractFootControlState
       // update visualization
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
-
-      footRotationDetector.compute();
    }
 
 

@@ -13,7 +13,6 @@ import us.ihmc.valkyrie.imu.MicroStrainData;
  */
 public class YoSwitchableFilterModeIMUHandleHolder extends YoIMUHandleHolder
 {
-   private final SwitchableFilterModeIMUHandle handle;
    private final YoEnum<MicroStrainData.MicrostrainFilterType> filterTypeToUse;
 
    public static YoSwitchableFilterModeIMUHandleHolder create(IMUHandle complimentaryFilterHandle, IMUHandle kalmanFilterHandle, IMUDefinition definition, YoVariableRegistry parentRegistry)
@@ -24,8 +23,6 @@ public class YoSwitchableFilterModeIMUHandleHolder extends YoIMUHandleHolder
    private YoSwitchableFilterModeIMUHandleHolder(final SwitchableFilterModeIMUHandle handle, IMUDefinition imuDefinition, YoVariableRegistry parentRegistry)
    {
       super(handle, imuDefinition, parentRegistry);
-
-      this.handle = handle;
 
       filterTypeToUse = new YoEnum<>(handle.getName() + "_filterTypeToUse", parentRegistry, MicroStrainData.MicrostrainFilterType.class);
 

@@ -6,23 +6,27 @@ import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 
 public class QuadrupedRequestedSteppingStateCommand implements Command<QuadrupedRequestedSteppingStateCommand, QuadrupedRequestedSteppingStateMessage>
 {
+   private long sequenceId;
    private QuadrupedSteppingRequestedEvent requestedSteppingState;
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       requestedSteppingState = null;
    }
 
    @Override
    public void set(QuadrupedRequestedSteppingStateCommand other)
    {
+      sequenceId = other.sequenceId;
       requestedSteppingState = other.getRequestedSteppingState();
    }
 
    @Override
    public void setFromMessage(QuadrupedRequestedSteppingStateMessage message)
    {
+      sequenceId = message.getSequenceId();
       requestedSteppingState = QuadrupedSteppingRequestedEvent.fromByte(message.getQuadrupedSteppingRequestedEvent());
    }
 
@@ -46,5 +50,11 @@ public class QuadrupedRequestedSteppingStateCommand implements Command<Quadruped
    public boolean isCommandValid()
    {
       return requestedSteppingState != null;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

@@ -27,7 +27,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
-   private RemoteQuadrupedTeleopManager stepTeleopManager;
+   protected RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
 
    @BeforeEach
@@ -96,7 +96,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      double groundClearance = 0.1;
+      double groundClearance = 0.05;
 
       List<QuadrupedTimedStepMessage> steps = new ArrayList<>();
       steps.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(RobotQuadrant.FRONT_LEFT, new Point3D(0.55, 0.1, 0.0), groundClearance, 0.1, 0.43));

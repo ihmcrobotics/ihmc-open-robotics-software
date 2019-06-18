@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -38,7 +38,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.6"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
@@ -54,7 +54,7 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.11"
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.11"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"

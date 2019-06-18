@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -84,7 +85,7 @@ public class FlamingoStanceState extends SingleSupportState
 
       if (icpErrorIsTooLarge)
       {
-         FrameConvexPolygon2D supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+         FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
          FrameConvexPolygon2D combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
          if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
          {

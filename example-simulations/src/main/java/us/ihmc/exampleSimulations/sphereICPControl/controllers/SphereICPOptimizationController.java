@@ -3,10 +3,10 @@ package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -29,6 +30,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -62,7 +64,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final StateMachine<SupportState, State> stateMachine;
 
-   private final ContinuousCMPBasedICPPlanner icpPlanner;
+   private final SmoothCMPBasedICPPlanner icpPlanner;
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -110,19 +112,19 @@ public class SphereICPOptimizationController implements GenericSphereController
 
       omega0.set(controlToolbox.getOmega0());
       heightController = new BasicHeightController(controlToolbox, registry);
-      icpPlanner = new ContinuousCMPBasedICPPlanner(controlToolbox.getBipedSupportPolygons(), controlToolbox.getContactableFeet(),
-                                                    controlToolbox.getCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), registry,
-                                                    yoGraphicsListRegistry);
-      icpPlanner.setOmega0(omega0.getDoubleValue());
-      icpPlanner.initializeParameters(controlToolbox.getCapturePointPlannerParameters());
+      icpPlanner = new SmoothCMPBasedICPPlanner(controlToolbox.getFullRobotModel(), controlToolbox.getBipedSupportPolygons(), controlToolbox.getSoleZUpFrames(),
+                                                controlToolbox.getContactableFeet(), null, null, registry, yoGraphicsListRegistry, 9.81,
+                                                controlToolbox.getNewCapturePointPlannerParameters());
+      icpPlanner.setDefaultPhaseTimes(1.0, 1.0);
+      icpPlanner.setOmega0(omega0.getValue());
 
       icpGains = new YoICPControlGains("CoMController", registry);
       icpGains.setKpOrthogonalToMotion(3.0);
       icpGains.setKpParallelToMotion(2.0);
 
-      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getBipedSupportPolygons(),
-                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(),
-                                                                controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getSoleZUpFrames(),
+                                                                controlToolbox.getBipedSupportPolygons(), controlToolbox.getICPControlPolygons(),
+                                                                controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
       StateMachineFactory<SupportState, State> factory = new StateMachineFactory<>(SupportState.class);
       factory.setNamePrefix("supportstateMachine").setRegistry(registry).buildYoClock(yoTime);
@@ -145,6 +147,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       yoGraphicsListRegistry.registerYoGraphic("forceViz", forceVisualizer);
 
       parentRegistry.addChild(registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
    }
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -190,6 +193,9 @@ public class SphereICPOptimizationController implements GenericSphereController
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
+         centerOfMass.setToZero(centerOfMassFrame);
+         centerOfMass.changeFrame(worldFrame);
+
          icpReferenceTrack.setBallLoop(desiredICP);
          icpTrack.setBallLoop(icp);
          cmpTrack.setBallLoop(yoDesiredCMP);
@@ -286,6 +292,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    }
 
    private final FootstepTiming timing = new FootstepTiming();
+   private final SimpleAdjustableFootstep footstep = new SimpleAdjustableFootstep();
 
    private class SingleSupportState implements State
    {
@@ -305,7 +312,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
             if (footstep != null)
             {
-               icpOptimizationController.getFootstepSolution(footstep);
+               footstep.setPose(icpOptimizationController.getFootstepSolution());
             }
          }
 
@@ -333,9 +340,12 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
          icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
 
-         icpOptimizationController.addFootstepToPlan(nextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextNextFootstep, timing);
+         footstep.set(nextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
 
          RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
 
@@ -391,7 +401,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
                if (footstep != null)
                {
-                  icpOptimizationController.getFootstepSolution(footstep);
+                  footstep.setPose(icpOptimizationController.getFootstepSolution());
                }
             }
          }
@@ -426,9 +436,12 @@ public class SphereICPOptimizationController implements GenericSphereController
          icpPlanner.addFootstepToPlan(nextNextFootstep, timing);
          icpPlanner.addFootstepToPlan(nextNextNextFootstep, timing);
 
-         icpOptimizationController.addFootstepToPlan(nextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextFootstep, timing);
-         icpOptimizationController.addFootstepToPlan(nextNextNextFootstep, timing);
+         footstep.set(nextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
+         footstep.set(nextNextNextFootstep);
+         icpOptimizationController.addFootstepToPlan(footstep, timing.getSwingTime(), timing.getTransferTime());
 
          RobotSide transferToSide = nextFootstep.getRobotSide().getOppositeSide();
 

@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Double;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -31,7 +32,6 @@ import us.ihmc.ros2.Ros2Node;
 
 public class KinematicsPlanningBehavior extends AbstractBehavior
 {
-   // TODO : hold hand!
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double defaultRigidBodyWeight = 20.0;
@@ -50,6 +50,8 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> wholeBodyTrajectoryPublisher;
 
    private double trajectoryTime = 0.0;
+   private int planningResult = -1;
+   private int numberOfValidKeyFrames = -1;
 
    public KinematicsPlanningBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                      FullHumanoidRobotModel fullRobotModel)
@@ -72,6 +74,8 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    {
       keyFrameTimes.clear();
       rigidBodyMessages.clear();
+      planningResult = -1;
+      numberOfValidKeyFrames = -1;
    }
 
    public void setKeyFrameTimes(double trajectoryTime, int numberOfKeyFrames)
@@ -159,18 +163,21 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       if (toolboxOutputQueue.isNewPacketAvailable())
       {
          KinematicsPlanningToolboxOutputStatus solution = toolboxOutputQueue.poll();
+         planningResult = solution.getPlanId();
+         numberOfValidKeyFrames = solution.getRobotConfigurations().size();
 
          Double keyFrameTimes = solution.getKeyFrameTimes();
-
-         if (keyFrameTimes.size() != solution.getKeyFrameTimes().size())
-            throw new RuntimeException("size of key frames are not matched : (given) " + keyFrameTimes.size() + ", (output) "
-                  + solution.getKeyFrameTimes().size());
-         if (solution.getSolutionQuality() < 0)
-            throw new RuntimeException("a key frame can not be accepted.");
-
          trajectoryTime = keyFrameTimes.get(keyFrameTimes.size() - 1);
 
-         wholeBodyTrajectoryPublisher.publish(solution.getSuggestedControllerMessage());
+         if (planningResult == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_OPTIMAL_SOLUTION)
+         {
+            wholeBodyTrajectoryPublisher.publish(solution.getSuggestedControllerMessage());
+         }
+         else
+         {
+            LogTools.warn("planning result is not good. " + planningResult);
+         }
+
          deactivateKinematicsToolboxModule();
       }
    }
@@ -243,6 +250,16 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return false;
+   }
+
+   public int getPlanningResult()
+   {
+      return planningResult;
+   }
+
+   public int getNumberOfValidKeyFrames()
+   {
+      return numberOfValidKeyFrames;
    }
 
    private void deactivateKinematicsToolboxModule()

@@ -9,33 +9,39 @@ import controller_msgs.msg.dds.SpineTrajectoryMessage;
 
 public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, SpineTrajectoryMessage>, EpsilonComparable<SpineTrajectoryCommand>
 {
+   private long sequenceId;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public SpineTrajectoryCommand()
    {
       jointspaceTrajectory = new JointspaceTrajectoryCommand();
+      clear();
    }
 
    public SpineTrajectoryCommand(Random random)
    {
+      sequenceId = random.nextInt();
       jointspaceTrajectory = new JointspaceTrajectoryCommand(random);
    }
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       jointspaceTrajectory.clear();
    }
 
    @Override
    public void set(SpineTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.jointspaceTrajectory);
    }
 
    @Override
    public void setFromMessage(SpineTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
 
@@ -90,5 +96,11 @@ public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, S
    public double getExecutionTime()
    {
       return jointspaceTrajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

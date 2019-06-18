@@ -10,9 +10,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -44,7 +47,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -55,8 +57,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -105,7 +108,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final StateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final PlanarRegionsListHandler planarRegionsListHandler;
    private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
    private final YoDouble controlledCoMHeightAcceleration = new YoDouble("controlledCoMHeightAcceleration", registry);
@@ -120,6 +122,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final StatusMessageOutputManager statusOutputManager;
    private final WalkingCommandConsumer commandConsumer;
 
+   private final TaskspaceTrajectoryStatusMessage pelvisStatusMessage = new TaskspaceTrajectoryStatusMessage();
+
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final YoBoolean limitCommandSent = new YoBoolean("limitCommandSent", registry);
 
@@ -130,6 +134,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final DoubleProvider unloadFraction;
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
+
+   private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -153,6 +159,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
+
+      pelvisStatusMessage.setEndEffectorName(pelvis.getName());
 
       unloadFraction = walkingControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
@@ -208,11 +216,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.statusOutputManager = statusOutputManager;
 
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
+      enableHeightFeedbackControl.set(walkingControllerParameters.enableHeightFeedbackControl());
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      planarRegionsListHandler = walkingMessageHandler.getPlanarRegionsListHandler();
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
                                                    registry);
 
@@ -417,6 +425,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       this.controllerCoreOutput = controllerCoreOutput;
    }
 
+   public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
+   {
+      balanceManager.setLinearMomentumRateControlModuleOutput(output);
+   }
+
    public void initialize()
    {
       controllerCoreCommand.requestReinitialization();
@@ -441,7 +454,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
+         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
@@ -528,13 +541,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
    private final FramePoint2D capturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    public void doAction()
    {
-      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
-      balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
-
       WalkingState currentState = stateMachine.getCurrentState();
       commandConsumer.update();
       commandConsumer.consumeHeadCommands();
@@ -553,9 +562,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       updateFailureDetection();
 
-      if (planarRegionsListHandler.hasNewPlanarRegions())
-         balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
-
       // Do transitions will request ICP planner updates.
       stateMachine.doTransitions();
       // This updates the ICP plan continuously.
@@ -566,6 +572,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       currentState = stateMachine.getCurrentState();
 
       updateManagers(currentState);
+      reportStatusMessages();
 
       handleChangeInContactState();
 
@@ -574,6 +581,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
+         // This happens on the first tick when the controller core has not yet run to update the center of pressure.
+         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
+         {
+            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+         }
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
@@ -652,15 +664,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          }
       }
 
-      if (pelvisOrientationManager != null)
-         pelvisOrientationManager.compute();
+      pelvisOrientationManager.compute();
 
       comHeightManager.compute();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
                                                                                                isRecoveringFromPush, feetManager));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
-      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
+      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       if (currentState.isDoubleSupportState())
          balanceManager.compute(currentState.getTransferToSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
@@ -668,6 +679,99 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       else
          balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon,
                                 controlHeightWithMomentum);
+   }
+
+   private void reportStatusMessages()
+   {
+      Object statusMessage;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         statusMessage = feetManager.pollStatusToReport(robotSide);
+         if (statusMessage != null)
+            statusOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      {
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+         {
+            statusMessage = bodyManager.pollStatusToReport();
+            if (statusMessage != null)
+               statusOutputManager.reportStatusMessage(statusMessage);
+         }
+      }
+
+      TaskspaceTrajectoryStatusMessage pelvisOrientationStatus = pelvisOrientationManager.pollStatusToReport();
+      TaskspaceTrajectoryStatusMessage pelvisXYStatus = balanceManager.pollPelvisXYTranslationStatusToReport();
+      TaskspaceTrajectoryStatusMessage pelvisHeightStatus = comHeightManager.pollStatusToReport();
+
+      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisOrientationStatus, pelvisXYStatus, pelvisHeightStatus);
+
+      if (mergedPelvisStatus != null)
+      {
+         statusOutputManager.reportStatusMessage(mergedPelvisStatus);
+      }
+   }
+
+   private TaskspaceTrajectoryStatusMessage mergePelvisStatusMessages(TaskspaceTrajectoryStatusMessage pelvisOrientationStatus,
+                                                                      TaskspaceTrajectoryStatusMessage pelvisXYStatus,
+                                                                      TaskspaceTrajectoryStatusMessage pelvisHeightStatus)
+   {
+      int numberOfStatus = pelvisOrientationStatus != null ? 1 : 0;
+      numberOfStatus += pelvisXYStatus != null ? 1 : 0;
+      numberOfStatus += pelvisHeightStatus != null ? 1 : 0;
+
+      if (numberOfStatus <= 1)
+      {
+         if (pelvisOrientationStatus != null)
+            return pelvisOrientationStatus;
+         if (pelvisXYStatus != null)
+            return pelvisXYStatus;
+         if (pelvisHeightStatus != null)
+            return pelvisHeightStatus;
+         return null;
+      }
+
+      Quaternion desiredEndEffectorOrientation = pelvisStatusMessage.getDesiredEndEffectorOrientation();
+      Point3D desiredEndEffectorPosition = pelvisStatusMessage.getDesiredEndEffectorPosition();
+      Quaternion actualEndEffectorOrientation = pelvisStatusMessage.getActualEndEffectorOrientation();
+      Point3D actualEndEffectorPosition = pelvisStatusMessage.getActualEndEffectorPosition();
+
+      desiredEndEffectorOrientation.setToNaN();
+      desiredEndEffectorPosition.setToNaN();
+      actualEndEffectorOrientation.setToNaN();
+      actualEndEffectorPosition.setToNaN();
+
+      if (pelvisOrientationStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisOrientationStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisOrientationStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisOrientationStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation());
+         actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation());
+      }
+
+      if (pelvisXYStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisXYStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisXYStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisXYStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
+         actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
+      }
+      
+      if (pelvisHeightStatus != null)
+      {
+         pelvisStatusMessage.setSequenceId(pelvisHeightStatus.getSequenceId());
+         pelvisStatusMessage.setTimestamp(pelvisHeightStatus.getTimestamp());
+         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisHeightStatus.getTrajectoryExecutionStatus());
+         desiredEndEffectorPosition.setZ(pelvisHeightStatus.getDesiredEndEffectorPosition().getZ());
+         actualEndEffectorPosition.setZ(pelvisHeightStatus.getActualEndEffectorPosition().getZ());
+      }
+
+      return pelvisStatusMessage;
    }
 
    private void submitControllerCoreCommands()
@@ -712,14 +816,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
-      controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
-
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
+   }
+
+   public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
+   {
+      return balanceManager.getLinearMomentumRateControlModuleInput();
    }
 
    public YoVariableRegistry getYoVariableRegistry()

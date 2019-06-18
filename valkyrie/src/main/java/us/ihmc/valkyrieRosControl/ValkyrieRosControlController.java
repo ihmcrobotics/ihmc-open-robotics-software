@@ -34,7 +34,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -143,7 +143,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final double gravity = 9.80665;
 
    public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
-   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_ihmc_controller";
+   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_" + HighLevelHumanoidControllerFactory.ROS2_ID.getNodeName();
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
@@ -324,11 +324,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                                     VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME);
       RealtimeRos2Node controllerRealtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, realtimeThreadFactory,
                                                                                      VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME);
-      PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-      LogSettings logSettings = robotModel.getLogSettings();
+      DataServerSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), yoVariableServerScheduler, logModelProvider, logSettings, estimatorDT);
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
 
       /*
        * Create sensors
@@ -356,8 +355,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
 
       DRCOutputProcessor drcOutputProcessor = null;
+
       if (USE_STATE_CHANGE_TORQUE_SMOOTHER_PROCESSOR)
-         drcOutputProcessor = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
+      {
+         DRCOutputProcessorWithStateChangeSmoother outputSmoother = new DRCOutputProcessorWithStateChangeSmoother(drcOutputProcessor);
+         controllerFactory.attachControllerStateChangedListener(outputSmoother.createControllerStateChangedListener());
+         drcOutputProcessor = outputSmoother;
+      }
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);

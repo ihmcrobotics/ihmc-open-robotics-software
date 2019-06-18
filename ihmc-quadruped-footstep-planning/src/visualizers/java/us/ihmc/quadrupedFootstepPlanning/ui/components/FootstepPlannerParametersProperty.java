@@ -9,23 +9,19 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
 {
    private final DoubleField maximumStepReach = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepReach, SettableFootstepPlannerParameters::setMaximumStepReach);
    private final DoubleField maximumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepWidth, SettableFootstepPlannerParameters::setMaximumStepWidth);
-   private final DoubleField maximumStepCycleDistance = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepCycleDistance, SettableFootstepPlannerParameters::setMaximumStepCycleDistance);
    private final DoubleField minimumStepLength = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepLength, SettableFootstepPlannerParameters::setMinimumStepLength);
    private final DoubleField minimumStepWidth = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepWidth, SettableFootstepPlannerParameters::setMinimumStepWidth);
    private final DoubleField minimumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMinimumStepYaw, SettableFootstepPlannerParameters::setMinimumStepYaw);
    private final DoubleField maximumStepYaw = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepYaw, SettableFootstepPlannerParameters::setMaximumStepYaw);
 
    private final DoubleField maximumStepChangeZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepChangeZ, SettableFootstepPlannerParameters::setMaximumStepChangeZ);
-   private final DoubleField maximumStepCycleChangeZ = new DoubleField(SettableFootstepPlannerParameters::getMaximumStepCycleChangeZ, SettableFootstepPlannerParameters::setMaximumStepCycleChangeZ);
    private final DoubleField bodyGroundClearance = new DoubleField(SettableFootstepPlannerParameters::getBodyGroundClearance, SettableFootstepPlannerParameters::setBodyGroundClearance);
 
-   private final DoubleField forwardWeight = new DoubleField(SettableFootstepPlannerParameters::getForwardWeight, SettableFootstepPlannerParameters::setForwardWeight);
-   private final DoubleField lateralWeight = new DoubleField(SettableFootstepPlannerParameters::getLateralWeight, SettableFootstepPlannerParameters::setLateralWeight);
    private final DoubleField yawWeight = new DoubleField(SettableFootstepPlannerParameters::getYawWeight, SettableFootstepPlannerParameters::setYawWeight);
    private final DoubleField costPerStep = new DoubleField(SettableFootstepPlannerParameters::getCostPerStep, SettableFootstepPlannerParameters::setCostPerStep);
    private final DoubleField stepUpWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepUpWeight, SettableFootstepPlannerParameters::setStepUpWeight);
    private final DoubleField stepDownWeight  = new DoubleField(SettableFootstepPlannerParameters::getStepDownWeight, SettableFootstepPlannerParameters::setStepDownWeight);
-   private final DoubleField heuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getHeuristicsWeight, SettableFootstepPlannerParameters::setHeuristicsWeight);
+   private final DoubleField heuristicsWeight = new DoubleField(SettableFootstepPlannerParameters::getHeuristicsInflationWeight, SettableFootstepPlannerParameters::setHeuristicsWeight);
 
    private final DoubleField minXClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromFoot, SettableFootstepPlannerParameters::setMinXClearanceFromFoot);
    private final DoubleField minYClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromFoot, SettableFootstepPlannerParameters::setMinYClearanceFromFoot);
@@ -72,11 +68,6 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumStepWidth);
    }
 
-   public void bidirectionalBindMaximumStepCycleDistance(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, maximumStepCycleDistance);
-   }
-
    public void bidirectionalBindMaximumStepYaw(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, maximumStepYaw);
@@ -92,24 +83,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, maximumStepChangeZ);
    }
 
-   public void bidirectionalBindMaximumStepCycleChangeZ(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, maximumStepCycleChangeZ);
-   }
-
    public void bidirectionalBindBodyGroundClearance(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, bodyGroundClearance);
-   }
-
-   public void bidirectionalBindForwardWeight(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, forwardWeight);
-   }
-
-   public void bidirectionalBindLateralWeight(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, lateralWeight);
    }
 
    public void bidirectionalBindYawWeight(Property<? extends Number> property)

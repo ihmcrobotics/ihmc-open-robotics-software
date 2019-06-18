@@ -23,6 +23,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private long sequenceId;
    private RobotSide robotSide;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    private double swingHeight = 0.0;
@@ -56,6 +57,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void clear()
    {
+      sequenceId = 0;
       robotSide = null;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
@@ -74,6 +76,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void setFromMessage(FootstepDataMessage message)
    {
+      sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
@@ -131,6 +134,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void set(FootstepDataCommand other)
    {
+      sequenceId = other.sequenceId;
       robotSide = other.robotSide;
       trajectoryType = other.trajectoryType;
       swingHeight = other.swingHeight;
@@ -337,5 +341,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public boolean isDelayedExecutionSupported()
    {
       return true;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

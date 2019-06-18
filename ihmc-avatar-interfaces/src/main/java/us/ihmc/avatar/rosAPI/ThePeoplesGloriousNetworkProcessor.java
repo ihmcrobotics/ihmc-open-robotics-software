@@ -27,7 +27,6 @@ import us.ihmc.avatar.ros.RosCapturabilityBasedStatusPublisher;
 import us.ihmc.avatar.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.avatar.ros.RosSCSCameraPublisher;
 import us.ihmc.avatar.ros.RosSCSLidarPublisher;
-import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.avatar.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.commons.thread.ThreadTools;
@@ -49,7 +48,6 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -57,7 +55,6 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
-   private final DRCRobotModel robotModel;
    private final PacketCommunicator controllerCommunicationBridge;
    private final ObjectCommunicator scsSensorCommunicationBridge;
 
@@ -68,31 +65,34 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullHumanoidRobotModel fullRobotModel;
 
+   @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
          String tfPrefix, String... additionalMessagePackages) throws IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, Collections.<Class>emptySet(), additionalMessagePackages);
    }
 
+   @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace,
          String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, additionalMessagePackages);
    }
 
+   @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes, String... additionalMessagePackages) throws IOException
    {
       this(rosUri, rosAPI_communicator, sensorCommunicator, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix, additionalPacketTypes, null, null, additionalMessagePackages);
    }
 
+   @SuppressWarnings("rawtypes")
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator rosAPI_communicator, ObjectCommunicator sensorCommunicator,
          DRCROSPPSTimestampOffsetProvider ppsOffsetProvider, DRCRobotModel robotModel, String namespace, String tfPrefix, Collection<Class> additionalPacketTypes,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers, String... additionalMessagePackages) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
-      this.robotModel = robotModel;
       this.controllerCommunicationBridge = rosAPI_communicator;
       this.scsSensorCommunicationBridge = sensorCommunicator;
       this.ppsTimestampOffsetProvider = ppsOffsetProvider;
@@ -146,15 +146,15 @@ public class ThePeoplesGloriousNetworkProcessor
 
 
 
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
-      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-
-      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
-
+//      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+//      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+//      DRCRobotJointMap jointMap = robotModel.getJointMap();
+//
+//      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
+//
 //      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
 //            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
       if (scsSensorCommunicationBridge != null)
@@ -189,6 +189,7 @@ public class ThePeoplesGloriousNetworkProcessor
 //      System.setErr(printStreamBridge);
    }
 
+   @SuppressWarnings("unused")
    private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
          RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
@@ -207,6 +208,7 @@ public class ThePeoplesGloriousNetworkProcessor
       }
    }
 
+   @SuppressWarnings({"rawtypes", "unchecked"})
    private void setupInputs(String namespace, HumanoidRobotDataReceiver robotDataReceiver, FullHumanoidRobotModel fullRobotModel, String... additionalPackages)
    {
       Set<Class<?>> inputTypes = GenericROSTranslationTools.getCoreInputTopics();
@@ -242,6 +244,7 @@ public class ThePeoplesGloriousNetworkProcessor
       new IHMCProntoRosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
    }
 
+   @SuppressWarnings("unused")
    private void setupErrorTopics()
    {
       controllerCommunicationBridge.attachListener(InvalidPacketNotificationPacket.class, new PacketConsumer<InvalidPacketNotificationPacket>()

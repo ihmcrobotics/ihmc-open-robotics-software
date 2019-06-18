@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -48,7 +49,7 @@ public class FootstepDataMessageConverter
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
 
             ArrayList<Point2D> contactPoints = new ArrayList<>();
-            for (int contactPointIdx = 0; contactPointIdx < foothold.getNumberOfVertices(); contactPointIdx++)
+            for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
             HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }

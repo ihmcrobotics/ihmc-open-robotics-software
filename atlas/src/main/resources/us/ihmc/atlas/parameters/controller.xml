@@ -3,6 +3,16 @@
     <registry name="DRCControllerThread">
         <registry name="DRCMomentumBasedController">
             <registry name="HumanoidHighLevelControllerManager">
+                <registry name="WalkingControllerState">
+            	    <registry name="LinearMomentumRateControlModule">
+            		    <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                        <parameter name="LinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                        <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    </registry>
+            	</registry>
                 <registry name="HighLevelHumanoidControllerFactory">
                     <registry name="MomentumOptimizationSettings">
                         <parameter name="SpineYawJointspaceWeight" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
@@ -43,15 +53,6 @@
                         <parameter name="LoadedFootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
                         <parameter name="LoadedFootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-                        <parameter name="DefaultLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="DefaultLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-                        <parameter name="DefaultLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
-                        <parameter name="DefaultAngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="DefaultAngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="DefaultAngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                        <parameter name="HighLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="HighLinearMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                     </registry>
                     <registry name="JointspaceGains">
                         <parameter name="kpSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
@@ -172,29 +173,39 @@
 <parameter name="PelvisHeightControlStateOffsetTrajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
 <parameter name="PelvisHeightControlStateMaxDistanceAnklePelvis" type="DoubleParameter" min="0.0" max="1.0" value="0.9"/>
                             </registry>
+                            <registry name="CenterOfMassHeightControlState">
+<registry name="LookAheadCoMHeightTrajectoryGenerator">
+    <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
+</registry>
+                            </registry>
                         </registry>
-                    </registry>
-                    <registry name="HighLevelControlManagerFactory">
                         <registry name="FeetManager">
+                            <registry name="SupportStateParameters">
+<parameter name="avoidFootRotations" type="BooleanParameter" value="false"/>
+<parameter name="dampFootRotations" type="BooleanParameter" value="false"/>
+<parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                            </registry>
+                            <registry name="FootRotationDetectorParameters">
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                            </registry>
                             <registry name="leftFootControlModule">
 <parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
                             </registry>
                             <registry name="rightFootControlModule">
 <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.3"/>
                             </registry>
+                            <registry name="ToeOffManager">
+<parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="true"/>
+                            </registry>
                         </registry>
                         <registry name="BalanceManager">
-                        	<registry name="PelvisICPBasedTranslationManager">
+                            <parameter name="maxICPErrorBeforeSingleSupportX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
+                            <registry name="PelvisICPBasedTranslationManager">
 								<parameter name="frozenOffsetDecayBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        	</registry>
+                            </registry>
                         </registry>
-	                    <registry name="CenterOfMassHeightManager">
-	                    	<registry name="CenterOfMassHeightControlState">
-	                    		<registry name="LookAheadCoMHeightTrajectoryGenerator">
-	                    			<parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
-	                    		</registry>>
-	                    	</registry>
-	                    </registry>
                     </registry>
                 </registry>
             </registry>

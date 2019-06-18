@@ -7,8 +7,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.base.CaseFormat;
-
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanningStatisticsRequestMessage;
@@ -22,12 +20,12 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
@@ -42,6 +40,7 @@ public class MultiStageFootstepPlanningModule
    private static final boolean DEBUG = false;
    private static final double YO_VARIABLE_SERVER_DT = 0.01;
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 2;
+   public static final ROS2ModuleIdentifier ROS2_ID = new ROS2ModuleIdentifier(MultiStageFootstepPlanningModule.class, ROS2Tools.FOOTSTEP_PLANNER_TOOLBOX);
 
    private final String name = getClass().getSimpleName();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -52,7 +51,6 @@ public class MultiStageFootstepPlanningModule
    private final RealtimeRos2Node realtimeRos2Node;
 
    private final ScheduledExecutorService executorService;
-   private ScheduledFuture<?> taskScheduled = null;
    private ScheduledFuture<?> yoVariableServerScheduled = null;
    private final int updatePeriodMilliseconds = 1;
 
@@ -76,7 +74,7 @@ public class MultiStageFootstepPlanningModule
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, ROS2_ID.getNodeName());
       CommandInputManager commandInputManager = new CommandInputManager(name, FootstepPlannerCommunicationProperties.getSupportedCommands());
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(FootstepPlannerCommunicationProperties.getSupportedStatusMessages());
       new ControllerNetworkSubscriber(FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName), commandInputManager,
@@ -157,11 +155,6 @@ public class MultiStageFootstepPlanningModule
 
    public void receivedPacket(ToolboxStateMessage message)
    {
-      if (taskScheduled != null)
-      {
-         return;
-      }
-
       switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
       {
       case WAKE_UP:

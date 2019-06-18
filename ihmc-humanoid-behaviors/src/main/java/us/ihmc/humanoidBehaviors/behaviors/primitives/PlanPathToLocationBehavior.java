@@ -1,14 +1,19 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,17 +22,24 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
    //wakeup, request plan
    private final boolean DEBUG = false;
    private boolean planningSuccess = false;
-   private PipeLine pipeLine = new PipeLine();
+
+   private FootstepPlanningResult planningResult;
+
+   private PipeLine<BehaviorAction> pipeLine = new PipeLine<BehaviorAction>();
+   private final YoInteger planId = new YoInteger("planId", registry);
+
    private FramePose3D goalPose = null;
    private double timeout = 5.0;
    private final SleepBehavior sleepBehavior;
@@ -40,11 +52,15 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
    private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
 
+   private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+
    public PlanPathToLocationBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, ros2Node);
 
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
       footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
 
@@ -62,6 +78,11 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public FootstepDataListMessage getFootStepList()
    {
       return footstepDataListMessage;
+   }
+
+   public FootstepPlanningResult getPlanningResult()
+   {
+      return planningResult;
    }
 
    public FootstepPlanningToolboxOutputStatus geFootstepPlanningToolboxOutputStatus()
@@ -86,7 +107,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               publishTextToSpeack("Telling Planner To Wake Up");
+               publishTextToSpeech("PlanPathToLocationBehavior: Telling Planner To Wake Up");
             }
             toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));
 
@@ -100,10 +121,17 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          {
             if (DEBUG)
             {
-               publishTextToSpeack("Requesting Plan");
+               publishTextToSpeech("PlanPathToLocationBehavior: Requesting Plan");
             }
-            footstepPlanningRequestPublisher.publish(FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
-                                                                                                                     goalPose));
+
+            planId.increment();
+            FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide,
+                                                                                                                    goalPose, FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+            if (planarRegions.get() != null)
+               request.getPlanarRegionsListMessage().set(planarRegions.get());
+            request.setPlannerRequestId(planId.getIntegerValue());
+            request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
+            footstepPlanningRequestPublisher.publish(request);
          }
       };
 
@@ -113,7 +141,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
 
-            publishTextToSpeack("Waiting For Plan");
+            publishTextToSpeech("PlanPathToLocationBehavior: Waiting For Plan");
 
             sleepBehavior.setSleepTime(timeout);
          }
@@ -121,7 +149,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
          @Override
          public boolean isDone()
          {
+            
             return super.isDone() || footPlanStatusQueue.isNewPacketAvailable();
+
          }
       };
 
@@ -133,33 +163,29 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             if (footPlanStatusQueue.isNewPacketAvailable())
             {
+
                footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
-               if (footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
-                     || footstepPlanningToolboxOutputStatus.getFootstepPlanningResult() == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
+               planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
+               
+
+               if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
                else
+               {
+                  publishTextToSpeech("PlanPathToLocationBehavior: bad plan");
+
                   planningSuccess = false;
+               }
             }
             else
             {
+               publishTextToSpeech("PlanPathToLocationBehavior: never got a plan");
+
                planningSuccess = false;
             }
-
-            if (planningSuccess)
-            {
-               if (DEBUG)
-               {
-                  publishTextToSpeack("Processing Plan");
-               }
-            }
-            else if (DEBUG)
-            {
-               publishTextToSpeack("Plan Failed");
-            }
-
          }
       };
 
@@ -180,7 +206,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    public boolean planSuccess()
    {
-      return planningSuccess;
+      if (planningResult != null)
+         return (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION);
+      return false;
    }
 
    @Override
@@ -188,9 +216,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    {
       setupPipeline();
       planningSuccess = false;
+      planningResult = null;
       footstepDataListMessage = null;
       footstepPlanningToolboxOutputStatus = null;
       footPlanStatusQueue.clear();
+      planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
+
    }
 
    @Override

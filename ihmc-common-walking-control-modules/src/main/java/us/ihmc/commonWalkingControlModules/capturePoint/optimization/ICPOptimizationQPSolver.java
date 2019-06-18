@@ -351,12 +351,12 @@ public class ICPOptimizationQPSolver
     *
     * @param polygon polygon to add.
     */
-   public void addSupportPolygon(FrameConvexPolygon2D polygon)
+   public void addSupportPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
       if (polygon == null)
          return;
 
-      polygon.changeFrame(worldFrame);
+      polygon.checkReferenceFrameMatch(worldFrame);
       copLocationConstraint.addPolygon(polygon);
       cmpLocationConstraint.addPolygon(polygon);
    }

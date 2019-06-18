@@ -24,7 +24,7 @@ public class DiagnosticRemoteValkyrieVisualizer implements SCSVisualizerStateLis
       scsVisualizer.setShowOverheadView(false);
 
       YoVariableClient client = new YoVariableClient(scsVisualizer);
-      client.start();
+      client.startWithHostSelector();
    }
    
 

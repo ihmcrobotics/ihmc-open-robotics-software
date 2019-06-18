@@ -40,4 +40,13 @@ public class PIDGains extends PDGains implements PIDGainsReadOnly
    {
       this.integralLeakRatio = integralLeakRatio;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof PIDGainsReadOnly)
+         return PIDGainsReadOnly.super.equals((PIDGainsReadOnly) object);
+      else
+         return false;
+   }
 }

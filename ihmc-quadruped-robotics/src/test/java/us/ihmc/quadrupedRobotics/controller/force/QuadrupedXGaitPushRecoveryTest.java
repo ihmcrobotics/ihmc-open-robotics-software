@@ -98,7 +98,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 1.0));
       conductor.simulate();
 
-      pusher.applyForce(new Vector3D(0.0, -1.0, 0.0), 50.0, 0.3);
+      pusher.applyForce(new Vector3D(0.0, -1.0, 0.0), 45.0, 0.3);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

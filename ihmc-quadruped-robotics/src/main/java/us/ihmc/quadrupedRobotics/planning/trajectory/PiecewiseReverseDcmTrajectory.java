@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -19,6 +20,8 @@ import java.util.List;
 public class PiecewiseReverseDcmTrajectory
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private static final boolean visualize = false;
 
    private boolean initialized;
    private final int maxSteps;
@@ -70,8 +73,11 @@ public class PiecewiseReverseDcmTrajectory
       }
    }
 
-   public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
+   public void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, double pointSize)
    {
+      YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
       for (int i = 0; i < dcmCornerPoints.size(); i++)
       {
          YoFramePoint3D dcmCornerPoint = dcmCornerPoints.get(i);
@@ -87,6 +93,11 @@ public class PiecewiseReverseDcmTrajectory
          artifactList.add(vrpCornerPointViz.createArtifact());
       }
 
+      graphicsList.setVisible(visualize);
+      artifactList.setVisible(visualize);
+
+      yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    /**

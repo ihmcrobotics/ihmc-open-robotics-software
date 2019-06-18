@@ -72,6 +72,8 @@ public class QuadrupedFreezeController implements State
 
       feetManager.requestFullContact();
 
+      controllerToolbox.updateSupportPolygon();
+
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJointBasics joint = joints.get(i);
@@ -89,6 +91,8 @@ public class QuadrupedFreezeController implements State
       controllerToolbox.update();
 
       feetManager.compute();
+
+      controllerToolbox.updateSupportPolygon();
 
       // Initialize force feedback
       for (int i = 0; i < joints.size(); i++)

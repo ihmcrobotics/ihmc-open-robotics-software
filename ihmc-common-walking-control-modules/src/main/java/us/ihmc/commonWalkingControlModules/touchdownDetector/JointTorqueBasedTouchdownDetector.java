@@ -89,4 +89,10 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       jointTorque.set(0.0);
       touchdownDetected.set(false);
    }
+
+   @Override
+   public String getName()
+   {
+      return getClass().getSimpleName();
+   }
 }

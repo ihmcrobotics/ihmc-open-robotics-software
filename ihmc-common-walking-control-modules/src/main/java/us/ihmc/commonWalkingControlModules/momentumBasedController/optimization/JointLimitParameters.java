@@ -62,4 +62,38 @@ public class JointLimitParameters
       jointLimitFilterBreakFrequency = other.jointLimitFilterBreakFrequency;
       velocityControlGain = other.velocityControlGain;
    }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointLimitParameters)
+      {
+         JointLimitParameters other = (JointLimitParameters) object;
+
+         if (maxAbsJointVelocity != other.maxAbsJointVelocity)
+            return false;
+         if (jointLimitDistanceForMaxVelocity != other.jointLimitDistanceForMaxVelocity)
+            return false;
+         if (jointLimitFilterBreakFrequency != other.jointLimitFilterBreakFrequency)
+            return false;
+         if (velocityControlGain != other.velocityControlGain)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": qd max: " + maxAbsJointVelocity + ", joint limit distance for qd max: " + jointLimitDistanceForMaxVelocity
+            + ", joint limit filter break frequency: " + jointLimitFilterBreakFrequency + ", velocity control gain: " + velocityControlGain;
+   }
 }

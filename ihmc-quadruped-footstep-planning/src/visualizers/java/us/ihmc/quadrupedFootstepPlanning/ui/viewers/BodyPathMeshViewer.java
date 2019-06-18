@@ -18,8 +18,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +52,7 @@ public class BodyPathMeshViewer extends AnimationTimer
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
 
-   public BodyPathMeshViewer(Messager messager)
+   public BodyPathMeshViewer(Messager messager, Topic<Boolean> showPathPathTopic, Topic<Boolean> computePathTopic, Topic<List<? extends Point3DReadOnly>> bodyPathDataTopic)
    {
       isExecutorServiceProvided = executorService == null;
 
@@ -62,10 +62,10 @@ public class BodyPathMeshViewer extends AnimationTimer
       Vector3D defaultSize = new Vector3D(1.0, 1.0, 1.0);
       defaultSize.scale(1.5 * BODYPATH_LINE_THICKNESS);
 
-      show = messager.createInput(FootstepPlannerMessagerAPI.ShowBodyPath, true);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BodyPathDataTopic, this::processBodyPathOnThread);
+      show = messager.createInput(showPathPathTopic, true);
+      messager.registerTopicListener(bodyPathDataTopic, this::processBodyPathOnThread);
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(computePathTopic, data -> reset.set(true));
 
 
       root.getChildren().addAll(bodyPathMeshView);

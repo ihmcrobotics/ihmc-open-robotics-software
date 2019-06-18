@@ -1,13 +1,12 @@
 package us.ihmc.valkyrie.pushRecovery;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryATest;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieICPOptimizationParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -24,12 +23,6 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
          {
             return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
             {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
@@ -127,6 +120,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {

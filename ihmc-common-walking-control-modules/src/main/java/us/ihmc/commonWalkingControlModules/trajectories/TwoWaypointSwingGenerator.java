@@ -1,11 +1,18 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import java.util.ArrayList;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,8 +25,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
 
 public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 {
@@ -110,13 +115,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
+   public void setInitialConditions(FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
-   public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
+   public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
       this.finalPosition.setIncludingFrame(finalPosition);
       this.finalVelocity.setIncludingFrame(finalVelocity);
@@ -174,13 +179,15 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       trajectory.informDone();
    }
 
-   public void setWaypointProportions(double... waypointProportions)
+   public void setWaypointProportions(double[] waypointProportions)
    {
-      if(waypointProportions.length != numberWaypoints)
-         return;
+      setWaypointProportions(waypointProportions[0], waypointProportions[1]);
+   }
 
-      this.waypointProportions[0] = waypointProportions[0];
-      this.waypointProportions[1] = waypointProportions[1];
+   public void setWaypointProportions(double waypointProportions0, double waypointProportions1)
+   {
+      this.waypointProportions[0] = waypointProportions0;
+      this.waypointProportions[1] = waypointProportions1;
    }
 
    @Override
@@ -349,7 +356,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       for (int i = 0; i < numberWaypoints; i++)
          waypointViz.setBall(waypointPositions.get(i), i);
    }
-   
+
    public boolean doOptimizationUpdate()
    {
       return trajectory.doOptimizationUpdate();

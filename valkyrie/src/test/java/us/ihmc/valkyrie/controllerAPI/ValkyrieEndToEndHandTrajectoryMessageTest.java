@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,11 +13,8 @@ import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,6 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -112,19 +111,21 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
+      double firstTrajectoryTime = 1.0;
       EuclideanTrajectoryPointCalculator calculator = new EuclideanTrajectoryPointCalculator();
-      calculator.appendTrajectoryPoint(1.0, new Point3D(0.25, 0.0, 1.05));
-      calculator.appendTrajectoryPoint(1.5, new Point3D(0.4, 0.0, 0.95));
-      calculator.appendTrajectoryPoint(1.75, new Point3D(0.5, 0.0, 0.85));
-      calculator.appendTrajectoryPoint(2.0, new Point3D(0.6, 0.0, 0.95));
-      calculator.appendTrajectoryPoint(2.5, new Point3D(0.6, 0.0, 1.25));
-      calculator.appendTrajectoryPoint(3.5, new Point3D(0.25, 0.0, 1.05));
-      calculator.computeTrajectoryPointVelocities(true);
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = calculator.getTrajectoryPoints();
+      calculator.appendTrajectoryPoint(0.0, new Point3D(0.25, 0.0, 1.05));
+      calculator.appendTrajectoryPoint(0.5, new Point3D(0.4, 0.0, 0.95));
+      calculator.appendTrajectoryPoint(0.75, new Point3D(0.5, 0.0, 0.85));
+      calculator.appendTrajectoryPoint(1.0, new Point3D(0.6, 0.0, 0.95));
+      calculator.appendTrajectoryPoint(1.5, new Point3D(0.6, 0.0, 1.25));
+      calculator.appendTrajectoryPoint(2.5, new Point3D(0.25, 0.0, 1.05));
+      calculator.compute(2.5);
+      FrameEuclideanTrajectoryPointList trajectoryPoints = calculator.getTrajectoryPoints();
       SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
-      for (FrameEuclideanTrajectoryPoint trajectoryPoint : trajectoryPoints)
+      for (int i=0;i<trajectoryPoints.getNumberOfTrajectoryPoints();i++)
       {
-         double time = trajectoryPoint.getTime();
+         FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
+         double time = trajectoryPoint.getTime() + firstTrajectoryTime;
          Point3DReadOnly position = trajectoryPoint.getPositionCopy();
          Vector3DReadOnly linearVelocity = trajectoryPoint.getLinearVelocityCopy();
          se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add()

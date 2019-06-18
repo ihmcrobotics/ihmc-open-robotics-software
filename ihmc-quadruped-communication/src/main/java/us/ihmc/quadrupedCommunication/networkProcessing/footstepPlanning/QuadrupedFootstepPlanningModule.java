@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.footstepPlanningPort;
 
 public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
 {
@@ -47,7 +48,8 @@ public class QuadrupedFootstepPlanningModule extends QuadrupedToolboxModule
                                           LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
                                           DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(name, fulRobotModel, modelProvider, startYoVariableServer, new DataServerSettings(logYoVariables, true, 8007, "FootstepPlanningModule"), updatePeriodMilliseconds,
+      super(name, fulRobotModel, modelProvider, startYoVariableServer, new DataServerSettings(logYoVariables, true, footstepPlanningPort,
+                                                                                              "FootstepPlanningModule"), updatePeriodMilliseconds,
             pubSubImplementation);
 
 

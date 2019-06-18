@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -112,9 +113,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
 
-   public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
-         Map<RigidBodyBasics, FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
-         StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                                     Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
+                                                     Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
+                                                     CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
+                                                     StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                     YoVariableRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -145,7 +149,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          String namePrefix = foot.getName();
 
          DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(), estimatorDT);
-         AlphaFilteredYoFrameVector footToRootJointPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+         AlphaFilteredYoFrameVector footToRootJointPosition = new AlphaFilteredYoFrameVector(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
          footToRootJointPositions.put(foot, footToRootJointPosition);
 
          YoFramePoint3D rootJointPosition = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
@@ -164,7 +168,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          copsRawInFootFrame.put(foot, copRawInFootFrame);
 
          DoubleProvider alphaCop = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
-         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
+         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = new AlphaFilteredYoFramePoint2d(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0);
          copsFilteredInFootFrame.put(foot, copFilteredInFootFrame);
 
@@ -179,6 +183,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
             private final Vector3D copOffset = new Vector3D();
+
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
@@ -323,7 +328,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
                   if (intersections == 0)
                   {
-                     System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
+                     LogTools.info("Found no solution for the CoP projection.");
                      tempCoP2d.setToZero(footFrame);
                   }
                   else
@@ -331,10 +336,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
                      tempCoP2d.set(intersectionPoints[0]);
 
                      if (intersections == 2)
-                        System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
+                        LogTools.info("Found two solutions for the CoP projection.");
                   }
-
-
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
                {
@@ -364,12 +367,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    private void correctFootPositionsUsingCoP(RigidBodyBasics plantedFoot)
    {
-      if (!useControllerDesiredCoP.getValue())
+      if (!trustCoPAsNonSlippingContactPoint.getValue())
          return;
 
-      AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(plantedFoot);
-      tempCoPOffset.setIncludingFrame(copFilteredInFootFrame.getReferenceFrame(), copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
-
+      tempCoPOffset.setIncludingFrame(copsFilteredInFootFrame.get(plantedFoot), 0.0);
       tempCoPOffset.changeFrame(worldFrame);
 
       YoFramePoint3D footPositionInWorld = footPositionsInWorld.get(plantedFoot);
@@ -456,7 +457,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          }
       }
 
-      for(int i = 0; i < trustedFeet.size(); i++)
+      for (int i = 0; i < trustedFeet.size(); i++)
       {
          RigidBodyBasics trustedFoot = trustedFeet.get(i);
          updateCoPPosition(trustedFoot);
@@ -468,14 +469,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (correctTrustedFeetPositions.getValue())
       {
-         for(int i = 0; i < trustedFeet.size(); i++)
+         for (int i = 0; i < trustedFeet.size(); i++)
          {
             RigidBodyBasics trustedFoot = trustedFeet.get(i);
             updateTrustedFootPosition(trustedFoot);
          }
       }
 
-      for(int i = 0; i < unTrustedFeet.size(); i++)
+      for (int i = 0; i < unTrustedFeet.size(); i++)
       {
          RigidBodyBasics unTrustedFoot = unTrustedFeet.get(i);
          updateUntrustedFootPosition(unTrustedFoot, pelvisPosition);

@@ -11,8 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 public class JointLimitReductionCommand implements InverseKinematicsCommand<JointLimitReductionCommand>, InverseDynamicsCommand<JointLimitReductionCommand>
 {
-   private final int initialCapacity = 40;
-   private final List<String> jointNames = new ArrayList<>(initialCapacity);
+   private static final int initialCapacity = 40;
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList jointReductionFactors = new TDoubleArrayList(initialCapacity);
 
@@ -22,7 +21,6 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
 
    public void clear()
    {
-      jointNames.clear();
       joints.clear();
       jointReductionFactors.reset();
    }
@@ -30,7 +28,6 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
    public void addReductionFactor(OneDoFJointBasics joint, double reductionFactor)
    {
       MathTools.checkIntervalContains(reductionFactor, 0.0, 1.0);
-      jointNames.add(joint.getName());
       joints.add(joint);
       jointReductionFactors.add(reductionFactor);
    }
@@ -42,7 +39,6 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
-         jointNames.add(other.jointNames.get(i));
          joints.add(other.joints.get(i));
          jointReductionFactors.add(other.jointReductionFactors.get(i));
       }
@@ -67,5 +63,45 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.LIMIT_REDUCTION;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointLimitReductionCommand)
+      {
+         JointLimitReductionCommand other = (JointLimitReductionCommand) object;
+
+         if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+         {
+            if (joints.get(jointIndex) != other.joints.get(jointIndex))
+               return false;
+         }
+         if (!jointReductionFactors.equals(other.jointReductionFactors))
+            return false;
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ":";
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      {
+         ret += "\nJoint: " + joints.get(jointIndex) + ", reduction: " + jointReductionFactors.get(jointIndex);
+      }
+      return ret;
    }
 }

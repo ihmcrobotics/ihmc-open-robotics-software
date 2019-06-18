@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.QuadrupedSupportPolygons;
@@ -13,11 +14,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.controller.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedFallDetector;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.geometry.YoGroundPlaneEstimator;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
@@ -30,6 +33,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -66,6 +70,10 @@ public class QuadrupedControllerToolbox
    private final YoFrameVector3D yoCoMVelocityEstimate;
    private final CenterOfMassDataHolderReadOnly centerOfMassDataHolder;
 
+   private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
+
+   private final YoBoolean controllerFailed;
+
    public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                      YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -73,6 +81,7 @@ public class QuadrupedControllerToolbox
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
 
       yoCoMVelocityEstimate = new YoFrameVector3D("yoCoMVelocityEstimate", ReferenceFrame.getWorldFrame(), registry);
+      controllerFailed = new YoBoolean("controllerFailed", registry);
 
       this.runtimeEnvironment = runtimeEnvironment;
 
@@ -121,6 +130,14 @@ public class QuadrupedControllerToolbox
 
          footContactStates.put(robotQuadrant, planeContactState);
          contactStates.put(robotQuadrant, contactState);
+         planeContactState.attachContactChangeListener(changed ->
+                                                       {
+                                                          if (((YoBoolean) changed).getBooleanValue())
+                                                             contactState.set(ContactState.IN_CONTACT);
+                                                          else
+                                                             contactState.set(ContactState.NO_CONTACT);
+                                                       });
+
       }
 
       if (yoGraphicsListRegistry != null)
@@ -132,14 +149,21 @@ public class QuadrupedControllerToolbox
       supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), footContactStates,
                                                     referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
 
+      attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
       update();
+      updateSupportPolygon();
+   }
+
+   public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
+   {
+      controllerFailureListeners.add(controllerFailureListener);
+      fallDetector.attachControllerFailureListener(controllerFailureListener);
    }
 
    public void update()
    {
       referenceFrames.updateFrames();
-      supportPolygon.updateUsingContactStates(footContactStates);
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -156,6 +180,11 @@ public class QuadrupedControllerToolbox
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);
       dcmPositionEstimator.compute(comVelocityEstimate);
+   }
+
+   public void updateSupportPolygon()
+   {
+      supportPolygon.updateUsingContactStates(footContactStates);
    }
 
    public FullQuadrupedRobotModel getFullRobotModel()
@@ -208,7 +237,12 @@ public class QuadrupedControllerToolbox
       return fallDetector;
    }
 
-   public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
+   public YoBoolean getControllerFailedBoolean()
+   {
+      return controllerFailed;
+   }
+
+   public MovingReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
    {
       return referenceFrames.getSoleFrame(robotQuadrant);
    }

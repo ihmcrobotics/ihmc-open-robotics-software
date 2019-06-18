@@ -9,6 +9,7 @@ import java.util.List;
 
 public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTimedStepListCommand, QuadrupedTimedStepListMessage>
 {
+   private long sequenceId;
    private boolean isExpressedInAbsoluteTime;
    private final RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = new RecyclingArrayList<>(30, QuadrupedTimedStepCommand.class);
 
@@ -20,6 +21,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    @Override
    public void clear()
    {
+      sequenceId = 0;
       isExpressedInAbsoluteTime = true;
       stepCommands.clear();
       clearQueuableCommandVariables();
@@ -29,6 +31,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    public void setFromMessage(QuadrupedTimedStepListMessage message)
    {
       clear();
+      sequenceId = message.getSequenceId();
 
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
       List<QuadrupedTimedStepMessage> stepList = message.getQuadrupedStepList();
@@ -46,6 +49,7 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
    {
       clear();
 
+      sequenceId = other.sequenceId;
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
       RecyclingArrayList<QuadrupedTimedStepCommand> otherFootsteps = other.getStepCommands();
       if (otherFootsteps != null)
@@ -90,5 +94,11 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
       {
          stepCommands.get(i).getTimeIntervalCommand().shiftTimeInterval(timeOffset);
       }
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

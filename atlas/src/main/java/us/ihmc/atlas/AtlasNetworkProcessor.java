@@ -20,7 +20,6 @@ public class AtlasNetworkProcessor
    private static final boolean ENABLE_BEHAVIOR_MODULE = true;
    private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
    private static final boolean ENABLE_MOCAP_MODULE = false;
-   private static String defaultRosNameSpace = "/ihmc_ros/atlas";
 
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -66,6 +65,8 @@ public class AtlasNetworkProcessor
         networkModuleParams.setFilterControllerInputMessages(true);
         networkModuleParams.setEnableJoystickBasedStepping(true);
         networkModuleParams.enableBipedalSupportPlanarRegionPublisher(true);
+        networkModuleParams.enableAutoREAStateUpdater(true);
+        networkModuleParams.enableWalkingPreviewToolbox(true);
 
         networkModuleParams.enableWholeBodyTrajectoryToolbox(true);
 

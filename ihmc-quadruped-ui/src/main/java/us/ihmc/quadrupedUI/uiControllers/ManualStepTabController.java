@@ -3,27 +3,28 @@ package us.ihmc.quadrupedUI.uiControllers;
 import com.sun.javafx.collections.ImmutableObservableList;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedUI.QuadrupedUIMessagerAPI;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.CRC32;
 
 public class ManualStepTabController
 {
@@ -35,7 +36,11 @@ public class ManualStepTabController
 
    private JavaFXMessager messager;
    private AtomicReference<QuadrupedXGaitSettingsReadOnly> xGaitSettingsReference;
-   private AtomicReference<QuadrupedReferenceFrames> referenceFramesReference = new AtomicReference<>(null);
+
+   private FullQuadrupedRobotModel fullRobotModel;
+   private OneDoFJointBasics[] allJoints;
+   private int jointNameHash;
+   private QuadrupedReferenceFrames referenceFrames;
 
 
    @FXML
@@ -67,22 +72,71 @@ public class ManualStepTabController
    @FXML
    private CheckBox useTrot;
 
+   public void setFullRobotModelFactory(FullQuadrupedRobotModelFactory fullRobotModelFactory)
+   {
+      fullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      allJoints = fullRobotModel.getOneDoFJoints();
+      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
+   }
+
+   private static int calculateJointNameHash(OneDoFJointBasics[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
+   {
+      CRC32 crc = new CRC32();
+      for (OneDoFJointBasics joint : joints)
+      {
+         crc.update(joint.getName().getBytes());
+      }
+
+      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
+      {
+         crc.update(forceSensorDefinition.getSensorName().getBytes());
+      }
+
+      for (IMUDefinition imuDefinition : imuDefinitions)
+      {
+         crc.update(imuDefinition.getName().getBytes());
+      }
+
+      return (int) crc.getValue();
+   }
+
+
    public void attachMessager(JavaFXMessager messager, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings)
    {
       this.messager = messager;
-
       xGaitSettingsReference = messager.createInput(QuadrupedUIMessagerAPI.XGaitSettingsTopic);
-      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotModelTopic, fullRobotModel ->
-                                           referenceFramesReference.set(new QuadrupedReferenceFrames(fullRobotModel)));
+      messager.registerTopicListener(QuadrupedUIMessagerAPI.RobotConfigurationDataTopic, this::handleRobotConfigurationData);
 
       xGaitSettingsReference.set(defaultXGaitSettings);
    }
 
+   public void handleRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+   {
+      if (referenceFrames == null || fullRobotModel == null)
+         return;
+
+      if (robotConfigurationData.getJointNameHash() != jointNameHash )
+         throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+
+      RigidBodyTransform newRootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
+
+      float[] newJointConfiguration = robotConfigurationData.getJointAngles().toArray();
+      for (int i = 0; i < allJoints.length; i++)
+         allJoints[i].setQ(newJointConfiguration[i]);
+
+      fullRobotModel.getElevator().updateFramesRecursively();
+      referenceFrames.updateFrames();
+   }
+
+
+
    public void bindControls()
    {
       swingHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.01, 0.2, defaultStepHeight, 0.01));
-      stepHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 0.1, 0.0, 0.01));
-      stepLength.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.2, 0.2, 0.0, 0.02));
+      stepHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 0.25, 0.0, 0.01));
+      stepLength.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.2, 0.45, 0.0, 0.02));
       stepWidth.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-0.1, 0.1, 0.0, 0.02));
       stepDuration.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.05, 3.0, defaultStepDuration, 0.05));
       dwellTime.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.0, defaultDwellTime, 0.05));
@@ -125,7 +179,6 @@ public class ManualStepTabController
       int numberOfSteps = this.numberOfSteps.getValue();
 
       QuadrupedXGaitSettingsReadOnly xGaitSettings = xGaitSettingsReference.get();
-      QuadrupedReferenceFrames referenceFrames = referenceFramesReference.get();
 
       QuadrupedTimedStepListMessage stepListMessage = new QuadrupedTimedStepListMessage();
 
@@ -182,6 +235,8 @@ public class ManualStepTabController
 
          frontPosition.changeFrame(ReferenceFrame.getWorldFrame());
          rearPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         frontPosition.addZ(stepHeight);
+         rearPosition.addZ(stepHeight);
 
          frontFootMessage.getTimeInterval().setStartTime(timeDelay);
          frontFootMessage.getTimeInterval().setEndTime(timeDelay + stepDuration);
@@ -215,7 +270,6 @@ public class ManualStepTabController
       int numberOfSteps = this.numberOfSteps.getValue();
 
       QuadrupedXGaitSettingsReadOnly xGaitSettings = xGaitSettingsReference.get();
-      QuadrupedReferenceFrames referenceFrames = referenceFramesReference.get();
 
       QuadrupedTimedStepListMessage stepListMessage = new QuadrupedTimedStepListMessage();
 
@@ -264,6 +318,7 @@ public class ManualStepTabController
          firstPosition.addY(widthOffset);
 
          firstPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         firstPosition.addZ(stepHeight);
 
          firstFootMessage.getTimeInterval().setStartTime(currentTime);
          firstFootMessage.getTimeInterval().setEndTime(currentTime + stepDuration);
@@ -289,6 +344,7 @@ public class ManualStepTabController
             secondPosition.addY(widthOffset);
 
             secondPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            secondPosition.addZ(stepHeight);
 
             oppositeFootMessage.getTimeInterval().setStartTime(currentTime);
             oppositeFootMessage.getTimeInterval().setEndTime(currentTime + stepDuration);

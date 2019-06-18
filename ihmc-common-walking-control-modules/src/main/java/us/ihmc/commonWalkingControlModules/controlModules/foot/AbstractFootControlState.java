@@ -75,4 +75,9 @@ public abstract class AbstractFootControlState implements State
    {
       return true;
    }
+
+   public Object pollStatusToReport()
+   {
+      return null;
+   }
 }

@@ -1,21 +1,32 @@
 package us.ihmc.simulationConstructionSetTools.bambooTools;
 
-import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
-import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
-import us.ihmc.log.LogTools;
-import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.lang3.SystemUtils;
+
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class BambooTools
 {
@@ -26,6 +37,8 @@ public class BambooTools
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "C:/videos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
+
+   private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
    private static boolean WRITE_LOG_FILE_ON_SUCCESS = false;
 
@@ -126,6 +139,27 @@ public class BambooTools
    
    
    /**
+    * Internal method wrapping {@link #createVideoWithDateTimeAndNameInternal(String, SimulationConstructionSet, boolean, String)} with a timeout.
+    * @see #createVideoWithDateTimeAndNameInternal
+    */
+   private static File[] createVideoWithDateTimeAndName(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
+   {
+      Future<File[]> future = THREAD_POOL.submit(() -> createVideoWithDateTimeAndNameInternal(rootDirectory, scs, writeData, videoName));
+      try
+      {
+         return future.get(5, TimeUnit.MINUTES);
+      }
+      catch (InterruptedException | ExecutionException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (TimeoutException e)
+      {
+         throw new RuntimeException("Video creation timed out after 5 min.");
+      }
+   }
+
+   /**
     * Internal method that calls on scs to create video and data
     * @param rootDirectory - directory to store the video and data
     * @param scs - the sim to use to create the video
@@ -133,7 +167,7 @@ public class BambooTools
     * @param videoName - the name of the video (does not include date,time, and extension yet)
     * @return File handles to the directory, video file, and the data file, in that order. Access to the file handle does not mean the file was created successfully. 
     */
-   private static File[] createVideoWithDateTimeAndName(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
+   private static File[] createVideoWithDateTimeAndNameInternal(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
    {
       String dateString = FormattingTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";

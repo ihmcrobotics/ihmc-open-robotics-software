@@ -110,6 +110,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
          TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(scs, robot);
+         dataExporter.setRootDirectory("D:/DataAndVideos/");
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }

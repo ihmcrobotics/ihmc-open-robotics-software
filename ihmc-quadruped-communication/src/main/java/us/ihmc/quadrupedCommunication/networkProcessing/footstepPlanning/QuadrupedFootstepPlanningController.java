@@ -16,6 +16,7 @@ import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiv
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.*;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.QuadrupedAStarFootstepPlanner;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.VisibilityGraphWithAStarPlanner;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
@@ -80,6 +81,8 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       }
       plannerMap.put(FootstepPlannerType.A_STAR,
                      QuadrupedAStarFootstepPlanner.createPlanner(footstepPlannerParameters, defaultXGaitSettings, null, expansion, registry));
+      plannerMap.put(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR, new VisibilityGraphWithAStarPlanner(footstepPlannerParameters, xGaitSettings,
+                                                                                                    visibilityGraphParameters, graphicsListRegistry, registry));
       activePlanner.set(FootstepPlannerType.SIMPLE_PATH_TURN_WALK_TURN);
 
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -168,10 +171,9 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       start.setInitialQuadrant(RobotQuadrant.fromByte(request.getInitialStepRobotQuadrant()));
       goal.setGoalPose(goalPose);
 
-      // FIXME
-//      double horizonLength = request.getHorizonLength();
-//      if (horizonLength > 0.0 && Double.isFinite(horizonLength))
-//         planner.setPlanningHorizonLength(horizonLength);
+      double horizonLength = request.getHorizonLength();
+      if (horizonLength > 0.0 && Double.isFinite(horizonLength))
+         planner.setPlanningHorizonLength(horizonLength);
 
       double timeout = request.getTimeout();
       if (timeout > 0.0 && Double.isFinite(timeout))
@@ -283,9 +285,7 @@ public class QuadrupedFootstepPlanningController extends QuadrupedToolboxControl
       else
       {
          result.getFootstepDataList().set(convertToTimedStepListMessage(footstepPlan));
-
-         if (footstepPlan.hasLowLevelPlanGoal())
-            result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
+         result.getLowLevelPlannerGoal().set(footstepPlan.getLowLevelPlanGoal());
       }
 
       if (bodyPathPlan != null)

@@ -18,14 +18,6 @@ public abstract class MomentumOptimizationSettings implements ControllerCoreOpti
    /**
     * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
     */
-   public Vector3DReadOnly getHighLinearMomentumWeightForRecovery()
-   {
-      return null;
-   }
-
-   /**
-    * Note: This method does not need to be overwritten if the values for this parameter are loaded from XML.
-    */
    public Vector3DReadOnly getAngularMomentumWeight()
    {
       return null;

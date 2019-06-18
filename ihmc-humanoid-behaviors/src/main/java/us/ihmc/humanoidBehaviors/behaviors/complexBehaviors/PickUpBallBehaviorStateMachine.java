@@ -93,7 +93,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Walking To The Ball");
+            publishTextToSpeech("Walking To The Ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -110,7 +110,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Looking For The Ball Again");
+            publishTextToSpeech("Looking For The Ball Again");
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.waitingForValidation.set(false);
@@ -125,7 +125,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Picking Up The Ball");
+            publishTextToSpeech("Picking Up The Ball");
             coactiveElement.currentState.set(PickUpBallBehaviorState.PICKING_UP_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -165,7 +165,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    @Override
    public void onBehaviorExited()
    {
-      publishTextToSpeack("YAY IM ALL DONE");
+      publishTextToSpeech("YAY IM ALL DONE");
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);

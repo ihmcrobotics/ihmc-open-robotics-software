@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.controller.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerInterface;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -60,7 +61,7 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedBodyICPBasedTranslationManager bodyICPBasedTranslationManager;
 
-   private final DCMPlanner dcmPlanner;
+   private final DCMPlannerInterface dcmPlanner;
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
@@ -110,7 +111,6 @@ public class QuadrupedBalanceManager
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
                                   yoGraphicsListRegistry, debug);
-
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       bodyICPBasedTranslationManager = new QuadrupedBodyICPBasedTranslationManager(controllerToolbox, 0.05, registry);
@@ -181,7 +181,7 @@ public class QuadrupedBalanceManager
          if (count == maxNumberOfFootstepGraphicsPerQuadrant)
             continue;
 
-         step.getGoalPosition(stepSequenceVisualizationPosition);
+         stepSequenceVisualizationPosition.set(step.getReferenceFrame(), step.getGoalPosition());
          stepSequenceVisualization.get(quadrant).setBall(stepSequenceVisualizationPosition, count);
          stepVisualizationCounter.get(quadrant).setValue(count + 1);
       }
@@ -194,7 +194,7 @@ public class QuadrupedBalanceManager
       {
          QuadrupedTimedStep step = steps.get(i);
          RobotQuadrant quadrant = step.getRobotQuadrant();
-         step.getGoalPosition(stepSequenceVisualizationPosition);
+         stepSequenceVisualizationPosition.set(step.getReferenceFrame(), step.getGoalPosition());
          stepSequenceVisualization.get(quadrant).setBall(stepSequenceVisualizationPosition, 0);
       }
    }
@@ -302,7 +302,7 @@ public class QuadrupedBalanceManager
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
-      dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getLipmHeight());
+      dcmPlanner.setNominalCoMHeight(linearInvertedPendulumModel.getLipmHeight());
 
       dcmPlanner.computeDcmSetpoints(controllerToolbox.getContactStates(), yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDCMPosition(yoFinalDesiredDCM);
@@ -366,15 +366,17 @@ public class QuadrupedBalanceManager
    /** FIXME This is a hack 6/26/2018 Robert Griffin **/
    private final FramePoint2D dcmError2d = new FramePoint2D();
    private final FrameLine2D adjustedICPDynamicsLine = new FrameLine2D();
-   private final FramePoint2D perfectCMP = new FramePoint2D();
+   private final FramePoint3D perfectCMP = new FramePoint3D();
 
    private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint3DReadOnly actualCapturePointPosition)
    {
       desiredICP2d.setIncludingFrame(yoDesiredDCMPosition);
       finalICP2d.setIncludingFrame(yoFinalDesiredDCM);
       actualICP2d.setIncludingFrame(actualCapturePointPosition);
-      dcmPlanner.getPerfectCMPPosition(perfectCMP);
+      dcmPlanner.getDesiredECMPPosition(perfectCMP);
       perfectCMP.changeFrame(worldFrame);
+
+
 
       /**
        * FIXME This is a hack 6/26/2018 Robert Griffin
@@ -383,8 +385,12 @@ public class QuadrupedBalanceManager
        */
       dcmError2d.sub(actualICP2d, desiredICP2d);
 
-      double estimatedDesiredExponential = perfectCMP.distance(finalICP2d) / perfectCMP.distance(desiredICP2d);
+      double estimatedDesiredExponential = perfectCMP.distanceXY(finalICP2d) / perfectCMP.distanceXY(desiredICP2d);
       finalICP2d.scaleAdd(estimatedDesiredExponential, dcmError2d, finalICP2d);
+
+      if (actualICP2d.distance(finalICP2d) < 1.0e-10)
+         return Double.NaN;
+
       adjustedICPDynamicsLine.set(actualICP2d, finalICP2d);
       adjustedICPDynamicsLine.orthogonalProjection(desiredICP2d); // projects the desired icp onto this dynamics line
 
@@ -402,8 +408,8 @@ public class QuadrupedBalanceManager
       }
 
 
-      double actualDistanceDueToDisturbance = perfectCMP.distance(actualICP2d);
-      double expectedDistanceAccordingToPlan = perfectCMP.distance(desiredICP2d);
+      double actualDistanceDueToDisturbance = perfectCMP.distanceXY(actualICP2d);
+      double expectedDistanceAccordingToPlan = perfectCMP.distanceXY(desiredICP2d);
 
       double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
 

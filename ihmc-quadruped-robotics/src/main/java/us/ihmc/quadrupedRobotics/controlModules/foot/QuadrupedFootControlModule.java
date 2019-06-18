@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -49,6 +50,7 @@ public class QuadrupedFootControlModule
    private final YoBoolean isFirstStep;
 
    private final QuadrupedSwingState swingState;
+   private final QuadrupedSupportState supportState;
 
    public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoGraphicsListRegistry graphicsListRegistry,
                                      YoVariableRegistry parentRegistry)
@@ -59,8 +61,7 @@ public class QuadrupedFootControlModule
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
-      // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
+      supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox, registry);
       swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
 
@@ -90,6 +91,13 @@ public class QuadrupedFootControlModule
       isFirstStep.set(true);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      supportState.setControllerCoreMode(controllerCoreMode);
+      swingState.setControllerCoreMode(controllerCoreMode);
+      moveViaWaypointsState.setControllerCoreMode(controllerCoreMode);
    }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
@@ -197,10 +205,8 @@ public class QuadrupedFootControlModule
    public void compute()
    {
       // Update foot state machine.
-      // Note Sylvain 2018/03/23: the controller is sensitive to the call order on the doAction and doTransitions.
-      // Inverting the ordering will break some tests, such as QuadrupedXGaitFlatGroundTrotTest.testTrottingInAForwardLeftCircle().
-      footStateMachine.doAction();
       footStateMachine.doTransitions();
+      footStateMachine.doAction();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

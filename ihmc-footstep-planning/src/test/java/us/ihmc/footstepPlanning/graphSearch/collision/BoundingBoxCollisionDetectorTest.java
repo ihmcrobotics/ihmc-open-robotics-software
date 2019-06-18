@@ -1,11 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -66,56 +68,56 @@ public class BoundingBoxCollisionDetectorTest
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       BodyCollisionData collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
-      Assert.assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
+      assertFalse(collisionData.isCollisionDetected());
+      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       planarRegionsList = getSquarePlanarRegionsList(0.5, 1.0 + distanceFromBox, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
-      Assert.assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
+      assertFalse(collisionData.isCollisionDetected());
+      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       // test slightly outside along x
       planarRegionsList = getSquarePlanarRegionsList(1.0 + distanceFromBox, 0.5, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
-      Assert.assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
+      assertFalse(collisionData.isCollisionDetected());
+      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       planarRegionsList = getSquarePlanarRegionsList(-0.5 - distanceFromBox, 0.5, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
-      Assert.assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
+      assertFalse(collisionData.isCollisionDetected());
+      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       // test slightly inside along y
       planarRegionsList = getSquarePlanarRegionsList(0.0, distanceFromBox, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertTrue(collisionData.isCollisionDetected());
+      assertTrue(collisionData.isCollisionDetected());
 
       planarRegionsList = getSquarePlanarRegionsList(0.5, 1.0 - distanceFromBox, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertTrue(collisionData.isCollisionDetected());
+      assertTrue(collisionData.isCollisionDetected());
 
       // test slightly inside along x
       planarRegionsList = getSquarePlanarRegionsList(1.0 - distanceFromBox, 0.5, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertTrue(collisionData.isCollisionDetected());
+      assertTrue(collisionData.isCollisionDetected());
 
       planarRegionsList = getSquarePlanarRegionsList(-0.5 + distanceFromBox, 0.5, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertTrue(collisionData.isCollisionDetected());
+      assertTrue(collisionData.isCollisionDetected());
    }
 
    @Test
@@ -163,18 +165,18 @@ public class BoundingBoxCollisionDetectorTest
       // assert no collision at zero yaw
       collisionChecker.setBoxPose(0.25, 0.25, 0.0, Math.toRadians(0.0));
       BodyCollisionData collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
-      Assert.assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromRegionAtZeroYaw, 1e-8);
+      assertFalse(collisionData.isCollisionDetected());
+      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromRegionAtZeroYaw, 1e-8);
 
       // assert no collision at small positive rotation
       collisionChecker.setBoxPose(0.25, 0.25, 0.0, Math.toRadians(15.0));
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertFalse(collisionData.isCollisionDetected());
+      assertFalse(collisionData.isCollisionDetected());
 
       // assert collision at small negative rotation
       collisionChecker.setBoxPose(0.25, 0.25, 0.0, Math.toRadians(-15.0));
       collisionData = collisionChecker.checkForCollision();
-      Assert.assertTrue(collisionData.isCollisionDetected());
+      assertTrue(collisionData.isCollisionDetected());
    }
 
    @Test
@@ -220,19 +222,19 @@ public class BoundingBoxCollisionDetectorTest
 
       // check when body is too high
       collisionChecker.setBoxPose(0.0, 0.0, 0.51, 0.0);
-      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+      assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
 
       // check when body is just below too high
       collisionChecker.setBoxPose(0.0, 0.0, 0.49, 0.0);
-      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+      assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
 
       // check when body is too low
       collisionChecker.setBoxPose(0.0, 0.0, -0.51, 0.0);
-      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+      assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
 
       // check when body is just above too low
       collisionChecker.setBoxPose(0.0, 0.0, -0.49, 0.0);
-      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+      assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
    }
 
    @Test
@@ -290,19 +292,19 @@ public class BoundingBoxCollisionDetectorTest
 
       // test just outside along y
       collisionChecker.setBoxPose(0.25, 0.01, 0.0, Math.toRadians(90.0));
-      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+      assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
 
       // test just inside along y
       collisionChecker.setBoxPose(0.15, -0.01, 0.0, Math.toRadians(90.0));
-      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+      assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
 
       // test just outside along x
       collisionChecker.setBoxPose(-0.75 - 0.01, -0.55, 0.0, Math.toRadians(90.0));
-      Assert.assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
+      assertFalse(collisionChecker.checkForCollision().isCollisionDetected());
 
       // test just inside along x
       collisionChecker.setBoxPose(-0.75 + 0.01, -0.45, 0.0, Math.toRadians(90.0));
-      Assert.assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
+      assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
    }
 
    @Test

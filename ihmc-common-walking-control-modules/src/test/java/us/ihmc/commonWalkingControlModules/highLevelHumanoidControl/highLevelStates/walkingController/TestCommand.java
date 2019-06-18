@@ -102,6 +102,12 @@ public class TestCommand implements Command<TestCommand,AbortWalkingMessage>
    }
 
    @Override
+   public long getSequenceId()
+   {
+      return 0;
+   }
+
+   @Override
    public boolean equals(Object obj)
    {
       if (this == obj)

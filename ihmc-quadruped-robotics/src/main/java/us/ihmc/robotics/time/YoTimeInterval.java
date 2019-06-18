@@ -1,11 +1,10 @@
 package us.ihmc.robotics.time;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoTimeInterval extends TimeInterval
+public class YoTimeInterval implements TimeIntervalBasics
 {
    private YoDouble startTime;
    private YoDouble endTime;
@@ -43,6 +42,6 @@ public class YoTimeInterval extends TimeInterval
    @Override
    public String toString()
    {
-      return EuclidCoreIOTools.getStringOf("(", " )", ", ", startTime.getDoubleValue(), endTime.getDoubleValue());
+      return EuclidCoreIOTools.getStringOf("(", " )", ", ", getStartTime(), getEndTime());
    }
 }

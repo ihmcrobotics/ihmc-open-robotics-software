@@ -8,7 +8,6 @@ import us.ihmc.avatar.posePlayback.PosePlaybackSCSBridge;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyriePosePlaybackSCSBridge
 {
@@ -17,7 +16,6 @@ public class ValkyriePosePlaybackSCSBridge
    {
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
       
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       FullHumanoidRobotModel fullRobotModelForSlider = robotModel.createFullRobotModel();

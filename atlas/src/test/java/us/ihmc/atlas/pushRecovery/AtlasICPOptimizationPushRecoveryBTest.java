@@ -1,6 +1,7 @@
 package us.ihmc.atlas.pushRecovery;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
@@ -9,12 +10,9 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryBTest;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import java.lang.Exception;
 
 public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimizationPushRecoveryBTest
 {
@@ -28,12 +26,6 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
          {
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
@@ -97,6 +89,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       return 0.8;
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
    {
@@ -104,13 +97,15 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       super.testPushICPOptimizationDiagonalOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
-      percentWeight = 0.13;
+      percentWeight = 0.125;
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
    {
@@ -118,6 +113,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       super.testPushICPOptimizationLongBackwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
    {
@@ -132,6 +128,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       super.testPushICPOptimizationNoPush();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
    {
@@ -139,6 +136,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
    {
@@ -146,6 +144,7 @@ public class AtlasICPOptimizationPushRecoveryBTest extends AvatarICPOptimization
       super.testPushICPOptimizationOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationRandomPushInSwing() throws Exception
    {

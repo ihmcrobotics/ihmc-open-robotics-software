@@ -29,6 +29,8 @@ public final class MessageUnpackingTools
                messagesToPack.add(multipleMessageHolder.getRightArmTrajectoryMessage());
             if (multipleMessageHolder.getChestTrajectoryMessage() != null && !multipleMessageHolder.getChestTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(multipleMessageHolder.getChestTrajectoryMessage());
+            if (multipleMessageHolder.getSpineTrajectoryMessage() != null && !multipleMessageHolder.getSpineTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
+               messagesToPack.add(multipleMessageHolder.getSpineTrajectoryMessage());
             if (multipleMessageHolder.getPelvisTrajectoryMessage() != null && !multipleMessageHolder.getPelvisTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(multipleMessageHolder.getPelvisTrajectoryMessage());
             if (multipleMessageHolder.getHeadTrajectoryMessage() != null && !multipleMessageHolder.getHeadTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())

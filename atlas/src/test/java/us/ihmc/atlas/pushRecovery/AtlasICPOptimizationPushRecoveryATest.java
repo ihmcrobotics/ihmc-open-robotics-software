@@ -1,6 +1,7 @@
 package us.ihmc.atlas.pushRecovery;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
@@ -9,12 +10,9 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryATest;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import java.lang.Exception;
 
 public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimizationPushRecoveryATest
 {
@@ -28,12 +26,6 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
          {
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
@@ -150,6 +142,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {

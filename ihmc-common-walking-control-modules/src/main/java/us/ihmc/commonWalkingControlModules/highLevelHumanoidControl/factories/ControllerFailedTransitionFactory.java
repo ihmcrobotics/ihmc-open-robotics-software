@@ -39,8 +39,8 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
       if (stateTransition != null)
          return stateTransition;
 
-      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                                         parentRegistry);
+      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(
+            controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControllerFailedBoolean());
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;

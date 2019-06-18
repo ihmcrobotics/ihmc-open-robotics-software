@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -48,10 +48,10 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private double initialTime;
    private AngularMomentumTrajectory activeTrajectory;
    private List<CoPPointsInFoot> copLocations;
-   private SmoothCMPPlannerParameters smoothCMPPlannerParameters;
 
    private final YoBoolean planSwingAngularMomentum;
    private final YoBoolean planTransferAngularMomentum;
+   private int numberOfStepsToConsider;
 
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredTorque = new FrameVector3D();
@@ -81,12 +81,11 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
+   public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      this.smoothCMPPlannerParameters = smoothCMPPlannerParameters;
-      this.planSwingAngularMomentum.set(smoothCMPPlannerParameters.planSwingAngularMomentum());
-      this.planTransferAngularMomentum.set(smoothCMPPlannerParameters.planTransferAngularMomentum());
+      numberOfStepsToConsider = icpPlannerParameters.getNumberOfFootstepsToConsider();
+      this.planSwingAngularMomentum.set(icpPlannerParameters.planSwingAngularMomentum());
+      this.planTransferAngularMomentum.set(icpPlannerParameters.planTransferAngularMomentum());
    }
 
    @Override
@@ -142,7 +141,6 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       int stepIndex = 0;
       double currentTime = time.getDoubleValue();
       double accumulatedTime = 0.0;
-      int numberOfStepsToConsider = smoothCMPPlannerParameters.getNumberOfFootstepsToConsider();
 
       if (startingTrajectoryType.equals(WalkingTrajectoryType.SWING))
       {

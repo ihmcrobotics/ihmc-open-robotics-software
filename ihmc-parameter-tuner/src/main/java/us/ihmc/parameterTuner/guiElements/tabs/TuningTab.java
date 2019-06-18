@@ -118,12 +118,12 @@ public class TuningTab extends Tab
       return tuningBox.getParameterSavingInfo();
    }
 
-   private void hide()
+   public void hide()
    {
       tuningBox.hide();
    }
 
-   private void updateView()
+   public void updateView()
    {
       tuningBox.updateView();
    }

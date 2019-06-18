@@ -1,12 +1,13 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
-import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 
 public class LatticeNodeTest
 {

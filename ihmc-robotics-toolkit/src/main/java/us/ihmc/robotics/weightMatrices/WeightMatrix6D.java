@@ -94,9 +94,9 @@ public class WeightMatrix6D
    }
 
    /**
-    * set the frame the linear and angular weights are expressed in 
+    * Set the frame the linear and angular weights are expressed in.
     * 
-    * @param weightFrame the new frame to which the weights are expressed in 
+    * @param weightFrame the new frame to which the weights are expressed in
     */
    public void setWeightFrame(ReferenceFrame weightFrame)
    {
@@ -107,7 +107,7 @@ public class WeightMatrix6D
     * Sets the weight frame for the angular and linear parts separately.
     * 
     * @param angularWeightFrame the new frame to which the angular weights are referring to.
-    * @param linearWeightFrame the new frame to which the linear  weights are referring to.
+    * @param linearWeightFrame the new frame to which the linear weights are referring to.
     */
    public void setWeightFrames(ReferenceFrame angularWeightFrame, ReferenceFrame linearWeightFrame)
    {
@@ -181,11 +181,9 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the angular weights
-    * 
+    * Sets the angular weights.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param angularXWeight angular weight of the x axis
@@ -200,13 +198,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the angular x axis weight
+    * Sets the angular x axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the x axis weight.
+    * @param weight the x axis weight.
     */
    public void setAngularXAxisWeight(double weight)
    {
@@ -214,13 +211,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the angular y axis weight
+    * Sets the angular y axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the y axis weight.
+    * @param weight the y axis weight.
     */
    public void setAngularYAxisWeight(double weight)
    {
@@ -228,13 +224,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the angular z axis weight
+    * Sets the angular z axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the z axis weight.
+    * @param weight the z axis weight.
     */
    public void setAngularZAxisWeight(double weight)
    {
@@ -242,12 +237,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * set the angular weights
-    * @param angularWeights the linear weights
+    * Set the angular weights.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
+    * 
+    * @param angularWeights the linear weights
     */
    public void setAngularWeights(Vector3DReadOnly angularWeights)
    {
@@ -255,11 +250,9 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the linear weights
-    * 
+    * Sets the linear weights.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
     * @param angularXWeight linear weight of the x axis
@@ -274,13 +267,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the linear x axis weight
+    * Sets the linear x axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the x axis weight.
+    * @param weight the x axis weight.
     */
    public void setLinearXAxisWeight(double weight)
    {
@@ -288,13 +280,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the linear y axis weight
+    * Sets the linear y axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the y axis weight.
+    * @param weight the y axis weight.
     */
    public void setLinearYAxisWeight(double weight)
    {
@@ -302,13 +293,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * sets the linear z axis weight
+    * Sets the linear z axis weight.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
-    * @param the z axis weight.
+    * @param weight the z axis weight.
     */
    public void setLinearZAxisWeight(double weight)
    {
@@ -316,12 +306,12 @@ public class WeightMatrix6D
    }
 
    /**
-    * set the linear weights
-    * @param linearWeights the linear weights
+    * Set the linear weights.
     * <p>
-    * Note that it is preferable to also set weight frame to which this weight matrix is referring
-    * to.
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
+    * 
+    * @param linearWeights the linear weights
     */
    public void setLinearWeights(Vector3DReadOnly linearWeights)
    {
@@ -493,6 +483,7 @@ public class WeightMatrix6D
 
    /**
     * Returns true if any weight equals {@code SolverWeightLevels.HARD_CONSTRAINT}.
+    * 
     * @return
     */
    public boolean containsHardConstraint()
@@ -511,30 +502,41 @@ public class WeightMatrix6D
    }
 
    @Override
-   public boolean equals(Object obj)
+   public boolean equals(Object object)
    {
-      if (this == obj)
+      if (this == object)
+      {
          return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      WeightMatrix6D other = (WeightMatrix6D) obj;
-      if (angularWeights == null)
-      {
-         if (other.angularWeights != null)
-            return false;
       }
-      else if (!angularWeights.equals(other.angularWeights))
-         return false;
-      if (linearWeights == null)
+      else if (object instanceof WeightMatrix6D)
       {
-         if (other.angularWeights != null)
-            return false;
-      }
-      else if (!linearWeights.equals(other.linearWeights))
-         return false;
-      return true;
-   }
+         WeightMatrix6D other = (WeightMatrix6D) object;
 
+         if (angularWeights == null)
+         {
+            if (other.angularWeights != null)
+               return false;
+         }
+         else if (!angularWeights.equals(other.angularWeights))
+         {
+            return false;
+         }
+
+         if (linearWeights == null)
+         {
+            if (other.angularWeights != null)
+               return false;
+         }
+         else if (!linearWeights.equals(other.linearWeights))
+         {
+            return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
 }

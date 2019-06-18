@@ -158,7 +158,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Finished Turning Valve");
+            publishTextToSpeech("Finished Turning Valve");
          }
       };
 
@@ -167,7 +167,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Did I Turn It Far Enough?");
+            publishTextToSpeech("Did I Turn It Far Enough?");
          }
       };
 

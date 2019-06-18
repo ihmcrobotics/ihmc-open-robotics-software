@@ -7,20 +7,20 @@
 uint32 sequence_id
 
 # ID number referring to each planar region, it should be unique.
-int32[<=300] region_id
+int32[<=3000] region_id
 # The coordinates in world of the origin of each planar region.
-geometry_msgs/Point[<=300] region_origin
+geometry_msgs/Point[<=3000] region_origin
 # The orientation with respect to world of each planar region.
-geometry_msgs/Quaternion[<=300] region_orientation
+geometry_msgs/Quaternion[<=3000] region_orientation
 # The normal expressed in world of each planar region.
-geometry_msgs/Vector3[<=300] region_normal
+geometry_msgs/Vector3[<=3000] region_normal
 
 # Indicates for each planar region the number of vertices for the concave hull.
-int32[<=300] concave_hulls_size
+int32[<=3000] concave_hulls_size
 # Indicates for each planar region the number of convex polygons.
-int32[<=300] number_of_convex_polygons
+int32[<=3000] number_of_convex_polygons
 # Indicates successively the number of vertices for each convex polygon of each planar region.
-int32[<=1000] convex_polygons_size
+int32[<=3000] convex_polygons_size
 
 # Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
-geometry_msgs/Point[<=5000] vertex_buffer
+geometry_msgs/Point[<=50000] vertex_buffer

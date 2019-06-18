@@ -1,6 +1,8 @@
 package us.ihmc.ihmcPerception.linemod;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -9,12 +11,11 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.jme3.math.FastMath;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
@@ -32,7 +33,7 @@ public class LineModDetectorTest
       ArrayList<Vector3D> vertexes = detector.generateTrainingCameraPoses(3);
 //      for (Vector3d vector3d : vertexes)
 //         System.out.println(vector3d.x + " " + vector3d.y + " " + vector3d.z);
-      org.junit.Assert.assertEquals(257,vertexes.size());
+      assertEquals(257,vertexes.size());
    }
 
    @Test

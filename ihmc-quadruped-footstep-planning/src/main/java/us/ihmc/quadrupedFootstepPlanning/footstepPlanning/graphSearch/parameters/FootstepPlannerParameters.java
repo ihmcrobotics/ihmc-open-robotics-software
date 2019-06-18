@@ -1,18 +1,25 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.trajectories.CubicSplineCurveGenerator;
 
 public interface FootstepPlannerParameters
 {
+   /**
+    * The total maximum Euclidean distance length.
+    */
    double getMaximumStepReach();
 
-   double getMaximumStepWidth();
-
-   double getMaximumStepCycleDistance();
+   double getMaximumStepLength();
 
    double getMinimumStepLength();
+
+   double getMaximumStepWidth();
 
    double getMinimumStepWidth();
 
@@ -22,15 +29,13 @@ public interface FootstepPlannerParameters
 
    double getMaximumStepChangeZ();
 
-   double getMaximumStepCycleChangeZ();
-
    double getBodyGroundClearance();
 
-   double getForwardWeight();
-
-   double getLateralWeight();
+   double getDistanceHeuristicWeight();
 
    double getYawWeight();
+
+   double getXGaitWeight();
 
    double getCostPerStep();
 
@@ -38,11 +43,30 @@ public interface FootstepPlannerParameters
 
    double getStepDownWeight();
 
-   double getHeuristicsWeight();
+   double getHeuristicsInflationWeight();
 
    double getMinXClearanceFromFoot();
 
    double getMinYClearanceFromFoot();
+
+
+   default double getDesiredWalkingSpeed(double phase)
+   {
+      if (phase < 90)
+         return InterpolationTools.hermiteInterpolate(getPaceSpeed(), getCrawlSpeed(), phase / 90.0);
+      else
+         return InterpolationTools.hermiteInterpolate(getCrawlSpeed(), getTrotSpeed(), (phase - 90.0) / 90.0);
+   }
+
+   double getCrawlSpeed();
+   double getTrotSpeed();
+   double getPaceSpeed();
+
+   /**
+    * Distance which a foothold is projected into planar region. Should be a positive value,
+    * e.g. 0.02 means footholds are projected 2cm inside. If this is a non-positive value then no projection is performed.
+    */
+   double getProjectInsideDistance();
 
    /**
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher

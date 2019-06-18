@@ -1,9 +1,9 @@
 package us.ihmc.atlas;
 
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.avatar.AvatarDynamicReachabilityCalculatorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.AvatarDynamicReachabilityCalculatorTest;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;

@@ -1,85 +1,143 @@
 package us.ihmc.humanoidRobotics.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
-public class CenterOfPressureDataHolder
+public class CenterOfPressureDataHolder implements Settable<CenterOfPressureDataHolder>
 {
-   private final Map<String, RigidBodyBasics> nameToRigidBodyMap = new LinkedHashMap<String, RigidBodyBasics>();
-   private final Map<RigidBodyBasics, ReferenceFrame> soleFrames;
-   private final Map<RigidBodyBasics, Point2D> centerOfPressures = new LinkedHashMap<>();
+   private final List<RigidBodyBasics> bodiesWithCenterOfPressures = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint2D> centerOfPressures = new RecyclingArrayList<>(FramePoint2D.class);
 
-   public CenterOfPressureDataHolder(Map<RigidBodyBasics, ReferenceFrame> soleFrames)
+   /**
+    * This is used for lookups only and is populated from the {@link #centerOfPressures}. It should not be modified
+    * directly and does not represent the state of the class.
+    */
+   private final transient Map<RigidBodyBasics, FramePoint2D> centerOfPressureMap = new LinkedHashMap<>();
+
+   public CenterOfPressureDataHolder()
    {
-      this.soleFrames = soleFrames;
-      
-      for(RigidBodyBasics rigidBody : soleFrames.keySet())
+   }
+
+   public CenterOfPressureDataHolder(Collection<RigidBodyBasics> rigidBodies)
+   {
+      rigidBodies.forEach(rigidBody -> registerRigidBody(rigidBody));
+   }
+
+   public void clear()
+   {
+      bodiesWithCenterOfPressures.clear();
+      centerOfPressures.clear();
+      centerOfPressureMap.clear();
+   }
+
+   public void registerRigidBody(RigidBodyBasics rigidBody)
+   {
+      if (bodiesWithCenterOfPressures.contains(rigidBody))
+         throw new RuntimeException("The body: " + rigidBody.getName() + " has already been registered.");
+
+      FramePoint2D cop = centerOfPressures.add();
+      cop.setToNaN(ReferenceFrame.getWorldFrame());
+      bodiesWithCenterOfPressures.add(rigidBody);
+      centerOfPressureMap.put(rigidBody, cop);
+   }
+
+   public void registerRigidBody(RigidBodyBasics rigidBody, FramePoint2DReadOnly centerOfPressure)
+   {
+      if (bodiesWithCenterOfPressures.contains(rigidBody))
+         throw new RuntimeException("The body: " + rigidBody.getName() + " has already been registered.");
+
+      FramePoint2D cop = centerOfPressures.add();
+      cop.setIncludingFrame(centerOfPressure);
+      bodiesWithCenterOfPressures.add(rigidBody);
+      centerOfPressureMap.put(rigidBody, cop);
+   }
+
+   public int getNumberOfBodiesWithCenterOfPressure()
+   {
+      return bodiesWithCenterOfPressures.size();
+   }
+
+   public RigidBodyBasics getRigidBody(int bodyIndex)
+   {
+      return bodiesWithCenterOfPressures.get(bodyIndex);
+   }
+
+   public void setCenterOfPressure(FramePoint2DReadOnly centerOfPressure, RigidBodyBasics foot)
+   {
+      centerOfPressureMap.get(foot).setIncludingFrame(centerOfPressure);
+   }
+
+   public void setCenterOfPressure(ReferenceFrame referenceFrame, Point2DReadOnly centerOfPressure, RigidBodyBasics foot)
+   {
+      centerOfPressureMap.get(foot).setIncludingFrame(referenceFrame, centerOfPressure);
+   }
+
+   public void setCenterOfPressure(ReferenceFrame referenceFrame, Point2DReadOnly centerOfPressure, int bodyIndex)
+   {
+      centerOfPressures.get(bodyIndex).setIncludingFrame(referenceFrame, centerOfPressure);
+   }
+
+   public void getCenterOfPressure(FramePoint2DBasics centerOfPressureToPack, RigidBodyBasics foot)
+   {
+      centerOfPressureToPack.setIncludingFrame(centerOfPressureMap.get(foot));
+   }
+
+   public FramePoint2D getCenterOfPressure(RigidBodyBasics foot)
+   {
+      return centerOfPressureMap.get(foot);
+   }
+
+   public FramePoint2D getCenterOfPressure(int bodyIndex)
+   {
+      return centerOfPressures.get(bodyIndex);
+   }
+
+   @Override
+   public void set(CenterOfPressureDataHolder other)
+   {
+      clear();
+      for (int i = 0; i < other.getNumberOfBodiesWithCenterOfPressure(); i++)
       {
-         nameToRigidBodyMap.put(rigidBody.getName(), rigidBody);
-         centerOfPressures.put(rigidBody, new Point2D());
+         RigidBodyBasics rigidBody = other.getRigidBody(i);
+         registerRigidBody(rigidBody, other.getCenterOfPressure(i));
       }
    }
 
-   public void setCenterOfPressure(Point2D centerOfPressure, RigidBodyBasics foot)
+   @Override
+   public boolean equals(Object obj)
    {
-      centerOfPressures.get(foot).set(centerOfPressure);
-   }
-   
-   public void setCenterOfPressureByName(Point2D centerOfPressure, RigidBodyBasics foot)
-   {
-      RigidBodyBasics footFromNameMap = nameToRigidBodyMap.get(foot.getName());
-      setCenterOfPressure(centerOfPressure, footFromNameMap);
-   }
-
-   public void setCenterOfPressure(FramePoint2D centerOfPressure, RigidBodyBasics foot)
-   {
-      if (centerOfPressure != null)
+      if (obj == this)
       {
-         centerOfPressure.checkReferenceFrameMatch(soleFrames.get(foot));
-         centerOfPressures.get(foot).set(centerOfPressure);
+         return true;
+      }
+      else if (obj instanceof CenterOfPressureDataHolder)
+      {
+         CenterOfPressureDataHolder other = (CenterOfPressureDataHolder) obj;
+         if (getNumberOfBodiesWithCenterOfPressure() != other.getNumberOfBodiesWithCenterOfPressure())
+            return false;
+         for (int i = 0; i < getNumberOfBodiesWithCenterOfPressure(); i++)
+         {
+            RigidBodyBasics rigidBody = getRigidBody(i);
+            if (!getCenterOfPressure(i).equals(other.getCenterOfPressure(rigidBody)))
+               return false;
+         }
+         return true;
       }
       else
       {
-         centerOfPressures.get(foot).set(Double.NaN, Double.NaN);
+         return false;
       }
-   }
-   
-   public void setCenterOfPressureByName(FramePoint2D centerOfPressure, RigidBodyBasics foot)
-   {
-      RigidBodyBasics footFromNameMap = nameToRigidBodyMap.get(foot.getName());
-      setCenterOfPressure(centerOfPressure, footFromNameMap);
-   }
-
-   public void getCenterOfPressure(Point2D centerOfPressureToPack, RigidBodyBasics foot)
-   {
-      centerOfPressureToPack.set(centerOfPressures.get(foot));
-   }
-   
-   public void getCenterOfPressureByName(Point2D centerOfPressureToPack, RigidBodyBasics foot)
-   {      
-      RigidBodyBasics footFromNameMap = nameToRigidBodyMap.get(foot.getName());
-      getCenterOfPressure(centerOfPressureToPack, footFromNameMap);
-   }
-   
-   public void getCenterOfPressure(FramePoint2D centerOfPressureToPack, RigidBodyBasics foot)
-   {
-      centerOfPressureToPack.setIncludingFrame(soleFrames.get(foot), centerOfPressures.get(foot));
-   }
-   
-   public void getCenterOfPressureByName(FramePoint2D centerOfPressureToPack, RigidBodyBasics foot)
-   {
-      RigidBodyBasics footFromNameMap = nameToRigidBodyMap.get(foot.getName());
-      getCenterOfPressure(centerOfPressureToPack, footFromNameMap);
-   }
-   
-   public Set<RigidBodyBasics> getRigidBodies()
-   {
-      return soleFrames.keySet();
    }
 }

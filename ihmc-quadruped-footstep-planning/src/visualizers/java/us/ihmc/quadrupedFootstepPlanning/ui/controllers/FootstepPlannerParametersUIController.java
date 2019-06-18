@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.ui.controllers;
 
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.FootstepPlannerParametersProperty;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.SettableFootstepPlannerParameters;
 import javafx.fxml.FXML;
@@ -8,7 +9,6 @@ import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -72,6 +72,8 @@ public class FootstepPlannerParametersUIController
    private static final String CONFIGURATION_FILE_NAME = "./Configurations/footstepPlannerParameters.txt";
    private FilePropertyHelper filePropertyHelper;
 
+   private Topic<FootstepPlannerParameters> plannerParametersTopic;
+
    public FootstepPlannerParametersUIController()
    {
       File configurationFile = new File(CONFIGURATION_FILE_NAME);
@@ -92,6 +94,12 @@ public class FootstepPlannerParametersUIController
    {
       this.messager = messager;
    }
+
+   public void setPlannerParametersTopic(Topic<FootstepPlannerParameters> plannerParametersTopic)
+   {
+      this.plannerParametersTopic = plannerParametersTopic;
+   }
+
 
    public void setPlannerParameters(FootstepPlannerParameters parameters)
    {
@@ -135,27 +143,23 @@ public class FootstepPlannerParametersUIController
       parametersProperty.bidirectionalBindMaximumStepWidth(maxStepWidth.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepWidth(minStepWidth.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindMaximumStepCycleDistance(maxStepCycleDistance.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMaximumStepYaw(maxStepYaw.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumStepYaw(minStepYaw.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindMaximumStepChangeZ(maxStepChangeZ.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindMaximumStepCycleChangeZ(maxStepCycleChangeZ.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindBodyGroundClearance(bodyGroundClearance.getValueFactory().valueProperty());
 
       parametersProperty.bidirectionalBindMinXClearanceFromFoot(minXClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinYClearanceFromFoot(minYClearanceFromFoot.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindMinimumSurfaceInclineRadians(minSurfaceIncline.getValueFactory().valueProperty());
 
-      parametersProperty.bidirectionalBindForwardWeight(forwardWeight.getValueFactory().valueProperty());
-      parametersProperty.bidirectionalBindLateralWeight(lateralWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindYawWeight(yawWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindStepUpWeight(stepUpWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindStepDownWeight(stepDownWeight.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindCostPerStep(costPerStep.getValueFactory().valueProperty());
       parametersProperty.bidirectionalBindHeuristicsWeight(heuristicsWeight.getValueFactory().valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerParametersTopic, parametersProperty, createConverter(), true);
+      messager.bindBidirectional(plannerParametersTopic, parametersProperty, createConverter(), true);
    }
 
    @FXML
@@ -174,9 +178,7 @@ public class FootstepPlannerParametersUIController
       filePropertyHelper.saveProperty("minStepWidth", minStepWidth.getValue());
       filePropertyHelper.saveProperty("minStepLength", minStepLength.getValue());
       filePropertyHelper.saveProperty("maxStepChangeZ", maxStepChangeZ.getValue());
-      filePropertyHelper.saveProperty("maxStepCycleChangeZ", maxStepCycleChangeZ.getValue());
       filePropertyHelper.saveProperty("bodyGroundClearance", bodyGroundClearance.getValue());
-      filePropertyHelper.saveProperty("maxStepCycleDistance", maxStepCycleDistance.getValue());
       filePropertyHelper.saveProperty("maxStepYaw", maxStepYaw.getValue());
       filePropertyHelper.saveProperty("minStepYaw", minStepYaw.getValue());
       filePropertyHelper.saveProperty("minXClearanceFromFoot", minXClearanceFromFoot.getValue());

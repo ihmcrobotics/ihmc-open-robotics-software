@@ -5,23 +5,27 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccelerationsCommand, NeckDesiredAccelerationsMessage>
 {
+   private long sequenceId;
    private final DesiredAccelerationsCommand desiredAccelerations = new DesiredAccelerationsCommand();
 
    @Override
    public void clear()
    {
+      sequenceId = 0;
       desiredAccelerations.clear();
    }
 
    @Override
    public void set(NeckDesiredAccelerationsCommand other)
    {
+      sequenceId = other.sequenceId;
       desiredAccelerations.set(other.desiredAccelerations);
    }
 
    @Override
    public void setFromMessage(NeckDesiredAccelerationsMessage message)
    {
+      sequenceId = message.getSequenceId();
       desiredAccelerations.setFromMessage(message.getDesiredAccelerations());
    }
 
@@ -70,5 +74,11 @@ public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccel
    public double getExecutionTime()
    {
       return desiredAccelerations.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

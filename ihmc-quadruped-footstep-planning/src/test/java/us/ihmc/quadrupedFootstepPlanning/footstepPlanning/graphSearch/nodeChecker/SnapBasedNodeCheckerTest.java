@@ -1,11 +1,19 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecker;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,16 +32,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SnapBasedNodeCheckerTest
 {
@@ -48,6 +47,12 @@ public class SnapBasedNodeCheckerTest
          public double getMinimumStepLength()
          {
             return -0.3;
+         }
+
+         @Override
+         public double getProjectInsideDistance()
+         {
+            return 0.0;
          }
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
@@ -401,6 +406,12 @@ public class SnapBasedNodeCheckerTest
          {
             return 0.0;
          }
+
+         @Override
+         public double getProjectInsideDistance()
+         {
+            return 0.0;
+         }
       };
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters);
       FootstepNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, snapper);
@@ -588,9 +599,9 @@ public class SnapBasedNodeCheckerTest
 
       public void assertCorrectRejection(String message, FootstepNode node, FootstepNode parentNode, QuadrupedFootstepPlannerNodeRejectionReason rejectionReason)
       {
-         assertEquals(message, rejectionReason, reason.getAndSet(null));
-         assertEquals(message, node, rejectedNode.getAndSet(null));
-         assertEquals(message, parentNode, rejectedParentNode.getAndSet(null));
+         assertEquals(rejectionReason, reason.getAndSet(null), message);
+         assertEquals(node, rejectedNode.getAndSet(null), message);
+         assertEquals(parentNode, rejectedParentNode.getAndSet(null), message);
       }
 
       @Override

@@ -8,6 +8,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedStep;
 import us.ihmc.quadrupedBasics.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -18,6 +19,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
 
 public class QuadrupedFallDetector
 {
@@ -61,6 +64,8 @@ public class QuadrupedFallDetector
    private final YoEnum<FallDetectionType> fallDetectionType = YoEnum.create("fallDetectionType", FallDetectionType.class, registry);
    private final GlitchFilteredYoBoolean isFallDetected;
 
+   private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
+
    public QuadrupedFallDetector(ReferenceFrame bodyFrame, QuadrantDependentList<MovingReferenceFrame> soleFrames,
                                 DivergentComponentOfMotionEstimator dcmPositionEstimator, QuadrupedFallDetectionParameters fallDetectionParameters,
                                 YoVariableRegistry parentRegistry)
@@ -89,13 +94,18 @@ public class QuadrupedFallDetector
       parentRegistry.addChild(registry);
    }
 
+   public void attachControllerFailureListener(ControllerFailureListener controllerFailureListener)
+   {
+      controllerFailureListeners.add(controllerFailureListener);
+   }
+
    public void setNextFootstep(RobotQuadrant robotQuadrant, QuadrupedStep timedFootstep)
    {
       boolean notNull = timedFootstep != null;
       isUsingNextFootsteps.get(robotQuadrant).set(notNull);
 
       if (notNull)
-         timedFootstep.getGoalPosition(nextFootstepPositions.get(robotQuadrant));
+         nextFootstepPositions.get(robotQuadrant).set(timedFootstep.getGoalPosition());
    }
 
    public void setHeightForFallDetection(double desiredHeight, double currentHeight)
@@ -136,9 +146,12 @@ public class QuadrupedFallDetector
       isFallDetected.setWindowSize(fallDetectorGlitchFilterWindow.getValue());
       isFallDetected.update(isFallDetectedUnfiltered);
       if (isFallDetected.getBooleanValue())
-         return true;
-      else
-         return false;
+      {
+         for (int i = 0; i < controllerFailureListeners.size(); i++)
+            controllerFailureListeners.get(i).controllerFailed(null);
+      }
+
+      return isFallDetected.getBooleanValue();
    }
 
    private void updateEstimates()
@@ -186,10 +199,5 @@ public class QuadrupedFallDetector
       yoDcmDistanceOutsideSupportPolygon.set(supportDistance);
       yoDcmDistanceOutsideUpcomingPolygon.set(upcomingSupportDistance);
       return supportDistance > dcmOutsideSupportThreshold.getValue() && upcomingSupportDistance > yoDcmDistanceOutsideUpcomingPolygon.getDoubleValue();
-   }
-
-   public BooleanProvider getIsFallDetected()
-   {
-      return isFallDetected;
    }
 }

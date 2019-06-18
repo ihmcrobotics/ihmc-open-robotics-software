@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -55,6 +54,8 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
 
    private boolean areFeetLoaded()
    {
+      temporaryFootWrench.setToZero(ReferenceFrame.getWorldFrame());
+
       double averageWeight = 0.0;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -62,6 +63,9 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotQuadrant);
 
          footSwitches.get(robotQuadrant).computeAndPackFootWrench(temporaryFootWrench);
+
+         temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
+
          prepFootFz.set(temporaryFootWrench.getLinearPartZ());
          prepFootFzAverage.update();
 

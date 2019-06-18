@@ -1,6 +1,9 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -18,8 +21,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import java.util.ArrayList;
 
 public class FootstepPlannerStepUpTest
 {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController">
+    <children>
+        <GridPane hgap="15.0" vgap="2.0" layoutX="15.0" layoutY="17.0">
+            <children>
+                <Button fx:id="placeWaypoints" onAction="#placeWaypoints" prefWidth="130.0" text="Place Waypoints" GridPane.rowIndex="1" />
+
+                <Button fx:id="continuePatrol" onAction="#continuePatrol" prefWidth="130.0" text="Continue Patrol (inactive)" GridPane.rowIndex="5" />
+                <Button fx:id="pausePatrol" onAction="#pausePatrol" prefWidth="130.0" text="Pause Patrol (inactive)" GridPane.rowIndex="6" />
+                <Button fx:id="destroyPatrol" onAction="#destroyPatrol" prefWidth="130.0" text="Destroy Patrol (inactive)" GridPane.rowIndex="7" />
+            </children>
+        </GridPane>
+    </children>
+</AnchorPane>

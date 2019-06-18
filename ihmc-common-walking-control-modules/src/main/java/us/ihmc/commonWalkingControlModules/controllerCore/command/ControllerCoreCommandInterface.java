@@ -9,10 +9,49 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 public interface ControllerCoreCommandInterface
 {
-   InverseDynamicsCommandList getInverseDynamicsCommandList();
-   VirtualModelControlCommandList getVirtualModelControlCommandList();
-   FeedbackControlCommandList getFeedbackControlCommandList();
-   InverseKinematicsCommandList getInverseKinematicsCommandList();
-   JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
+   void clear();
+
    WholeBodyControllerCoreMode getControllerCoreMode();
+
+   boolean isReinitializationRequested();
+
+   InverseDynamicsCommandList getInverseDynamicsCommandList();
+
+   VirtualModelControlCommandList getVirtualModelControlCommandList();
+
+   FeedbackControlCommandList getFeedbackControlCommandList();
+
+   InverseKinematicsCommandList getInverseKinematicsCommandList();
+
+   JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
+
+   default boolean equals(ControllerCoreCommandInterface other)
+   {
+      if (other == null)
+      {
+         return false;
+      }
+      else if (other == this)
+      {
+         return true;
+      }
+      else
+      {
+         if (getControllerCoreMode() != other.getControllerCoreMode())
+            return false;
+         if (isReinitializationRequested() != other.isReinitializationRequested())
+            return false;
+         if (!getInverseDynamicsCommandList().equals(other.getInverseDynamicsCommandList()))
+            return false;
+         if (!getInverseKinematicsCommandList().equals(other.getInverseKinematicsCommandList()))
+            return false;
+         if (!getVirtualModelControlCommandList().equals(other.getVirtualModelControlCommandList()))
+            return false;
+         if (!getFeedbackControlCommandList().equals(other.getFeedbackControlCommandList()))
+            return false;
+         if (!getLowLevelOneDoFJointDesiredDataHolder().equals(other.getLowLevelOneDoFJointDesiredDataHolder()))
+            return false;
+         return true;
+      }
+   }
 }

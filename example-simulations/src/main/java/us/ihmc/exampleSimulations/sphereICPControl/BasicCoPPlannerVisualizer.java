@@ -60,7 +60,7 @@ public class BasicCoPPlannerVisualizer
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
 
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<FramePose3D>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootPoses = new SideDependentList<>();
@@ -104,7 +104,7 @@ public class BasicCoPPlannerVisualizer
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          double xToAnkle = 0.0;
          double yToAnkle = 0.0;
-         double zToAnkle = 0.084;
+         double zToAnkle = 0.0;
          List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
          contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
@@ -141,14 +141,13 @@ public class BasicCoPPlannerVisualizer
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
-      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
+      bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet);
       List<FootstepTiming> timings = new ArrayList<>();
@@ -164,7 +163,7 @@ public class BasicCoPPlannerVisualizer
             for (RobotSide robotSide : RobotSide.values)
             {
                soleFrames.get(robotSide).update();
-               ankleZUpFrames.get(robotSide).update();
+               soleZUpFrames.get(robotSide).update();
             }
             midFeetZUpFrame.update();
          }

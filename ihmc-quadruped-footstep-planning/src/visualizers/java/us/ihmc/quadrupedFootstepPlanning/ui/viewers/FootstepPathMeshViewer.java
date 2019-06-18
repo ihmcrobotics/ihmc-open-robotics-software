@@ -16,9 +16,9 @@ import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.FootstepPlan;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -58,12 +58,17 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private static final QuadrantDependentList<Color> intermediateFootstepColors = new QuadrantDependentList<>(Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160), Color.rgb(160, 160, 160));
 
    private final Messager messager;
+   private final Topic<Boolean> showFootstepPlanTopic;
+   private final Topic<Boolean> showFootstepPreviewTopic;
 
-   public FootstepPathMeshViewer(Messager messager)
+   public FootstepPathMeshViewer(Messager messager, Topic<FootstepPlan> footstepPlanTopic, Topic<Boolean> computePathTopic, Topic<Boolean> showFootstepPlanTopic,
+                                 Topic<Boolean> showFootstepPreviewTopic)
    {
       this.messager = messager;
+      this.showFootstepPlanTopic = showFootstepPlanTopic;
+      this.showFootstepPreviewTopic = showFootstepPreviewTopic;
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanTopic, footstepPlan -> executorService.submit(() -> {
+      messager.registerTopicListener(footstepPlanTopic, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
       }));
@@ -81,9 +86,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
          root.getChildren().add(previewSphere);
       }
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePathTopic, data -> reset.set(true));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, this::handleShowSolution);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, this::handleShowPreview);
+      messager.registerTopicListener(computePathTopic, data -> reset.set(true));
+      messager.registerTopicListener(showFootstepPlanTopic, this::handleShowSolution);
+      messager.registerTopicListener(showFootstepPreviewTopic, this::handleShowPreview);
    }
 
    public QuadrantDependentList<Point3D> getPreviewFootstepPositions()
@@ -95,7 +100,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       showSolution.set(show);
       if (show)
-         messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPreviewTopic, false);
+         messager.submitMessage(showFootstepPreviewTopic, false);
       else
          clearSolution.set(true);
    }
@@ -104,7 +109,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       showPreviewSteps.set(show);
       if (show)
-         messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlanTopic, false);
+         messager.submitMessage(showFootstepPlanTopic, false);
    }
 
 
@@ -113,6 +118,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
       meshBuilder.clear();
       QuadrantDependentList<Color> colors = solutionWasReceived.get() ? solutionFootstepColors : intermediateFootstepColors;
 
+      if (plan == null)
+      {
+         reset.set(true);
+         return;
+      }
       FramePoint3D footPosition = new FramePoint3D();
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
@@ -120,7 +130,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          QuadrupedTimedStep footstep = plan.getFootstep(i);
          Color regionColor = colors.get(footstep.getRobotQuadrant());
 
-         footstep.getGoalPosition(footPosition);
+         footPosition.set(footstep.getGoalPosition());
          footPosition.addZ(zOffset);
 
          meshBuilder.addSphere(RADIUS, footPosition, regionColor);

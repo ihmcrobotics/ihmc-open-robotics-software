@@ -6,10 +6,10 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.SettableVisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.VisibilityGraphsParametersProperty;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 
 public class VisibilityGraphsParametersUIController
 {
@@ -42,11 +42,16 @@ public class VisibilityGraphsParametersUIController
    @FXML
    private Slider normalZThresholdForAccessibleRegions;
 
-
+   private Topic<VisibilityGraphsParameters> visibilityGraphsParametersTopic;
 
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
+   }
+
+   public void setVisibilityGraphsParametersTopic(Topic<VisibilityGraphsParameters> visibilityGraphsParametersTopic)
+   {
+      this.visibilityGraphsParametersTopic = visibilityGraphsParametersTopic;
    }
 
    public void setVisbilityGraphsParameters(VisibilityGraphsParameters parameters)
@@ -76,7 +81,7 @@ public class VisibilityGraphsParametersUIController
       parametersProperty.bidirectionalBindRegionOrthogonalAngle(regionOrthogonalAngle.valueProperty());
       parametersProperty.bidirectionalBindSearchHostRegionEpsilon(searchHostRegionEpsilon.valueProperty());
 
-      messager.bindBidirectional(FootstepPlannerMessagerAPI.VisibilityGraphsParametersTopic, parametersProperty, createConverter(), true);
+      messager.bindBidirectional(visibilityGraphsParametersTopic, parametersProperty, createConverter(), true);
    }
 
    private SpinnerValueFactory.IntegerSpinnerValueFactory createPlanarRegionMinSizeValueFactory()

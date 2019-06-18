@@ -16,8 +16,13 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputListBasics
 {
    private final List<OneDoFJointBasics> jointsWithDesiredData;
-   private final TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
    private final RecyclingArrayList<JointDesiredOutput> lowLevelJointData;
+
+   /**
+    * This is used for lookups only and is populated from the {@link #lowLevelJointData}. It should not
+    * be modified directly and does not represent the state of the class.
+    */
+   private final transient TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
 
    public LowLevelOneDoFJointDesiredDataHolder()
    {
@@ -31,8 +36,8 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       jointsWithDesiredData = new ArrayList<>(initialCapacity);
 
       /**
-       * A autoCompactionFactor of 0 disables auto-compacting, which ensures no garbage
-       * is created by emptying and filling the map repeatedly. @dcalvert
+       * A autoCompactionFactor of 0 disables auto-compacting, which ensures no garbage is created by
+       * emptying and filling the map repeatedly. @dcalvert
        */
       float disableAutoCompaction = 0;
       lowLevelJointDataMap = new TLongObjectHashMap<>(initialCapacity);
@@ -74,8 +79,8 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    }
 
    /**
-    * Complete the information held in this using other.
-    * Does not overwrite the data already set in this.
+    * Complete the information held in this using other. Does not overwrite the data already set in
+    * this.
     */
    @Override
    public void completeWith(JointDesiredOutputListReadOnly other)
@@ -169,8 +174,22 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
       return jointData;
    }
 
+   public void set(LowLevelOneDoFJointDesiredDataHolder other)
+   {
+      overwriteWith(other);
+   }
+
    private static void throwJointAlreadyRegisteredException(OneDoFJointBasics joint)
    {
       throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof JointDesiredOutputListReadOnly)
+         return JointDesiredOutputListBasics.super.equals((JointDesiredOutputListReadOnly) object);
+      else
+         return false;
    }
 }

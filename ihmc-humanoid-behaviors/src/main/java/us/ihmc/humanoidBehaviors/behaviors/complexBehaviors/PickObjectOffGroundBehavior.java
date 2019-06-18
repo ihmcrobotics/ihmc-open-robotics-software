@@ -62,7 +62,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            publishTextToSpeack("Picking Up The Ball");
+            publishTextToSpeech("Picking Up The Ball");
             FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(), grabLocation.getY(),
                                                   grabLocation.getZ() + objectRadius + 0.25);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);

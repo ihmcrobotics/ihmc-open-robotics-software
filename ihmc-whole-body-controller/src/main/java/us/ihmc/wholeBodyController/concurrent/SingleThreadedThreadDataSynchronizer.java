@@ -1,9 +1,9 @@
 package us.ihmc.wholeBodyController.concurrent;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -66,12 +66,12 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
-      LinkedHashMap<RigidBodyBasics, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
+      List<RigidBodyBasics> feet = new ArrayList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));
+         feet.add(estimatorFullRobotModel.getFoot(robotSide));
       }
-      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames);
+      estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(feet);
 
       controllerFullRobotModel = estimatorFullRobotModel;
       controllerForceSensorDataHolder = estimatorForceSensorDataHolder;

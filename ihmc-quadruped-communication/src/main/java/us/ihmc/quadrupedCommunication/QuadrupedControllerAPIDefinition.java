@@ -54,6 +54,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedStatusMessages.add(QuadrupedFootstepStatusMessage.class);
       quadrupedStatusMessages.add(QuadrupedGroundPlaneMessage.class);
       quadrupedStatusMessages.add(WalkingControllerFailureStatusMessage.class);
+      quadrupedStatusMessages.add(ControllerCrashNotificationPacket.class);
 
       quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
 

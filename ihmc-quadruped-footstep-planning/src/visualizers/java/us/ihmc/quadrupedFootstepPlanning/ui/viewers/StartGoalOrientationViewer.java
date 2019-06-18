@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,7 +38,9 @@ public class StartGoalOrientationViewer extends AnimationTimer
    private final AtomicReference<Quaternion> lowLevelGoalQuaternionReference;
    private final AtomicReference<Quaternion> goalQuaternionReference;
 
-   public StartGoalOrientationViewer(Messager messager)
+   public StartGoalOrientationViewer(Messager messager, Topic<Boolean> startOrientationEditModeEnabledTopic, Topic<Boolean> goalOrientationEditModeEnabledTopic,
+                                     Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> lowLevelGoalPositionTopic,
+                                     Topic<Quaternion> lowLevelGoalOrientationTopic, Topic<Point3D> goalPositionTopic, Topic<Quaternion> goalOrientationTopic)
    {
       startArrow.setMouseTransparent(true);
       lowLevelGoalArrow.setMouseTransparent(true);
@@ -48,16 +50,16 @@ public class StartGoalOrientationViewer extends AnimationTimer
       root.getChildren().add(lowLevelGoalArrow);
       root.getChildren().add(goalArrow);
 
-      startRotationEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
-      goalRotationEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
+      startRotationEditModeEnabled = messager.createInput(startOrientationEditModeEnabledTopic, false);
+      goalRotationEditModeEnabled = messager.createInput(goalOrientationEditModeEnabledTopic, false);
 
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D());
-      lowLevelGoalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPositionTopic, new Point3D());
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D());
+      startPositionReference = messager.createInput(startPositionTopic, new Point3D());
+      lowLevelGoalPositionReference = messager.createInput(lowLevelGoalPositionTopic, new Point3D());
+      goalPositionReference = messager.createInput(goalPositionTopic, new Point3D());
 
-      startQuaternionReference = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion());
-      lowLevelGoalQuaternionReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientationTopic, new Quaternion());
-      goalQuaternionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion());
+      startQuaternionReference = messager.createInput(startOrientationTopic, new Quaternion());
+      lowLevelGoalQuaternionReference = messager.createInput(lowLevelGoalOrientationTopic, new Quaternion());
+      goalQuaternionReference = messager.createInput(goalOrientationTopic, new Quaternion());
    }
 
    @Override

@@ -1,7 +1,7 @@
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
 }
 
 ihmc {
@@ -19,7 +19,7 @@ mainDependencies {
    compile group: "org.ejml", name: "core", version: "0.30"
    compile "org.apache.commons:commons-lang3:3.8.1"
    compile group: "us.ihmc.thirdparty.jinput", name: "jinput", version: "190214"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: "source"
@@ -39,7 +39,7 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics-test", version: "source"
    compile group: "us.ihmc", name: "ihmc-quadruped-planning-test", version: "source"

@@ -1,6 +1,11 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
@@ -13,10 +18,6 @@ import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
 
 public class PitchEstimatorTest
 {

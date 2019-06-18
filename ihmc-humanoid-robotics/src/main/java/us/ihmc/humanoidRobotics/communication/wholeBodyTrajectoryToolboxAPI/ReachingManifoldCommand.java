@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class ReachingManifoldCommand
       implements Command<ReachingManifoldCommand, ReachingManifoldMessage>, WholeBodyTrajectoryToolboxAPI<ReachingManifoldMessage>
 {
+   private long sequenceId;
    private int rigidBodyHashCode;
    private RigidBodyBasics rigidBody;
 
@@ -51,6 +52,8 @@ public class ReachingManifoldCommand
    {
       clear();
 
+      sequenceId = other.sequenceId;
+
       rigidBodyHashCode = other.rigidBodyHashCode;
       rigidBody = other.rigidBody;
 
@@ -76,6 +79,7 @@ public class ReachingManifoldCommand
    {
       clear();
 
+      sequenceId = message.getSequenceId();
       rigidBodyHashCode = message.getEndEffectorHashCode();
       if (rigidBodyHashMap == null)
          rigidBody = null;
@@ -96,6 +100,7 @@ public class ReachingManifoldCommand
    @Override
    public void clear()
    {
+      sequenceId = 0;
       rigidBodyHashCode = 0;
       rigidBody = null;
       manifoldOriginPosition = new Point3D();
@@ -160,5 +165,11 @@ public class ReachingManifoldCommand
    public Quaternion getManifoldOriginOrientation()
    {
       return manifoldOriginOrientation;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

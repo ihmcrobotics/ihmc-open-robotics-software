@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.controllerAPI.EndToEndArmTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -28,9 +26,9 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @Test
-   public void testMessageWithTooManyTrajectoryPoints() throws Exception
+   public void testSingleTrajectoryPoint() throws Exception
    {
-      super.testMessageWithTooManyTrajectoryPoints();
+      super.testSingleTrajectoryPoint();
    }
 
    @Override
@@ -42,16 +40,16 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @Test
-   public void testQueuedMessages() throws Exception
+   public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
-      super.testQueuedMessages();
+      super.testMessageWithTooManyTrajectoryPoints();
    }
 
    @Override
    @Test
-   public void testQueueStoppedWithOverrideMessage() throws Exception
+   public void testQueuedMessages() throws Exception
    {
-      super.testQueueStoppedWithOverrideMessage();
+      super.testQueuedMessages();
    }
 
    @Override
@@ -63,9 +61,9 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @Test
-   public void testSingleTrajectoryPoint() throws Exception
+   public void testQueueStoppedWithOverrideMessage() throws Exception
    {
-      super.testSingleTrajectoryPoint();
+      super.testQueueStoppedWithOverrideMessage();
    }
 
    @Override

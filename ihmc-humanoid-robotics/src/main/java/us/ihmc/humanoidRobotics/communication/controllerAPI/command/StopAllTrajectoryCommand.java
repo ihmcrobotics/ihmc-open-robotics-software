@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 
 public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryCommand, StopAllTrajectoryMessage>
 {
+   private long sequenceId;
    private boolean stopAllTrajectory = false;
    
    /** the time to delay this command on the controller side before being executed **/
@@ -15,12 +16,14 @@ public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryComman
    @Override
    public void clear()
    {
+      sequenceId = 0;
       stopAllTrajectory = false;
    }
 
    @Override
    public void set(StopAllTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       stopAllTrajectory = other.stopAllTrajectory;
       executionDelayTime = other.executionDelayTime;
    }
@@ -28,6 +31,7 @@ public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryComman
    @Override
    public void setFromMessage(StopAllTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       stopAllTrajectory = true;
    }
 
@@ -104,4 +108,9 @@ public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryComman
       return true;
    }
 
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
+   }
 }

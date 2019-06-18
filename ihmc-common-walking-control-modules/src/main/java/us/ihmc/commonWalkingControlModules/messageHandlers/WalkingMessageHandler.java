@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -124,6 +123,7 @@ public class WalkingMessageHandler
    private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
    private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
+   private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime,
@@ -185,17 +185,17 @@ public class WalkingMessageHandler
          case QUEUE:
             if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
             {
-               PrintTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
+               LogTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
             }
             if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
             {
-               PrintTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
+               LogTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
             }
             if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
             {
                if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
                {
-                  PrintTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                  LogTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
                   return;
                }
 
@@ -206,20 +206,20 @@ public class WalkingMessageHandler
                }
                else
                {
-                  PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+                  LogTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
                }
                return;
             }
             break;
          default:
-            PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
+            LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
             return;
          }
       }
 
       if (command.getNumberOfFootsteps() + currentNumberOfFootsteps.getIntegerValue() > maxNumberOfFootsteps)
       {
-         PrintTools.warn("Can not exceed " + maxNumberOfFootsteps + " footsteps stopping execution.");
+         LogTools.warn("Can not exceed " + maxNumberOfFootsteps + " footsteps stopping execution.");
          clearFootsteps();
          return;
       }
@@ -269,7 +269,7 @@ public class WalkingMessageHandler
          clearFootsteps();
       }
 
-      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
+      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxStepHeightChange.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
       {
          clearFootsteps();
       }
@@ -293,7 +293,7 @@ public class WalkingMessageHandler
    {
       if (isWalkingPaused.getBooleanValue())
       {
-         PrintTools.warn(this, "Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
+         LogTools.warn("Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
          requestedFootstepAdjustment.clear();
          hasNewFootstepAdjustment.set(false);
          return;
@@ -452,7 +452,7 @@ public class WalkingMessageHandler
 
       if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
       {
-         PrintTools.warn(this, "RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: "
+         LogTools.warn("RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: "
                + requestedFootstepAdjustment.getRobotSide());
          hasNewFootstepAdjustment.set(false);
          requestedFootstepAdjustment.clear();
@@ -977,7 +977,8 @@ public class WalkingMessageHandler
     * @return if the footsteps were found to be safe
     */
    private static boolean checkFootsteps(List<Footstep> footsteps, SideDependentList<ReferenceFrame> soleFrames, double maxStepDistance,
-                                         double maxSwingDistance, FramePoint3DBasics tempStanceLocation, FramePoint3DBasics tempStepOrigin)
+                                         double maxStepHeightChange, double maxSwingDistance, FramePoint3DBasics tempStanceLocation,
+                                         FramePoint3DBasics tempStepOrigin)
    {
       if (footsteps.isEmpty())
       {
@@ -998,6 +999,14 @@ public class WalkingMessageHandler
          {
             LogTools.warn("Received step that was too far to be executed safely. Distance from previous step was " + distance
                   + ". If that is acceptable increase the MaxStepDistance parameter.");
+            return false;
+         }
+
+         double heightChange = Math.abs(stepPosition.getZ() - tempStanceLocation.getZ());
+         if (heightChange > maxStepHeightChange)
+         {
+            LogTools.warn("Received step that was too far to be executed safely. Height change w.r.t. previous step was " + heightChange
+                  + ". If that is acceptable increase the MaxStepHeightChange parameter.");
             return false;
          }
 

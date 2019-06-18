@@ -7,10 +7,10 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
-import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxModule;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
+import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.xBoxPort;
 
 public class QuadrupedXBoxModule extends QuadrupedToolboxModule
 {
@@ -30,15 +31,17 @@ public class QuadrupedXBoxModule extends QuadrupedToolboxModule
    private final QuadrupedXBoxController xBoxController;
 
    public QuadrupedXBoxModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, double nominalBodyHeight,
-                              LogModelProvider modelProvider, DomainFactory.PubSubImplementation pubSubImplementation)
+                              LogModelProvider modelProvider, boolean startYoVariableServer, DomainFactory.PubSubImplementation pubSubImplementation)
          throws IOException
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, false, null, updatePeriodMilliseconds,
+      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
+            new DataServerSettings(false, true, xBoxPort, "XBoxModule"), updatePeriodMilliseconds,
             pubSubImplementation);
 
       xBoxController = new QuadrupedXBoxController(robotDataReceiver, defaultXGaitSettings, nominalBodyHeight, outputManager, registry, updatePeriodMilliseconds);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
+      startYoVariableServer(getClass());
    }
 
    @Override

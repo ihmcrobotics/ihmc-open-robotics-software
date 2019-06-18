@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -12,13 +13,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.util.YoQuadrupedTimedStep;
-import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -28,25 +29,15 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.List;
+import us.ihmc.yoVariables.variable.*;
 
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final FrameVector3DReadOnly zeroVector3D = new FrameVector3D(worldFrame);
    private static final boolean debug = false;
-
-   private static final double[] defaultWaypointProportions = new double[] {0.33, 0.66};
-   private static final double[] defaultObstacleClearanceWaypointProportions = new double[] {0.25, 0.75};
 
    //   private final OneWaypointSwingGenerator swingTrajectoryWaypointCalculator;
    private final TwoWaypointSwingGenerator swingTrajectoryWaypointCalculator;
@@ -60,7 +51,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
 
-   private final FramePoint3D finalPosition = new FramePoint3D();
+   private final YoFramePoint3D finalPosition;
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
 
    private final FramePoint3D lastStepPosition = new FramePoint3D();
@@ -92,12 +83,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean hasMinimumTimePassed;
 
-   private final DoubleParameter minHeightDifferenceForObstacleClearance;
-   private final DoubleParameter minPhaseThroughSwingForContact;
-
-   private final DoubleParameter percentPastSwingForDone;
    private final YoBoolean isSwingPastDone;
 
+   private WholeBodyControllerCoreMode controllerCoreMode = WholeBodyControllerCoreMode.VIRTUAL_MODEL;
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private final QuadrupedControllerToolbox controllerToolbox;
@@ -110,9 +98,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final YoDouble swingTimeSpeedUpFactor;
    private final YoDouble maxSwingTimeSpeedUpFactor;
-   private final DoubleParameter minSwingTimeForDisturbanceRecovery;
-   private final DoubleParameter minRequiredSpeedUpFactor;
-   private final BooleanParameter isSwingSpeedUpEnabled;
+   private final BooleanProvider isSwingSpeedUpEnabled;
 
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
@@ -129,9 +115,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       String namePrefix = robotQuadrant.getPascalCaseName();
 
-      minHeightDifferenceForObstacleClearance = new DoubleParameter(namePrefix + "MinHeightDifferenceForObstacleClearance", registry, 0.04);
-      minPhaseThroughSwingForContact = new DoubleParameter(namePrefix + "minPhaseThroughSwingForContact", registry, 0.8);
-
       timeInState = new YoDouble(namePrefix + "TimeInState", registry);
       timeInStateWithSwingSpeedUp = new YoDouble(namePrefix + "TimeInStateWithSwingSpeedUp", registry);
       timeRemainingInState = new YoDouble(namePrefix + "TimeRemainingInState", registry);
@@ -143,22 +126,20 @@ public class QuadrupedSwingState extends QuadrupedFootState
       maxSwingTimeSpeedUpFactor = new YoDouble(namePrefix + "MaxTimeSpeedUpFactor", registry);
 
       isSwingPastDone = new YoBoolean(namePrefix + "IsSwingPastDone", registry);
-      percentPastSwingForDone = new DoubleParameter(namePrefix + "PercentPastSwingForDone", registry, 0.0);
 
-      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, 0.0);
-      touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
-      touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity,
-                                                         registry);
+      this.parameters = controllerToolbox.getFootControlModuleParameters();
 
-      isSwingSpeedUpEnabled = new BooleanParameter(namePrefix + "IsSwingSpeedUpEnabled", registry, false);
-      minSwingTimeForDisturbanceRecovery = new DoubleParameter(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry, 0.2);
-      minRequiredSpeedUpFactor = new DoubleParameter(namePrefix + "MinRequiredSpeedUpFactor", registry, 1.05);
+      touchdownVelocity = parameters.getTouchdownVelocity();
+      touchdownAcceleration = parameters.getTouchdownAcceleration();
+
+      isSwingSpeedUpEnabled = parameters.getIsSwingSpeedUpEnabled();
+
+      finalPosition = new YoFramePoint3D(namePrefix + "StepFinalPosition", worldFrame, registry);
 
       finalPosition.setToNaN();
       lastStepPosition.setToNaN();
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
 
-      this.parameters = controllerToolbox.getFootControlModuleParameters();
 
       MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
@@ -195,6 +176,14 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
       desiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
       desiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
+
+      graphicsListRegistry.registerYoGraphic("SwingState", new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red()));
+   }
+
+   public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
+   {
+      this.controllerCoreMode = controllerCoreMode;
+      feedbackControlCommand.setControlMode(controllerCoreMode);
    }
 
    @Override
@@ -209,11 +198,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
       controllerToolbox.getFootContactState(robotQuadrant).clear();
       footSwitch.reset();
 
-      lastStepPosition.setIncludingFrame(finalPosition);
+      lastStepPosition.setMatchingFrame(finalPosition);
       if (lastStepPosition.containsNaN())
          lastStepPosition.setToZero(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
 
-      currentStepCommand.getGoalPosition(finalPosition);
+      finalPosition.set(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
 
       if (stepTransitionCallback != null)
       {
@@ -226,7 +215,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
       initialPosition.changeFrame(worldFrame);
       initialLinearVelocity.changeFrame(worldFrame);
 
-      finalPosition.changeFrame(worldFrame);
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
       setFootstepDurationInternal(currentStepCommand.getTimeInterval().getDuration());
@@ -243,9 +231,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if (debug)
       {
-         Point3D touchdown = new Point3D();
-         currentStepCommand.getGoalPosition(touchdown);
-         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + touchdown + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
+         PrintTools.debug(currentStepCommand.getRobotQuadrant() + ", " + new Point3D(currentStepCommand.getGoalPosition()) + ", " + currentStepCommand.getGroundClearance() + ", " + currentStepCommand
                .getTimeInterval());
       }
    }
@@ -255,13 +241,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
       lastStepPosition.changeFrame(worldFrame);
       lastStepPosition.checkReferenceFrameMatch(finalPosition);
       double zDifference = Math.abs(finalPosition.getZ() - lastStepPosition.getZ());
-      return zDifference > minHeightDifferenceForObstacleClearance.getValue();
+      return zDifference > parameters.getMinHeightDifferenceForObstacleClearance();
    }
 
    private void setFootstepDurationInternal(double swingTime)
    {
       swingDuration.set(swingTime);
-      maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / minSwingTimeForDisturbanceRecovery.getValue(), 1.0));
+      maxSwingTimeSpeedUpFactor.set(Math.max(swingTime / parameters.getMinSwingTimeForDisturbanceRecovery(), 1.0));
    }
 
    @Override
@@ -311,8 +297,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       desiredSoleLinearVelocity.setMatchingFrame(desiredVelocity);
       desiredSoleLinearAcceleration.setMatchingFrame(desiredAcceleration);
 
-      feedbackControlCommand.set(desiredPosition, desiredVelocity);
-      feedbackControlCommand.setFeedForwardAction(desiredAcceleration);
+      if (controllerCoreMode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
+         feedbackControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+      else if (controllerCoreMode == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         feedbackControlCommand.setVirtualModelControl(desiredPosition, desiredVelocity, zeroVector3D);
+      else
+         throw new UnsupportedOperationException("Unsupported control mode: " + controllerCoreMode);
       feedbackControlCommand.setGains(parameters.getSolePositionGains());
       feedbackControlCommand.setWeightsForSolver(parameters.getSolePositionWeights());
 
@@ -321,7 +311,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      return timeInState / swingDuration.getDoubleValue() > minPhaseThroughSwingForContact.getValue();
+      return timeInState / swingDuration.getDoubleValue() > parameters.getMinPhaseThroughSwingForContact();
    }
 
    private void updateEndOfStateConditions(double timeInState)
@@ -337,10 +327,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
       double startTime = currentStepCommand.getTimeInterval().getStartTime();
       double percentDone = (currentTime - startTime) / (touchDownTime - startTime);
-      //      double percentDone = timeInState / swingDuration.getDoubleValue();
 
       // Trigger support phase.
-      if (percentDone >= (1.0 + percentPastSwingForDone.getValue()))
+      if (percentDone >= (1.0 + parameters.getPercentPastSwingForDone()))
       {
          isSwingPastDone.set(true);
       }
@@ -360,8 +349,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
          swingTrajectoryWaypointCalculator.setStepTime(swingDuration.getDoubleValue());
          swingTrajectoryWaypointCalculator.setTrajectoryType(activeTrajectoryType.getEnumValue());
          swingTrajectoryWaypointCalculator.setSwingHeight(currentStepCommand.getGroundClearance());
-         double[] waypointProportions = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE ? defaultObstacleClearanceWaypointProportions : defaultWaypointProportions;
-         swingTrajectoryWaypointCalculator.setWaypointProportions(waypointProportions);
+         if (activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+            swingTrajectoryWaypointCalculator.setWaypointProportions(parameters.getSwingObstacleClearanceWaypointProportion0(), parameters.getSwingObstacleClearanceWaypointProportion1());
+         else
+            swingTrajectoryWaypointCalculator.setWaypointProportions(parameters.getSwingWaypointProportion0(), parameters.getSwingWaypointProportion1());
          swingTrajectoryWaypointCalculator.initialize();
       }
 
@@ -383,22 +374,17 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private void blendForStepAdjustment()
    {
       // Compute current goal position.
-      currentStepCommand.getGoalPosition(finalPosition);
-      finalPosition.changeFrame(worldFrame);
+      finalPosition.set(currentStepCommand.getReferenceFrame(), currentStepCommand.getGoalPosition());
       finalPosition.addZ(parameters.getStepGoalOffsetZParameter());
 
-      // Compute swing trajectory.
-      if (timeRemainingInState.getDoubleValue() > parameters.getMinimumStepAdjustmentTimeParameter())
-      {
-         double duration = swingDuration.getDoubleValue();
-         blendedSwingTrajectory.clear();
+      double duration = swingDuration.getDoubleValue();
+      blendedSwingTrajectory.clear();
 
-         touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
-         touchdownTrajectory.initialize();
+      touchdownTrajectory.setLinearTrajectory(duration, finalPosition, finalLinearVelocity, touchdownAcceleration);
+      touchdownTrajectory.initialize();
 
-         blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
-         blendedSwingTrajectory.initialize();
-      }
+      blendedSwingTrajectory.blendFinalConstraint(finalPosition, duration, duration);
+      blendedSwingTrajectory.initialize();
    }
 
    /**
@@ -424,7 +410,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
          speedUpFactor = Double.POSITIVE_INFINITY;
       }
 
-      if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > minRequiredSpeedUpFactor.getValue() && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
+      if (isSwingSpeedUpEnabled.getValue() && (speedUpFactor > parameters.getMinRequiredSpeedUpFactor() && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
       {
          speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 

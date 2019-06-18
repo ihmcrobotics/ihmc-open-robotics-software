@@ -3,7 +3,9 @@ package us.ihmc.quadrupedCommunication.networkProcessing.xBox;
 import controller_msgs.msg.dds.*;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
+import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsBasics;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedPlanning.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.stepStream.input.InputValueIntegrator;
 import us.ihmc.quadrupedCommunication.networkProcessing.OutputManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedRobotDataReceiver;
@@ -42,14 +44,16 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
    private final YoDouble maxTranslationX = new YoDouble("xBoxMaxTranslationX", registry);
    private final YoDouble maxTranslationY = new YoDouble("xBoxMaxTranslationY", registry);
 
-   private final YoDouble maxVelocityX = new YoDouble("xBoxMaxVelocityX", registry);
+   private final YoDouble maxYSpeedFraction = new YoDouble("maxYSpeedFraction", registry);
+   private final YoDouble maxYawSpeedFraction = new YoDouble("maxYawSpeedFraction", registry);
    private final YoDouble maxVelocityY = new YoDouble("xBoxMaxVelocityY", registry);
    private final YoDouble maxVelocityYaw = new YoDouble("xBoxMaxVelocityYaw", registry);
 
    private final YoDouble bodyOrientationShiftTime = new YoDouble("xBoxBodyOrientationShiftTime", registry);
 
+   private final QuadrupedXGaitSettingsBasics xGaitSettings;
+
    private final InputValueIntegrator bodyHeight;
-   private double endPhaseShift;
 
    private QuadrupedXGaitSettingsPacket xGaitSettingsPacket = null;
    private QuadrupedTeleopDesiredVelocity desiredVelocityMessage = null;
@@ -71,6 +75,8 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       joystick.addJoystickEventListener(this);
       joystick.setPollInterval(10);
 
+      xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
+
       maxBodyYaw.set(0.15);
       maxBodyRoll.set(0.15);
       maxBodyPitch.set(0.15);
@@ -79,13 +85,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       maxTranslationX.set(0.25);
       maxTranslationY.set(0.15);
 
-      maxVelocityX.set(0.25);
-      maxVelocityY.set(0.1);
-      maxVelocityYaw.set(0.2);
+      maxYSpeedFraction.set(0.5);
+      maxYawSpeedFraction.set(0.75);
 
       bodyOrientationShiftTime.set(0.1);
       this.bodyHeight = new InputValueIntegrator(Conversions.millisecondsToSeconds(updateTimeInMs), nominalBodyHeight);
-      this.endPhaseShift = defaultXGaitSettings.getEndPhaseShift();
 
       // Initialize all channels to zero.
       for (XBoxOneMapping channel : XBoxOneMapping.values)
@@ -106,7 +110,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    public void processXGaitSettingsPacket(QuadrupedXGaitSettingsPacket packet)
    {
-      endPhaseShift = packet.getEndPhaseShift();
+      xGaitSettings.set(packet);
    }
 
    public void setPaused(boolean paused)
@@ -199,7 +203,11 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void processJoystickStepCommands()
    {
-      double xVelocity = channels.get(xVelocityMapping) * maxVelocityX.getValue();
+      maxVelocityY.set(maxYSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
+      maxVelocityYaw.set(maxYawSpeedFraction.getDoubleValue() * xGaitSettings.getMaxSpeed());
+
+
+      double xVelocity = channels.get(xVelocityMapping) * xGaitSettings.getMaxSpeed();
       double yVelocity = channels.get(yVelocityMapping) * maxVelocityY.getValue();
 
       double bodyYawLeft = channels.get(negativeYawRateMapping);
@@ -214,7 +222,7 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
 
    private void processStateChangeRequests(Event event)
    {
-      if (event.getValue() < 0.5)
+      if (event.getValue() < 0.5 || xGaitSettings == null)
          return;
 
       XBoxOneMapping mapping = XBoxOneMapping.getMapping(event);
@@ -235,19 +243,18 @@ public class QuadrupedXBoxController extends QuadrupedToolboxController implemen
       //      }
       if (mapping == endPhaseShiftDown && channels.get(mapping) < 0.5) // the bumpers were firing twice for one click
       {
-         endPhaseShift -= 90.0;
+         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() - 90.0);
       }
       else if (mapping == endPhaseShiftUp && channels.get(mapping) < 0.5)
       {
-         endPhaseShift += 90.0;
+         xGaitSettings.setEndPhaseShift(xGaitSettings.getEndPhaseShift() + 90.0);
       }
       //      else if(mapping == XBoxOneMapping.XBOX_BUTTON && channels.get(mapping) < 0.5)
       //      {
       //         stepTeleopManager.setPaused(!stepTeleopManager.isPaused());
       //      }
 
-      xGaitSettingsPacket = new QuadrupedXGaitSettingsPacket();
-      xGaitSettingsPacket.setEndPhaseShift(endPhaseShift);
+      xGaitSettingsPacket = xGaitSettings.getAsPacket();
    }
 
    @Override

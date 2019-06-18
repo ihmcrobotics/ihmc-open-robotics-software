@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrientationTrajectoryCommand, PelvisOrientationTrajectoryMessage>,
       FrameBasedCommand<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryCommand>
 {
+   private long sequenceId;
    private boolean enableUserPelvisControlDuringWalking = false;
    private final SO3TrajectoryControllerCommand so3Trajectory;
 
@@ -28,28 +29,30 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    @Override
    public void clear()
    {
+      sequenceId = 0;
       so3Trajectory.clear();
    }
 
    @Override
    public void set(PelvisOrientationTrajectoryCommand other)
    {
+      sequenceId = other.sequenceId;
       setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
       so3Trajectory.set(other.so3Trajectory);
    }
 
    @Override
-   public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
+   public void setFromMessage(PelvisOrientationTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      so3Trajectory.set(resolver, message.getSo3Trajectory());
+      FrameBasedCommand.super.setFromMessage(message);
    }
 
    @Override
-   public void setFromMessage(PelvisOrientationTrajectoryMessage message)
+   public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
+      sequenceId = message.getSequenceId();
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      so3Trajectory.setFromMessage(message.getSo3Trajectory());
+      so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
    /**
@@ -123,5 +126,11 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public double getExecutionTime()
    {
       return so3Trajectory.getExecutionTime();
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

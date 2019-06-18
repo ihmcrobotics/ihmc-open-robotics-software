@@ -53,4 +53,10 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
       touchdownDetected.set(false);
       touchdownDetectedFiltered.set(false);
    }
+
+   @Override
+   public String getName()
+   {
+      return getClass().getSimpleName();
+   }
 }

@@ -16,6 +16,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
 {
    public static final int NO_REGION_ID = -1;
 
+   private long sequenceId;
    private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
@@ -35,6 +36,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    @Override
    public void clear()
    {
+      sequenceId = 0;
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
       concaveHullsVertices.clear();
@@ -44,6 +46,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    @Override
    public void setFromMessage(PlanarRegionMessage message)
    {
+      sequenceId = message.getSequenceId();
       setRegionProperties(message.getRegionId(), message.getRegionOrigin(), message.getRegionNormal());
 
       concaveHullsVertices.clear();
@@ -70,6 +73,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    @Override
    public void set(PlanarRegionCommand command)
    {
+      sequenceId = command.sequenceId;
       fromLocalToWorldTransform.set(command.getTransformToWorld());
       fromWorldToLocalTransform.set(command.getTransformFromWorld());
 
@@ -147,5 +151,11 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public void getPlanarRegion(PlanarRegion planarRegionToPack)
    {
       planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, regionId);
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 }

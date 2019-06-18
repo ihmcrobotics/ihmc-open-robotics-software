@@ -11,6 +11,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.util.NetworkPorts;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,14 +24,14 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
    {
       int port = NetworkPorts.COACTIVE_ELEMENTS_PORT.getPort();
 
-      System.out.println("Creating human");
+      LogTools.info("Creating human");
       SimpleCoactiveElement userInterfaceSideCoactiveElement = new SimpleCoactiveElement();
       userInterfaceSideCoactiveElement.initializeUserInterfaceSide();
       CoactiveElementYoWhiteBoardSynchronizer humanSideSynchronizer = new CoactiveElementYoWhiteBoardSynchronizer(port, HumanOrMachine.HUMAN, userInterfaceSideCoactiveElement);
       assertEquals(HumanOrMachine.HUMAN, humanSideSynchronizer.getWhichSideIsThisRunningOn());
       assertEquals(userInterfaceSideCoactiveElement, humanSideSynchronizer.getCoactiveElement());
 
-      System.out.println("Starting human");
+      LogTools.info("Starting human");
       humanSideSynchronizer.startASynchronizerOnAThread(100L);
       while (port == 0)
       {
@@ -38,7 +39,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
          Thread.yield();
       }
 
-      System.out.println("creating machine");
+      LogTools.info("creating machine");
       
       SimpleCoactiveElement machineSideCoactiveElement = new SimpleCoactiveElement();
       machineSideCoactiveElement.initializeMachineSide();
@@ -46,7 +47,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
       assertEquals(HumanOrMachine.MACHINE, machineSideSynchronizer.getWhichSideIsThisRunningOn());
       assertEquals(machineSideCoactiveElement, machineSideSynchronizer.getCoactiveElement());
 
-      System.out.println("Starting machine");
+      LogTools.info("Starting machine");
       machineSideSynchronizer.startASynchronizerOnAThread(100L);
       
       while(!humanSideSynchronizer.getYoWhiteBoard().isConnected())

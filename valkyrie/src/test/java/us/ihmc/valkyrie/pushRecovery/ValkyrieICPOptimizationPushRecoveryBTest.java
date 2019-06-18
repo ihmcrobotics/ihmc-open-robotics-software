@@ -1,13 +1,12 @@
 package us.ihmc.valkyrie.pushRecovery;
 
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryBTest;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieICPOptimizationParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -24,12 +23,6 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
          {
             return new ValkyrieWalkingControllerParameters(getJointMap(), RobotTarget.SCS)
             {
-               @Override
-               public boolean useOptimizationBasedICPController()
-               {
-                  return true;
-               }
-
                @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
@@ -80,6 +73,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       return 0.8;
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws Exception
    {
@@ -87,6 +81,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationDiagonalOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws Exception
    {
@@ -94,6 +89,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationLongBackwardPushInSwing() throws Exception
    {
@@ -101,6 +97,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationLongBackwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationLongForwardPushInSwing() throws Exception
    {
@@ -115,6 +112,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationNoPush();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws Exception
    {
@@ -122,6 +120,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationOutwardPushInSlowSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationOutwardPushInSwing() throws Exception
    {
@@ -129,6 +128,7 @@ public class ValkyrieICPOptimizationPushRecoveryBTest extends AvatarICPOptimizat
       super.testPushICPOptimizationOutwardPushInSwing();
    }
 
+   @Override
    @Test
    public void testPushICPOptimizationRandomPushInSwing() throws Exception
    {

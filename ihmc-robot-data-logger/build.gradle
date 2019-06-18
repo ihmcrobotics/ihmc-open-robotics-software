@@ -10,9 +10,9 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.15.6"
+   id("us.ihmc.ihmc-build") version "0.15.7"
    id("us.ihmc.ihmc-ci") version "4.23"
-   id("us.ihmc.log-tools") version "0.2.2"
+   id("us.ihmc.log-tools") version "0.3.1"
    id("org.hidetake.ssh") version "2.9.0"
    id "application"
 }
@@ -44,11 +44,11 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid", version: "0.11.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.7"
    compile group: "us.ihmc", name: "ihmc-video-codecs", version: "2.1.5"
-   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.2"
+   compile group: "us.ihmc", name: "ihmc-realtime", version: "1.2.3"
    compile group: "us.ihmc", name: "ihmc-java-decklink-capture", version: "0.3"
    compile group: "us.ihmc", name: "ihmc-pub-sub", version: "0.10.2"
    compile group: "us.ihmc", name: "ihmc-pub-sub-serializers-extra", version: "0.10.2"
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.5"
    compile group: "us.ihmc", name: "mecano", version: "0.0.17"
@@ -62,7 +62,7 @@ mainDependencies {
 
 testDependencies {
 
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.25.4"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
 

@@ -755,7 +755,7 @@ public class VisibilityGraphsFrameworkTest
    public static void main(String[] args) throws Exception
    {
       VisibilityGraphsFrameworkTest test = new VisibilityGraphsFrameworkTest();
-      String dataSetName = "20171218_204953_FlatGroundWithWall";
+      String dataSetName = "20171218_205120_BodyPathPlannerEnvironment";
       test.setup();
       test.runAssertionsOnDataset(dataset -> test.runAssertionsWithoutOcclusion(dataset), dataSetName);
       test.tearDown();

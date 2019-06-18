@@ -101,7 +101,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             PrintTools.debug(this, "Initializing Behavior");
             footListBehavior.initialize();
             footListBehavior.set(desiredFootsteps);
-            publishTextToSpeack("Setting Up Stance");
+            publishTextToSpeech("Setting Up Stance");
             currentState = BasicStates.SET_STANCE;
          }
       };
@@ -131,7 +131,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             PrintTools.debug(this, "Initializing Behavior");
             footListBehavior.initialize();
             footListBehavior.set(desiredFootsteps);
-            publishTextToSpeack("Setting Up Stance");
+            publishTextToSpeech("Setting Up Stance");
             currentState = BasicStates.SET_STANCE;
          }
       };
@@ -143,7 +143,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
          {
             PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75);
             movePelvisBehavior.setInput(message);
-            publishTextToSpeack("Decrease heigth");
+            publishTextToSpeech("Decrease heigth");
             currentState = BasicStates.MOVE_PELVIS;
          }
       };
@@ -159,7 +159,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             p.changeFrame(ReferenceFrame.getWorldFrame());
             PelvisTrajectoryMessage message = HumanoidMessageTools.createPelvisTrajectoryMessage(2, p, orientation);
             pelvisTrajectoryBehavior.setInput(message);
-            publishTextToSpeack("Moving Pelvis To Final Location");
+            publishTextToSpeech("Moving Pelvis To Final Location");
             currentState = BasicStates.MOVE_PELVIS2;
          }
       };
@@ -173,7 +173,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             rot.setEuler(0, 0, Math.toRadians(-10));
             ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(2, rot, referenceFrames.getPelvisZUpFrame());
             yawChestBehavior.setInput(chestOrientationPacket);
-            publishTextToSpeack("Setting Chest Yaw");
+            publishTextToSpeech("Setting Chest Yaw");
             currentState = BasicStates.YAW_CHEST;
          }
       };
@@ -187,7 +187,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                   -1.0660904511124556, -2.8798335374002835};
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, joints);
             leftArmBehavior.setInput(armTrajectoryMessage);
-            publishTextToSpeack("Moving Left Arm To First Location");
+            publishTextToSpeech("Moving Left Arm To First Location");
             currentState = BasicStates.LEFT_ARM_PRE;
          }
       };
@@ -200,7 +200,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                   -1.5848189434466957, -0.7292067346614854};
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, joints);
             rightArmBehavior.setInput(armTrajectoryMessage);
-            publishTextToSpeack("Moving Right Arm To First Location");
+            publishTextToSpeech("Moving Right Arm To First Location");
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
@@ -212,7 +212,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             double[] joints = new double[] {0.785398, -1.5708, 3.14159, 1.7671424999999998, 1.6892682660534968, -1.6755335374002835, -2.8798335374002835};
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 3, joints);
             leftArmBehavior.setInput(armTrajectoryMessage);
-            publishTextToSpeack("Moving Left Arm To Final Location");
+            publishTextToSpeech("Moving Left Arm To Final Location");
             currentState = BasicStates.LEFT_ARM_FINAL;
          }
       };
@@ -225,7 +225,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
                   -1.4980698118674458, -0.5046966801690266};
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 3, joints);
             rightArmBehavior.setInput(armTrajectoryMessage);
-            publishTextToSpeack("Moving Right Arm To Final Location");
+            publishTextToSpeech("Moving Right Arm To Final Location");
             currentState = BasicStates.RIGHT_ARM_FINAL;
          }
       };
@@ -283,7 +283,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      publishTextToSpeack("Getting Ready To Fight Fires");
+      publishTextToSpeech("Getting Ready To Fight Fires");
       setUpPipeline();
 
    }
@@ -309,7 +309,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
 
       currentState = BasicStates.DONE;
 
-      publishTextToSpeack("Ready To Fight Fires");
+      publishTextToSpeech("Ready To Fight Fires");
    }
 
 }

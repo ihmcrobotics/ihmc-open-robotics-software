@@ -95,6 +95,7 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
     * Removes and returns the last command of this list.
     * 
     * @return the last command.
+    * @deprecated this method should be removed and it is not really useful anyway.
     */
    public VirtualModelControlCommand<?> pollCommand()
    {
@@ -144,6 +145,33 @@ public class VirtualModelControlCommandList implements VirtualModelControlComman
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.COMMAND_LIST;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof VirtualModelControlCommandList)
+      {
+         VirtualModelControlCommandList other = (VirtualModelControlCommandList) object;
+
+         if (getNumberOfCommands() != other.getNumberOfCommands())
+            return false;
+         for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)
+         {
+            if (!getCommand(commandIndex).equals(other.getCommand(commandIndex)))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override

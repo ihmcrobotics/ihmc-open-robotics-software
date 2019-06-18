@@ -64,6 +64,18 @@
                             <registry name="rightFootControlModule">
 <parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.2"/>
                             </registry>
+                            <registry name="ToeOffManager">
+<parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
+                            </registry>
+                            <registry name="FootRotationDetectorParameters">
+<parameter name="omegaThresholdForEstimation" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+<parameter name="rotationThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                            </registry>
+                            <registry name="SupportStateParameters">
+<parameter name="avoidFootRotations" type="BooleanParameter" value="true"/>
+<parameter name="dampFootRotations" type="BooleanParameter" value="true"/>
+<parameter name="footDamping" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                            </registry>
                         </registry>
                     </registry>
                     <registry name="MomentumOptimizationSettings">

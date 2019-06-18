@@ -91,3 +91,4 @@
 **/.apdisk
 **/rebel.xml
 **/generatedTestSuites/*TestSuite.java
+**/.attach_pid*

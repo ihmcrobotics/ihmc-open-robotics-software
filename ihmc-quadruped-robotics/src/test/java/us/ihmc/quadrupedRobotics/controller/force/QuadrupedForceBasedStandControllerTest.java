@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import junit.framework.AssertionFailedError;
 import org.junit.jupiter.api.*;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -32,7 +31,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private PushRobotTestConductor pusher;
    private QuadrupedTestFactory quadrupedTestFactory;
 
-   private static final double bodyShiftDuration = 0.1;
+   private static final double bodyShiftDuration = 0.6;
    private static final double comShiftDuration = 1.0;
 
    @BeforeEach
@@ -92,7 +91,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    }
 
 
-   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
+   private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException
    {
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
@@ -237,10 +236,10 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
 
       double initialBodyHeight = variables.getCurrentHeightInWorld().getDoubleValue();
-      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
-      runMovingBody(initialBodyHeight, orientationShift, -orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift , orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift, orientationShift, -orientationShift, orientationShift, heightDelta, orientationDelta);
       runMovingBody(initialBodyHeight - heightShift, -orientationShift, -orientationShift, -orientationShift, heightDelta, orientationDelta);
-      runMovingBody(initialBodyHeight + heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
+      runMovingBody(initialBodyHeight - heightShift, orientationShift, orientationShift, orientationShift, heightDelta, orientationDelta);
       runMovingBody(initialBodyHeight, 0.0, 0.0, 0.0, heightDelta, orientationDelta);
    }
 

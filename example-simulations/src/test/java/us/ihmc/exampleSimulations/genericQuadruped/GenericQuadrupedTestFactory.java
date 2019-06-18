@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkModuleParameters;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -180,10 +181,22 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
          Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.INTRAPROCESS, "quadruped_teleop_manager");
 
+         QuadrupedNetworkModuleParameters networkModuleParameters = new QuadrupedNetworkModuleParameters();
+
+         // disable xbox
+         networkModuleParameters.enableXBoxModule(false);
+
+         // enable teleop modules
+         networkModuleParameters.enableFootstepPlanningModule(true);
+         networkModuleParameters.enableBodyHeightTeleopModule(true);
+         networkModuleParameters.enableBodyTeleopModule(true);
+         networkModuleParameters.enableStepTeleopModule(true);
+
          graphicsListRegistry = new YoGraphicsListRegistry();
          networkProcessor = new GenericQuadrupedNetworkProcessor(modelFactory, physicalProperties.getNominalBodyHeight(), new DefaultFootstepPlannerParameters(),
                                                                  xGaitSettings, new GenericQuadrupedPointFootSnapperParameters(),
-                                                                 PubSubImplementation.INTRAPROCESS);
+                                                                 PubSubImplementation.INTRAPROCESS, networkModuleParameters);
+         networkProcessor.setRootRegistry(teleopRegistry, graphicsListRegistry);
          stepTeleopManager = new RemoteQuadrupedTeleopManager(robotName, ros2Node, networkProcessor, xGaitSettings, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);

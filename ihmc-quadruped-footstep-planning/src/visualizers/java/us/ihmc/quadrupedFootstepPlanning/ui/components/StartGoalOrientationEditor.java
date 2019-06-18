@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,18 +43,32 @@ public class StartGoalOrientationEditor extends AnimationTimer
    private final AtomicReference<Boolean> startEditModeEnabled;
    private final AtomicReference<Boolean> goalEditModeEnabled;
 
-   public StartGoalOrientationEditor(Messager messager, SubScene subScene)
+   private final Topic<Boolean> editModeEnabledTopic;
+   private final Topic<Boolean> startOrientationEditModeEnabledTopic;
+   private final Topic<Boolean> goalOrientationEditModeEnabledTopic;
+   private final Topic<Quaternion> startOrientationTopic;
+   private final Topic<Quaternion> goalOrientationTopic;
+
+   public StartGoalOrientationEditor(Messager messager, SubScene subScene, Topic<Boolean> editModeEnabledTopic,
+                                     Topic<Boolean> startOrientationEditModeEnabledTopic, Topic<Boolean> goalOrientationEditModeEnabledTopic,
+                                     Topic<Point3D> startPositionTopic, Topic<Quaternion> startOrientationTopic, Topic<Point3D> goalPositionTopic,
+                                     Topic<Quaternion> goalOrientationTopic, Topic<PlanarRegion> selectedRegionTopic)
    {
       this.messager = messager;
       this.subScene = subScene;
+      this.editModeEnabledTopic = editModeEnabledTopic;
+      this.startOrientationEditModeEnabledTopic = startOrientationEditModeEnabledTopic;
+      this.goalOrientationEditModeEnabledTopic = goalOrientationEditModeEnabledTopic;
+      this.startOrientationTopic = startOrientationTopic;
+      this.goalOrientationTopic = goalOrientationTopic;
 
-      startEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
-      goalEditModeEnabled = messager.createInput(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
+      startEditModeEnabled = messager.createInput(startOrientationEditModeEnabledTopic, false);
+      goalEditModeEnabled = messager.createInput(goalOrientationEditModeEnabledTopic, false);
 
-      startPositionReference = messager.createInput(FootstepPlannerMessagerAPI.StartPositionTopic);
-      goalPositionReference = messager.createInput(FootstepPlannerMessagerAPI.GoalPositionTopic);
+      startPositionReference = messager.createInput(startPositionTopic);
+      goalPositionReference = messager.createInput(goalPositionTopic);
 
-      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(FootstepPlannerMessagerAPI.SelectedRegionTopic);
+      AtomicReference<PlanarRegion> selectedRegionReference = messager.createInput(selectedRegionTopic);
 
       rayCastInterceptor = (event) ->
       {
@@ -128,13 +142,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
             double startYaw = Math.atan2(difference.getY(), difference.getX());
             Quaternion orientation = new Quaternion(startYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, orientation);
+            messager.submitMessage(startOrientationTopic, orientation);
          }
 
          if(orientationValidated.getAndSet(false))
          {
-            messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationEditModeEnabledTopic, false);
-            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
+            messager.submitMessage(startOrientationEditModeEnabledTopic, false);
+            messager.submitMessage(editModeEnabledTopic, false);
          }
       }
 
@@ -150,13 +164,13 @@ public class StartGoalOrientationEditor extends AnimationTimer
             double goalYaw = Math.atan2(difference.getY(), difference.getX());
             Quaternion orientation = new Quaternion(goalYaw, 0.0, 0.0);
 
-            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, orientation);
+            messager.submitMessage(goalOrientationTopic, orientation);
          }
 
          if(orientationValidated.getAndSet(false))
          {
-            messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabledTopic, false);
-            messager.submitMessage(FootstepPlannerMessagerAPI.EditModeEnabledTopic, false);
+            messager.submitMessage(goalOrientationEditModeEnabledTopic, false);
+            messager.submitMessage(editModeEnabledTopic, false);
          }
       }
    }

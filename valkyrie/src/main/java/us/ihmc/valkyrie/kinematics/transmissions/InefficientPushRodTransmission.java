@@ -258,9 +258,6 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
-      LinearActuator rightTurboDriver = actuatorData[0];
-      LinearActuator leftTurboDriver = actuatorData[1];
-      
       ValkyrieJointInterface topJointInterface, bottomJointInterface;
 
       if (topJointFirst)

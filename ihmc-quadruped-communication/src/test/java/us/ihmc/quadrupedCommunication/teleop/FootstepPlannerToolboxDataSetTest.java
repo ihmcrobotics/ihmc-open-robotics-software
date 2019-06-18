@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -27,6 +27,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedOrientedStep;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
@@ -43,6 +45,7 @@ import us.ihmc.quadrupedFootstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.DefaultPointFootSnapperParameters;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -50,6 +53,7 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 public abstract class FootstepPlannerToolboxDataSetTest
@@ -110,9 +114,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
          }
 
          @Override
-         public double getMaximumStepCycleDistance()
+         public double getMaximumStepLength()
          {
-            return 0.65;
+            return 0.6;
          }
 
          @Override
@@ -226,7 +230,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -234,12 +238,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsTestable();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
    @Disabled
    @Test
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void runInDevelopmentTests()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -247,17 +251,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().getQuadrupedPlannerIsInDevelopment();
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      runAssertionsOnAllDatasets(dataSets);
    }
 
-   protected void runAssertionsOnDataset(Function<DataSet, String> dataSetTester, String datasetName)
-   {
-      DataSet dataset = DataSetIOTools.loadDataSet(datasetName);
-      String errorMessages = dataSetTester.apply(dataset);
-      Assert.assertTrue("Errors:" + errorMessages, errorMessages.isEmpty());
-   }
-
-   private void runAssertionsOnAllDatasets(Function<DataSet, String> dataSetTester, List<DataSet> allDatasets)
+   private void runAssertionsOnAllDatasets(List<DataSet> allDatasets)
    {
       if (VERBOSE || DEBUG)
          LogTools.info("Unit test files found: " + allDatasets.size());
@@ -267,6 +264,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       int numberOfFailingTests = 0;
       List<String> failingDatasets = new ArrayList<>();
+      List<String> failingMessages = new ArrayList<>();
       int numbberOfTestedSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
@@ -276,11 +274,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
          numbberOfTestedSets++;
          resetAllAtomics();
-         String errorMessagesForCurrentFile = dataSetTester.apply(dataset);
+         String errorMessagesForCurrentFile = runAssertions(dataset);
          if (!errorMessagesForCurrentFile.isEmpty())
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+            failingMessages.add(errorMessagesForCurrentFile);
          }
 
          if (DEBUG || VERBOSE)
@@ -296,7 +295,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       message += "\n Datasets failing: ";
       for (int i = 0; i < failingDatasets.size(); i++)
       {
-         message += "\n" + failingDatasets.get(i);
+         message += "\n" + failingDatasets.get(i) + " : " + failingMessages.get(i);
       }
       if (VISUALIZE)
       {
@@ -307,6 +306,12 @@ public abstract class FootstepPlannerToolboxDataSetTest
       {
          Assert.assertEquals(message, 0, numberOfFailingTests);
       }
+   }
+
+   protected String runAssertions(DataSetName dataSetName)
+   {
+      DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
+      return runAssertions(dataSet);
    }
 
    protected String runAssertions(DataSet dataset)
@@ -321,32 +326,30 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    protected void packPlanningRequest(DataSet dataset)
    {
-      FramePose3D startPose = new FramePose3D();
-      FramePose3D goalPose = new FramePose3D();
-      startPose.setPosition(dataset.getPlannerInput().getQuadrupedStartPosition());
-      goalPose.setPosition(dataset.getPlannerInput().getQuadrupedGoalPosition());
+      Quaternion startOrientation = new Quaternion();
+      Quaternion goalOrientation = new Quaternion();
       if (dataset.getPlannerInput().getHasQuadrupedStartYaw())
-         startPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
+         startOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedStartYaw(), 0.0, 0.0);
       if (dataset.getPlannerInput().getHasQuadrupedGoalYaw())
-         goalPose.setOrientationYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
+         goalOrientation.setYawPitchRoll(dataset.getPlannerInput().getQuadrupedGoalYaw(), 0.0, 0.0);
+
+      PlannerInput plannerInput = dataset.getPlannerInput();
 
       double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double timeout = timeMultiplier * Double.parseDouble(dataset.getPlannerInput().getAdditionalData(getTimeoutFlag()).get(0));
-
-      QuadrupedFootstepPlannerStart start = new QuadrupedFootstepPlannerStart();
-      QuadrupedFootstepPlannerGoal goal = new QuadrupedFootstepPlannerGoal();
-      start.setStartPose(startPose);
-      goal.setGoalPose(goalPose);
+      double timeout = timeMultiplier * plannerInput.getQuadrupedTimeout();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTypeTopic, getPlannerType());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeoutTopic, timeout);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.XGaitSettingsTopic, xGaitSettings);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionDataTopic, dataset.getPlanarRegionsList());
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, new Point3D(startPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, new Point3D(goalPose.getPosition()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, new Quaternion(startPose.getOrientation()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, new Quaternion(goalPose.getOrientation()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartPositionTopic, plannerInput.getQuadrupedStartPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalPositionTopic, plannerInput.getQuadrupedGoalPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.StartOrientationTopic, startOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.GoalOrientationTopic, goalOrientation);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLengthTopic, Double.POSITIVE_INFINITY);
+
+      ThreadTools.sleep(1000);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePathTopic, true);
 
@@ -362,13 +365,14 @@ public abstract class FootstepPlannerToolboxDataSetTest
          PrintTools.info("Processed an output from a remote planner.");
 
       plannerResultReference.set(FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult()));
-      plannerPlanReference.set(convertToFootstepPlan(packet.getFootstepDataList()));
+      plannerPlanReference.set(convertToFootstepPlan(packet));
       plannerReceivedPlan.set(true);
       plannerReceivedResult.set(true);
    }
 
-   private static FootstepPlan convertToFootstepPlan(QuadrupedTimedStepListMessage footstepDataListMessage)
+   private static FootstepPlan convertToFootstepPlan(QuadrupedFootstepPlanningToolboxOutputStatus packet)
    {
+      QuadrupedTimedStepListMessage footstepDataListMessage = packet.getFootstepDataList();
       FootstepPlan footstepPlan = new FootstepPlan();
 
       for (QuadrupedTimedStepMessage footstepMessage : footstepDataListMessage.getQuadrupedStepList())
@@ -381,14 +385,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
          footstepPlan.addFootstep(step);
       }
+      footstepPlan.setLowLevelPlanGoal(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getLowLevelPlannerGoal()));
 
       return footstepPlan;
-   }
-
-   private String getTimeoutFlag()
-   {
-//      return getPlannerType().toString().toLowerCase() + "_timeout";
-      return "quadruped_timeout";
    }
 
    private String findPlanAndAssertGoodResult(DataSet dataset)
@@ -429,8 +428,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
       plannerReceivedPlan.set(false);
       plannerReceivedResult.set(false);
 
-      errorMessage += assertPlanIsValid(datasetName, result, plan, dataset.getPlannerInput().getQuadrupedGoalPosition(), dataset.getPlannerInput().getQuadrupedGoalYaw());
-
+      errorMessage += assertPlanIsValid(datasetName, result, plan);
       for (int i = 0; i < 100; i++)
          ThreadTools.sleep(10);
 
@@ -440,11 +438,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
    private double totalTimeTaken;
 
-   private String waitForResult(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForResult(BooleanSupplier waitCondition, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
       long waitTime = 10;
-      while (conditionChecker.checkCondition())
+      while (waitCondition.getAsBoolean())
       {
          if (totalTimeTaken > maxTimeToWait)
          {
@@ -460,11 +458,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return errorMessage;
    }
 
-   private String validateResult(ConditionChecker conditionChecker, FootstepPlanningResult result, String prefix)
+   private String validateResult(BooleanSupplier waitCondition, FootstepPlanningResult result, String prefix)
    {
       String errorMessage = "";
 
-      if (!conditionChecker.checkCondition())
+      if (!waitCondition.getAsBoolean())
       {
          errorMessage += prefix + " failed to find a valid result. Result : " + result + "\n";
       }
@@ -472,11 +470,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return errorMessage;
    }
 
-   private String waitForPlan(ConditionChecker conditionChecker, double maxTimeToWait, String prefix)
+   private String waitForPlan(BooleanSupplier waitCondition, double maxTimeToWait, String prefix)
    {
       String errorMessage = "";
 
-      while (conditionChecker.checkCondition())
+      while (waitCondition.getAsBoolean())
       {
          long waitTime = 10;
 
@@ -515,8 +513,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    }
 
 
-   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps, Point3DReadOnly goalPosition,
-                                           double goalYaw)
+   private static String assertPlanIsValid(String datasetName, FootstepPlanningResult result, FootstepPlan plannedSteps)
    {
       QuadrantDependentList<Point3DBasics> finalSteps = getFinalStepPositions(plannedSteps);
 
@@ -538,11 +535,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       centerPoint.scale(0.25);
 
-      if (!goalPosition.epsilonEquals(centerPoint, 3.0 * FootstepNode.gridSizeXY))
-         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + goalPosition;
+      Point3DReadOnly goalPosition = plannedSteps.getLowLevelPlanGoal().getPosition();
+      double goalYaw = plannedSteps.getLowLevelPlanGoal().getYaw();
+      if (goalPosition.distanceXY(centerPoint) > 3.0 * FootstepNode.gridSizeXY)
+         errorMessage += datasetName + " did not reach goal position. Made it to " + centerPoint + ", trying to get to " + new Point3D(goalPosition);
       if (Double.isFinite(goalYaw))
       {
-         if (!MathTools.epsilonEquals(goalYaw, nominalYaw, FootstepNode.gridSizeYaw))
+         if (AngleTools.computeAngleDifferenceMinusPiToPi(goalYaw, nominalYaw) > FootstepNode.gridSizeYaw)
             errorMessage += datasetName + " did not reach goal yaw. Made it to " + nominalYaw + ", trying to get to " + goalYaw;
       }
 
@@ -561,14 +560,9 @@ public abstract class FootstepPlannerToolboxDataSetTest
          if (finalSteps.containsKey(step.getRobotQuadrant()))
             continue;
          else
-            finalSteps.put(step.getRobotQuadrant(), step.getGoalPosition());
+            finalSteps.put(step.getRobotQuadrant(), new Point3D(step.getGoalPosition()));
       }
 
       return finalSteps;
-   }
-
-   private static interface ConditionChecker
-   {
-      boolean checkCondition();
    }
 }

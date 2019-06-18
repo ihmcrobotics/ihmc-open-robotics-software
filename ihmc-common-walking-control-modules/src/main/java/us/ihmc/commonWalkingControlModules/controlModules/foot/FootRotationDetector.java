@@ -3,11 +3,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameLine2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine3DBasics;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -23,30 +22,20 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLine2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * This class computes whether a foot is rotating.</br>
  * If that is the case provides an estimate of the line of rotation. This class does not rely on a center of pressure
  * estimate and can be used with robots that do not have force-torque sensing in the feet.
  * <p>
- * Two strategies can be used to detect the rotation:
- * <ul>
- * <li>Assuming flat ground and a ground height of 0.0 the foot can be intersected with this plane to accurately find
- * the line of rotation.<br>
- * <li>The twist of the foot can be used to detect an instantaneous line of rotation if the angular velocity of the foot
- * is sufficient.
- * </ul>
- * <p>
- * Both methods require some form of thresholding as to whether foot rotation is occurring. For the twist based
- * detection the angular foot velocity (only in sole plane) is integrated with a leak rate. This integrated velocity is
- * then thresholded to determine if foot the foot is unstable.
- * <p>
- * ------------</br>
- * Currently this class implements only the second one since the assumptions are less restrictive. Depending on the
- * performance the first method should be implemented as an alternative.</br>
- * ------------
- *
+ * The strategy employed is to use the measured twist of the foot to compute the current line of rotation. This requires
+ * the angular velocity of the foot to be sufficiently large. A threshold determines if that is the case. The speed of
+ * rotation is the integrated using a leak rate. If the integral which is a measure of absolute foot rotation exceeds
+ * a second threshold the foot is assumed to rotate.]
+ * 
  * @author Georg Wiedebach
  */
 public class FootRotationDetector
@@ -62,7 +51,7 @@ public class FootRotationDetector
    private final AlphaFilteredYoFramePoint2d filteredPointOfRotation;
    private final AlphaFilteredYoFrameVector2d filteredAxisOfRotation;
 
-   private final FrameLine2DBasics lineOfRotationInSole = new FrameLine2D();
+   private final FixedFrameLine2DBasics lineOfRotationInSole;
    private final YoDouble integratedRotationAngle;
    private final YoDouble absoluteFootOmega;
    private final YoBoolean isRotating;
@@ -94,6 +83,10 @@ public class FootRotationDetector
       absoluteFootOmega = new YoDouble(side.getLowerCaseName() + "AbsoluteFootOmega", registry);
       isRotating = new YoBoolean(side.getLowerCaseName() + "IsRotating", registry);
 
+      YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
+      YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
+      lineOfRotationInSole = new YoFrameLine2D(point, direction);
+
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
       filteredAxisOfRotation = new AlphaFilteredYoFrameVector2d(side + "FilteredAxisOfRotation", "", registry, alpha, soleFrame);
@@ -111,7 +104,7 @@ public class FootRotationDetector
 
    public boolean compute()
    {
-      // 1. Using the twist of the foot
+      // Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
       double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
       absoluteFootOmega.set(Math.sqrt(omegaSquared));
@@ -120,7 +113,7 @@ public class FootRotationDetector
          tempPointOfRotation.setToZero(soleFrame);
          tempPointOfRotation.cross(soleFrameTwist.getAngularPart(), soleFrameTwist.getLinearPart());
          tempPointOfRotation.scale(1.0 / omegaSquared);
-         lineOfRotationInSole.setToZero(soleFrame);
+         lineOfRotationInSole.setToZero();
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
@@ -144,7 +137,7 @@ public class FootRotationDetector
       {
          filteredPointOfRotation.reset();
          filteredAxisOfRotation.reset();
-         lineOfRotationInSole.setToZero(soleFrame);
+         lineOfRotationInSole.setToZero();
       }
 
       if (!isRotating.getValue())
@@ -194,7 +187,7 @@ public class FootRotationDetector
       linePointB.setToNaN();
       filteredPointOfRotation.reset();
       filteredAxisOfRotation.reset();
-      lineOfRotationInSole.setToZero(soleFrame);
+      lineOfRotationInSole.setToZero();
       integratedRotationAngle.set(0.0);
       absoluteFootOmega.set(0.0);
       isRotating.set(false);

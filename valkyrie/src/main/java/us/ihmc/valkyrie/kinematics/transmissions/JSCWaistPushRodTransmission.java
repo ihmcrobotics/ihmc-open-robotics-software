@@ -14,7 +14,7 @@ public class JSCWaistPushRodTransmission implements PushRodTransmissionInterface
    private final DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
 
    /** Joint position, jointPositions = [q1 q2] = [spine roll, spine pitch]' */
-   private final DenseMatrix64F jointPositions = new DenseMatrix64F(2, 1);
+//   private final DenseMatrix64F jointPositions = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F jointVelocites = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F jointTorques = new DenseMatrix64F(2, 1);
    /** Actuator position, pushrodPositions = [left actuator , right actuator]' */

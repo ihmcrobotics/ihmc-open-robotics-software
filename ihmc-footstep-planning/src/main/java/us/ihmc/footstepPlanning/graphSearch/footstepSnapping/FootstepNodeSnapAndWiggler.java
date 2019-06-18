@@ -104,7 +104,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
    private boolean shiftFootToAvoidBodyCollision(FootstepNode footstepNode, RigidBodyTransform snapTransform)
    {
-      if(collisionDetector == null)
+      if(collisionDetector == null || !parameters.checkForBodyBoxCollisions())
          return false;
 
       BodyCollisionData collisionData = collisionDetector.checkForCollision(footstepNode, snapTransform.getTranslationZ());

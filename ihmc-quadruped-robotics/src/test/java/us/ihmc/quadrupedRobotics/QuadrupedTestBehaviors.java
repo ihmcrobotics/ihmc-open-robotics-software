@@ -36,6 +36,9 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getControllerState(), HighLevelControllerName.STAND_READY));
       conductor.addTimeLimit(variables.getYoTime(), stateCompletionSafetyFactory * variables.getTimeInStandPrep());
       conductor.simulate();
+
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), 0.5));
+      conductor.simulate();
    }
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables)
@@ -95,10 +98,8 @@ public class QuadrupedTestBehaviors
       conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
       conductor.simulate();
 
-      double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
       double initialEndPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
 
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.1);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
@@ -112,7 +113,6 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
    }
 
@@ -140,10 +140,8 @@ public class QuadrupedTestBehaviors
       conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
       conductor.simulate();
 
-      double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
       double initialEndPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
 
-      stepTeleopManager.setEndDoubleSupportDuration(0.1);
       stepTeleopManager.setEndPhaseShift(180.0);
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
@@ -157,7 +155,6 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      stepTeleopManager.setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.setEndPhaseShift(initialEndPhaseShift);
    }
 

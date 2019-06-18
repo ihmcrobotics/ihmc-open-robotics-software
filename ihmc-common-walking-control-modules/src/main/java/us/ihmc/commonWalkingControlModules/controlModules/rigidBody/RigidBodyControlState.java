@@ -102,7 +102,7 @@ public abstract class RigidBodyControlState implements State
       trajectoryStartTime.set(yoTime.getDoubleValue());
    }
 
-   protected double getTimeInTrajectory()
+   public double getTimeInTrajectory()
    {
       return yoTime.getDoubleValue() - trajectoryStartTime.getDoubleValue();
    }
@@ -185,5 +185,10 @@ public abstract class RigidBodyControlState implements State
    public RigidBodyControlMode getControlMode()
    {
       return controlMode;
+   }
+
+   public Object pollStatusToReport()
+   {
+      return null;
    }
 }

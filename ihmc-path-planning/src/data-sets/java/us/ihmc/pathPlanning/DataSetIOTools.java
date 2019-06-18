@@ -1,6 +1,5 @@
 package us.ihmc.pathPlanning;
 
-import org.apache.commons.io.Charsets;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -47,22 +46,12 @@ public class DataSetIOTools
 
    public static List<DataSet> loadDataSets(Predicate<DataSet> dataSetFilter)
    {
-      List<String> dataSetNamesList;
+      DataSetName[] dataSetNames = DataSetName.values();
+      List<DataSet> dataSets = new ArrayList<>();
 
-      try
+      for (int i = 0; i < dataSetNames.length; i++)
       {
-         dataSetNamesList = loadDataSetNames();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("Unable to read list of data set directories");
-      }
-
-      ArrayList<DataSet> dataSets = new ArrayList<>();
-      for (int i = 0; i < dataSetNamesList.size(); i++)
-      {
-         String dataSetName = dataSetNamesList.get(i);
-         DataSet dataSet = loadDataSet(dataSetName);
+         DataSet dataSet = loadDataSet(dataSetNames[i]);
          dataSets.add(dataSet);
       }
 
@@ -70,35 +59,21 @@ public class DataSetIOTools
       return dataSets;
    }
 
-   private static List<String> loadDataSetNames() throws IOException
+   public static DataSet loadDataSet(DataSetName dataSetName)
    {
-      Class<?> loadingClass = DataSetIOTools.class;
-      InputStream dataSetListStream = loadingClass.getResourceAsStream("/" + DATA_SET_DIRECTORY_PATH);
-
-      InputStreamReader reader = new InputStreamReader(dataSetListStream, Charsets.toCharset(UTF_8));
-      BufferedReader bufferedReader = new BufferedReader(reader);
-
-      List<String> dataSetNamesList = new ArrayList<>();
-      String line = bufferedReader.readLine();
-      while (line != null)
-      {
-         dataSetNamesList.add(line);
-         line = bufferedReader.readLine();
-      }
-
-      return dataSetNamesList;
+      return loadDataSet(dataSetName.name().substring(1));
    }
 
-   public static DataSet loadDataSet(String dataSetName)
+   public static DataSet loadDataSet(String dataSetFileName)
    {
       Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
 
-      String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANAR_REGIONS_DIRECTORY;
+      String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + dataSetFileName + "/" + PLANAR_REGIONS_DIRECTORY;
       PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(loadingClass.getClassLoader(), dataSetPlanarRegionsPath);
 
-      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+      DataSet dataSet = new DataSet(dataSetFileName, planarRegionsList);
       InputStream plannerInputsStream = loadingClass.getClassLoader()
-                                                    .getResourceAsStream(DATA_SET_DIRECTORY_PATH + "/" + dataSetName + "/" + PLANNER_INPUTS_FILENAME);
+                                                    .getResourceAsStream(DATA_SET_DIRECTORY_PATH + "/" + dataSetFileName + "/" + PLANNER_INPUTS_FILENAME);
       if (plannerInputsStream != null)
       {
          try
@@ -108,7 +83,7 @@ public class DataSetIOTools
          }
          catch (IOException e)
          {
-            System.err.println("Unable to read planner inputs for dataset: " + dataSetName);
+            System.err.println("Unable to read planner inputs for dataset: " + dataSetFileName);
             return null;
          }
       }

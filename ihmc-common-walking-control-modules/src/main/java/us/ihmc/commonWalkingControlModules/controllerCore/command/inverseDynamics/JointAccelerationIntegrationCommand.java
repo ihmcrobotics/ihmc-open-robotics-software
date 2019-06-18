@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -34,8 +33,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 public class JointAccelerationIntegrationCommand
       implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>, VirtualModelControlCommand<JointAccelerationIntegrationCommand>
 {
-   private final int initialCapacity = 15;
-   private final List<String> jointNamesToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
+   private static final int initialCapacity = 15;
    private final List<OneDoFJointBasics> jointsToComputeDesiredPositionFor = new ArrayList<>(initialCapacity);
    private final RecyclingArrayList<JointAccelerationIntegrationParameters> jointParameters = new RecyclingArrayList<>(initialCapacity,
                                                                                                                        JointAccelerationIntegrationParameters.class);
@@ -57,7 +55,6 @@ public class JointAccelerationIntegrationCommand
     */
    public void clear()
    {
-      jointNamesToComputeDesiredPositionFor.clear();
       jointsToComputeDesiredPositionFor.clear();
       jointParameters.clear();
    }
@@ -76,7 +73,6 @@ public class JointAccelerationIntegrationCommand
     */
    public void addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
    {
-      jointNamesToComputeDesiredPositionFor.add(joint.getName());
       jointsToComputeDesiredPositionFor.add(joint);
       jointParameters.add().reset();
    }
@@ -153,16 +149,8 @@ public class JointAccelerationIntegrationCommand
       clear();
       for (int i = 0; i < other.getNumberOfJointsToComputeDesiredPositionFor(); i++)
       {
-         jointNamesToComputeDesiredPositionFor.add(other.jointNamesToComputeDesiredPositionFor.get(i));
          jointsToComputeDesiredPositionFor.add(other.jointsToComputeDesiredPositionFor.get(i));
-      }
-   }
-
-   public void retrieveJointsFromName(Map<String, ? extends OneDoFJointBasics> nameToJointMap)
-   {
-      for (int i = 0; i < getNumberOfJointsToComputeDesiredPositionFor(); i++)
-      {
-         jointsToComputeDesiredPositionFor.set(i, nameToJointMap.get(jointNamesToComputeDesiredPositionFor.get(i)));
+         jointParameters.add().set(other.getJointParameters(i));
       }
    }
 
@@ -185,5 +173,46 @@ public class JointAccelerationIntegrationCommand
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.JOINT_ACCELERATION_INTEGRATION;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof JointAccelerationIntegrationCommand)
+      {
+         JointAccelerationIntegrationCommand other = (JointAccelerationIntegrationCommand) object;
+
+         if (getNumberOfJointsToComputeDesiredPositionFor() != other.getNumberOfJointsToComputeDesiredPositionFor())
+            return false;
+
+         for (int jointIndex = 0; jointIndex < getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
+         {
+            if (getJointToComputeDesiredPositionFor(jointIndex) != other.getJointToComputeDesiredPositionFor(jointIndex))
+               return false;
+            if (!getJointParameters(jointIndex).equals(other.getJointParameters(jointIndex)))
+               return false;
+         }
+
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ":";
+      for (int jointIndex = 0; jointIndex < getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
+      {
+         ret += "\nJoint: " + getJointToComputeDesiredPositionFor(jointIndex).getName() + ", " + getJointParameters(jointIndex).toString();
+      }
+      return ret;
    }
 }

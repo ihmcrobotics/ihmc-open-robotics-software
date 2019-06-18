@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.Assert;
-import gnu.trove.map.hash.TLongObjectHashMap;
+
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -39,6 +38,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -48,7 +48,6 @@ import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -2186,12 +2185,6 @@ public class VirtualModelControllerTestHelper
 
       @Override
       public MovingReferenceFrame getChestFrame()
-      {
-         return null;
-      }
-
-      @Override
-      public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
       {
          return null;
       }
