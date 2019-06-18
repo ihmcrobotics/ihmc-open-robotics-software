@@ -200,7 +200,6 @@ public class FootstepListBehavior extends AbstractBehavior
       isStopped.set(false);
       hasBeenInitialized.set(false);
       hasLastStepBeenReached.set(false);
-      isRobotDoneWalking.set(false);
       hasRobotStartedWalking.set(false);
 
       //upon leaving this behavior just make sure the walking has stopped.
@@ -239,7 +238,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      //      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
+     // System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
       boolean ret = isRobotDoneWalking.getBooleanValue() && !isPaused.getBooleanValue();
       if (!isDone.getBooleanValue() && ret)
       {

@@ -12,7 +12,6 @@ import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.RobotVisualizerList;
 import us.ihmc.avatar.SimulationRobotVisualizer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -47,6 +46,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -71,8 +71,6 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
-import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.frameObjects.FrameIndexMap;
 
@@ -87,8 +85,6 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2Node = new RequiredFactoryField<>("realtimeRos2Node");
 
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
-   private final OptionalFactoryField<Boolean> doSlowIntegrationForTorqueOffset = new OptionalFactoryField<>("doSlowIntegrationForTorqueOffset");
-   private final OptionalFactoryField<Boolean> doSmoothJointTorquesAtControllerStateChanges = new OptionalFactoryField<>("doSmoothJointTorquesAtControllerStateChanges");
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
@@ -101,11 +97,13 @@ public class AvatarSimulationFactory
    private SensorReaderFactory sensorReaderFactory;
    private JointDesiredOutputWriter simulationOutputWriter;
    private DRCOutputProcessor simulationOutputProcessor;
-   private AvatarEstimatorThread stateEstimationThread;
+   private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private DisposableRobotController robotController;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
+   private FullHumanoidRobotModel masterFullRobotModel;
+   private HumanoidRobotContextData masterContext;
 
    private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
@@ -193,28 +191,12 @@ public class AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(humanoidFloatingRootJointRobot);
+      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(humanoidFloatingRootJointRobot, masterContext);
    }
 
    private void setupSimulationOutputProcessor()
    {
       simulationOutputProcessor = robotModel.get().getCustomSimulationOutputProcessor(humanoidFloatingRootJointRobot);
-
-      if (doSmoothJointTorquesAtControllerStateChanges.get())
-      {
-         DRCOutputProcessorWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputProcessorWithStateChangeSmoother(simulationOutputProcessor);
-         highLevelHumanoidControllerFactory.get()
-                                           .attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
-
-         simulationOutputProcessor = drcOutputWriterWithStateChangeSmoother;
-      }
-
-      if (doSlowIntegrationForTorqueOffset.get())
-      {
-         DRCOutputProcessorWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(simulationOutputProcessor,
-                                                                                                                     robotModel.get().getControllerDT());
-         simulationOutputProcessor = outputWriterWithTorqueOffsets;
-      }
    }
 
    private void setupStateEstimationThread()
@@ -237,10 +219,9 @@ public class AvatarSimulationFactory
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      stateEstimationThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                        robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory,
-                                                        contextDataFactory, realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter,
-                                                        gravity.get());
+      estimatorThread = new AvatarEstimatorThread(robotName, robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
+                                                  robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, contextDataFactory,
+                                                  realtimeRos2Node.get(), pelvisPoseCorrectionCommunicator, simulationOutputWriter, gravity.get());
    }
 
    private void setupControllerThread()
@@ -252,24 +233,64 @@ public class AvatarSimulationFactory
                                                     realtimeRos2Node.get(), gravity.get(), robotModel.get().getEstimatorDT());
    }
 
+   private void createMasterContext()
+   {
+      // Create intermediate data buffer for threading.
+      masterFullRobotModel = robotModel.get().createFullRobotModel();
+      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
+   }
+
    private void setupMultiThreadedRobotController()
    {
       DRCRobotModel robotModel = this.robotModel.get();
 
-      // Create intermediate data buffer for threading.
-      FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
-      HumanoidRobotContextData masterContext = new HumanoidRobotContextData();
-
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
-      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer();
-      SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer();
-      RobotVisualizerList estimatorRobotVisualizerList = new RobotVisualizerList(estimatorRobotVisualizer, yoVariableServer);
-      RobotVisualizerList controllerRobotVisualizerList = new RobotVisualizerList(controllerRobotVisualizer, yoVariableServer);
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(stateEstimationThread, estimatorDivisor, masterFullRobotModel, estimatorRobotVisualizerList);
-      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, masterFullRobotModel, controllerRobotVisualizerList);
+      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+      HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeRos2Node.get());
+
+      // Previously done in estimator thread write
+      if (simulationOutputWriter != null)
+      {
+         estimatorTask.addRunnableOnSchedulerThread(() -> {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeAfter();
+         });
+      }
+      // Previously done in estimator thread read
+      SensorReader sensorReader = estimatorThread.getSensorReader();
+      estimatorTask.addRunnableOnSchedulerThread(() -> {
+         long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+         masterContext.setTimestamp(newTimestamp);
+      });
+      if (simulationOutputWriter != null)
+      {
+         estimatorTask.addRunnableOnSchedulerThread(() -> {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+         });
+      }
+      // Previously done in controller thread write
+      if (simulationOutputProcessor != null)
+      {
+         controllerTask.addRunnableOnSchedulerThread(new Runnable()
+         {
+            boolean initialized = false;
+
+            @Override
+            public void run()
+            {
+               if (!controllerThread.getHumanoidRobotContextData().getControllerRan())
+                  return;
+               if (!initialized)
+                  simulationOutputProcessor.initialize();
+               initialized = true;
+               simulationOutputProcessor.processAfterController(controllerThread.getHumanoidRobotContextData().getTimestamp());
+            }
+         });
+      }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
       tasks.add(estimatorTask);
@@ -287,10 +308,28 @@ public class AvatarSimulationFactory
       else
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledRobotController<>(controllerName, tasks, masterContext, overrunBehavior);
+         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, robotModel.getSimulateDT());
+         tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
+      }
+
+      // If running with server setup the server registries and their updates.
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.setMainRegistry(estimatorThread.getYoVariableRegistry(), estimatorThread.getFullRobotModel().getElevator(),
+                                          estimatorThread.getYoGraphicsListRegistry());
+         estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                             estimatorThread.getYoVariableRegistry()));
+
+         yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
+         controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                              controllerThread.getYoVariableRegistry()));
       }
 
       // Add registry and graphics to SCS.
+      SimulationRobotVisualizer estimatorRobotVisualizer = new SimulationRobotVisualizer(estimatorThread.getYoVariableRegistry(), estimatorThread.getYoGraphicsListRegistry());
+      SimulationRobotVisualizer controllerRobotVisualizer = new SimulationRobotVisualizer(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
+      estimatorTask.addRunnableOnSchedulerThread(() -> estimatorRobotVisualizer.update());
+      controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
       addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
       addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoVariableRegistry(), simulationConstructionSet);
       if (handControlTask != null)
@@ -342,7 +381,7 @@ public class AvatarSimulationFactory
             jointPositions.put(joint.getName(), joint.getQ());
          }
 
-         stateEstimationThread.initializeEstimator(rootJointTransform, jointPositions);
+         estimatorThread.initializeEstimator(rootJointTransform, jointPositions);
       }
    }
 
@@ -447,7 +486,7 @@ public class AvatarSimulationFactory
          simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getYoGraphicsListRegistry());
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(estimatorThread.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.createOverheadPlotter();
          guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());
@@ -466,8 +505,6 @@ public class AvatarSimulationFactory
    public AvatarSimulation createAvatarSimulation()
    {
       gravity.setDefaultValue(-9.81);
-      doSlowIntegrationForTorqueOffset.setDefaultValue(false);
-      doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
       createCollisionMeshes.setDefaultValue(false);
       createYoVariableServer.setDefaultValue(false);
@@ -475,6 +512,7 @@ public class AvatarSimulationFactory
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       createHumanoidFloatingRootJointRobot();
+      createMasterContext();
       setupYoVariableServer();
       setupSimulationConstructionSet();
       setupSensorReaderFactory();
@@ -500,7 +538,7 @@ public class AvatarSimulationFactory
       avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setControllerThread(controllerThread);
-      avatarSimulation.setStateEstimationThread(stateEstimationThread);
+      avatarSimulation.setStateEstimationThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setHumanoidFloatingRootJointRobot(humanoidFloatingRootJointRobot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
@@ -544,16 +582,6 @@ public class AvatarSimulationFactory
    public void setRealtimeRos2Node(RealtimeRos2Node realtimeRos2Node)
    {
       this.realtimeRos2Node.set(realtimeRos2Node);
-   }
-
-   public void setDoSlowIntegrationForTorqueOffset(boolean doSlowIntegrationForTorqueOffset)
-   {
-      this.doSlowIntegrationForTorqueOffset.set(doSlowIntegrationForTorqueOffset);
-   }
-
-   public void setDoSmoothJointTorquesAtControllerStateChanges(boolean doSmoothJointTorquesAtControllerStateChanges)
-   {
-      this.doSmoothJointTorquesAtControllerStateChanges.set(doSmoothJointTorquesAtControllerStateChanges);
    }
 
    public void setAddActualCMPVisualization(boolean addActualCMPVisualization)

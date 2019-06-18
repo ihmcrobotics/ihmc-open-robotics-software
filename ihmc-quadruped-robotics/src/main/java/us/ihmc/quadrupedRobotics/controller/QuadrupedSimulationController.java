@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -26,6 +27,8 @@ public class QuadrupedSimulationController implements RobotController
    private boolean firstTick = true;
 
    private final RobotVisualizer robotVisualizer;
+
+   private final SensorDataContext sensorDataContext = new SensorDataContext();
 
    public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, StateEstimatorController stateEstimator,
                                         DRCPoseCommunicator poseCommunicator)
@@ -78,7 +81,8 @@ public class QuadrupedSimulationController implements RobotController
    @Override
    public void doControl()
    {
-      sensorReader.read();
+      long timestamp = sensorReader.read(sensorDataContext);
+      sensorReader.compute(timestamp, sensorDataContext);
       if(stateEstimator != null)
       {
          if(firstTick)
@@ -98,7 +102,6 @@ public class QuadrupedSimulationController implements RobotController
 
       if (robotVisualizer != null)
       {
-         long timestamp = sensorReader.getSensorRawOutputMapReadOnly().getWallTime();
          robotVisualizer.update(timestamp);
       }
 

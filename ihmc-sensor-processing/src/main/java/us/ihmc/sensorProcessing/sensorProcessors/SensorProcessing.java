@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 import org.ejml.data.DenseMatrix64F;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -236,9 +235,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
 
-   private AtlasAuxiliaryRobotData auxiliaryRobotData;
-   
-
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          YoVariableRegistry parentRegistry)
    {
@@ -247,7 +243,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       jointSensorDefinitions = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       imuSensorDefinitions = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
       forceSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
-      this.auxiliaryRobotData = null;
 
       String prefix = null;
       String suffix = null;
@@ -1986,17 +1981,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
       return inputForceSensors;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
-   {
-      return this.auxiliaryRobotData;
-   }
-
-   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
-   {
-      this.auxiliaryRobotData = auxiliaryRobotData;
    }
 
    public List<OneDoFJointBasics> getJointSensorDefinitions()
