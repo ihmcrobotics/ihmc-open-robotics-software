@@ -12,8 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -37,17 +35,12 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
 /**
  * @author Shlok Agarwal on 7/5/17
@@ -300,12 +293,6 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
-   {
-      return new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
-   }
-
-   @Override
    public LogSettings getLogSettings()
    {
       return LogSettings.SIMULATION;
@@ -342,22 +329,13 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot,
-                                                                         ThreadDataSynchronizerInterface threadDataSynchronizer,
-                                                                         RealtimeRos2Node realtimeRos2Node,
-                                                                         CloseableAndDisposableRegistry closeableAndDisposableRegistry)
-   {
-      return null;
-   }
-
-   @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return null;
    }
 
    @Override
-   public DRCRobotSensorInformation getSensorInformation()
+   public HumanoidRobotSensorInformation getSensorInformation()
    {
       return null;
    }

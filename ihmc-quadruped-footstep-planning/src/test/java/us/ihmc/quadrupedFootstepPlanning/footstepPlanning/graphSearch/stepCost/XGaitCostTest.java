@@ -2,6 +2,8 @@ package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedGait;
@@ -30,7 +32,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper());
 
       String errorMessage = "";
       errorMessage += testTimeDelta(stepDuration + doubleSupportDuration, RobotQuadrant.FRONT_LEFT, xGaitSettings);
@@ -53,7 +55,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper());
 
       String errorMessage = "";
       errorMessage += testTimeDelta(0.5 * (stepDuration + doubleSupportDuration), RobotQuadrant.FRONT_LEFT, xGaitSettings);
@@ -76,7 +78,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper());
 
       String errorMessage = "";
       errorMessage += testTimeDelta(0.0, RobotQuadrant.FRONT_LEFT, xGaitSettings);
@@ -96,5 +98,14 @@ public class XGaitCostTest
          message += "\n" + robotQuadrant + " expected duration " + expectedDuration + ", got " + actual;
 
       return message;
+   }
+
+   private class TestSnapper extends FootstepNodeSnapper
+   {
+      @Override
+      protected FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
+      {
+         return FootstepNodeSnapData.identityData();
+      }
    }
 }

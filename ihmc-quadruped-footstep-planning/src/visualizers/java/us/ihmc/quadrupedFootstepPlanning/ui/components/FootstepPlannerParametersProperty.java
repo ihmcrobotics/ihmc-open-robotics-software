@@ -41,7 +41,7 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField cliffHeightToAvoid = new DoubleField(SettableFootstepPlannerParameters::getCliffHeightToAvoid, SettableFootstepPlannerParameters::setCliffHeightToAvoid);
    private final DoubleField minFrontEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndForwardDistanceFromCliffBottoms);
    private final DoubleField minFrontEndBackwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumFrontEndBackwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumFrontEndBackwardDistanceFromCliffBottoms);
-   private final DoubleField minHindEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndBackwardDistanceFromCliffBottoms);
+   private final DoubleField minHindEndForwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndForwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndForwardDistanceFromCliffBottoms);
    private final DoubleField minHindEndBackwardDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumHindEndBackwardDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumHindEndBackwardDistanceFromCliffBottoms);
    private final DoubleField minLateralDistanceFromCliffBottoms = new DoubleField(SettableFootstepPlannerParameters::getMinimumLateralDistanceFromCliffBottoms, SettableFootstepPlannerParameters::setMinimumLateralDistanceFromCliffBottoms);
 
@@ -56,6 +56,9 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
    private final DoubleField minXClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinXClearanceFromFoot, SettableFootstepPlannerParameters::setMinXClearanceFromFoot);
    private final DoubleField minYClearanceFromFoot = new DoubleField(SettableFootstepPlannerParameters::getMinYClearanceFromFoot, SettableFootstepPlannerParameters::setMinYClearanceFromFoot);
    private final DoubleField minimumSurfaceInclineRadians = new DoubleField(SettableFootstepPlannerParameters::getMinimumSurfaceInclineRadians, SettableFootstepPlannerParameters::setMinimumSurfaceInclineRadians);
+   
+   private final BooleanField projectIntoConvexHullExpansion = new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringExpansion, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringExpansion);
+   private final BooleanField projectIntoConvexHullPostProcessing= new BooleanField(SettableFootstepPlannerParameters::getProjectInsideUsingConvexHullDuringPostProcessing, SettableFootstepPlannerParameters::setProjectInsideUsingConvexHullDuringPostProcessing);
 
    public FootstepPlannerParametersProperty(Object bean, String name)
    {
@@ -288,5 +291,13 @@ public class FootstepPlannerParametersProperty extends ParametersProperty<Settab
       bindFieldBidirectionalToNumberProperty(property, minimumSurfaceInclineRadians);
    }
 
+   public void bidirectionalBindProjectIntoConvexHullExpansion(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullExpansion);
+   }
 
+   public void bidirectionalBindProjectIntoConvexHullPostProcessing(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, projectIntoConvexHullPostProcessing);
+   }
 }

@@ -190,4 +190,11 @@ public class QuadrupedMessageTools
 
       return message;
    }
+
+   public static QuadrupedFootLoadBearingMessage createLoadBearingMessage(RobotQuadrant robotQuadrant)
+   {
+      QuadrupedFootLoadBearingMessage message = new QuadrupedFootLoadBearingMessage();
+      message.setRobotQuadrant(robotQuadrant.toByte());
+      return message;
+   }
 }

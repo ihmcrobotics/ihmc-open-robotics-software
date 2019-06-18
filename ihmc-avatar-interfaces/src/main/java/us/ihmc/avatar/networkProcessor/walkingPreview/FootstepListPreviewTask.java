@@ -74,7 +74,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (RobotSide robotSide : RobotSide.values)
          contactStateHolders.put(robotSide, WalkingPreviewContactStateHolder.holdAtCurrent(footContactStates.get(robotSide)));
@@ -115,7 +115,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       commandList.clear();
 
@@ -136,13 +136,13 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       destroyListeners();
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       if (numberOfFootstepsRemaining > 0)
          return false;

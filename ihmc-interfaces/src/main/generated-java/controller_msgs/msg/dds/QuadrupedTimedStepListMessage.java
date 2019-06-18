@@ -28,6 +28,10 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
             * Defines if the step list is adjustable
             */
    public boolean are_steps_adjustable_ = true;
+   /**
+            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+            */
+   public boolean offset_steps_height_with_execution_error_;
 
    public QuadrupedTimedStepListMessage()
    {
@@ -51,6 +55,8 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       are_steps_adjustable_ = other.are_steps_adjustable_;
+
+      offset_steps_height_with_execution_error_ = other.offset_steps_height_with_execution_error_;
 
    }
 
@@ -117,6 +123,21 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       return are_steps_adjustable_;
    }
 
+   /**
+            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+            */
+   public void setOffsetStepsHeightWithExecutionError(boolean offset_steps_height_with_execution_error)
+   {
+      offset_steps_height_with_execution_error_ = offset_steps_height_with_execution_error;
+   }
+   /**
+            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+            */
+   public boolean getOffsetStepsHeightWithExecutionError()
+   {
+      return offset_steps_height_with_execution_error_;
+   }
+
 
    public static Supplier<QuadrupedTimedStepListMessagePubSubType> getPubSubType()
    {
@@ -149,6 +170,8 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.are_steps_adjustable_, other.are_steps_adjustable_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.offset_steps_height_with_execution_error_, other.offset_steps_height_with_execution_error_, epsilon)) return false;
+
 
       return true;
    }
@@ -170,6 +193,8 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_)) return false;
       if(this.are_steps_adjustable_ != otherMyClass.are_steps_adjustable_) return false;
 
+      if(this.offset_steps_height_with_execution_error_ != otherMyClass.offset_steps_height_with_execution_error_) return false;
+
 
       return true;
    }
@@ -189,7 +214,9 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       builder.append("queueing_properties=");
       builder.append(this.queueing_properties_);      builder.append(", ");
       builder.append("are_steps_adjustable=");
-      builder.append(this.are_steps_adjustable_);
+      builder.append(this.are_steps_adjustable_);      builder.append(", ");
+      builder.append("offset_steps_height_with_execution_error=");
+      builder.append(this.offset_steps_height_with_execution_error_);
       builder.append("}");
       return builder.toString();
    }

@@ -60,9 +60,9 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
       {
 
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
 
 
          }
@@ -96,9 +96,9 @@ public class WalkTimingBehavior extends StateMachineBehavior<WalkTimingBehaviorS
       BehaviorAction walking = new BehaviorAction()
       {
          @Override
-         public void doTransitionIntoAction()
+         public void onEntry()
          {
-            super.doTransitionIntoAction();
+            super.onEntry();
             publishTextToSpeech("Timer Entering Walking State");
 
          }

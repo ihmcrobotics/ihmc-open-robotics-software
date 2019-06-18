@@ -42,7 +42,7 @@ public class MultiSenseBlobDetector
 // RANDOM STUFF
 
 //      AtlasSensorInformation sensorInformation = new AtlasSensorInformation(DRCRobotModel.RobotTarget.HEAD_ON_A_STICK);
-//      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters()[0];
+//      AvatarRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters()[0];
 //
 //      PointCloudDataReceiverInterface pointCloudDataReceiver = new BlobDetectionPointCloudReceiver();
 //

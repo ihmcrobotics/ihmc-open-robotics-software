@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 import org.ejml.data.DenseMatrix64F;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -170,9 +169,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoLong timestamp = new YoLong("timestamp", registry);
-   private final YoLong visionSensorTimestamp = new YoLong("visionSensorTimestamp", registry);
-   private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
+   private final YoLong wallTime = new YoLong("wallTime", registry);
+   private final YoLong monotonicTime = new YoLong("monotonicTime", registry);
+   private final YoLong syncTimestamp = new YoLong("syncTimestamp", registry);
 
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJointBasics, YoDouble> inputJointVelocities = new LinkedHashMap<>();
@@ -236,9 +235,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
 
-   private AtlasAuxiliaryRobotData auxiliaryRobotData;
-   
-
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          YoVariableRegistry parentRegistry)
    {
@@ -247,7 +243,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       jointSensorDefinitions = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       imuSensorDefinitions = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
       forceSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
-      this.auxiliaryRobotData = null;
 
       String prefix = null;
       String suffix = null;
@@ -359,11 +354,28 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       startComputation(0, 0, -1);
    }
 
-   public void startComputation(long timestamp, long visionSensorTimestamp, long sensorHeadPPSTimestamp)
+   /**
+    * Triggers a control tick for this sensor processing.
+    * <p>
+    * During a control tick, every sensor processor is updated once and the timestamps are updated.
+    * </p>
+    * 
+    * @param wallTime Time in nanoseconds of the clock hanging on the wall. Takes into account leap
+    *           seconds/years and is updated by the NTP server (thus can jump backwards). The wall
+    *           time is usually used in ROS1 for synchronizing timestamps of different time sources
+    *           (computers, sensors, etc.)
+    * @param monotonicTime Time in nanoseconds that represents the absolute elapsed wall-clock time
+    *           since some arbitrary, fixed point in the past. It is not affected by changes in the
+    *           system time-of-day clock. This time is usually computed from a real-time process and
+    *           can be used for reliably computing the time elapsed between two events.
+    * @param syncTimestamp Platform dependent. Time signal in nanoseconds that can be used to
+    *           synchronize two time sources.
+    */
+   public void startComputation(long wallTime, long monotonicTime, long syncTimestamp)
    {
-      this.timestamp.set(timestamp);
-      this.visionSensorTimestamp.set(visionSensorTimestamp);
-      this.sensorHeadPPSTimetamp.set(sensorHeadPPSTimestamp);
+      this.wallTime.set(wallTime);
+      this.monotonicTime.set(monotonicTime);
+      this.syncTimestamp.set(syncTimestamp);
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
@@ -1818,21 +1830,21 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    @Override
-   public long getTimestamp()
+   public long getWallTime()
    {
-      return timestamp.getLongValue();
+      return wallTime.getLongValue();
    }
 
    @Override
-   public long getVisionSensorTimestamp()
+   public long getMonotonicTime()
    {
-      return visionSensorTimestamp.getLongValue();
+      return monotonicTime.getLongValue();
    }
    
    @Override
-   public long getSensorHeadPPSTimestamp()
+   public long getSyncTimestamp()
    {
-      return sensorHeadPPSTimetamp.getLongValue();
+      return syncTimestamp.getLongValue();
    }
 
    public void setJointEnabled(OneDoFJointBasics oneDoFJoint, boolean enabled)
@@ -1969,17 +1981,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
       return inputForceSensors;
-   }
-
-   @Override
-   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
-   {
-      return this.auxiliaryRobotData;
-   }
-
-   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
-   {
-      this.auxiliaryRobotData = auxiliaryRobotData;
    }
 
    public List<OneDoFJointBasics> getJointSensorDefinitions()
