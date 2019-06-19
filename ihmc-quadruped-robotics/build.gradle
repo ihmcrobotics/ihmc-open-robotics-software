@@ -21,8 +21,8 @@ mainDependencies {
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "com.google.guava", name: "guava", version: "18.0"
 
-   compile group: "us.ihmc", name: "euclid-frame", version: "0.11.0"
-   compile group: "us.ihmc", name: "euclid-shape", version: "0.11.0"
+   compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
+   compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
