@@ -26,7 +26,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
