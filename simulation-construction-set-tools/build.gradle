@@ -18,7 +18,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.13"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
 }
@@ -26,6 +26,6 @@ mainDependencies {
 testDependencies {
 
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.13"
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
