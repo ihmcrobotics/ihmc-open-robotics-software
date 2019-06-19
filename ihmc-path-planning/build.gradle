@@ -19,7 +19,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "euclid-frame", version: "0.12.0"
    compile group: "us.ihmc", name: "euclid-shape", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
    compile group: "us.ihmc", name: "robot-environment-awareness", version: "source"
@@ -29,7 +29,7 @@ visualizersDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("data-sets")
 
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
 }

@@ -16,7 +16,7 @@ mainDependencies {
    compile group: "io.javaslang", name: "javaslang", version: "2.0.3"
 
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"

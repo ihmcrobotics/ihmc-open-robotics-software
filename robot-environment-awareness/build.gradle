@@ -23,7 +23,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "joctomap", version: "1.6.11"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
-   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.8"
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "0.12.9"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
 }
