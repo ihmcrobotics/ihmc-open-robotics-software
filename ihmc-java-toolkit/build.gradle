@@ -23,7 +23,7 @@ mainDependencies {
 
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "euclid", version: "0.12.0"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
 }
 
 testDependencies {

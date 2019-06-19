@@ -31,7 +31,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.6"
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.11"
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
