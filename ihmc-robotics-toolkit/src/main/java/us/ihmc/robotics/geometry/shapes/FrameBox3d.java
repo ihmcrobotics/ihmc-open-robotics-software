@@ -119,8 +119,7 @@ public class FrameBox3d extends FrameShape3d<FrameBox3d, Box3D>
 
    public void getFramePose(FramePose3D framePoseToPack)
    {
-      framePoseToPack.setToZero(referenceFrame);
-      box3d.getPose().set(framePoseToPack);
+      framePoseToPack.setIncludingFrame(referenceFrame, box3d.getPose());
    }
 
    public void scale(double scale)
