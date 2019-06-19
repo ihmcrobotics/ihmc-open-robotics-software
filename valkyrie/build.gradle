@@ -33,7 +33,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "IHMCRosControl", version: "0.5.0", changing: true
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.26.2"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.13"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "0.12.12"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "0.12.7"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
