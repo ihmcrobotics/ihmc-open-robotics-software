@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Box3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -185,7 +185,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return frameBox.getBox3d().isInsideOrOnSurface(pointInWorldToCheck);
+      return frameBox.getBox3d().isPointInside(pointInWorldToCheck);
    }
 
    public synchronized void getCurrentBox3d(FrameBox3d frameBoxToPack)
@@ -202,7 +202,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      frameBox.getBox3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      frameBox.getBox3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override
@@ -289,7 +289,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
    public double getHalfHeight()
    {
-      return frameBox.getBox3d().getHeight() * 0.5;
+      return frameBox.getBox3d().getSizeX() * 0.5;
    }
 
    @Override

@@ -23,7 +23,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: "source"
    compile group: "us.ihmc", name: "ihmc-path-planning", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "ihmc-geometry", version: "0.12.5"
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-path-planning-data-sets", version: "source"
 }

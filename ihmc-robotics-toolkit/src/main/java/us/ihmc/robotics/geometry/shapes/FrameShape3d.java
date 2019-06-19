@@ -1,14 +1,15 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Shape3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
-public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends FrameGeometryObject<F, G>
+public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3DBasics & GeometryObject<G>> extends FrameGeometryObject<F, G>
 {
    public FrameShape3d(G shape3d)
    {
@@ -45,7 +46,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
       closestPointToPack.setToZero(referenceFrame);
       normalToPack.setToZero(referenceFrame);
       
-      getGeometryObject().checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
+      getGeometryObject().evaluatePoint3DCollision(pointInWorldToCheck, closestPointToPack, normalToPack);
    }
    
    /**
@@ -60,7 +61,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     */
    public final boolean checkIfInside(Point3DBasics pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
-      return getGeometryObject().checkIfInside(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
+      return getGeometryObject().evaluatePoint3DCollision(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
    }
 
    /**
@@ -72,7 +73,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideOrOnSurface(pointToCheck);
+      return getGeometryObject().isPointInside(pointToCheck);
    }
 
    /**
@@ -86,7 +87,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
    {
       checkReferenceFrameMatch(pointToCheck);
       
-      return getGeometryObject().isInsideEpsilon(pointToCheck, epsilon);
+      return getGeometryObject().isPointInside(pointToCheck, epsilon);
    }
 
    /**
