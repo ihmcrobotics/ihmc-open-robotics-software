@@ -32,7 +32,7 @@ applicationDependencies {
    compile ihmc.sourceSetProject("main")
 
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: "source"
-   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.7"
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: "0.12.8"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.12"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
 }
