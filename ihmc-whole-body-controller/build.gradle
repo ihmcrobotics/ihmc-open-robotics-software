@@ -32,7 +32,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: "source"
    compile group: "us.ihmc", name: "ihmc-communication", version: "source"
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: "source"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.13"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: "source"
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"

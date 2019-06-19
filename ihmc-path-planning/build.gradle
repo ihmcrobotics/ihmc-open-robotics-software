@@ -39,7 +39,7 @@ testDependencies {
    compile ihmc.sourceSetProject("data-sets")
 
    compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.26.2"
-   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.13"
+   compile group: "us.ihmc", name: "simulation-construction-set", version: "0.12.14"
    compile group: "us.ihmc", name: "robot-environment-awareness-application", version: "source"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: "source"
 }
