@@ -15,7 +15,7 @@ ihmc {
 mainDependencies {
    compile group: "us.ihmc", name: "euclid-frame", version: "0.11.0"
    compile group: "us.ihmc", name: "euclid-shape", version: "0.11.0"
-   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.10"
+   compile group: "us.ihmc", name: "ihmc-yovariables", version: "0.3.11"
    compile group: "org.ejml", name: "dense64", version: "0.30"
    compile group: "org.ejml", name: "core", version: "0.30"
    compile "org.apache.commons:commons-lang3:3.8.1"
