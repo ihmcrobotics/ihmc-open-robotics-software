@@ -30,24 +30,97 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.linearAlgebra.commonOps.NativeCommonOps;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   @Test
+   public void testBaseFrame()
+   {
+      double controlDT = 0.004;
+      Random random = new Random(562968L);
+      YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+
+      // Create two floating joints. This test attempts to control the end effector body with respect to the moving base body.
+      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      SixDoFJoint joint1 = MultiBodySystemRandomTools.nextSixDoFJoint(random, "joint1", elevator);
+      RigidBody baseBody = MultiBodySystemRandomTools.nextRigidBody(random, "baseBody", joint1);
+      SixDoFJoint joint2 = MultiBodySystemRandomTools.nextSixDoFJoint(random, "joint2", baseBody);
+      RigidBody endEffector = MultiBodySystemRandomTools.nextRigidBody(random, "endEffector", joint2);
+
+      // Create the feedback controller for the end effector.
+      JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, joints, centerOfMassFrame, null, null, registry);
+      toolbox.setupForInverseDynamicsSolver(null);
+      FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+
+      // Scramble the joint states.
+      MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+      MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+      elevator.updateFramesRecursively();
+
+      // Create a command with baseBody as base and desired values in the baseBody frame.
+      FramePoint3D desiredPosition = EuclidFrameRandomTools.nextFramePoint3D(random, baseBody.getBodyFixedFrame());
+      FrameVector3D zero = new FrameVector3D(desiredPosition.getReferenceFrame());
+      PID3DGains gains = new DefaultPID3DGains();
+      gains.setProportionalGains(500.0);
+      gains.setDerivativeGains(50.0);
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(baseBody, endEffector);
+      pointFeedbackControlCommand.setGains(gains);
+      pointFeedbackController.setEnabled(true);
+
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
+      QPInput motionQPInput = new QPInput(MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      DenseMatrix64F jointAccelerations = new DenseMatrix64F(0, 0);
+      double damping = 0.001;
+      RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         // Keep updating the desired since it is converted to world frame inside the command.
+         // TODO: This can be removed once we start saving the desired values in their trajectory frames.
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, zero, zero);
+         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+         pointFeedbackController.computeInverseDynamics();
+
+         SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
+         Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
+         NativeCommonOps.solveDamped(motionQPInput.getTaskJacobian(), motionQPInput.getTaskObjective(), damping, jointAccelerations);
+         integrator.integrateJointAccelerations(joints, jointAccelerations);
+         integrator.integrateJointVelocities(joints, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, integrator.getJointVelocities());
+         MultiBodySystemTools.insertJointsState(joints, JointStateType.CONFIGURATION, integrator.getJointConfigurations());
+         elevator.updateFramesRecursively();
+      }
+
+      // Assert position is close to desired
+      FramePoint3D position = new FramePoint3D(endEffector.getBodyFixedFrame());
+      position.changeFrame(desiredPosition.getReferenceFrame());
+      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, position, 1.0E-3);
+   }
 
    @Test
    public void testConvergence() throws Exception
