@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.Sphere3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 
 public class FrameSphere3d extends FrameShape3d<FrameSphere3d, Sphere3D>
@@ -34,13 +34,12 @@ public class FrameSphere3d extends FrameShape3d<FrameSphere3d, Sphere3D>
    
    public void getCenter(FramePoint3D centerToPack)
    {
-      centerToPack.setToZero(getReferenceFrame());
-      sphere.getPosition(centerToPack);
+      centerToPack.setIncludingFrame(getReferenceFrame(), sphere.getPosition());
    }
    
    public void getCenter(Point3DBasics centerToPack)
    {
-      sphere.getPosition(centerToPack);
+      centerToPack.set(sphere.getPosition());
    }
    
    public double getRadius()
