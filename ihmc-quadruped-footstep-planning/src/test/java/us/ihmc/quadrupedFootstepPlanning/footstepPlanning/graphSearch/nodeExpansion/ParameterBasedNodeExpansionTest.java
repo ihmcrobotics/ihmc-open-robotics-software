@@ -23,6 +23,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeTransitionChecker;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
+import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -45,7 +46,7 @@ public class ParameterBasedNodeExpansionTest
 
    private static final double stanceLength = 1.0;
    private static final double stanceWidth = 0.5;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final QuadrantDependentList<AppearanceDefinition> colorDefinitions = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Yellow(),
                                                                                                                    YoAppearance.Blue(),
                                                                                                                    YoAppearance.Beige());
@@ -54,11 +55,12 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithBaseAtOrigin()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setStanceLength(stanceLength);
 
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
       double yaw = 0.0;
       FootstepNode baseNode = new FootstepNode(quadrantToCheck, 0.5 * stanceLength, 0.5 * stanceWidth, 0.5 * stanceLength, -0.5 * stanceWidth,
@@ -67,7 +69,7 @@ public class ParameterBasedNodeExpansionTest
       HashSet<FootstepNode> expandedNodes = expansion.expandNode(baseNode);
       for (FootstepNode expandedNode : expandedNodes)
       {
-         assertFalse("baseNode " + expandedNode + " is not supposed to be equal to " + baseNode, expandedNode.quadrantGeometricallyEquals(baseNode));
+         assertFalse("baseNode " + expandedNode + " is not supposed to be equal to " + baseNode, expandedNode.equals(baseNode));
       }
 
       if (visualize)
@@ -109,10 +111,11 @@ public class ParameterBasedNodeExpansionTest
    public void testExpandNodeWithTranslatedAndRotated()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
       PoseReferenceFrame centerFrame = new PoseReferenceFrame("centerFrame", ReferenceFrame.getWorldFrame());
       FramePoint2D frontLeft = new FramePoint2D(centerFrame, 0.5 * stanceLength, 0.5 * stanceWidth);
@@ -191,10 +194,11 @@ public class ParameterBasedNodeExpansionTest
             return 0.35;
          }
       };
-      QuadrupedXGaitSettings xGaitSettingsReadOnly = new QuadrupedXGaitSettings();
-      xGaitSettingsReadOnly.setStanceLength(stanceLength);
-      xGaitSettingsReadOnly.setStanceWidth(stanceWidth);
-      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettingsReadOnly);
+      QuadrupedXGaitSettings xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings.setStanceLength(stanceLength);
+      xGaitSettings.setStanceWidth(stanceWidth);
+      xGaitSettings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, xGaitSettings);
 
       double frontLeftX = 0.5;
       double frontLeftY = 0.5;
