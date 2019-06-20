@@ -15,13 +15,10 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeChecki
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.nodeExpansion.VariableResolutionNodeExpansion;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.BodyPathBasedVelocityProvider;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.NominalVelocityProvider;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -29,9 +26,6 @@ import java.util.Arrays;
 
 public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlanner
 {
-   private static final boolean debug = false;
-   private static final RobotSide defaultStartNodeSide = RobotSide.LEFT;
-
    private final BodyPathPlanner bodyPathPlanner;
    private final QuadrupedFootstepPlanner footstepPlanner;
 
@@ -47,9 +41,6 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       this.bodyPathPlanner = bodyPathPlanner;
 
       YoVariableRegistry registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
-
-
-      NominalVelocityProvider velocityProvider = new BodyPathBasedVelocityProvider(this.bodyPathPlanner);
 
       FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(parameters, parameters::getProjectInsideDistanceForExpansion,
                                                                               parameters::getProjectInsideUsingConvexHullDuringExpansion, true);
@@ -77,15 +68,14 @@ public class QuadrupedBodyPathBasedAStarPlanner implements QuadrupedFootstepPlan
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setVelocityProvider(velocityProvider);
 
       FootstepCost footstepCost = costBuilder.buildCost();
 
       planningHorizonLength = new YoDouble("planningHorizonLength", registry);
       planningHorizonLength.set(1.0);
 
-      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics, velocityProvider,
-                                                          expansion, footstepCost, snapper, postProcessingSnapper, null, registry);
+      footstepPlanner = new QuadrupedAStarFootstepPlanner(parameters, xGaitSettings, nodeChecker, nodeTransitionChecker, heuristics,  expansion, footstepCost,
+                                                          snapper, postProcessingSnapper, null, registry);
 
       parentRegistry.addChild(registry);
    }
