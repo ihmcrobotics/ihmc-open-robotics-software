@@ -119,7 +119,7 @@ public final class SpatialFeedbackControllerTest
       // Assert pose is close to desired
       FramePose3D pose = new FramePose3D(endEffector.getBodyFixedFrame());
       pose.changeFrame(desiredPose.getReferenceFrame());
-      EuclidGeometryTestTools.assertPose3DGeometricallyEquals(desiredPose, pose, 1.0E-3);
+      EuclidGeometryTestTools.assertPose3DGeometricallyEquals(desiredPose, pose, 1.0E-10);
    }
 
    @Test
