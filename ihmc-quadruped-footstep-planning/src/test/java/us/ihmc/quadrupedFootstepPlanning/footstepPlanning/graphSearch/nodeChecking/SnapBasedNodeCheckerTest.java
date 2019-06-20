@@ -98,11 +98,12 @@ public class SnapBasedNodeCheckerTest
 
       isValid = nodeChecker.isNodeValid(node);
 
-      // should be invalid
-      testListener.assertCorrectRejection("", node, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-      assertFalse(isValid);
+      // should be valid, but at center
+      testListener.assertCorrectRejection("", null, null);
+      assertTrue(isValid);
 
 
+      // reset snap data
       snapper.setPlanarRegions(planarRegionList);
       parameters.setDistanceInside(0.08);
       frontLeft.setX(0.9 * 0.5 * cinderWidth);
@@ -110,6 +111,7 @@ public class SnapBasedNodeCheckerTest
       node = new FootstepNode(robotQuadrant, frontLeft, frontRight, hindLeft, hindRight, yaw, stanceLength, stanceWidth);
 
       isValid = nodeChecker.isNodeValid(node);
+      // should be invalid, as it requires shifting way too far
       testListener.assertCorrectRejection("", node, QuadrupedFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
       assertFalse(isValid);
    }
