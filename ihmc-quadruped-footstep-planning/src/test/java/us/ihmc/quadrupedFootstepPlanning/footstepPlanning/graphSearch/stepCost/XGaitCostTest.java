@@ -65,7 +65,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
       double yaw = Math.toRadians(45.0);
       ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
@@ -124,7 +124,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
       double yaw = Math.toRadians(45.0);
       ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
@@ -234,7 +234,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
 
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), new ForwardVelocityProvider());
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
       double yaw = Math.toRadians(45.0);
       ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
@@ -291,9 +291,7 @@ public class XGaitCostTest
 
       FootstepPlannerParameters footstepPlannerParameters = new TestParameters();
 
-      StraightShotVelocityProvider velocityProvider = new StraightShotVelocityProvider(footstepPlannerParameters);
-
-      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings, new TestSnapper(), velocityProvider);
+      XGaitCost xGaitCost = new XGaitCost(footstepPlannerParameters, xGaitSettings);
       ReferenceFrame yawedFrame = new PoseReferenceFrame("yawedFrame", ReferenceFrame.getWorldFrame());
       double yaw = Math.toRadians(45.0);
       ((PoseReferenceFrame) yawedFrame).setOrientationAndUpdate(new Quaternion(yaw, 0.0, 0.0));
@@ -330,21 +328,8 @@ public class XGaitCostTest
                                                 yaw, 1.0, 0.5);
       FootstepNode endNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, nextFrontLeft, frontRight, hindLeft, hindRight,
                                               yaw, 1.0, 0.5);
-      FootstepNode goalNode = new FootstepNode(RobotQuadrant.FRONT_LEFT, frontLeftGoal, frontRightGoal, hindLeftGoal, hindRightGoal,
-                                               yaw, 1.0, 0.5);
-
-      velocityProvider.setGoalNode(goalNode);
 
       assertEquals(0.0, xGaitCost.compute(startNode, endNode), 5e-2);
-   }
-
-   private class TestSnapper extends FootstepNodeSnapper
-   {
-      @Override
-      protected FootstepNodeSnapData snapInternal(int xIndex, int yIndex)
-      {
-         return FootstepNodeSnapData.identityData();
-      }
    }
 
    private class TestParameters extends DefaultFootstepPlannerParameters

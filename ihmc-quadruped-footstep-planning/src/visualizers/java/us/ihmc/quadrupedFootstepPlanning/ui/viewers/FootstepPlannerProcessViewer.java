@@ -17,7 +17,6 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.FootstepCostBuilder;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.stepCost.ForwardVelocityProvider;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapRenderer;
 import us.ihmc.quadrupedFootstepPlanning.ui.components.NodeOccupancyMapSequenceRenderer;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
@@ -66,7 +65,6 @@ public class FootstepPlannerProcessViewer extends AnimationTimer
       costBuilder.setXGaitSettings(xGaitSettings);
       costBuilder.setSnapper(snapper);
       costBuilder.setIncludeHeightCost(true);
-      costBuilder.setVelocityProvider(new ForwardVelocityProvider());
 
       costCalculator = costBuilder.buildCost();
 
