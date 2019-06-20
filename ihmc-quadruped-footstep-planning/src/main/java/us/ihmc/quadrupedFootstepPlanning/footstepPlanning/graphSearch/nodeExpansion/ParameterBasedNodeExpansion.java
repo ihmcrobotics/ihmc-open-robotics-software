@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
@@ -19,8 +18,6 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.HashSet;
-
-import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
@@ -77,8 +74,8 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
                                                 0.5 * nextQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
       Point2D newXGaitPosition = new Point2D();
 
-      double maxNegativeYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMinimumStepYaw() : -parameters.getMaximumStepYaw();
-      double maxPositiveYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMaximumStepYaw() : -parameters.getMinimumStepYaw();
+      double maxNegativeYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMaximumStepYawInward() : -parameters.getMaximumStepYawOutward();
+      double maxPositiveYaw = movingQuadrant.isQuadrantOnLeftSide() ? parameters.getMaximumStepYawOutward() : -parameters.getMaximumStepYawInward();
 
       // FIXME revisit this and see if the operations can be reduced.
       for (double movingX = -maxLength; movingX <= maxLength; movingX += resolution)

@@ -126,13 +126,13 @@ public abstract class FootstepPlannerToolboxDataSetTest
          }
 
          @Override
-         public double getMinimumStepWidth()
+         public double getMaximumStepInward()
          {
             return -0.3;
          }
 
          @Override
-         public double getMaximumStepWidth()
+         public double getMaximumStepOutward()
          {
             return 0.35;
          }

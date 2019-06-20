@@ -18,7 +18,7 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
       return 0.3;
    }
@@ -32,21 +32,21 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
       return -0.15;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
       return 0.5;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
       return -0.2;
    }

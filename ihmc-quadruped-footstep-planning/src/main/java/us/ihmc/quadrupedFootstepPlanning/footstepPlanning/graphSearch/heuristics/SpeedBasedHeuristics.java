@@ -24,7 +24,7 @@ public class SpeedBasedHeuristics extends CostToGoHeuristics
       double desiredSpeed = parameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredYawSpeed = xGaitSettings.getMaxYawSpeedFraction() * desiredSpeed;
       double maxYaw = Math.min(desiredYawSpeed * (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration()),
-                               0.5 * (parameters.getMaximumStepYaw() - parameters.getMinimumStepYaw()));
+                               0.5 * (parameters.getMaximumStepYawOutward() - parameters.getMaximumStepYawInward()));
       double minDistanceSteps = 4.0 * bodyDistance / desiredSpeed;
       double minYawSteps = 2.0 * yawDistance / maxYaw;
 

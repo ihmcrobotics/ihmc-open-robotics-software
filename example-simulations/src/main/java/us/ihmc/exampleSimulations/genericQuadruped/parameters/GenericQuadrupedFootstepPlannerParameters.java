@@ -8,14 +8,14 @@ public class GenericQuadrupedFootstepPlannerParameters extends DefaultFootstepPl
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
       return 0.25;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
       return -0.05;
    }

@@ -1,9 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.QuadrupedFootstepPlannerParametersPacket;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.filters.SteppableRegionFilter;
-import us.ihmc.robotics.geometry.PlanarRegion;
 
 public interface FootstepPlannerParameters
 {
@@ -31,9 +28,9 @@ public interface FootstepPlannerParameters
       return getMinimumFrontStepLength();
    }
 
-   double getMaximumStepWidth();
+   double getMaximumStepOutward();
 
-   double getMinimumStepWidth();
+   double getMaximumStepInward();
 
    default double getMaximumFrontStepLengthWhenSteppingUp()
    {
@@ -85,9 +82,9 @@ public interface FootstepPlannerParameters
       return Double.NEGATIVE_INFINITY;
    }
 
-   double getMinimumStepYaw();
+   double getMaximumStepYawInward();
 
-   double getMaximumStepYaw();
+   double getMaximumStepYawOutward();
 
    double getMaximumStepChangeZ();
 
@@ -234,10 +231,10 @@ public interface FootstepPlannerParameters
       packet.setMaximumHindStepLengthWhenSteppingDown(getMaximumHindStepLengthWhenSteppingDown());
       packet.setMinimumHindStepLengthWhenSteppingDown(getMinimumHindStepLengthWhenSteppingDown());
       packet.setStepZForSteppingDown(getStepZForSteppingDown());
-      packet.setMaximumStepWidth(getMaximumStepWidth());
-      packet.setMinimumStepWidth(getMinimumStepWidth());
-      packet.setMinimumStepYaw(getMinimumStepYaw());
-      packet.setMaximumStepYaw(getMaximumStepYaw());
+      packet.setMaximumStepWidth(getMaximumStepOutward());
+      packet.setMinimumStepWidth(getMaximumStepInward());
+      packet.setMinimumStepYaw(getMaximumStepYawInward());
+      packet.setMaximumStepYaw(getMaximumStepYawOutward());
       packet.setMaximumStepChangeZ(getMaximumStepChangeZ());
       packet.setBodyGroundClearance(getBodyGroundClearance());
       packet.setMaxWalkingSpeedMultiplier(getMaxWalkingSpeedMultiplier());

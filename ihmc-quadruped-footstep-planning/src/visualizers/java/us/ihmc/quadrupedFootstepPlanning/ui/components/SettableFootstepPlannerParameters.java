@@ -24,10 +24,10 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
    private double minimumHindStepLengthWhenSteppingDown;
    private double stepZForSteppingDown;
 
-   private double maximumStepWidth;
-   private double minimumStepWidth;
-   private double minimumStepYaw;
-   private double maximumStepYaw;
+   private double maximumStepOutward;
+   private double maximumStepInward;
+   private double maximumStepYawInward;
+   private double maximumStepYawOutward;
 
    private double maximumStepChangeZ;
    private double bodyGroundClearance;
@@ -181,30 +181,30 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepWidth(double maximumStepWidth)
+   public void setMaximumStepOutward(double maximumStepOutward)
    {
-      this.maximumStepWidth = maximumStepWidth;
+      this.maximumStepOutward = maximumStepOutward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMinimumStepWidth(double minimumStepWidth)
+   public void setMaximumStepInward(double maximumStepInward)
    {
-      this.minimumStepWidth = minimumStepWidth;
+      this.maximumStepInward = maximumStepInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMinimumStepYaw(double minimumStepYaw)
+   public void setMaximumStepYawInward(double maximumStepYawInward)
    {
-      this.minimumStepYaw = minimumStepYaw;
+      this.maximumStepYawInward = maximumStepYawInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public void setMaximumStepYaw(double maximumStepYaw)
+   public void setMaximumStepYawOutward(double maximumStepYawOutward)
    {
-      this.maximumStepYaw = maximumStepYaw;
+      this.maximumStepYawOutward = maximumStepYawOutward;
    }
 
    /** {@inheritDoc} */
@@ -501,29 +501,29 @@ public class SettableFootstepPlannerParameters implements FootstepPlannerParamet
 
    /** {@inheritDoc} */
    @Override
-   public double getMaximumStepWidth()
+   public double getMaximumStepOutward()
    {
-      return maximumStepWidth;
+      return maximumStepOutward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepWidth()
+   public double getMaximumStepInward()
    {
-      return minimumStepWidth;
+      return maximumStepInward;
    }
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumStepYaw()
+   public double getMaximumStepYawInward()
    {
-      return minimumStepYaw;
+      return maximumStepYawInward;
    }
 
    /** {@inheritDoc} */
-   public double getMaximumStepYaw()
+   public double getMaximumStepYawOutward()
    {
-      return maximumStepYaw;
+      return maximumStepYawOutward;
    }
 
    /** {@inheritDoc} */
