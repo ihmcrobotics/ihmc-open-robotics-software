@@ -51,11 +51,10 @@ public class LogVisualizer
    private final SimulationConstructionSet scs;
    private YoVariableLogPlaybackRobot robot;
    private SimulationOverheadPlotter plotter;
-   private static final String logName = "/home/shadylady/robotLogs/20190612_134809_LlamaNetworkingFactory";
 
    public LogVisualizer() throws IOException
    {
-      this(8000, false, new File(logName));
+      this(8000, false, null);
    }
 
    public LogVisualizer(int bufferSize, boolean showOverheadView,
