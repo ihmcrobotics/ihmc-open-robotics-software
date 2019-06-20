@@ -9,6 +9,8 @@ import us.ihmc.quadrupedPlanning.QuadrupedSpeed;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 
+import static us.ihmc.robotics.Assert.assertTrue;
+
 public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxDataSetTest
 {
    public FootstepPlannerType getPlannerType()
@@ -22,16 +24,11 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       settings.setStanceLength(0.9);
       settings.setStanceWidth(0.5);
 
-      settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.5 + 0.25);
-      settings.getAmbleMediumTimings().setStepDuration(0.5);
-      settings.getAmbleFastTimings().setEndDoubleSupportDuration(0.25);
-      settings.getAmbleFastTimings().setStepDuration(0.35);
-      settings.getAmbleFastTimings().setMaxSpeed(1.0);
-      settings.getTrotMediumTimings().setEndDoubleSupportDuration(0.1);
-      settings.getTrotMediumTimings().setStepDuration(0.35);
-
-      settings.setQuadrupedSpeed(QuadrupedSpeed.FAST);
+      settings.setQuadrupedSpeed(QuadrupedSpeed.MEDIUM);
       settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
+      settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
+      settings.getAmbleMediumTimings().setStepDuration(0.5);
+      settings.getAmbleMediumTimings().setMaxSpeed(0.3);
       return settings;
    }
 
@@ -48,7 +45,9 @@ public class QuadrupedAStarToolboxDataSetTest extends FootstepPlannerToolboxData
       VISUALIZE = true;
       test.setup();
 
-      test.runAssertions(DataSetName._20171215_214730_CinderBlockField);
+      String errorMessage = test.runAssertions(DataSetName._20171218_204953_FlatGroundWithWall);
+      assertTrue(errorMessage, errorMessage.isEmpty());
+
       ThreadTools.sleepForever();
       test.tearDown();
    }

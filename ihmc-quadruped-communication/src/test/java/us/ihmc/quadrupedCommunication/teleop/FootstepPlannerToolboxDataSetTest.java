@@ -65,7 +65,7 @@ public abstract class FootstepPlannerToolboxDataSetTest
    protected static boolean VISUALIZE = false;
    // For enabling helpful prints.
    protected static boolean DEBUG = false;
-   protected static boolean VERBOSE = false;
+   protected static boolean VERBOSE = true;
 
    private FootstepPlannerUI ui = null;
    protected Messager messager = null;
@@ -108,33 +108,15 @@ public abstract class FootstepPlannerToolboxDataSetTest
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
-         public double getMaximumFrontStepReach()
+         public double getXGaitWeight()
          {
-            return 0.7;
+            return 2.0;
          }
 
          @Override
-         public double getMaximumFrontStepLength()
+         public double getDesiredVelocityWeight()
          {
-            return 0.6;
-         }
-
-         @Override
-         public double getMinimumFrontStepLength()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMaximumStepInward()
-         {
-            return -0.3;
-         }
-
-         @Override
-         public double getMaximumStepOutward()
-         {
-            return 0.35;
+            return 0.5;
          }
       };
 
@@ -322,13 +304,11 @@ public abstract class FootstepPlannerToolboxDataSetTest
    {
       resetAllAtomics();
       ThreadTools.sleep(1000);
-      packPlanningRequest(dataset);
-      String errorMessage = findPlanAndAssertGoodResult(dataset);
-
-      return errorMessage;
+      double timeout = packPlanningRequest(dataset);
+      return findPlanAndAssertGoodResult(timeout);
    }
 
-   protected void packPlanningRequest(DataSet dataset)
+   protected double packPlanningRequest(DataSet dataset)
    {
       Quaternion startOrientation = new Quaternion();
       Quaternion goalOrientation = new Quaternion();
@@ -361,6 +341,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
 
       if (DEBUG)
          LogTools.info("Sending out planning request.");
+
+      return timeout;
    }
 
    private void processFootstepPlanningOutputStatus(QuadrupedFootstepPlanningToolboxOutputStatus packet)
@@ -394,11 +376,10 @@ public abstract class FootstepPlannerToolboxDataSetTest
       return footstepPlan;
    }
 
-   private String findPlanAndAssertGoodResult(DataSet dataset)
+   private String findPlanAndAssertGoodResult(double timeout)
    {
       totalTimeTaken = 0.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double maxTimeToWait = 2.0 * timeoutMultiplier * 60.0;
+      double maxTimeToWait = 2.0 * timeout;
       String datasetName = "";
 
       queryPlannerResults();
@@ -408,6 +389,8 @@ public abstract class FootstepPlannerToolboxDataSetTest
          PrintTools.info("Waiting for result.");
 
       errorMessage += waitForResult(() -> resultReference.get() == null, maxTimeToWait, datasetName);
+      if (!errorMessage.isEmpty())
+         return errorMessage;
 
       if (DEBUG)
          PrintTools.info("Received a result (actual = " + resultReference.get() + ", checking it's validity.");
