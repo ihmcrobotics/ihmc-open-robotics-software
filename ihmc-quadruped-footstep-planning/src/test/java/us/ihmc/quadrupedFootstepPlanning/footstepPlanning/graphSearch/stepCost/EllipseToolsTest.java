@@ -76,7 +76,7 @@ public class EllipseToolsTest
 
          double distanceSign = EllipseTools.isPointInsideEllipse(maxX, maxY, point) ? -1.0 : 1.0;
          double expectedDistance = distanceSign * projectedPoint.distance(point);
-         double distance = EllipseTools.getDistanceToEllipse(maxX, maxY, point);
+         double distance = EllipseTools.getDistanceFromPointToEllipse(maxX, maxY, point);
 
          assertEquals("iteration " + i, expectedDistance, distance, 1e-6);
       }
@@ -85,7 +85,6 @@ public class EllipseToolsTest
    @Test
    public void testIsPointInsideEllipse()
    {
-      double epsilonToEdge = 1e-2;
       Random random = new Random(1738L);
       for (int i = 0; i < 1000; i++)
       {
@@ -93,7 +92,7 @@ public class EllipseToolsTest
          double maxY = RandomNumbers.nextDouble(random, 0.0, 100.0);
 
          Point2DReadOnly point = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
-         double distanceToEllipse = EllipseTools.getDistanceToEllipse(maxX, maxY, point);
+         double distanceToEllipse = EllipseTools.getDistanceFromPointToEllipse(maxX, maxY, point);
          boolean pointIsInsideExpected = distanceToEllipse < 0.0;
 
          assertEquals("iteration " + i, pointIsInsideExpected, EllipseTools.isPointInsideEllipse(maxX, maxY, point));

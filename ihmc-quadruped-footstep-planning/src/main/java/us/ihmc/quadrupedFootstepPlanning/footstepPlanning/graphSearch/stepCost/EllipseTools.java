@@ -43,6 +43,9 @@ public class EllipseTools
     */
    static double getProjectionMultiplierOntoEllipse(double ellipseXRadius, double ellipseYRadius, double xPosition, double yPosition)
    {
+      if (ellipseXRadius < 1e-3 && ellipseXRadius < 1e-3)
+         return 0.0;
+
       return ellipseXRadius * ellipseYRadius / Math.sqrt(MathTools.square(ellipseXRadius * yPosition) + MathTools.square(ellipseYRadius * xPosition));
    }
 
@@ -57,12 +60,12 @@ public class EllipseTools
    }
 
 
-   static double getDistanceToEllipse(double ellipseXRadius, double ellipseYRadius, Point2DReadOnly point)
+   static double getDistanceFromPointToEllipse(double ellipseXRadius, double ellipseYRadius, Point2DReadOnly point)
    {
-      return getDistanceToEllipse(ellipseXRadius, ellipseYRadius, point.getX(), point.getY());
+      return getDistanceFromPointToEllipse(ellipseXRadius, ellipseYRadius, point.getX(), point.getY());
    }
 
-   static double getDistanceToEllipse(double ellipseXRadius, double ellipseYRadius, double xPosition, double yPosition)
+   static double getDistanceFromPointToEllipse(double ellipseXRadius, double ellipseYRadius, double xPosition, double yPosition)
    {
       double multiplier = getProjectionMultiplierOntoEllipse(ellipseXRadius, ellipseYRadius, xPosition, yPosition);
       return (1.0 - multiplier) * EuclidCoreTools.norm(xPosition, yPosition);
