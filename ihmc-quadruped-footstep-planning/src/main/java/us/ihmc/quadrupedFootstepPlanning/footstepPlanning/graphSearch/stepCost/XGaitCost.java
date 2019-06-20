@@ -15,6 +15,7 @@ import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.graph.Foot
 import us.ihmc.quadrupedFootstepPlanning.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.stepStream.QuadrupedXGaitTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -27,6 +28,7 @@ public class XGaitCost implements FootstepCost
 
    private final NominalVelocityProvider velocityProvider;
 
+   private final Point2D endXGaitInStartFrame = new Point2D();
    private final Vector2D nominalVelocityHeading = new Vector2D();
    private final Vector2D nominalTranslation = new Vector2D();
    private final Point2D nominalXGaitEndPosition = new Point2D();
@@ -80,50 +82,26 @@ public class XGaitCost implements FootstepCost
       startOrientation.transform(nominalVelocityHeading, false);
 
       double durationBetweenSteps = QuadrupedXGaitTools.computeTimeDeltaBetweenSteps(previousQuadrant, xGaitSettings);
-      double desiredMaxForwardSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
-      double desiredMaxHorizontalSpeed = xGaitSettings.getMaxHorizontalSpeedFraction() * desiredMaxForwardSpeed;
+      double desiredMaxForwardTranslation = durationBetweenSteps * plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
+      double desiredMaxHorizontalTranslation = xGaitSettings.getMaxHorizontalSpeedFraction() * desiredMaxForwardTranslation;
+      double desiredMaxYaw = xGaitSettings.getMaxYawSpeedFraction() * desiredMaxForwardTranslation;
 
-      double desiredVelocityAtHeading = EllipseTools.computeMagnitudeOnEllipseInDirection(desiredMaxForwardSpeed, desiredMaxHorizontalSpeed, nominalVelocityHeading.getX(),
-                                                                             nominalVelocityHeading.getY());
+      endXGaitInStartFrame.sub(endXGaitPosition, startXGaitPosition);
+      startNode.getStepOrientation().inverseTransform(endXGaitInStartFrame);
 
-      nominalTranslation.set(nominalVelocityHeading);
-      nominalTranslation.scale(desiredVelocityAtHeading * durationBetweenSteps);
-      startOrientation.inverseTransform(nominalTranslation, false);
+      double distanceToNominalVelocityEllipse = EllipseTools.getDistanceFromPointToEllipse(desiredMaxForwardTranslation, desiredMaxHorizontalTranslation,
+                                                                                              endXGaitInStartFrame.getX(), endXGaitInStartFrame.getY());
 
-      nominalXGaitEndPosition.add(startXGaitPosition, nominalTranslation);
+      double costOfNominalVelocity = plannerParameters.getDesiredVelocityWeight() * Math.abs(distanceToNominalVelocityEllipse);
 
-      double nominalYawOfEnd = velocityProvider.computeNominalYaw(nominalXGaitEndPosition, startNode.getStepYaw());
-      if (Double.isNaN(nominalYawOfEnd))
-         nominalYawOfEnd = startNode.getStepYaw();
 
-      endOrientation.setYawPitchRoll(nominalYawOfEnd, 0.0, 0.0);
+      double yawRotation = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getStepYaw(), endNode.getStepYaw());
+      double distancePastMaximumEllipseTranslation = Math.max(distanceToNominalVelocityEllipse, 0.0);
+      double distancePastMaximumYawRotation = Math.max(Math.abs(yawRotation) - desiredMaxYaw, 0.0);
+      double extraFootTranslationFromRotation = startNode.getNominalStanceLength() * Math.sin(0.5 * distancePastMaximumYawRotation);
 
-      footOffsetFromXGait.set(0.5 * movingQuadrant.getEnd().negateIfHindEnd(xGaitSettings.getStanceLength()),
-                              0.5 * movingQuadrant.getSide().negateIfRightSide(xGaitSettings.getStanceWidth()));
-      endOrientation.transform(footOffsetFromXGait, false);
+      double costOfXGait = plannerParameters.getXGaitWeight() * (extraFootTranslationFromRotation + distancePastMaximumEllipseTranslation);
 
-      nominalFootEndPosition.add(nominalXGaitEndPosition, footOffsetFromXGait);
-
-      FootstepNode.snapPointToGrid(nominalFootEndPosition);
-
-      double costOfNominalVelocity = plannerParameters.getDesiredVelocityWeight() * EuclidCoreTools
-            .norm(endNode.getX(movingQuadrant) - nominalFootEndPosition.getX(), endNode.getY(movingQuadrant) - nominalFootEndPosition.getY());
-
-      FootstepNode.snapPointToGrid(nominalXGaitEndPosition);
-      FootstepNode.snapPointToGrid(startXGaitPosition, snappedXGaitStartPosition);
-
-      double distanceFromNominalXGaitCenter;
-      if (nominalXGaitEndPosition.distance(startXGaitPosition) < 1e-2)
-      {
-         distanceFromNominalXGaitCenter = endXGaitPosition.distance(snappedXGaitStartPosition);
-      }
-      else
-      {
-         acceptableTranslationLine.set(snappedXGaitStartPosition, nominalXGaitEndPosition);
-         distanceFromNominalXGaitCenter = acceptableTranslationLine.distance(endXGaitPosition);
-      }
-      double costOfXGait = plannerParameters.getXGaitWeight() * (distanceFromNominalXGaitCenter);
-
-      return costOfNominalVelocity + costOfXGait;
+      return costOfXGait + costOfNominalVelocity;
    }
 }
