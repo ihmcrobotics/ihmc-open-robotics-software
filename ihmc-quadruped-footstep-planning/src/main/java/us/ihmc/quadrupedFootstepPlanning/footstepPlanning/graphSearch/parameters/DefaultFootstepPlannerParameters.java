@@ -74,13 +74,13 @@ public class DefaultFootstepPlannerParameters implements FootstepPlannerParamete
    @Override
    public double getXGaitWeight()
    {
-      return 0.0;//7.5;
+      return 7.5;
    }
 
    @Override
    public double getDesiredVelocityWeight()
    {
-      return 0.0;//1.0;
+      return 1.0;
    }
 
    @Override

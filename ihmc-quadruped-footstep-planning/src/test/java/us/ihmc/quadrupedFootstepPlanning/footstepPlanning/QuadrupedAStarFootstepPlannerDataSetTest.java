@@ -19,11 +19,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDataSetTest
 {
-   public FootstepPlannerType getPlannerType()
-   {
-      return FootstepPlannerType.A_STAR;
-   }
-
    public QuadrupedXGaitSettings getXGaitSettings()
    {
       QuadrupedXGaitSettings settings = new QuadrupedXGaitSettings();
@@ -33,8 +28,7 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       settings.setEndPhaseShift(QuadrupedGait.AMBLE.getEndPhaseShift());
       settings.getAmbleMediumTimings().setEndDoubleSupportDuration(0.25);
       settings.getAmbleMediumTimings().setStepDuration(0.5);
-      settings.getAmbleMediumTimings().setMaxSpeed(0.4);
-      settings.setMaxYawSpeedFraction(5.0);
+      settings.getAmbleMediumTimings().setMaxSpeed(0.3);
       return settings;
    }
 
@@ -45,34 +39,17 @@ public class QuadrupedAStarFootstepPlannerDataSetTest extends FootstepPlannerDat
       xGaitSettings = getXGaitSettings();
       FootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters()
       {
-//         @Override
-//         public double getMaximumFrontStepReach()
-//         {
-//            return 0.7;
-//         }
-//
-//         public double getMaximumFrontStepLength()
-//         {
-//            return 0.6;
-//         }
-//
-//         @Override
-//         public double getMinimumFrontStepLength()
-//         {
-//            return -0.3;
-//         }
-//
-//         @Override
-//         public double getMinimumStepWidth()
-//         {
-//            return -0.3;
-//         }
-//
-//         @Override
-//         public double getMaximumStepWidth()
-//         {
-//            return 0.35;
-//         }
+         @Override
+         public double getXGaitWeight()
+         {
+            return 2.0;
+         }
+
+         @Override
+         public double getDesiredVelocityWeight()
+         {
+            return 0.5;
+         }
       };
       AStarMessagerListener listener;
       if (VISUALIZE)
