@@ -408,27 +408,6 @@ public class XGaitCostTest
       assertEquals(0.0, xGaitCost.compute(startNode, endNode), 5e-2);
    }
 
-   @Test
-   public void computeMagnitudeOnEllipseInDirection()
-   {
-      Random random = new Random(1738L);
-      for (int i = 0; i < 1000; i++)
-      {
-         double maxX = RandomNumbers.nextDouble(random, 0.0, 100.0);
-         double maxY = RandomNumbers.nextDouble(random, 0.0, 100.0);
-
-         double xDirection = RandomNumbers.nextDouble(random, -10.0, 10.0);
-         double yDirection = RandomNumbers.nextDouble(random, -10.0, 10.0);
-
-         double xIntersection = maxX * maxY / Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection)) * xDirection;
-         double yIntersection = maxX * maxY / Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection)) * yDirection;
-
-         double magnitude = EuclidCoreTools.norm(xIntersection, yIntersection);
-
-         assertEquals(magnitude, XGaitCost.computeMagnitudeOnEllipseInDirection(maxX, maxY, xDirection, yDirection), 1e-5);
-      }
-   }
-
    private String testTimeDelta(double expectedDuration, RobotQuadrant robotQuadrant, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       String message = "";

@@ -83,7 +83,7 @@ public class XGaitCost implements FootstepCost
       double desiredMaxForwardSpeed = plannerParameters.getMaxWalkingSpeedMultiplier() * xGaitSettings.getMaxSpeed();
       double desiredMaxHorizontalSpeed = xGaitSettings.getMaxHorizontalSpeedFraction() * desiredMaxForwardSpeed;
 
-      double desiredVelocityAtHeading = computeMagnitudeOnEllipseInDirection(desiredMaxForwardSpeed, desiredMaxHorizontalSpeed, nominalVelocityHeading.getX(),
+      double desiredVelocityAtHeading = EllipseTools.computeMagnitudeOnEllipseInDirection(desiredMaxForwardSpeed, desiredMaxHorizontalSpeed, nominalVelocityHeading.getX(),
                                                                              nominalVelocityHeading.getY());
 
       nominalTranslation.set(nominalVelocityHeading);
@@ -125,16 +125,5 @@ public class XGaitCost implements FootstepCost
       double costOfXGait = plannerParameters.getXGaitWeight() * (distanceFromNominalXGaitCenter);
 
       return costOfNominalVelocity + costOfXGait;
-   }
-
-   static double computeMagnitudeOnEllipseInDirection(double maxX, double maxY, double xDirection, double yDirection)
-   {
-      double magnitude = EuclidCoreTools.norm(xDirection, yDirection);
-      if (magnitude < 1e-3)
-         return 0.0;
-
-      magnitude *= maxX * maxY;
-      magnitude /= Math.sqrt(MathTools.square(maxX * yDirection) + MathTools.square(maxY * xDirection));
-      return magnitude;
    }
 }
